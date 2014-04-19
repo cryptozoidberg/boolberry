@@ -773,7 +773,6 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
   if(it_prev != m_alternative_chains.end() || it_main_prev != m_blocks_index.end())
   {
     //we have new block in alternative chain
-
     //build alternative subchain, front -> mainchain, back -> alternative head
     blocks_ext_by_hash::iterator alt_it = it_prev; //m_alternative_chains.find()
     std::list<blocks_ext_by_hash::iterator> alt_chain;
