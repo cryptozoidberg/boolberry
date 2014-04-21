@@ -248,6 +248,14 @@ POP_WARNINGS
 	typedef std::map<std::string, std::string> command_line_params_a;
 	typedef std::map<std::wstring, std::wstring> command_line_params_w;
 
+  template<typename t_pod_data>
+  void apped_pod_to_strbuff(std::string& buff, const t_pod_data& pod)
+  {
+    buff.append(reinterpret_cast<const char*>(&pod), sizeof(pod));
+  }
+
+
+
 	template<class t_string>
 	bool parse_commandline(std::map<t_string, t_string>& res, int argc, char** argv)
 	{

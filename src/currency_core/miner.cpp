@@ -29,13 +29,14 @@ namespace currency
 
   namespace
   {
-    const command_line::arg_descriptor<std::string> arg_extra_messages =  {"extra-messages-file", "Specify file for extra messages to include into coinbase transactions", "", true};
-    const command_line::arg_descriptor<std::string> arg_start_mining =    {"start-mining", "Specify wallet address to mining for", "", true};
+    const command_line::arg_descriptor<std::string>   arg_extra_messages =  {"extra-messages-file", "Specify file for extra messages to include into coinbase transactions", "", true};
+    const command_line::arg_descriptor<std::string>   arg_start_mining =    {"start-mining", "Specify wallet address to mining for", "", true};
     const command_line::arg_descriptor<uint32_t>      arg_mining_threads =  {"mining-threads", "Specify mining threads count", 0, true};
   }
 
 
-  miner::miner(i_miner_handler* phandler):m_stop(1),
+  miner::miner(i_miner_handler* phandler, blockchain_storage& bc):m_stop(1),
+    m_bc(bc),
     m_template(boost::value_initialized<block>()),
     m_template_no(0),
     m_diffic(0),
@@ -45,11 +46,11 @@ namespace currency
     m_pausers_count(0), 
     m_threads_total(0),
     m_starter_nonce(0), 
-    m_last_hr_merge_time(0),
-    m_hashes(0),
     m_do_print_hashrate(false),
     m_do_mining(false),
-	m_current_hash_rate(0)
+	  m_current_hash_rate(0),
+    m_last_hr_merge_time(0),
+    m_hashes(0)
   {
 
   }
@@ -123,18 +124,7 @@ namespace currency
     if(m_last_hr_merge_time && is_mining())
     {
       m_current_hash_rate = m_hashes * 1000 / ((misc_utils::get_tick_count() - m_last_hr_merge_time + 1));
-      CRITICAL_REGION_LOCAL(m_last_hash_rates_lock);
-      m_last_hash_rates.push_back(m_current_hash_rate);
-      if(m_last_hash_rates.size() > 19)
-        m_last_hash_rates.pop_front();
-      if(m_do_print_hashrate)
-      {
-        uint64_t total_hr = std::accumulate(m_last_hash_rates.begin(), m_last_hash_rates.end(), 0);
-        float hr = static_cast<float>(total_hr)/static_cast<float>(m_last_hash_rates.size());
-        std::cout << "hashrate: " << std::setprecision(4) << std::fixed << hr << ENDL;
-      }
     }
-    m_last_hr_merge_time = misc_utils::get_tick_count();
     m_hashes = 0;
   }
   //-----------------------------------------------------------------------------------------------------
@@ -250,12 +240,12 @@ namespace currency
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
-  bool miner::find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height)
+  bool miner::find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, blockchain_storage& bc)
   {
     for(; bl.nonce != std::numeric_limits<uint32_t>::max(); bl.nonce++)
     {
       crypto::hash h;
-      get_block_longhash(bl, h, height);
+      get_block_longhash(bl, h, height, boost::bind(&blockchain_storage::make_scratchpad_from_selector, &bc, _1, _2, height));
 
       if(check_hash(h, diffic))
       {
@@ -333,7 +323,7 @@ namespace currency
 
       b.nonce = nonce;
       crypto::hash h;
-      get_block_longhash(b, h, height);
+      get_block_longhash(b, h, height, boost::bind(&blockchain_storage::make_scratchpad_from_selector, &m_bc, _1, _2, height));
 
       if(check_hash(h, local_diff))
       {

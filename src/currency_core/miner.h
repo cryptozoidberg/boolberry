@@ -10,7 +10,7 @@
 #include "currency_basic.h"
 #include "difficulty.h"
 #include "math_helper.h"
-
+#include "blockchain_storage.h"
 
 namespace currency
 {
@@ -29,7 +29,7 @@ namespace currency
   class miner
   {
   public: 
-    miner(i_miner_handler* phandler);
+    miner(i_miner_handler* phandler, blockchain_storage& bc);
     ~miner();
     bool init(const boost::program_options::variables_map& vm);
     static void init_options(boost::program_options::options_description& desc);
@@ -43,7 +43,7 @@ namespace currency
     bool on_idle();
     void on_synchronized();
     //synchronous analog (for fast calls)
-    static bool find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height);
+    static bool find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, blockchain_storage& bc);
     void pause();
     void resume();
     void do_print_hashrate(bool do_hr);
@@ -78,20 +78,18 @@ namespace currency
     std::list<boost::thread> m_threads;
     ::critical_section m_threads_lock;
     i_miner_handler* m_phandler;
+    blockchain_storage& m_bc;
     account_public_address m_mine_address;
     math_helper::once_a_time_seconds<5> m_update_block_template_interval;
     math_helper::once_a_time_seconds<2> m_update_merge_hr_interval;
     std::vector<blobdata> m_extra_messages;
     miner_config m_config;
     std::string m_config_folder_path;    
+    std::atomic<uint64_t> m_current_hash_rate;
     std::atomic<uint64_t> m_last_hr_merge_time;
     std::atomic<uint64_t> m_hashes;
-    std::atomic<uint64_t> m_current_hash_rate;
-    critical_section m_last_hash_rates_lock;
-    std::list<uint64_t> m_last_hash_rates;
     bool m_do_print_hashrate;
     bool m_do_mining;
-
   };
 }
 

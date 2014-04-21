@@ -82,8 +82,6 @@ namespace currency
   blobdata get_block_hashing_blob(const block& b);
   bool get_block_hash(const block& b, crypto::hash& res);
   crypto::hash get_block_hash(const block& b);
-  bool get_block_longhash(const block& b, crypto::hash& res, uint64_t height);
-  crypto::hash get_block_longhash(const block& b, uint64_t height);
   bool generate_genesis_block(block& bl);
   bool parse_and_validate_block_from_blob(const blobdata& b_blob, block& b);
   bool get_inputs_money_amount(const transaction& tx, uint64_t& money);
@@ -100,6 +98,40 @@ namespace currency
   std::vector<uint64_t> relative_output_offsets_to_absolute(const std::vector<uint64_t>& off);
   std::vector<uint64_t> absolute_output_offsets_to_relative(const std::vector<uint64_t>& off);
   std::string print_money(uint64_t amount);
+  
+  
+  //---------------------------------------------------------------
+  struct get_scratchpad_param
+  {
+    uint64_t selectors[4];
+  };
+
+  template<typename callback_t>
+  bool get_block_longhash(const block& b, crypto::hash& res, uint64_t /*height*/, callback_t get_scratchpad)
+  {
+    crypto::hash fast_h = null_hash;
+    static_assert(sizeof(fast_h) == sizeof(get_scratchpad_param), "wrong get_scratchpad_param size");
+
+    blobdata bd = get_block_hashing_blob(b);
+    crypto::cn_fast_hash(bd.data(), bd.size(), fast_h);
+    get_scratchpad_param* pscratch_selector = reinterpret_cast<get_scratchpad_param*>(&fast_h);
+    blobdata scratchpad;
+    get_scratchpad(*pscratch_selector, scratchpad);
+    CHECK_AND_ASSERT_MES(scratchpad.size(), false, "get_scratchpad() callback returned empty scratchpad");
+    //use fast_h as salt
+    scratchpad.append(reinterpret_cast<const char*>(&fast_h), sizeof(fast_h));
+
+    crypto::cn_slow_hash(scratchpad.data(), scratchpad.size(), res);
+    return true;
+  }
+  //---------------------------------------------------------------
+  template<typename callback_t>
+  crypto::hash get_block_longhash(const block& b, uint64_t height, callback_t cb)
+  {
+    crypto::hash p = null_hash;
+    get_block_longhash(b, p, height, cb);
+    return p;
+  }
   //---------------------------------------------------------------
   template<class t_object>
   bool t_serializable_object_to_blob(const t_object& to, blobdata& b_blob)

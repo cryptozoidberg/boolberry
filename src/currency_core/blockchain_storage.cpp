@@ -698,7 +698,7 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
      block size, so first miner transaction generated with fake amount of money, and with phase we know think we know expected block size
   */
   //make blocks coin-base tx looks close to real coinbase tx to get truthful blob size
-  bool r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, txs_size, fee, miner_address, m_royalty_account.m_account_address, m_donations_account.m_account_address, b.miner_tx, ex_nonce, 11);
+  bool r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, txs_size, fee, miner_address, m_donations_account.m_account_address, m_royalty_account.m_account_address, b.miner_tx, ex_nonce, 11);
   CHECK_AND_ASSERT_MES(r, false, "Failed to construc miner tx, first chance");
 #ifdef _DEBUG
   std::list<size_t> try_val;
@@ -707,7 +707,7 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
 
   size_t cumulative_size = txs_size + get_object_blobsize(b.miner_tx);
   for (size_t try_count = 0; try_count != 10; ++try_count) {
-    r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, cumulative_size, fee, miner_address, m_royalty_account.m_account_address, m_donations_account.m_account_address, b.miner_tx, ex_nonce, 11);
+    r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, cumulative_size, fee, miner_address, m_donations_account.m_account_address, m_royalty_account.m_account_address, b.miner_tx, ex_nonce, 11);
 #ifdef _DEBUG
     try_val.push_back(get_object_blobsize(b.miner_tx));
 #endif
@@ -815,8 +815,11 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     crypto::hash proof_of_work = null_hash;
     if(!m_checkpoints.is_in_checkpoint_zone(bei.height))
     {
+            
       m_is_in_checkpoint_zone = false;
-      get_block_longhash(bei.bl, proof_of_work, bei.height);
+      get_block_longhash(bei.bl, proof_of_work, bei.height, [&](const get_scratchpad_param& prm, blobdata& bd){
+        make_scratchpad_from_selector_alt(prm, bd, bei.height, alt_chain);
+      });
 
       if(!check_hash(proof_of_work, current_diff))
       {
@@ -1274,6 +1277,9 @@ bool blockchain_storage::pop_transaction_from_global_index(const transaction& tx
     CHECK_AND_ASSERT_MES(it->second.back().first == tx_id , false, "transactions outs global index consistency broken: tx id missmatch");
     CHECK_AND_ASSERT_MES(it->second.back().second == i, false, "transactions outs global index consistency broken: in transaction index missmatch");
     it->second.pop_back();
+    //do not let to exist empty m_outputs entries - this will broke scratchpad selector
+    if(!it->second.size())
+      m_outputs.erase(it);
     --i;
   }
   return true;
@@ -1516,6 +1522,94 @@ bool blockchain_storage::check_block_timestamp(std::vector<uint64_t> timestamps,
   return true;
 }
 //------------------------------------------------------------------
+bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector)
+{
+  //for each block we put:
+  //prev_hash
+  //random index tx_hash
+  //random index miner_tx out key
+  //transaction public one-time key from extra
+
+  string_tools::apped_pod_to_strbuff(res, b.prev_id);
+  if(b.tx_hashes.size())
+    string_tools::apped_pod_to_strbuff(res, b.tx_hashes[selector%b.tx_hashes.size()]);
+  else 
+    string_tools::apped_pod_to_strbuff(res, get_transaction_hash(b.miner_tx));
+
+  
+  CHECK_AND_ASSERT_MES(b.miner_tx.vout.size(), false, "wrong block with empty transacions");
+  CHECK_AND_ASSERT_MES(b.miner_tx.vout[selector%b.miner_tx.vout.size()].target.type() == typeid(txout_to_key), false, "wrong tx out type in coinbase!!!");  
+  string_tools::apped_pod_to_strbuff(res, boost::get<txout_to_key>(b.miner_tx.vout[selector%b.miner_tx.vout.size()].target).key);
+  crypto::public_key tx_pub_key = null_pkey;
+  parse_and_validate_tx_extra(b.miner_tx, tx_pub_key);
+  CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Failed to parse tx_pub_key from transaction public key");
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::make_scratchpad_from_selector(const get_scratchpad_param& prm, blobdata& bd, uint64_t height)
+{
+  /*lets leave genesis block with mock scratchpad*/
+  if(!height)
+  {
+    bd = "GENESIS";
+    return true;
+  }
+
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  //lets get two transactions outs
+  uint64_t index_a = prm.selectors[0]%height;
+  uint64_t index_b = prm.selectors[1]%height;
+  bool r = get_block_scratchpad_data(m_blocks[index_a].bl, bd, prm.selectors[2]);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for a, index=" << index_a);
+  r = get_block_scratchpad_data(m_blocks[index_b].bl, bd, prm.selectors[3]);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for b, index=" << index_b);
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::get_block_for_scratchpad_alt(uint64_t connection_height, uint64_t block_index, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain, block* &block_ptr_ref)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  if(block_index >= connection_height)
+  {
+    //take it from alt chain
+    for(auto it: alt_chain)
+    {
+      if(it->second.height == block_index)
+      {
+        block_ptr_ref = &it->second.bl;
+        return true;
+      }
+    }
+    CHECK_AND_ASSERT_MES(false, false, "Failed to find alternative block with height=" << block_index);
+  }else
+  {
+    block_ptr_ref = &m_blocks[block_index].bl;
+  }
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::make_scratchpad_from_selector_alt(const get_scratchpad_param& prm, blobdata& bd, uint64_t height, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  //lets get two transactions outs
+  uint64_t index_a = prm.selectors[0]%height;
+  uint64_t index_b = prm.selectors[1]%height;
+  
+  block* pblocka = nullptr;
+  block* pblockb = nullptr;
+  uint64_t connection_height = alt_chain.size() ? alt_chain.front()->second.height:height;
+  bool r = get_block_for_scratchpad_alt(connection_height, index_a, alt_chain, pblocka);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_for_scratchpad_alt for a, index=" << index_a);
+  r = get_block_for_scratchpad_alt(connection_height, index_b, alt_chain, pblockb);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_for_scratchpad_alt for b, index=" << index_b);
+  
+  r = get_block_scratchpad_data(*pblocka, bd, prm.selectors[2]);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for a, index=" << index_a);
+  r = get_block_scratchpad_data(*pblockb, bd, prm.selectors[3]);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for b, index=" << index_b);  
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypto::hash& id, block_verification_context& bvc)
 {
   TIME_MEASURE_START(block_processing_time);
@@ -1546,8 +1640,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   crypto::hash proof_of_work = null_hash;
   if(!m_checkpoints.is_in_checkpoint_zone(get_current_blockchain_height()))
   {
-    proof_of_work = get_block_longhash(bl, m_blocks.size());
-
+    proof_of_work = get_block_longhash(bl, m_blocks.size(), boost::bind(&blockchain_storage::make_scratchpad_from_selector, this, _1, _2, m_blocks.size()));
     if(!check_hash(proof_of_work, current_diffic))
     {
       LOG_PRINT_L0("Block with id: " << id << ENDL
