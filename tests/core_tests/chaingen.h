@@ -167,20 +167,20 @@ public:
   struct block_info
   {
     block_info()
-      : prev_id()
+      : b()
       , already_generated_coins(0)
       , block_size(0)
     {
     }
 
-    block_info(crypto::hash a_prev_id, uint64_t an_already_generated_coins, size_t a_block_size)
-      : prev_id(a_prev_id)
+    block_info(const currency::block& b_, uint64_t an_already_generated_coins, size_t a_block_size)
+      : b(b_)
       , already_generated_coins(an_already_generated_coins)
       , block_size(a_block_size)
     {
     }
 
-    crypto::hash prev_id;
+    currency::block b;
     uint64_t already_generated_coins;
     size_t block_size;
   };
@@ -217,6 +217,7 @@ public:
     const std::vector<crypto::hash>& tx_hashes = std::vector<crypto::hash>(), size_t txs_sizes = 0);
   bool construct_block_manually_tx(currency::block& blk, const currency::block& prev_block,
     const currency::account_base& miner_acc, const std::vector<crypto::hash>& tx_hashes, size_t txs_size);
+  bool find_nounce(currency::block& blk, currency::difficulty_type dif, uint64_t height);
 
 private:
   std::unordered_map<crypto::hash, block_info> m_blocks_info;

@@ -36,7 +36,7 @@ void test_generator::get_block_chain(std::vector<block_info>& blockchain, const 
     }
 
     blockchain.push_back(it->second);
-    curr = it->second.prev_id;
+    curr = it->second.b.prev_id;
   }
 
   std::reverse(blockchain.begin(), blockchain.end());
@@ -74,7 +74,7 @@ void test_generator::add_block(const currency::block& blk, size_t tsx_size, std:
   uint64_t block_reward;
   uint64_t max_donation;
   get_block_reward(misc_utils::median(block_sizes), block_size, already_generated_coins, 0, block_reward, max_donation);
-  m_blocks_info[get_block_hash(blk)] = block_info(blk.prev_id, already_generated_coins + block_reward, block_size);
+  m_blocks_info[get_block_hash(blk)] = block_info(blk, already_generated_coins + block_reward, block_size);
 }
 
 bool test_generator::construct_block(currency::block& blk, uint64_t height, const crypto::hash& prev_id,
@@ -154,12 +154,26 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
 
   // Nonce search...
   blk.nonce = 0;
-  while (!miner::find_nonce_for_given_block(blk, get_test_difficulty(), height))
+  while (!find_nounce(blk, get_test_difficulty(), height))
     blk.timestamp++;
 
   add_block(blk, txs_size, block_sizes, already_generated_coins);
 
   return true;
+}
+bool test_generator::find_nounce(block& blk, difficulty_type dif, uint64_t height)
+{
+  std::vector<block_info> blocks;
+  get_block_chain(blocks, blk.prev_id, std::numeric_limits<size_t>::max());
+  if(height > blocks.size())
+    throw std::runtime_error("wrong height in find_nounce");
+
+  return miner::find_nonce_for_given_block(blk, get_test_difficulty(), height, [&](uint64_t index, block& b){
+    if(index >= blocks.size())
+      throw std::runtime_error("wrong height in find_nounce");
+    b = blocks[index].b;
+    return true;
+  });
 }
 
 bool test_generator::construct_block(currency::block& blk, const currency::account_base& miner_acc, uint64_t timestamp)
@@ -217,7 +231,7 @@ bool test_generator::construct_block_manually(block& blk, const block& prev_bloc
   //blk.tree_root_hash = get_tx_tree_hash(blk);
 
   difficulty_type a_diffic = actual_params & bf_diffic ? diffic : get_test_difficulty();
-  fill_nonce(blk, a_diffic, height);
+  find_nounce(blk, a_diffic, height);
 
   add_block(blk, txs_sizes, block_sizes, already_generated_coins);
 
@@ -474,12 +488,13 @@ void fill_tx_sources_and_destinations(const std::vector<test_event_entry>& event
   }
 }
 
+/*
 void fill_nonce(currency::block& blk, const difficulty_type& diffic, uint64_t height)
 {
   blk.nonce = 0;
   while (!miner::find_nonce_for_given_block(blk, diffic, height))
     blk.timestamp++;
-}
+}*/
 
 bool construct_miner_tx_manually(size_t height, uint64_t already_generated_coins,
                                  const account_public_address& miner_address, transaction& tx, uint64_t fee,

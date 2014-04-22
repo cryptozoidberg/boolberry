@@ -240,21 +240,6 @@ namespace currency
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
-  /*bool miner::find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, blockchain_storage& bc)
-  {
-    for(; bl.nonce != std::numeric_limits<uint32_t>::max(); bl.nonce++)
-    {
-      crypto::hash h;
-      get_block_longhash(bl, h, height, [&](uint64_t index, block& b){return bc.get_block_by_height(index, b);});
-
-      if(check_hash(h, diffic))
-      {
-        return true;
-      }
-    }
-    return false;
-  }*/
-  //-----------------------------------------------------------------------------------------------------
   void miner::on_synchronized()
   {
     if(m_do_mining)

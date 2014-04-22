@@ -43,10 +43,27 @@ namespace currency
     bool on_idle();
     void on_synchronized();
     //synchronous analog (for fast calls)
-    /*static bool find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, blockchain_storage& bc);*/
     void pause();
     void resume();
     void do_print_hashrate(bool do_hr);
+
+    template<typename callback_t>
+    static bool find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, callback_t blocks_accessor)
+    {
+      for(; bl.nonce != std::numeric_limits<uint32_t>::max(); bl.nonce++)
+      {
+        crypto::hash h;
+        get_block_longhash(bl, h, height, blocks_accessor);
+
+        if(check_hash(h, diffic))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+
 
   private:
     bool worker_thread();
