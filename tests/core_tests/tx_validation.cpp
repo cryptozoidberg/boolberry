@@ -62,6 +62,7 @@ namespace
         tx_out out;
         out.amount = dst_entr.amount;
         txout_to_key tk;
+        tk.mix_attr = CURRENCY_TO_KEY_OUT_RELAXED;
         tk.key = out_eph_public_key;
         out.target = tk;
         m_tx.vout.push_back(out);

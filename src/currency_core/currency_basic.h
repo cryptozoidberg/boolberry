@@ -16,14 +16,13 @@
 #include "serialization/json_archive.h"
 #include "serialization/debug_archive.h"
 #include "serialization/crypto.h"
-#include "serialization/keyvalue_serialization.h" // eepe named serialization
+#include "serialization/keyvalue_serialization.h" // epee key-value serialization
 #include "string_tools.h"
 #include "currency_config.h"
 #include "crypto/crypto.h"
 #include "crypto/hash.h"
 #include "misc_language.h"
 #include "tx_extra.h"
-
 
 namespace currency
 {
@@ -52,13 +51,14 @@ namespace currency
     crypto::hash hash;
   };
 
+
   struct txout_to_key
   {
     txout_to_key() { }
     txout_to_key(const crypto::public_key &_key) : key(_key) { }
     crypto::public_key key;
+    uint8_t mix_attr;
   };
-
 
   /* inputs */
 

@@ -23,10 +23,14 @@
 #define EMISSION_SUPPLY                               TOTAL_MONEY_SUPPLY - DONATIONS_SUPPLY 
 
 
+#define CURRENCY_TO_KEY_OUT_RELAXED                   0
+#define CURRENCY_TO_KEY_OUT_FORCED_NO_MIX             1
+
 #define CURRENCY_REWARD_BLOCKS_WINDOW                 100
 #define CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE       20000 //size of block (bytes) after which reward for block calculated using block size
 #define CURRENCY_COINBASE_BLOB_RESERVED_SIZE          600
 #define CURRENCY_DISPLAY_DECIMAL_POINT                8
+
 // COIN - number of smallest units in one coin
 #define COIN                                            ((uint64_t)100000000) // pow(10, 8)
 #define DEFAULT_DUST_THRESHOLD                          ((uint64_t)1000000) // pow(10, 6)

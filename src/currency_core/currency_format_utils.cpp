@@ -324,7 +324,7 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool construct_tx_out(const account_public_address& destination_addr, const crypto::secret_key& tx_sec_key, size_t output_index, uint64_t amount, transaction& tx)
+  bool construct_tx_out(const account_public_address& destination_addr, const crypto::secret_key& tx_sec_key, size_t output_index, uint64_t amount, transaction& tx, uint8_t tx_outs_attr)
   {
     crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
     crypto::public_key out_eph_public_key = AUTO_VAL_INIT(out_eph_public_key);
@@ -338,6 +338,7 @@ namespace currency
     out.amount = amount;
     txout_to_key tk;
     tk.key = out_eph_public_key;
+    tk.mix_attr = tx_outs_attr;
     out.target = tk;
     tx.vout.push_back(out);
     return true;
@@ -346,7 +347,8 @@ namespace currency
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
                                                              transaction& tx, 
-                                                             uint64_t unlock_time)
+                                                             uint64_t unlock_time,
+                                                             uint8_t tx_outs_attr)
   {
     tx.vin.clear();
     tx.vout.clear();
@@ -416,7 +418,7 @@ namespace currency
     BOOST_FOREACH(const tx_destination_entry& dst_entr,  shuffled_dsts)
     {
       CHECK_AND_ASSERT_MES(dst_entr.amount > 0, false, "Destination with wrong amount: " << dst_entr.amount);
-      bool r = construct_tx_out(dst_entr.addr, txkey.sec, output_index, dst_entr.amount, tx);
+      bool r = construct_tx_out(dst_entr.addr, txkey.sec, output_index, dst_entr.amount, tx,  tx_outs_attr);
       CHECK_AND_ASSERT_MES(r, false, "Failed to construc tx out");
       output_index++;
       summary_outs_money += dst_entr.amount;
