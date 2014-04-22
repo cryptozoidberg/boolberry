@@ -168,7 +168,7 @@ bool test_generator::find_nounce(block& blk, difficulty_type dif, uint64_t heigh
   if(height > blocks.size())
     throw std::runtime_error("wrong height in find_nounce");
 
-  return miner::find_nonce_for_given_block(blk, get_test_difficulty(), height, [&](uint64_t index, block& b){
+  return miner::find_nonce_for_given_block(blk, dif, height, [&](uint64_t index, block& b){
     if(index >= blocks.size())
       throw std::runtime_error("wrong height in find_nounce");
     b = blocks[index].b;

@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     GENERATE_AND_PLAY(gen_block_ts_not_checked);
     GENERATE_AND_PLAY(gen_block_ts_in_past);
     GENERATE_AND_PLAY(gen_block_ts_in_future);
-    GENERATE_AND_PLAY(gen_block_invalid_prev_id);
+    //GENERATE_AND_PLAY(gen_block_invalid_prev_id); disabled becouse impossible to generate text chain with wrong prev_id - pow hash not works without chaining
     GENERATE_AND_PLAY(gen_block_invalid_nonce);
     GENERATE_AND_PLAY(gen_block_no_miner_tx);
     GENERATE_AND_PLAY(gen_block_unlock_time_is_low);
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
     GENERATE_AND_PLAY(gen_block_has_invalid_tx);
     GENERATE_AND_PLAY(gen_block_is_too_big);
     GENERATE_AND_PLAY(gen_block_invalid_binary_format); // Takes up to 3 hours, if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 500, up to 30 minutes, if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 10
-
+    
     // Transaction verification tests
     GENERATE_AND_PLAY(gen_tx_big_version);
     GENERATE_AND_PLAY(gen_tx_unlock_time);

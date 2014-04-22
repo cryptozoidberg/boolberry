@@ -57,6 +57,7 @@ namespace currency
 
         if(check_hash(h, diffic))
         {
+            LOG_PRINT_L0("Found nonce for block: " << get_block_hash(bl) << "[" << height << "]: PoW:" << h);
           return true;
         }
       }
