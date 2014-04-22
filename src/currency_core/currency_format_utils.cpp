@@ -626,6 +626,31 @@ namespace currency
   {
     return get_object_hash(t, res, blob_size);
   }
+  //------------------------------------------------------------------
+  //------------------------------------------------------------------
+  bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector)
+  {
+    //for each block we put:
+    //prev_hash
+    //random index tx_hash
+    //random index miner_tx out key
+    //transaction public one-time key from extra
+
+    string_tools::apped_pod_to_strbuff(res, b.prev_id);
+    if(b.tx_hashes.size())
+      string_tools::apped_pod_to_strbuff(res, b.tx_hashes[selector%b.tx_hashes.size()]);
+    else 
+      string_tools::apped_pod_to_strbuff(res, get_transaction_hash(b.miner_tx));
+
+
+    CHECK_AND_ASSERT_MES(b.miner_tx.vout.size(), false, "wrong block with empty transacions");
+    CHECK_AND_ASSERT_MES(b.miner_tx.vout[selector%b.miner_tx.vout.size()].target.type() == typeid(txout_to_key), false, "wrong tx out type in coinbase!!!");  
+    string_tools::apped_pod_to_strbuff(res, boost::get<txout_to_key>(b.miner_tx.vout[selector%b.miner_tx.vout.size()].target).key);
+    crypto::public_key tx_pub_key = null_pkey;
+    parse_and_validate_tx_extra(b.miner_tx, tx_pub_key);
+    CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Failed to parse tx_pub_key from transaction public key");
+    return true;
+  }
   //---------------------------------------------------------------
   blobdata get_block_hashing_blob(const block& b)
   {

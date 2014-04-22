@@ -240,12 +240,12 @@ namespace currency
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
-  bool miner::find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, blockchain_storage& bc)
+  /*bool miner::find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, blockchain_storage& bc)
   {
     for(; bl.nonce != std::numeric_limits<uint32_t>::max(); bl.nonce++)
     {
       crypto::hash h;
-      get_block_longhash(bl, h, height, boost::bind(&blockchain_storage::make_scratchpad_from_selector, &bc, _1, _2, height));
+      get_block_longhash(bl, h, height, [&](uint64_t index, block& b){return bc.get_block_by_height(index, b);});
 
       if(check_hash(h, diffic))
       {
@@ -253,7 +253,7 @@ namespace currency
       }
     }
     return false;
-  }
+  }*/
   //-----------------------------------------------------------------------------------------------------
   void miner::on_synchronized()
   {
@@ -323,7 +323,7 @@ namespace currency
 
       b.nonce = nonce;
       crypto::hash h;
-      get_block_longhash(b, h, height, boost::bind(&blockchain_storage::make_scratchpad_from_selector, &m_bc, _1, _2, height));
+      get_block_longhash(b, h, height, [&](uint64_t index, block& b){return m_bc.get_block_by_height(index, b);});
 
       if(check_hash(h, local_diff))
       {

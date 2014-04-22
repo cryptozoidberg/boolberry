@@ -108,7 +108,6 @@ namespace currency
     uint64_t get_current_comulative_blocksize_limit();
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     uint64_t block_difficulty(size_t i);
-    bool make_scratchpad_from_selector(const get_scratchpad_param& prm, blobdata& bd, uint64_t height);
 
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
     bool get_blocks(const t_ids_container& block_ids, t_blocks_container& blocks, t_missed_container& missed_bs)
@@ -221,8 +220,7 @@ namespace currency
     bool complete_timestamps_vector(uint64_t start_height, std::vector<uint64_t>& timestamps);
     bool update_next_comulative_size_limit();
     bool lookfor_donation(const transaction& tx, uint64_t& donation, uint64_t& royalty);
-    bool make_scratchpad_from_selector_alt(const get_scratchpad_param& prm, blobdata& bd, uint64_t height, std::list<blocks_ext_by_hash::iterator>& alt_chain);
-    bool get_block_for_scratchpad_alt(uint64_t connection_height, uint64_t block_index, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain, block* &block_ptr_ref);
+    bool get_block_for_scratchpad_alt(uint64_t connection_height, uint64_t block_index, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain, block & b);
   };
 
 

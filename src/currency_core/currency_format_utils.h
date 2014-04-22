@@ -101,13 +101,42 @@ namespace currency
   
   
   //---------------------------------------------------------------
+  bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector);
   struct get_scratchpad_param
   {
     uint64_t selectors[4];
   };
-
+  //---------------------------------------------------------------
   template<typename callback_t>
-  bool get_block_longhash(const block& b, crypto::hash& res, uint64_t /*height*/, callback_t get_scratchpad)
+  bool make_scratchpad_from_selector(const get_scratchpad_param& prm, blobdata& bd, uint64_t height, callback_t get_blocks_accessor)
+  {
+    /*lets genesis block with mock scratchpad*/
+    if(!height)
+    {
+      bd = "GENESIS";
+      return true;
+    }
+    //lets get two transactions outs
+    uint64_t index_a = prm.selectors[0]%height;
+    uint64_t index_b = prm.selectors[1]%height;
+    
+    
+    block ba = AUTO_VAL_INIT(ba);
+    block bb = AUTO_VAL_INIT(bb);
+    bool r = get_blocks_accessor(index_a, ba);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to get block \"a\" from block accessor, index=" << index_a);
+    r = get_blocks_accessor(index_a, bb);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to get block \"b\" from block accessor, index=" << index_b);
+
+    r = get_block_scratchpad_data(ba, bd, prm.selectors[2]);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for a, index=" << index_a);
+    r = get_block_scratchpad_data(bb, bd, prm.selectors[3]);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for b, index=" << index_b);
+    return true;
+  }
+  //---------------------------------------------------------------
+  template<typename callback_t>
+  bool get_block_longhash(const block& b, crypto::hash& res, uint64_t height, callback_t get_blocks_accessor)
   {
     crypto::hash fast_h = null_hash;
     static_assert(sizeof(fast_h) == sizeof(get_scratchpad_param), "wrong get_scratchpad_param size");
@@ -116,7 +145,7 @@ namespace currency
     crypto::cn_fast_hash(bd.data(), bd.size(), fast_h);
     get_scratchpad_param* pscratch_selector = reinterpret_cast<get_scratchpad_param*>(&fast_h);
     blobdata scratchpad;
-    get_scratchpad(*pscratch_selector, scratchpad);
+    make_scratchpad_from_selector(*pscratch_selector, scratchpad, height, get_blocks_accessor);
     CHECK_AND_ASSERT_MES(scratchpad.size(), false, "get_scratchpad() callback returned empty scratchpad");
     //use fast_h as salt
     scratchpad.append(reinterpret_cast<const char*>(&fast_h), sizeof(fast_h));
