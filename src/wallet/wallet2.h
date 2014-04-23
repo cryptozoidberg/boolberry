@@ -294,6 +294,7 @@ namespace tools
     if(fake_outputs_count)
     {
       COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::request req = AUTO_VAL_INIT(req);
+      req.use_forced_mix_outs = false; //add this feature to UI later
       req.outs_count = fake_outputs_count + 1;// add one to make possible (if need) to skip real output key
       BOOST_FOREACH(transfer_container::iterator it, selected_transfers)
       {

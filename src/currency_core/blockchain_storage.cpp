@@ -964,7 +964,7 @@ size_t blockchain_storage::get_alternative_blocks_count()
   return m_alternative_chains.size();
 }
 //------------------------------------------------------------------
-bool blockchain_storage::add_out_to_get_random_outs(std::vector<std::pair<crypto::hash, size_t> >& amount_outs, COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount& result_outs, uint64_t amount, size_t i)
+bool blockchain_storage::add_out_to_get_random_outs(std::vector<std::pair<crypto::hash, size_t> >& amount_outs, COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount& result_outs, uint64_t amount, size_t i, uint64_t mix_count, bool use_only_forced_to_mix)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   transactions_container::iterator tx_it = m_transactions.find(amount_outs[i].first);
@@ -978,6 +978,17 @@ bool blockchain_storage::add_out_to_get_random_outs(std::vector<std::pair<crypto
   //check if transaction is unlocked
   if(!is_tx_spendtime_unlocked(tx.unlock_time))
     return false;
+
+  //use appropriate mix_attr out 
+  uint8_t mix_attr = boost::get<txout_to_key>(tx.vout[amount_outs[i].second].target).mix_attr;
+  
+  if(mix_attr == CURRENCY_TO_KEY_OUT_FORCED_NO_MIX)
+    return false; //COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS call means that ring signature will have more than one entry.
+  else if(use_only_forced_to_mix && mix_attr == CURRENCY_TO_KEY_OUT_RELAXED)
+    return false; //relaxed not allowed
+  else if(mix_attr != CURRENCY_TO_KEY_OUT_RELAXED && mix_attr > mix_count)
+    return false;//mix_attr set to specific minimum, and mix_count is less then desired count
+
 
   COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry& oen = *result_outs.outs.insert(result_outs.outs.end(), COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry());
   oen.global_amount_index = i;
@@ -1030,7 +1041,7 @@ bool blockchain_storage::get_random_outs_for_amounts(const COMMAND_RPC_GET_RANDO
         size_t i = rand()%up_index_limit;
         if(used.count(i))
           continue;
-        bool added = add_out_to_get_random_outs(amount_outs, result_outs, amount, i);
+        bool added = add_out_to_get_random_outs(amount_outs, result_outs, amount, i, req.outs_count, req.use_forced_mix_outs);
         used.insert(i);
         if(added)
           ++j;
@@ -1039,7 +1050,7 @@ bool blockchain_storage::get_random_outs_for_amounts(const COMMAND_RPC_GET_RANDO
     }else
     {
       for(size_t i = 0; i != up_index_limit; i++)
-        add_out_to_get_random_outs(amount_outs, result_outs, amount, i);
+        add_out_to_get_random_outs(amount_outs, result_outs, amount, i, req.outs_count, req.use_forced_mix_outs);
     }
   }
   return true;

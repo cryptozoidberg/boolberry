@@ -223,12 +223,12 @@ bool gen_block_reward::check_block_rewards(currency::core& /*c*/, size_t /*ev_in
   DEFINE_TESTS_ERROR_CONTEXT("gen_block_reward_without_txs::check_block_rewards");
 
   std::array<uint64_t, 7> blk_rewards;
-  blk_rewards[0] = EMISSION_SUPPLY >> 18;
+  blk_rewards[0] = EMISSION_SUPPLY >> EMISSION_CURVE_CHARACTER;
   blk_rewards[0] = blk_rewards[0] - blk_rewards[0]%DEFAULT_DUST_THRESHOLD;
   uint64_t cumulative_reward = blk_rewards[0];
   for (size_t i = 1; i < blk_rewards.size(); ++i)
   {
-    blk_rewards[i] = (EMISSION_SUPPLY - cumulative_reward) >> 18;
+    blk_rewards[i] = (EMISSION_SUPPLY - cumulative_reward) >> EMISSION_CURVE_CHARACTER;
     blk_rewards[i] = blk_rewards[i] - blk_rewards[i]%DEFAULT_DUST_THRESHOLD;
     cumulative_reward += blk_rewards[i];
   }

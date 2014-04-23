@@ -36,8 +36,8 @@ namespace currency {
   //-----------------------------------------------------------------------------------------------
   bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t already_donated_coins, uint64_t &reward, uint64_t &max_donation) 
   {    
-    uint64_t base_reward = (EMISSION_SUPPLY - already_generated_coins) >> 18  ;
-    max_donation = (DONATIONS_SUPPLY - already_donated_coins) >> 18;
+    uint64_t base_reward = (EMISSION_SUPPLY - already_generated_coins) >> EMISSION_CURVE_CHARACTER  ;
+    max_donation = (DONATIONS_SUPPLY - already_donated_coins) >> EMISSION_CURVE_CHARACTER;
     //crop dust
     base_reward = base_reward - base_reward%DEFAULT_DUST_THRESHOLD;
     max_donation = max_donation - max_donation%DEFAULT_DUST_THRESHOLD;

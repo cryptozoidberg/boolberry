@@ -117,9 +117,11 @@ namespace currency
     {
       std::list<uint64_t> amounts;
       uint64_t            outs_count;
+      bool                use_forced_mix_outs;
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(amounts)
         KV_SERIALIZE(outs_count)
+        KV_SERIALIZE(use_forced_mix_outs)
       END_KV_SERIALIZE_MAP()
     };
 

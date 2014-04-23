@@ -22,6 +22,8 @@
 #define DONATIONS_SUPPLY                              TOTAL_MONEY_SUPPLY/10 
 #define EMISSION_SUPPLY                               TOTAL_MONEY_SUPPLY - DONATIONS_SUPPLY 
 
+#define EMISSION_CURVE_CHARACTER                      20
+
 
 #define CURRENCY_TO_KEY_OUT_RELAXED                   0
 #define CURRENCY_TO_KEY_OUT_FORCED_NO_MIX             1
