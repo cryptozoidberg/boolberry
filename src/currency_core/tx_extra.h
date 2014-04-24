@@ -4,8 +4,11 @@
 
 #pragma once 
 
+#define TX_EXTRA_PADDING_MAX_COUNT                    40
+#define TX_EXTRA_TAG_PUBKEY                           0x01
+#define TX_EXTRA_TAG_USER_DATA                        0x02
+#define TX_EXTRA_TAG_ALIAS                            0x03
+#define TX_EXTRA_TAG_ALIAS_FLAGS_OP_UPDATE            0x01
+#define TX_EXTRA_TAG_ALIAS_FLAGS_ADDR_WITH_TRACK      0x02
 
 
-#define TX_EXTRA_PADDING_MAX_COUNT          40
-#define TX_EXTRA_TAG_PUBKEY                 0x01
-#define TX_EXTRA_NONCE                      0x02

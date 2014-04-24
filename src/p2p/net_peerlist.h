@@ -124,15 +124,8 @@ namespace nodetool
     {
       if(ver < 3)
         return;
+      CHECK_PROJECT_NAME();
       CRITICAL_REGION_LOCAL(m_peerlist_lock);
-      if(ver < 4)
-      {
-        //loading data from old storage
-        peers_indexed_old pio; 
-        a & pio;
-        peers_indexed_from_old(pio, m_peers_white);
-        return;
-      }
       a & m_peers_white;
       a & m_peers_gray;
     }

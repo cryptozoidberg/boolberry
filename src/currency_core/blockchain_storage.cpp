@@ -235,6 +235,9 @@ bool blockchain_storage::purge_transaction_from_blockchain(const crypto::hash& t
   transaction& tx = tx_index_it->second.tx;
 
   purge_transaction_keyimages_from_blockchain(tx, true);
+  
+  bool r = unprocess_blockchain_tx_extra(tx);
+  CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_extra");
 
   if(!is_coinbase(tx))
   {
@@ -1297,9 +1300,77 @@ bool blockchain_storage::pop_transaction_from_global_index(const transaction& tx
   return true;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::unprocess_blockchain_tx_extra(const transaction& tx)
+{
+  if(!is_coinbase(tx))
+  {
+    tx_extra_info ei = AUTO_VAL_INIT(ei);
+    bool r = parse_and_validate_tx_extra(tx, ei);
+    CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra on unprocess_blockchain_tx_extra");
+    if(ei.m_alias.m_alias.size())
+    {
+      r = pop_alias_info(ei.m_alias);
+      CHECK_AND_ASSERT_MES(r, false, "failed to pop_alias_info");
+    }
+  }
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::pop_alias_info(const alias_info& ai)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  CHECK_AND_ASSERT_MES(ai.m_alias.size(), false, "empty name in pop_alias_info");
+  aliases_container::mapped_type& alias_history = m_aliases[ai.m_alias];
+  CHECK_AND_ASSERT_MES(alias_history.size(), false, "empty name list in pop_alias_info");
+  alias_history.pop_back();
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::put_alias_info(const alias_info& ai)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  CHECK_AND_ASSERT_MES(ai.m_alias.size(), false, "empty name in put_alias_info");
+
+  aliases_container::mapped_type& alias_history = m_aliases[ai.m_alias];
+  if(ai.m_sign == null_sig)
+  {//adding new alias, check sat name is free
+    CHECK_AND_ASSERT_MES(!alias_history.size(), false, "alias " << ai.m_alias << " already in use");
+    alias_history.push_back(ai);
+  }else
+  {
+    //update procedure
+    CHECK_AND_ASSERT_MES(alias_history.size(), false, "alias " << ai.m_alias << " can't be update becouse it doesn't exists");
+    std::string signed_buff;
+    make_tx_extra_alias_entry(signed_buff, ai, true);
+    bool r = crypto::check_signature(get_blob_hash(signed_buff), alias_history.back().m_address.m_spend_public_key, ai.m_sign);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to check signature, alias update failed");
+    //update granted
+    alias_history.push_back(ai);
+  }
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
+{
+  //check transaction extra
+  tx_extra_info ei = AUTO_VAL_INIT(ei);
+  bool r = parse_and_validate_tx_extra(tx, ei);
+  CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra");
+  if(is_coinbase(tx) && ei.m_alias.m_alias.size())
+  {
+    r = put_alias_info(ei.m_alias);
+    CHECK_AND_ASSERT_MES(r, false, "failed to put_alias_info");
+  }
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::add_transaction_from_block(const transaction& tx, const crypto::hash& tx_id, const crypto::hash& bl_id, uint64_t bl_height)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
+  bool r = process_blockchain_tx_extra(tx);
+  CHECK_AND_ASSERT_MES(r, false, "failed to process_blockchain_tx_extra");
+
   struct add_transaction_input_visitor: public boost::static_visitor<bool>
   {
     key_images_container& m_spent_keys;
@@ -1329,8 +1400,10 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
   {
     if(!boost::apply_visitor(add_transaction_input_visitor(m_spent_keys, tx_id, bl_id), in))
     {
-      LOG_ERROR("critical internal error: add_transaction_input_visitor failed. but here key_images should be shecked");
+      LOG_ERROR("critical internal error: add_transaction_input_visitor failed. but key_images should be already checked");
       purge_transaction_keyimages_from_blockchain(tx, false);
+      bool r = unprocess_blockchain_tx_extra(tx);
+      CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_extra");
       return false;
     }
   }
@@ -1340,10 +1413,13 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
   auto i_r = m_transactions.insert(std::pair<crypto::hash, transaction_chain_entry>(tx_id, ch_e));
   if(!i_r.second)
   {
-    LOG_PRINT_L0("tx with id: " << tx_id << " in block id: " << bl_id << " already in blockchain");
+    LOG_ERROR("critical internal error: tx with id: " << tx_id << " in block id: " << bl_id << " already in blockchain");
+    purge_transaction_keyimages_from_blockchain(tx, true);
+    bool r = unprocess_blockchain_tx_extra(tx);
+    CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_extra");
     return false;
   }
-  bool r = push_transaction_to_global_outs_index(tx, tx_id, i_r.first->second.m_global_output_indexes);
+  r = push_transaction_to_global_outs_index(tx, tx_id, i_r.first->second.m_global_output_indexes);
   CHECK_AND_ASSERT_MES(r, false, "failed to return push_transaction_to_global_outs_index tx id " << tx_id);
   LOG_PRINT_L2("Added transaction to blockchain history:" << ENDL
     << "tx_id: " << tx_id << ENDL

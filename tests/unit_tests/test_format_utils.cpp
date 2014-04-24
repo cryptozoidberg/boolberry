@@ -32,7 +32,7 @@ TEST(parse_and_validate_tx_extra, is_correct_wrong_extra_couner_too_big)
 {
   currency::transaction tx = AUTO_VAL_INIT(tx);
   tx.extra.resize(20, 0);
-  tx.extra[0] = TX_EXTRA_NONCE;
+  tx.extra[0] = TX_EXTRA_TAG_USER_DATA;
   tx.extra[1] = 255;
   crypto::public_key tx_pub_key;
   bool r = parse_and_validate_tx_extra(tx, tx_pub_key);

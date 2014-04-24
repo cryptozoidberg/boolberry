@@ -18,6 +18,7 @@ using namespace epee;
 #include "currency_basic_impl.h"
 #include "verification_context.h"
 #include "crypto/hash.h"
+#include "common/boost_serialization_helper.h"
 
 
 namespace currency
@@ -64,13 +65,14 @@ namespace currency
 #define CURRENT_MEMPOOL_ARCHIVE_VER    7
 
     template<class archive_t>
-    void serialize(archive_t & a, const unsigned int version)
+    void serialize(archive_t & ar, const unsigned int version)
     {
       if(version < CURRENT_MEMPOOL_ARCHIVE_VER )
         return;
+      CHECK_PROJECT_NAME();
       CRITICAL_REGION_LOCAL(m_transactions_lock);
-      a & m_transactions;
-      a & m_spent_key_images;
+      ar & m_transactions;
+      ar & m_spent_key_images;
     }
 
     struct tx_details

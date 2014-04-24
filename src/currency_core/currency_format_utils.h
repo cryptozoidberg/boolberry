@@ -59,9 +59,29 @@ namespace currency
     tx_destination_entry(uint64_t a, const account_public_address &ad) : amount(a), addr(ad) { }
   };
 
+  struct alias_info_base
+  {
+    account_public_address m_address;
+    crypto::secret_key m_view_key;
+    crypto::signature m_sign;     //is this field set no nonzero - that means update alias operation
+    std::string m_text_comment;
+  };
+
+  struct alias_info: public alias_info_base
+  {
+    std::string m_alias;
+  };
+
+  struct tx_extra_info 
+  {
+    crypto::public_key m_tx_pub_key;
+    alias_info m_alias;
+  };
   //---------------------------------------------------------------
   bool construct_tx_out(const account_public_address& destination_addr, const crypto::secret_key& tx_sec_key, size_t output_index, uint64_t amount, transaction& tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, transaction& tx, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
+  bool make_tx_extra_alias_entry(std::string& buff, const alias_info& alinfo, bool make_buff_to_sign = false);
+  bool parse_and_validate_tx_extra(const transaction& tx, tx_extra_info& extra);
   bool parse_and_validate_tx_extra(const transaction& tx, crypto::public_key& tx_pub_key);
   crypto::public_key get_tx_pub_key_from_extra(const transaction& tx);
   bool add_tx_pub_key_to_extra(transaction& tx, const crypto::public_key& tx_pub_key);

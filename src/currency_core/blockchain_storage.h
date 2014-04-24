@@ -163,6 +163,7 @@ namespace currency
     typedef std::unordered_map<crypto::hash, block_extended_info> blocks_ext_by_hash;
     typedef std::unordered_map<crypto::hash, block> blocks_by_hash;
     typedef std::map<uint64_t, std::vector<std::pair<crypto::hash, size_t>>> outputs_container; //crypto::hash - tx hash, size_t - index of out in transaction
+    typedef std::map<std::string, std::list<alias_info_base>> aliases_container; //alias can be address address address + view key
 
     tx_memory_pool& m_tx_pool;
     critical_section m_blockchain_lock; // TODO: add here reader/writer lock
@@ -182,6 +183,7 @@ namespace currency
     blocks_ext_by_hash m_invalid_blocks;     // crypto::hash -> block_extended_info
     outputs_container m_outputs;
 
+    aliases_container m_aliases;
 
     std::string m_config_folder;
     checkpoints m_checkpoints;
@@ -221,6 +223,10 @@ namespace currency
     bool update_next_comulative_size_limit();
     bool lookfor_donation(const transaction& tx, uint64_t& donation, uint64_t& royalty);
     bool get_block_for_scratchpad_alt(uint64_t connection_height, uint64_t block_index, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain, block & b);
+    bool process_blockchain_tx_extra(const transaction& tx);
+    bool unprocess_blockchain_tx_extra(const transaction& tx);
+    bool pop_alias_info(const alias_info& ai);
+    bool put_alias_info(const alias_info& ai);
   };
 
 
@@ -235,6 +241,7 @@ namespace currency
   {
     if(version < 11)
       return;
+    CHECK_PROJECT_NAME();
     CRITICAL_REGION_LOCAL(m_blockchain_lock);
     ar & m_blocks;
     ar & m_blocks_index;
@@ -244,6 +251,7 @@ namespace currency
     ar & m_outputs;
     ar & m_invalid_blocks;
     ar & m_current_block_cumul_sz_limit;
+    ar & m_aliases;
     /*serialization bug workaround*/
     if(version > 11)
     {

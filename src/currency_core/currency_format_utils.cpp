@@ -262,10 +262,94 @@ namespace currency
   //---------------------------------------------------------------
   bool parse_and_validate_tx_extra(const transaction& tx, crypto::public_key& tx_pub_key)
   {
-    tx_pub_key = null_pkey;
+    tx_extra_info e = AUTO_VAL_INIT(e);
+    bool r = parse_and_validate_tx_extra(tx, e);
+    tx_pub_key = e.m_tx_pub_key;
+    return r;
+  }
+  //---------------------------------------------------------------
+  bool make_tx_extra_alias_entry(std::string& buff, const alias_info& alinfo, bool make_buff_to_sign)
+  {
+    CHECK_AND_ASSERT_MES(alinfo.m_alias.size(), false, "alias cant be empty");
+    CHECK_AND_ASSERT_MES(alinfo.m_alias.size() <= std::numeric_limits<uint8_t>::max(), false, "alias is too big size");
+    CHECK_AND_ASSERT_MES(alinfo.m_text_comment.size() <= std::numeric_limits<uint8_t>::max(), false, "alias comment is too big size");
+    buff.resize(3);
+    buff[0] = TX_EXTRA_TAG_ALIAS;
+    buff[1] = 0;
+    buff[2] = static_cast<uint8_t>(alinfo.m_alias.size());
+    buff += alinfo.m_alias;
+    string_tools::apped_pod_to_strbuff(buff, alinfo.m_address.m_spend_public_key);
+    string_tools::apped_pod_to_strbuff(buff, alinfo.m_address.m_view_public_key);
+    if(alinfo.m_view_key != null_skey)
+    {
+      buff[1] |= TX_EXTRA_TAG_ALIAS_FLAGS_ADDR_WITH_TRACK;
+      string_tools::apped_pod_to_strbuff(buff, alinfo.m_view_key);
+    }
+    buff.resize(buff.size()+1);
+    buff.back() = static_cast<uint8_t>(alinfo.m_text_comment.size());
+    buff += alinfo.m_text_comment;
+    if(!make_buff_to_sign && alinfo.m_sign != null_sig )
+    {
+      buff[1] |= TX_EXTRA_TAG_ALIAS_FLAGS_OP_UPDATE;
+      string_tools::apped_pod_to_strbuff(buff, alinfo.m_sign);
+    }
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool parse_tx_extra_alias_entry(const transaction& tx, size_t start, alias_info& alinfo, size_t& whole_entry_len)
+  {
+    whole_entry_len = 0;
+    size_t i = start;
+    /************************************************************************************************************************************************************
+               first byte counter+                                                                           first byte counter+
+    1 byte          bytes[]             sizeof(crypto::public_key)*2           sizeof(crypto::secret_key)         bytes[]                 sizeof(crypto::signature)           
+    |--flags--|c---alias name----|--------- account public address --------|[----account tracking key----]|[c--- text comment ---][----- signature(poof of alias owning) ------]
+
+    ************************************************************************************************************************************************************/
+    CHECK_AND_ASSERT_MES(tx.extra.size()-1-i >= sizeof(crypto::public_key)*2+1, false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
+    ++i;
+    uint8_t alias_flags = tx.extra[i];
+    ++i;
+    uint8_t alias_name_len = tx.extra[i];
+    CHECK_AND_ASSERT_MES(tx.extra.size()-1-i >= tx.extra[i]+sizeof(crypto::public_key)*2, false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have wrong name bytes counter) in tx " << get_transaction_hash(tx));
+    
+    alinfo.m_alias.assign((const char*)&tx.extra[i+1], static_cast<size_t>(tx.extra[i]));
+    i += tx.extra[i] + 1;
+    alinfo.m_address.m_spend_public_key = *reinterpret_cast<const crypto::public_key*>(&tx.extra[i]);
+    i += sizeof(const crypto::public_key);
+    alinfo.m_address.m_view_public_key = *reinterpret_cast<const crypto::public_key*>(&tx.extra[i]);
+    i += sizeof(const crypto::public_key);
+    if(alias_flags&TX_EXTRA_TAG_ALIAS_FLAGS_ADDR_WITH_TRACK)
+    {//address aliased with tracking key
+      CHECK_AND_ASSERT_MES(tx.extra.size()-i >= sizeof(crypto::secret_key), false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
+      alinfo.m_view_key = *reinterpret_cast<const crypto::secret_key*>(&tx.extra[i]);
+      i += sizeof(const crypto::secret_key);
+    }
+    uint8_t comment_len = tx.extra[i];
+    if(comment_len)
+    {
+      CHECK_AND_ASSERT_MES(tx.extra.size() - i >=tx.extra[i], false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
+      alinfo.m_text_comment.assign((const char*)&tx.extra[i+1], static_cast<size_t>(tx.extra[i]));
+      i += tx.extra[i] + 1;
+    }
+    if(alias_flags&TX_EXTRA_TAG_ALIAS_FLAGS_OP_UPDATE)
+    {
+      CHECK_AND_ASSERT_MES(tx.extra.size()-i >= sizeof(crypto::secret_key), false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
+      alinfo.m_sign = *reinterpret_cast<const crypto::signature*>(&tx.extra[i]);
+      i += sizeof(const crypto::secret_key);
+    }
+    CHECK_AND_ASSERT_MES(tx.extra.size()>i, false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
+    whole_entry_len = start - i;
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool parse_and_validate_tx_extra(const transaction& tx, tx_extra_info& extra)
+  {
+    extra.m_tx_pub_key = null_pkey;
     bool padding_started = false; //let the padding goes only at the end
     bool tx_extra_tag_pubkey_found = false;
-    bool tx_extra_extra_nonce_found = false;
+    bool tx_extra_user_data_found = false;
+    bool tx_alias_found = false;
     for(size_t i = 0; i != tx.extra.size();)
     {
       if(padding_started)
@@ -276,19 +360,29 @@ namespace currency
       {
         CHECK_AND_ASSERT_MES(sizeof(crypto::public_key) <= tx.extra.size()-1-i, false, "Failed to parse transaction extra (TX_EXTRA_TAG_PUBKEY have not enough bytes) in tx " << get_transaction_hash(tx));
         CHECK_AND_ASSERT_MES(!tx_extra_tag_pubkey_found, false, "Failed to parse transaction extra (duplicate TX_EXTRA_TAG_PUBKEY entry) in tx " << get_transaction_hash(tx));
-        tx_pub_key = *reinterpret_cast<const crypto::public_key*>(&tx.extra[i+1]);
+        extra.m_tx_pub_key = *reinterpret_cast<const crypto::public_key*>(&tx.extra[i+1]);
         i += 1 + sizeof(crypto::public_key);
         tx_extra_tag_pubkey_found = true;
         continue;
-      }else if(tx.extra[i] == TX_EXTRA_NONCE)
+      }else if(tx.extra[i] == TX_EXTRA_TAG_USER_DATA)
       {
         //CHECK_AND_ASSERT_MES(is_coinbase(tx), false, "Failed to parse transaction extra (TX_EXTRA_NONCE can be only in coinbase) in tx " << get_transaction_hash(tx));
-        CHECK_AND_ASSERT_MES(!tx_extra_extra_nonce_found, false, "Failed to parse transaction extra (duplicate TX_EXTRA_NONCE entry) in tx " << get_transaction_hash(tx));
+        CHECK_AND_ASSERT_MES(!tx_extra_user_data_found, false, "Failed to parse transaction extra (duplicate TX_EXTRA_NONCE entry) in tx " << get_transaction_hash(tx));
         CHECK_AND_ASSERT_MES(tx.extra.size()-1-i >= 1, false, "Failed to parse transaction extra (TX_EXTRA_NONCE have not enough bytes) in tx " << get_transaction_hash(tx));
         ++i;
         CHECK_AND_ASSERT_MES(tx.extra.size()-1-i >= tx.extra[i], false, "Failed to parse transaction extra (TX_EXTRA_NONCE have wrong bytes counter) in tx " << get_transaction_hash(tx));
-        tx_extra_extra_nonce_found = true;
+        tx_extra_user_data_found = true;
         i += tx.extra[i];//actually don't need to extract it now, just skip
+      }else if(tx.extra[i] == TX_EXTRA_TAG_ALIAS)
+      {
+        CHECK_AND_ASSERT_MES(is_coinbase(tx), false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS can be only in coinbase) in tx " << get_transaction_hash(tx));
+        CHECK_AND_ASSERT_MES(!tx_alias_found, false, "Failed to parse transaction extra (duplicate TX_EXTRA_TAG_ALIAS entry) in tx " << get_transaction_hash(tx));
+        size_t aliac_entry_len = 0;
+        if(!parse_tx_extra_alias_entry(tx, i, extra.m_alias, aliac_entry_len))
+          return false;
+
+        tx_alias_found = true;
+        i += aliac_entry_len;
       }
       else if(!tx.extra[i])
       {
@@ -314,7 +408,7 @@ namespace currency
     size_t start_pos = tx.extra.size();
     tx.extra.resize(tx.extra.size() + 2 + extra_nonce.size());
     //write tag
-    tx.extra[start_pos] = TX_EXTRA_NONCE;
+    tx.extra[start_pos] = TX_EXTRA_TAG_USER_DATA;
     //write len
     ++start_pos;
     tx.extra[start_pos] = static_cast<uint8_t>(extra_nonce.size());

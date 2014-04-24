@@ -30,5 +30,14 @@ namespace boost
       ar & ei.already_donated_coins;
     }
 
+    template<class archive_t>
+    void serialize(archive_t & ar, currency::alias_info_base& ai, const unsigned int version)
+    {
+      ar & ai.m_address.m_spend_public_key;
+      ar & ai.m_address.m_view_public_key;
+      ar & ai.m_view_key;
+      ar & ai.m_sign;
+      ar & ai.m_text_comment;
+    }
   }
 }
