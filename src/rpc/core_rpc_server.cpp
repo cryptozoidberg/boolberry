@@ -450,7 +450,6 @@ namespace currency
       error_resp.message = "Core is busy.";
       return false;
     }
-    crypto::hash last_block_hash = null_hash;
     block last_block = AUTO_VAL_INIT(last_block);
     bool have_last_block_hash = m_core.get_blockchain_storage().get_top_block(last_block);
     if (!have_last_block_hash)
