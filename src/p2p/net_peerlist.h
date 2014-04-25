@@ -25,6 +25,7 @@
 #include "p2p_protocol_defs.h"
 #include "currency_config.h"
 #include "net_peerlist_boost_serialization.h"
+#include "common/boost_serialization_helper.h"
 
 
 
@@ -120,14 +121,14 @@ namespace nodetool
   public:    
     
     template <class Archive, class t_version_type>
-    void serialize(Archive &a,  const t_version_type ver)
+    void serialize(Archive &ar,  const t_version_type ver)
     {
       if(ver < 3)
         return;
       CHECK_PROJECT_NAME();
       CRITICAL_REGION_LOCAL(m_peerlist_lock);
-      a & m_peers_white;
-      a & m_peers_gray;
+      ar & m_peers_white;
+      ar & m_peers_gray;
     }
 
   private: 
