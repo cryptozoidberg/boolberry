@@ -13,31 +13,6 @@
 
 namespace currency
 {
-  //---------------------------------------------------------------
-  void get_transaction_prefix_hash(const transaction_prefix& tx, crypto::hash& h);
-  crypto::hash get_transaction_prefix_hash(const transaction_prefix& tx);
-  bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx, crypto::hash& tx_hash, crypto::hash& tx_prefix_hash);
-  bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx);
-  void get_donation_parts(uint64_t total_donations, uint64_t& royalty, uint64_t& donations);
-  bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins,
-                                                             size_t current_block_size, 
-                                                             uint64_t fee, 
-                                                             const account_public_address &miner_address, 
-                                                             transaction& tx, 
-                                                             const blobdata& extra_nonce = blobdata(), 
-                                                             size_t max_outs = 11);
-
-  bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins, 
-                                                             uint64_t already_donated_coins, 
-                                                             size_t current_block_size, 
-                                                             uint64_t fee, 
-                                                             const account_public_address &miner_address, 
-                                                             const account_public_address &donation_address, 
-                                                             const account_public_address &royalty_address, 
-                                                             transaction& tx, 
-                                                             const blobdata& extra_nonce = blobdata(), 
-                                                             size_t max_outs = 11, 
-                                                             size_t percents_to_donate = 100 /* of course :) */);
 
   struct tx_source_entry
   {
@@ -77,10 +52,39 @@ namespace currency
     crypto::public_key m_tx_pub_key;
     alias_info m_alias;
   };
+
+  //---------------------------------------------------------------
+  void get_transaction_prefix_hash(const transaction_prefix& tx, crypto::hash& h);
+  crypto::hash get_transaction_prefix_hash(const transaction_prefix& tx);
+  bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx, crypto::hash& tx_hash, crypto::hash& tx_prefix_hash);
+  bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx);
+  void get_donation_parts(uint64_t total_donations, uint64_t& royalty, uint64_t& donations);
+  bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins,
+                                                             size_t current_block_size, 
+                                                             uint64_t fee, 
+                                                             const account_public_address &miner_address, 
+                                                             transaction& tx, 
+                                                             const blobdata& extra_nonce = blobdata(), 
+                                                             size_t max_outs = 11);
+
+  bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins, 
+                                                             uint64_t already_donated_coins, 
+                                                             size_t current_block_size, 
+                                                             uint64_t fee, 
+                                                             const account_public_address &miner_address, 
+                                                             const account_public_address &donation_address, 
+                                                             const account_public_address &royalty_address, 
+                                                             transaction& tx, 
+                                                             const blobdata& extra_nonce = blobdata(), 
+                                                             size_t max_outs = 11, 
+                                                             size_t percents_to_donate = 50, /* 50% */
+                                                             const alias_info& alias = alias_info()
+                                                             );
   //---------------------------------------------------------------
   bool construct_tx_out(const account_public_address& destination_addr, const crypto::secret_key& tx_sec_key, size_t output_index, uint64_t amount, transaction& tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, transaction& tx, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool make_tx_extra_alias_entry(std::string& buff, const alias_info& alinfo, bool make_buff_to_sign = false);
+  bool add_tx_extra_alias(transaction& tx, const alias_info& alinfo);
   bool parse_and_validate_tx_extra(const transaction& tx, tx_extra_info& extra);
   bool parse_and_validate_tx_extra(const transaction& tx, crypto::public_key& tx_pub_key);
   crypto::public_key get_tx_pub_key_from_extra(const transaction& tx);

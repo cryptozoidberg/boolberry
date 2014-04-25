@@ -50,6 +50,48 @@ TEST(parse_and_validate_tx_extra, is_correct_wrong_extra_nonce_double_entry)
   ASSERT_FALSE(r);
 }
 
+template<int sz>
+struct t_dummy
+{
+  char a[sz];
+};
+template <typename forced_to_pod_t>
+void force_random(forced_to_pod_t& o)
+{
+
+  t_dummy<sizeof(forced_to_pod_t)> d = crypto::rand<t_dummy<sizeof(forced_to_pod_t)>>();
+  o = *reinterpret_cast<forced_to_pod_t*>(&d);
+}
+
+TEST(parse_and_validate_tx_extra, put_and_load_alias)
+{
+
+  currency::transaction miner_tx = AUTO_VAL_INIT(miner_tx);
+  currency::account_public_address acc = AUTO_VAL_INIT(acc);
+  currency::alias_info alias = AUTO_VAL_INIT(alias);
+  force_random(alias.m_address);
+  force_random(alias.m_sign);
+  force_random(alias.m_view_key);
+  alias.m_alias = "sdsdsd";
+  alias.m_text_comment = "werwrwerw";
+
+  bool res = currency::construct_miner_tx(0, 0, 0, 0, 0, 1000, acc, acc, acc, miner_tx, currency::blobdata(), 10, 50, alias);
+  currency::tx_extra_info ei = AUTO_VAL_INIT(ei);
+  bool r = parse_and_validate_tx_extra(miner_tx, ei);
+  ASSERT_TRUE(r);
+  if(ei.m_alias.m_address.m_spend_public_key == alias.m_address.m_spend_public_key &&
+    ei.m_alias.m_address.m_view_public_key == alias.m_address.m_view_public_key &&
+    ei.m_alias.m_alias == alias.m_alias &&
+    ei.m_alias.m_sign == alias.m_sign &&
+    ei.m_alias.m_text_comment == alias.m_text_comment &&
+    ei.m_alias.m_view_key == alias.m_view_key)
+  {
+    return;
+  }else 
+    ASSERT_TRUE(false);
+}
+
+
 TEST(validate_parse_amount_case, validate_parse_amount)
 {
   uint64_t res = 0;

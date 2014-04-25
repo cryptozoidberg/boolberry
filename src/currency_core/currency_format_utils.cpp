@@ -71,6 +71,7 @@ namespace currency
   {
     account_public_address donation_mock = AUTO_VAL_INIT(donation_mock);
     account_public_address royalty_mock = AUTO_VAL_INIT(royalty_mock);
+    alias_info alias = AUTO_VAL_INIT(alias);
     return construct_miner_tx(height, median_size, already_generated_coins, 0, 
                                                                             current_block_size, 
                                                                             fee, 
@@ -80,7 +81,8 @@ namespace currency
                                                                             tx, 
                                                                             extra_nonce, 
                                                                             max_outs, 
-                                                                            0);
+                                                                            0, 
+                                                                            alias);
   }
   //---------------------------------------------------------------
   bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins, 
@@ -93,7 +95,8 @@ namespace currency
                                                              transaction& tx, 
                                                              const blobdata& extra_nonce, 
                                                              size_t max_outs, 
-                                                             size_t percents_to_donate)
+                                                             size_t percents_to_donate, 
+                                                             const alias_info& alias)
   {
     tx.vin.clear();
     tx.vout.clear();
@@ -106,6 +109,11 @@ namespace currency
     if(extra_nonce.size())
       if(!add_tx_extra_nonce(tx, extra_nonce))
         return false;
+    if(alias.m_alias.size())
+    {
+      if(!add_tx_extra_alias(tx, alias))
+        return false;
+    }
 
     txin_gen in;
     in.height = height;
@@ -296,6 +304,16 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
+  bool add_tx_extra_alias(transaction& tx, const alias_info& alinfo)
+  {
+    std::string buff;
+    bool r = make_tx_extra_alias_entry(buff, alinfo);
+    if(!r) return false;
+    tx.extra.resize(tx.extra.size() + buff.size());
+    memcpy(&tx.extra[tx.extra.size() - buff.size()], buff.data(), buff.size());
+    return true;
+  }
+  //---------------------------------------------------------------
   bool parse_tx_extra_alias_entry(const transaction& tx, size_t start, alias_info& alinfo, size_t& whole_entry_len)
   {
     whole_entry_len = 0;
@@ -339,7 +357,7 @@ namespace currency
       i += sizeof(const crypto::secret_key);
     }
     CHECK_AND_ASSERT_MES(tx.extra.size()>i, false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
-    whole_entry_len = start - i;
+    whole_entry_len = i - start;
     return true;
   }
   //---------------------------------------------------------------
