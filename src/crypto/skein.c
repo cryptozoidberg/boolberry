@@ -1943,7 +1943,7 @@ static HashReturn Final (hashState *state,       BitSequence *hashval);
 /* select the context size and init the context */
 static HashReturn Init(hashState *state, int hashbitlen)
 {
-#if SKEIN_256_NIST_MAX_HASH_BITS
+#ifdef SKEIN_256_NIST_MAX_HASH_BITS
   if (hashbitlen <= SKEIN_256_NIST_MAX_HASHBITS)
   {
     Skein_Assert(hashbitlen > 0,BAD_HASHLEN);

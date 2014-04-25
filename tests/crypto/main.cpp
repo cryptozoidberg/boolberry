@@ -14,6 +14,10 @@
 #include "crypto-tests.h"
 #include "../io.h"
 
+PRAGMA_WARNING_PUSH
+PRAGMA_GCC("GCC diagnostic ignored \"-Wstrict-aliasing\"")
+
+
 using namespace std;
 using namespace crypto;
 typedef crypto::hash chash;
@@ -34,7 +38,7 @@ bool operator !=(const key_derivation &a, const key_derivation &b) {
   return 0 != memcmp(&a, &b, sizeof(key_derivation));
 }
 
-DISABLE_GCC_WARNING(maybe-uninitialized)
+
 
 int main(int argc, char *argv[]) {
   fstream input;
@@ -245,3 +249,4 @@ error:
   }
   return error ? 1 : 0;
 }
+PRAGMA_WARNING_POP
