@@ -1302,7 +1302,7 @@ bool blockchain_storage::pop_transaction_from_global_index(const transaction& tx
 //------------------------------------------------------------------
 bool blockchain_storage::unprocess_blockchain_tx_extra(const transaction& tx)
 {
-  if(!is_coinbase(tx))
+  if(is_coinbase(tx))
   {
     tx_extra_info ei = AUTO_VAL_INIT(ei);
     bool r = parse_and_validate_tx_extra(tx, ei);
@@ -1314,6 +1314,21 @@ bool blockchain_storage::unprocess_blockchain_tx_extra(const transaction& tx)
     }
   }
   return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::get_alias_info(const std::string& alias, alias_info_base& info)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  auto it = m_aliases.find(alias);
+  if(it != m_aliases.end())
+  {
+    if(it->second.size())
+    {
+      info = it->second.back();
+      return true;
+    }
+  }
+  return false;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::pop_alias_info(const alias_info& ai)

@@ -205,10 +205,10 @@ public:
   void add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins);
   bool construct_block(currency::block& blk, uint64_t height, const crypto::hash& prev_id,
     const currency::account_base& miner_acc, uint64_t timestamp, uint64_t already_generated_coins,
-    std::vector<size_t>& block_sizes, const std::list<currency::transaction>& tx_list);
-  bool construct_block(currency::block& blk, const currency::account_base& miner_acc, uint64_t timestamp);
+    std::vector<size_t>& block_sizes, const std::list<currency::transaction>& tx_list, const currency::alias_info& ai = currency::alias_info());
+  bool construct_block(currency::block& blk, const currency::account_base& miner_acc, uint64_t timestamp, const currency::alias_info& ai = currency::alias_info());
   bool construct_block(currency::block& blk, const currency::block& blk_prev, const currency::account_base& miner_acc,
-    const std::list<currency::transaction>& tx_list = std::list<currency::transaction>());
+    const std::list<currency::transaction>& tx_list = std::list<currency::transaction>(), const currency::alias_info& ai = currency::alias_info());
 
   bool construct_block_manually(currency::block& blk, const currency::block& prev_block,
     const currency::account_base& miner_acc, int actual_params = bf_none, uint8_t major_ver = 0,
@@ -515,6 +515,13 @@ inline bool do_replay_file(const std::string& filename)
   currency::block BLK_NAME;                                                           \
   generator.construct_block(BLK_NAME, PREV_BLOCK, MINER_ACC);                         \
   VEC_EVENTS.push_back(BLK_NAME);
+
+#define MAKE_NEXT_BLOCK_ALIAS(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, ALIAS)     \
+  currency::block BLK_NAME;                                                           \
+  generator.construct_block(BLK_NAME, PREV_BLOCK, MINER_ACC,                          \
+                  std::list<currency::transaction>(), ALIAS);                         \
+  VEC_EVENTS.push_back(BLK_NAME);
+
 
 #define MAKE_NEXT_BLOCK_TX1(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, TX1)         \
   currency::block BLK_NAME;                                                           \

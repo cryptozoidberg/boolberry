@@ -79,7 +79,7 @@ void test_generator::add_block(const currency::block& blk, size_t tsx_size, std:
 
 bool test_generator::construct_block(currency::block& blk, uint64_t height, const crypto::hash& prev_id,
                                      const currency::account_base& miner_acc, uint64_t timestamp, uint64_t already_generated_coins,
-                                     std::vector<size_t>& block_sizes, const std::list<currency::transaction>& tx_list)
+                                     std::vector<size_t>& block_sizes, const std::list<currency::transaction>& tx_list, const currency::alias_info& ai)
 {
   blk.major_version = CURRENT_BLOCK_MAJOR_VERSION;
   blk.minor_version = CURRENT_BLOCK_MINOR_VERSION;
@@ -109,7 +109,19 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
   size_t target_block_size = txs_size + get_object_blobsize(blk.miner_tx);
   while (true)
   {
-    if (!construct_miner_tx(height, misc_utils::median(block_sizes), already_generated_coins, target_block_size, total_fee, miner_acc.get_keys().m_account_address, blk.miner_tx, blobdata(), 10))
+    if (!construct_miner_tx(height, misc_utils::median(block_sizes), 
+                                    already_generated_coins, 
+                                    0, 
+                                    target_block_size, 
+                                    total_fee, 
+                                    miner_acc.get_keys().m_account_address, 
+                                    currency::account_public_address(),
+                                    currency::account_public_address(),
+                                    blk.miner_tx, 
+                                    blobdata(), 
+                                    10,
+                                    0, 
+                                    ai))
       return false;
 
     size_t actual_block_size = txs_size + get_object_blobsize(blk.miner_tx);
@@ -176,16 +188,16 @@ bool test_generator::find_nounce(block& blk, difficulty_type dif, uint64_t heigh
   });
 }
 
-bool test_generator::construct_block(currency::block& blk, const currency::account_base& miner_acc, uint64_t timestamp)
+bool test_generator::construct_block(currency::block& blk, const currency::account_base& miner_acc, uint64_t timestamp, const currency::alias_info& ai)
 {
   std::vector<size_t> block_sizes;
   std::list<currency::transaction> tx_list;
-  return construct_block(blk, 0, null_hash, miner_acc, timestamp, 0, block_sizes, tx_list);
+  return construct_block(blk, 0, null_hash, miner_acc, timestamp, 0, block_sizes, tx_list, ai);
 }
 
 bool test_generator::construct_block(currency::block& blk, const currency::block& blk_prev,
                                      const currency::account_base& miner_acc,
-                                     const std::list<currency::transaction>& tx_list/* = std::list<currency::transaction>()*/)
+                                     const std::list<currency::transaction>& tx_list, const currency::alias_info& ai)
 {
   uint64_t height = boost::get<txin_gen>(blk_prev.miner_tx.vin.front()).height + 1;
   crypto::hash prev_id = get_block_hash(blk_prev);
@@ -195,7 +207,7 @@ bool test_generator::construct_block(currency::block& blk, const currency::block
   std::vector<size_t> block_sizes;
   get_last_n_block_sizes(block_sizes, prev_id, CURRENCY_REWARD_BLOCKS_WINDOW);
 
-  return construct_block(blk, height, prev_id, miner_acc, timestamp, already_generated_coins, block_sizes, tx_list);
+  return construct_block(blk, height, prev_id, miner_acc, timestamp, already_generated_coins, block_sizes, tx_list, ai);
 }
 
 bool test_generator::construct_block_manually(block& blk, const block& prev_block, const account_base& miner_acc,

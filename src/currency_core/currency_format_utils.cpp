@@ -276,6 +276,15 @@ namespace currency
     return r;
   }
   //---------------------------------------------------------------
+  bool sign_update_alias(alias_info& ai, const crypto::public_key& pkey, const crypto::secret_key& skey)
+  {
+    std::string buf;
+    bool r = make_tx_extra_alias_entry(buf, ai, true);
+    CHECK_AND_ASSERT_MES(r, false, "failed to make_tx_extra_alias_entry");
+    crypto::generate_signature(get_blob_hash(buf), pkey, skey, ai.m_sign);
+    return true;
+  }
+  //---------------------------------------------------------------
   bool make_tx_extra_alias_entry(std::string& buff, const alias_info& alinfo, bool make_buff_to_sign)
   {
     CHECK_AND_ASSERT_MES(alinfo.m_alias.size(), false, "alias cant be empty");
@@ -356,7 +365,6 @@ namespace currency
       alinfo.m_sign = *reinterpret_cast<const crypto::signature*>(&tx.extra[i]);
       i += sizeof(const crypto::secret_key);
     }
-    CHECK_AND_ASSERT_MES(tx.extra.size()>i, false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
     whole_entry_len = i - start;
     return true;
   }
@@ -400,7 +408,7 @@ namespace currency
           return false;
 
         tx_alias_found = true;
-        i += aliac_entry_len;
+        i += aliac_entry_len-1;
       }
       else if(!tx.extra[i])
       {
@@ -796,10 +804,10 @@ namespace currency
     std::vector<size_t> sz;
     construct_miner_tx(0, 0, 0, 0, 0, 0, ac, ac, ac, bl.miner_tx, std::string(), 11, 0); // zero profit in genesis
     blobdata txb = tx_to_blob(bl.miner_tx);
-    std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
-    */
+    std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);*/
+    
     //hard code coinbase tx in genesis block, because "tru" generating tx use random, but genesis should be always the same
-    std::string genesis_coinbase_tx_hex = "010a01ff0008c0a8a504029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd088071808ece1c022a74a3c4c36d32e95633d44ba9a7b8188297b2ac91afecab826b86fabaa709168090bcfd020252d128bc9913d5ee8b702c37609917c2357b2f587e5de5622348a3acd718e5d68094ebdc0302b8ed916c56b3a99c9cdf22c7be7ec4e85587e5d40bc46bf6995313c288ad841e80d88ee16f021b452b4ac6c6419e06181f8c9f0734bd5bb132d8b75b44bbcd07dd8f553acba680f092cbdd0802b10ba13e303cbe9abf7d5d44f1d417727abcc14903a74e071abd652ce1bf76dd80e0bcefa7570205e440069d10646f1bbfaeee88a2db218017941c5fa7280849126d2372fc64348080bfb59dd20d029cad2882bba92fb7ecc8136475dae03169839eee05ff3ee3232d0136712f08b721010c84372fc72b99d4af00271ea85bc9c908a2ea12ebe9f5262e20ae7aca748ce3";
+    std::string genesis_coinbase_tx_hex = "010a01ff0008c09fab03029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807100808ece1c022a74a3c4c36d32e95633d44ba9a7b8188297b2ac91afecab826b86fabaa709160080d293ad030252d128bc9913d5ee8b702c37609917c2357b2f587e5de5622348a3acd718e5d60080a8d6b90702b8ed916c56b3a99c9cdf22c7be7ec4e85587e5d40bc46bf6995313c288ad841e0080d88ee16f021b452b4ac6c6419e06181f8c9f0734bd5bb132d8b75b44bbcd07dd8f553acba6008080dd9da41702b10ba13e303cbe9abf7d5d44f1d417727abcc14903a74e071abd652ce1bf76dd0080a0e5b9c291010205e440069d10646f1bbfaeee88a2db218017941c5fa7280849126d2372fc64340080c0caf384a302029cad2882bba92fb7ecc8136475dae03169839eee05ff3ee3232d0136712f08b700210149a194b25dcfe3d01049ea6656500f0e69f795cd16dfb3ecd66c384cc4616f69";
 
     blobdata tx_bl;
     string_tools::parse_hexstr_to_binbuff(genesis_coinbase_tx_hex, tx_bl);
