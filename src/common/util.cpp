@@ -306,9 +306,9 @@ std::string get_nix_version_display_string()
       pathRet = "/";
     else
       pathRet = pszHome;
-#ifdef MAC_OSX
+#ifdef __APPLE__
     // Mac
-    pathRet /= "Library/Application Support";
+    pathRet += "/Library/Application Support";
     config_folder =  (pathRet + "/" + CURRENCY_NAME);
 #else
     // Unix
