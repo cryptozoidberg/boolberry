@@ -13,9 +13,11 @@
 #include "crypto/hash.h"
 #include "crypto-tests.h"
 #include "../io.h"
+#include "pragma_comp_defs.h"
 
 PRAGMA_WARNING_PUSH
 PRAGMA_GCC("GCC diagnostic ignored \"-Wstrict-aliasing\"")
+PRAGMA_GCC("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
 
 
 using namespace std;
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]) {
     input.exceptions(ios_base::badbit | ios_base::failbit | ios_base::eofbit);
     if (cmd == "check_scalar") {
       ec_scalar scalar;
-      bool expected, actual;
+      bool expected = false, actual = false;
       get(input, scalar, expected);
       actual = check_scalar(scalar);
       if (expected != actual) {
@@ -160,7 +162,7 @@ int main(int argc, char *argv[]) {
       chash prefix_hash;
       public_key pub;
       signature sig;
-      bool expected, actual;
+      bool expected = false, actual = false;
       get(input, prefix_hash, pub, sig, expected);
       actual = check_signature(prefix_hash, pub, sig);
       if (expected != actual) {
