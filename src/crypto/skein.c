@@ -13,6 +13,7 @@
 #include <stddef.h>                          /* get size_t definition */
 #include <string.h>      /* get the memcpy/memset functions */
 #include "skein.h"       /* get the Skein API definitions   */
+#include "pragma_comp_defs.h"
 
 #define DISABLE_UNUSED 0
 
@@ -77,7 +78,7 @@ typedef struct                               /* 1024-bit Skein hash context stru
 } Skein1024_Ctxt_t;
 
 /*   Skein APIs for (incremental) "straight hashing" */
-#if SKEIN_256_NIST_MAX_HASH_BITS
+#ifdef SKEIN_256_NIST_MAX_HASH_BITS
 static int  Skein_256_Init  (Skein_256_Ctxt_t *ctx, size_t hashBitLen);
 #endif
 static int  Skein_512_Init  (Skein_512_Ctxt_t *ctx, size_t hashBitLen);
@@ -1334,7 +1335,8 @@ static int Skein_256_Update(Skein_256_Ctxt_t *ctx, const u08b_t *msg, size_t msg
 
     return SKEIN_SUCCESS;
     }
-   
+PRAGMA_WARNING_PUSH
+PRAGMA_GCC("GCC diagnostic ignored \"-Wstrict-aliasing\"")
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /* finalize the hash computation and output the result */
 static int Skein_256_Final(Skein_256_Ctxt_t *ctx, u08b_t *hashVal)
@@ -2034,3 +2036,4 @@ HashReturn skein_hash(int hashbitlen, const BitSequence *data, /* all-in-one cal
   }
   return r;
 }
+PRAGMA_WARNING_POP
