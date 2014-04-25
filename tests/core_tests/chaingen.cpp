@@ -383,7 +383,9 @@ bool init_spent_output_indices(map_output_idx_t& outs, map_output_t& outs_mine, 
     return true;
 }
 
-bool fill_output_entries(std::vector<output_index>& out_indices, size_t sender_out, size_t nmix, size_t& real_entry_idx, std::vector<tx_source_entry::output_entry>& output_entries)
+bool fill_output_entries(std::vector<output_index>& out_indices,
+                         size_t sender_out, size_t nmix, uint64_t& real_entry_idx,
+                         std::vector<tx_source_entry::output_entry>& output_entries)
 {
   if (out_indices.size() <= nmix)
     return false;
