@@ -34,9 +34,14 @@ static const char _NR[] = {
 #include <stddef.h>
 #include <time.h> 
 #include <sys/timeb.h>
+#ifndef __MACH__
 #include <malloc.h>
+#else
+#include <malloc/malloc.h>
+#endif
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef WIN32
 #include <process.h>
