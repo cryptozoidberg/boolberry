@@ -363,7 +363,7 @@ namespace currency
     {
       CHECK_AND_ASSERT_MES(tx.extra.size()-i >= sizeof(crypto::secret_key), false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
       alinfo.m_sign = *reinterpret_cast<const crypto::signature*>(&tx.extra[i]);
-      i += sizeof(const crypto::secret_key);
+      i += sizeof(const crypto::signature);
     }
     whole_entry_len = i - start;
     return true;
