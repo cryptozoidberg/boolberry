@@ -188,12 +188,12 @@ namespace nodetool
     std::string m_bind_ip;
     std::string m_port;
 #ifdef ALLOW_DEBUG_COMMANDS
-    uint64_t m_last_stat_request_time;
+    int64_t m_last_stat_request_time;
 #endif
     std::list<net_address>   m_priority_peers;
     std::vector<net_address> m_seed_nodes;
     std::list<nodetool::peerlist_entry> m_command_line_peers;
-    uint64_t m_peer_livetime;
+    int64_t m_peer_livetime;
     //keep connections to initiate some interactions
     net_server m_net_server;
   };

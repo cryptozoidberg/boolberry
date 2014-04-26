@@ -86,7 +86,7 @@ namespace nodetool
   struct basic_node_data
   {
     uuid network_id;                   
-    time_t local_time;
+    int64_t local_time;
     uint32_t my_port;
     peerid_type peer_id;
 
@@ -153,7 +153,7 @@ namespace nodetool
 
     struct response
     {
-      time_t local_time;
+      int64_t local_time;
       t_playload_type payload_data;
       std::list<peerlist_entry> local_peerlist; 
 
@@ -208,7 +208,7 @@ namespace nodetool
   struct proof_of_trust
   {
     peerid_type peer_id;
-    uint64_t    time;
+    int64_t    time;
     crypto::signature sign;
 
     BEGIN_KV_SERIALIZE_MAP()
@@ -272,7 +272,7 @@ namespace nodetool
       std::list<peerlist_entry> local_peerlist_gray; 
       std::list<connection_entry> connections_list; 
       peerid_type my_id;
-      uint64_t    local_time;
+      int64_t    local_time;
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE_CONTAINER_POD_AS_BLOB(local_peerlist_white)
         KV_SERIALIZE_CONTAINER_POD_AS_BLOB(local_peerlist_gray)

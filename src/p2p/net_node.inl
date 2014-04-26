@@ -723,8 +723,8 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::check_trust(const proof_of_trust& tr)
   {
-    uint64_t local_time = time(NULL);
-    uint64_t time_delata = local_time > tr.time ? local_time - tr.time: tr.time - local_time;
+    int64_t local_time = time(NULL);
+    int64_t time_delata = local_time > tr.time ? local_time - tr.time: tr.time - local_time;
     if(time_delata > 24*60*60 )
     {
       LOG_ERROR("check_trust failed to check time conditions, local_time=" <<  local_time << ", proof_time=" << tr.time);
