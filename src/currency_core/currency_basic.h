@@ -255,6 +255,7 @@ namespace currency
     uint8_t minor_version;
     uint64_t timestamp;
     crypto::hash  prev_id;
+    crypto::hash  mm;
     uint32_t nonce;
 
     BEGIN_SERIALIZE()
