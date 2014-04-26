@@ -17,7 +17,7 @@
 
 PRAGMA_WARNING_PUSH
 PRAGMA_GCC("GCC diagnostic ignored \"-Wstrict-aliasing\"")
-PRAGMA_GCC("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+//PRAGMA_GCC("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
 
 
 using namespace std;
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
       }
     } else if (cmd == "secret_key_to_public_key") {
       secret_key sec;
-      bool expected1, actual1;
+      bool expected1 = false, actual1 = false;
       public_key expected2, actual2;
       get(input, sec, expected1);
       if (expected1) {
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     } else if (cmd == "generate_key_derivation") {
       public_key key1;
       secret_key key2;
-      bool expected1, actual1;
+      bool expected1 = false, actual1 = false;
       key_derivation expected2, actual2;
       get(input, key1, key2, expected1);
       if (expected1) {
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
       key_derivation derivation;
       size_t output_index;
       public_key base;
-      bool expected1, actual1;
+      bool expected1 = false, actual1 = false;
       public_key expected2, actual2;
       get(input, derivation, output_index, base, expected1);
       if (expected1) {
