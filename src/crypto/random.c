@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "hash-ops.h"
-#include "initializer.h"
+//#include "initializer.h"
 #include "random.h"
 
 static void generate_system_random_bytes(size_t n, void *result);
@@ -69,7 +69,7 @@ static union hash_state state;
 #if !defined(NDEBUG)
 static volatile int curstate; /* To catch thread safety problems. */
 #endif
-
+/*
 FINALIZER(deinit_random) {
 #if !defined(NDEBUG)
   assert(curstate == 1);
@@ -77,17 +77,32 @@ FINALIZER(deinit_random) {
 #endif
   memset(&state, 0, sizeof(union hash_state));
 }
+*/
 
-INITIALIZER(init_random) {
+//INITIALIZER(init_random) {
+void init_random()
+{
   generate_system_random_bytes(32, &state);
-  REGISTER_FINALIZER(deinit_random);
+  //REGISTER_FINA\LIZER(deinit_random);
 #if !defined(NDEBUG)
   assert(curstate == 0);
   curstate = 1;
 #endif
 }
 
+
+void grant_random_initialize()
+{
+  static bool initalized = false;
+  if(!initalized)
+  {
+    init_random();
+    initalized = true;
+  }
+}
+
 void generate_random_bytes(size_t n, void *result) {
+  grant_random_initialize();
 #if !defined(NDEBUG)
   assert(curstate == 1);
   curstate = 2;

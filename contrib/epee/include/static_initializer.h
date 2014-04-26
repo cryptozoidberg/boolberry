@@ -37,6 +37,8 @@ class initializer - useful to initialize some static classes
                        which have init() and un_init() static members
 ************************************************************************/
 
+
+
 template<class to_initialize>
 class initializer
 {
