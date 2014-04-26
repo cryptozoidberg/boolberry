@@ -7,4 +7,4 @@
 #include <stddef.h>
 
 void generate_random_bytes(size_t n, void *result);
-void grant_random_initialize();
+void grant_random_initialize(void);

@@ -80,7 +80,7 @@ FINALIZER(deinit_random) {
 */
 
 //INITIALIZER(init_random) {
-void init_random()
+void init_random(void)
 {
   generate_system_random_bytes(32, &state);
   //REGISTER_FINA\LIZER(deinit_random);
@@ -91,7 +91,7 @@ void init_random()
 }
 
 
-void grant_random_initialize()
+void grant_random_initialize(void)
 {
   static bool initalized = false;
   if(!initalized)
