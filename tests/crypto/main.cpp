@@ -17,7 +17,6 @@
 
 PRAGMA_WARNING_PUSH
 PRAGMA_GCC("GCC diagnostic ignored \"-Wstrict-aliasing\"")
-//PRAGMA_GCC("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
 
 
 using namespace std;

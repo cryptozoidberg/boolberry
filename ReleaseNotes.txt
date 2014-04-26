@@ -1,1 +1,1 @@
-Project is separated from Cryptonote, moved to GitHub.
+Project is separated from Cryptonote(forked bytecoin), moved to GitHub.
