@@ -18,15 +18,15 @@
 
 namespace crypto {
 
-  struct randon_init_singleton
+  struct random_init_singleton
   {
-    randon_init_singleton()
+    random_init_singleton()
     {
       grant_random_initialize();
     }
   };
 
-  randon_init_singleton init_rand; //place initializer here to avoid grant_random_initialize first call after threads will be possible(local static variables init is not thread-safe)
+  random_init_singleton init_rand; //place initializer here to avoid grant_random_initialize first call after threads will be possible(local static variables init is not thread-safe)
 
   using std::abort;
   using std::int32_t;
