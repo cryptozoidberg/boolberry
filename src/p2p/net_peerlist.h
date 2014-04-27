@@ -124,7 +124,7 @@ namespace nodetool
     void serialize(Archive &ar,  const t_version_type ver)
     {
       if(ver < CURRENT_PEERLIST_STORAGE_ARCHIVE_VER)
-        return;
+        throw std::runtime_error("not supported storage format");
       CHECK_PROJECT_NAME();
       CRITICAL_REGION_LOCAL(m_peerlist_lock);
       ar & m_peers_white;

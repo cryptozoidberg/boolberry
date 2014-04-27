@@ -49,18 +49,12 @@ namespace nodetool
   {
     //
     TRY_ENTRY();
-    std::string state_file_path = m_config_folder + "/" + P2P_NET_DATA_FILENAME;
-    std::ifstream p2p_data;
-    p2p_data.open( state_file_path , std::ios_base::binary | std::ios_base::in);
-    if(!p2p_data.fail())
-    {
-      boost::archive::binary_iarchive a(p2p_data);
-      a >> *this;
-    }else
-    {
-      make_default_config();
-    }
+    
+    make_default_config();
 
+    std::string state_file_path = m_config_folder + "/" + P2P_NET_DATA_FILENAME;
+    tools::unserialize_obj_from_file(*this, state_file_path);
+    
     //at this moment we have hardcoded config
     m_config.m_net_config.handshake_interval = P2P_DEFAULT_HANDSHAKE_INTERVAL;
     m_config.m_net_config.connections_count = P2P_DEFAULT_CONNECTIONS_COUNT;
@@ -280,16 +274,7 @@ namespace nodetool
     }
 
     std::string state_file_path = m_config_folder + "/" + P2P_NET_DATA_FILENAME;
-    std::ofstream p2p_data;
-    p2p_data.open( state_file_path , std::ios_base::binary | std::ios_base::out| std::ios::trunc);
-    if(p2p_data.fail())
-    {
-      LOG_PRINT_L0("Failed to save config to file " << state_file_path);
-      return false;
-    };
-
-    boost::archive::binary_oarchive a(p2p_data);
-    a << *this;
+    tools::serialize_obj_to_file(*this, state_file_path);
     return true;
     CATCH_ENTRY_L0("blockchain_storage::save", false);
 
