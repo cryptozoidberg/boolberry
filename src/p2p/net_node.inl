@@ -497,6 +497,27 @@ namespace nodetool
     LOG_PRINT_CC_GREEN(con, "CONNECTION HANDSHAKED OK.", LOG_LEVEL_2);
     return true;
   }
+  //-----------------------------------------------------------------------------------  
+  template<class t_payload_net_handler>
+  void node_server<t_payload_net_handler>::cache_connect_fail_info(const net_address& addr)
+  {
+    CRITICAL_REGION_LOCAL(m_conn_fails_cache_lock);
+    m_conn_fails_cache[addr] = time(NULL);
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::is_addr_recently_failed(const net_address& addr)
+  {
+    CRITICAL_REGION_LOCAL(m_conn_fails_cache_lock);
+    auto it = m_conn_fails_cache.find(addr);
+    if(it == m_conn_fails_cache.end())
+      return false;
+
+    if(time(NULL) - it->second > P2P_FAILED_ADDR_FORGET_SECONDS)
+      return false;
+    else
+      return true;
+  }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::make_new_connection_from_peerlist(bool use_white_list)
@@ -530,10 +551,16 @@ namespace nodetool
       if(is_peer_used(pe))
         continue;
 
+      if(is_addr_recently_failed(pe.adr))
+        continue;
+
       LOG_PRINT_L1("Selected peer: " << pe.id << " " << string_tools::get_ip_string_from_int32(pe.adr.ip) << ":" << boost::lexical_cast<std::string>(pe.adr.port) << "[white=" << use_white_list << "] last_seen: " << (pe.last_seen ? misc_utils::get_time_interval_string(time(NULL) - pe.last_seen) : "never"));
       
       if(!try_to_connect_and_handshake_with_new_peer(pe.adr, false, pe.last_seen, use_white_list))
+      {
+        cache_connect_fail_info(pe.adr);
         continue;
+      }
 
       return true;
     }

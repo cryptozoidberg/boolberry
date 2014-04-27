@@ -146,6 +146,8 @@ namespace nodetool
     template<class t_callback>
     bool try_ping(basic_node_data& node_data, p2p_connection_context& context, t_callback cb);
     bool make_expected_connections_count(bool white_list, size_t expected_connections);
+    void cache_connect_fail_info(const net_address& addr);
+    bool is_addr_recently_failed(const net_address& addr);
 
     //debug functions
     std::string print_connections_container();
@@ -196,6 +198,10 @@ namespace nodetool
     int64_t m_peer_livetime;
     //keep connections to initiate some interactions
     net_server m_net_server;
+
+    std::map<net_address, time_t> m_conn_fails_cache;
+    critical_section m_conn_fails_cache_lock;
+
   };
 }
 

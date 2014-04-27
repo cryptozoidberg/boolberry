@@ -80,7 +80,7 @@
 #define P2P_DEFAULT_HANDSHAKE_INVOKE_TIMEOUT            5000       //5 seconds
 #define P2P_STAT_TRUSTED_PUB_KEY                        ""
 #define P2P_DEFAULT_WHITELIST_CONNECTIONS_PERCENT       70
-
+#define P2P_FAILED_ADDR_FORGET_SECONDS                  60*60     //1 hour
 
 
 /* This money will go to growth of the project */
