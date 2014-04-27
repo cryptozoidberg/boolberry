@@ -53,15 +53,16 @@ namespace currency
     crypto::hash hash;
   };
 
-
+  #pragma pack(push, 1)
   struct txout_to_key
   {
     txout_to_key() { }
     txout_to_key(const crypto::public_key &_key) : key(_key) { }
+
     crypto::public_key key;
     uint8_t mix_attr;
   };
-
+  #pragma pack(pop)
   /* inputs */
 
   struct txin_gen
@@ -264,6 +265,7 @@ namespace currency
       VARINT_FIELD(minor_version)
       VARINT_FIELD(timestamp)
       FIELD(prev_id)
+      FIELD(mm)
       FIELD(nonce)
     END_SERIALIZE()
   };

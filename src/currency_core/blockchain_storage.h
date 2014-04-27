@@ -235,12 +235,12 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER    12
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER    13
 
   template<class archive_t>
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
   {
-    if(version < 11)
+    if(version < CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER)
       return;
     CHECK_PROJECT_NAME();
     CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -254,32 +254,30 @@ namespace currency
     ar & m_current_block_cumul_sz_limit;
     ar & m_aliases;
     /*serialization bug workaround*/
-    if(version > 11)
+    
+    uint64_t total_check_count = m_blocks.size() + m_blocks_index.size() + m_transactions.size() + m_spent_keys.size() + m_alternative_chains.size() + m_outputs.size() + m_invalid_blocks.size() + m_current_block_cumul_sz_limit;
+    if(archive_t::is_saving::value)
+    {        
+      ar & total_check_count;
+    }else
     {
-      uint64_t total_check_count = m_blocks.size() + m_blocks_index.size() + m_transactions.size() + m_spent_keys.size() + m_alternative_chains.size() + m_outputs.size() + m_invalid_blocks.size() + m_current_block_cumul_sz_limit;
-      if(archive_t::is_saving::value)
-      {        
-        ar & total_check_count;
-      }else
+      uint64_t total_check_count_loaded = 0;
+      ar & total_check_count_loaded;
+      if(total_check_count != total_check_count_loaded)
       {
-        uint64_t total_check_count_loaded = 0;
-        ar & total_check_count_loaded;
-        if(total_check_count != total_check_count_loaded)
-        {
-          LOG_ERROR("Blockchain storage data corruption detected. total_count loaded from file = " << total_check_count_loaded << ", expected = " << total_check_count);
+        LOG_ERROR("Blockchain storage data corruption detected. total_count loaded from file = " << total_check_count_loaded << ", expected = " << total_check_count);
 
-          LOG_PRINT_L0("Blockchain storage:" << ENDL << 
-            "m_blocks: " << m_blocks.size() << ENDL  << 
-            "m_blocks_index: " << m_blocks_index.size() << ENDL  << 
-            "m_transactions: " << m_transactions.size() << ENDL  << 
-            "m_spent_keys: " << m_spent_keys.size() << ENDL  << 
-            "m_alternative_chains: " << m_alternative_chains.size() << ENDL  << 
-            "m_outputs: " << m_outputs.size() << ENDL  << 
-            "m_invalid_blocks: " << m_invalid_blocks.size() << ENDL  << 
-            "m_current_block_cumul_sz_limit: " << m_current_block_cumul_sz_limit);
+        LOG_PRINT_L0("Blockchain storage:" << ENDL << 
+          "m_blocks: " << m_blocks.size() << ENDL  << 
+          "m_blocks_index: " << m_blocks_index.size() << ENDL  << 
+          "m_transactions: " << m_transactions.size() << ENDL  << 
+          "m_spent_keys: " << m_spent_keys.size() << ENDL  << 
+          "m_alternative_chains: " << m_alternative_chains.size() << ENDL  << 
+          "m_outputs: " << m_outputs.size() << ENDL  << 
+          "m_invalid_blocks: " << m_invalid_blocks.size() << ENDL  << 
+          "m_current_block_cumul_sz_limit: " << m_current_block_cumul_sz_limit);
 
-          throw std::runtime_error("Blockchain data corruption");
-        }
+        throw std::runtime_error("Blockchain data corruption");
       }
     }
 

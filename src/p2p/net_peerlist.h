@@ -27,7 +27,7 @@
 #include "net_peerlist_boost_serialization.h"
 #include "common/boost_serialization_helper.h"
 
-
+#define CURRENT_PEERLIST_STORAGE_ARCHIVE_VER    5
 
 namespace nodetool
 {
@@ -123,7 +123,7 @@ namespace nodetool
     template <class Archive, class t_version_type>
     void serialize(Archive &ar,  const t_version_type ver)
     {
-      if(ver < 3)
+      if(ver < CURRENT_PEERLIST_STORAGE_ARCHIVE_VER)
         return;
       CHECK_PROJECT_NAME();
       CRITICAL_REGION_LOCAL(m_peerlist_lock);
@@ -362,4 +362,4 @@ namespace nodetool
   //--------------------------------------------------------------------------------------------------
 }
 
-BOOST_CLASS_VERSION(nodetool::peerlist_manager, 4)
+BOOST_CLASS_VERSION(nodetool::peerlist_manager, CURRENT_PEERLIST_STORAGE_ARCHIVE_VER)

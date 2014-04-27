@@ -15,7 +15,9 @@
 #include "common/unordered_containers_boost_serialization.h"
 #include "crypto/crypto.h"
 
-//namespace currency {
+#define CURRENT_BLOCK_ARCHIVE_VER   2
+BOOST_CLASS_VERSION(currency::block, CURRENT_BLOCK_ARCHIVE_VER)
+
 namespace boost
 {
   namespace serialization
@@ -66,6 +68,7 @@ namespace boost
   inline void serialize(Archive &a, currency::txout_to_key &x, const boost::serialization::version_type ver)
   {
     a & x.key;
+    a & x.mix_attr;
   }
 
   template <class Archive>
@@ -123,15 +126,18 @@ namespace boost
     a & x.extra;
     a & x.signatures;
   }
-
-
   template <class Archive>
   inline void serialize(Archive &a, currency::block &b, const boost::serialization::version_type ver)
   {
+    if(ver < CURRENT_BLOCK_ARCHIVE_VER)
+    {
+      throw std::runtime_error("wrong block serialization version");
+    }
     a & b.major_version;
     a & b.minor_version;
     a & b.timestamp;
     a & b.prev_id;
+    a & b.mm;
     a & b.nonce;
     //------------------
     a & b.miner_tx;

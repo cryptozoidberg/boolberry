@@ -1067,7 +1067,7 @@ bool blockchain_storage::find_blockchain_supplement(const std::list<crypto::hash
   {
     LOG_ERROR("Client sent wrong NOTIFY_REQUEST_CHAIN: m_block_ids.size()=" << qblock_ids.size() << /*", m_height=" << req.m_total_height <<*/ ", dropping connection");
     return false;
-  }
+  } 
   //check genesis match
   if(qblock_ids.back() != get_block_hash(m_blocks[0].bl))
   {
