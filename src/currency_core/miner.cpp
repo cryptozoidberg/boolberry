@@ -123,8 +123,9 @@ namespace currency
   {
     if(m_last_hr_merge_time && is_mining())
     {
-      m_current_hash_rate = m_hashes * 1000 / ((misc_utils::get_tick_count() - m_last_hr_merge_time + 1));
+      m_current_hash_rate = (m_hashes * 1000) / ((misc_utils::get_tick_count() - m_last_hr_merge_time + 1));
     }
+    m_last_hr_merge_time = misc_utils::get_tick_count();
     m_hashes = 0;
     if(m_do_print_hashrate)
       std::cout << "hr: " << m_current_hash_rate << ENDL;
