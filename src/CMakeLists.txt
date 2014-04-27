@@ -25,22 +25,49 @@ source_group(simpleminer FILES ${MINER})
 add_library(common ${COMMON})
 add_library(crypto ${CRYPTO})
 add_library(currency_core ${CURRENCY_CORE})
-add_executable(daemon ${DAEMON} ${P2P} ${CURRENCY_PROTOCOL})
-add_executable(connectivity_tool ${CONN_TOOL})
-add_executable(simpleminer ${MINER})
-target_link_libraries(daemon rpc currency_core crypto common ${Boost_LIBRARIES})
-target_link_libraries(connectivity_tool currency_core crypto common ${Boost_LIBRARIES})
-target_link_libraries(simpleminer currency_core crypto common ${Boost_LIBRARIES})
-add_dependencies(daemon version)
+
 add_library(rpc ${RPC})
-add_library(wallet ${WALLET})
-add_executable(simplewallet ${SIMPLEWALLET} )
-target_link_libraries(simplewallet wallet rpc currency_core crypto common ${Boost_LIBRARIES})
-add_dependencies(simplewallet version)
-add_dependencies(daemon version)
-add_dependencies(wallet version)
 add_dependencies(rpc version)
+
+add_library(wallet ${WALLET})
+add_dependencies(wallet version)
+
+add_executable(daemon ${DAEMON} ${P2P} ${CURRENCY_PROTOCOL})
+add_dependencies(daemon version)
+target_link_libraries(daemon rpc currency_core crypto common
+                             ${Boost_LIBRARIES})
+
+add_executable(connectivity_tool ${CONN_TOOL})
+target_link_libraries(connectivity_tool currency_core crypto common
+                                        ${Boost_LIBRARIES})
+
+add_executable(simpleminer ${MINER})
+target_link_libraries(simpleminer currency_core crypto common
+                                  ${Boost_LIBRARIES})
+
+add_executable(simplewallet ${SIMPLEWALLET})
+add_dependencies(simplewallet version)
+target_link_libraries(simplewallet wallet rpc currency_core crypto common
+                                   ${Boost_LIBRARIES})
 
 set_property(TARGET common crypto currency_core rpc wallet PROPERTY FOLDER "libs")
 set_property(TARGET daemon simplewallet connectivity_tool simpleminer PROPERTY FOLDER "prog")
 set_property(TARGET daemon PROPERTY OUTPUT_NAME "hpd")
+
+if(APPLE)
+  set(SIMPLE_BUNDLE 1)
+endif()
+
+if(SIMPLE_BUNDLE)
+  set(INSTALL_DIR "${CMAKE_BINARY_DIR}/hp-${VERSION}")
+  install(TARGETS daemon simplewallet connectivity_tool simpleminer
+      RUNTIME DESTINATION "${INSTALL_DIR}" COMPONENT Runtime
+  )
+
+  install(FILES ${Boost_LIBRARIES} DESTINATION "${INSTALL_DIR}/lib")
+
+  if(APPLE)
+    set(FIXUP_COMMAND ${CMAKE_SOURCE_DIR}/utils/macosx_fixup.sh " " ${INSTALL_DIR})
+    install(CODE "execute_process(COMMAND ${FIXUP_COMMAND})")
+  endif()
+endif()
