@@ -50,7 +50,9 @@ namespace currency
     m_do_mining(false),
 	  m_current_hash_rate(0),
     m_last_hr_merge_time(0),
-    m_hashes(0)
+    m_hashes(0),
+    m_aliace_to_apply_in_block(boost::value_initialized<alias_info>()),
+    m_do_donate(false)
   {
 
   }
@@ -71,10 +73,25 @@ namespace currency
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
+  bool miner::validate_alias_info()
+  {
+    alias_info dummy;
+    CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
+    if(m_bc.get_alias_info(m_aliace_to_apply_in_block.m_alias, dummy))
+    {
+      LOG_PRINT_L0("Alias \"" << m_aliace_to_apply_in_block.m_alias << "\" got used bye someone else, canceled." );
+      m_aliace_to_apply_in_block = AUTO_VAL_INIT(m_aliace_to_apply_in_block);
+      return false;
+    }
+    return true;
+  }
+  //-----------------------------------------------------------------------------------------------------
   bool miner::on_block_chain_update()
   {
     if(!is_mining())
       return true;
+    
+    validate_alias_info();
 
     return request_block_template();
   }
@@ -89,8 +106,8 @@ namespace currency
     {
       extra_nonce = m_extra_messages[m_config.current_extra_message_index];
     }
-
-    if(!m_phandler->get_block_template(bl, m_mine_address, di, height, extra_nonce))
+    CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
+    if(!m_phandler->get_block_template(bl, m_mine_address, di, height, extra_nonce, m_do_donate ? 100:0, m_aliace_to_apply_in_block))
     {
       LOG_ERROR("Failed to get_block_template(), stopping mining");
       return false;
@@ -214,6 +231,20 @@ namespace currency
       m_threads.push_back(boost::thread(boost::bind(&miner::worker_thread, this)));
 
     LOG_PRINT_L0("Mining has started with " << threads_count << " threads, good luck!" )
+    return true;
+  }
+  //-----------------------------------------------------------------------------------------------------
+  bool miner::set_alias_info(const alias_info& ai)
+  {
+    alias_info dummy;
+    if(m_bc.get_alias_info(ai.m_alias, dummy))
+    {
+      LOG_PRINT_L0("Alias \"" << ai.m_alias << "\" is already used." );
+      return false;
+    }
+    CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
+    m_aliace_to_apply_in_block = ai;
+
     return true;
   }
   //-----------------------------------------------------------------------------------------------------

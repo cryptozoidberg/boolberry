@@ -87,7 +87,7 @@ namespace currency
     difficulty_type get_difficulty_for_next_block();
     bool add_new_block(const block& bl_, block_verification_context& bvc);
     bool reset_and_set_genesis_block(const block& b);
-    bool create_block_template(block& b, const account_public_address& miner_address, difficulty_type& di, uint64_t& height, const blobdata& ex_nonce);
+    bool create_block_template(block& b, const account_public_address& miner_address, difficulty_type& di, uint64_t& height, const blobdata& ex_nonce, size_t percents_to_donate, const alias_info& ai);
     bool have_block(const crypto::hash& id);
     size_t get_total_transactions();
     bool get_outs(uint64_t amount, std::list<crypto::public_key>& pkeys);

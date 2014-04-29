@@ -33,6 +33,7 @@ public:
     m_cmd_binder.set_handler("print_pool_sh", boost::bind(&daemon_cmmands_handler::print_pool_sh, this, _1), "Print transaction pool (short format)");
     m_cmd_binder.set_handler("show_hr", boost::bind(&daemon_cmmands_handler::show_hr, this, _1), "Start showing hash rate");
     m_cmd_binder.set_handler("hide_hr", boost::bind(&daemon_cmmands_handler::hide_hr, this, _1), "Stop showing hash rate");
+    m_cmd_binder.set_handler("make_alias", boost::bind(&daemon_cmmands_handler::make_alias, this, _1), "Puts alias reservation record into block template, if alias is free");
     m_cmd_binder.set_handler("save", boost::bind(&daemon_cmmands_handler::save, this, _1), "Save blockchain");
   }
 
@@ -294,6 +295,27 @@ private:
     m_srv.get_payload_object().get_core().get_miner().start(adr, threads_count);
     return true;
   }
+  //--------------------------------------------------------------------------------
+  bool make_alias(const std::vector<std::string>& args)
+  {
+    if(args.size() != 2)
+    {
+      std::cout << "Please, specify alias and wallet address to associate with" << std::endl;
+      return true;
+    }
+
+    currency::alias_info ai = AUTO_VAL_INIT(ai);
+    ai.m_alias = args[0];
+
+    currency::account_public_address adr = AUTO_VAL_INIT(adr);
+    if(!currency::get_account_address_from_str(adr, args[1]))
+    {
+      std::cout << "target account address has wrong format" << std::endl;
+      return true;
+    }
+    m_srv.get_payload_object().get_core().get_miner().set_alias_info(ai);
+    return true;
+  }  
   //--------------------------------------------------------------------------------
   bool stop_mining(const std::vector<std::string>& args)
   {

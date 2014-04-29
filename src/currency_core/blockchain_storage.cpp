@@ -670,7 +670,7 @@ uint64_t blockchain_storage::get_current_comulative_blocksize_limit()
   return m_current_block_cumul_sz_limit;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::create_block_template(block& b, const account_public_address& miner_address, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce)
+bool blockchain_storage::create_block_template(block& b, const account_public_address& miner_address, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, size_t percents_to_donate, const alias_info& ai)
 {
   size_t median_size;
   uint64_t already_generated_coins;
@@ -701,7 +701,7 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
      block size, so first miner transaction generated with fake amount of money, and with phase we know think we know expected block size
   */
   //make blocks coin-base tx looks close to real coinbase tx to get truthful blob size
-  bool r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, txs_size, fee, miner_address, m_donations_account.m_account_address, m_royalty_account.m_account_address, b.miner_tx, ex_nonce, 11);
+  bool r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, txs_size, fee, miner_address, m_donations_account.m_account_address, m_royalty_account.m_account_address, b.miner_tx, ex_nonce, 11, percents_to_donate, ai);
   CHECK_AND_ASSERT_MES(r, false, "Failed to construc miner tx, first chance");
 #ifdef _DEBUG
   std::list<size_t> try_val;
@@ -710,7 +710,7 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
 
   size_t cumulative_size = txs_size + get_object_blobsize(b.miner_tx);
   for (size_t try_count = 0; try_count != 10; ++try_count) {
-    r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, cumulative_size, fee, miner_address, m_donations_account.m_account_address, m_royalty_account.m_account_address, b.miner_tx, ex_nonce, 11);
+    r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, cumulative_size, fee, miner_address, m_donations_account.m_account_address, m_royalty_account.m_account_address, b.miner_tx, ex_nonce, 11, percents_to_donate, ai);
 #ifdef _DEBUG
     try_val.push_back(get_object_blobsize(b.miner_tx));
 #endif

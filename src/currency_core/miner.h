@@ -18,7 +18,7 @@ namespace currency
   struct i_miner_handler
   {
     virtual bool handle_block_found(block& b) = 0;
-    virtual bool get_block_template(block& b, const account_public_address& adr, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce) = 0;
+    virtual bool get_block_template(block& b, const account_public_address& adr, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, size_t percents_to_donate, const alias_info& ai) = 0;
   protected:
     ~i_miner_handler(){};
   };
@@ -46,6 +46,7 @@ namespace currency
     void pause();
     void resume();
     void do_print_hashrate(bool do_hr);
+    bool set_alias_info(const alias_info& ai);
 
     template<typename callback_t>
     static bool find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, callback_t blocks_accessor)
@@ -70,6 +71,7 @@ namespace currency
     bool worker_thread();
     bool request_block_template();
     void  merge_hr();
+    bool validate_alias_info();
     
     struct miner_config
     {
@@ -108,6 +110,9 @@ namespace currency
     std::atomic<uint64_t> m_hashes;
     bool m_do_print_hashrate;
     bool m_do_mining;
+    alias_info m_aliace_to_apply_in_block;
+    critical_section m_aliace_to_apply_in_block_lock;
+    bool m_do_donate;
   };
 }
 

@@ -295,10 +295,12 @@ namespace currency
     {
       uint64_t reserve_size;       //max 255 bytes
       std::string wallet_address;
+      bool donate_to_developers;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(reserve_size)
         KV_SERIALIZE(wallet_address)
+        KV_SERIALIZE(donate_to_developers)
       END_KV_SERIALIZE_MAP()
     };
 
