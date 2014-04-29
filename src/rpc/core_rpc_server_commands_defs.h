@@ -450,6 +450,7 @@ namespace currency
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(alias)
+      //namespace_accessor<decltype(this_ref.details)>::serialize_map<is_store>(this_ref.details, stg, hparent_section);//KV_CHAIN_MAP(details)
       KV_CHAIN_MAP(details)
     END_KV_SERIALIZE_MAP()
 
