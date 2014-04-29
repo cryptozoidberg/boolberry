@@ -608,17 +608,43 @@ bool simple_wallet::show_blockchain_height(const std::vector<std::string>& args)
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::get_alias_from_daemon(const std::string& alias_name, currency::alias_info_base& ai)
 {
+  COMMAND_RPC_GET_ALIAS_DETAILS::request req = AUTO_VAL_INIT(req);
+  COMMAND_RPC_GET_ALIAS_DETAILS::response res = AUTO_VAL_INIT(res);
 
-  COMMAND_RPC_GET_HEIGHT::request req;
-  COMMAND_RPC_GET_HEIGHT::response res = boost::value_initialized<COMMAND_RPC_GET_HEIGHT::response>();
-  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/getheight", req, res, m_http_client);
+  req.alias = alias_name;
+  bool r = net_utils::invoke_http_json_rpc(m_daemon_address + "/json_rpc", "get_alias_details", req, res, m_http_client);
+  if(!r)
+  {
+    LOG_PRINT_RED_L0("Failed to invoke get_alias_details rpc");
+    return false;
+  }
+  if(res.status != CORE_RPC_STATUS_OK)
+  {
+    LOG_PRINT_RED_L0("Failed to invoke get_alias_details rpc: core status: " << res.status);
+    return false;
+  }
 
+  if(!currency::get_account_address_from_str(ai.m_address, res.alias_details.address))
+  {
+    LOG_PRINT_RED_L0("Failed to parse get_alias_details response: address " << res.alias_details.address);
+    return false;
+  }
+
+  if(res.alias_details.tracking_key.size())
+  {
+    if(!string_tools::parse_tpod_from_hex_string(res.alias_details.tracking_key, ai.m_view_key))
+    {
+      LOG_PRINT_RED_L0("Failed to parse get_alias_details response: address " << res.alias_details.address);
+      return false;
+    }
+  }
+  ai.m_text_comment = res.alias_details.comment;
   return true;
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
 {
-  if(adr_str.size())
+  if(!adr_str.size())
     return false;
 
   if(adr_str[0] == '@')
@@ -664,7 +690,7 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   for (size_t i = 1; i < local_args.size(); i += 2) 
   {
     currency::tx_destination_entry de;
-    if(!get_transfer_address(de.addr, local_args[i]))
+    if(!get_transfer_address(local_args[i], de.addr))
     {
       fail_msg_writer() << "wrong address: " << local_args[i];
       return true;

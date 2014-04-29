@@ -29,7 +29,7 @@ namespace
 {
   const command_line::arg_descriptor<std::string, true> arg_ip           = {"ip", "set ip"};
   const command_line::arg_descriptor<size_t>      arg_port               = {"port", "set port"};
-  const command_line::arg_descriptor<size_t>      arg_rpc_port           = {"rpc_port", "set rpc port"};
+  const command_line::arg_descriptor<size_t>      arg_rpc_port           = {"rpc_port", "set rpc port", RPC_DEFAULT_PORT};
   const command_line::arg_descriptor<uint32_t, true> arg_timeout         = {"timeout", "set timeout"};
   const command_line::arg_descriptor<std::string> arg_priv_key           = {"private_key", "private key to subscribe debug command", "", true};
   const command_line::arg_descriptor<uint64_t>    arg_peer_id            = {"peer_id", "peer_id if known(if not - will be requested)", 0};
@@ -37,6 +37,7 @@ namespace
   const command_line::arg_descriptor<bool>        arg_request_stat_info  = {"request_stat_info", "request statistics information"};
   const command_line::arg_descriptor<bool>        arg_request_net_state  = {"request_net_state", "request network state information (peer list, connections count)"};
   const command_line::arg_descriptor<bool>        arg_get_daemon_info    = {"rpc_get_daemon_info", "request daemon state info vie rpc (--rpc_port option should be set ).", "", true};
+  const command_line::arg_descriptor<bool>        arg_get_aliases        = {"rpc_get_aliases", "request daemon aliases all list", "", true};
 }
 
 typedef COMMAND_REQUEST_STAT_INFO_T<t_currency_protocol_handler<core>::stat_info> COMMAND_REQUEST_STAT_INFO;
@@ -157,6 +158,30 @@ bool print_COMMAND_REQUEST_NETWORK_STATE(const COMMAND_REQUEST_NETWORK_STATE::re
   return true;
 }
 //---------------------------------------------------------------------------------------------------------------
+bool handle_get_aliases(po::variables_map& vm)
+{
+  if(!command_line::has_arg(vm, arg_rpc_port))
+  {
+    std::cout << "{" << ENDL << "  \"status\": \"ERROR: " << "RPC port not set \"" << ENDL << "}";
+    return false;
+  }
+
+  epee::net_utils::http::http_simple_client http_client;
+
+  currency::COMMAND_RPC_GET_ALL_ALIASES::request req = AUTO_VAL_INIT(req);
+  currency::COMMAND_RPC_GET_ALL_ALIASES::response res = AUTO_VAL_INIT(res);
+  std::string daemon_addr = command_line::get_arg(vm, arg_ip) + ":" + std::to_string(command_line::get_arg(vm, arg_rpc_port));
+  bool r = epee::net_utils::invoke_http_json_rpc(daemon_addr + "/json_rpc", "get_all_alias_details", req, res, http_client, command_line::get_arg(vm, arg_timeout));
+  if(!r)
+  {
+    std::cout << "{" << ENDL << "  \"status\": \"ERROR: " << "Failed to invoke request \"" << ENDL << "}";
+    return false;
+  }
+  std::cout << epee::serialization::store_t_to_json(res);
+
+  return true;
+}
+//---------------------------------------------------------------------------------------------------------------
 bool handle_get_daemon_info(po::variables_map& vm)
 {
   if(!command_line::has_arg(vm, arg_rpc_port))
@@ -177,7 +202,7 @@ bool handle_get_daemon_info(po::variables_map& vm)
     return false;
   }
   std::cout << "OK" << ENDL
-    << "height: " << res.height << ENDL
+  << "height: " << res.height << ENDL
   << "difficulty: " << res.difficulty << ENDL
   << "tx_count: " << res.tx_count << ENDL
   << "tx_pool_size: " << res.tx_pool_size << ENDL
@@ -307,6 +332,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_params, arg_peer_id);
   command_line::add_arg(desc_params, arg_priv_key);
   command_line::add_arg(desc_params, arg_get_daemon_info);
+  command_line::add_arg(desc_params, arg_get_aliases);
 
 
   po::options_description desc_all;
@@ -341,6 +367,10 @@ int main(int argc, char* argv[])
   else if(command_line::has_arg(vm, arg_generate_keys))
   {
     return  generate_and_print_keys() ? 0:1;
+  }
+  else if(command_line::has_arg(vm, arg_get_aliases))
+  {
+    return handle_get_aliases(vm) ? 0:1;
   }
   else
   {

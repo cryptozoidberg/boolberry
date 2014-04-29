@@ -307,8 +307,7 @@ private:
     currency::alias_info ai = AUTO_VAL_INIT(ai);
     ai.m_alias = args[0];
 
-    currency::account_public_address adr = AUTO_VAL_INIT(adr);
-    if(!currency::get_account_address_from_str(adr, args[1]))
+    if(!currency::get_account_address_from_str(ai.m_address, args[1]))
     {
       std::cout << "target account address has wrong format" << std::endl;
       return true;
