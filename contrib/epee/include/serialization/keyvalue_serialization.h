@@ -85,6 +85,9 @@ public: \
 #define KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(varialble)     KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE_N(varialble, #varialble) //skip is_pod compile time check
 #define KV_SERIALIZE_CONTAINER_POD_AS_BLOB(varialble)     KV_SERIALIZE_CONTAINER_POD_AS_BLOB_N(varialble, #varialble)
 
+#define KV_CHAIN_MAP(variabl_obj)   \
+  namespace_accessor<decltype(this_ref.variabl_obj)>::serialize_map<is_store>(this_ref.variabl_obj, stg, hparent_section);
+
 }
 
 

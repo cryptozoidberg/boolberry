@@ -313,7 +313,13 @@ private:
       std::cout << "target account address has wrong format" << std::endl;
       return true;
     }
-    m_srv.get_payload_object().get_core().get_miner().set_alias_info(ai);
+    if(m_srv.get_payload_object().get_core().get_miner().set_alias_info(ai))
+    {
+      std::cout << "Alias \"" << ai.m_alias << "\" set to be committed to blockchain" << std::endl;
+    }else 
+    {
+      std::cout << "Alias \"" << ai.m_alias << "\" failed to be committed to blockchain" << std::endl;
+    }
     return true;
   }  
   //--------------------------------------------------------------------------------

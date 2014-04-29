@@ -430,5 +430,74 @@ namespace currency
 
   };
 
+  struct alias_rpc_details_base
+  {
+    std::string address;
+    std::string tracking_key;
+    std::string comment;
+    
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(address)
+      KV_SERIALIZE(tracking_key)
+      KV_SERIALIZE(comment)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct alias_rpc_details
+  {
+    std::string alias;
+    alias_rpc_details_base details;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(alias)
+      KV_CHAIN_MAP(details)
+    END_KV_SERIALIZE_MAP()
+
+  };
+
+  struct COMMAND_RPC_GET_ALIAS_DETAILS
+  {
+    struct request
+    {
+      std::string alias;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(alias)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      alias_rpc_details_base alias_details;
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(alias_details)
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+
+  struct COMMAND_RPC_GET_ALL_ALIASES
+  {
+    struct request
+    {
+      BEGIN_KV_SERIALIZE_MAP()
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::list<alias_rpc_details> aliases;
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(aliases)
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+
 }
 

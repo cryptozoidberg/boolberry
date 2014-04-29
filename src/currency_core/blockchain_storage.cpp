@@ -1331,6 +1331,21 @@ bool blockchain_storage::get_alias_info(const std::string& alias, alias_info_bas
   return false;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::get_all_aliases(std::list<alias_info>& aliases)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  for(auto a: m_aliases)
+  {
+    if(a.second.size())
+    {
+      aliases.push_back(alias_info());
+      aliases.back().m_alias = a.first;
+      static_cast<alias_info_base&>(aliases.back()) = a.second.back();
+    }
+  }
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::pop_alias_info(const alias_info& ai)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);

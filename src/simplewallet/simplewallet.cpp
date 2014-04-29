@@ -606,6 +606,41 @@ bool simple_wallet::show_blockchain_height(const std::vector<std::string>& args)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+bool simple_wallet::get_alias_from_daemon(const std::string& alias_name, currency::alias_info_base& ai)
+{
+
+  COMMAND_RPC_GET_HEIGHT::request req;
+  COMMAND_RPC_GET_HEIGHT::response res = boost::value_initialized<COMMAND_RPC_GET_HEIGHT::response>();
+  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/getheight", req, res, m_http_client);
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
+{
+  if(adr_str.size())
+    return false;
+
+  if(adr_str[0] == '@')
+  {
+    //referred by alias name
+    if(adr_str.size() < 2)
+      return false;
+    std::string pure_alias_name = adr_str.substr(1);
+    currency::alias_info_base ai = AUTO_VAL_INIT(ai);
+    if(!get_alias_from_daemon(pure_alias_name, ai))
+      return false;
+    addr = ai.m_address;
+    return true;
+  }
+
+  if(!get_account_address_from_str(addr, adr_str))
+  {
+    return false;
+  }
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
 bool simple_wallet::transfer(const std::vector<std::string> &args_)
 {
   if (!try_connect_to_daemon())
@@ -629,7 +664,7 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   for (size_t i = 1; i < local_args.size(); i += 2) 
   {
     currency::tx_destination_entry de;
-    if(!get_account_address_from_str(de.addr, local_args[i]))
+    if(!get_transfer_address(de.addr, local_args[i]))
     {
       fail_msg_writer() << "wrong address: " << local_args[i];
       return true;

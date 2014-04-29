@@ -347,15 +347,30 @@ namespace currency
       if(check_hash(h, local_diff))
       {
         //we lucky!
+        //move alias info to temp var 
+        alias_info ai_local = AUTO_VAL_INIT(ai_local);
+        CRITICAL_REGION_BEGIN(m_aliace_to_apply_in_block_lock);
+        if(m_aliace_to_apply_in_block.m_alias.size())
+        {
+          ai_local = m_aliace_to_apply_in_block;
+          m_aliace_to_apply_in_block = AUTO_VAL_INIT(m_aliace_to_apply_in_block);
+        }
+        CRITICAL_REGION_END();
+
         ++m_config.current_extra_message_index;
         LOG_PRINT_GREEN("Found block for difficulty: " << local_diff, LOG_LEVEL_0);
         if(!m_phandler->handle_block_found(b))
         {
           --m_config.current_extra_message_index;
+          CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
+          if(ai_local.m_alias.size())
+            m_aliace_to_apply_in_block = ai_local;
         }else
         {
-          //success update, lets update config
+          //success, let's update config
           epee::serialization::store_t_to_json_file(m_config, m_config_folder_path + "/" + MINER_CONFIG_FILE_NAME);
+          if(ai_local.m_alias.size())
+            LOG_PRINT_GREEN("Alias \"" << ai_local.m_alias << "\" successfully committed to blockchain", LOG_LEVEL_0);
         }
       }
       nonce+=m_threads_total;

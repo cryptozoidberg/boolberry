@@ -101,6 +101,7 @@ namespace currency
     bool get_backward_blocks_sizes(size_t from_height, std::vector<size_t>& sz, size_t count);
     bool get_tx_outputs_gindexs(const crypto::hash& tx_id, std::vector<uint64_t>& indexs);
     bool get_alias_info(const std::string& alias, alias_info_base& info);
+    bool get_all_aliases(std::list<alias_info>& aliases);
     bool store_blockchain();
     bool check_tx_input(const txin_to_key& txin, const crypto::hash& tx_prefix_hash, const std::vector<crypto::signature>& sig, uint64_t* pmax_related_block_height = NULL);
     bool check_tx_inputs(const transaction& tx, const crypto::hash& tx_prefix_hash, uint64_t* pmax_used_block_height = NULL);

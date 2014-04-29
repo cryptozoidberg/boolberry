@@ -537,4 +537,51 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_alias_details(const COMMAND_RPC_GET_ALIAS_DETAILS::request& req, COMMAND_RPC_GET_ALIAS_DETAILS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
+  {
+    if(!check_core_ready())
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_CORE_BUSY;
+      error_resp.message = "Core is busy.";
+      return false;
+    }
+    alias_info_base aib = AUTO_VAL_INIT(aib);
+    if(!m_core.get_blockchain_storage().get_alias_info(req.alias, aib))
+    {
+      res.status = "Alias not found.";
+      return true;
+    }
+    res.alias_details.address = currency::get_account_address_as_str(aib.m_address);
+    res.alias_details.comment = aib.m_text_comment;
+    if(aib.m_view_key != currency::null_skey)
+      res.alias_details.tracking_key = string_tools::pod_to_hex(aib.m_view_key);
+
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_all_aliases(const COMMAND_RPC_GET_ALL_ALIASES::request& req, COMMAND_RPC_GET_ALL_ALIASES::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
+  {
+    if(!check_core_ready())
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_CORE_BUSY;
+      error_resp.message = "Core is busy.";
+      return false;
+    }
+
+    std::list<currency::alias_info> aliases;
+    m_core.get_blockchain_storage().get_all_aliases(aliases);
+    for(auto a: aliases)
+    {
+      res.aliases.push_back(alias_rpc_details());
+      res.aliases.back().alias = a.m_alias;
+      res.aliases.back().details.address =  currency::get_account_address_as_str(a.m_address);
+      res.aliases.back().details.comment = a.m_text_comment;
+      if(a.m_view_key != currency::null_skey)
+        res.aliases.back().details.tracking_key = string_tools::pod_to_hex(a.m_view_key);
+    }
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
 }

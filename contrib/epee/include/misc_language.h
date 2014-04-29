@@ -49,6 +49,11 @@ namespace epee
 	}
 
 
+  /* helper class, to make able get namespace via decltype()::*/
+  template<class base_class>
+  class namespace_accessor: public base_class{};
+
+
 
 #define AUTO_VAL_INIT(v)   boost::value_initialized<decltype(v)>()
 
