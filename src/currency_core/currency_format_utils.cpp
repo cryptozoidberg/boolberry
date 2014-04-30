@@ -756,7 +756,7 @@ namespace currency
     //prev_hash
     //random index tx_hash
     //random index miner_tx out key
-    //transaction public one-time key from extra
+    //transaction public one-time key from extra (not used yet)
 
     string_tools::apped_pod_to_strbuff(res, b.prev_id);
     if(b.tx_hashes.size())
@@ -768,9 +768,10 @@ namespace currency
     CHECK_AND_ASSERT_MES(b.miner_tx.vout.size(), false, "wrong block with empty transacions");
     CHECK_AND_ASSERT_MES(b.miner_tx.vout[selector%b.miner_tx.vout.size()].target.type() == typeid(txout_to_key), false, "wrong tx out type in coinbase!!!");  
     string_tools::apped_pod_to_strbuff(res, boost::get<txout_to_key>(b.miner_tx.vout[selector%b.miner_tx.vout.size()].target).key);
-    crypto::public_key tx_pub_key = null_pkey;
-    parse_and_validate_tx_extra(b.miner_tx, tx_pub_key);
-    CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Failed to parse tx_pub_key from transaction public key");
+    //crypto::public_key tx_pub_key = null_pkey;
+    //parse_and_validate_tx_extra(b.miner_tx, tx_pub_key);
+    //CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Failed to parse tx_pub_key from transaction public key");
+    
     return true;
   }
   //---------------------------------------------------------------
