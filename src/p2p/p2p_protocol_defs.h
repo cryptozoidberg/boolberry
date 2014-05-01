@@ -14,6 +14,7 @@ namespace nodetool
 {
   typedef boost::uuids::uuid uuid;
   typedef uint64_t peerid_type;
+  typedef std::string blobdata;
 
 #pragma pack (push, 1)
   
@@ -104,6 +105,59 @@ namespace nodetool
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
+#define  ALERT_TYPE_CALM            0
+#define  ALERT_TYPE_URGENT          1
+#define  ALERT_TYPE_CRITICAL        2
+
+  /*
+  Don't put any strings into maintainers message: if secret key will
+  be stolen it can be used maliciously.
+  */
+  struct alert_condition
+  {
+    uint32_t if_build_less_then; //apply alert if build less then
+    uint8_t  alert_mode;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE_N(if_build_less_then, "l")
+      KV_SERIALIZE_N(alert_mode, "a")
+    END_KV_SERIALIZE_MAP()    
+  };
+
+  struct maintainers_alert_details
+  {
+    uint64_t timestamp;
+    /*actual version*/
+    uint8_t  ver_major;
+    uint8_t  ver_minor;
+    uint8_t  ver_revision;
+    uint32_t build_no;
+    /*conditions for alerting*/
+    std::list<alert_condition> conditions;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE_N(timestamp, "t")
+      KV_SERIALIZE_N(ver_major, "m")
+      KV_SERIALIZE_N(ver_minor, "i")
+      KV_SERIALIZE_N(ver_revision, "r")
+      KV_SERIALIZE_N(build_no, "b")
+      KV_SERIALIZE_N(conditions, "c")
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct maintainers_alert_entry
+  {
+    blobdata alert_details_buff;
+    crypto::signature sign;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(alert_details_buff)
+      KV_SERIALIZE_VAL_POD_AS_BLOB(sign)
+    END_KV_SERIALIZE_MAP()
+  };
+  /************************************************************************/
+  /*                                                                      */
+  /************************************************************************/
   template<class t_playload_type>
 	struct COMMAND_HANDSHAKE_T
 	{
@@ -113,10 +167,12 @@ namespace nodetool
     {
       basic_node_data node_data;
       t_playload_type payload_data;
+      maintainers_alert_entry maintainers_alert;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(node_data)
         KV_SERIALIZE(payload_data)
+        KV_SERIALIZE(maintainers_alert)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -124,12 +180,14 @@ namespace nodetool
     {
       basic_node_data node_data;
       t_playload_type payload_data;
-      std::list<peerlist_entry> local_peerlist; 
+      std::list<peerlist_entry> local_peerlist;
+      maintainers_alert_entry maintainers_alert;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(node_data)
         KV_SERIALIZE(payload_data)
         KV_SERIALIZE_CONTAINER_POD_AS_BLOB(local_peerlist)
+        KV_SERIALIZE(maintainers_alert)
       END_KV_SERIALIZE_MAP()
     };
 	};
@@ -146,8 +204,11 @@ namespace nodetool
     struct request
     {
       t_playload_type payload_data;
+      maintainers_alert_entry maintainers_alert;
+
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(payload_data)
+        KV_SERIALIZE(maintainers_alert)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -156,11 +217,13 @@ namespace nodetool
       int64_t local_time;
       t_playload_type payload_data;
       std::list<peerlist_entry> local_peerlist; 
+      maintainers_alert_entry maintainers_alert;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(local_time)
         KV_SERIALIZE(payload_data)
         KV_SERIALIZE_CONTAINER_POD_AS_BLOB(local_peerlist)
+        KV_SERIALIZE(maintainers_alert)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -308,46 +371,6 @@ namespace nodetool
 
 #endif
     
-#define  ALERT_TYPE_CALM            0
-#define  ALERT_TYPE_URGENT          1
-#define  ALERT_TYPE_CRITICAL        2
-
-  /*
-  Don't put any strings into maintainers message: if secret key will
-  be stolen any strings can be used maliciously.
-  */
-  struct alert_condition
-  {
-    uint32_t if_build_less_then; //apply alert if build less then
-    uint8_t  alert_mode;
-
-    BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE_N(if_build_less_then, "l")
-      KV_SERIALIZE_N(alert_mode, "a")
-    END_KV_SERIALIZE_MAP()    
-  };
-
-  struct MAINTAINERS_ALERT
-  {
-    uint64_t timestamp;
-    /*actual version*/
-    uint8_t  ver_major;
-    uint8_t  ver_minor;
-    uint8_t  ver_revision;
-    uint32_t build_no;
-    /*conditions for alerting*/
-    std::list<alert_condition> conditions;
-
-    BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE_N(timestamp, "t")
-      KV_SERIALIZE_N(ver_major, "m")
-      KV_SERIALIZE_N(ver_minor, "i")
-      KV_SERIALIZE_N(ver_revision, "r")
-      KV_SERIALIZE_N(build_no, "b")
-      KV_SERIALIZE_N(conditions, "c")
-    END_KV_SERIALIZE_MAP()    
-
-  };
 }
 
 
