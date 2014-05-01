@@ -307,8 +307,47 @@ namespace nodetool
   };
 
 #endif
+    
+#define  ALERT_TYPE_CALM            0
+#define  ALERT_TYPE_URGENT          1
+#define  ALERT_TYPE_CRITICAL        2
 
+  /*
+  Don't put any strings into maintainers message: if secret key will
+  be stolen any strings can be used maliciously.
+  */
+  struct alert_condition
+  {
+    uint32_t if_build_less_then; //apply alert if build less then
+    uint8_t  alert_mode;
 
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE_N(if_build_less_then, "l")
+      KV_SERIALIZE_N(alert_mode, "a")
+    END_KV_SERIALIZE_MAP()    
+  };
+
+  struct MAINTAINERS_ALERT
+  {
+    uint64_t timestamp;
+    /*actual version*/
+    uint8_t  ver_major;
+    uint8_t  ver_minor;
+    uint8_t  ver_revision;
+    uint32_t build_no;
+    /*conditions for alerting*/
+    std::list<alert_condition> conditions;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE_N(timestamp, "t")
+      KV_SERIALIZE_N(ver_major, "m")
+      KV_SERIALIZE_N(ver_minor, "i")
+      KV_SERIALIZE_N(ver_revision, "r")
+      KV_SERIALIZE_N(build_no, "b")
+      KV_SERIALIZE_N(conditions, "c")
+    END_KV_SERIALIZE_MAP()    
+
+  };
 }
 
 
