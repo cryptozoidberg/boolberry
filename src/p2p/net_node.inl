@@ -296,6 +296,7 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::on_maintainers_entry_update()
   {
+    LOG_PRINT_MAGENTA("Fresh maintainers info recieved(timestamp: " << m_maintainers_info_local.timestamp << ")", LOG_LEVEL_0);
     if(PROJECT_VERSION_BUILD_NO < m_maintainers_info_local.build_no)
     {
       LOG_PRINT_MAGENTA("Newer version avaliable: " << static_cast<uint32_t>(m_maintainers_info_local.ver_major) <<

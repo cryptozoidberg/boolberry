@@ -355,6 +355,7 @@ bool handle_update_maintainers_info(po::variables_map& vm)
   bool r = epee::serialization::load_t_from_json_file(mi, path);
   CHECK_AND_ASSERT_MES(r, false, "Failed to load maintainers_info from json file: " << path);
   mi.timestamp = time(NULL);  
+  std::cout << "timestamp: " << mi.timestamp << ENDL;
   epee::serialization::store_t_to_binary(mi, req.maintainers_info_buff);
   crypto::generate_signature(currency::get_blob_hash(req.maintainers_info_buff), tools::get_public_key_from_string(P2P_MAINTAINERS_PUB_KEY), prvk, req.sign);
 
