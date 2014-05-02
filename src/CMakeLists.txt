@@ -36,7 +36,7 @@ add_executable(daemon ${DAEMON} ${P2P} ${CURRENCY_PROTOCOL})
 add_dependencies(daemon version)
 target_link_libraries(daemon rpc currency_core crypto common
                              ${Boost_LIBRARIES})
-
+                     
 add_executable(connectivity_tool ${CONN_TOOL})
 target_link_libraries(connectivity_tool currency_core crypto common
                                         ${Boost_LIBRARIES})

@@ -13,7 +13,7 @@
 #include <boost/serialization/is_bitwise_serializable.hpp>
 #include "currency_basic.h"
 #include "common/unordered_containers_boost_serialization.h"
-#include "crypto/crypto.h"
+#include "common/crypto_boost_serialization.h"
 
 #define CURRENT_BLOCK_ARCHIVE_VER   2
 BOOST_CLASS_VERSION(currency::block, CURRENT_BLOCK_ARCHIVE_VER)
@@ -22,39 +22,6 @@ namespace boost
 {
   namespace serialization
   {
-
-  //---------------------------------------------------
-  template <class Archive>
-  inline void serialize(Archive &a, crypto::public_key &x, const boost::serialization::version_type ver)
-  {
-    a & reinterpret_cast<char (&)[sizeof(crypto::public_key)]>(x);
-  }
-  template <class Archive>
-  inline void serialize(Archive &a, crypto::secret_key &x, const boost::serialization::version_type ver)
-  {
-    a & reinterpret_cast<char (&)[sizeof(crypto::secret_key)]>(x);
-  }
-  template <class Archive>
-  inline void serialize(Archive &a, crypto::key_derivation &x, const boost::serialization::version_type ver)
-  {
-    a & reinterpret_cast<char (&)[sizeof(crypto::key_derivation)]>(x);
-  }
-  template <class Archive>
-  inline void serialize(Archive &a, crypto::key_image &x, const boost::serialization::version_type ver)
-  {
-    a & reinterpret_cast<char (&)[sizeof(crypto::key_image)]>(x);
-  }
-
-  template <class Archive>
-  inline void serialize(Archive &a, crypto::signature &x, const boost::serialization::version_type ver)
-  {
-    a & reinterpret_cast<char (&)[sizeof(crypto::signature)]>(x);
-  }
-  template <class Archive>
-  inline void serialize(Archive &a, crypto::hash &x, const boost::serialization::version_type ver)
-  {
-    a & reinterpret_cast<char (&)[sizeof(crypto::hash)]>(x);
-  }
 
   template <class Archive>
   inline void serialize(Archive &a, currency::txout_to_script &x, const boost::serialization::version_type ver)

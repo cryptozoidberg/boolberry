@@ -38,6 +38,7 @@ namespace
   const command_line::arg_descriptor<bool>        arg_request_net_state  = {"request_net_state", "request network state information (peer list, connections count)"};
   const command_line::arg_descriptor<bool>        arg_get_daemon_info    = {"rpc_get_daemon_info", "request daemon state info vie rpc (--rpc_port option should be set ).", "", true};
   const command_line::arg_descriptor<bool>        arg_get_aliases        = {"rpc_get_aliases", "request daemon aliases all list", "", true};
+  const command_line::arg_descriptor<std::string> arg_upate_maintainers_info = {"upate_maintainers_info", "Push maintainers info into the network, upate_maintainers_info=file_with_info.json", "", true};
 }
 
 typedef COMMAND_REQUEST_STAT_INFO_T<t_currency_protocol_handler<core>::stat_info> COMMAND_REQUEST_STAT_INFO;
@@ -260,7 +261,7 @@ bool handle_request_stat(po::variables_map& vm, peerid_type peer_id)
   pot.peer_id = peer_id;
   pot.time = time(NULL);
   crypto::public_key pubk = AUTO_VAL_INIT(pubk);
-  string_tools::hex_to_pod(P2P_STAT_TRUSTED_PUB_KEY, pubk);
+  string_tools::hex_to_pod(P2P_MAINTAINERS_PUB_KEY, pubk);
   crypto::hash h = tools::get_proof_of_trust_hash(pot);
   crypto::generate_signature(h, pubk, prvk, pot.sign);
 
@@ -303,6 +304,73 @@ bool handle_request_stat(po::variables_map& vm, peerid_type peer_id)
   return true;
 }
 //---------------------------------------------------------------------------------------------------------------
+bool get_private_key(crypto::secret_key& pk, po::variables_map& vm)
+{
+  if(!command_line::has_arg(vm, arg_priv_key))
+  {
+    std::cout << "ERROR: secret key not set" << ENDL;
+    return false;
+  }
+  
+  if(!string_tools::hex_to_pod(command_line::get_arg(vm, arg_priv_key) , pk))
+  {
+    std::cout << "ERROR: wrong secret key set" << ENDL;
+    return false;
+  }
+  crypto::public_key pubkey = AUTO_VAL_INIT(pubkey);
+  if(!crypto::secret_key_to_public_key(pk, pubkey))
+  {
+    std::cout << "ERROR: wrong secret key set(secret_key_to_public_key failed)" << ENDL;
+    return false;
+  }
+  if( pubkey != tools::get_public_key_from_string(P2P_MAINTAINERS_PUB_KEY))
+  {
+    std::cout << "ERROR: wrong secret key set(public keys not match)" << ENDL;
+    return false;
+  }
+  return true;
+}
+//---------------------------------------------------------------------------------------------------------------
+bool handle_update_maintainers_info(po::variables_map& vm)
+{
+  if(!command_line::has_arg(vm, arg_rpc_port))
+  {
+    std::cout << "ERROR: rpc port not set" << ENDL;
+    return false;
+  }
+  crypto::secret_key prvk = AUTO_VAL_INIT(prvk);
+  if(!get_private_key(prvk, vm))
+  {
+    std::cout << "ERROR: secrete key error" << ENDL;
+    return false;
+  }
+
+  epee::net_utils::http::http_simple_client http_client;
+
+  currency::COMMAND_RPC_SET_MAINTAINERS_INFO::request req = AUTO_VAL_INIT(req);
+  currency::COMMAND_RPC_SET_MAINTAINERS_INFO::response res = AUTO_VAL_INIT(res);
+  /*std::string daemon_addr = command_line::get_arg(vm, arg_ip) + ":" + std::to_string(command_line::get_arg(vm, arg_rpc_port));
+  bool r = net_utils::invoke_http_json_remote_command2(daemon_addr + "/getinfo", req, res, http_client, command_line::get_arg(vm, arg_timeout));
+  if(!r)
+  {
+    std::cout << "ERROR: failed to invoke request" << ENDL;
+    return false;
+  }
+
+  std::cout << "OK" << ENDL
+    << "height: " << res.height << ENDL
+    << "difficulty: " << res.difficulty << ENDL
+    << "tx_count: " << res.tx_count << ENDL
+    << "tx_pool_size: " << res.tx_pool_size << ENDL
+    << "alt_blocks_count: " << res.alt_blocks_count << ENDL
+    << "outgoing_connections_count: " << res.outgoing_connections_count << ENDL
+    << "incoming_connections_count: " << res.incoming_connections_count << ENDL
+    << "white_peerlist_size: " << res.white_peerlist_size << ENDL
+    << "grey_peerlist_size: " << res.grey_peerlist_size << ENDL;*/
+
+  return true;
+}
+//---------------------------------------------------------------------------------------------------------------
 bool generate_and_print_keys()
 {
   crypto::public_key pk = AUTO_VAL_INIT(pk);
@@ -333,7 +401,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_params, arg_priv_key);
   command_line::add_arg(desc_params, arg_get_daemon_info);
   command_line::add_arg(desc_params, arg_get_aliases);
-
+  command_line::add_arg(desc_params, arg_upate_maintainers_info);
 
   po::options_description desc_all;
   desc_all.add(desc_general).add(desc_params);
@@ -371,6 +439,10 @@ int main(int argc, char* argv[])
   else if(command_line::has_arg(vm, arg_get_aliases))
   {
     return handle_get_aliases(vm) ? 0:1;
+  }
+  else if(command_line::has_arg(vm, arg_upate_maintainers_info))
+  {
+    return handle_update_maintainers_info(vm) ? 0:1;
   }
   else
   {

@@ -49,7 +49,9 @@ namespace nodetool
   {
     //
     TRY_ENTRY();
-    
+    bool r = string_tools::hex_to_pod(P2P_MAINTAINERS_PUB_KEY, m_maintainers_pub_key);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to parse P2P_MAINTAINERS_PUB_KEY = " << P2P_MAINTAINERS_PUB_KEY);
+
     make_default_config();
 
     std::string state_file_path = m_config_folder + "/" + P2P_NET_DATA_FILENAME;
@@ -291,8 +293,48 @@ namespace nodetool
     return true;
   }
   //-----------------------------------------------------------------------------------
- 
-
+  template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::on_maintainers_entry_update()
+  {
+    if(PROJECT_VERSION_BUILD_NO < m_maintainers_info_local.build_no)
+    {
+      LOG_PRINT_MAGENTA("Newer version avaliable: " << m_maintainers_info_local.ver_major <<
+                                                "." << m_maintainers_info_local.ver_minor <<
+                                                "." << m_maintainers_info_local.ver_revision <<
+                                                "." << m_maintainers_info_local.build_no <<
+                                                ", current version: " <<  PROJECT_VERSION_LONG, LOG_LEVEL_0);
+      handle_alert_conditions();
+    }
+    return true;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
+   bool node_server<t_payload_net_handler>::handle_maintainers_entry(const maintainers_entry& me)
+   {
+     bool r = crypto::check_signature(crypto::cn_fast_hash(me.maintainers_info_buff.data(), me.maintainers_info_buff.size()), m_maintainers_pub_key, me.sign);
+     CHECK_AND_ASSERT_MES(r, false, "Failed to check signature in maintainers_entry");
+     //signature ok, load from blob
+     maintainers_info mi = AUTO_VAL_INIT(mi);
+     r = epee::serialization::load_t_from_binary(mi, me.maintainers_info_buff);
+     CHECK_AND_ASSERT_MES(r, false, "Failed to load maintainers_info from maintainers_entry buff");
+     if(mi.timestamp > m_maintainers_info_local.timestamp)
+     {
+       //lets update new
+       CRITICAL_REGION_LOCAL(m_maintainers_local_lock);
+       m_maintainers_entry_local = me;
+       m_maintainers_info_local = mi;
+       on_maintainers_entry_update();
+     }
+     return true;
+   }
+  //-----------------------------------------------------------------------------------
+   template<class t_payload_net_handler>
+   bool node_server<t_payload_net_handler>::fill_maintainers_entry(maintainers_entry& me)
+   {
+     me = m_maintainers_entry_local;
+     return true;
+   }
+   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::do_handshake_with_peer(peerid_type& pi, p2p_connection_context& context_, bool just_take_peerlist)
   {
@@ -300,6 +342,7 @@ namespace nodetool
     typename COMMAND_HANDSHAKE::response rsp;
     get_local_node_data(arg.node_data);
     m_payload_handler.get_payload_sync_data(arg.payload_data);
+    fill_maintainers_entry(arg.maintrs_entry);
     
     simple_event ev;
     std::atomic<bool> hsh_result(false);
@@ -317,7 +360,13 @@ namespace nodetool
 
       if(rsp.node_data.network_id != HONEYPENNY_NETWORK)
       {
-        LOG_ERROR_CCONTEXT("COMMAND_HANDSHAKE Failed, wrong network!  (" << string_tools::get_str_from_guid_a(rsp.node_data.network_id) << "), closing connection.");
+        LOG_ERROR_CCONTEXT("COMMAND_HANDSHAKE Failed, wrong network!, closing connection.");
+        return;
+      }
+
+      if(!handle_maintainers_entry(rsp.maintrs_entry))
+      {
+        LOG_ERROR_CCONTEXT("COMMAND_HANDSHAKE Failed, wrong maintainers entry!, closing connection.");
         return;
       }
 
@@ -371,6 +420,7 @@ namespace nodetool
   {
     typename COMMAND_TIMED_SYNC::request arg = AUTO_VAL_INIT(arg);
     m_payload_handler.get_payload_sync_data(arg.payload_data);
+    fill_maintainers_entry(arg.maintrs_entry);
 
     bool r = net_utils::async_invoke_remote_command2<typename COMMAND_TIMED_SYNC::response>(context_.m_connection_id, COMMAND_TIMED_SYNC::ID, arg, m_net_server.get_config_object(), 
       [this](int code, const typename COMMAND_TIMED_SYNC::response& rsp, p2p_connection_context& context)
@@ -378,6 +428,12 @@ namespace nodetool
       if(code < 0)
       {
         LOG_PRINT_CC_RED(context, "COMMAND_TIMED_SYNC invoke failed. (" << code <<  ", " << levin::get_err_descr(code) << ")", LOG_LEVEL_1);
+        return;
+      }
+
+      if(!handle_maintainers_entry(rsp.maintrs_entry))
+      {
+        LOG_ERROR_CCONTEXT("COMMAND_HANDSHAKE Failed, wrong maintainers entry!, closing connection.");
         return;
       }
 
@@ -666,6 +722,53 @@ namespace nodetool
     m_peer_handshake_idle_maker_interval.do_call(boost::bind(&node_server<t_payload_net_handler>::peer_sync_idle_maker, this));
     m_connections_maker_interval.do_call(boost::bind(&node_server<t_payload_net_handler>::connections_maker, this));
     m_peerlist_store_interval.do_call(boost::bind(&node_server<t_payload_net_handler>::store_config, this));
+
+    m_calm_alert_interval.do_call([&](){return clam_alert_worker();});
+    m_urgent_alert_interval.do_call([&](){return urgent_alert_worker();});
+    m_critical_alert_interval.do_call([&](){return critical_alert_worker();});
+    return true;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::clam_alert_worker()
+  {
+    if(m_alert_mode != ALERT_TYPE_CALM)
+      return true;
+
+    LOG_PRINT_L0("This software is is up to date, please update.");
+    return true;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::urgent_alert_worker()
+  {
+    if(m_alert_mode  != ALERT_TYPE_CALM)
+      return true;
+
+    LOG_PRINT_CYAN("[URGENT]:This software is is up to date, please update.", LOG_LEVEL_0);
+    return true;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::critical_alert_worker()
+  {
+    if(m_alert_mode  != ALERT_TYPE_CALM)
+      return true;
+
+    LOG_PRINT_RED("[CRITICAL]:This software is is up to date, please update.", LOG_LEVEL_0);
+    return true;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::handle_alert_conditions()
+  {
+    CRITICAL_REGION_LOCAL(m_maintainers_local_lock);
+    m_alert_mode = 0;
+    for(auto c: m_maintainers_info_local.conditions)
+    {
+      if(PROJECT_VERSION_BUILD_NO < c.if_build_less_then && c.alert_mode > m_alert_mode)
+        m_alert_mode = c.alert_mode;
+    }
     return true;
   }
   //-----------------------------------------------------------------------------------
@@ -755,7 +858,7 @@ namespace nodetool
       return false;
     }
     crypto::public_key pk = AUTO_VAL_INIT(pk);
-    string_tools::hex_to_pod(P2P_STAT_TRUSTED_PUB_KEY, pk);
+    string_tools::hex_to_pod(P2P_MAINTAINERS_PUB_KEY, pk);
     crypto::hash h = tools::get_proof_of_trust_hash(tr);
     if(!crypto::check_signature(h, pk, tr.sign))
     {
@@ -931,6 +1034,12 @@ namespace nodetool
   template<class t_payload_net_handler>
   int node_server<t_payload_net_handler>::handle_timed_sync(int command, typename COMMAND_TIMED_SYNC::request& arg, typename COMMAND_TIMED_SYNC::response& rsp, p2p_connection_context& context)
   {
+    if(!handle_maintainers_entry(arg.maintrs_entry))
+    {
+      LOG_ERROR_CCONTEXT("COMMAND_HANDSHAKE Failed, wrong maintainers entry!, closing connection.");
+      return 1;
+    }
+
     if(!m_payload_handler.process_payload_sync_data(arg.payload_data, context, false))
     {
       LOG_ERROR_CCONTEXT("Failed to process_payload_sync_data(), dropping connection");
@@ -942,6 +1051,7 @@ namespace nodetool
     rsp.local_time = time(NULL);
     m_peerlist.get_peerlist_head(rsp.local_peerlist);
     m_payload_handler.get_payload_sync_data(rsp.payload_data);
+    fill_maintainers_entry(rsp.maintrs_entry);
     LOG_PRINT_CCONTEXT_L2("COMMAND_TIMED_SYNC");
     return 1;
   }
@@ -968,6 +1078,12 @@ namespace nodetool
     {
       LOG_ERROR_CCONTEXT("COMMAND_HANDSHAKE came, but seems that connection already have associated peer_id (double COMMAND_HANDSHAKE?)");
       drop_connection(context);
+      return 1;
+    }
+
+    if(!handle_maintainers_entry(arg.maintrs_entry))
+    {
+      LOG_ERROR_CCONTEXT("COMMAND_HANDSHAKE Failed, wrong maintainers entry!, closing connection.");
       return 1;
     }
 
@@ -1002,6 +1118,7 @@ namespace nodetool
     m_peerlist.get_peerlist_head(rsp.local_peerlist);
     get_local_node_data(rsp.node_data);
     m_payload_handler.get_payload_sync_data(rsp.payload_data);
+    fill_maintainers_entry(rsp.maintrs_entry);
     LOG_PRINT_CCONTEXT_GREEN("COMMAND_HANDSHAKE", LOG_LEVEL_1);
     return 1;
   }

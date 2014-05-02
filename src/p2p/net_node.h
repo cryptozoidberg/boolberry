@@ -24,8 +24,12 @@
 #include "p2p_networks.h"
 #include "math_helper.h"
 #include "net_node_common.h"
+#include "maintainers_info_boost_serialization.h"
 
 using namespace epee;
+
+
+#define CURRENT_P2P_STORAGE_ARCHIVE_VER    2
 
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4355)
@@ -54,7 +58,12 @@ namespace nodetool
   public:
     typedef t_payload_net_handler payload_net_handler;
     // Some code
-    node_server(t_payload_net_handler& payload_handler):m_payload_handler(payload_handler), m_allow_local_ip(false), m_hide_my_port(false)
+    node_server(t_payload_net_handler& payload_handler):m_payload_handler(payload_handler), 
+                                                        m_allow_local_ip(false), 
+                                                        m_hide_my_port(false), 
+                                                        m_alert_mode(0), 
+                                                        m_maintainers_entry_local(AUTO_VAL_INIT(m_maintainers_entry_local)),
+                                                        m_maintainers_info_local(AUTO_VAL_INIT(m_maintainers_info_local))
     {}
 
     static void init_options(boost::program_options::options_description& desc);
@@ -71,6 +80,11 @@ namespace nodetool
     {
       a & m_peerlist;
       a & m_config.m_peer_id;
+      if(ver < 2)
+        return;
+      a & m_maintainers_info_local;
+      a & m_maintainers_entry_local;
+      a & m_alert_mode;
     }
     // debug functions
     bool log_peerlist();
@@ -78,6 +92,7 @@ namespace nodetool
     virtual uint64_t get_connections_count();
     size_t get_outgoing_connections_count();
     peerlist_manager& get_peerlist_manager(){return m_peerlist;}
+    bool handle_maintainers_entry(const maintainers_entry& me);
   private:
     typedef COMMAND_REQUEST_STAT_INFO_T<typename t_payload_net_handler::stat_info> COMMAND_REQUEST_STAT_INFO;
 
@@ -148,6 +163,14 @@ namespace nodetool
     bool make_expected_connections_count(bool white_list, size_t expected_connections);
     void cache_connect_fail_info(const net_address& addr);
     bool is_addr_recently_failed(const net_address& addr);
+    bool fill_maintainers_entry(maintainers_entry& me);
+    bool on_maintainers_entry_update();
+    bool handle_alert_conditions();
+    /*this code is temporary here(to show regular message if need), until we get normal GUI*/
+    bool clam_alert_worker();
+    bool urgent_alert_worker();
+    bool critical_alert_worker();
+
 
     //debug functions
     std::string print_connections_container();
@@ -186,6 +209,11 @@ namespace nodetool
     math_helper::once_a_time_seconds<P2P_DEFAULT_HANDSHAKE_INTERVAL> m_peer_handshake_idle_maker_interval;
     math_helper::once_a_time_seconds<1> m_connections_maker_interval;
     math_helper::once_a_time_seconds<60*30, false> m_peerlist_store_interval;
+    
+    /*this code is temporary here(to show regular message if need), until we get normal GUI*/
+    math_helper::once_a_time_seconds<60, false>  m_calm_alert_interval;
+    math_helper::once_a_time_seconds<10, false>  m_urgent_alert_interval;
+    math_helper::once_a_time_seconds<1, false>   m_critical_alert_interval;
 
     std::string m_bind_ip;
     std::string m_port;
@@ -201,9 +229,18 @@ namespace nodetool
 
     std::map<net_address, time_t> m_conn_fails_cache;
     critical_section m_conn_fails_cache_lock;
+    crypto::public_key m_maintainers_pub_key;
+
+    maintainers_info m_maintainers_info_local;
+    maintainers_entry m_maintainers_entry_local;
+    uint8_t m_alert_mode;
+    critical_section m_maintainers_local_lock;
 
   };
 }
+
+
+
 
 #include "net_node.inl"
 

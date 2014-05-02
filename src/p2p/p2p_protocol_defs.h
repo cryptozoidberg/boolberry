@@ -105,9 +105,9 @@ namespace nodetool
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
-#define  ALERT_TYPE_CALM            0
-#define  ALERT_TYPE_URGENT          1
-#define  ALERT_TYPE_CRITICAL        2
+#define  ALERT_TYPE_CALM            1
+#define  ALERT_TYPE_URGENT          2
+#define  ALERT_TYPE_CRITICAL        3
 
   /*
   Don't put any strings into maintainers message: if secret key will
@@ -124,7 +124,7 @@ namespace nodetool
     END_KV_SERIALIZE_MAP()    
   };
 
-  struct maintainers_alert_details
+  struct maintainers_info
   {
     uint64_t timestamp;
     /*actual version*/
@@ -145,13 +145,13 @@ namespace nodetool
     END_KV_SERIALIZE_MAP()
   };
 
-  struct maintainers_alert_entry
+  struct maintainers_entry
   {
-    blobdata alert_details_buff;
+    blobdata maintainers_info_buff;
     crypto::signature sign;
 
     BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(alert_details_buff)
+      KV_SERIALIZE(maintainers_info_buff)
       KV_SERIALIZE_VAL_POD_AS_BLOB(sign)
     END_KV_SERIALIZE_MAP()
   };
@@ -167,12 +167,12 @@ namespace nodetool
     {
       basic_node_data node_data;
       t_playload_type payload_data;
-      maintainers_alert_entry maintainers_alert;
+      maintainers_entry maintrs_entry;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(node_data)
         KV_SERIALIZE(payload_data)
-        KV_SERIALIZE(maintainers_alert)
+        KV_SERIALIZE(maintrs_entry)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -181,13 +181,13 @@ namespace nodetool
       basic_node_data node_data;
       t_playload_type payload_data;
       std::list<peerlist_entry> local_peerlist;
-      maintainers_alert_entry maintainers_alert;
+      maintainers_entry maintrs_entry;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(node_data)
         KV_SERIALIZE(payload_data)
         KV_SERIALIZE_CONTAINER_POD_AS_BLOB(local_peerlist)
-        KV_SERIALIZE(maintainers_alert)
+        KV_SERIALIZE(maintrs_entry)
       END_KV_SERIALIZE_MAP()
     };
 	};
@@ -204,11 +204,11 @@ namespace nodetool
     struct request
     {
       t_playload_type payload_data;
-      maintainers_alert_entry maintainers_alert;
+      maintainers_entry maintrs_entry;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(payload_data)
-        KV_SERIALIZE(maintainers_alert)
+        KV_SERIALIZE(maintrs_entry)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -217,13 +217,13 @@ namespace nodetool
       int64_t local_time;
       t_playload_type payload_data;
       std::list<peerlist_entry> local_peerlist; 
-      maintainers_alert_entry maintainers_alert;
+      maintainers_entry maintrs_entry;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(local_time)
         KV_SERIALIZE(payload_data)
         KV_SERIALIZE_CONTAINER_POD_AS_BLOB(local_peerlist)
-        KV_SERIALIZE(maintainers_alert)
+        KV_SERIALIZE(maintrs_entry)
       END_KV_SERIALIZE_MAP()
     };
   };

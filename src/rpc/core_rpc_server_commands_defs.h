@@ -7,11 +7,12 @@
 #include "currency_core/currency_basic.h"
 #include "currency_core/difficulty.h"
 #include "crypto/hash.h"
+#include "p2p/p2p_protocol_defs.h"
 
 namespace currency
 {
   //-----------------------------------------------
-#define CORE_RPC_STATUS_OK   "OK"
+#define CORE_RPC_STATUS_OK     "OK"
 #define CORE_RPC_STATUS_BUSY   "BUSY"
 
   struct COMMAND_RPC_GET_HEIGHT
@@ -154,6 +155,21 @@ namespace currency
       END_KV_SERIALIZE_MAP()
     };
   };
+
+  //-----------------------------------------------
+  struct COMMAND_RPC_SET_MAINTAINERS_INFO
+  {
+    typedef nodetool::maintainers_entry request;
+
+    struct response
+    {
+      std::string status;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
   //-----------------------------------------------
   struct COMMAND_RPC_SEND_RAW_TX
   {

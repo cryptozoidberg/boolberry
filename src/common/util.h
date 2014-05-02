@@ -28,6 +28,14 @@ namespace tools
     return crypto::cn_fast_hash(s.data(), s.size());
   }
 
+  inline 
+  crypto::public_key get_public_key_from_string(const std::string& str_key)
+  {
+    crypto::public_key k = AUTO_VAL_INIT(k);
+    epee::string_tools::hex_to_pod(str_key, k);
+    return k;
+  }
+
 
   class signal_handler
   {
