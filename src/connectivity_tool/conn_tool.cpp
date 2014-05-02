@@ -344,30 +344,34 @@ bool handle_update_maintainers_info(po::variables_map& vm)
     std::cout << "ERROR: secrete key error" << ENDL;
     return false;
   }
+  std::string path = command_line::get_arg(vm, arg_upate_maintainers_info);
 
   epee::net_utils::http::http_simple_client http_client;
 
   currency::COMMAND_RPC_SET_MAINTAINERS_INFO::request req = AUTO_VAL_INIT(req);
   currency::COMMAND_RPC_SET_MAINTAINERS_INFO::response res = AUTO_VAL_INIT(res);
-  /*std::string daemon_addr = command_line::get_arg(vm, arg_ip) + ":" + std::to_string(command_line::get_arg(vm, arg_rpc_port));
-  bool r = net_utils::invoke_http_json_remote_command2(daemon_addr + "/getinfo", req, res, http_client, command_line::get_arg(vm, arg_timeout));
+
+  maintainers_info mi = AUTO_VAL_INIT(mi);
+  bool r = epee::serialization::load_t_from_json_file(mi, path);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to load maintainers_info from json file: " << path);
+  mi.timestamp = time(NULL);  
+  epee::serialization::store_t_to_binary(mi, req.maintainers_info_buff);
+  crypto::generate_signature(currency::get_blob_hash(req.maintainers_info_buff), tools::get_public_key_from_string(P2P_MAINTAINERS_PUB_KEY), prvk, req.sign);
+
+  std::string daemon_addr = command_line::get_arg(vm, arg_ip) + ":" + std::to_string(command_line::get_arg(vm, arg_rpc_port));
+  r = net_utils::invoke_http_bin_remote_command2(daemon_addr + "/set_maintainers_info.bin", req, res, http_client, command_line::get_arg(vm, arg_timeout));
   if(!r)
   {
     std::cout << "ERROR: failed to invoke request" << ENDL;
     return false;
   }
+  if(res.status != CORE_RPC_STATUS_OK)
+  {
+    std::cout << "ERROR: failed to update maintainers info: " << res.status << ENDL;
+    return false;
+  }
 
-  std::cout << "OK" << ENDL
-    << "height: " << res.height << ENDL
-    << "difficulty: " << res.difficulty << ENDL
-    << "tx_count: " << res.tx_count << ENDL
-    << "tx_pool_size: " << res.tx_pool_size << ENDL
-    << "alt_blocks_count: " << res.alt_blocks_count << ENDL
-    << "outgoing_connections_count: " << res.outgoing_connections_count << ENDL
-    << "incoming_connections_count: " << res.incoming_connections_count << ENDL
-    << "white_peerlist_size: " << res.white_peerlist_size << ENDL
-    << "grey_peerlist_size: " << res.grey_peerlist_size << ENDL;*/
-
+  std::cout << "OK" << ENDL;
   return true;
 }
 //---------------------------------------------------------------------------------------------------------------

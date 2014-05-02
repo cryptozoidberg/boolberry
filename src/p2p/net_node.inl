@@ -298,10 +298,10 @@ namespace nodetool
   {
     if(PROJECT_VERSION_BUILD_NO < m_maintainers_info_local.build_no)
     {
-      LOG_PRINT_MAGENTA("Newer version avaliable: " << m_maintainers_info_local.ver_major <<
-                                                "." << m_maintainers_info_local.ver_minor <<
-                                                "." << m_maintainers_info_local.ver_revision <<
-                                                "." << m_maintainers_info_local.build_no <<
+      LOG_PRINT_MAGENTA("Newer version avaliable: " << static_cast<uint32_t>(m_maintainers_info_local.ver_major) <<
+                                                "." << static_cast<uint32_t>(m_maintainers_info_local.ver_minor) <<
+                                                "." << static_cast<uint32_t>(m_maintainers_info_local.ver_revision) <<
+                                                "." << static_cast<uint32_t>(m_maintainers_info_local.build_no) <<
                                                 ", current version: " <<  PROJECT_VERSION_LONG, LOG_LEVEL_0);
       handle_alert_conditions();
     }
@@ -311,6 +311,9 @@ namespace nodetool
   template<class t_payload_net_handler>
    bool node_server<t_payload_net_handler>::handle_maintainers_entry(const maintainers_entry& me)
    {
+     if(me.sign == AUTO_VAL_INIT(me.sign))//todo: make null_sig (and other null_xxx) available out of currency namespace
+       return true;
+
      bool r = crypto::check_signature(crypto::cn_fast_hash(me.maintainers_info_buff.data(), me.maintainers_info_buff.size()), m_maintainers_pub_key, me.sign);
      CHECK_AND_ASSERT_MES(r, false, "Failed to check signature in maintainers_entry");
      //signature ok, load from blob
@@ -338,8 +341,8 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::do_handshake_with_peer(peerid_type& pi, p2p_connection_context& context_, bool just_take_peerlist)
   {
-    typename COMMAND_HANDSHAKE::request arg;
-    typename COMMAND_HANDSHAKE::response rsp;
+    typename COMMAND_HANDSHAKE::request arg = AUTO_VAL_INIT(arg);
+    typename COMMAND_HANDSHAKE::response rsp = AUTO_VAL_INIT(rsp);
     get_local_node_data(arg.node_data);
     m_payload_handler.get_payload_sync_data(arg.payload_data);
     fill_maintainers_entry(arg.maintrs_entry);
@@ -742,7 +745,7 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::urgent_alert_worker()
   {
-    if(m_alert_mode  != ALERT_TYPE_CALM)
+    if(m_alert_mode  != ALERT_TYPE_URGENT)
       return true;
 
     LOG_PRINT_CYAN("[URGENT]:This software is is up to date, please update.", LOG_LEVEL_0);
@@ -752,7 +755,7 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::critical_alert_worker()
   {
-    if(m_alert_mode  != ALERT_TYPE_CALM)
+    if(m_alert_mode  != ALERT_TYPE_CRITICAL)
       return true;
 
     LOG_PRINT_RED("[CRITICAL]:This software is is up to date, please update.", LOG_LEVEL_0);

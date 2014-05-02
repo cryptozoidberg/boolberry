@@ -119,8 +119,8 @@ namespace nodetool
     uint8_t  alert_mode;
 
     BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE_N(if_build_less_then, "l")
-      KV_SERIALIZE_N(alert_mode, "a")
+      KV_SERIALIZE_N(if_build_less_then, "build")
+      KV_SERIALIZE_N(alert_mode, "mode")
     END_KV_SERIALIZE_MAP()    
   };
 
@@ -136,12 +136,12 @@ namespace nodetool
     std::list<alert_condition> conditions;
 
     BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE_N(timestamp, "t")
-      KV_SERIALIZE_N(ver_major, "m")
-      KV_SERIALIZE_N(ver_minor, "i")
-      KV_SERIALIZE_N(ver_revision, "r")
-      KV_SERIALIZE_N(build_no, "b")
-      KV_SERIALIZE_N(conditions, "c")
+      KV_SERIALIZE_N(timestamp, "ts")
+      KV_SERIALIZE_N(ver_major, "maj")
+      KV_SERIALIZE_N(ver_minor, "min")
+      KV_SERIALIZE_N(ver_revision, "rev")
+      KV_SERIALIZE_N(build_no, "build")
+      KV_SERIALIZE_N(conditions, "cs")
     END_KV_SERIALIZE_MAP()
   };
 
