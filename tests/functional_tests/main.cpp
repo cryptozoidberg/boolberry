@@ -102,11 +102,11 @@ int main(int argc, char* argv[])
     std::string s;
     std::cin >> s;
     
-    return 1;
+    return 0;
   }else if(command_line::get_arg(vm, arg_test_miniupnp))
   {
     miniupnp_test();
-    return 1;
+    return 0;
   }
   else
   {

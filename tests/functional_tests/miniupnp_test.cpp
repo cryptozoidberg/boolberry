@@ -13,9 +13,9 @@ bool test_casual()
   LOG_PRINT_L0("Starting miniupnp tests...");
   tools::miniupnp_helper hlpr;
 
-  hlpr.start_regular_mapping(10101, 10101, 50000);
+  hlpr.start_regular_mapping(10101, 10101, 10000);
 
-  boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+  boost::this_thread::sleep_for(boost::chrono::milliseconds(50000));
 
   return true;
 }
