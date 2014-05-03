@@ -7,7 +7,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 enable_testing()
 
-include_directories(src contrib/epee/include "${CMAKE_BINARY_DIR}/version")
+include_directories(src contrib contrib/epee/include "${CMAKE_BINARY_DIR}/version")
+add_definitions(-DSTATICLIB)
 
 set(AES auto CACHE STRING "Hardware AES support: auto, on, off, or runtime")
 if(NOT "${AES}" MATCHES "^(auto|on|off|runtime)$")
@@ -137,5 +138,7 @@ else()
   endif()
 endif()
 
+add_subdirectory(contrib)
 add_subdirectory(src)
 add_subdirectory(tests)
+

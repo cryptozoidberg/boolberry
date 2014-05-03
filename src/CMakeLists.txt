@@ -25,8 +25,8 @@ source_group(simpleminer FILES ${MINER})
 add_library(common ${COMMON})
 add_library(crypto ${CRYPTO})
 add_library(currency_core ${CURRENCY_CORE})
-
 add_library(rpc ${RPC})
+
 add_dependencies(rpc version)
 
 add_library(wallet ${WALLET})
@@ -34,21 +34,17 @@ add_dependencies(wallet version)
 
 add_executable(daemon ${DAEMON} ${P2P} ${CURRENCY_PROTOCOL})
 add_dependencies(daemon version)
-target_link_libraries(daemon rpc currency_core crypto common
-                             ${Boost_LIBRARIES})
+target_link_libraries(daemon rpc currency_core crypto common upnpc-static ${Boost_LIBRARIES})
                      
 add_executable(connectivity_tool ${CONN_TOOL})
-target_link_libraries(connectivity_tool currency_core crypto common
-                                        ${Boost_LIBRARIES})
+target_link_libraries(connectivity_tool currency_core crypto common ${Boost_LIBRARIES})
 
 add_executable(simpleminer ${MINER})
-target_link_libraries(simpleminer currency_core crypto common
-                                  ${Boost_LIBRARIES})
+target_link_libraries(simpleminer currency_core crypto common ${Boost_LIBRARIES})
 
 add_executable(simplewallet ${SIMPLEWALLET})
 add_dependencies(simplewallet version)
-target_link_libraries(simplewallet wallet rpc currency_core crypto common
-                                   ${Boost_LIBRARIES})
+target_link_libraries(simplewallet wallet rpc currency_core crypto common ${Boost_LIBRARIES})
 
 set_property(TARGET common crypto currency_core rpc wallet PROPERTY FOLDER "libs")
 set_property(TARGET daemon simplewallet connectivity_tool simpleminer PROPERTY FOLDER "prog")

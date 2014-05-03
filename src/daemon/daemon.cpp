@@ -150,12 +150,12 @@ int main(int argc, char* argv[])
   LOG_PRINT_L0("Initializing p2p server...");
   res = p2psrv.init(vm);
   CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize p2p server.");
-  LOG_PRINT_L0("P2p server initialized OK");
+  LOG_PRINT_L0("P2p server initialized OK on port: " << p2psrv.get_this_peer_port());
 
   LOG_PRINT_L0("Initializing currency protocol...");
   res = cprotocol.init(vm);
   CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize currency protocol.");
-  LOG_PRINT_L0("Cryptonote protocol initialized OK");
+  LOG_PRINT_L0("Currency protocol initialized OK");
 
   LOG_PRINT_L0("Initializing core rpc server...");
   res = rpc_server.init(vm);

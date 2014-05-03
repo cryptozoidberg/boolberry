@@ -9,12 +9,14 @@ using namespace epee;
 
 #include "common/command_line.h"
 #include "transactions_flow_test.h"
+#include "miniupnp_test.h"
 
 namespace po = boost::program_options;
 
 namespace
 {
   const command_line::arg_descriptor<bool> arg_test_transactions_flow = {"test_transactions_flow", ""};
+  const command_line::arg_descriptor<bool> arg_test_miniupnp          = {"test_miniupnp", ""};
 
   const command_line::arg_descriptor<std::string> arg_working_folder  = {"working-folder", "", "."};
   const command_line::arg_descriptor<std::string> arg_source_wallet   = {"source-wallet",  "", "", true};
@@ -45,6 +47,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_options, command_line::arg_help);
 
   command_line::add_arg(desc_options, arg_test_transactions_flow);
+  command_line::add_arg(desc_options, arg_test_miniupnp);
 
   command_line::add_arg(desc_options, arg_working_folder);
   command_line::add_arg(desc_options, arg_source_wallet);
@@ -57,6 +60,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_options, arg_tx_count);
   command_line::add_arg(desc_options, arg_tx_per_second);
   command_line::add_arg(desc_options, arg_test_repeat_count);
+  
 
   po::variables_map vm;
   bool r = command_line::handle_error_helper(desc_options, [&]()
@@ -98,6 +102,10 @@ int main(int argc, char* argv[])
     std::string s;
     std::cin >> s;
     
+    return 1;
+  }else if(command_line::get_arg(vm, arg_test_miniupnp))
+  {
+    miniupnp_test();
     return 1;
   }
   else
