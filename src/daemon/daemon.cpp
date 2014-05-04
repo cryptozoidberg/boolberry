@@ -21,6 +21,7 @@ using namespace epee;
 #include "rpc/core_rpc_server.h"
 #include "currency_protocol/currency_protocol_handler.h"
 #include "daemon_commands_handler.h"
+#include "common/miniupnp_helper.h"
 #include "version.h"
 
 #if defined(WIN32)
@@ -145,12 +146,16 @@ int main(int argc, char* argv[])
   cprotocol.set_p2p_endpoint(&p2psrv);
   ccore.set_currency_protocol(&cprotocol);
   daemon_cmmands_handler dch(p2psrv);
+  tools::miniupnp_helper upnp_helper;
 
   //initialize objects
   LOG_PRINT_L0("Initializing p2p server...");
   res = p2psrv.init(vm);
   CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize p2p server.");
   LOG_PRINT_L0("P2p server initialized OK on port: " << p2psrv.get_this_peer_port());
+
+  LOG_PRINT_L0("Starting UPnP");
+  upnp_helper.run_port_mapping_loop(p2psrv.get_this_peer_port(), p2psrv.get_this_peer_port(), 20*60*1000);
 
   LOG_PRINT_L0("Initializing currency protocol...");
   res = cprotocol.init(vm);
