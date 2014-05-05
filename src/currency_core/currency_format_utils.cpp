@@ -753,10 +753,11 @@ namespace currency
   bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector)
   {
     //for each block we put:
-    //prev_hash
-    //random index tx_hash
-    //random index miner_tx out key
-    //transaction public one-time key from extra (not used yet)
+    //prev_hash [32]
+    //random index tx_hash [32]
+    //random index miner_tx out key [32]
+    //transaction public one-time key from extra (not used yet) [32]
+    //
 
     string_tools::apped_pod_to_strbuff(res, b.prev_id);
     if(b.tx_hashes.size())

@@ -14,6 +14,7 @@
 #include "generate_key_image.h"
 #include "generate_key_image_helper.h"
 #include "is_out_to_acc.h"
+#include "keccak_test.h"
 
 int main(int argc, char** argv)
 {
@@ -23,6 +24,16 @@ int main(int argc, char** argv)
   performance_timer timer;
   timer.start();
 
+  TEST_PERFORMANCE0(test_keccak);
+  TEST_PERFORMANCE0(test_keccak_m);
+  TEST_PERFORMANCE0(test_keccak_m_mul);
+  TEST_PERFORMANCE1(test_keccak_m_mul_rand, 400);
+  TEST_PERFORMANCE1(test_keccak_m_mul_rand, 40000);
+  TEST_PERFORMANCE1(test_keccak_m_mul_rand, 4000000);
+  TEST_PERFORMANCE1(test_keccak_m_mul_rand, 40000000);
+  TEST_PERFORMANCE1(test_keccak_m_mul_rand, 100000000);
+
+  /*
   TEST_PERFORMANCE2(test_construct_tx, 1, 1);
   TEST_PERFORMANCE2(test_construct_tx, 1, 2);
   TEST_PERFORMANCE2(test_construct_tx, 1, 10);
@@ -55,7 +66,7 @@ int main(int argc, char** argv)
   TEST_PERFORMANCE0(test_generate_key_image);
   TEST_PERFORMANCE0(test_derive_public_key);
   TEST_PERFORMANCE0(test_derive_secret_key);
-
+  */
   std::cout << "Tests finished. Elapsed time: " << timer.elapsed_ms() / 1000 << " sec" << std::endl;
 
   return 0;
