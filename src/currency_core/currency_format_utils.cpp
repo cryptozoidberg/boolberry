@@ -749,6 +749,33 @@ namespace currency
     return get_object_hash(t, res, blob_size);
   }
   //------------------------------------------------------------------
+  template<typename pod_operand_a, typename pod_operand_b>
+  crypto::hash hash_together(const pod_operand_a& a, const pod_operand_b& b)
+  {
+    std::string blob;
+    string_tools::apped_pod_to_strbuff(blob, a);
+    string_tools::apped_pod_to_strbuff(blob, b);  
+    return crypto::cn_fast_hash(blob.data(), blob.size());
+  }
+  //------------------------------------------------------------------
+  bool put_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd)
+  {
+    scratchpd.push_back(b.prev_id);
+    crypto::public_key tx_pub;
+    bool r = parse_and_validate_tx_extra(b.miner_tx, tx_pub);
+    CHECK_AND_ASSERT_MES(r, false, "wrong miner tx in put_block_scratchpad_data: no one-time tx pubkey");
+    scratchpd.push_back(*reinterpret_cast<crypto::hash*>(&tx_pub));
+    scratchpd.push_back(get_tx_tree_hash(b));
+    for(const auto& out: b.miner_tx.vout)
+    {
+      CHECK_AND_ASSERT_MES(out.target.type() == typeid(txout_to_key), false, "wrong tx out type in coinbase!!!");
+      /*
+      tx outs possible to fill with nonrandom data, let's hash it with prev_tx to avoid nonrandom data in scratchpad
+      */
+      scratchpd.push_back(hash_together(b.prev_id, boost::get<txout_to_key>(out.target).key));
+    }
+    return true;
+  }
   //------------------------------------------------------------------
   bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector)
   {

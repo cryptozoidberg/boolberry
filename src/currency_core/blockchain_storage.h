@@ -49,6 +49,7 @@ namespace currency
       difficulty_type cumulative_difficulty;
       uint64_t already_generated_coins;
       uint64_t already_donated_coins;
+      uint64_t scratch_offset;
     };
 
     blockchain_storage(tx_memory_pool& tx_pool);
@@ -184,8 +185,8 @@ namespace currency
     // some invalid blocks
     blocks_ext_by_hash m_invalid_blocks;     // crypto::hash -> block_extended_info
     outputs_container m_outputs;
-
     aliases_container m_aliases;
+    std::vector<crypto::hash> m_scratchpad;
 
     std::string m_config_folder;
     checkpoints m_checkpoints;
@@ -229,6 +230,7 @@ namespace currency
     bool unprocess_blockchain_tx_extra(const transaction& tx);
     bool pop_alias_info(const alias_info& ai);
     bool put_alias_info(const alias_info& ai);
+    
   };
 
 
@@ -236,7 +238,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER    13
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER    14
 
   template<class archive_t>
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
@@ -254,6 +256,7 @@ namespace currency
     ar & m_invalid_blocks;
     ar & m_current_block_cumul_sz_limit;
     ar & m_aliases;
+    ar & m_scratchpad;
     /*serialization bug workaround*/
     
     uint64_t total_check_count = m_blocks.size() + m_blocks_index.size() + m_transactions.size() + m_spent_keys.size() + m_alternative_chains.size() + m_outputs.size() + m_invalid_blocks.size() + m_current_block_cumul_sz_limit;

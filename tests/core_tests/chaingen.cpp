@@ -177,14 +177,15 @@ bool test_generator::find_nounce(block& blk, difficulty_type dif, uint64_t heigh
 {
   std::vector<block_info> blocks;
   get_block_chain(blocks, blk.prev_id, std::numeric_limits<size_t>::max());
-  if(height > blocks.size())
+  if(height != blocks.size())
     throw std::runtime_error("wrong height in find_nounce");
+  std::vector<crypto::hash> scratchpad_local;
+  for(auto& i: blocks)
+    put_block_scratchpad_data(i.b, scratchpad_local);
 
-  return miner::find_nonce_for_given_block(blk, dif, height, [&](uint64_t index, block& b){
-    if(index >= blocks.size())
-      throw std::runtime_error("wrong height in find_nounce");
-    b = blocks[index].b;
-    return true;
+  return miner::find_nonce_for_given_block(blk, dif, height, [&](uint64_t index) -> crypto::hash&
+  {
+    return scratchpad_local[index%scratchpad_local.size()];
   });
 }
 

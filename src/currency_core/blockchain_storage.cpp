@@ -153,6 +153,7 @@ bool blockchain_storage::pop_block_from_blockchain()
   CHECK_AND_ASSERT_MES(m_blocks.size() > 1, false, "pop_block_from_blockchain: can't pop from blockchain with size = " << m_blocks.size());
   size_t h = m_blocks.size()-1;
   block_extended_info& bei = m_blocks[h];
+  m_scratchpad.resize(bei.scratch_offset);
   //crypto::hash id = get_block_hash(bei.bl);
   bool r = purge_block_data_from_blockchain(bei.bl, bei.bl.tx_hashes.size());
   CHECK_AND_ASSERT_MES(r, false, "Failed to purge_block_data_from_blockchain for block " << get_block_hash(bei.bl) << " on height " << h);
@@ -264,6 +265,9 @@ bool blockchain_storage::purge_block_data_from_blockchain(const block& bl, size_
   }
 
   res = purge_transaction_from_blockchain(get_transaction_hash(bl.miner_tx)) && res;
+
+  //purge scratchpad
+
 
   return res;
 }
@@ -767,6 +771,7 @@ bool blockchain_storage::complete_timestamps_vector(uint64_t start_top_height, s
 //------------------------------------------------------------------
 bool blockchain_storage::handle_alternative_block(const block& b, const crypto::hash& id, block_verification_context& bvc)
 {
+  TRY_ENTRY();
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
 
   //block is not related with head of main chain
@@ -779,6 +784,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     //build alternative subchain, front -> mainchain, back -> alternative head
     blocks_ext_by_hash::iterator alt_it = it_prev; //m_alternative_chains.find()
     std::list<blocks_ext_by_hash::iterator> alt_chain;
+    std::vector<crypto::hash> alt_scratchppad;
     std::vector<uint64_t> timestamps;
     while(alt_it != m_alternative_chains.end())
     {
@@ -795,6 +801,17 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
       get_block_hash(m_blocks[alt_chain.front()->second.height - 1].bl, h);
       CHECK_AND_ASSERT_MES(h == alt_chain.front()->second.bl.prev_id, false, "alternative chain have wrong connection to main chain");
       complete_timestamps_vector(alt_chain.front()->second.height - 1, timestamps);
+      //build alternative scratchpad
+      for(auto& ach: alt_chain)
+      {
+        if(!put_block_scratchpad_data(ach->second.bl, alt_scratchppad))
+        {
+          LOG_PRINT_RED_L0("Block with id: " << id
+            << ENDL << " for alternative chain, have invalid data");
+          bvc.m_verifivation_failed = true;
+          return false;
+        }
+      }
     }else
     {
       CHECK_AND_ASSERT_MES(it_main_prev != m_blocks_index.end(), false, "internal error: broken imperative condition it_main_prev != m_blocks_index.end()");
@@ -820,11 +837,20 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     {
             
       m_is_in_checkpoint_zone = false;
-      get_block_longhash(bei.bl, proof_of_work, bei.height, [&](uint64_t index, block& b){
+      get_block_longhash(bei.bl, proof_of_work, bei.height, [&](uint64_t index) -> crypto::hash&
+      {
         uint64_t connection_height = alt_chain.size() ? alt_chain.front()->second.height:bei.height;
-        return get_block_for_scratchpad_alt(connection_height, index, alt_chain, b);
-      });
+        uint64_t summary_scratchpad_len =  m_blocks[connection_height-1].scratch_offset + alt_scratchppad.size();
+        uint64_t offset = index%summary_scratchpad_len;
 
+        if(offset >= m_blocks[connection_height-1].scratch_offset)
+        {
+          return alt_scratchppad[offset - m_blocks[connection_height-1].scratch_offset];
+        }else
+        {
+          return m_scratchpad[offset];  
+        }
+      });
       if(!check_hash(proof_of_work, current_diff))
       {
         LOG_PRINT_RED_L0("Block with id: " << id
@@ -885,9 +911,9 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     bvc.m_marked_as_orphaned = true;
     LOG_PRINT_RED_L0("Block recognized as orphaned and rejected, id = " << id);
   }
-
-
+  
   return true;
+  CATCH_ENTRY_L0("blockchain_storage::handle_alternative_block", false);
 }
 //------------------------------------------------------------------
 bool blockchain_storage::get_blocks(uint64_t start_offset, size_t count, std::list<block>& blocks, std::list<transaction>& txs)
@@ -1715,9 +1741,11 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   crypto::hash proof_of_work = null_hash;
   if(!m_checkpoints.is_in_checkpoint_zone(get_current_blockchain_height()))
   {
-    proof_of_work = get_block_longhash(bl, m_blocks.size(), [&](uint64_t index, block& b){
-      return get_block_by_height(index, b);
+    proof_of_work = get_block_longhash(bl, m_blocks.size(), [&](uint64_t index) -> crypto::hash&
+    {
+      return m_scratchpad[index%m_scratchpad.size()];
     });
+
     if(!check_hash(proof_of_work, current_diffic))
     {
       LOG_PRINT_L0("Block with id: " << id << ENDL
@@ -1811,6 +1839,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
 
   block_extended_info bei = boost::value_initialized<block_extended_info>();
   bei.bl = bl;
+  bei.scratch_offset = m_scratchpad.size();
   bei.block_cumulative_size = cumulative_block_size;
   bei.cumulative_difficulty = current_diffic;
   bei.already_generated_coins = already_generated_coins + base_reward;
@@ -1829,6 +1858,17 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     return false;
   }
 
+  
+  //append to scratchpad
+  if(!put_block_scratchpad_data(bl, m_scratchpad))
+  {
+    m_scratchpad.resize(bei.scratch_offset);
+    LOG_ERROR("Internal error for block id: " << id << ": failed to put_block_scratchpad_data");
+    purge_block_data_from_blockchain(bl, tx_processed_count);
+    bvc.m_verifivation_failed = true;
+    return false;    
+  }
+
   m_blocks.push_back(bei);
   update_next_comulative_size_limit();
   TIME_MEASURE_FINISH(block_processing_time);
@@ -1840,8 +1880,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     << ", " << block_processing_time << "("<< target_calculating_time << "/" << longhash_calculating_time << ")ms");
 
   bvc.m_added_to_main_chain = true;
-  /*if(!m_orphanes_reorganize_in_work)
-    review_orphaned_blocks_with_new_block_id(id, true);*/
+  
 
   m_tx_pool.on_blockchain_inc(bei.height, id);
   //LOG_PRINT_L0("BLOCK: " << ENDL << "" << dump_obj_as_json(bei.bl));

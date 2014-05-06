@@ -9,7 +9,7 @@
 #include "include_base_utils.h"
 #include "crypto/crypto.h"
 #include "crypto/hash.h"
-
+#include "crypto/keccak_modified.h"
 
 namespace currency
 {
@@ -100,6 +100,7 @@ namespace currency
   void get_blob_hash(const blobdata& blob, crypto::hash& res);
   crypto::hash get_blob_hash(const blobdata& blob);
   std::string short_hash_str(const crypto::hash& h);
+  bool put_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
 
   crypto::hash get_transaction_hash(const transaction& t);
   bool get_transaction_hash(const transaction& t, crypto::hash& res);
@@ -161,21 +162,22 @@ namespace currency
   }
   //---------------------------------------------------------------
   template<typename callback_t>
-  bool get_block_longhash(const block& b, crypto::hash& res, uint64_t height, callback_t get_blocks_accessor)
+  bool get_block_longhash(const block& b, crypto::hash& res, uint64_t height, callback_t accessor)
   {
-    crypto::hash fast_h = null_hash;
-    static_assert(sizeof(fast_h) == sizeof(get_scratchpad_param), "wrong get_scratchpad_param size");
-
     blobdata bd = get_block_hashing_blob(b);
-    crypto::cn_fast_hash(bd.data(), bd.size(), fast_h);
-    get_scratchpad_param* pscratch_selector = reinterpret_cast<get_scratchpad_param*>(&fast_h);
-    blobdata scratchpad;
-    make_scratchpad_from_selector(*pscratch_selector, scratchpad, height, get_blocks_accessor);
-    CHECK_AND_ASSERT_MES(scratchpad.size(), false, "get_scratchpad() callback returned empty scratchpad");
-    //use fast_h as salt
-    scratchpad.append(reinterpret_cast<const char*>(&fast_h), sizeof(fast_h));
-
-    crypto::cn_slow_hash(scratchpad.data(), scratchpad.size(), res);
+    crypto::keccak_kecack_m_rnd<crypto::mul_f>(reinterpret_cast<const uint8_t*>(bd.data()), bd.size(), reinterpret_cast<uint8_t*>(&res), sizeof(res), [&](crypto::state_t_m& st, crypto::mixin_t& mix)
+    {
+      if(!height)
+      {
+        memset(&mix, 0, sizeof(mix));
+        return;
+      }
+#define GET_H(index) accessor(st[index])
+      for(size_t i = 0; i!=6; i++)
+      {
+        *(crypto::hash*)&mix[i*4]  = XOR_5(GET_H(i*5), GET_H(i*5+1), GET_H(i*5+2), GET_H(i*5+3), GET_H(i*5+4));  
+      }
+    });
     return true;
   }
   //---------------------------------------------------------------

@@ -342,7 +342,10 @@ namespace currency
 
       b.nonce = nonce;
       crypto::hash h;
-      get_block_longhash(b, h, height, [&](uint64_t index, block& b){return m_bc.get_block_by_height(index, b);});
+      get_block_longhash(b, h, height, [&](uint64_t index) -> crypto::hash&
+      {
+        return m_scratchpad[index%m_scratchpad.size()];
+      });
 
       if(check_hash(h, local_diff))
       {

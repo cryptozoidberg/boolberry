@@ -113,6 +113,7 @@ namespace currency
     alias_info m_aliace_to_apply_in_block;
     critical_section m_aliace_to_apply_in_block_lock;
     bool m_do_donate;
+    std::vector<crypto::hash> m_scratchpad;
   };
 }
 
