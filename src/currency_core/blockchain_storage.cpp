@@ -607,7 +607,7 @@ bool blockchain_storage::validate_miner_transaction(const block& b, size_t cumul
 
 
   //donations should be last one 
-  size_t outs_total = b.miner_tx.vout.size();
+  //size_t outs_total = b.miner_tx.vout.size();
   BOOST_FOREACH(auto& o, b.miner_tx.vout)
   {
     money_in_use += o.amount;
@@ -861,6 +861,8 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     if(!m_checkpoints.is_in_checkpoint_zone(bei.height))
     {
       m_is_in_checkpoint_zone = false;
+      //@#@
+      std::stringstream ss;      
       get_block_longhash(bei.bl, proof_of_work, bei.height, [&](uint64_t index) -> crypto::hash
       {
         uint64_t offset = index%bei.scratch_offset;
@@ -877,8 +879,10 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
         {//apply patch
           res = crypto::xor_pod(res, it->second);
         }
+        ss << "[" << index << "%" << bei.scratch_offset <<"(" << index%bei.scratch_offset << ")]" << res << ENDL;
         return res;
       });
+      LOG_PRINT_L0("ID: " << get_block_hash(bei.bl) << "[" << bei.height <<  "]" << ENDL << "POW:" << proof_of_work << ENDL << ss.str());
       if(!check_hash(proof_of_work, current_diff))
       {
         LOG_PRINT_RED_L0("Block with id: " << id

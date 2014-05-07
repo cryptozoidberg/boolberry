@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "hash-ops.h"
+#include "crypto.h"
 
 #ifndef KECCAK_ROUNDS
 #define KECCAK_ROUNDS 24
@@ -27,7 +27,7 @@ namespace crypto
     static_assert(sizeof(pod_operand_a) == sizeof(pod_operand_b), "invalid xor_h usage: different sizes");
     static_assert(sizeof(pod_operand_a)%8 == 0, "invalid xor_h usage: wrong size");
 
-    crypto::hash r;
+    hash r;
     for(size_t i = 0; i != 4; i++)
     {
       ((uint64_t*)&r)[i] = ((const uint64_t*)&a)[i] ^ ((const uint64_t*)&b)[i];
@@ -91,8 +91,8 @@ namespace crypto
 
     rsiz = sizeof(state_t_m) == mdlen ? HASH_DATA_AREA : 200 - 2 * mdlen;
     rsizw = rsiz / 8;
-
-    memset(st, 0, sizeof(st));
+    memset(&st[0], 0, 25*sizeof(st[0]));
+    
 
     for ( ; inlen >= rsiz; inlen -= rsiz, in += rsiz) {
       for (i = 0; i < rsizw; i++)

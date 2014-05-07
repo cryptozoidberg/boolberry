@@ -340,7 +340,7 @@ namespace currency
     uint8_t alias_name_len = tx.extra[i];
     CHECK_AND_ASSERT_MES(tx.extra.size()-1-i >= tx.extra[i]+sizeof(crypto::public_key)*2, false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have wrong name bytes counter) in tx " << get_transaction_hash(tx));
     
-    alinfo.m_alias.assign((const char*)&tx.extra[i+1], static_cast<size_t>(tx.extra[i]));
+    alinfo.m_alias.assign((const char*)&tx.extra[i+1], static_cast<size_t>(alias_name_len));
     i += tx.extra[i] + 1;
     alinfo.m_address.m_spend_public_key = *reinterpret_cast<const crypto::public_key*>(&tx.extra[i]);
     i += sizeof(const crypto::public_key);

@@ -201,11 +201,20 @@ bool test_generator::find_nounce(block& blk, std::vector<block_info>& blocks, di
   std::vector<crypto::hash> scratchpad_local;
   for(auto& i: blocks)
     put_block_scratchpad_data(i.b, scratchpad_local);
-
-  return miner::find_nonce_for_given_block(blk, dif, height, [&](uint64_t index) -> crypto::hash&
+  
+  bool r = miner::find_nonce_for_given_block(blk, dif, height, [&](uint64_t index) -> crypto::hash&
   {
     return scratchpad_local[index%scratchpad_local.size()];
   });
+  //@#@
+  std::stringstream ss;
+  crypto::hash pow = get_block_longhash(blk, height, [&](uint64_t index) -> crypto::hash&
+  {
+    ss << "[" << index << "%" << scratchpad_local.size() <<"(" << index%scratchpad_local.size() << ")]" << scratchpad_local[index%scratchpad_local.size()] << ENDL;
+    return scratchpad_local[index%scratchpad_local.size()];
+  });
+  LOG_PRINT_L0("ID: " << get_block_hash(blk) << "[" << height <<  "]" << ENDL << "POW:" << pow << ENDL << ss.str());
+  return r;
 }
 
 bool test_generator::construct_block(currency::block& blk, const currency::account_base& miner_acc, uint64_t timestamp, const currency::alias_info& ai)

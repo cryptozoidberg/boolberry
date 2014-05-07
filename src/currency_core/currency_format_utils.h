@@ -165,13 +165,6 @@ namespace currency
   }
   //---------------------------------------------------------------
   template<typename callback_t>
-  bool get_block_longhash(const block& b, crypto::hash& res, uint64_t height, callback_t accessor)
-  {
-    blobdata bd = get_block_hashing_blob(b);
-    return get_blob_longhash(bd, res, height, accessor);
-  }
-  //---------------------------------------------------------------
-  template<typename callback_t>
   bool get_blob_longhash(const blobdata& bd, crypto::hash& res, uint64_t height, callback_t accessor)
   {
     crypto::keccak_kecack_m_rnd<crypto::mul_f>(reinterpret_cast<const uint8_t*>(bd.data()), bd.size(), reinterpret_cast<uint8_t*>(&res), sizeof(res), [&](crypto::state_t_m& st, crypto::mixin_t& mix)
@@ -184,10 +177,17 @@ namespace currency
 #define GET_H(index) accessor(st[index])
       for(size_t i = 0; i!=6; i++)
       {
-        *(crypto::hash*)&mix[i*4]  = XOR_5(GET_H(i*5), GET_H(i*5+1), GET_H(i*5+2), GET_H(i*5+3), GET_H(i*5+4));  
+        *(crypto::hash*)&mix[i*4]  = XOR_4(GET_H(i*4), GET_H(i*4+1), GET_H(i*4+2), GET_H(i*4+3));  
       }
     });
     return true;
+  }
+  //---------------------------------------------------------------
+  template<typename callback_t>
+  bool get_block_longhash(const block& b, crypto::hash& res, uint64_t height, callback_t accessor)
+  {
+    blobdata bd = get_block_hashing_blob(b);
+    return get_blob_longhash(bd, res, height, accessor);
   }
   //---------------------------------------------------------------
   template<typename callback_t>

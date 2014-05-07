@@ -29,6 +29,8 @@ add_executable(unit_tests ${UNIT_TESTS})
 add_executable(net_load_tests_clt net_load_tests/clt.cpp)
 add_executable(net_load_tests_srv net_load_tests/srv.cpp)
 
+add_dependencies(coretests version)
+
 target_link_libraries(core_proxy currency_core common crypto ${Boost_LIBRARIES})
 target_link_libraries(coretests currency_core common crypto ${Boost_LIBRARIES})
 target_link_libraries(difficulty-tests currency_core)
