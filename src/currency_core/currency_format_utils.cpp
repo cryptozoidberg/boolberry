@@ -794,6 +794,12 @@ namespace currency
     size_t start_offset = scratchpd.size();
     get_block_scratchpad_addendum(b, scratchpd);
     get_scratchpad_patch(global_start_entry, start_offset, scratchpd.size(), scratchpd, patch);
+        //@#@ 
+    LOG_PRINT2("patches.log", "PATCH FOR BID: " << get_block_hash(b) 
+                         << ", scr_offset " << global_start_entry << ENDL 
+                         << dump_patch(patch) , LOG_LEVEL_3);
+
+
     return true;
   }
   //------------------------------------------------------------------
@@ -829,7 +835,16 @@ namespace currency
     }
     return ss.str();
   }
-
+  //------------------------------------------------------------------
+  std::string dump_patch(const std::map<uint64_t, crypto::hash>& patch)
+  {
+    std::stringstream ss;
+    for(auto& p: patch)
+    {
+      ss << "[" << p.first << "]" << p.second << ENDL;
+    }
+    return ss.str();
+  }
   //------------------------------------------------------------------
   bool pop_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd)
   {
@@ -839,6 +854,11 @@ namespace currency
       return false;
 
     get_scratchpad_patch(scratchpd.size() - block_scratch_addendum.size(), 0, block_scratch_addendum.size(), block_scratch_addendum, patch);
+    //@#@ 
+    LOG_PRINT2("patches.log", "PATCH FOR BID: " << get_block_hash(b) 
+                         << ", scr_offset " << scratchpd.size() - block_scratch_addendum.size() << ENDL 
+                         << dump_patch(patch) , LOG_LEVEL_3);
+
     //apply patch
     apply_scratchpad_patch(scratchpd, patch);
     scratchpd.resize(scratchpd.size() - block_scratch_addendum.size());

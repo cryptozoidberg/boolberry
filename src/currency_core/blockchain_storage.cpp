@@ -846,16 +846,23 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     CHECK_AND_ASSERT_MES(bei.scratch_offset, false, "INTERNAL ERROR: Wrong bei.scratch_offset==0 in handle_alternative_block");
     
     //lets collect patchs from main line
+    std::map<uint64_t, crypto::hash> main_line_patches;
     for(uint64_t i = connection_height; i != m_blocks.size(); i++)
     {
       std::vector<crypto::hash> block_addendum;
-      bool res = get_block_scratchpad_addendum(b, block_addendum);
+      bool res = get_block_scratchpad_addendum(m_blocks[i].bl, block_addendum);
       CHECK_AND_ASSERT_MES(res, false, "Failed to get_block_scratchpad_addendum for alt block");
       get_scratchpad_patch(m_blocks[i].scratch_offset, 
                            0, 
                            block_addendum.size(), 
                            block_addendum, 
-                           alt_scratchppad_patch);
+                           main_line_patches);
+    }
+    //apply only that patches that lay under alternative scratchpad offset
+    for(auto ml: main_line_patches)
+    {
+      if(ml.first < m_blocks[connection_height].scratch_offset)
+        alt_scratchppad_patch[ml.first] = crypto::xor_pod(alt_scratchppad_patch[ml.first], ml.second);
     }
 
     difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);

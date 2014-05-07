@@ -163,5 +163,18 @@ namespace misc_utils
     return slc;
   }
 
+    template< typename t_contaner, typename t_redicate>
+    void erase_if( t_contaner& items, const t_redicate& predicate ) 
+    {
+      for(auto it = items.begin(); it != items.end(); ) 
+      {
+        if( predicate(*it) ) 
+          it = items.erase(it);
+        else 
+          ++it;
+      }
+    };
+
+
 }
 }
