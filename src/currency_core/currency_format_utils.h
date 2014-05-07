@@ -100,10 +100,12 @@ namespace currency
   void get_blob_hash(const blobdata& blob, crypto::hash& res);
   crypto::hash get_blob_hash(const blobdata& blob);
   std::string short_hash_str(const crypto::hash& h);
+  bool get_block_scratchpad_addendum(const block& b, std::vector<crypto::hash>& res);
   bool get_scratchpad_patch(size_t global_start_entry, size_t local_start_entry, size_t local_end_entry, const std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
-  bool put_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
-  bool put_block_scratchpad_data(size_t global_start_entry, const block& b, std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
-  bool pop_block_scratchpad_data(uint64_t start_offeset, std::vector<crypto::hash>& scratchpd);
+  bool push_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
+  bool push_block_scratchpad_data(size_t global_start_entry, const block& b, std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
+  bool pop_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
+  bool apply_scratchpad_patch(std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
 
   crypto::hash get_transaction_hash(const transaction& t);
   bool get_transaction_hash(const transaction& t, crypto::hash& res);
@@ -127,6 +129,7 @@ namespace currency
   std::vector<uint64_t> relative_output_offsets_to_absolute(const std::vector<uint64_t>& off);
   std::vector<uint64_t> absolute_output_offsets_to_relative(const std::vector<uint64_t>& off);
   std::string print_money(uint64_t amount);
+  std::string dump_scratchpad(const std::vector<crypto::hash>& scr);
   
   
   //---------------------------------------------------------------

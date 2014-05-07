@@ -153,7 +153,7 @@ bool blockchain_storage::pop_block_from_blockchain()
   CHECK_AND_ASSERT_MES(m_blocks.size() > 1, false, "pop_block_from_blockchain: can't pop from blockchain with size = " << m_blocks.size());
   size_t h = m_blocks.size()-1;
   block_extended_info& bei = m_blocks[h];
-  pop_block_scratchpad_data(bei.scratch_offset, m_scratchpad);
+  pop_block_scratchpad_data(bei.bl, m_scratchpad);
   //crypto::hash id = get_block_hash(bei.bl);
   bool r = purge_block_data_from_blockchain(bei.bl, bei.bl.tx_hashes.size());
   CHECK_AND_ASSERT_MES(r, false, "Failed to purge_block_data_from_blockchain for block " << get_block_hash(bei.bl) << " on height " << h);
@@ -814,7 +814,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
       //build alternative scratchpad
       for(auto& ach: alt_chain)
       {
-        if(!put_block_scratchpad_data(ach->second.scratch_offset, ach->second.bl, alt_scratchppad, alt_scratchppad_patch))
+        if(!push_block_scratchpad_data(ach->second.scratch_offset, ach->second.bl, alt_scratchppad, alt_scratchppad_patch))
         {
           LOG_PRINT_RED_L0("Block with id: " << id
             << ENDL << " for alternative chain, have invalid data");
@@ -848,10 +848,13 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     //lets collect patchs from main line
     for(uint64_t i = connection_height; i != m_blocks.size(); i++)
     {
+      std::vector<crypto::hash> block_addendum;
+      bool res = get_block_scratchpad_addendum(b, block_addendum);
+      CHECK_AND_ASSERT_MES(res, false, "Failed to get_block_scratchpad_addendum for alt block");
       get_scratchpad_patch(m_blocks[i].scratch_offset, 
-                           m_blocks[i].scratch_offset, 
-                           i == m_blocks.size()-1 ? m_scratchpad.size():m_blocks[i+1].scratch_offset, 
-                           m_scratchpad, 
+                           0, 
+                           block_addendum.size(), 
+                           block_addendum, 
                            alt_scratchppad_patch);
     }
 
@@ -862,6 +865,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     {
       m_is_in_checkpoint_zone = false;
       //@#@
+      size_t call_no = 0;
       std::stringstream ss;      
       get_block_longhash(bei.bl, proof_of_work, bei.height, [&](uint64_t index) -> crypto::hash
       {
@@ -879,10 +883,11 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
         {//apply patch
           res = crypto::xor_pod(res, it->second);
         }
-        ss << "[" << index << "%" << bei.scratch_offset <<"(" << index%bei.scratch_offset << ")]" << res << ENDL;
+        ss << "[" << call_no << "][" << index << "%" << bei.scratch_offset <<"(" << index%bei.scratch_offset << ")]" << res << ENDL;
+        ++call_no;
         return res;
       });
-      LOG_PRINT_L0("ID: " << get_block_hash(bei.bl) << "[" << bei.height <<  "]" << ENDL << "POW:" << proof_of_work << ENDL << ss.str());
+      LOG_PRINT_L3("ID: " << get_block_hash(bei.bl) << "[" << bei.height <<  "]" << ENDL << "POW:" << proof_of_work << ENDL << ss.str());
       if(!check_hash(proof_of_work, current_diff))
       {
         LOG_PRINT_RED_L0("Block with id: " << id
@@ -1891,14 +1896,19 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   }
 
   
+
   //append to scratchpad
-  if(!put_block_scratchpad_data(bl, m_scratchpad))
+  if(!push_block_scratchpad_data(bl, m_scratchpad))
   {
     LOG_ERROR("Internal error for block id: " << id << ": failed to put_block_scratchpad_data");
     purge_block_data_from_blockchain(bl, tx_processed_count);
     bvc.m_verifivation_failed = true;
     return false;    
   }
+
+  //@#@
+  LOG_PRINT_L3("SCRATCHPAD_SHOT FOR H=" << bei.height+1 << ENDL << dump_scratchpad(m_scratchpad));
+
 
   m_blocks.push_back(bei);
   update_next_comulative_size_limit();
@@ -1950,7 +1960,8 @@ bool blockchain_storage::add_new_block(const block& bl_, block_verification_cont
   {
     //chain switching or wrong block
     bvc.m_added_to_main_chain = false;
-    return handle_alternative_block(bl, id, bvc);
+    bool r = handle_alternative_block(bl, id, bvc);
+    return r;
     //never relay alternative blocks
   }
 
