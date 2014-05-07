@@ -23,6 +23,7 @@ using namespace std;
 using namespace epee;
 using namespace currency;
 
+#define DIFF_UP_TIMESTAMP_DELTA 100
 
 void test_generator::get_block_chain(std::vector<block_info>& blockchain, const crypto::hash& head, size_t n) const
 {
@@ -68,13 +69,13 @@ uint64_t test_generator::get_already_generated_coins(const currency::block& blk)
   return get_already_generated_coins(blk_hash);
 }
 
-void test_generator::add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins)
+void test_generator::add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins, difficulty_type cum_diff)
 {
   const size_t block_size = tsx_size + get_object_blobsize(blk.miner_tx);
   uint64_t block_reward;
   uint64_t max_donation;
   get_block_reward(misc_utils::median(block_sizes), block_size, already_generated_coins, 0, block_reward, max_donation);
-  m_blocks_info[get_block_hash(blk)] = block_info(blk, already_generated_coins + block_reward, block_size);
+  m_blocks_info[get_block_hash(blk)] = block_info(blk, already_generated_coins + block_reward, block_size, cum_diff);
 }
 
 bool test_generator::construct_block(currency::block& blk, uint64_t height, const crypto::hash& prev_id,
@@ -163,20 +164,38 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
   }
 
   //blk.tree_root_hash = get_tx_tree_hash(blk);
+  std::vector<block_info> blocks;
+  get_block_chain(blocks, blk.prev_id, std::numeric_limits<size_t>::max());
 
+  difficulty_type a_diffic = get_difficulty_for_next_block(blocks);
   // Nonce search...
   blk.nonce = 0;
-  while (!find_nounce(blk, get_test_difficulty(), height))
+  while (!find_nounce(blk, blocks, a_diffic, height))
     blk.timestamp++;
 
-  add_block(blk, txs_size, block_sizes, already_generated_coins);
+  add_block(blk, txs_size, block_sizes, already_generated_coins, blocks.size() ? blocks.back().cumul_difficulty + a_diffic: a_diffic);
 
   return true;
 }
-bool test_generator::find_nounce(block& blk, difficulty_type dif, uint64_t height)
+
+difficulty_type test_generator::get_difficulty_for_next_block(const std::vector<block_info>& blocks)
 {
-  std::vector<block_info> blocks;
-  get_block_chain(blocks, blk.prev_id, std::numeric_limits<size_t>::max());
+  std::vector<uint64_t> timestamps;
+  std::vector<difficulty_type> commulative_difficulties;
+  size_t offset = blocks.size() - std::min(blocks.size(), static_cast<size_t>(DIFFICULTY_BLOCKS_COUNT));
+  if(!offset)
+    ++offset;//skip genesis block
+  for(; offset < blocks.size(); offset++)
+  {
+    timestamps.push_back(blocks[offset].b.timestamp);
+    commulative_difficulties.push_back(blocks[offset].cumul_difficulty);
+  }
+  return next_difficulty(timestamps, commulative_difficulties);
+}
+
+
+bool test_generator::find_nounce(block& blk, std::vector<block_info>& blocks, difficulty_type dif, uint64_t height)
+{
   if(height != blocks.size())
     throw std::runtime_error("wrong height in find_nounce");
   std::vector<crypto::hash> scratchpad_local;
@@ -202,8 +221,8 @@ bool test_generator::construct_block(currency::block& blk, const currency::block
 {
   uint64_t height = boost::get<txin_gen>(blk_prev.miner_tx.vin.front()).height + 1;
   crypto::hash prev_id = get_block_hash(blk_prev);
-  // Keep difficulty unchanged
-  uint64_t timestamp = blk_prev.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN;
+  // Keep push difficulty little up to be sure about PoW hash success
+  uint64_t timestamp = height > 10 ? blk_prev.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN: blk_prev.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN - DIFF_UP_TIMESTAMP_DELTA;
   uint64_t already_generated_coins = get_already_generated_coins(prev_id);
   std::vector<size_t> block_sizes;
   get_last_n_block_sizes(block_sizes, prev_id, CURRENCY_REWARD_BLOCKS_WINDOW);
@@ -219,13 +238,13 @@ bool test_generator::construct_block_manually(block& blk, const block& prev_bloc
                                               const std::vector<crypto::hash>& tx_hashes/* = std::vector<crypto::hash>()*/,
                                               size_t txs_sizes/* = 0*/)
 {
+  size_t height = get_block_height(prev_block) + 1;
   blk.major_version = actual_params & bf_major_ver ? major_ver : CURRENT_BLOCK_MAJOR_VERSION;
   blk.minor_version = actual_params & bf_minor_ver ? minor_ver : CURRENT_BLOCK_MINOR_VERSION;
-  blk.timestamp     = actual_params & bf_timestamp ? timestamp : prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN; // Keep difficulty unchanged
+  blk.timestamp     = actual_params & bf_timestamp ? timestamp : (height > 10 ? prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN: prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN-DIFF_UP_TIMESTAMP_DELTA); // Keep difficulty unchanged
   blk.prev_id       = actual_params & bf_prev_id   ? prev_id   : get_block_hash(prev_block);
   blk.tx_hashes     = actual_params & bf_tx_hashes ? tx_hashes : std::vector<crypto::hash>();
-
-  size_t height = get_block_height(prev_block) + 1;
+  
   uint64_t already_generated_coins = get_already_generated_coins(prev_block);
   std::vector<size_t> block_sizes;
   get_last_n_block_sizes(block_sizes, get_block_hash(prev_block), CURRENCY_REWARD_BLOCKS_WINDOW);
@@ -242,11 +261,13 @@ bool test_generator::construct_block_manually(block& blk, const block& prev_bloc
   }
 
   //blk.tree_root_hash = get_tx_tree_hash(blk);
+  std::vector<block_info> blocks;
+  get_block_chain(blocks, blk.prev_id, std::numeric_limits<size_t>::max());
 
-  difficulty_type a_diffic = actual_params & bf_diffic ? diffic : get_test_difficulty();
-  find_nounce(blk, a_diffic, height);
+  difficulty_type a_diffic = actual_params & bf_diffic ? diffic : get_difficulty_for_next_block(blocks);
+  find_nounce(blk, blocks, a_diffic, height);
 
-  add_block(blk, txs_sizes, block_sizes, already_generated_coins);
+  add_block(blk, txs_sizes, block_sizes, already_generated_coins, blocks.size() ? blocks.back().cumul_difficulty + a_diffic: a_diffic);
 
   return true;
 }

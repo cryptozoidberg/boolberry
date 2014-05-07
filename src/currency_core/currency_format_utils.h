@@ -100,7 +100,10 @@ namespace currency
   void get_blob_hash(const blobdata& blob, crypto::hash& res);
   crypto::hash get_blob_hash(const blobdata& blob);
   std::string short_hash_str(const crypto::hash& h);
+  bool get_scratchpad_patch(size_t global_start_entry, size_t local_start_entry, size_t local_end_entry, const std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
   bool put_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
+  bool put_block_scratchpad_data(size_t global_start_entry, const block& b, std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
+  bool pop_block_scratchpad_data(uint64_t start_offeset, std::vector<crypto::hash>& scratchpd);
 
   crypto::hash get_transaction_hash(const transaction& t);
   bool get_transaction_hash(const transaction& t, crypto::hash& res);
@@ -165,6 +168,12 @@ namespace currency
   bool get_block_longhash(const block& b, crypto::hash& res, uint64_t height, callback_t accessor)
   {
     blobdata bd = get_block_hashing_blob(b);
+    return get_blob_longhash(bd, res, height, accessor);
+  }
+  //---------------------------------------------------------------
+  template<typename callback_t>
+  bool get_blob_longhash(const blobdata& bd, crypto::hash& res, uint64_t height, callback_t accessor)
+  {
     crypto::keccak_kecack_m_rnd<crypto::mul_f>(reinterpret_cast<const uint8_t*>(bd.data()), bd.size(), reinterpret_cast<uint8_t*>(&res), sizeof(res), [&](crypto::state_t_m& st, crypto::mixin_t& mix)
     {
       if(!height)

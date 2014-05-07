@@ -153,7 +153,7 @@ bool blockchain_storage::pop_block_from_blockchain()
   CHECK_AND_ASSERT_MES(m_blocks.size() > 1, false, "pop_block_from_blockchain: can't pop from blockchain with size = " << m_blocks.size());
   size_t h = m_blocks.size()-1;
   block_extended_info& bei = m_blocks[h];
-  m_scratchpad.resize(bei.scratch_offset);
+  pop_block_scratchpad_data(bei.scratch_offset, m_scratchpad);
   //crypto::hash id = get_block_hash(bei.bl);
   bool r = purge_block_data_from_blockchain(bei.bl, bei.bl.tx_hashes.size());
   CHECK_AND_ASSERT_MES(r, false, "Failed to purge_block_data_from_blockchain for block " << get_block_hash(bei.bl) << " on height " << h);
@@ -177,10 +177,19 @@ bool blockchain_storage::reset_and_set_genesis_block(const block& b)
   m_blocks_index.clear();
   m_alternative_chains.clear();
   m_outputs.clear();
+  m_scratchpad.clear();
 
   block_verification_context bvc = boost::value_initialized<block_verification_context>();
   add_new_block(b, bvc);
   return bvc.m_added_to_main_chain && !bvc.m_verifivation_failed;
+}
+//------------------------------------------------------------------
+//TODO: not the best way, add later update method instead of full copy
+bool blockchain_storage::copy_scratchpad(std::vector<crypto::hash>& scr)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  scr = m_scratchpad;
+  return true;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::purge_transaction_keyimages_from_blockchain(const transaction& tx, bool strict_check)
@@ -785,6 +794,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     blocks_ext_by_hash::iterator alt_it = it_prev; //m_alternative_chains.find()
     std::list<blocks_ext_by_hash::iterator> alt_chain;
     std::vector<crypto::hash> alt_scratchppad;
+    std::map<uint64_t, crypto::hash> alt_scratchppad_patch;
     std::vector<uint64_t> timestamps;
     while(alt_it != m_alternative_chains.end())
     {
@@ -804,7 +814,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
       //build alternative scratchpad
       for(auto& ach: alt_chain)
       {
-        if(!put_block_scratchpad_data(ach->second.bl, alt_scratchppad))
+        if(!put_block_scratchpad_data(ach->second.scratch_offset, ach->second.bl, alt_scratchppad, alt_scratchppad_patch))
         {
           LOG_PRINT_RED_L0("Block with id: " << id
             << ENDL << " for alternative chain, have invalid data");
@@ -830,26 +840,44 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     block_extended_info bei = boost::value_initialized<block_extended_info>();
     bei.bl = b;
     bei.height = alt_chain.size() ? it_prev->second.height + 1 : it_main_prev->second + 1;
+    uint64_t connection_height = alt_chain.size() ? alt_chain.front()->second.height:bei.height;
+    CHECK_AND_ASSERT_MES(connection_height, false, "INTERNAL ERROR: Wrong connection_height==0 in handle_alternative_block");
+    bei.scratch_offset = m_blocks[connection_height].scratch_offset + alt_scratchppad.size();
+    CHECK_AND_ASSERT_MES(bei.scratch_offset, false, "INTERNAL ERROR: Wrong bei.scratch_offset==0 in handle_alternative_block");
+    
+    //lets collect patchs from main line
+    for(uint64_t i = connection_height; i != m_blocks.size(); i++)
+    {
+      get_scratchpad_patch(m_blocks[i].scratch_offset, 
+                           m_blocks[i].scratch_offset, 
+                           i == m_blocks.size()-1 ? m_scratchpad.size():m_blocks[i+1].scratch_offset, 
+                           m_scratchpad, 
+                           alt_scratchppad_patch);
+    }
+
     difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
     CHECK_AND_ASSERT_MES(current_diff, false, "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!");
     crypto::hash proof_of_work = null_hash;
     if(!m_checkpoints.is_in_checkpoint_zone(bei.height))
     {
-            
       m_is_in_checkpoint_zone = false;
-      get_block_longhash(bei.bl, proof_of_work, bei.height, [&](uint64_t index) -> crypto::hash&
+      get_block_longhash(bei.bl, proof_of_work, bei.height, [&](uint64_t index) -> crypto::hash
       {
-        uint64_t connection_height = alt_chain.size() ? alt_chain.front()->second.height:bei.height;
-        uint64_t summary_scratchpad_len =  m_blocks[connection_height-1].scratch_offset + alt_scratchppad.size();
-        uint64_t offset = index%summary_scratchpad_len;
-
-        if(offset >= m_blocks[connection_height-1].scratch_offset)
+        uint64_t offset = index%bei.scratch_offset;
+        crypto::hash res;
+        if(offset >= m_blocks[connection_height].scratch_offset)
         {
-          return alt_scratchppad[offset - m_blocks[connection_height-1].scratch_offset];
+          res = alt_scratchppad[offset - m_blocks[connection_height].scratch_offset];
         }else
         {
-          return m_scratchpad[offset];  
+          res = m_scratchpad[offset];  
         }
+        auto it = alt_scratchppad_patch.find(offset);
+        if(it != alt_scratchppad_patch.end())
+        {//apply patch
+          res = crypto::xor_pod(res, it->second);
+        }
+        return res;
       });
       if(!check_hash(proof_of_work, current_diff))
       {
@@ -1862,7 +1890,6 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   //append to scratchpad
   if(!put_block_scratchpad_data(bl, m_scratchpad))
   {
-    m_scratchpad.resize(bei.scratch_offset);
     LOG_ERROR("Internal error for block id: " << id << ": failed to put_block_scratchpad_data");
     purge_block_data_from_blockchain(bl, tx_processed_count);
     bvc.m_verifivation_failed = true;

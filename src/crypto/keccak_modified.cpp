@@ -81,7 +81,7 @@ namespace crypto
       // Theta
       for (i = 0; i < 5; i++)     
       {
-        bc[i] = st[i] * st[i + 5] * st[i + 10] * st[i + 15] * st[i + 20];//surprise
+        bc[i] = st[i] ^ st[i + 5] ^ st[i + 10] * st[i + 15] * st[i + 20];//surprise
       }
 
       for (i = 0; i < 5; i++) {

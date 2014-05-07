@@ -758,8 +758,21 @@ namespace currency
     return crypto::cn_fast_hash(blob.data(), blob.size());
   }
   //------------------------------------------------------------------
-  bool put_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd)
+  bool get_scratchpad_patch(size_t global_start_entry, size_t local_start_entry, size_t local_end_entry, const std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch)
   {
+    if(!global_start_entry)
+      return true;
+    for(size_t i = local_start_entry; i != local_end_entry; i++)
+    {
+      size_t rnd_upd_ind = reinterpret_cast<const uint64_t*>(&scratchpd[i])[0] % global_start_entry;
+      patch[rnd_upd_ind] = crypto::xor_pod(patch[rnd_upd_ind], scratchpd[i]);
+    }
+    return true;
+  }
+  //------------------------------------------------------------------
+  bool put_block_scratchpad_data(size_t global_start_entry, const block& b, std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch)
+  {
+    size_t start_offset = scratchpd.size();
     scratchpd.push_back(b.prev_id);
     crypto::public_key tx_pub;
     bool r = parse_and_validate_tx_extra(b.miner_tx, tx_pub);
@@ -774,32 +787,40 @@ namespace currency
       */
       scratchpd.push_back(hash_together(b.prev_id, boost::get<txout_to_key>(out.target).key));
     }
+    get_scratchpad_patch(global_start_entry, start_offset, scratchpd.size(), scratchpd, patch);
     return true;
   }
   //------------------------------------------------------------------
-  bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector)
+  bool apply_scratchpad_patch(std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch)
   {
-    //for each block we put:
-    //prev_hash [32]
-    //random index tx_hash [32]
-    //random index miner_tx out key [32]
-    //transaction public one-time key from extra (not used yet) [32]
-    //
-
-    string_tools::apped_pod_to_strbuff(res, b.prev_id);
-    if(b.tx_hashes.size())
-      string_tools::apped_pod_to_strbuff(res, b.tx_hashes[selector%b.tx_hashes.size()]);
-    else 
-      string_tools::apped_pod_to_strbuff(res, get_transaction_hash(b.miner_tx));
-
-
-    CHECK_AND_ASSERT_MES(b.miner_tx.vout.size(), false, "wrong block with empty transacions");
-    CHECK_AND_ASSERT_MES(b.miner_tx.vout[selector%b.miner_tx.vout.size()].target.type() == typeid(txout_to_key), false, "wrong tx out type in coinbase!!!");  
-    string_tools::apped_pod_to_strbuff(res, boost::get<txout_to_key>(b.miner_tx.vout[selector%b.miner_tx.vout.size()].target).key);
-    //crypto::public_key tx_pub_key = null_pkey;
-    //parse_and_validate_tx_extra(b.miner_tx, tx_pub_key);
-    //CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Failed to parse tx_pub_key from transaction public key");
-    
+    for(auto& p: patch)
+    {
+      scratchpd[p.first] = crypto::xor_pod(scratchpd[p.first], p.second);
+    }
+    return true;
+  }
+  //------------------------------------------------------------------
+  bool put_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd)
+  {
+    std::map<uint64_t, crypto::hash> patch;
+    size_t inital_sz = scratchpd.size();
+    if(!put_block_scratchpad_data(scratchpd.size(), b, scratchpd, patch))
+    {
+      scratchpd.resize(inital_sz);
+      return false;
+    }
+    //apply patch
+    apply_scratchpad_patch(scratchpd, patch);
+    return true;
+  }
+  //------------------------------------------------------------------
+  bool pop_block_scratchpad_data(uint64_t start_offeset, std::vector<crypto::hash>& scratchpd)
+  {
+    std::map<uint64_t, crypto::hash> patch;
+    get_scratchpad_patch(start_offeset, start_offeset, scratchpd.size(), scratchpd, patch);
+    //apply patch
+    apply_scratchpad_patch(scratchpd, patch);
+    scratchpd.resize(start_offeset);
     return true;
   }
   //---------------------------------------------------------------

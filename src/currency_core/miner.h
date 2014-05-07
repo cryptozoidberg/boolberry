@@ -49,16 +49,18 @@ namespace currency
     bool set_alias_info(const alias_info& ai);
 
     template<typename callback_t>
-    static bool find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, callback_t blocks_accessor)
+    static bool find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, callback_t scratch_accessor)
     {
+      blobdata bd = get_block_hashing_blob(bl);
       for(; bl.nonce != std::numeric_limits<uint32_t>::max(); bl.nonce++)
       {
         crypto::hash h;
-        get_block_longhash(bl, h, height, blocks_accessor);
+        *reinterpret_cast<uint32_t*>(&bd[1]) = bl.nonce;
+        get_blob_longhash(bd, h, height, scratch_accessor);
 
         if(check_hash(h, diffic))
         {
-            LOG_PRINT_L0("Found nonce for block: " << get_block_hash(bl) << "[" << height << "]: PoW:" << h);
+          LOG_PRINT_L0("Found nonce for block: " << get_block_hash(bl) << "[" << height << "]: PoW:" << h << "(diff:" << diffic << ")");
           return true;
         }
       }
@@ -72,6 +74,7 @@ namespace currency
     bool request_block_template();
     void  merge_hr();
     bool validate_alias_info();
+    bool update_scratchpad();
     
     struct miner_config
     {

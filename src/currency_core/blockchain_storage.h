@@ -111,6 +111,7 @@ namespace currency
     uint64_t get_current_comulative_blocksize_limit();
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     uint64_t block_difficulty(size_t i);
+    bool copy_scratchpad(std::vector<crypto::hash>& scr);//TODO: not the best way, add later update method instead of full copy
 
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
     bool get_blocks(const t_ids_container& block_ids, t_blocks_container& blocks, t_missed_container& missed_bs)
@@ -230,7 +231,6 @@ namespace currency
     bool unprocess_blockchain_tx_extra(const transaction& tx);
     bool pop_alias_info(const alias_info& ai);
     bool put_alias_info(const alias_info& ai);
-    
   };
 
 

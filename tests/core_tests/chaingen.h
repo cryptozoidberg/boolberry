@@ -170,19 +170,22 @@ public:
       : b()
       , already_generated_coins(0)
       , block_size(0)
+      , cumul_difficulty(0)
     {
     }
 
-    block_info(const currency::block& b_, uint64_t an_already_generated_coins, size_t a_block_size)
+    block_info(const currency::block& b_, uint64_t an_already_generated_coins, size_t a_block_size, currency::difficulty_type diff)
       : b(b_)
       , already_generated_coins(an_already_generated_coins)
       , block_size(a_block_size)
+      , cumul_difficulty(diff)
     {
     }
 
     currency::block b;
     uint64_t already_generated_coins;
     size_t block_size;
+    currency::difficulty_type cumul_difficulty;
   };
 
   enum block_fields
@@ -197,12 +200,13 @@ public:
     bf_diffic    = 1 << 6
   };
 
+  currency::difficulty_type get_difficulty_for_next_block(const std::vector<block_info>& blocks);
   void get_block_chain(std::vector<block_info>& blockchain, const crypto::hash& head, size_t n) const;
   void get_last_n_block_sizes(std::vector<size_t>& block_sizes, const crypto::hash& head, size_t n) const;
   uint64_t get_already_generated_coins(const crypto::hash& blk_id) const;
   uint64_t get_already_generated_coins(const currency::block& blk) const;
 
-  void add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins);
+  void add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins, currency::difficulty_type cum_diff);
   bool construct_block(currency::block& blk, uint64_t height, const crypto::hash& prev_id,
     const currency::account_base& miner_acc, uint64_t timestamp, uint64_t already_generated_coins,
     std::vector<size_t>& block_sizes, const std::list<currency::transaction>& tx_list, const currency::alias_info& ai = currency::alias_info());
@@ -217,7 +221,8 @@ public:
     const std::vector<crypto::hash>& tx_hashes = std::vector<crypto::hash>(), size_t txs_sizes = 0);
   bool construct_block_manually_tx(currency::block& blk, const currency::block& prev_block,
     const currency::account_base& miner_acc, const std::vector<crypto::hash>& tx_hashes, size_t txs_size);
-  bool find_nounce(currency::block& blk, currency::difficulty_type dif, uint64_t height);
+  bool find_nounce(currency::block& blk, std::vector<block_info>& blocks, currency::difficulty_type dif, uint64_t height);
+  //bool find_nounce(currency::block& blk, currency::difficulty_type dif, uint64_t height);
 
 private:
   std::unordered_map<crypto::hash, block_info> m_blocks_info;
@@ -507,24 +512,24 @@ inline bool do_replay_file(const std::string& filename)
 
 #define MAKE_GENESIS_BLOCK(VEC_EVENTS, BLK_NAME, MINER_ACC, TS)                       \
   test_generator generator;                                                           \
-  currency::block BLK_NAME;                                                           \
+  currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
   generator.construct_block(BLK_NAME, MINER_ACC, TS);                                 \
   VEC_EVENTS.push_back(BLK_NAME);
 
 #define MAKE_NEXT_BLOCK(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC)                  \
-  currency::block BLK_NAME;                                                           \
+  currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
   generator.construct_block(BLK_NAME, PREV_BLOCK, MINER_ACC);                         \
   VEC_EVENTS.push_back(BLK_NAME);
 
 #define MAKE_NEXT_BLOCK_ALIAS(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, ALIAS)     \
-  currency::block BLK_NAME;                                                           \
+  currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
   generator.construct_block(BLK_NAME, PREV_BLOCK, MINER_ACC,                          \
                   std::list<currency::transaction>(), ALIAS);                         \
   VEC_EVENTS.push_back(BLK_NAME);
 
 
 #define MAKE_NEXT_BLOCK_TX1(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, TX1)         \
-  currency::block BLK_NAME;                                                           \
+  currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
   {                                                                                   \
     std::list<currency::transaction> tx_list;                                         \
     tx_list.push_back(TX1);                                                           \
@@ -533,12 +538,12 @@ inline bool do_replay_file(const std::string& filename)
   VEC_EVENTS.push_back(BLK_NAME);
 
 #define MAKE_NEXT_BLOCK_TX_LIST(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, TXLIST)  \
-  currency::block BLK_NAME;                                                           \
+  currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
   generator.construct_block(BLK_NAME, PREV_BLOCK, MINER_ACC, TXLIST);                 \
   VEC_EVENTS.push_back(BLK_NAME);
 
 #define REWIND_BLOCKS_N(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, COUNT)           \
-  currency::block BLK_NAME;                                                           \
+  currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
   {                                                                                   \
     currency::block blk_last = PREV_BLOCK;                                            \
     for (size_t i = 0; i < COUNT; ++i)                                                \

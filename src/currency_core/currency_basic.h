@@ -258,13 +258,13 @@ namespace currency
     uint32_t nonce;
 
     BEGIN_SERIALIZE()
-      VARINT_FIELD(major_version)
+      FIELD(major_version)
       if(major_version > CURRENT_BLOCK_MAJOR_VERSION) return false;
+      FIELD(nonce)
+      FIELD(prev_id)
+      FIELD(mm)      
       VARINT_FIELD(minor_version)
       VARINT_FIELD(timestamp)
-      FIELD(prev_id)
-      FIELD(mm)
-      FIELD(nonce)
     END_SERIALIZE()
   };
 

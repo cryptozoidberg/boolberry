@@ -86,11 +86,17 @@ namespace currency
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
+  bool miner::update_scratchpad()
+  {
+    return m_bc.copy_scratchpad(m_scratchpad);
+  }
+  //-----------------------------------------------------------------------------------------------------
   bool miner::on_block_chain_update()
   {
     if(!is_mining())
       return true;
     
+    update_scratchpad();
     validate_alias_info();
 
     return request_block_template();
@@ -313,6 +319,10 @@ namespace currency
     difficulty_type local_diff = 0;
     uint32_t local_template_ver = 0;
     block b;
+    blobdata block_blob;
+    //for now have a copy of scratchpad for every thread
+    //temporary solution(to avoid slow synchronization while mining), will be changed in few weeks to use one 
+    std::vector<crypto::hash> local_scratch_pad;
     while(!m_stop)
     {
       if(m_pausers_count)//anti split workaround
@@ -322,12 +332,17 @@ namespace currency
       }
 
       if(local_template_ver != m_template_no)
-      {
-        
+      {        
         CRITICAL_REGION_BEGIN(m_template_lock);
         b = m_template;
+        block_blob = get_block_hashing_blob(b);
         local_diff = m_diffic;
-        height = m_height;
+        if(height != m_height)
+        {
+          height = m_height;
+          //copy new scratchpad
+          local_scratch_pad = m_scratchpad;
+        }    
         CRITICAL_REGION_END();
         local_template_ver = m_template_no;
         nonce = m_starter_nonce + th_local_index;
@@ -340,9 +355,9 @@ namespace currency
         continue;
       }
 
-      b.nonce = nonce;
+      *reinterpret_cast<uint32_t*>(&block_blob[1]) = nonce;
       crypto::hash h;
-      get_block_longhash(b, h, height, [&](uint64_t index) -> crypto::hash&
+      get_blob_longhash(block_blob, h, height, [&](uint64_t index) -> crypto::hash&
       {
         return m_scratchpad[index%m_scratchpad.size()];
       });
@@ -350,6 +365,7 @@ namespace currency
       if(check_hash(h, local_diff))
       {
         //we lucky!
+        b.nonce = nonce;
         //move alias info to temp var 
         alias_info ai_local = AUTO_VAL_INIT(ai_local);
         CRITICAL_REGION_BEGIN(m_aliace_to_apply_in_block_lock);
