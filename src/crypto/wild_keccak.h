@@ -1,6 +1,11 @@
 // keccak.h
 // 19-Nov-11  Markku-Juhani O. Saarinen <mjos@iki.fi>
 
+// Copyright (c) 2014 The XXX developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+
 #pragma once
 
 #include <stdint.h>
@@ -47,8 +52,9 @@ namespace crypto
   typedef uint64_t state_t_m[25];
   typedef uint64_t mixin_t[KK_MIXIN_SIZE];
 
+  //with multiplication, for tests
   template<class f_traits>
-  int keccak_m(const uint8_t *in, size_t inlen, uint8_t *md, int mdlen)
+  int keccak_generic(const uint8_t *in, size_t inlen, uint8_t *md, int mdlen)
   {
     state_t_m st;
     uint8_t temp[144];
@@ -62,7 +68,7 @@ namespace crypto
     for ( ; inlen >= rsiz; inlen -= rsiz, in += rsiz) {
       for (i = 0; i < rsizw; i++)
         st[i] ^= ((uint64_t *) in)[i];
-      f_traits::keccakf_m(st, KECCAK_ROUNDS);
+      f_traits::keccakf(st, KECCAK_ROUNDS);
     }
 
 
@@ -75,7 +81,7 @@ namespace crypto
     for (i = 0; i < rsizw; i++)
       st[i] ^= ((uint64_t *) temp)[i];
 
-    f_traits::keccakf_m(st, KECCAK_ROUNDS);
+    f_traits::keccakf(st, KECCAK_ROUNDS);
 
     memcpy(md, st, mdlen);
 
@@ -83,7 +89,7 @@ namespace crypto
   }
 
   template<class f_traits, class callback_t>
-  int keccak_m_rnd(const uint8_t *in, size_t inlen, uint8_t *md, int mdlen, callback_t cb)
+  int wild_keccak(const uint8_t *in, size_t inlen, uint8_t *md, int mdlen, callback_t cb)
   {
     state_t_m st;
     uint8_t temp[144];
@@ -108,7 +114,7 @@ namespace crypto
           for (size_t k = 0; k < KK_MIXIN_SIZE; k++)
             st[k] ^= mix_in[k];
         }
-        f_traits::keccakf_m(st, 1);
+        f_traits::keccakf(st, 1);
       }
     }
 
@@ -131,7 +137,7 @@ namespace crypto
         for (size_t k = 0; k < KK_MIXIN_SIZE; k++)
           st[k] ^= mix_in[k]; 
       }
-      f_traits::keccakf_m(st, 1);
+      f_traits::keccakf(st, 1);
     }
 
     memcpy(md, st, mdlen);
@@ -140,23 +146,24 @@ namespace crypto
   }
 
   template<class f_traits, class callback_t>
-  int keccak_kecack_m_rnd(const uint8_t *in, size_t inlen, uint8_t *md, int mdlen, callback_t cb)
+  int wild_keccak_dbl(const uint8_t *in, size_t inlen, uint8_t *md, int mdlen, callback_t cb)
   {
-    keccak_m_rnd<f_traits>(in, inlen, md, mdlen, cb);
-    keccak_m_rnd<f_traits>(md, mdlen, md, mdlen, cb);
+    //Satoshi's classic
+    wild_keccak<f_traits>(in, inlen, md, mdlen, cb);
+    wild_keccak<f_traits>(md, mdlen, md, mdlen, cb);
     return 0;
   }
 
   class regular_f
   {
   public:
-    static void keccakf_m(uint64_t st[25], int rounds);
+    static void keccakf(uint64_t st[25], int rounds);
   };
 
   class mul_f
   {
   public:
-    static void keccakf_m(uint64_t st[25], int rounds);
+    static void keccakf(uint64_t st[25], int rounds);
   };
 }
 

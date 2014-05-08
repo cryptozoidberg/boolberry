@@ -53,7 +53,7 @@ void hash_process(union hash_state *state, const uint8_t *buf, size_t count);
 
 
 void cn_fast_hash(const void *data, size_t length, char *hash);
-void cn_slow_hash(const void *data, size_t length, char *hash);
+//void cn_slow_hash(const void *data, size_t length, char *hash);
 
 void hash_extra_blake(const void *data, size_t length, char *hash);
 void hash_extra_groestl(const void *data, size_t length, char *hash);

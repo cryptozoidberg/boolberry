@@ -312,7 +312,7 @@ POP_WARNINGS
 #endif
     if (ge_frombytes_vartime(&image_unp, &image) != 0) {
       return false;
-    }
+    } 
     ge_dsm_precomp(image_pre, &image_unp);
     sc_0(&sum);
     buf->h = prefix_hash;

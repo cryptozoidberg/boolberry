@@ -11,7 +11,7 @@ extern "C" {
 #include "crypto/keccak.h"
 }
 
-#include "crypto/keccak_modified.h"
+#include "crypto/wild_keccak.h"
 
 
 
@@ -55,32 +55,32 @@ public:
   }
 };
 
-class test_keccak_m: public test_keccak_base
+class test_keccak_generic: public test_keccak_base
 {
 public:
   bool test()
   {
     pretest();
     crypto::hash h;
-    crypto::keccak_m<crypto::regular_f>(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h), sizeof(h));
+    crypto::keccak_generic<crypto::regular_f>(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h), sizeof(h));
     return true;
   }
 };
 
-class test_keccak_m_mul: public test_keccak_base
+class test_keccak_generic_with_mul: public test_keccak_base
 {
 public:
   bool test()
   {
     pretest();
     crypto::hash h;
-    crypto::keccak_m<crypto::mul_f>(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h), sizeof(h));
+    crypto::keccak_generic<crypto::mul_f>(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h), sizeof(h));
     return true;
   }
 };
 
 template<int scratchpad_size>
-class test_keccak_m_mul_rand: public test_keccak_base
+class test_wild_keccak: public test_keccak_base
 {
 public:
   bool init()
@@ -96,7 +96,7 @@ public:
   {
     pretest();
     crypto::hash h;
-    crypto::keccak_kecack_m_rnd<crypto::mul_f>(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h), sizeof(h), [&](crypto::state_t_m& st, crypto::mixin_t& mix)
+    crypto::wild_keccak_dbl<crypto::mul_f>(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h), sizeof(h), [&](crypto::state_t_m& st, crypto::mixin_t& mix)
     {
 #define SCR_I(i) m_scratchpad_vec[st[i]%m_scratchpad_vec.size()]
       for(size_t i = 0; i!=6; i++)

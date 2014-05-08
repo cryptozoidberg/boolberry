@@ -532,7 +532,7 @@ bool gen_block_invalid_binary_format::generate(std::vector<test_event_entry>& ev
   for (size_t i = 0; i < CURRENCY_MINED_MONEY_UNLOCK_WINDOW; ++i)
   {
     MAKE_NEXT_BLOCK(events, blk_curr, blk_last, miner_account);
-    blk_last = blk_curr;
+    blk_last = blk_curr; 
   }
 
   // Lifting up takes a while

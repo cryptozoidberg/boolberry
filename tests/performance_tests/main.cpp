@@ -25,13 +25,13 @@ int main(int argc, char** argv)
   timer.start();
 
   TEST_PERFORMANCE0(test_keccak);
-  TEST_PERFORMANCE0(test_keccak_m);
-  TEST_PERFORMANCE0(test_keccak_m_mul);
-  TEST_PERFORMANCE1(test_keccak_m_mul_rand, 400);
-  TEST_PERFORMANCE1(test_keccak_m_mul_rand, 40000);
-  TEST_PERFORMANCE1(test_keccak_m_mul_rand, 4000000);
-  TEST_PERFORMANCE1(test_keccak_m_mul_rand, 40000000);
-  TEST_PERFORMANCE1(test_keccak_m_mul_rand, 100000000);
+  TEST_PERFORMANCE0(test_keccak_generic);
+  TEST_PERFORMANCE0(test_keccak_generic_with_mul);
+  TEST_PERFORMANCE1(test_wild_keccak, 400);
+  TEST_PERFORMANCE1(test_wild_keccak, 40000);
+  TEST_PERFORMANCE1(test_wild_keccak, 4000000);
+  TEST_PERFORMANCE1(test_wild_keccak, 40000000);
+  TEST_PERFORMANCE1(test_wild_keccak, 100000000);
 
   /*
   TEST_PERFORMANCE2(test_construct_tx, 1, 1);

@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2013 The Cryptonote developers
+// Copyright (c) 2012-2013 The XXX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -598,6 +599,12 @@ bool blockchain_storage::lookfor_donation(const transaction& tx, uint64_t& donat
   return true;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::validate_donations_value(const block& b, uint64_t donation, uint64_t royalty)
+{
+  //TODO: Add code here
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::validate_miner_transaction(const block& b, size_t cumulative_block_size, uint64_t fee, uint64_t& base_reward, uint64_t already_generated_coins, uint64_t already_donated_coins, uint64_t& donation_total)
 {
   //validate reward
@@ -605,16 +612,25 @@ bool blockchain_storage::validate_miner_transaction(const block& b, size_t cumul
   uint64_t royalty = 0;
   uint64_t donation = 0;
 
-
   //donations should be last one 
   //size_t outs_total = b.miner_tx.vout.size();
   BOOST_FOREACH(auto& o, b.miner_tx.vout)
   {
     money_in_use += o.amount;
   }
-  bool r = lookfor_donation(b.miner_tx, donation, royalty);
-  CHECK_AND_ASSERT_MES(r, false, "Failed to lookfor_donation");
-  money_in_use -= donation + royalty;
+  uint64_t h = get_block_height(b);
+
+  //once a day, without
+  if(! (h%720) /*&& h > 21600*/)
+  {
+    bool r = lookfor_donation(b.miner_tx, donation, royalty);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to lookfor_donation");
+    
+    r = validate_donations_value(b, donation, royalty);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to validate donations value");
+    
+    money_in_use -= donation + royalty;
+  }
 
 
   std::vector<size_t> last_blocks_sizes;

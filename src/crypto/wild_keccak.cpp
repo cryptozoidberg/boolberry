@@ -2,8 +2,13 @@
 // 19-Nov-11  Markku-Juhani O. Saarinen <mjos@iki.fi>
 // A baseline Keccak (3rd round) implementation.
 
-//#include "hash-ops.h"
-#include "keccak_modified.h"
+// Memory-hard extension of keccak for PoW 
+// Copyright (c) 2014 The XXX developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+
+#include "wild_keccak.h"
 namespace crypto
 {
 
@@ -32,7 +37,7 @@ namespace crypto
   };
 
   // update the state with given number of rounds
-  void regular_f::keccakf_m(uint64_t st[25], int rounds)
+  void regular_f::keccakf(uint64_t st[25], int rounds)
   {
     int i, j, round;
     uint64_t t, bc[5];
@@ -71,7 +76,7 @@ namespace crypto
     }
   }
 
-  void mul_f::keccakf_m(uint64_t st[25], int rounds)
+  void mul_f::keccakf(uint64_t st[25], int rounds)
   {
     int i, j, round;
     uint64_t t, bc[5];

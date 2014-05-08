@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2013 The Cryptonote developers
+// Copyright (c) 2012-2013 The XXX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -231,6 +232,7 @@ namespace currency
     bool unprocess_blockchain_tx_extra(const transaction& tx);
     bool pop_alias_info(const alias_info& ai);
     bool put_alias_info(const alias_info& ai);
+    bool validate_donations_value(const block& b, uint64_t donation, uint64_t royalty);
   };
 
 

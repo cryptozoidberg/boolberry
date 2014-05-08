@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2013 The Cryptonote developers
+// Copyright (c) 2012-2013 The XXX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,7 +10,7 @@
 #include "include_base_utils.h"
 #include "crypto/crypto.h"
 #include "crypto/hash.h"
-#include "crypto/keccak_modified.h"
+#include "crypto/wild_keccak.h"
 
 namespace currency
 {
@@ -171,7 +172,7 @@ namespace currency
   template<typename callback_t>
   bool get_blob_longhash(const blobdata& bd, crypto::hash& res, uint64_t height, callback_t accessor)
   {
-    crypto::keccak_kecack_m_rnd<crypto::mul_f>(reinterpret_cast<const uint8_t*>(bd.data()), bd.size(), reinterpret_cast<uint8_t*>(&res), sizeof(res), [&](crypto::state_t_m& st, crypto::mixin_t& mix)
+    crypto::wild_keccak_dbl<crypto::mul_f>(reinterpret_cast<const uint8_t*>(bd.data()), bd.size(), reinterpret_cast<uint8_t*>(&res), sizeof(res), [&](crypto::state_t_m& st, crypto::mixin_t& mix)
     {
       if(!height)
       {
