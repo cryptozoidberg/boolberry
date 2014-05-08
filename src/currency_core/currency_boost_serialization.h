@@ -104,7 +104,6 @@ namespace boost
     a & b.minor_version;
     a & b.timestamp;
     a & b.prev_id;
-    a & b.mm;
     a & b.nonce;
     //------------------
     a & b.miner_tx;

@@ -871,9 +871,10 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     if(!m_checkpoints.is_in_checkpoint_zone(bei.height))
     {
       m_is_in_checkpoint_zone = false;
-      //@#@
+#ifdef ENABLE_HASHING_DEBUG
       size_t call_no = 0;
       std::stringstream ss;      
+#endif
       get_block_longhash(bei.bl, proof_of_work, bei.height, [&](uint64_t index) -> crypto::hash
       {
         uint64_t offset = index%bei.scratch_offset;
@@ -890,11 +891,15 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
         {//apply patch
           res = crypto::xor_pod(res, it->second);
         }
+#ifdef ENABLE_HASHING_DEBUG
         ss << "[" << call_no << "][" << index << "%" << bei.scratch_offset <<"(" << index%bei.scratch_offset << ")]" << res << ENDL;
         ++call_no;
+#endif
         return res;
       });
+#ifdef ENABLE_HASHING_DEBUG
       LOG_PRINT_L3("ID: " << get_block_hash(bei.bl) << "[" << bei.height <<  "]" << ENDL << "POW:" << proof_of_work << ENDL << ss.str());
+#endif
       if(!check_hash(proof_of_work, current_diff))
       {
         LOG_PRINT_RED_L0("Block with id: " << id
@@ -1913,8 +1918,9 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     return false;    
   }
 
-  //@#@
+#ifdef ENABLE_HASHING_DEBUG  
   LOG_PRINT_L3("SCRATCHPAD_SHOT FOR H=" << bei.height+1 << ENDL << dump_scratchpad(m_scratchpad));
+#endif
 
 
   m_blocks.push_back(bei);

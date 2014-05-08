@@ -772,7 +772,8 @@ namespace currency
   //------------------------------------------------------------------
   bool get_block_scratchpad_addendum(const block& b, std::vector<crypto::hash>& res)
   {
-    res.push_back(b.prev_id);
+    if(get_block_height(b))
+      res.push_back(b.prev_id);
     crypto::public_key tx_pub;
     bool r = parse_and_validate_tx_extra(b.miner_tx, tx_pub);
     CHECK_AND_ASSERT_MES(r, false, "wrong miner tx in put_block_scratchpad_data: no one-time tx pubkey");
@@ -794,11 +795,11 @@ namespace currency
     size_t start_offset = scratchpd.size();
     get_block_scratchpad_addendum(b, scratchpd);
     get_scratchpad_patch(global_start_entry, start_offset, scratchpd.size(), scratchpd, patch);
-        //@#@ 
+#ifdef ENABLE_HASHING_DEBUG
     LOG_PRINT2("patches.log", "PATCH FOR BID: " << get_block_hash(b) 
                          << ", scr_offset " << global_start_entry << ENDL 
                          << dump_patch(patch) , LOG_LEVEL_3);
-
+#endif
 
     return true;
   }
@@ -854,11 +855,11 @@ namespace currency
       return false;
 
     get_scratchpad_patch(scratchpd.size() - block_scratch_addendum.size(), 0, block_scratch_addendum.size(), block_scratch_addendum, patch);
-    //@#@ 
+#ifdef ENABLE_HASHING_DEBUG
     LOG_PRINT2("patches.log", "PATCH FOR BID: " << get_block_hash(b) 
                          << ", scr_offset " << scratchpd.size() - block_scratch_addendum.size() << ENDL 
                          << dump_patch(patch) , LOG_LEVEL_3);
-
+#endif
     //apply patch
     apply_scratchpad_patch(scratchpd, patch);
     scratchpd.resize(scratchpd.size() - block_scratch_addendum.size());

@@ -87,24 +87,26 @@ namespace crypto
   {
     state_t_m st;
     uint8_t temp[144];
-    int i, rsiz, rsizw;
+    int rsiz, rsizw;
 
     rsiz = sizeof(state_t_m) == mdlen ? HASH_DATA_AREA : 200 - 2 * mdlen;
     rsizw = rsiz / 8;
     memset(&st[0], 0, 25*sizeof(st[0]));
     
 
-    for ( ; inlen >= rsiz; inlen -= rsiz, in += rsiz) {
-      for (i = 0; i < rsizw; i++)
+    for ( ; inlen >= rsiz; inlen -= rsiz, in += rsiz) 
+    {
+      for (size_t i = 0; i < rsizw; i++)
         st[i] ^= ((uint64_t *) in)[i];
+
       for(size_t ll = 0; ll != KECCAK_ROUNDS; ll++)
       {
-        if(i!=0)
-        {//skip first state with
+        if(ll != 0)
+        {//skip first round
           mixin_t mix_in;
           cb(st, mix_in);
-          for (i = 0; i < KK_MIXIN_SIZE; i++)
-            st[i] ^= mix_in[i]; 
+          for (size_t k = 0; k < KK_MIXIN_SIZE; k++)
+            st[k] ^= mix_in[k];
         }
         f_traits::keccakf_m(st, 1);
       }
@@ -116,18 +118,18 @@ namespace crypto
     memset(temp + inlen, 0, rsiz - inlen);
     temp[rsiz - 1] |= 0x80;
 
-    for (i = 0; i < rsizw; i++)
+    for (size_t i = 0; i < rsizw; i++)
       st[i] ^= ((uint64_t *) temp)[i];
 
     //f_traits::keccakf_m(st, KECCAK_ROUNDS);
     for(size_t ll = 0; ll != KECCAK_ROUNDS; ll++)
     {
-      if(i!=0)
+      if(ll != 0)
       {//skip first state with
         mixin_t mix_in;
         cb(st, mix_in);
-        for (i = 0; i < KK_MIXIN_SIZE; i++)
-          st[i] ^= mix_in[i]; 
+        for (size_t k = 0; k < KK_MIXIN_SIZE; k++)
+          st[k] ^= mix_in[k]; 
       }
       f_traits::keccakf_m(st, 1);
     }

@@ -254,7 +254,6 @@ namespace currency
     uint8_t minor_version;
     uint64_t timestamp;
     crypto::hash  prev_id;
-    crypto::hash  mm;
     uint32_t nonce;
 
     BEGIN_SERIALIZE()
@@ -262,7 +261,6 @@ namespace currency
       if(major_version > CURRENT_BLOCK_MAJOR_VERSION) return false;
       FIELD(nonce)
       FIELD(prev_id)
-      FIELD(mm)      
       VARINT_FIELD(minor_version)
       VARINT_FIELD(timestamp)
     END_SERIALIZE()
