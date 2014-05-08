@@ -524,8 +524,6 @@ bool gen_block_invalid_binary_format::generate(std::vector<test_event_entry>& ev
 {
   BLOCK_VALIDATION_INIT_GENERATE();
 
-  std::vector<uint64_t> timestamps;
-  std::vector<difficulty_type> cummulative_difficulties;
   difficulty_type cummulative_diff = 1;
 
   // Unlock blk_0 outputs
@@ -534,8 +532,6 @@ bool gen_block_invalid_binary_format::generate(std::vector<test_event_entry>& ev
   for (size_t i = 0; i < CURRENCY_MINED_MONEY_UNLOCK_WINDOW; ++i)
   {
     MAKE_NEXT_BLOCK(events, blk_curr, blk_last, miner_account);
-    timestamps.push_back(blk_curr.timestamp);
-    cummulative_difficulties.push_back(++cummulative_diff);
     blk_last = blk_curr;
   }
 
@@ -543,10 +539,8 @@ bool gen_block_invalid_binary_format::generate(std::vector<test_event_entry>& ev
   difficulty_type diffic;
   do
   {
-    blk_last = boost::get<block>(events.back());
-    diffic = next_difficulty(timestamps, cummulative_difficulties);
-    if (!lift_up_difficulty(events, timestamps, cummulative_difficulties, generator, 1, blk_last, miner_account))
-      return false;
+    MAKE_NEXT_BLOCK(events, blk_curr, blk_last, miner_account);
+    diffic = generator.get_block_difficulty(get_block_hash(blk_curr));
     std::cout << "Block #" << events.size() << ", difficulty: " << diffic << std::endl;
   }
   while (diffic < 1500);
@@ -559,7 +553,7 @@ bool gen_block_invalid_binary_format::generate(std::vector<test_event_entry>& ev
   std::vector<crypto::hash> tx_hashes;
   tx_hashes.push_back(get_transaction_hash(tx_0));
   size_t txs_size = get_object_blobsize(tx_0);
-  diffic = next_difficulty(timestamps, cummulative_difficulties);
+  diffic = generator.get_difficulty_for_next_block(get_block_hash(blk_last)); 
   if (!generator.construct_block_manually(blk_test, blk_last, miner_account,
     test_generator::bf_diffic | test_generator::bf_timestamp | test_generator::bf_tx_hashes, 0, 0, blk_last.timestamp,
     crypto::hash(), diffic, transaction(), tx_hashes, txs_size))

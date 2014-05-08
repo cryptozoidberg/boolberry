@@ -201,10 +201,12 @@ public:
   };
 
   currency::difficulty_type get_difficulty_for_next_block(const std::vector<block_info>& blocks);
+  currency::difficulty_type get_difficulty_for_next_block(const crypto::hash& head_id);
   void get_block_chain(std::vector<block_info>& blockchain, const crypto::hash& head, size_t n) const;
   void get_last_n_block_sizes(std::vector<size_t>& block_sizes, const crypto::hash& head, size_t n) const;
   uint64_t get_already_generated_coins(const crypto::hash& blk_id) const;
   uint64_t get_already_generated_coins(const currency::block& blk) const;
+  currency::difficulty_type get_block_difficulty(const crypto::hash& blk_id) const;
 
   void add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins, currency::difficulty_type cum_diff);
   bool construct_block(currency::block& blk, uint64_t height, const crypto::hash& prev_id,

@@ -62,6 +62,19 @@ uint64_t test_generator::get_already_generated_coins(const crypto::hash& blk_id)
   return it->second.already_generated_coins;
 }
 
+currency::difficulty_type test_generator::get_block_difficulty(const crypto::hash& blk_id) const
+{
+  auto it = m_blocks_info.find(blk_id);
+  if (it == m_blocks_info.end())
+    throw std::runtime_error("block hash wasn't found");
+  
+  auto it_prev = m_blocks_info.find(it->second.b.prev_id);
+  if (it_prev == m_blocks_info.end())
+    throw std::runtime_error("block hash wasn't found");
+
+  return it->second.cumul_difficulty - it_prev->second.cumul_difficulty;
+}
+
 uint64_t test_generator::get_already_generated_coins(const currency::block& blk) const
 {
   crypto::hash blk_hash;
@@ -176,6 +189,14 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
   add_block(blk, txs_size, block_sizes, already_generated_coins, blocks.size() ? blocks.back().cumul_difficulty + a_diffic: a_diffic);
 
   return true;
+}
+
+currency::difficulty_type test_generator::get_difficulty_for_next_block(const crypto::hash& head_id)
+{
+  std::vector<block_info> blocks;
+  get_block_chain(blocks, head_id, std::numeric_limits<size_t>::max());
+
+  return get_difficulty_for_next_block(blocks);
 }
 
 difficulty_type test_generator::get_difficulty_for_next_block(const std::vector<block_info>& blocks)
