@@ -55,12 +55,21 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  void get_donation_parts(uint64_t total_donations, uint64_t& royalty, uint64_t& donation)
+  bool get_donation_accounts(account_keys &donation_acc, account_keys &royalty_acc)
   {
-    royalty = total_donations/10; 
-    donation = total_donations - royalty;
+    bool r = get_account_address_from_str(donation_acc.m_account_address, CURRENCY_DONATIONS_ADDRESS);
+    CHECK_AND_ASSERT_MES(r, false, "failed to get_account_address_from_str from P2P_DONATIONS_ADDRESS");
+
+    r = string_tools::parse_tpod_from_hex_string(CURRENCY_DONATIONS_ADDRESS_TRACKING_KEY, donation_acc.m_view_secret_key);
+    CHECK_AND_ASSERT_MES(r, false, "failed to parse_tpod_from_hex_string from P2P_DONATIONS_ADDRESS_TRACKING_KEY");
+
+    r = get_account_address_from_str(donation_acc.m_account_address, CURRENCY_ROYALTY_ADDRESS);
+    CHECK_AND_ASSERT_MES(r, false, "failed to get_account_address_from_str from P2P_ROYALTY_ADDRESS");
+
+    r = string_tools::parse_tpod_from_hex_string(CURRENCY_ROYALTY_ADDRESS_TRACKING_KEY, donation_acc.m_view_secret_key);
+    CHECK_AND_ASSERT_MES(r, false, "failed to parse_tpod_from_hex_string from P2P_ROYALTY_ADDRESS_TRACKING_KEY");
+    return true;
   }
-  
   //---------------------------------------------------------------
   bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins, 
                                                              size_t current_block_size, 
@@ -70,15 +79,16 @@ namespace currency
                                                              const blobdata& extra_nonce, 
                                                              size_t max_outs)
   {
-    account_public_address donation_mock = AUTO_VAL_INIT(donation_mock);
-    account_public_address royalty_mock = AUTO_VAL_INIT(royalty_mock);
+    account_keys donation_acc = AUTO_VAL_INIT(donation_acc);
+    account_keys royalty_acc = AUTO_VAL_INIT(royalty_acc);
+    get_donation_accounts(donation_acc, royalty_acc);
     alias_info alias = AUTO_VAL_INIT(alias);
     return construct_miner_tx(height, median_size, already_generated_coins, 0, 
                                                                             current_block_size, 
                                                                             fee, 
                                                                             miner_address, 
-                                                                            donation_mock, 
-                                                                            royalty_mock, 
+                                                                            donation_acc.m_account_address, 
+                                                                            royalty_acc.m_account_address, 
                                                                             tx, 
                                                                             extra_nonce, 
                                                                             max_outs, 
@@ -127,7 +137,10 @@ namespace currency
       return false;
     }
     block_reward += fee;
-    uint64_t total_donation_amount = (max_donation * percents_to_donate)/100;
+    uint64_t total_donation_amount = 0;//(max_donation * percents_to_donate)/100;
+    if(height && !(height%CURRENCY_DONATIONS_INTERVAL))
+      total_donation_amount = get_donations_anount_for_day(already_donated_coins);
+
     uint64_t royalty = 0;
     uint64_t donations = 0;
     get_donation_parts(total_donation_amount, royalty, donations);
@@ -477,6 +490,7 @@ namespace currency
     tx.extra.clear();
 
     tx.version = CURRENT_TRANSACTION_VERSION;
+    tx.flags = TX_FLAG_SUPPRESS_DONATION; // turn off donations by default
     tx.unlock_time = unlock_time;
 
     keypair txkey = keypair::generate();

@@ -119,6 +119,11 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
     txs_size += get_object_blobsize(tx);
   }
 
+  account_keys donation_acc = AUTO_VAL_INIT(donation_acc);
+  account_keys royalty_acc = AUTO_VAL_INIT(royalty_acc);
+  get_donation_accounts(donation_acc, royalty_acc);
+
+
   blk.miner_tx = AUTO_VAL_INIT(blk.miner_tx);
   size_t target_block_size = txs_size + get_object_blobsize(blk.miner_tx);
   while (true)
@@ -129,8 +134,8 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
                                     target_block_size, 
                                     total_fee, 
                                     miner_acc.get_keys().m_account_address, 
-                                    currency::account_public_address(),
-                                    currency::account_public_address(),
+                                    donation_acc.m_account_address,
+                                    royalty_acc.m_account_address,
                                     blk.miner_tx, 
                                     blobdata(), 
                                     10,

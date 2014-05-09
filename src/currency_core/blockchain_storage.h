@@ -232,7 +232,9 @@ namespace currency
     bool unprocess_blockchain_tx_extra(const transaction& tx);
     bool pop_alias_info(const alias_info& ai);
     bool put_alias_info(const alias_info& ai);
-    bool validate_donations_value(const block& b, uint64_t donation, uint64_t royalty);
+    bool validate_donations_value(uint64_t donation, uint64_t royalty);
+    //uint64_t get_block_avr_donation_vote(const block& b);
+    bool get_required_donations_value_for_next_block(uint64_t& don_am); //applicable only for each CURRENCY_DONATIONS_INTERVAL-th block
   };
 
 

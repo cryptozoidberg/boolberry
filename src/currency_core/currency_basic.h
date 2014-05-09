@@ -144,6 +144,7 @@ namespace currency
     std::vector<tx_out> vout;
     //extra
     std::vector<uint8_t> extra;
+    uint8_t flags;
 
     BEGIN_SERIALIZE()
       VARINT_FIELD(version)

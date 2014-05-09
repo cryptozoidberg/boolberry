@@ -84,11 +84,14 @@
 
 
 /* This money will go to growth of the project */
-#define P2P_DONATIONS_ADDRESS                           "1CXauKc2Kq11W5zRXzcQSWTZGyZ81dVhiBmdt5CxbB5MdFY15xUWCDWR3iM2gQokwzCzu31f8BXHvQtZR7yKHLkeCtFaus6"
-#define P2P_DONATIONS_ADDRESS_TRACKING_KEY              "ae67e521b6c944198e07daf134b81607e7e7020c00463831c4ed7326e510be0b"
-/* This money will go to the founder of Cryptonote technology, 10% of donations */
-#define P2P_ROYALTY_ADDRESS                             "1GZftqCMdB2dTmRn5bNuxRWcZAFD6LrGp1sXqSCAY3QTj8mJxojTr8y4ARbfivt2szSkis8XUybf1WDBsW3R22stQqcniF1"
-#define P2P_ROYALTY_ADDRESS_TRACKING_KEY                "d8844de0e50915206e86d2b95b7bd34d0e518f381003c9d271c592c350ac5d03"
+#define CURRENCY_DONATIONS_ADDRESS                     "1CXauKc2Kq11W5zRXzcQSWTZGyZ81dVhiBmdt5CxbB5MdFY15xUWCDWR3iM2gQokwzCzu31f8BXHvQtZR7yKHLkeCtFaus6"
+#define CURRENCY_DONATIONS_ADDRESS_TRACKING_KEY        "ae67e521b6c944198e07daf134b81607e7e7020c00463831c4ed7326e510be0b"
+/* This money will go to the founder of CryptoNote technology, 10% of donations */
+#define CURRENCY_ROYALTY_ADDRESS                       "1GZftqCMdB2dTmRn5bNuxRWcZAFD6LrGp1sXqSCAY3QTj8mJxojTr8y4ARbfivt2szSkis8XUybf1WDBsW3R22stQqcniF1"
+#define CURRENCY_ROYALTY_ADDRESS_TRACKING_KEY          "d8844de0e50915206e86d2b95b7bd34d0e518f381003c9d271c592c350ac5d03"
+
+#define CURRENCY_DONATIONS_INTERVAL                     10//720
+
 
 
 #define ALLOW_DEBUG_COMMANDS

@@ -58,8 +58,8 @@ namespace currency
   void get_transaction_prefix_hash(const transaction_prefix& tx, crypto::hash& h);
   crypto::hash get_transaction_prefix_hash(const transaction_prefix& tx);
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx, crypto::hash& tx_hash, crypto::hash& tx_prefix_hash);
-  bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx);
-  void get_donation_parts(uint64_t total_donations, uint64_t& royalty, uint64_t& donations);
+  bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx);  
+  bool get_donation_accounts(account_keys &donation_acc, account_keys &royalty_acc);
   bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins,
                                                              size_t current_block_size, 
                                                              uint64_t fee, 

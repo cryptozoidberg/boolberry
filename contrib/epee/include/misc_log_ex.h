@@ -1337,8 +1337,15 @@ POP_WARNINGS
   {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, true, log_name);}}
 
 
+
+#if defined __PRETTY_FUNCTION__ 
+#define LOCAL_FUNCTION_DEF__ __PRETTY_FUNCTION__ 
+#else
+#define LOCAL_FUNCTION_DEF__ __FUNCTION__
+#endif 
+
 #define LOG_ERROR2(log_name, x) { \
-  std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << "ERROR " << __FILE__ << ":" << __LINE__ << " " << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str(), LOG_LEVEL_0, epee::log_space::console_color_red, true, log_name);LOCAL_ASSERT(0); epee::log_space::log_singletone::get_set_err_count(true, epee::log_space::log_singletone::get_set_err_count()+1);}
+  std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << "ERROR " << __FILE__ << ":" << __LINE__ << "|" << LOCAL_FUNCTION_DEF__ << "|" << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str(), LOG_LEVEL_0, epee::log_space::console_color_red, true, log_name);LOCAL_ASSERT(0); epee::log_space::log_singletone::get_set_err_count(true, epee::log_space::log_singletone::get_set_err_count()+1);}
 
 #define LOG_FRAME2(log_name, x, y) epee::log_space::log_frame frame(x, y, log_name)
 
@@ -1425,6 +1432,7 @@ POP_WARNINGS
 
 
 #define ASSERT_MES_AND_THROW(message) {LOG_ERROR(message); std::stringstream ss; ss << message; throw std::runtime_error(ss.str());}
+
 #define CHECK_AND_ASSERT_THROW_MES(expr, message) {if(!(expr)) ASSERT_MES_AND_THROW(message);}
 
 
@@ -1438,10 +1446,10 @@ POP_WARNINGS
 #define CHECK_AND_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_ERROR(message); return fail_ret_val;};}while(0)
 #endif
 
-#ifndef CHECK_AND_ASSERT_MES_AND_THROW
+/*#ifndef CHECK_AND_ASSERT_MES_AND_THROW
 #define CHECK_AND_ASSERT_MES_AND_THROW(expr, message)   do{if(!(expr)) {LOG_ERROR(message); throw std::runtime_error(message);};}while(0)
 #endif
-
+*/
 
 #ifndef CHECK_AND_NO_ASSERT_MES
 #define CHECK_AND_NO_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_PRINT_L0(message); /*LOCAL_ASSERT(expr);*/ return fail_ret_val;};}while(0)
