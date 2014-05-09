@@ -34,6 +34,13 @@ namespace currency {
     return CURRENCY_MAX_TX_SIZE;
   }
   //-----------------------------------------------------------------------------------------------
+  uint64_t get_donations_for_height(uint64_t h, uint64_t already_donated)
+  {
+    if(h && !(h%CURRENCY_DONATIONS_INTERVAL))
+      return get_donations_anount_for_day(already_donated);
+    return 0;
+  }
+  //-----------------------------------------------------------------------------------------------
   uint64_t get_donations_anount_for_day(uint64_t already_donated_coins)
   {
     int64_t amount = 0;

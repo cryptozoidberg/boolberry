@@ -40,6 +40,7 @@ namespace currency {
   size_t get_max_tx_size();
   bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t already_donated_coins, uint64_t &reward, uint64_t &max_donation);
   uint64_t get_donations_anount_for_day(uint64_t already_donated_coins);
+  uint64_t get_donations_for_height(uint64_t h, uint64_t already_donated);
   void get_donation_parts(uint64_t total_donations, uint64_t& royalty, uint64_t& donation);
   uint8_t get_account_address_checksum(const public_address_outer_blob& bl);
   std::string get_account_address_as_str(const account_public_address& adr);

@@ -62,6 +62,15 @@ uint64_t test_generator::get_already_generated_coins(const crypto::hash& blk_id)
   return it->second.already_generated_coins;
 }
 
+uint64_t test_generator::get_already_donated_coins(const crypto::hash& blk_id) const
+{
+  auto it = m_blocks_info.find(blk_id);
+  if (it == m_blocks_info.end())
+    throw std::runtime_error("block hash wasn't found");
+
+  return it->second.already_donated;
+}
+
 currency::difficulty_type test_generator::get_block_difficulty(const crypto::hash& blk_id) const
 {
   auto it = m_blocks_info.find(blk_id);
@@ -82,17 +91,21 @@ uint64_t test_generator::get_already_generated_coins(const currency::block& blk)
   return get_already_generated_coins(blk_hash);
 }
 
-void test_generator::add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins, difficulty_type cum_diff)
+void test_generator::add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, 
+                               uint64_t already_generated_coins, 
+                               uint64_t already_donated_coins, 
+                               difficulty_type cum_diff)
 {
   const size_t block_size = tsx_size + get_object_blobsize(blk.miner_tx);
   uint64_t block_reward;
   uint64_t max_donation;
-  get_block_reward(misc_utils::median(block_sizes), block_size, already_generated_coins, 0, block_reward, max_donation);
-  m_blocks_info[get_block_hash(blk)] = block_info(blk, already_generated_coins + block_reward, block_size, cum_diff);
+  get_block_reward(misc_utils::median(block_sizes), block_size, already_generated_coins, already_donated_coins, block_reward, max_donation);
+  uint64_t donation_for_block = get_donations_for_height(get_block_height(blk), already_donated_coins);
+  m_blocks_info[get_block_hash(blk)] = block_info(blk, already_generated_coins + block_reward, already_donated_coins + donation_for_block, block_size, cum_diff);
 }
 
 bool test_generator::construct_block(currency::block& blk, uint64_t height, const crypto::hash& prev_id,
-                                     const currency::account_base& miner_acc, uint64_t timestamp, uint64_t already_generated_coins,
+                                     const currency::account_base& miner_acc, uint64_t timestamp, uint64_t already_generated_coins, uint64_t already_donated_coins,
                                      std::vector<size_t>& block_sizes, const std::list<currency::transaction>& tx_list, const currency::alias_info& ai)
 {
   blk.major_version = CURRENT_BLOCK_MAJOR_VERSION;
@@ -130,7 +143,7 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
   {
     if (!construct_miner_tx(height, misc_utils::median(block_sizes), 
                                     already_generated_coins, 
-                                    0, 
+                                    already_donated_coins, 
                                     target_block_size, 
                                     total_fee, 
                                     miner_acc.get_keys().m_account_address, 
@@ -191,7 +204,7 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
   while (!find_nounce(blk, blocks, a_diffic, height))
     blk.timestamp++;
 
-  add_block(blk, txs_size, block_sizes, already_generated_coins, blocks.size() ? blocks.back().cumul_difficulty + a_diffic: a_diffic);
+  add_block(blk, txs_size, block_sizes, already_generated_coins, already_donated_coins, blocks.size() ? blocks.back().cumul_difficulty + a_diffic: a_diffic);
 
   return true;
 }
@@ -257,7 +270,7 @@ bool test_generator::construct_block(currency::block& blk, const currency::accou
 {
   std::vector<size_t> block_sizes;
   std::list<currency::transaction> tx_list;
-  return construct_block(blk, 0, null_hash, miner_acc, timestamp, 0, block_sizes, tx_list, ai);
+  return construct_block(blk, 0, null_hash, miner_acc, timestamp, 0, 0, block_sizes, tx_list, ai);
 }
 
 bool test_generator::construct_block(currency::block& blk, const currency::block& blk_prev,
@@ -269,10 +282,11 @@ bool test_generator::construct_block(currency::block& blk, const currency::block
   // Keep push difficulty little up to be sure about PoW hash success
   uint64_t timestamp = height > 10 ? blk_prev.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN: blk_prev.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN - DIFF_UP_TIMESTAMP_DELTA;
   uint64_t already_generated_coins = get_already_generated_coins(prev_id);
+  uint64_t already_donated_coins = get_already_donated_coins(prev_id);
   std::vector<size_t> block_sizes;
   get_last_n_block_sizes(block_sizes, prev_id, CURRENCY_REWARD_BLOCKS_WINDOW);
 
-  return construct_block(blk, height, prev_id, miner_acc, timestamp, already_generated_coins, block_sizes, tx_list, ai);
+  return construct_block(blk, height, prev_id, miner_acc, timestamp, already_generated_coins, already_donated_coins, block_sizes, tx_list, ai);
 }
 
 bool test_generator::construct_block_manually(block& blk, const block& prev_block, const account_base& miner_acc,
@@ -291,6 +305,7 @@ bool test_generator::construct_block_manually(block& blk, const block& prev_bloc
   blk.tx_hashes     = actual_params & bf_tx_hashes ? tx_hashes : std::vector<crypto::hash>();
   
   uint64_t already_generated_coins = get_already_generated_coins(prev_block);
+  uint64_t already_donated_coins = get_already_donated_coins(get_block_hash(prev_block));
   std::vector<size_t> block_sizes;
   get_last_n_block_sizes(block_sizes, get_block_hash(prev_block), CURRENCY_REWARD_BLOCKS_WINDOW);
   if (actual_params & bf_miner_tx)
@@ -312,7 +327,7 @@ bool test_generator::construct_block_manually(block& blk, const block& prev_bloc
   difficulty_type a_diffic = actual_params & bf_diffic ? diffic : get_difficulty_for_next_block(blocks);
   find_nounce(blk, blocks, a_diffic, height);
 
-  add_block(blk, txs_sizes, block_sizes, already_generated_coins, blocks.size() ? blocks.back().cumul_difficulty + a_diffic: a_diffic);
+  add_block(blk, txs_sizes, block_sizes, already_generated_coins, already_donated_coins, blocks.size() ? blocks.back().cumul_difficulty + a_diffic: a_diffic);
 
   return true;
 }

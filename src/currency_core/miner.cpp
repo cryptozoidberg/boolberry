@@ -230,6 +230,7 @@ namespace currency
 
     if(!m_template_no)
       request_block_template();//lets update block template
+    update_scratchpad();
 
     boost::interprocess::ipcdetail::atomic_write32(&m_stop, 0);
     boost::interprocess::ipcdetail::atomic_write32(&m_thread_index, 0);
@@ -360,7 +361,7 @@ namespace currency
       crypto::hash h;
       get_blob_longhash(block_blob, h, height, [&](uint64_t index) -> crypto::hash&
       {
-        return m_scratchpad[index%m_scratchpad.size()];
+        return local_scratch_pad[index%local_scratch_pad.size()];
       });
 
       if(check_hash(h, local_diff))

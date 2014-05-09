@@ -640,8 +640,9 @@ bool blockchain_storage::validate_donations_value(uint64_t donation, uint64_t ro
   uint64_t expected_donation = 0;
   uint64_t expected_royalty = 0;
   get_donation_parts(expected_don_total, expected_royalty, expected_donation);
-  CHECK_AND_ASSERT_MES2(expected_royalty == royalty && expected_donation == donation, false, 
-                       "wrong donation parts: " << donation<< "/" << royalty << ", expected: "<< expected_donation<< "/" << expected_royalty);
+  CHECK_AND_ASSERT_MES(expected_royalty == royalty && expected_donation == donation, 
+                       false, 
+                       "wrong donation parts: " << donation << "/" << royalty << ", expected: " << expected_donation << "/" << expected_royalty);
   return true;
 }
 //------------------------------------------------------------------

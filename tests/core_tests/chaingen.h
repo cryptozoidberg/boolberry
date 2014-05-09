@@ -169,14 +169,16 @@ public:
     block_info()
       : b()
       , already_generated_coins(0)
+      , already_donated(0)
       , block_size(0)
       , cumul_difficulty(0)
     {
     }
 
-    block_info(const currency::block& b_, uint64_t an_already_generated_coins, size_t a_block_size, currency::difficulty_type diff)
+    block_info(const currency::block& b_, uint64_t an_already_generated_coins, uint64_t an_already_donated_coins, size_t a_block_size, currency::difficulty_type diff)
       : b(b_)
       , already_generated_coins(an_already_generated_coins)
+      , already_donated(an_already_donated_coins)
       , block_size(a_block_size)
       , cumul_difficulty(diff)
     {
@@ -184,6 +186,7 @@ public:
 
     currency::block b;
     uint64_t already_generated_coins;
+    uint64_t already_donated;
     size_t block_size;
     currency::difficulty_type cumul_difficulty;
   };
@@ -204,13 +207,15 @@ public:
   currency::difficulty_type get_difficulty_for_next_block(const crypto::hash& head_id);
   void get_block_chain(std::vector<block_info>& blockchain, const crypto::hash& head, size_t n) const;
   void get_last_n_block_sizes(std::vector<size_t>& block_sizes, const crypto::hash& head, size_t n) const;
+  
+  uint64_t get_already_donated_coins(const crypto::hash& blk_id) const;
   uint64_t get_already_generated_coins(const crypto::hash& blk_id) const;
   uint64_t get_already_generated_coins(const currency::block& blk) const;
   currency::difficulty_type get_block_difficulty(const crypto::hash& blk_id) const;
 
-  void add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins, currency::difficulty_type cum_diff);
+  void add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins, uint64_t already_donated_coins, currency::difficulty_type cum_diff);
   bool construct_block(currency::block& blk, uint64_t height, const crypto::hash& prev_id,
-    const currency::account_base& miner_acc, uint64_t timestamp, uint64_t already_generated_coins,
+    const currency::account_base& miner_acc, uint64_t timestamp, uint64_t already_generated_coins, uint64_t already_donated_coins, 
     std::vector<size_t>& block_sizes, const std::list<currency::transaction>& tx_list, const currency::alias_info& ai = currency::alias_info());
   bool construct_block(currency::block& blk, const currency::account_base& miner_acc, uint64_t timestamp, const currency::alias_info& ai = currency::alias_info());
   bool construct_block(currency::block& blk, const currency::block& blk_prev, const currency::account_base& miner_acc,
