@@ -203,9 +203,9 @@ public:
     bf_diffic    = 1 << 6
   };
 
-  currency::difficulty_type get_difficulty_for_next_block(const std::vector<block_info>& blocks);
+  currency::difficulty_type get_difficulty_for_next_block(const std::vector<const block_info*>& blocks);
   currency::difficulty_type get_difficulty_for_next_block(const crypto::hash& head_id);
-  void get_block_chain(std::vector<block_info>& blockchain, const crypto::hash& head, size_t n) const;
+  void get_block_chain(std::vector<const block_info*>& blockchain, const crypto::hash& head, size_t n) const;
   void get_last_n_block_sizes(std::vector<size_t>& block_sizes, const crypto::hash& head, size_t n) const;
   
   uint64_t get_already_donated_coins(const crypto::hash& blk_id) const;
@@ -228,7 +228,7 @@ public:
     const std::vector<crypto::hash>& tx_hashes = std::vector<crypto::hash>(), size_t txs_sizes = 0);
   bool construct_block_manually_tx(currency::block& blk, const currency::block& prev_block,
     const currency::account_base& miner_acc, const std::vector<crypto::hash>& tx_hashes, size_t txs_size);
-  bool find_nounce(currency::block& blk, std::vector<block_info>& blocks, currency::difficulty_type dif, uint64_t height);
+  bool find_nounce(currency::block& blk, std::vector<const block_info*>& blocks, currency::difficulty_type dif, uint64_t height);
   //bool find_nounce(currency::block& blk, currency::difficulty_type dif, uint64_t height);
 
 private:
