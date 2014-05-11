@@ -185,9 +185,11 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::init(const boost::program_options::variables_map& vm)
   {
-    ADD_HARDCODED_SEED_NODE("107.170.97.197:10101");
 
-
+    ADD_HARDCODED_SEED_NODE("107.170.97.197:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
+    ADD_HARDCODED_SEED_NODE("188.226.215.102:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
+    ADD_HARDCODED_SEED_NODE("128.199.196.65:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
+    ADD_HARDCODED_SEED_NODE("107.170.228.11:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));    
 
     bool res = handle_command_line(vm);
     CHECK_AND_ASSERT_MES(res, false, "Failed to handle command line");
@@ -885,7 +887,6 @@ namespace nodetool
     rsp.connections_count = m_net_server.get_config_object().get_connections_count();
     rsp.incoming_connections_count = rsp.connections_count - get_outgoing_connections_count();
     rsp.version = PROJECT_VERSION_LONG;
-    rsp.os_version = tools::get_os_version_string();
     m_payload_handler.get_stat_info(rsp.payload_info);
     return 1;
   }

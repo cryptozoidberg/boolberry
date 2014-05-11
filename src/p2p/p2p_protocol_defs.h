@@ -298,14 +298,12 @@ namespace nodetool
     struct response
     {
       std::string version;
-      std::string os_version;
       uint64_t connections_count;
       uint64_t incoming_connections_count;
       payload_stat_info payload_info;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(version)
-        KV_SERIALIZE(os_version)
         KV_SERIALIZE(connections_count)
         KV_SERIALIZE(incoming_connections_count)
         KV_SERIALIZE(payload_info)

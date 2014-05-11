@@ -57,6 +57,10 @@ namespace epee
 
 #define AUTO_VAL_INIT(v)   boost::value_initialized<decltype(v)>()
 
+#define STRINGIFY_EXPAND(s) STRINGIFY(s)
+#define STRINGIFY(s) #s
+
+
 namespace misc_utils
 {
 	template<typename t_type>

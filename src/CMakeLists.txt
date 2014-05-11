@@ -46,7 +46,7 @@ target_link_libraries(simplewallet wallet rpc currency_core crypto common ${Boos
 
 set_property(TARGET common crypto currency_core rpc wallet PROPERTY FOLDER "libs")
 set_property(TARGET daemon simplewallet connectivity_tool PROPERTY FOLDER "prog")
-set_property(TARGET daemon PROPERTY OUTPUT_NAME "hpd")
+set_property(TARGET daemon PROPERTY OUTPUT_NAME "fbd")
 
 if(APPLE)
   set(SIMPLE_BUNDLE 1)

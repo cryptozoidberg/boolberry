@@ -5,7 +5,7 @@ case $1 in
         cat <<'EOM'
 graph_title tx_count
 graph_vlabel tx_count
-graph_category hpenny
+graph_category fberry
 tx_count.label tx_count
 tx_count.type COUNTER
 EOM

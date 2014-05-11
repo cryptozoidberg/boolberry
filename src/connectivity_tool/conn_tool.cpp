@@ -120,7 +120,6 @@ bool print_COMMAND_REQUEST_STAT_INFO(const COMMAND_REQUEST_STAT_INFO::response& 
 {
   std::cout << " ------ COMMAND_REQUEST_STAT_INFO ------ " << ENDL;
   std::cout << "Version:             " << si.version << ENDL;
-  std::cout << "OS Version:          " << si.os_version << ENDL;
   std::cout << "Connections:          " << si.connections_count << ENDL;
   std::cout << "INC Connections:     " << si.incoming_connections_count << ENDL;
 

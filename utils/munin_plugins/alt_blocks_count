@@ -5,7 +5,7 @@ case $1 in
         cat <<'EOM'
 graph_title alt_blocks_count
 graph_vlabel alt_blocks_count
-graph_category hpenny
+graph_category fberry
 alt_blocks_count.label alt_blocks_count
 EOM
         exit 0;;
