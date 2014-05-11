@@ -110,7 +110,7 @@ namespace currency
 
   crypto::hash get_transaction_hash(const transaction& t);
   bool get_transaction_hash(const transaction& t, crypto::hash& res);
-  bool get_transaction_hash(const transaction& t, crypto::hash& res, size_t& blob_size);
+  //bool get_transaction_hash(const transaction& t, crypto::hash& res, size_t& blob_size);
   blobdata get_block_hashing_blob(const block& b);
   bool get_block_hash(const block& b, crypto::hash& res);
   crypto::hash get_block_hash(const block& b);
@@ -234,6 +234,8 @@ namespace currency
     blobdata b = t_serializable_object_to_blob(o);
     return b.size();
   }
+  //---------------------------------------------------------------
+  size_t get_object_blobsize(const transaction& t);
   //---------------------------------------------------------------
   template<class t_object>
   bool get_object_hash(const t_object& o, crypto::hash& res, size_t& blob_size)

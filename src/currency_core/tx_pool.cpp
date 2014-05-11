@@ -131,8 +131,8 @@ namespace currency
   bool tx_memory_pool::add_tx(const transaction &tx, tx_verification_context& tvc, bool keeped_by_block)
   {
     crypto::hash h = null_hash;
-    size_t blob_size = 0;
-    get_transaction_hash(tx, h, blob_size);
+    size_t blob_size = get_object_blobsize(tx);
+    get_transaction_hash(tx, h);
     return add_tx(tx, h, blob_size, tvc, keeped_by_block);
   }
   //---------------------------------------------------------------------------------

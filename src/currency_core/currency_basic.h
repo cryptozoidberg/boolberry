@@ -128,8 +128,6 @@ namespace currency
       VARINT_FIELD(amount)
       FIELD(target)
     END_SERIALIZE()
-
-
   };
 
   class transaction_prefix
@@ -202,8 +200,9 @@ namespace currency
       ar.end_array();
     END_SERIALIZE()
 
-  private:
+
     static size_t get_signature_size(const txin_v& tx_in);
+    
   };
 
 

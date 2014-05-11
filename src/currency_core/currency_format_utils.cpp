@@ -749,20 +749,22 @@ namespace currency
   {
     crypto::hash h = null_hash;
     size_t blob_size = 0;
-    get_object_hash(t, h, blob_size);
+    get_object_hash(static_cast<const transaction_prefix&>(t), h, blob_size);
     return h;
   }
   //---------------------------------------------------------------
   bool get_transaction_hash(const transaction& t, crypto::hash& res)
   {
     size_t blob_size = 0;
-    return get_object_hash(t, res, blob_size);
+    return get_object_hash(static_cast<const transaction_prefix&>(t), res, blob_size);
   }
   //---------------------------------------------------------------
-  bool get_transaction_hash(const transaction& t, crypto::hash& res, size_t& blob_size)
+  /*bool get_transaction_hash(const transaction& t, crypto::hash& res, size_t& blob_size)
   {
+
+
     return get_object_hash(t, res, blob_size);
-  }
+  }*/
   //------------------------------------------------------------------
   template<typename pod_operand_a, typename pod_operand_b>
   crypto::hash hash_together(const pod_operand_a& a, const pod_operand_b& b)
@@ -971,6 +973,14 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
+  size_t get_object_blobsize(const transaction& t)
+  {
+    size_t prefix_blob = get_object_blobsize(static_cast<const transaction_prefix&>(t));
+    for(const auto& in: t.vin)
+      prefix_blob += transaction::get_signature_size(in);
+    return prefix_blob;
+  }
+  //---------------------------------------------------------------
   blobdata block_to_blob(const block& b)
   {
     return t_serializable_object_to_blob(b);
@@ -1007,8 +1017,7 @@ namespace currency
   {
     std::vector<crypto::hash> txs_ids;
     crypto::hash h = null_hash;
-    size_t bl_sz = 0;
-    get_transaction_hash(b.miner_tx, h, bl_sz);
+    get_transaction_hash(b.miner_tx, h);
     txs_ids.push_back(h);
     BOOST_FOREACH(auto& th, b.tx_hashes)
       txs_ids.push_back(th);
