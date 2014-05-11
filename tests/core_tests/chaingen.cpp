@@ -23,7 +23,7 @@ using namespace std;
 using namespace epee;
 using namespace currency;
 
-#define DIFF_UP_TIMESTAMP_DELTA 100
+#define DIFF_UP_TIMESTAMP_DELTA 50
 
 void test_generator::get_block_chain(std::vector<block_info>& blockchain, const crypto::hash& head, size_t n) const
 {

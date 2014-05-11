@@ -557,7 +557,7 @@ bool blockchain_storage::lookfor_donation(const transaction& tx, uint64_t& donat
   CHECK_AND_ASSERT_MES(r, false, "Failed to validate coinbase extra");
 
 
-  if(tx.vout.size() > 2)
+  if(tx.vout.size() >= 2)
   {
     //check donations value
     size_t i = tx.vout.size()-2;
@@ -567,7 +567,7 @@ bool blockchain_storage::lookfor_donation(const transaction& tx, uint64_t& donat
       donation = tx.vout[i].amount;
     }
   }
-  if(tx.vout.size() > 1)
+  if(tx.vout.size() >= 1)
   {
     size_t i = tx.vout.size()-1;
     CHECK_AND_ASSERT_MES(tx.vout[i].target.type() ==  typeid(txout_to_key), false, "wrong type id in transaction out" );
