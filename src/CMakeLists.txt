@@ -20,7 +20,7 @@ source_group(rpc FILES ${RPC})
 source_group(simplewallet FILES ${SIMPLEWALLET})
 source_group(connectivity-tool FILES ${CONN_TOOL})
 source_group(wallet FILES ${WALLET})
-source_group(simpleminer FILES ${MINER})
+
 
 add_library(common ${COMMON})
 add_library(crypto ${CRYPTO})
@@ -39,15 +39,13 @@ target_link_libraries(daemon rpc currency_core crypto common upnpc-static ${Boos
 add_executable(connectivity_tool ${CONN_TOOL})
 target_link_libraries(connectivity_tool currency_core crypto common ${Boost_LIBRARIES})
 
-add_executable(simpleminer ${MINER})
-target_link_libraries(simpleminer currency_core crypto common ${Boost_LIBRARIES})
 
 add_executable(simplewallet ${SIMPLEWALLET})
 add_dependencies(simplewallet version)
 target_link_libraries(simplewallet wallet rpc currency_core crypto common ${Boost_LIBRARIES})
 
 set_property(TARGET common crypto currency_core rpc wallet PROPERTY FOLDER "libs")
-set_property(TARGET daemon simplewallet connectivity_tool simpleminer PROPERTY FOLDER "prog")
+set_property(TARGET daemon simplewallet connectivity_tool PROPERTY FOLDER "prog")
 set_property(TARGET daemon PROPERTY OUTPUT_NAME "hpd")
 
 if(APPLE)
@@ -56,7 +54,7 @@ endif()
 
 if(SIMPLE_BUNDLE)
   set(INSTALL_DIR "${CMAKE_BINARY_DIR}/hp-${VERSION}")
-  install(TARGETS daemon simplewallet connectivity_tool simpleminer
+  install(TARGETS daemon simplewallet connectivity_tool
       RUNTIME DESTINATION "${INSTALL_DIR}" COMPONENT Runtime
   )
 

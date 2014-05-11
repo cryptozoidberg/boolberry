@@ -29,5 +29,5 @@ TEST(block_pack_unpack, basic_struct_packing)
   boost::archive::binary_iarchive a2(ss);
   a2 >> b_loaded_from_boost;
   crypto::hash loaded_boost_id = get_block_hash(b_loaded_from_boost);
-  ASSERT_EQ(original_id, loaded_id);
+  ASSERT_EQ(original_id, loaded_boost_id);
 }
