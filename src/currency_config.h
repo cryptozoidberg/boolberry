@@ -53,8 +53,6 @@
 #define CURRENCY_LOCKED_TX_ALLOWED_DELTA_SECONDS        (DIFFICULTY_TARGET * CURRENCY_LOCKED_TX_ALLOWED_DELTA_BLOCKS)
 #define CURRENCY_LOCKED_TX_ALLOWED_DELTA_BLOCKS         1
 
-#define CURRENCY_GENESIS_TIME_PROOF                     "0000000000000000000000000000000000000000000000000000000000000000"
-
 #define DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN             DIFFICULTY_TARGET //just alias
 
 
@@ -63,8 +61,14 @@
 #define CURRENCY_PROTOCOL_HOP_RELAX_COUNT               3      //value of hop, after which we use only announce of new block
 
 
+#ifndef TESTNET
 #define P2P_DEFAULT_PORT                                10101
 #define RPC_DEFAULT_PORT                                10102
+#else 
+#define P2P_DEFAULT_PORT                                20101
+#define RPC_DEFAULT_PORT                                20102
+#endif
+
 #define COMMAND_RPC_GET_BLOCKS_FAST_MAX_COUNT           1000
 
 #define P2P_LOCAL_WHITE_PEERLIST_LIMIT                  1000
@@ -96,7 +100,13 @@
 
 #define ALLOW_DEBUG_COMMANDS
 
-#define CURRENCY_NAME                                   "HoneyPenny"
+#define CURRENCY_NAME_BASE                              "forceberry"
+#ifndef TESTNET
+#define CURRENCY_NAME                                   CURRENCY_NAME_BASE
+#else
+#define CURRENCY_NAME                                   CURRENCY_NAME_BASE"_testnet"
+#endif
+
 #define CURRENCY_POOLDATA_FILENAME                      "poolstate.bin"
 #define CURRENCY_BLOCKCHAINDATA_FILENAME                "blockchain.bin"
 #define CURRENCY_BLOCKCHAINDATA_TEMP_FILENAME           "blockchain.bin.tmp"

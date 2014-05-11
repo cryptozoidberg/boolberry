@@ -910,14 +910,23 @@ namespace currency
     account_public_address ac = boost::value_initialized<account_public_address>();
     std::vector<size_t> sz;
     //proof 
-    std::string proof = "The Times: Banks and building societies are increasing the cost of home loans.";
+#ifndef TESTNET
+    std::string proof = "TODO:";
+#else 
+    std::string proof = "The Times, May 10 2014: Great Recession wasn’t so bad . . . for lawyers, accountants and bankers";
+#endif
+
 
     construct_miner_tx(0, 0, 0, 0, 0, 0, ac, ac, ac, bl.miner_tx, proof, 11, 0); // zero profit in genesis
     blobdata txb = tx_to_blob(bl.miner_tx);
     std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
     
     //hard code coinbase tx in genesis block, because "true" generating tx use random, but genesis should be always the same
-    std::string genesis_coinbase_tx_hex = "010a01ff0008c09fab03029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807100808ece1c022a74a3c4c36d32e95633d44ba9a7b8188297b2ac91afecab826b86fabaa709160080d293ad030252d128bc9913d5ee8b702c37609917c2357b2f587e5de5622348a3acd718e5d60080a8d6b90702b8ed916c56b3a99c9cdf22c7be7ec4e85587e5d40bc46bf6995313c288ad841e0080d88ee16f021b452b4ac6c6419e06181f8c9f0734bd5bb132d8b75b44bbcd07dd8f553acba6008080dd9da41702b10ba13e303cbe9abf7d5d44f1d417727abcc14903a74e071abd652ce1bf76dd0080a0e5b9c291010205e440069d10646f1bbfaeee88a2db218017941c5fa7280849126d2372fc64340080c0caf384a302029cad2882bba92fb7ecc8136475dae03169839eee05ff3ee3232d0136712f08b70071016cc176813e8c790f34d5d46d15d2eec90949dddc7df0ae439dde6c80764a78e9024e5468652054696d65733a2042616e6b7320616e64206275696c64696e6720736f636965746965732061726520696e6372656173696e672074686520636f7374206f6620686f6d65206c6f616e732e";
+#ifndef TESTNET
+    std::string genesis_coinbase_tx_hex = "TODO:";
+#else 
+    std::string genesis_coinbase_tx_hex = "010a01ff0008809bee02029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd0880710080bbb021022a74a3c4c36d32e95633d44ba9a7b8188297b2ac91afecab826b86fabaa709160080cab5ee010252d128bc9913d5ee8b702c37609917c2357b2f587e5de5622348a3acd718e5d60080a8d6b90702b8ed916c56b3a99c9cdf22c7be7ec4e85587e5d40bc46bf6995313c288ad841e0080c8afa025021b452b4ac6c6419e06181f8c9f0734bd5bb132d8b75b44bbcd07dd8f553acba60080b081daaf1402b10ba13e303cbe9abf7d5d44f1d417727abcc14903a74e071abd652ce1bf76dd0080c0f9decfae010205e440069d10646f1bbfaeee88a2db218017941c5fa7280849126d2372fc64340080c0caf384a302029cad2882bba92fb7ecc8136475dae03169839eee05ff3ee3232d0136712f08b700830101249b1e5ff278465e0d0bbeeaac5d8b77eff667dd1e0de49425c5100231432ddf02605468652054696d65732c204d617920313020323031343a20477265617420526563657373696f6e207761736e927420736f20626164202e202e202e20666f72206c6177796572732c206163636f756e74616e747320616e642062616e6b657273";
+#endif
 
     blobdata tx_bl;
     string_tools::parse_hexstr_to_binbuff(genesis_coinbase_tx_hex, tx_bl);

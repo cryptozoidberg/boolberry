@@ -10,6 +10,11 @@ enable_testing()
 include_directories(src contrib contrib/epee/include "${CMAKE_BINARY_DIR}/version")
 add_definitions(-DSTATICLIB)
 
+set(TESTNET TRUE CACHE BOOL "Compile for testnet")
+if(TESTNET)
+  add_definitions(-DTESTNET)  
+endif()
+
 set(AES auto CACHE STRING "Hardware AES support: auto, on, off, or runtime")
 if(NOT "${AES}" MATCHES "^(auto|on|off|runtime)$")
   message(SEND_ERROR "Value of AES must be auto, on, off, or runtime")
