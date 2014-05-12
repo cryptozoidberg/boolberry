@@ -50,8 +50,9 @@ namespace currency
     CHECK_AND_ASSERT_MES(r, false, "Failed to parse transaction from blob");
     //TODO: validate tx
 
-    crypto::cn_fast_hash(tx_blob.data(), tx_blob.size(), tx_hash);
+    //crypto::cn_fast_hash(tx_blob.data(), tx_blob.size(), tx_hash);
     get_transaction_prefix_hash(tx, tx_prefix_hash);
+    tx_hash = tx_prefix_hash;
     return true;
   }
   //---------------------------------------------------------------

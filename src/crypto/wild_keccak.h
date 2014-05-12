@@ -89,11 +89,11 @@ namespace crypto
   }
 
   template<class f_traits, class callback_t>
-  int wild_keccak(const uint8_t *in, size_t inlen, uint8_t *md, int mdlen, callback_t cb)
+  int wild_keccak(const uint8_t *in, size_t inlen, uint8_t *md, size_t mdlen, callback_t cb)
   {
     state_t_m st;
     uint8_t temp[144];
-    int rsiz, rsizw;
+    uint64_t rsiz, rsizw;
 
     rsiz = sizeof(state_t_m) == mdlen ? HASH_DATA_AREA : 200 - 2 * mdlen;
     rsizw = rsiz / 8;
@@ -127,7 +127,6 @@ namespace crypto
     for (size_t i = 0; i < rsizw; i++)
       st[i] ^= ((uint64_t *) temp)[i];
 
-    //f_traits::keccakf_m(st, KECCAK_ROUNDS);
     for(size_t ll = 0; ll != KECCAK_ROUNDS; ll++)
     {
       if(ll != 0)
@@ -146,7 +145,7 @@ namespace crypto
   }
 
   template<class f_traits, class callback_t>
-  int wild_keccak_dbl(const uint8_t *in, size_t inlen, uint8_t *md, int mdlen, callback_t cb)
+  int wild_keccak_dbl(const uint8_t *in, size_t inlen, uint8_t *md, size_t mdlen, callback_t cb)
   {
     //Satoshi's classic
     wild_keccak<f_traits>(in, inlen, md, mdlen, cb);
