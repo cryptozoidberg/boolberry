@@ -909,20 +909,20 @@ namespace currency
     //genesis block
     bl = boost::value_initialized<block>();
     
-    account_public_address ac = boost::value_initialized<account_public_address>();
+    /*account_public_address ac = boost::value_initialized<account_public_address>();
     std::vector<size_t> sz;
     //proof 
 #ifndef TESTNET
     std::string proof = "TODO:";
 #else 
-    std::string proof = "The Times, May 10 2014: Great Recession wasn’t so bad . . . for lawyers, accountants and bankers";
+    std::string proof = "The Times, May 10 2014: Great Recession wasn't so bad . . . for lawyers, accountants and bankers";
 #endif
 
 
     construct_miner_tx(0, 0, 0, 0, 0, 0, ac, ac, ac, bl.miner_tx, proof, 11, 0); // zero profit in genesis
     blobdata txb = tx_to_blob(bl.miner_tx);
     std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
-    
+    */
     //hard code coinbase tx in genesis block, because "true" generating tx use random, but genesis should be always the same
 #ifndef TESTNET
     std::string genesis_coinbase_tx_hex = "TODO:";
