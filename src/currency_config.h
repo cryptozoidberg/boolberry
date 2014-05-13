@@ -100,7 +100,7 @@
 
 #define ALLOW_DEBUG_COMMANDS
 
-#define CURRENCY_NAME_BASE                              "forceberry"
+#define CURRENCY_NAME_BASE                              "boolberry"
 #ifndef TESTNET
 #define CURRENCY_NAME                                   CURRENCY_NAME_BASE
 #else

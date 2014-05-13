@@ -155,7 +155,7 @@ namespace currency
         return 1;
       }
     }
-
+    
 
     block_verification_context bvc = boost::value_initialized<block_verification_context>();
     m_core.pause_mine();

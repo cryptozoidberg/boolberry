@@ -1,7 +1,7 @@
 // keccak.h
 // 19-Nov-11  Markku-Juhani O. Saarinen <mjos@iki.fi>
 
-// Copyright (c) 2014 The XXX developers
+// Copyright (c) 2014 The Boolberry developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
