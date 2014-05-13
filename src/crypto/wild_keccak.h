@@ -54,11 +54,11 @@ namespace crypto
 
   //with multiplication, for tests
   template<class f_traits>
-  int keccak_generic(const uint8_t *in, size_t inlen, uint8_t *md, int mdlen)
+  int keccak_generic(const uint8_t *in, size_t inlen, uint8_t *md, size_t mdlen)
   {
     state_t_m st;
     uint8_t temp[144];
-    int i, rsiz, rsizw;
+    size_t i, rsiz, rsizw;
 
     rsiz = sizeof(state_t_m) == mdlen ? HASH_DATA_AREA : 200 - 2 * mdlen;
     rsizw = rsiz / 8;
