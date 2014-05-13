@@ -291,14 +291,14 @@ std::string get_nix_version_display_string()
   std::string get_default_data_dir()
   {
     //namespace fs = boost::filesystem;
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\CURRENCY_NAME
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\CURRENCY_NAME
-    // Mac: ~/Library/Application Support/CURRENCY_NAME
-    // Unix: ~/.CURRENCY_NAME
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\CURRENCY_NAME_SHORT
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\CURRENCY_NAME_SHORT
+    // Mac: ~/Library/Application Support/CURRENCY_NAME_SHORT
+    // Unix: ~/.CURRENCY_NAME_SHORT
     std::string config_folder;
 #ifdef WIN32
     // Windows
-    config_folder = get_special_folder_path(CSIDL_APPDATA, true) + "/" + CURRENCY_NAME;
+    config_folder = get_special_folder_path(CSIDL_APPDATA, true) + "/" + CURRENCY_NAME_SHORT;
 #else
     std::string pathRet;
     char* pszHome = getenv("HOME");
@@ -309,10 +309,10 @@ std::string get_nix_version_display_string()
 #ifdef __APPLE__
     // Mac
     pathRet += "/Library/Application Support";
-    config_folder =  (pathRet + "/" + CURRENCY_NAME);
+    config_folder =  (pathRet + "/" + CURRENCY_NAME_SHORT);
 #else
     // Unix
-    config_folder = (pathRet + "/." + CURRENCY_NAME);
+    config_folder = (pathRet + "/." + CURRENCY_NAME_SHORT);
 #endif
 #endif
 

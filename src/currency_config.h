@@ -104,10 +104,10 @@
 #define CURRENCY_NAME_SHORT_BASE                        "boolb"
 #ifndef TESTNET
 #define CURRENCY_NAME                                   CURRENCY_NAME_BASE
-#define CURRENCY_NAME_SHORT                             CURRENCY_NAME_SHORT
+#define CURRENCY_NAME_SHORT                             CURRENCY_NAME_SHORT_BASE
 #else
-#define CURRENCY_NAME                                   CURRENCY_NAME_BASE "_testnet"
-#define CURRENCY_NAME_SHORT                             CURRENCY_NAME_SHORT "_testnet"
+#define CURRENCY_NAME                                   CURRENCY_NAME_BASE"_testnet"
+#define CURRENCY_NAME_SHORT                             CURRENCY_NAME_SHORT_BASE"_testnet"
 #endif
 
 #define CURRENCY_POOLDATA_FILENAME                      "poolstate.bin"
