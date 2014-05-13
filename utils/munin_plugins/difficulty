@@ -5,7 +5,7 @@ case $1 in
         cat <<'EOM'
 graph_title difficulty
 graph_vlabel difficulty
-graph_category fberry
+graph_category boolb
 difficulty.label difficulty
 EOM
         exit 0;;
