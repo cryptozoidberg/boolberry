@@ -100,11 +100,14 @@
 
 #define ALLOW_DEBUG_COMMANDS
 
-#define CURRENCY_NAME_BASE                              "boolberry"
+#define CURRENCY_NAME_BASE                              "Boolberry"
+#define CURRENCY_NAME_SHORT_BASE                        "boolb"
 #ifndef TESTNET
 #define CURRENCY_NAME                                   CURRENCY_NAME_BASE
+#define CURRENCY_NAME_SHORT                             CURRENCY_NAME_SHORT
 #else
-#define CURRENCY_NAME                                   CURRENCY_NAME_BASE"_testnet"
+#define CURRENCY_NAME                                   CURRENCY_NAME_BASE "_testnet"
+#define CURRENCY_NAME_SHORT                             CURRENCY_NAME_SHORT "_testnet"
 #endif
 
 #define CURRENCY_POOLDATA_FILENAME                      "poolstate.bin"
