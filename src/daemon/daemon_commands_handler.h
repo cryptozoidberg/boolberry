@@ -304,6 +304,12 @@ private:
       return true;
     }
 
+    if(args[0].size() > MAX_ALIAS_LEN)
+    {
+      std::cout << "Too long alias name, please use name no longer than " << MAX_ALIAS_LEN << std::endl;
+      return true;
+    }
+
     currency::alias_info ai = AUTO_VAL_INIT(ai);
     ai.m_alias = args[0];
 

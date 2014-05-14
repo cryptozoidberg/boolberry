@@ -52,7 +52,7 @@ namespace currency
 	  m_current_hash_rate(0),
     m_last_hr_merge_time(0),
     m_hashes(0),
-    m_aliace_to_apply_in_block(boost::value_initialized<alias_info>()),
+    m_alias_to_apply_in_block(boost::value_initialized<alias_info>()),
     m_do_donate(false)
   {
 
@@ -78,10 +78,10 @@ namespace currency
   {
     alias_info dummy;
     CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
-    if(m_bc.get_alias_info(m_aliace_to_apply_in_block.m_alias, dummy))
+    if(m_bc.get_alias_info(m_alias_to_apply_in_block.m_alias, dummy))
     {
-      LOG_PRINT_L0("Alias \"" << m_aliace_to_apply_in_block.m_alias << "\" got used bye someone else, canceled." );
-      m_aliace_to_apply_in_block = AUTO_VAL_INIT(m_aliace_to_apply_in_block);
+      LOG_PRINT_L0("Alias \"" << m_alias_to_apply_in_block.m_alias << "\" got used bye someone else, canceled." );
+      m_alias_to_apply_in_block = AUTO_VAL_INIT(m_alias_to_apply_in_block);
       return false;
     }
     return true;
@@ -114,9 +114,9 @@ namespace currency
       extra_nonce = m_extra_messages[m_config.current_extra_message_index];
     }
     CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
-    if(!m_phandler->get_block_template(bl, m_mine_address, di, height, extra_nonce, m_do_donate ? 100:0, m_aliace_to_apply_in_block))
+    if(!m_phandler->get_block_template(bl, m_mine_address, di, height, extra_nonce, m_do_donate ? 100:0, m_alias_to_apply_in_block))
     {
-      LOG_ERROR("Failed to get_block_template(), stopping mining");
+      LOG_ERROR("Failed to get_block_template()");
       return false;
     }
     set_block_template(bl, di, height);
@@ -244,6 +244,7 @@ namespace currency
   //-----------------------------------------------------------------------------------------------------
   bool miner::set_alias_info(const alias_info& ai)
   {
+    CHECK_AND_ASSERT_MES(ai.m_alias.size() <= MAX_ALIAS_LEN, false, "Alias len is too big!");
     alias_info dummy;
     if(m_bc.get_alias_info(ai.m_alias, dummy))
     {
@@ -251,7 +252,7 @@ namespace currency
       return false;
     }
     CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
-    m_aliace_to_apply_in_block = ai;
+    m_alias_to_apply_in_block = ai;
 
     return true;
   }
@@ -371,10 +372,10 @@ namespace currency
         //move alias info to temp var 
         alias_info ai_local = AUTO_VAL_INIT(ai_local);
         CRITICAL_REGION_BEGIN(m_aliace_to_apply_in_block_lock);
-        if(m_aliace_to_apply_in_block.m_alias.size())
+        if(m_alias_to_apply_in_block.m_alias.size())
         {
-          ai_local = m_aliace_to_apply_in_block;
-          m_aliace_to_apply_in_block = AUTO_VAL_INIT(m_aliace_to_apply_in_block);
+          ai_local = m_alias_to_apply_in_block;
+          m_alias_to_apply_in_block = AUTO_VAL_INIT(m_alias_to_apply_in_block);
         }
         CRITICAL_REGION_END();
 
@@ -385,13 +386,20 @@ namespace currency
           --m_config.current_extra_message_index;
           CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
           if(ai_local.m_alias.size())
-            m_aliace_to_apply_in_block = ai_local;
+            m_alias_to_apply_in_block = ai_local;
         }else
         {
           //success, let's update config
           epee::serialization::store_t_to_json_file(m_config, m_config_folder_path + "/" + MINER_CONFIG_FILE_NAME);
           if(ai_local.m_alias.size())
-            LOG_PRINT_GREEN("Alias \"" << ai_local.m_alias << "\" successfully committed to blockchain", LOG_LEVEL_0);
+          {
+            tx_extra_info tei = AUTO_VAL_INIT(tei);
+            parse_and_validate_tx_extra(b.miner_tx, tei);
+            if(tei.m_alias.m_alias == ai_local.m_alias)
+            {LOG_PRINT_GREEN("Alias \"" << ai_local.m_alias << "\" successfully committed to blockchain", LOG_LEVEL_0);}
+            else
+            {LOG_ERROR("Alias \"" << ai_local.m_alias << "\" was not committed to blockchain");}
+          }
         }
       }
       nonce+=m_threads_total;

@@ -114,7 +114,7 @@ namespace currency
     std::atomic<uint64_t> m_hashes;
     bool m_do_print_hashrate;
     bool m_do_mining;
-    alias_info m_aliace_to_apply_in_block;
+    alias_info m_alias_to_apply_in_block;
     critical_section m_aliace_to_apply_in_block_lock;
     bool m_do_donate;
     std::vector<crypto::hash> m_scratchpad;
