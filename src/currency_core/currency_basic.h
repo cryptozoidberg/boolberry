@@ -153,7 +153,6 @@ namespace currency
       FIELD(extra)
     END_SERIALIZE()
 
-
   protected:
     transaction_prefix(){}
   };

@@ -12,6 +12,9 @@
 #include "generic-ops.h"
 #include "hash.h"
 
+PUSH_WARNINGS
+DISABLE_CLANG_WARNING(unused-private-field)
+
 namespace crypto {
 
   extern "C" {
