@@ -44,7 +44,11 @@ target_link_libraries(net_load_tests_srv currency_core common crypto gtest_main 
 
 if(NOT MSVC)
   set_property(TARGET gtest gtest_main unit_tests net_load_tests_clt net_load_tests_srv APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-undef -Wno-sign-compare")
+  if(APPLE)
+    set_property(TARGET gtest gtest_main APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-unused-private-field")
+  endif()
 endif()
+
 
 add_custom_target(tests DEPENDS coretests difficulty hash performance_tests core_proxy unit_tests)
 set_property(TARGET coretests crypto-tests functional_tests difficulty-tests gtest gtest_main hash-tests hash-target-tests performance_tests core_proxy unit_tests tests net_load_tests_clt net_load_tests_srv PROPERTY FOLDER "tests")
