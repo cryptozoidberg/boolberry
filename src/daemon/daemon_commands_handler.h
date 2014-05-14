@@ -304,9 +304,9 @@ private:
       return true;
     }
 
-    if(args[0].size() > MAX_ALIAS_LEN)
+    if(!currency::validate_alias_name(args[0]))
     {
-      std::cout << "Too long alias name, please use name no longer than " << MAX_ALIAS_LEN << std::endl;
+      std::cout << "Wrong alias name" << std::endl;
       return true;
     }
 

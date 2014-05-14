@@ -244,7 +244,7 @@ namespace currency
   //-----------------------------------------------------------------------------------------------------
   bool miner::set_alias_info(const alias_info& ai)
   {
-    CHECK_AND_ASSERT_MES(ai.m_alias.size() <= MAX_ALIAS_LEN, false, "Alias len is too big!");
+    CHECK_AND_ASSERT_MES(validate_alias_name(ai.m_alias), false, "Alias name is wrong!");
     alias_info dummy;
     if(m_bc.get_alias_info(ai.m_alias, dummy))
     {

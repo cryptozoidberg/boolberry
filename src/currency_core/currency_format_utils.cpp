@@ -831,6 +831,17 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------
+  bool validate_alias_name(const std::string& al)
+  {
+    CHECK_AND_ASSERT_MES(al.size() <= MAX_ALIAS_LEN, false, "Too long alias name, please use name no longer than " << MAX_ALIAS_LEN );
+
+    for(const auto ch: al)
+    {
+      CHECK_AND_ASSERT_MES( std::isprint(ch) && !std::isspace(ch), false, "Wrong character in alias" << MAX_ALIAS_LEN );
+    }
+    return true;
+  }
+  //------------------------------------------------------------------
   bool push_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd)
   {
     std::map<uint64_t, crypto::hash> patch;
