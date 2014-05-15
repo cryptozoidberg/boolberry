@@ -358,7 +358,7 @@ namespace currency
       uint8_t minor_version;
       uint64_t timestamp;
       std::string prev_hash;
-      uint32_t nonce;
+      uint64_t nonce;
       bool orphan_status;
       uint64_t height;
       uint64_t depth;

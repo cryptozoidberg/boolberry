@@ -249,7 +249,7 @@ namespace currency
         << "If you support the project, leave donations enabled. If you disagree with the actions of the team,"
         << "vote against donations.(by entering command \"set_donations false\")"  << ENDL 
         << ENDL 
-        << "By default, if you do not refused it explicitely, donations set to enabled." << ENDL 
+        << "By default, if you didn't refuse it explicitely, donations set to enabled." << ENDL 
         << ENDL
         << "**********************************************************************");
       LOG_PRINT_CYAN("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", LOG_LEVEL_0);

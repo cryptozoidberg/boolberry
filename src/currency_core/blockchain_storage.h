@@ -242,7 +242,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER    14
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER    15
 
   template<class archive_t>
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
