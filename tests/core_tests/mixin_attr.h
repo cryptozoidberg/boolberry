@@ -22,9 +22,9 @@ struct mix_attr_tests : public test_chain_unit_base
 
   bool check_balances_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
   bool remember_last_block(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
-  bool check_last(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
+  bool check_last_not_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
   bool check_last2_and_balance(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
-
+  bool check_last_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
 private:
   crypto::hash top_id_befor_split;
 };

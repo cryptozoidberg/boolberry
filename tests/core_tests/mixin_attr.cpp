@@ -17,8 +17,9 @@ mix_attr_tests::mix_attr_tests()
 {
   REGISTER_CALLBACK_METHOD(mix_attr_tests, check_balances_1);
   REGISTER_CALLBACK_METHOD(mix_attr_tests, remember_last_block);
-  REGISTER_CALLBACK_METHOD(mix_attr_tests, check_last);
+  REGISTER_CALLBACK_METHOD(mix_attr_tests, check_last_not_changed);
   REGISTER_CALLBACK_METHOD(mix_attr_tests, check_last2_and_balance);
+  REGISTER_CALLBACK_METHOD(mix_attr_tests, check_last_changed);  
 }
 
 bool mix_attr_tests::generate(std::vector<test_event_entry>& events) const
@@ -53,13 +54,37 @@ bool mix_attr_tests::generate(std::vector<test_event_entry>& events) const
   DO_CALLBACK(events, "remember_last_block");                                                           
   MAKE_TX_MIX(events, tx_0, bob_account, alice_account, MK_COINS(20) - TESTS_DEFAULT_FEE, 3, blk_4);    
   MAKE_NEXT_BLOCK_TX1(events, blk_5_f, blk_4r, miner_account, tx_0);                                      
+  DO_CALLBACK(events, "check_last_not_changed");                                                                    
 
-  DO_CALLBACK(events, "check_last");                                                                    
+
   MAKE_TX_MIX_ATTR(events, tx_1, bob_account, alice_account, MK_COINS(20) - TESTS_DEFAULT_FEE, 0, blk_4, CURRENCY_TO_KEY_OUT_RELAXED, false);
   MAKE_NEXT_BLOCK_TX1(events, blk_5, blk_4r, miner_account, tx_1);                                      
   DO_CALLBACK(events, "check_last2_and_balance");                                                                
 
 
+  //check mixin
+  MAKE_ACCOUNT(events, bob_account2);
+  MAKE_ACCOUNT(events, alice_account2);
+
+
+  MAKE_TX_LIST_START_MIX_ATTR(events, txs_blk_6, miner_account, 
+                                                 bob_account2, 
+                                                 MK_COINS(5),
+                                                 blk_5, 
+                                                 4);
+  MAKE_TX_LIST_MIX_ATTR(events, txs_blk_6, miner_account, bob_account2, MK_COINS(5), blk_5, 4);
+  MAKE_TX_LIST_MIX_ATTR(events, txs_blk_6, miner_account, bob_account2, MK_COINS(5), blk_5, 4);
+  MAKE_TX_LIST_MIX_ATTR(events, txs_blk_6, miner_account, bob_account2, MK_COINS(5), blk_5, 4);
+  MAKE_NEXT_BLOCK_TX_LIST(events, blk_6, blk_5, miner_account, txs_blk_6);
+  
+  DO_CALLBACK(events, "remember_last_block");                                                           
+  MAKE_TX_MIX(events, tx_3, bob_account2, alice_account2, MK_COINS(5) - TESTS_DEFAULT_FEE, 2, blk_6);
+  MAKE_NEXT_BLOCK_TX1(events, blk_7_f, blk_6, miner_account, tx_3);                                      
+  DO_CALLBACK(events, "check_last_not_changed");                                                                    
+
+  MAKE_TX_MIX(events, tx_4, bob_account2, alice_account2, MK_COINS(5) - TESTS_DEFAULT_FEE, 3, blk_6);
+  MAKE_NEXT_BLOCK_TX1(events, blk_7, blk_6, miner_account, tx_4);
+  DO_CALLBACK(events, "check_last_changed");                                                                    
   return true;
 }
 
@@ -88,7 +113,7 @@ bool mix_attr_tests::remember_last_block(currency::core& c, size_t ev_index, con
   return true;
 }
 
-bool mix_attr_tests::check_last(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+bool mix_attr_tests::check_last_not_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {  
   CHECK_EQ(top_id_befor_split, c.get_tail_id());
   return true;
@@ -112,5 +137,10 @@ bool mix_attr_tests::check_last2_and_balance(currency::core& c, size_t ev_index,
   CHECK_EQ(0, get_balance(m_bob_account, chain, mtx));
   CHECK_EQ(MK_COINS(20)-TESTS_DEFAULT_FEE, get_balance(m_alice_account, chain, mtx));
 
+  return true;
+}
+bool mix_attr_tests::check_last_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+{  
+  CHECK_NOT_EQ(top_id_befor_split, c.get_tail_id());
   return true;
 }
