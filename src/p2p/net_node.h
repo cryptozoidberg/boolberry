@@ -29,7 +29,7 @@
 using namespace epee;
 
 
-#define CURRENT_P2P_STORAGE_ARCHIVE_VER    2
+#define CURRENT_P2P_STORAGE_ARCHIVE_VER    3
 
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4355)
@@ -78,10 +78,10 @@ namespace nodetool
     template <class Archive, class t_version_type>
     void serialize(Archive &a,  const t_version_type ver)
     {
+      if(ver < 3) 
+        return;
       a & m_peerlist;
       a & m_config.m_peer_id;
-      if(ver < 2)
-        return;
       a & m_maintainers_info_local;
       a & m_maintainers_entry_local;
       a & m_alert_mode;

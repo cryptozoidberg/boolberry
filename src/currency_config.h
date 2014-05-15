@@ -65,8 +65,8 @@
 #define P2P_DEFAULT_PORT                                10101
 #define RPC_DEFAULT_PORT                                10102
 #else 
-#define P2P_DEFAULT_PORT                                20101
-#define RPC_DEFAULT_PORT                                20102
+#define P2P_DEFAULT_PORT                                30101
+#define RPC_DEFAULT_PORT                                30102
 #endif
 
 #define COMMAND_RPC_GET_BLOCKS_FAST_MAX_COUNT           1000
@@ -87,17 +87,16 @@
 #define P2P_FAILED_ADDR_FORGET_SECONDS                  60*60     //1 hour
 
 
-#ifdef TESTNET
 /* This money will go to growth of the project */
-  #define CURRENCY_DONATIONS_ADDRESS                     "1CXauKc2Kq11W5zRXzcQSWTZGyZ81dVhiBmdt5CxbB5MdFY15xUWCDWR3iM2gQokwzCzu31f8BXHvQtZR7yKHLkeCtFaus6"
-  #define CURRENCY_DONATIONS_ADDRESS_TRACKING_KEY        "ae67e521b6c944198e07daf134b81607e7e7020c00463831c4ed7326e510be0b"
+  #define CURRENCY_DONATIONS_ADDRESS                     "1Dmynv2xdH1WJKDh4ynWuDYrFbPRw15WDC6UDnA82SLi4zBFEVQ3fu4VT2Lc7T7WkxgnGipZAoR4LMrdyK2XiPC6JWyD2bZ"
+  #define CURRENCY_DONATIONS_ADDRESS_TRACKING_KEY        "18316c72364e65abe895f5b1e7d5d7972a323f2cb7ce0c345a2eeb56e245310b"
 /* This money will go to the founder of CryptoNote technology, 10% of donations */
-  #define CURRENCY_ROYALTY_ADDRESS                       "1GZftqCMdB2dTmRn5bNuxRWcZAFD6LrGp1sXqSCAY3QTj8mJxojTr8y4ARbfivt2szSkis8XUybf1WDBsW3R22stQqcniF1"
-  #define CURRENCY_ROYALTY_ADDRESS_TRACKING_KEY          "d8844de0e50915206e86d2b95b7bd34d0e518f381003c9d271c592c350ac5d03"
-#else
   #define CURRENCY_ROYALTY_ADDRESS                       "1BDNvkzLabRjRMFmAxJqXK7b5JFHBNuk7Q6JHrdtxsy36oUMMH8VfBEUxEfcX6aLC9eAXX2pWxTncQRW87MyFbbY7WoQahe"
   #define CURRENCY_ROYALTY_ADDRESS_TRACKING_KEY          "53725c36758c365fa372643d68c83d80e1bf0f57189e5b52b1d1a0499e08c903"
-#endif
+
+
+
+
 
 #ifdef TESTNET
   #define CURRENCY_DONATIONS_INTERVAL                     10

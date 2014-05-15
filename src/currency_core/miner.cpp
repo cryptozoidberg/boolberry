@@ -30,9 +30,10 @@ namespace currency
 
   namespace
   {
-    const command_line::arg_descriptor<std::string>   arg_extra_messages =  {"extra-messages-file", "Specify file for extra messages to include into coinbase transactions", "", true};
-    const command_line::arg_descriptor<std::string>   arg_start_mining =    {"start-mining", "Specify wallet address to mining for", "", true};
-    const command_line::arg_descriptor<uint32_t>      arg_mining_threads =  {"mining-threads", "Specify mining threads count", 0, true};
+    const command_line::arg_descriptor<std::string>   arg_extra_messages =     {"extra-messages-file", "Specify file for extra messages to include into coinbase transactions", "", true};
+    const command_line::arg_descriptor<std::string>   arg_start_mining =       {"start-mining", "Specify wallet address to mining for", "", true};
+    const command_line::arg_descriptor<uint32_t>      arg_mining_threads =     {"mining-threads", "Specify mining threads count", 0, true};
+    const command_line::arg_descriptor<std::string>   arg_set_donation_mode =  {"donation-vote", "Select one of two options for donations vote: \"true\"(to vote fore donation) or \"false\"(to vote against)", "", true};
   }
 
 
@@ -53,7 +54,8 @@ namespace currency
     m_last_hr_merge_time(0),
     m_hashes(0),
     m_alias_to_apply_in_block(boost::value_initialized<alias_info>()),
-    m_do_donate(false)
+    m_do_donate(false),
+    m_config(AUTO_VAL_INIT(m_config))
   {
 
   }
@@ -160,10 +162,26 @@ namespace currency
     command_line::add_arg(desc, arg_extra_messages);
     command_line::add_arg(desc, arg_start_mining);
     command_line::add_arg(desc, arg_mining_threads);
+    command_line::add_arg(desc, arg_set_donation_mode);    
   }
   //-----------------------------------------------------------------------------------------------------
   bool miner::init(const boost::program_options::variables_map& vm)
   {
+    m_config_folder = command_line::get_arg(vm, command_line::arg_data_dir);
+    epee::serialization::load_t_from_json_file(m_config, m_config_folder + "/" + MINER_CONFIG_FILE_NAME);
+
+    if(command_line::has_arg(vm, arg_set_donation_mode))
+    {
+      std::string desc = command_line::get_arg(vm, arg_set_donation_mode);
+      CHECK_AND_ASSERT_MES(desc == "true" || desc == "false", false, "wrong donation mode option");
+      
+      m_config.donation_decision_made = true;
+      if(desc == "true")
+        m_config.donation_descision = true;
+      else 
+        m_config.donation_descision = false;
+    }
+
     if(command_line::has_arg(vm, arg_extra_messages))
     {
       std::string buff;
@@ -181,9 +199,6 @@ namespace currency
         if(buff != "0")
           m_extra_messages[i] = buff;
       }
-      m_config_folder_path = boost::filesystem::path(command_line::get_arg(vm, arg_extra_messages)).parent_path().string();
-      m_config = AUTO_VAL_INIT(m_config);
-      epee::serialization::load_t_from_json_file(m_config, m_config_folder_path + "/" + MINER_CONFIG_FILE_NAME);
       LOG_PRINT_L0("Loaded " << m_extra_messages.size() << " extra messages, current index " << m_config.current_extra_message_index);
     }
 
@@ -205,6 +220,17 @@ namespace currency
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
+  bool miner::deinit()
+  {
+    if (!tools::create_directories_if_necessary(m_config_folder))
+    {
+      LOG_PRINT_L0("Failed to create data directory: " << m_config_folder);
+      return false;
+    }
+    epee::serialization::store_t_to_json_file(m_config, m_config_folder + "/" + MINER_CONFIG_FILE_NAME);
+    return true;
+  }
+  //-----------------------------------------------------------------------------------------------------
   bool miner::is_mining()
   {
     return !m_stop;
@@ -212,6 +238,24 @@ namespace currency
   //----------------------------------------------------------------------------------------------------- 
   bool miner::start(const account_public_address& adr, size_t threads_count)
   {
+    if(!m_config.donation_decision_made)
+    {
+      LOG_PRINT_CYAN("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", LOG_LEVEL_0);
+      LOG_PRINT_L0(ENDL << "**********************************************************************" << ENDL 
+        << "NOTICE: Each block in blockchain have a vote, that takes into account "<< ENDL 
+        << "when calculating the reward amount for project team(once a day)." << ENDL 
+        << ENDL
+        << "Be sure to specify an option that expresses your attitude to work that make the project developers."  << ENDL 
+        << "If you support the project, leave donations enabled. If you disagree with the actions of the team,"
+        << "vote against donations.(by entering command \"set_donations false\")"  << ENDL 
+        << ENDL 
+        << "By default, if you do not refused it explicitely, donations set to enabled." << ENDL 
+        << ENDL
+        << "**********************************************************************");
+      LOG_PRINT_CYAN("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", LOG_LEVEL_0);
+      m_config.donation_descision = true;
+    }
+
     m_mine_address = adr;
     m_threads_total = static_cast<uint32_t>(threads_count);
     m_starter_nonce = crypto::rand<uint32_t>();
@@ -390,7 +434,7 @@ namespace currency
         }else
         {
           //success, let's update config
-          epee::serialization::store_t_to_json_file(m_config, m_config_folder_path + "/" + MINER_CONFIG_FILE_NAME);
+          epee::serialization::store_t_to_json_file(m_config, m_config_folder + "/" + MINER_CONFIG_FILE_NAME);
           if(ai_local.m_alias.size())
           {
             tx_extra_info tei = AUTO_VAL_INIT(tei);

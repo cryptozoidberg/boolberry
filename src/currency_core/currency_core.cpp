@@ -139,6 +139,7 @@ namespace currency
     bool core::deinit()
   {
     m_miner.stop();
+    m_miner.deinit();
     m_mempool.deinit();
     m_blockchain_storage.deinit();
     return true;

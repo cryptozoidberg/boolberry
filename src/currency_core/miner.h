@@ -33,6 +33,7 @@ namespace currency
     miner(i_miner_handler* phandler, blockchain_storage& bc);
     ~miner();
     bool init(const boost::program_options::variables_map& vm);
+    bool deinit();
     static void init_options(boost::program_options::options_description& desc);
     bool set_block_template(const block& bl, const difficulty_type& diffic, uint64_t height);
     bool on_block_chain_update();
@@ -68,8 +69,6 @@ namespace currency
       return false;
     }
 
-
-
   private:
     bool worker_thread();
     bool request_block_template();
@@ -80,9 +79,14 @@ namespace currency
     struct miner_config
     {
       uint64_t current_extra_message_index;
+      bool donation_decision_made;
+      bool donation_descision;
+      //TODO: add alias que here
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(current_extra_message_index)
+        KV_SERIALIZE(donation_decision_made)
+        KV_SERIALIZE(donation_descision)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -108,7 +112,7 @@ namespace currency
     math_helper::once_a_time_seconds<2> m_update_merge_hr_interval;
     std::vector<blobdata> m_extra_messages;
     miner_config m_config;
-    std::string m_config_folder_path;    
+    std::string m_config_folder;    
     std::atomic<uint64_t> m_current_hash_rate;
     std::atomic<uint64_t> m_last_hr_merge_time;
     std::atomic<uint64_t> m_hashes;
