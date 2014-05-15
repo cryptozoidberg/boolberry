@@ -118,7 +118,6 @@ bool mix_attr_tests::check_last_not_changed(currency::core& c, size_t ev_index, 
   CHECK_EQ(top_id_befor_split, c.get_tail_id());
   return true;
 }
-
 bool mix_attr_tests::check_last2_and_balance(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {  
   CHECK_NOT_EQ(top_id_befor_split, c.get_tail_id());

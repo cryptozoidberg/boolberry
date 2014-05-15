@@ -1338,14 +1338,14 @@ POP_WARNINGS
 
 
 
-#if defined __PRETTY_FUNCTION__ 
-#define LOCAL_FUNCTION_DEF__ __PRETTY_FUNCTION__ 
-#else
+#if defined(_MSC_VER)
 #define LOCAL_FUNCTION_DEF__ __FUNCTION__
+#else
+#define LOCAL_FUNCTION_DEF__ __PRETTY_FUNCTION__ 
 #endif 
 
 #define LOG_ERROR2(log_name, x) { \
-  std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << "ERROR " << __FILE__ << ":" << __LINE__ << "|" << LOCAL_FUNCTION_DEF__ << "|" << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str(), LOG_LEVEL_0, epee::log_space::console_color_red, true, log_name);LOCAL_ASSERT(0); epee::log_space::log_singletone::get_set_err_count(true, epee::log_space::log_singletone::get_set_err_count()+1);}
+  std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << "ERROR " << __FILE__ << ":" << __LINE__ << "[" << LOCAL_FUNCTION_DEF__ << "]" << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str(), LOG_LEVEL_0, epee::log_space::console_color_red, true, log_name);LOCAL_ASSERT(0); epee::log_space::log_singletone::get_set_err_count(true, epee::log_space::log_singletone::get_set_err_count()+1);}
 
 #define LOG_FRAME2(log_name, x, y) epee::log_space::log_frame frame(x, y, log_name)
 
