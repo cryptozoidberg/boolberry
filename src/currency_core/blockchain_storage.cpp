@@ -590,24 +590,6 @@ bool blockchain_storage::lookfor_donation(const transaction& tx, uint64_t& donat
   return true;
 }
 //------------------------------------------------------------------
-// uint64_t blockchain_storage::get_block_avr_donation_vote(const block& b)
-// {
-//   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-//   uint64_t total_donation_voted_fee = 0; 
-//   //for each transaction in block
-//   for(const auto& txh: b.tx_hashes)
-//   {
-//     auto it = m_transactions.find(txh);
-//     CHECK_AND_ASSERT_THROW_MES(it != m_transactions.end(), "transaction with id: " << txh << ENDL <<
-//       "from block id: " << get_block_hash(b) << " not found in transactions index");
-//     //append fee amount only if transaction voted for donation
-//     if(!(it->second.tx.flags && TX_FLAG_SUPPRESS_DONATION))
-//       total_donation_voted_fee += get_tx_fee(it->second.tx);
-//   }
-//   //return avrg value (all tx count divided to )
-//   return total_donation_voted_fee/b.tx_hashes.size();
-// }
-//------------------------------------------------------------------
 bool blockchain_storage::get_required_donations_value_for_next_block(uint64_t& don_am)
 {
   TRY_ENTRY();
@@ -615,27 +597,26 @@ bool blockchain_storage::get_required_donations_value_for_next_block(uint64_t& d
   uint64_t sz = get_current_blockchain_height();
   if(sz < CURRENCY_DONATIONS_INTERVAL || sz%CURRENCY_DONATIONS_INTERVAL)
   {
-    LOG_ERROR("validate_donations_value at wrong height: " << get_current_blockchain_height());
+    LOG_ERROR("internal error: validate_donations_value at wrong height: " << get_current_blockchain_height());
+    return false;
   }
-  return get_donations_anount_for_day(m_blocks.back().already_donated_coins);
+  std::vector<bool> donation_votes;
+  for(size_t i = m_blocks.size() - CURRENCY_DONATIONS_INTERVAL; i!= m_blocks.size(); i++)
+    donation_votes.push_back(m_blocks[i].bl.flags&BLOCK_FLAGS_VOTE_FOR_DONATION);
+
+  don_am = get_donations_anount_for_day(m_blocks.back().already_donated_coins, donation_votes);
+  return true;
   
-
-
-//   std::vector<uint64_t> don_vals;
-// 
-//   for(uint64_t i = sz - CURRENCY_DONATIONS_INTERVAL; i != sz; i++)
-//     don_vals.push_back(get_block_avr_donation_vote(m_blocks[i].bl));
-// 
-//   uint64_t median = misc_utils::median(don_vals);
-//   don_am =  median * 720 / 2;
-//   return true;
-   CATCH_ENTRY_L0("blockchain_storage::validate_donations_value", false);
+  CATCH_ENTRY_L0("blockchain_storage::validate_donations_value", false);
 }
 //------------------------------------------------------------------
 bool blockchain_storage::validate_donations_value(uint64_t donation, uint64_t royalty)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  uint64_t expected_don_total = get_donations_anount_for_day(m_blocks.back().already_donated_coins);
+  uint64_t expected_don_total = 0;
+  if(!get_required_donations_value_for_next_block(expected_don_total))
+    return false;
+
   CHECK_AND_ASSERT_MES(donation + royalty == expected_don_total, false, "Wrong donations amount: " << donation + royalty << ", expected " << expected_don_total);
   uint64_t expected_donation = 0;
   uint64_t expected_royalty = 0;
@@ -741,19 +722,23 @@ uint64_t blockchain_storage::get_current_comulative_blocksize_limit()
   return m_current_block_cumul_sz_limit;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::create_block_template(block& b, const account_public_address& miner_address, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, size_t percents_to_donate, const alias_info& ai)
+bool blockchain_storage::create_block_template(block& b, const account_public_address& miner_address, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai)
 {
   size_t median_size;
   uint64_t already_generated_coins;
   uint64_t already_donated_coins;
+  uint64_t donation_amount_for_this_block = 0;
 
   CRITICAL_REGION_BEGIN(m_blockchain_lock);
   b.major_version = CURRENT_BLOCK_MAJOR_VERSION;
   b.minor_version = CURRENT_BLOCK_MINOR_VERSION;
   b.prev_id = get_top_block_id();
   b.timestamp = time(NULL);
+  if(vote_for_donation)
+    b.flags = BLOCK_FLAGS_VOTE_FOR_DONATION;
   height = m_blocks.size();
   diffic = get_difficulty_for_next_block();
+  get_required_donations_value_for_next_block(donation_amount_for_this_block);
   CHECK_AND_ASSERT_MES(diffic, false, "difficulty owverhead.");
 
   median_size = m_current_block_cumul_sz_limit / 2;
@@ -772,7 +757,14 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
      block size, so first miner transaction generated with fake amount of money, and with phase we know think we know expected block size
   */
   //make blocks coin-base tx looks close to real coinbase tx to get truthful blob size
-  bool r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, txs_size, fee, miner_address, m_donations_account.m_account_address, m_royalty_account.m_account_address, b.miner_tx, ex_nonce, 11, percents_to_donate, ai);
+  bool r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, 
+                                                   txs_size, 
+                                                   fee, 
+                                                   miner_address, 
+                                                   m_donations_account.m_account_address, 
+                                                   m_royalty_account.m_account_address, 
+                                                   b.miner_tx, ex_nonce, 
+                                                   11, donation_amount_for_this_block, ai);
   CHECK_AND_ASSERT_MES(r, false, "Failed to construc miner tx, first chance");
 #ifdef _DEBUG
   std::list<size_t> try_val;
@@ -781,7 +773,15 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
 
   size_t cumulative_size = txs_size + get_object_blobsize(b.miner_tx);
   for (size_t try_count = 0; try_count != 10; ++try_count) {
-    r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, cumulative_size, fee, miner_address, m_donations_account.m_account_address, m_royalty_account.m_account_address, b.miner_tx, ex_nonce, 11, percents_to_donate, ai);
+    r = construct_miner_tx(height, median_size, already_generated_coins, already_donated_coins, 
+                                                cumulative_size, 
+                                                fee, 
+                                                miner_address, 
+                                                m_donations_account.m_account_address, 
+                                                m_royalty_account.m_account_address, 
+                                                b.miner_tx, ex_nonce, 
+                                                11, 
+                                                donation_amount_for_this_block, ai);
 #ifdef _DEBUG
     try_val.push_back(get_object_blobsize(b.miner_tx));
 #endif

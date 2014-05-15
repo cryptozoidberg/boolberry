@@ -100,7 +100,7 @@ void test_generator::add_block(const currency::block& blk, size_t tsx_size, std:
   uint64_t block_reward;
   uint64_t max_donation;
   get_block_reward(misc_utils::median(block_sizes), block_size, already_generated_coins, already_donated_coins, block_reward, max_donation);
-  uint64_t donation_for_block = get_donations_for_height(get_block_height(blk), already_donated_coins);
+  uint64_t donation_for_block = 0;
   m_blocks_info[get_block_hash(blk)] = block_info(blk, already_generated_coins + block_reward, already_donated_coins + donation_for_block, block_size, cum_diff);
 }
 
@@ -303,6 +303,7 @@ bool test_generator::construct_block_manually(block& blk, const block& prev_bloc
   blk.timestamp     = actual_params & bf_timestamp ? timestamp : (height > 10 ? prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN: prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN-DIFF_UP_TIMESTAMP_DELTA); // Keep difficulty unchanged
   blk.prev_id       = actual_params & bf_prev_id   ? prev_id   : get_block_hash(prev_block);
   blk.tx_hashes     = actual_params & bf_tx_hashes ? tx_hashes : std::vector<crypto::hash>();
+
   
   uint64_t already_generated_coins = get_already_generated_coins(prev_block);
   uint64_t already_donated_coins = get_already_donated_coins(get_block_hash(prev_block));

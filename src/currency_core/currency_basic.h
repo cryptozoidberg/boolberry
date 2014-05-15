@@ -23,6 +23,7 @@
 #include "crypto/hash.h"
 #include "misc_language.h"
 #include "tx_extra.h"
+#include "block_flags.h"
 
 namespace currency
 {
@@ -142,7 +143,6 @@ namespace currency
     std::vector<tx_out> vout;
     //extra
     std::vector<uint8_t> extra;
-    uint8_t flags;
 
     BEGIN_SERIALIZE()
       VARINT_FIELD(version)
@@ -253,7 +253,8 @@ namespace currency
     uint8_t minor_version;
     uint64_t timestamp;
     crypto::hash  prev_id;
-    uint32_t nonce;
+    uint64_t nonce;
+    uint8_t flags;
 
     BEGIN_SERIALIZE()
       FIELD(major_version)
@@ -262,6 +263,7 @@ namespace currency
       FIELD(prev_id)
       VARINT_FIELD(minor_version)
       VARINT_FIELD(timestamp)
+      FIELD(flags)
     END_SERIALIZE()
   };
 

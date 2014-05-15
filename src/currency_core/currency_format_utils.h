@@ -80,7 +80,7 @@ namespace currency
                                                              transaction& tx, 
                                                              const blobdata& extra_nonce = blobdata(), 
                                                              size_t max_outs = 11, 
-                                                             size_t percents_to_donate = 0, /* 0% by default */
+                                                             size_t amount_to_donate = 0, 
                                                              const alias_info& alias = alias_info()
                                                              );
   //---------------------------------------------------------------

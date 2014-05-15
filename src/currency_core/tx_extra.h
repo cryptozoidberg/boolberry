@@ -12,6 +12,4 @@
 #define TX_EXTRA_TAG_ALIAS_FLAGS_ADDR_WITH_TRACK      0x02
 
 
-#define TX_FLAG_SUPPRESS_DONATION                      0x01
-
 

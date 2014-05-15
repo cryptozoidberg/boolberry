@@ -107,14 +107,12 @@ namespace currency
                                                              transaction& tx, 
                                                              const blobdata& extra_nonce, 
                                                              size_t max_outs, 
-                                                             size_t percents_to_donate, 
+                                                             size_t amount_to_donate, 
                                                              const alias_info& alias)
   {
     tx.vin.clear();
     tx.vout.clear();
     tx.extra.clear();
-
-    CHECK_AND_ASSERT_MES(percents_to_donate <= 100, false, "wrong percents_to_donate value, should be between 0 and 100");
 
     keypair txkey = keypair::generate();
     add_tx_pub_key_to_extra(tx, txkey.pub);
@@ -140,7 +138,7 @@ namespace currency
     block_reward += fee;
     uint64_t total_donation_amount = 0;//(max_donation * percents_to_donate)/100;
     if(height && !(height%CURRENCY_DONATIONS_INTERVAL))
-      total_donation_amount = get_donations_anount_for_day(already_donated_coins);
+      total_donation_amount = amount_to_donate;
 
     uint64_t royalty = 0;
     uint64_t donations = 0;
@@ -491,7 +489,6 @@ namespace currency
     tx.extra.clear();
 
     tx.version = CURRENT_TRANSACTION_VERSION;
-    tx.flags = TX_FLAG_SUPPRESS_DONATION; // turn off donations by default
     tx.unlock_time = unlock_time;
 
     keypair txkey = keypair::generate();

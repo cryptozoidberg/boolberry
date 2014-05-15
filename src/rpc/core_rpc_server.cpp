@@ -360,7 +360,7 @@ namespace currency
     block b = AUTO_VAL_INIT(b);
     currency::blobdata blob_reserve;
     blob_reserve.resize(req.reserve_size, 0);
-    if(!m_core.get_block_template(b, acc, res.difficulty, res.height, blob_reserve, req.donate_to_developers? 100:0, alias_info()))
+    if(!m_core.get_block_template(b, acc, res.difficulty, res.height, blob_reserve, req.donate_to_developers, alias_info()))
     {
       error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
       error_resp.message = "Internal error: failed to create block template";

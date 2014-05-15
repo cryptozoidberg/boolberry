@@ -306,9 +306,9 @@ namespace currency
     return m_mempool.add_tx(tx, tx_hash, blob_size, tvc, keeped_by_block);
   }
   //-----------------------------------------------------------------------------------------------
-  bool core::get_block_template(block& b, const account_public_address& adr, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, size_t percents_to_donate, const alias_info& ai)
+  bool core::get_block_template(block& b, const account_public_address& adr, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai)
   {
-    return m_blockchain_storage.create_block_template(b, adr, diffic, height, ex_nonce, percents_to_donate, ai);
+    return m_blockchain_storage.create_block_template(b, adr, diffic, height, ex_nonce, vote_for_donation, ai);
   }
   //-----------------------------------------------------------------------------------------------
   bool core::find_blockchain_supplement(const std::list<crypto::hash>& qblock_ids, NOTIFY_RESPONSE_CHAIN_ENTRY::request& resp)

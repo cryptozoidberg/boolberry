@@ -34,21 +34,22 @@ namespace currency {
     return CURRENCY_MAX_TX_SIZE;
   }
   //-----------------------------------------------------------------------------------------------
-  uint64_t get_donations_for_height(uint64_t h, uint64_t already_donated)
+  uint64_t get_donations_anount_for_day(uint64_t already_donated_coins, const std::vector<bool>& votes)
   {
-    if(h && !(h%CURRENCY_DONATIONS_INTERVAL))
-      return get_donations_anount_for_day(already_donated);
-    return 0;
-  }
-  //-----------------------------------------------------------------------------------------------
-  uint64_t get_donations_anount_for_day(uint64_t already_donated_coins)
-  {
+    CHECK_AND_ASSERT_THROW_MES(votes.size() == CURRENCY_DONATIONS_INTERVAL, "wrong flags vector size");
+
+    size_t votes_count = 0;
+    for(auto v: votes)
+      if(v) ++votes_count;
+
     int64_t amount = 0;
     for(size_t i = 0; i != CURRENCY_DONATIONS_INTERVAL; i++)
     {
       amount += (DONATIONS_SUPPLY - already_donated_coins) >> EMISSION_CURVE_CHARACTER;
       already_donated_coins -= amount;
     }
+    amount = (amount*votes_count)/CURRENCY_DONATIONS_INTERVAL;
+
     amount = amount - amount%DEFAULT_DUST_THRESHOLD;
     return amount;
   }

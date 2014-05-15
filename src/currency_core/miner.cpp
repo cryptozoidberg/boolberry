@@ -114,7 +114,7 @@ namespace currency
       extra_nonce = m_extra_messages[m_config.current_extra_message_index];
     }
     CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
-    if(!m_phandler->get_block_template(bl, m_mine_address, di, height, extra_nonce, m_do_donate ? 100:0, m_alias_to_apply_in_block))
+    if(!m_phandler->get_block_template(bl, m_mine_address, di, height, extra_nonce, m_do_donate, m_alias_to_apply_in_block))
     {
       LOG_ERROR("Failed to get_block_template()");
       return false;

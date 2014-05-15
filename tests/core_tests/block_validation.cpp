@@ -343,7 +343,7 @@ bool gen_block_miner_tx_with_txin_to_key::generate(std::vector<test_event_entry>
   BLOCK_VALIDATION_INIT_GENERATE();
 
   // This block has only one output
-  block blk_1;
+  block blk_1 = AUTO_VAL_INIT(blk_1);
   generator.construct_block_manually(blk_1, blk_0, miner_account, test_generator::bf_none);
   events.push_back(blk_1);
 
@@ -371,7 +371,7 @@ bool gen_block_miner_tx_with_txin_to_key::generate(std::vector<test_event_entry>
   MAKE_MINER_TX_MANUALLY(miner_tx, blk_1);
   miner_tx.vin[0] = tmp_tx.vin[0];
 
-  block blk_2;
+  block blk_2 = AUTO_VAL_INIT(blk_2);
   generator.construct_block_manually(blk_2, blk_1r, miner_account, test_generator::bf_miner_tx, 0, 0, 0, crypto::hash(), 0, miner_tx);
   events.push_back(blk_2);
 
