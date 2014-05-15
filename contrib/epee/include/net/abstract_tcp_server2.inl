@@ -103,7 +103,10 @@ PRAGMA_WARNING_DISABLE_VS(4355)
     // Use safe_shared_from_this, because of this is public method and it can be called on the object being deleted
     auto self = safe_shared_from_this();
     if(!self)
+    {
+      LOG_PRINT_RED("Failed to start conntection, failed to call safe_shared_from_this", LOG_LEVEL_2);
       return false;
+    }
 
     m_is_multithreaded = is_multithreaded;
 
@@ -124,7 +127,7 @@ PRAGMA_WARNING_DISABLE_VS(4355)
 
     if(m_pfilter && !m_pfilter->is_remote_ip_allowed(context.m_remote_ip))
     {
-      LOG_PRINT_L2("[sock " << socket_.native_handle() << "] ip denied " << string_tools::get_ip_string_from_int32(context.m_remote_ip) << ", shutdowning connection");
+      LOG_PRINT_L0("[sock " << socket_.native_handle() << "] ip denied " << string_tools::get_ip_string_from_int32(context.m_remote_ip) << ", shutdowning connection");
       close();
       return false;
     }
