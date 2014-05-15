@@ -70,7 +70,6 @@ bool gen_ring_signature_1::generate(std::vector<test_event_entry>& events) const
 
 bool gen_ring_signature_1::check_balances_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_ring_signature_1::check_balances_1");
 
   m_bob_account = boost::get<account_base>(events[3]);
   m_alice_account = boost::get<account_base>(events[4]);
@@ -91,7 +90,6 @@ bool gen_ring_signature_1::check_balances_1(currency::core& c, size_t ev_index, 
 
 bool gen_ring_signature_1::check_balances_2(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_ring_signature_1::check_balances_2");
 
   std::list<block> blocks;
   bool r = c.get_blocks(0, 100 + 2 * CURRENCY_MINED_MONEY_UNLOCK_WINDOW, blocks);
@@ -151,7 +149,6 @@ bool gen_ring_signature_2::generate(std::vector<test_event_entry>& events) const
 
 bool gen_ring_signature_2::check_balances_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_ring_signature_2::check_balances_1");
 
   m_bob_account = boost::get<account_base>(events[1]);
   m_alice_account = boost::get<account_base>(events[2]);
@@ -172,7 +169,6 @@ bool gen_ring_signature_2::check_balances_1(currency::core& c, size_t ev_index, 
 
 bool gen_ring_signature_2::check_balances_2(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_ring_signature_2::check_balances_2");
 
   std::list<block> blocks;
   bool r = c.get_blocks(0, 100 + 2 * CURRENCY_MINED_MONEY_UNLOCK_WINDOW, blocks);
@@ -261,7 +257,6 @@ bool gen_ring_signature_big::generate(std::vector<test_event_entry>& events) con
 
 bool gen_ring_signature_big::check_balances_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_ring_signature_big::check_balances_1");
 
   m_bob_account = boost::get<account_base>(events[1]);
   m_alice_account = boost::get<account_base>(events[1 + m_test_size]);
@@ -289,7 +284,6 @@ bool gen_ring_signature_big::check_balances_1(currency::core& c, size_t ev_index
 
 bool gen_ring_signature_big::check_balances_2(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_ring_signature_big::check_balances_2");
 
   std::list<block> blocks;
   bool r = c.get_blocks(0, 2 * m_test_size + CURRENCY_MINED_MONEY_UNLOCK_WINDOW, blocks);

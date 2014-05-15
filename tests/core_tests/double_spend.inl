@@ -58,7 +58,6 @@ bool gen_double_spend_base<concrete_test>::mark_invalid_block(currency::core& /*
 template<class concrete_test>
 bool gen_double_spend_base<concrete_test>::check_double_spend(currency::core& c, size_t /*ev_index*/, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_double_spend_base::check_double_spend");
 
   if (concrete_test::has_invalid_tx)
   {

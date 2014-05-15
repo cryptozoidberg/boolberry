@@ -220,7 +220,6 @@ bool gen_block_reward::mark_checked_block(currency::core& /*c*/, size_t ev_index
 
 bool gen_block_reward::check_block_rewards(currency::core& /*c*/, size_t /*ev_index*/, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_block_reward_without_txs::check_block_rewards");
 
   std::array<uint64_t, 7> blk_rewards;
   blk_rewards[0] = EMISSION_SUPPLY >> EMISSION_CURVE_CHARACTER;

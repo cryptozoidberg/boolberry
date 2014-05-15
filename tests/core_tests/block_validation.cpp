@@ -598,7 +598,6 @@ bool gen_block_invalid_binary_format::corrupt_blocks_boundary(currency::core& c,
 
 bool gen_block_invalid_binary_format::check_all_blocks_purged(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_block_invalid_binary_format::check_all_blocks_purged");
 
   CHECK_EQ(1, c.get_pool_transactions_count());
   CHECK_EQ(m_corrupt_blocks_begin_idx - 2, c.get_current_blockchain_height());

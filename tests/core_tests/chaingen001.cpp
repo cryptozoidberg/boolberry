@@ -41,7 +41,6 @@ bool one_block::generate(std::vector<test_event_entry> &events)
 
 bool one_block::verify_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-    DEFINE_TESTS_ERROR_CONTEXT("one_block::verify_1");
 
     alice = boost::get<currency::account_base>(events[1]);
 

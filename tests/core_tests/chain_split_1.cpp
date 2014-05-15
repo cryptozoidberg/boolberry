@@ -136,21 +136,18 @@ bool gen_simple_chain_split_1::generate(std::vector<test_event_entry> &events) c
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_mempool_2(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_mempool_2");
   CHECK_TEST_CONDITION(c.get_pool_transactions_count() == 2);
   return true;
 }
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_mempool_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_mempool_1");
   CHECK_TEST_CONDITION(c.get_pool_transactions_count() == 3);
   return true;
 }
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_split_not_switched(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_split_not_switched");
   //check height
   CHECK_TEST_CONDITION(c.get_current_blockchain_height() == 9);
   CHECK_TEST_CONDITION(c.get_blockchain_total_transactions() == 9);
@@ -161,7 +158,6 @@ bool gen_simple_chain_split_1::check_split_not_switched(currency::core& c, size_
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_split_not_switched2(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_split_not_switched2");
   //check height
   CHECK_TEST_CONDITION(c.get_current_blockchain_height() == 9);
   CHECK_TEST_CONDITION(c.get_blockchain_total_transactions() == 9);
@@ -172,7 +168,6 @@ bool gen_simple_chain_split_1::check_split_not_switched2(currency::core& c, size
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_split_switched(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_split_switched");
 
   //check height
   CHECK_TEST_CONDITION(c.get_current_blockchain_height() == 10);
@@ -184,7 +179,6 @@ bool gen_simple_chain_split_1::check_split_switched(currency::core& c, size_t ev
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_split_not_switched_back(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_split_not_switched_back");
   //check height
   CHECK_TEST_CONDITION(c.get_current_blockchain_height() == 14);
   CHECK_TEST_CONDITION(c.get_blockchain_total_transactions() == 14);
@@ -196,7 +190,6 @@ bool gen_simple_chain_split_1::check_split_not_switched_back(currency::core& c, 
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_split_switched_back_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_split_switched_back_1");
 
   //check height
   CHECK_TEST_CONDITION(c.get_current_blockchain_height()== 15);
@@ -208,7 +201,6 @@ bool gen_simple_chain_split_1::check_split_switched_back_1(currency::core& c, si
 }//-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_split_switched_back_2(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_split_switched_back_2");
 
   //check height
   CHECK_TEST_CONDITION(c.get_current_blockchain_height() == 16);
@@ -221,14 +213,12 @@ bool gen_simple_chain_split_1::check_split_switched_back_2(currency::core& c, si
 /*
 bool gen_simple_chain_split_1::check_orphaned_chain_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_orphaned_chain_1");
   CHECK_TEST_CONDITION(c.get_orphaned_by_prev_blocks_count() == 2);
   return true;
 }
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_orphaned_switched_to_alternative(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_orphaned_switched_to_alternative");
   CHECK_TEST_CONDITION(c.get_orphaned_by_prev_blocks_count() == 0);
   CHECK_TEST_CONDITION(c.get_current_blockchain_height()== 17);
   CHECK_TEST_CONDITION(c.get_alternative_blocks_count() == 11);
@@ -237,14 +227,12 @@ bool gen_simple_chain_split_1::check_orphaned_switched_to_alternative(currency::
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_orphaned_chain_2(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_orphaned_chain_2");
   CHECK_TEST_CONDITION(c.get_orphaned_by_prev_blocks_count() == 4);
   return true;
 }
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_orphaned_switched_to_main(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_orphaned_switched_to_main");
   CHECK_TEST_CONDITION(c.get_orphaned_by_prev_blocks_count() == 0);
   CHECK_TEST_CONDITION(c.get_current_blockchain_height()== 19);
   CHECK_TEST_CONDITION(c.get_alternative_blocks_count() == 14);
@@ -253,7 +241,6 @@ bool gen_simple_chain_split_1::check_orphaned_switched_to_main(currency::core& c
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_orphaned_chain_38(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_orphaned_chain_38");
   CHECK_TEST_CONDITION(c.get_orphaned_by_prev_blocks_count() == 6);
   CHECK_TEST_CONDITION(c.get_alternative_blocks_count() == 14);
   CHECK_TEST_CONDITION(c.get_current_blockchain_height()== 19);
@@ -262,7 +249,6 @@ bool gen_simple_chain_split_1::check_orphaned_chain_38(currency::core& c, size_t
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_orphaned_chain_39(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_orphaned_chain_39");
   CHECK_TEST_CONDITION(c.get_orphaned_by_prev_blocks_count() == 4);
   CHECK_TEST_CONDITION(c.get_alternative_blocks_count() == 17);
   CHECK_TEST_CONDITION(c.get_current_blockchain_height()== 19);
@@ -271,7 +257,6 @@ bool gen_simple_chain_split_1::check_orphaned_chain_39(currency::core& c, size_t
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_orphaned_chain_40(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_orphaned_chain_40");
   CHECK_TEST_CONDITION(c.get_orphaned_by_prev_blocks_count() == 5);
   CHECK_TEST_CONDITION(c.get_alternative_blocks_count() == 17);
   CHECK_TEST_CONDITION(c.get_current_blockchain_height()== 19);
@@ -280,7 +265,6 @@ bool gen_simple_chain_split_1::check_orphaned_chain_40(currency::core& c, size_t
 //-----------------------------------------------------------------------------------------------------
 bool gen_simple_chain_split_1::check_orphaned_chain_41(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_simple_chain_split_1::check_orphaned_chain_41");
   CHECK_TEST_CONDITION(c.get_orphaned_by_prev_blocks_count() == 0);
   CHECK_TEST_CONDITION(c.get_alternative_blocks_count() == 19);
   CHECK_TEST_CONDITION(c.get_current_blockchain_height()== 23);

@@ -44,7 +44,6 @@ bool gen_double_spend_in_different_chains::generate(std::vector<test_event_entry
 
 bool gen_double_spend_in_different_chains::check_double_spend(currency::core& c, size_t /*ev_index*/, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_double_spend_in_different_chains::check_double_spend");
 
   std::list<block> block_list;
   bool r = c.get_blocks(0, 100 + 2 * CURRENCY_MINED_MONEY_UNLOCK_WINDOW, block_list);

@@ -504,7 +504,7 @@ bool fill_output_entries(std::vector<output_index>& out_indices,
 }
 
 bool fill_tx_sources(std::vector<tx_source_entry>& sources, const std::vector<test_event_entry>& events,
-                     const block& blk_head, const currency::account_base& from, uint64_t amount, size_t nmix)
+                     const block& blk_head, const currency::account_base& from, uint64_t amount, size_t nmix, bool check_for_spends = true)
 {
     map_output_idx_t outs;
     map_output_t outs_mine;
@@ -517,8 +517,11 @@ bool fill_tx_sources(std::vector<tx_source_entry>& sources, const std::vector<te
     if (!init_output_indices(outs, outs_mine, blockchain, mtx, from))
         return false;
 
-    if (!init_spent_output_indices(outs, outs_mine, blockchain, mtx, from))
+    if(check_for_spends)
+    {
+      if (!init_spent_output_indices(outs, outs_mine, blockchain, mtx, from))
         return false;
+    }
 
     // Iterate in reverse is more efficiency
     uint64_t sources_amount = 0;
@@ -561,12 +564,13 @@ bool fill_tx_destination(tx_destination_entry &de, const currency::account_base 
 void fill_tx_sources_and_destinations(const std::vector<test_event_entry>& events, const block& blk_head,
                                       const currency::account_base& from, const currency::account_base& to,
                                       uint64_t amount, uint64_t fee, size_t nmix, std::vector<tx_source_entry>& sources,
-                                      std::vector<tx_destination_entry>& destinations)
+                                      std::vector<tx_destination_entry>& destinations,
+                                      bool check_for_spends)
 {
   sources.clear();
   destinations.clear();
 
-  if (!fill_tx_sources(sources, events, blk_head, from, amount + fee, nmix))
+  if (!fill_tx_sources(sources, events, blk_head, from, amount + fee, nmix, check_for_spends))
     throw std::runtime_error("couldn't fill transaction sources");
 
   tx_destination_entry de;
@@ -635,13 +639,13 @@ bool construct_miner_tx_manually(size_t height, uint64_t already_generated_coins
 
 bool construct_tx_to_key(const std::vector<test_event_entry>& events, currency::transaction& tx, const block& blk_head,
                          const currency::account_base& from, const currency::account_base& to, uint64_t amount,
-                         uint64_t fee, size_t nmix)
+                         uint64_t fee, size_t nmix, uint8_t mix_attr, bool check_for_spends)
 {
   vector<tx_source_entry> sources;
   vector<tx_destination_entry> destinations;
-  fill_tx_sources_and_destinations(events, blk_head, from, to, amount, fee, nmix, sources, destinations);
+  fill_tx_sources_and_destinations(events, blk_head, from, to, amount, fee, nmix, sources, destinations, check_for_spends);
 
-  return construct_tx(from.get_keys(), sources, destinations, tx, 0);
+  return construct_tx(from.get_keys(), sources, destinations, tx, 0, mix_attr);
 }
 
 transaction construct_tx_with_fee(std::vector<test_event_entry>& events, const block& blk_head,

@@ -6,7 +6,7 @@
 #include "chaingen_tests_list.h"
 #include "common/command_line.h"
 #include "transaction_tests.h"
-#include "alias_tests.h"
+
 
 namespace po = boost::program_options;
 
@@ -73,6 +73,8 @@ int main(int argc, char* argv[])
   }
   else //if (command_line::get_arg(vm, arg_generate_and_play_test_data))
   {
+
+    GENERATE_AND_PLAY(mix_attr_tests);
     GENERATE_AND_PLAY(gen_simple_chain_001);
     GENERATE_AND_PLAY(gen_simple_chain_split_1);
     GENERATE_AND_PLAY(one_block);

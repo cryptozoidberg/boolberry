@@ -95,7 +95,6 @@ bool gen_chain_switch_1::generate(std::vector<test_event_entry>& events) const
 //-----------------------------------------------------------------------------------------------------
 bool gen_chain_switch_1::check_split_not_switched(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_chain_switch_1::check_split_not_switched");
 
   m_recipient_account_1 = boost::get<account_base>(events[1]);
   m_recipient_account_2 = boost::get<account_base>(events[2]);
@@ -138,7 +137,6 @@ bool gen_chain_switch_1::check_split_not_switched(currency::core& c, size_t ev_i
 //-----------------------------------------------------------------------------------------------------
 bool gen_chain_switch_1::check_split_switched(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  DEFINE_TESTS_ERROR_CONTEXT("gen_chain_switch_1::check_split_switched");
 
   std::list<block> blocks;
   bool r = c.get_blocks(0, 10000, blocks);

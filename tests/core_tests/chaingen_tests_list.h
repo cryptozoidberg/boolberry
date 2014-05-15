@@ -13,6 +13,8 @@
 #include "integer_overflow.h"
 #include "ring_signature_1.h"
 #include "tx_validation.h"
+#include "alias_tests.h"
+#include "mixin_attr.h"
 /************************************************************************/
 /*                                                                      */
 /************************************************************************/

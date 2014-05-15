@@ -330,9 +330,9 @@ namespace currency
       
       CHECKED_GET_SPECIFIC_VARIANT(tx_it->second.tx.vout[amount_outs_vec[i].second].target, const txout_to_key, outtk, false);
       if(outtk.mix_attr > 1)
-        CHECK_AND_ASSERT_MES(tx_in_to_key.key_offsets.size() >= outtk.mix_attr, false, "transaction out[" << count << "] is marked to be used minimum with " << outtk.mix_attr << "parts in ring signature, but input used only " << tx_in_to_key.key_offsets.size());
-      else if(outtk.mix_attr == 1)
-        CHECK_AND_ASSERT_MES(tx_in_to_key.key_offsets.size() == 1, false, "transaction out[" << count << "] is marked to be used minimum with " << outtk.mix_attr << "parts in ring signature, but input used is " << tx_in_to_key.key_offsets.size());
+        CHECK_AND_ASSERT_MES(tx_in_to_key.key_offsets.size() >= outtk.mix_attr, false, "transaction out[" << count << "] is marked to be used minimum with " << static_cast<uint32_t>(outtk.mix_attr) << "parts in ring signature, but input used only " << tx_in_to_key.key_offsets.size());
+      else if(outtk.mix_attr == CURRENCY_TO_KEY_OUT_FORCED_NO_MIX)
+        CHECK_AND_ASSERT_MES(tx_in_to_key.key_offsets.size() == 1, false, "transaction out[" << count << "] is marked to be used without mixins in ring signature, but input used is " << tx_in_to_key.key_offsets.size());
 
       if(!vis.handle_output(tx_it->second.tx, tx_it->second.tx.vout[amount_outs_vec[i].second]))
       {

@@ -1400,7 +1400,7 @@ POP_WARNINGS
 #define LOG_PRINT_L4(mess)        LOG_PRINT(mess, LOG_LEVEL_4)
 #define LOG_PRINT_J(mess, level)        LOG_PRINT2_JORNAL(LOG_DEFAULT_TARGET, mess, level)
 
-#define LOG_ERROR(mess)           LOG_ERROR2(LOG_DEFAULT_TARGET, mess)
+#define LOG_ERROR(mess)               LOG_ERROR2(LOG_DEFAULT_TARGET, mess)
 #define LOG_FRAME(mess, level)        LOG_FRAME2(LOG_DEFAULT_TARGET, mess, level)
 #define LOG_VALUE(mess, level)        LOG_VALUE2(LOG_DEFAULT_TARGET, mess, level)
 #define LOG_ARRAY(mess, level)        LOG_ARRAY2(LOG_DEFAULT_TARGET, mess, level)
