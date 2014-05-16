@@ -27,7 +27,7 @@
 #include "net_peerlist_boost_serialization.h"
 #include "common/boost_serialization_helper.h"
 
-#define CURRENT_PEERLIST_STORAGE_ARCHIVE_VER    6
+#define CURRENT_PEERLIST_STORAGE_ARCHIVE_VER    7
 
 namespace nodetool
 {

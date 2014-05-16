@@ -78,7 +78,7 @@ namespace nodetool
     template <class Archive, class t_version_type>
     void serialize(Archive &a,  const t_version_type ver)
     {
-      if(ver < 3) 
+      if(ver < CURRENT_P2P_STORAGE_ARCHIVE_VER) 
         return;
       a & m_peerlist;
       a & m_config.m_peer_id;
