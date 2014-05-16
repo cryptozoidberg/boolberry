@@ -738,7 +738,7 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
     b.flags = BLOCK_FLAGS_VOTE_FOR_DONATION;
   height = m_blocks.size();
   diffic = get_difficulty_for_next_block();
-  if(!height%CURRENCY_DONATIONS_INTERVAL)
+  if(!(height%CURRENCY_DONATIONS_INTERVAL))
     get_required_donations_value_for_next_block(donation_amount_for_this_block);
   CHECK_AND_ASSERT_MES(diffic, false, "difficulty owverhead.");
 

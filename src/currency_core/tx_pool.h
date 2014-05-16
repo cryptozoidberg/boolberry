@@ -59,8 +59,10 @@ namespace currency
     bool append_key_images(std::unordered_set<crypto::key_image>& kic, const transaction& tx);
     std::string print_pool(bool short_format);
 
-    /*bool flush_pool(const std::strig& folder);
-    bool inflate_pool(const std::strig& folder);*/
+    /*
+    bool flush_pool(const std::strig& folder);
+    bool inflate_pool(const std::strig& folder);
+    */
 
 #define CURRENT_MEMPOOL_ARCHIVE_VER    9
 

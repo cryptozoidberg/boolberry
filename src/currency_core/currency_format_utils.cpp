@@ -927,16 +927,19 @@ namespace currency
     std::string proof = "The Times, May 13 2014: Fear of public exposure shames stars into paying tax";
 #endif
 
-
-    construct_miner_tx(0, 0, 0, 0, 0, 0, ac, ac, ac, bl.miner_tx, proof, 11, 0); // zero profit in genesis
+    alias_info ai = AUTO_VAL_INIT(ai);
+    ai.m_alias = "zoidberg";
+    ai.m_text_comment = "Let's go!";
+    get_account_address_from_str(ai.m_address, "1HNJjUsofq5LYLoXem119dd491yFAb5g4bCHkecV4sPqigmuxw57Ci9am71fEN4CRmA9jgnvo5PDNfaq8QnprWmS5uLqnbq"); 
+    construct_miner_tx(0, 0, 0, 0, 0, 0, ac, ac, ac, bl.miner_tx, proof, 11, 0, ai); // zero profit in genesis
     blobdata txb = tx_to_blob(bl.miner_tx);
-    std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);*/
-    
+    std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
+    */
     //hard code coinbase tx in genesis block, because "true" generating tx use random, but genesis should be always the same
 #ifndef TESTNET
     std::string genesis_coinbase_tx_hex = "TODO:";
 #else 
-    std::string genesis_coinbase_tx_hex = "010a01ff0008809bee02029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd0880710080bbb021022a74a3c4c36d32e95633d44ba9a7b8188297b2ac91afecab826b86fabaa709160080cab5ee010252d128bc9913d5ee8b702c37609917c2357b2f587e5de5622348a3acd718e5d60080a8d6b90702b8ed916c56b3a99c9cdf22c7be7ec4e85587e5d40bc46bf6995313c288ad841e0080c8afa025021b452b4ac6c6419e06181f8c9f0734bd5bb132d8b75b44bbcd07dd8f553acba60080b081daaf1402b10ba13e303cbe9abf7d5d44f1d417727abcc14903a74e071abd652ce1bf76dd0080c0f9decfae010205e440069d10646f1bbfaeee88a2db218017941c5fa7280849126d2372fc64340080c0caf384a302029cad2882bba92fb7ecc8136475dae03169839eee05ff3ee3232d0136712f08b7006f01bdcd3d8c080f0e504d8c7dbd3a041f58bb9215340084d4fb849e802dbeffe132024c5468652054696d65732c204d617920313320323031343a2046656172206f66207075626c6963206578706f73757265207368616d657320737461727320696e746f20706179696e6720746178";
+    std::string genesis_coinbase_tx_hex = "010a01ff0008809bee02029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd0880710080bbb021022a74a3c4c36d32e95633d44ba9a7b8188297b2ac91afecab826b86fabaa709160080cab5ee010252d128bc9913d5ee8b702c37609917c2357b2f587e5de5622348a3acd718e5d60080a8d6b90702b8ed916c56b3a99c9cdf22c7be7ec4e85587e5d40bc46bf6995313c288ad841e0080c8afa025021b452b4ac6c6419e06181f8c9f0734bd5bb132d8b75b44bbcd07dd8f553acba60080b081daaf1402b10ba13e303cbe9abf7d5d44f1d417727abcc14903a74e071abd652ce1bf76dd0080c0f9decfae010205e440069d10646f1bbfaeee88a2db218017941c5fa7280849126d2372fc64340080c0caf384a302029cad2882bba92fb7ecc8136475dae03169839eee05ff3ee3232d0136712f08b700c40101a0725d3e5dbe77c7a125d47f176d139355f7bbb8c6a875ba795fbece8fb7ca35024c5468652054696d65732c204d617920313320323031343a2046656172206f66207075626c6963206578706f73757265207368616d657320737461727320696e746f20706179696e67207461780300087a6f696462657267afe8323edbd46c74d3010d32e98454d78dad266b8e5f09cc6fb5ae058e080cf9391048c006da8ec9d71d379037ff9036b53e62693bf045e6ac9fc44605f71d2b094c6574277320676f21";
 #endif
 
     blobdata tx_bl;
