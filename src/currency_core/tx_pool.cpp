@@ -30,7 +30,15 @@ namespace currency
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::add_tx(const transaction &tx, /*const crypto::hash& tx_prefix_hash,*/ const crypto::hash &id, size_t blob_size, tx_verification_context& tvc, bool kept_by_block)
   {
-
+    
+    //#9Protection from big transaction flood
+    if(!kept_by_block && blob_size > m_blockchain.get_current_comulative_blocksize_limit())
+    {
+      LOG_PRINT_L0("transaction is too big for current transaction flow, tx_id: " << id);
+      tvc.m_verifivation_failed = true;
+      return false;
+    }
+    //TODO: add rule for relay, based on tx size/fee ratio
 
     if(!check_inputs_types_supported(tx))
     {
