@@ -108,6 +108,7 @@ namespace boost
     //------------------
     a & b.miner_tx;
     a & b.tx_hashes;
+    a & b.flags;
   }
 }
 }
