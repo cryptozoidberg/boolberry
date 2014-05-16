@@ -19,7 +19,7 @@
 
 // TOTAL_MONEY_SUPPLY - total number coins to be generated
 #define TOTAL_MONEY_SUPPLY                            ((uint64_t)(-1))
-#define DONATIONS_SUPPLY                              (TOTAL_MONEY_SUPPLY/20) 
+#define DONATIONS_SUPPLY                              (TOTAL_MONEY_SUPPLY/100) 
 #define EMISSION_SUPPLY                               (TOTAL_MONEY_SUPPLY - DONATIONS_SUPPLY) 
 
 #define EMISSION_CURVE_CHARACTER                      20
