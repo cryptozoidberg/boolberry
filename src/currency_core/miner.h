@@ -57,7 +57,7 @@ namespace currency
       for(; bl.nonce != std::numeric_limits<uint32_t>::max(); bl.nonce++)
       {
         crypto::hash h;
-        *reinterpret_cast<uint32_t*>(&bd[1]) = bl.nonce;
+        *reinterpret_cast<uint64_t*>(&bd[1]) = bl.nonce;
         get_blob_longhash(bd, h, height, scratch_accessor);
 
         if(check_hash(h, diffic))

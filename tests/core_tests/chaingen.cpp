@@ -110,6 +110,7 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
 {
   blk.major_version = CURRENT_BLOCK_MAJOR_VERSION;
   blk.minor_version = CURRENT_BLOCK_MINOR_VERSION;
+  blk.flags = BLOCK_FLAGS_SUPPRESS_DONATION;
   blk.timestamp = timestamp;
   blk.prev_id = prev_id;
 
@@ -298,6 +299,7 @@ bool test_generator::construct_block_manually(block& blk, const block& prev_bloc
                                               size_t txs_sizes/* = 0*/)
 {
   size_t height = get_block_height(prev_block) + 1;
+  blk.flags = BLOCK_FLAGS_SUPPRESS_DONATION;
   blk.major_version = actual_params & bf_major_ver ? major_ver : CURRENT_BLOCK_MAJOR_VERSION;
   blk.minor_version = actual_params & bf_minor_ver ? minor_ver : CURRENT_BLOCK_MINOR_VERSION;
   blk.timestamp     = actual_params & bf_timestamp ? timestamp : (height > 10 ? prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN: prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN-DIFF_UP_TIMESTAMP_DELTA); // Keep difficulty unchanged
@@ -490,6 +492,9 @@ bool fill_output_entries(std::vector<output_index>& out_indices,
     }
     else if (0 < rest)
     {
+      if(boost::get<txout_to_key>(oi.out).mix_attr == CURRENCY_TO_KEY_OUT_FORCED_NO_MIX || boost::get<txout_to_key>(oi.out).mix_attr > nmix+1)
+        continue;
+
       --rest;
       append = true;
     }

@@ -284,7 +284,7 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   // Empty tx
   tx.set_null();
   ASSERT_TRUE(serialization::dump_binary(tx, blob));
-  ASSERT_EQ(5, blob.size()); // 5 bytes + 0 bytes extra + 0 bytes signatures
+  ASSERT_EQ(6, blob.size()); // 5 bytes + 0 bytes extra + 0 bytes signatures
   ASSERT_TRUE(serialization::parse_binary(blob, tx1));
   ASSERT_EQ(tx, tx1);
   ASSERT_EQ(linearize_vector2(tx.signatures), linearize_vector2(tx1.signatures));
@@ -295,7 +295,7 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   tx.set_null();
   tx.vin.push_back(txin_gen1);
   ASSERT_TRUE(serialization::dump_binary(tx, blob));
-  ASSERT_EQ(7, blob.size()); // 5 bytes + 2 bytes vin[0] + 0 bytes extra + 0 bytes signatures
+  ASSERT_EQ(8, blob.size()); // 5 bytes + 2 bytes vin[0] + 0 bytes extra + 0 bytes signatures
   ASSERT_TRUE(serialization::parse_binary(blob, tx1));
   ASSERT_EQ(tx, tx1);
   ASSERT_EQ(linearize_vector2(tx.signatures), linearize_vector2(tx1.signatures));
@@ -303,11 +303,13 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   // Miner tx with empty signatures 2nd vector
   tx.signatures.resize(1);
   ASSERT_TRUE(serialization::dump_binary(tx, blob));
-  ASSERT_EQ(7, blob.size()); // 5 bytes + 2 bytes vin[0] + 0 bytes extra + 0 bytes signatures
+  ASSERT_EQ(9, blob.size()); // 5 bytes + 2 bytes vin[0] + 0 bytes extra + 0 bytes signatures + counter
   ASSERT_TRUE(serialization::parse_binary(blob, tx1));
   ASSERT_EQ(tx, tx1);
   ASSERT_EQ(linearize_vector2(tx.signatures), linearize_vector2(tx1.signatures));
 
+  //TX VALIDATION REMOVED FROM SERIALIZATION
+  /*
   // Miner tx with one signature
   tx.signatures[0].resize(1);
   ASSERT_FALSE(serialization::dump_binary(tx, blob));
@@ -322,37 +324,38 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   tx.signatures[0].resize(1);
   tx.signatures[1].resize(1);
   ASSERT_FALSE(serialization::dump_binary(tx, blob));
+  */
 
   // Two txin_gen, no signatures
   tx.vin.push_back(txin_gen1);
   tx.signatures.resize(0);
   ASSERT_TRUE(serialization::dump_binary(tx, blob));
-  ASSERT_EQ(9, blob.size()); // 5 bytes + 2 * 2 bytes vins + 0 bytes extra + 0 bytes signatures
+  ASSERT_EQ(10, blob.size()); // 5 bytes + 2 * 2 bytes vins + 0 bytes extra + 0 bytes signatures
   ASSERT_TRUE(serialization::parse_binary(blob, tx1));
   ASSERT_EQ(tx, tx1);
   ASSERT_EQ(linearize_vector2(tx.signatures), linearize_vector2(tx1.signatures));
 
   // Two txin_gen, signatures vector contains only one empty element
-  tx.signatures.resize(1);
-  ASSERT_FALSE(serialization::dump_binary(tx, blob));
+  //tx.signatures.resize(1);
+  //ASSERT_FALSE(serialization::dump_binary(tx, blob));
 
   // Two txin_gen, signatures vector contains two empty elements
   tx.signatures.resize(2);
   ASSERT_TRUE(serialization::dump_binary(tx, blob));
-  ASSERT_EQ(9, blob.size()); // 5 bytes + 2 * 2 bytes vins + 0 bytes extra + 0 bytes signatures
+  ASSERT_EQ(12, blob.size()); // 5 bytes + 2 * 2 bytes vins + 0 bytes extra + 0 bytes signatures
   ASSERT_TRUE(serialization::parse_binary(blob, tx1));
   ASSERT_EQ(tx, tx1);
   ASSERT_EQ(linearize_vector2(tx.signatures), linearize_vector2(tx1.signatures));
 
   // Two txin_gen, signatures vector contains three empty elements
-  tx.signatures.resize(3);
-  ASSERT_FALSE(serialization::dump_binary(tx, blob));
+  //tx.signatures.resize(3);
+  //ASSERT_FALSE(serialization::dump_binary(tx, blob));
 
   // Two txin_gen, signatures vector contains two non empty elements
-  tx.signatures.resize(2);
-  tx.signatures[0].resize(1);
-  tx.signatures[1].resize(1);
-  ASSERT_FALSE(serialization::dump_binary(tx, blob));
+  //tx.signatures.resize(2);
+  //tx.signatures[0].resize(1);
+  //tx.signatures[1].resize(1);
+  //ASSERT_FALSE(serialization::dump_binary(tx, blob));
 
   // A few bytes instead of signature
   tx.vin.clear();
@@ -367,15 +370,18 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   ASSERT_FALSE(serialization::parse_binary(blob, tx1));
 
   // Not enough signature vectors for all inputs
-  txin_to_key txin_to_key1;
-  txin_to_key1.key_offsets.resize(2);
-  tx.vin.clear();
-  tx.vin.push_back(txin_to_key1);
-  tx.vin.push_back(txin_to_key1);
-  tx.signatures.resize(1);
-  tx.signatures[0].resize(2);
-  ASSERT_FALSE(serialization::dump_binary(tx, blob));
-
+  //txin_to_key txin_to_key1;
+  //txin_to_key1.key_offsets.resize(2);
+  //tx.vin.clear();
+  //tx.vin.push_back(txin_to_key1);
+  //tx.vin.push_back(txin_to_key1);
+  //tx.signatures.resize(1);
+  //tx.signatures[0].resize(2);
+  //ASSERT_FALSE(serialization::dump_binary(tx, blob));
+  
+  
+  
+  /*
   // Too much signatures for two inputs
   tx.signatures.resize(3);
   tx.signatures[0].resize(2);
@@ -415,4 +421,5 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   // Blob contains one excess signature
   blob.resize(blob.size() + sizeof(crypto::signature) / 2);
   ASSERT_FALSE(serialization::parse_binary(blob, tx1));
+  */
 }

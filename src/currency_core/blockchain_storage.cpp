@@ -602,7 +602,7 @@ bool blockchain_storage::get_required_donations_value_for_next_block(uint64_t& d
   }
   std::vector<bool> donation_votes;
   for(size_t i = m_blocks.size() - CURRENCY_DONATIONS_INTERVAL; i!= m_blocks.size(); i++)
-    donation_votes.push_back(m_blocks[i].bl.flags&BLOCK_FLAGS_VOTE_FOR_DONATION);
+    donation_votes.push_back(!(m_blocks[i].bl.flags&BLOCK_FLAGS_SUPPRESS_DONATION));
 
   don_am = get_donations_anount_for_day(m_blocks.back().already_donated_coins, donation_votes);
   return true;
@@ -734,8 +734,9 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
   b.minor_version = CURRENT_BLOCK_MINOR_VERSION;
   b.prev_id = get_top_block_id();
   b.timestamp = time(NULL);
-  if(vote_for_donation)
-    b.flags = BLOCK_FLAGS_VOTE_FOR_DONATION;
+  b.flags = 0;
+  if(!vote_for_donation)
+    b.flags = BLOCK_FLAGS_SUPPRESS_DONATION;
   height = m_blocks.size();
   diffic = get_difficulty_for_next_block();
   if(!(height%CURRENCY_DONATIONS_INTERVAL))
@@ -927,46 +928,49 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
     CHECK_AND_ASSERT_MES(current_diff, false, "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!");
     crypto::hash proof_of_work = null_hash;
+    // POW
+#ifdef ENABLE_HASHING_DEBUG
+    size_t call_no = 0;
+    std::stringstream ss;      
+#endif
+    get_block_longhash(bei.bl, proof_of_work, bei.height, [&](uint64_t index) -> crypto::hash
+    {
+      uint64_t offset = index%bei.scratch_offset;
+      crypto::hash res;
+      if(offset >= m_blocks[connection_height].scratch_offset)
+      {
+        res = alt_scratchppad[offset - m_blocks[connection_height].scratch_offset];
+      }else
+      {
+        res = m_scratchpad[offset];  
+      }
+      auto it = alt_scratchppad_patch.find(offset);
+      if(it != alt_scratchppad_patch.end())
+      {//apply patch
+        res = crypto::xor_pod(res, it->second);
+      }
+#ifdef ENABLE_HASHING_DEBUG
+      ss << "[" << call_no << "][" << index << "%" << bei.scratch_offset <<"(" << index%bei.scratch_offset << ")]" << res << ENDL;
+      ++call_no;
+#endif
+      return res;
+    });
+#ifdef ENABLE_HASHING_DEBUG
+    LOG_PRINT_L3("ID: " << get_block_hash(bei.bl) << "[" << bei.height <<  "]" << ENDL << "POW:" << proof_of_work << ENDL << ss.str());
+#endif
+    if(!check_hash(proof_of_work, current_diff))
+    {
+      LOG_PRINT_RED_L0("Block with id: " << id
+        << ENDL << " for alternative chain, have not enough proof of work: " << proof_of_work
+        << ENDL << " expected difficulty: " << current_diff);
+      bvc.m_verifivation_failed = true;
+      return false;
+    }
+    //
+    
     if(!m_checkpoints.is_in_checkpoint_zone(bei.height))
     {
       m_is_in_checkpoint_zone = false;
-#ifdef ENABLE_HASHING_DEBUG
-      size_t call_no = 0;
-      std::stringstream ss;      
-#endif
-      get_block_longhash(bei.bl, proof_of_work, bei.height, [&](uint64_t index) -> crypto::hash
-      {
-        uint64_t offset = index%bei.scratch_offset;
-        crypto::hash res;
-        if(offset >= m_blocks[connection_height].scratch_offset)
-        {
-          res = alt_scratchppad[offset - m_blocks[connection_height].scratch_offset];
-        }else
-        {
-          res = m_scratchpad[offset];  
-        }
-        auto it = alt_scratchppad_patch.find(offset);
-        if(it != alt_scratchppad_patch.end())
-        {//apply patch
-          res = crypto::xor_pod(res, it->second);
-        }
-#ifdef ENABLE_HASHING_DEBUG
-        ss << "[" << call_no << "][" << index << "%" << bei.scratch_offset <<"(" << index%bei.scratch_offset << ")]" << res << ENDL;
-        ++call_no;
-#endif
-        return res;
-      });
-#ifdef ENABLE_HASHING_DEBUG
-      LOG_PRINT_L3("ID: " << get_block_hash(bei.bl) << "[" << bei.height <<  "]" << ENDL << "POW:" << proof_of_work << ENDL << ss.str());
-#endif
-      if(!check_hash(proof_of_work, current_diff))
-      {
-        LOG_PRINT_RED_L0("Block with id: " << id
-          << ENDL << " for alternative chain, have not enough proof of work: " << proof_of_work
-          << ENDL << " expected difficulty: " << current_diff);
-        bvc.m_verifivation_failed = true;
-        return false;
-      }
     }else
     {
       m_is_in_checkpoint_zone = true;
@@ -1661,6 +1665,7 @@ bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::ha
 
     sig_index++;
   }
+  CHECK_AND_ASSERT_MES(tx.signatures.size() == sig_index, false, "tx signatures count differs from inputs");
 
   return true;
 }
@@ -1797,28 +1802,6 @@ bool blockchain_storage::get_block_for_scratchpad_alt(uint64_t connection_height
   return true;
 }
 //------------------------------------------------------------------
-/*bool blockchain_storage::make_scratchpad_from_selector_alt(const get_scratchpad_param& prm, blobdata& bd, uint64_t height, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain)
-{
-  CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  //lets get two transactions outs
-  uint64_t index_a = prm.selectors[0]%height;
-  uint64_t index_b = prm.selectors[1]%height;
-  
-  block* pblocka = nullptr;
-  block* pblockb = nullptr;
-  uint64_t connection_height = alt_chain.size() ? alt_chain.front()->second.height:height;
-  bool r = get_block_for_scratchpad_alt(connection_height, index_a, alt_chain, pblocka);
-  CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_for_scratchpad_alt for a, index=" << index_a);
-  r = get_block_for_scratchpad_alt(connection_height, index_b, alt_chain, pblockb);
-  CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_for_scratchpad_alt for b, index=" << index_b);
-  
-  r = get_block_scratchpad_data(*pblocka, bd, prm.selectors[2]);
-  CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for a, index=" << index_a);
-  r = get_block_scratchpad_data(*pblockb, bd, prm.selectors[3]);
-  CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for b, index=" << index_b);  
-  return true;
-}*/
-//------------------------------------------------------------------
 bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypto::hash& id, block_verification_context& bvc)
 {
   TIME_MEASURE_START(block_processing_time);
@@ -1847,22 +1830,22 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   TIME_MEASURE_FINISH(target_calculating_time);
   TIME_MEASURE_START(longhash_calculating_time);
   crypto::hash proof_of_work = null_hash;
-  if(!m_checkpoints.is_in_checkpoint_zone(get_current_blockchain_height()))
+  
+  proof_of_work = get_block_longhash(bl, m_blocks.size(), [&](uint64_t index) -> crypto::hash&
   {
-    proof_of_work = get_block_longhash(bl, m_blocks.size(), [&](uint64_t index) -> crypto::hash&
-    {
-      return m_scratchpad[index%m_scratchpad.size()];
-    });
+    return m_scratchpad[index%m_scratchpad.size()];
+  });
 
-    if(!check_hash(proof_of_work, current_diffic))
-    {
-      LOG_PRINT_L0("Block with id: " << id << ENDL
-        << "have not enough proof of work: " << proof_of_work << ENDL
-        << "nexpected difficulty: " << current_diffic );
-      bvc.m_verifivation_failed = true;
-      return false;
-    }
-  }else
+  if(!check_hash(proof_of_work, current_diffic))
+  {
+    LOG_PRINT_L0("Block with id: " << id << ENDL
+      << "have not enough proof of work: " << proof_of_work << ENDL
+      << "nexpected difficulty: " << current_diffic );
+    bvc.m_verifivation_failed = true;
+    return false;
+  }
+
+  if(m_checkpoints.is_in_checkpoint_zone(get_current_blockchain_height()))
   {
     if(!m_checkpoints.check_block(get_current_blockchain_height(), id))
     {

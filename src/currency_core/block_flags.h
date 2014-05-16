@@ -4,7 +4,5 @@
 
 #pragma once 
 
-#define BLOCK_FLAGS_VOTE_FOR_DONATION                           0x01
-
-
+#define BLOCK_FLAGS_SUPPRESS_DONATION                           0x01
 

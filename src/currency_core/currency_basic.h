@@ -9,13 +9,13 @@
 #include <vector>
 #include <cstring>  // memcmp
 #include <sstream>
+#include "serialization/crypto.h"
+#include "serialization/vector.h"
 #include "serialization/serialization.h"
 #include "serialization/variant.h"
-#include "serialization/vector.h"
 #include "serialization/binary_archive.h"
 #include "serialization/json_archive.h"
 #include "serialization/debug_archive.h"
-#include "serialization/crypto.h"
 #include "serialization/keyvalue_serialization.h" // epee key-value serialization
 #include "string_tools.h"
 #include "currency_config.h"
@@ -168,35 +168,7 @@ namespace currency
 
     BEGIN_SERIALIZE_OBJECT()
       FIELDS(*static_cast<transaction_prefix *>(this))
-
-      ar.tag("signatures");
-      ar.begin_array();
-      PREPARE_CUSTOM_VECTOR_SERIALIZATION(vin.size(), signatures);
-      bool signatures_not_expected = signatures.empty();
-      if (!signatures_not_expected && vin.size() != signatures.size())
-        return false;
-
-      for (size_t i = 0; i < vin.size(); ++i)
-      {
-        size_t signature_size = get_signature_size(vin[i]);
-        if (signatures_not_expected)
-        {
-          if (0 == signature_size)
-            continue;
-          else
-            return false;
-        }
-
-        PREPARE_CUSTOM_VECTOR_SERIALIZATION(signature_size, signatures[i]);
-        if (signature_size != signatures[i].size())
-          return false;
-
-        FIELDS(signatures[i]);
-
-        if (vin.size() - i > 1)
-          ar.delimit_array();
-      }
-      ar.end_array();
+      FIELD(signatures)
     END_SERIALIZE()
 
 

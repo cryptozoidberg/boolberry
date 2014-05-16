@@ -65,8 +65,8 @@
 #define P2P_DEFAULT_PORT                                10101
 #define RPC_DEFAULT_PORT                                10102
 #else 
-#define P2P_DEFAULT_PORT                                30101
-#define RPC_DEFAULT_PORT                                30102
+#define P2P_DEFAULT_PORT                                40101
+#define RPC_DEFAULT_PORT                                40102
 #endif
 
 #define COMMAND_RPC_GET_BLOCKS_FAST_MAX_COUNT           1000
