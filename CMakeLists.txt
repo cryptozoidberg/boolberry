@@ -10,7 +10,7 @@ enable_testing()
 include_directories(src contrib contrib/epee/include "${CMAKE_BINARY_DIR}/version")
 add_definitions(-DSTATICLIB)
 
-set(TESTNET TRUE CACHE BOOL "Compile for testnet")
+set(TESTNET FALSE CACHE BOOL "Compile for testnet")
 if(TESTNET)
   add_definitions(-DTESTNET)  
 endif()
