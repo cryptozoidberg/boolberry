@@ -34,6 +34,7 @@ public:
     m_cmd_binder.set_handler("show_hr", boost::bind(&daemon_cmmands_handler::show_hr, this, _1), "Start showing hash rate");
     m_cmd_binder.set_handler("hide_hr", boost::bind(&daemon_cmmands_handler::hide_hr, this, _1), "Stop showing hash rate");
     m_cmd_binder.set_handler("make_alias", boost::bind(&daemon_cmmands_handler::make_alias, this, _1), "Puts alias reservation record into block template, if alias is free");
+    m_cmd_binder.set_handler("set_donations", boost::bind(&daemon_cmmands_handler::set_donations, this, _1), "Set donations mode: true if you vote for donation, and false - if against");
     m_cmd_binder.set_handler("save", boost::bind(&daemon_cmmands_handler::save, this, _1), "Save blockchain");
   }
 
@@ -66,6 +67,27 @@ private:
   bool help(const std::vector<std::string>& args)
   {
     std::cout << get_commands_str() << ENDL;
+    return true;
+  }
+  //--------------------------------------------------------------------------------
+  bool set_donations(const std::vector<std::string>& args)
+  {
+    if(args.size() != 1)
+    {
+      std::cout << "wrong set_donation parameters, use true or false" << ENDL;
+      return true;
+    }
+
+    if(args[0] == "true")
+      m_srv.get_payload_object().get_core().get_miner().set_do_donations(true);
+    else if(args[0] == "false")
+      m_srv.get_payload_object().get_core().get_miner().set_do_donations(false);
+    else
+    {
+      std::cout << "wrong set_donation parameters, use true or false" << ENDL;
+      return true;
+    }
+    
     return true;
   }
   //--------------------------------------------------------------------------------

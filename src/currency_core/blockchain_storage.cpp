@@ -1971,8 +1971,8 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   LOG_PRINT_L1("+++++ BLOCK SUCCESSFULLY ADDED" << ENDL << "id:\t" << id
     << ENDL << "PoW:\t" << proof_of_work
     << ENDL << "HEIGHT " << bei.height << ", difficulty:\t" << current_diffic
-    << ENDL << "block reward: " << print_money(fee_summary + base_reward) << "(" << print_money(base_reward) << " + " << print_money(fee_summary)
-    << "), coinbase_blob_size: " << coinbase_blob_size << ", cumulative size: " << cumulative_block_size
+    << ENDL << "block reward: " << print_money(fee_summary + base_reward) << "(" << print_money(base_reward) << " + " << print_money(fee_summary) 
+    << ")" << ( (bei.height%CURRENCY_DONATIONS_INTERVAL)?std::string(""):std::string("donation: ") + print_money(donation_total) ) << ", coinbase_blob_size: " << coinbase_blob_size << ", cumulative size: " << cumulative_block_size
     << ", " << block_processing_time << "("<< target_calculating_time << "/" << longhash_calculating_time << ")ms");
 
   bvc.m_added_to_main_chain = true;

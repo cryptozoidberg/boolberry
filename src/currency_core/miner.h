@@ -44,6 +44,7 @@ namespace currency
     bool is_mining();
     bool on_idle();
     void on_synchronized();
+    void set_do_donations(bool do_donations);
     //synchronous analog (for fast calls)
     void pause();
     void resume();
@@ -120,7 +121,6 @@ namespace currency
     bool m_do_mining;
     alias_info m_alias_to_apply_in_block;
     critical_section m_aliace_to_apply_in_block_lock;
-    bool m_do_donate;
     std::vector<crypto::hash> m_scratchpad;
   };
 }

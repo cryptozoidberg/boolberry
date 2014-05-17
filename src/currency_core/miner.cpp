@@ -54,10 +54,8 @@ namespace currency
     m_last_hr_merge_time(0),
     m_hashes(0),
     m_alias_to_apply_in_block(boost::value_initialized<alias_info>()),
-    m_do_donate(false),
     m_config(AUTO_VAL_INIT(m_config))
   {
-
   }
   //-----------------------------------------------------------------------------------------------------
   miner::~miner()
@@ -116,7 +114,7 @@ namespace currency
       extra_nonce = m_extra_messages[m_config.current_extra_message_index];
     }
     CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
-    if(!m_phandler->get_block_template(bl, m_mine_address, di, height, extra_nonce, m_do_donate, m_alias_to_apply_in_block))
+    if(!m_phandler->get_block_template(bl, m_mine_address, di, height, extra_nonce, m_config.donation_descision, m_alias_to_apply_in_block))
     {
       LOG_ERROR("Failed to get_block_template()");
       return false;
@@ -234,6 +232,13 @@ namespace currency
   bool miner::is_mining()
   {
     return !m_stop;
+  }
+  //----------------------------------------------------------------------------------------------------- 
+  void miner::set_do_donations(bool do_donations)
+  {
+    LOG_PRINT_L0("Donations mode set to " << (do_donations?"true":"false"));
+    m_config.donation_decision_made = true;
+    m_config.donation_descision = do_donations;
   }
   //----------------------------------------------------------------------------------------------------- 
   bool miner::start(const account_public_address& adr, size_t threads_count)
