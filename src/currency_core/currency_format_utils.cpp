@@ -64,10 +64,10 @@ namespace currency
     r = string_tools::parse_tpod_from_hex_string(CURRENCY_DONATIONS_ADDRESS_TRACKING_KEY, donation_acc.m_view_secret_key);
     CHECK_AND_ASSERT_MES(r, false, "failed to parse_tpod_from_hex_string from P2P_DONATIONS_ADDRESS_TRACKING_KEY");
 
-    r = get_account_address_from_str(donation_acc.m_account_address, CURRENCY_ROYALTY_ADDRESS);
+    r = get_account_address_from_str(royalty_acc.m_account_address, CURRENCY_ROYALTY_ADDRESS);
     CHECK_AND_ASSERT_MES(r, false, "failed to get_account_address_from_str from P2P_ROYALTY_ADDRESS");
 
-    r = string_tools::parse_tpod_from_hex_string(CURRENCY_ROYALTY_ADDRESS_TRACKING_KEY, donation_acc.m_view_secret_key);
+    r = string_tools::parse_tpod_from_hex_string(CURRENCY_ROYALTY_ADDRESS_TRACKING_KEY, royalty_acc.m_view_secret_key);
     CHECK_AND_ASSERT_MES(r, false, "failed to parse_tpod_from_hex_string from P2P_ROYALTY_ADDRESS_TRACKING_KEY");
     return true;
   }
@@ -933,13 +933,13 @@ namespace currency
     get_account_address_from_str(ai.m_address, "1HNJjUsofq5LYLoXem119dd491yFAb5g4bCHkecV4sPqigmuxw57Ci9am71fEN4CRmA9jgnvo5PDNfaq8QnprWmS5uLqnbq"); 
     construct_miner_tx(0, 0, 0, 0, 0, 0, ac, ac, ac, bl.miner_tx, proof, 11, 0, ai); // zero profit in genesis
     blobdata txb = tx_to_blob(bl.miner_tx);
-    std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);*/
-    
+    std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
+*/    
     //hard code coinbase tx in genesis block, because "true" generating tx use random, but genesis should be always the same
 #ifndef TESTNET
     std::string genesis_coinbase_tx_hex = "TODO:";
 #else 
-    std::string genesis_coinbase_tx_hex = "010a01ff00088092f401029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807100808ece1c022a74a3c4c36d32e95633d44ba9a7b8188297b2ac91afecab826b86fabaa70916008084af5f0252d128bc9913d5ee8b702c37609917c2357b2f587e5de5622348a3acd718e5d60080f882ad1602b8ed916c56b3a99c9cdf22c7be7ec4e85587e5d40bc46bf6995313c288ad841e0080c8afa025021b452b4ac6c6419e06181f8c9f0734bd5bb132d8b75b44bbcd07dd8f553acba60080c0ee8ed20b02b10ba13e303cbe9abf7d5d44f1d417727abcc14903a74e071abd652ce1bf76dd0080e08d84ddcb010205e440069d10646f1bbfaeee88a2db218017941c5fa7280849126d2372fc64340080c0caf384a302029cad2882bba92fb7ecc8136475dae03169839eee05ff3ee3232d0136712f08b700c40101f58cd5aa2a7d2c268ec85a276047ca2d934908f5304040df5cb664bb80ecc3fd024c5468652054696d65732c204d617920313320323031343a2046656172206f66207075626c6963206578706f73757265207368616d657320737461727320696e746f20706179696e67207461780300087a6f696462657267afe8323edbd46c74d3010d32e98454d78dad266b8e5f09cc6fb5ae058e080cf9391048c006da8ec9d71d379037ff9036b53e62693bf045e6ac9fc44605f71d2b094c6574277320676f2100";
+    std::string genesis_coinbase_tx_hex = "010a01ff00088092f401029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807100808ece1c022a74a3c4c36d32e95633d44ba9a7b8188297b2ac91afecab826b86fabaa70916008084af5f0252d128bc9913d5ee8b702c37609917c2357b2f587e5de5622348a3acd718e5d60080f882ad1602b8ed916c56b3a99c9cdf22c7be7ec4e85587e5d40bc46bf6995313c288ad841e0080c8afa025021b452b4ac6c6419e06181f8c9f0734bd5bb132d8b75b44bbcd07dd8f553acba60080c0ee8ed20b02b10ba13e303cbe9abf7d5d44f1d417727abcc14903a74e071abd652ce1bf76dd0080e08d84ddcb010205e440069d10646f1bbfaeee88a2db218017941c5fa7280849126d2372fc64340080c0caf384a302029cad2882bba92fb7ecc8136475dae03169839eee05ff3ee3232d0136712f08b700c401013696374739ea10a92aeed86b210c57c5b3540991f335b9f7686c5aef40a716b3024c5468652054696d65732c204d617920313320323031343a2046656172206f66207075626c6963206578706f73757265207368616d657320737461727320696e746f20706179696e67207461780300087a6f696462657267afe8323edbd46c74d3010d32e98454d78dad266b8e5f09cc6fb5ae058e080cf9391048c006da8ec9d71d379037ff9036b53e62693bf045e6ac9fc44605f71d2b094c6574277320676f2100";
                                           
 #endif
 

@@ -588,7 +588,7 @@ namespace nodetool
     if(!local_peers_count)
       return false;//no peers
 
-    size_t max_random_index = std::min<uint64_t>(local_peers_count -1, 20);
+    size_t max_random_index = std::min<uint64_t>(local_peers_count -1, 50);
 
     std::set<size_t> tried_peers;
 
