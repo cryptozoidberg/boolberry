@@ -3,7 +3,7 @@ Building
 
 ### Unix and MacOS X
 
-Dependencies: GCC 4.7.3 or later, CMake 2.8.6 or later, and Boost 1.53 or later. You may download them from:
+Dependencies: GCC 4.7.3 or later, CMake 2.8.6 or later, and Boost 1.53(but don't use 1.54) or later. You may download them from:
 http://gcc.gnu.org/
 http://www.cmake.org/
 http://www.boost.org/
@@ -30,7 +30,7 @@ Building with Clang: it may be possible to use Clang instead of GCC, but this ma
 
 ### Windows
 
-Dependencies: MSVC 2012 or later, CMake 2.8.6 or later, and Boost 1.53 or later. You may download them from:
+Dependencies: MSVC 2012 or later, CMake 2.8.6 or later, and Boost 1.53(but don't use 1.54) or later. You may download them from:
 http://www.microsoft.com/
 http://www.cmake.org/
 http://www.boost.org/
