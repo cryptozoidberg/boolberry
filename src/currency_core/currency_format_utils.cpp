@@ -863,6 +863,62 @@ namespace currency
     return ss.str();
   }
   //------------------------------------------------------------------
+#define ANTI_OVERFLOW_AMOUNT       1000000
+#define GET_PERECENTS_BIG_NUMBERS(per, total) (per/ANTI_OVERFLOW_AMOUNT)*100 / (total/ANTI_OVERFLOW_AMOUNT) 
+
+  void print_reward_halwing()
+  {
+    std::cout << std::endl << "Reward halving for 10 years:" << std::endl;
+    std::cout << std::setw(10) << std::left << "day" << std::setw(19) << "block reward" << std::setw(19) << "generated coins" << std::endl;
+
+    uint64_t already_generated_coins = 0;
+    uint64_t already_donated_coins = 0;
+    uint64_t emission_supply = EMISSION_SUPPLY;
+    uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
+    for(uint64_t day = 0; day != 365*10; ++day)
+    {
+      uint64_t emission_reward = 0;
+      uint64_t stub = 0;
+      get_block_reward(0, 0, already_generated_coins, 0, emission_reward, stub);
+      if(!(day%183))
+      {
+        std::cout << std::left 
+          << std::setw(10) << day 
+          << std::setw(19) << print_money(emission_reward) 
+          << std::setw(4) << std::string(std::to_string(GET_PERECENTS_BIG_NUMBERS((already_generated_coins + already_donated_coins), total_money_supply)) + "%") 
+          << print_money(already_generated_coins + already_donated_coins) 
+          << std::endl;
+      }
+
+      
+      for(size_t i = 0; i != 720; i++)
+      {
+        get_block_reward(0, 0, already_generated_coins, 0, emission_reward, stub);
+        already_generated_coins += emission_reward;
+      }
+      std::vector<bool> votes(CURRENCY_DONATIONS_INTERVAL, true);
+      uint64_t max_possible_donation_reward = get_donations_anount_for_day(already_donated_coins, votes);
+      already_donated_coins += max_possible_donation_reward;
+
+    }
+
+
+  }
+  //------------------------------------------------------------------
+  void print_currency_details()
+  {   
+    //for future forks 
+    
+    std::cout << "Currency name: \t\t" << CURRENCY_NAME <<"(" << CURRENCY_NAME_SHORT << ")" << std::endl;
+    std::cout << "Money supply: \t\t" << print_money(TOTAL_MONEY_SUPPLY) << " coins"
+                  << "(" << print_money(EMISSION_SUPPLY) << " + " << print_money(DONATIONS_SUPPLY) << "), dev bounties is " << GET_PERECENTS_BIG_NUMBERS((DONATIONS_SUPPLY+ANTI_OVERFLOW_AMOUNT), (TOTAL_MONEY_SUPPLY)) << "%" << std::endl;
+
+    std::cout << "Block interval: \t" << DIFFICULTY_TARGET << " seconds" << std::endl;
+    std::cout << "Default p2p port: \t" << P2P_DEFAULT_PORT << std::endl;
+    std::cout << "Default rpc port: \t" << RPC_DEFAULT_PORT << std::endl;
+    print_reward_halwing();
+  }
+  //------------------------------------------------------------------
   std::string dump_patch(const std::map<uint64_t, crypto::hash>& patch)
   {
     std::stringstream ss;

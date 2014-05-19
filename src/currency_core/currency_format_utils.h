@@ -135,6 +135,8 @@ namespace currency
   std::string print_money(uint64_t amount);
   std::string dump_scratchpad(const std::vector<crypto::hash>& scr);
   std::string dump_patch(const std::map<uint64_t, crypto::hash>& patch);
+
+  void print_currency_details();
   
   
   //---------------------------------------------------------------

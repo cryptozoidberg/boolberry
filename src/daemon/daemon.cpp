@@ -41,6 +41,7 @@ namespace
   const command_line::arg_descriptor<std::string> arg_log_file    = {"log-file", "", ""};
   const command_line::arg_descriptor<int>         arg_log_level   = {"log-level", "", LOG_LEVEL_0};
   const command_line::arg_descriptor<bool>        arg_console     = {"no-console", "Disable daemon console commands"};
+  const command_line::arg_descriptor<bool>        arg_show_details     = {"currency-details", "Display currency details"};
 }
 
 bool command_line_preprocessor(const boost::program_options::variables_map& vm);
@@ -71,6 +72,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_cmd_sett, arg_log_file);
   command_line::add_arg(desc_cmd_sett, arg_log_level);
   command_line::add_arg(desc_cmd_sett, arg_console);
+  command_line::add_arg(desc_cmd_sett, arg_show_details);
   
 
   currency::core::init_options(desc_cmd_sett);
@@ -224,6 +226,12 @@ bool command_line_preprocessor(const boost::program_options::variables_map& vm)
   if (command_line::get_arg(vm, command_line::arg_version))
   {
     std::cout << CURRENCY_NAME  << " v" << PROJECT_VERSION_LONG << ENDL;
+    exit = true;
+  }
+
+  if(command_line::get_arg(vm, arg_show_details))
+  {
+    currency::print_currency_details();
     exit = true;
   }
   if (command_line::get_arg(vm, arg_os_version))
