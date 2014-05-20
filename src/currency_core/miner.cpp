@@ -151,7 +151,7 @@ namespace currency
     }
     m_last_hr_merge_time = misc_utils::get_tick_count();
     m_hashes = 0;
-    if(m_do_print_hashrate)
+    if(m_do_print_hashrate && is_mining())
       std::cout << "hr: " << m_current_hash_rate << ENDL;
   }
   //-----------------------------------------------------------------------------------------------------
