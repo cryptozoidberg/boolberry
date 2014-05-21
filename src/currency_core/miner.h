@@ -121,6 +121,8 @@ namespace currency
     bool m_do_mining;
     alias_info m_alias_to_apply_in_block;
     critical_section m_aliace_to_apply_in_block_lock;
+    
+    boost::shared_mutex m_scratchpad_access;
     std::vector<crypto::hash> m_scratchpad;
   };
 }

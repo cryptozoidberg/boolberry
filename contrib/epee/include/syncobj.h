@@ -66,6 +66,7 @@ namespace epee
     bool m_rised;
   };
 
+
   class critical_region;
 
   class critical_section
@@ -212,15 +213,23 @@ namespace epee
   };
 #endif
 
-#define  SHARED_CRITICAL_REGION_BEGIN(x) { shared_guard   critical_region_var(x)
-#define  EXCLUSIVE_CRITICAL_REGION_BEGIN(x) { exclusive_guard   critical_region_var(x)
+#define  SHARED_CRITICAL_REGION_LOCAL(x) boost::shared_lock< boost::shared_mutex > critical_region_var(x)
+#define  EXCLUSIVE_CRITICAL_REGION_LOCAL(x) boost::unique_lock< boost::shared_mutex > critical_region_var(x)
+
+#define  SHARED_CRITICAL_REGION_BEGIN(x) { SHARED_CRITICAL_REGION_LOCAL(x)
+#define  EXCLUSIVE_CRITICAL_REGION_BEGIN(x) { EXCLUSIVE_CRITICAL_REGION_LOCAL(x)
 
 #define  CRITICAL_REGION_LOCAL(x) epee::critical_region_t<decltype(x)>   critical_region_var(x)
 #define  CRITICAL_REGION_BEGIN(x) { epee::critical_region_t<decltype(x)>   critical_region_var(x)
 #define  CRITICAL_REGION_LOCAL1(x) epee::critical_region_t<decltype(x)>   critical_region_var1(x)
 #define  CRITICAL_REGION_BEGIN1(x) { epee::critical_region_t<decltype(x)>   critical_region_var1(x)
 
+
+
 #define  CRITICAL_REGION_END() }
+
+
+
 
 
 #if defined(WINDWOS_PLATFORM)

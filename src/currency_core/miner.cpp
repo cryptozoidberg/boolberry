@@ -89,6 +89,7 @@ namespace currency
   //-----------------------------------------------------------------------------------------------------
   bool miner::update_scratchpad()
   {
+    EXCLUSIVE_CRITICAL_REGION_LOCAL(m_scratchpad_access);
     return m_bc.copy_scratchpad(m_scratchpad);
   }
   //-----------------------------------------------------------------------------------------------------
@@ -99,7 +100,7 @@ namespace currency
     
     update_scratchpad();
     validate_alias_info();
-
+    //here miner threads may work few rounds without 
     return request_block_template();
   }
   //-----------------------------------------------------------------------------------------------------
@@ -366,15 +367,16 @@ namespace currency
     uint32_t th_local_index = boost::interprocess::ipcdetail::atomic_inc32(&m_thread_index);
     LOG_PRINT_L0("Miner thread was started ["<< th_local_index << "]");
     log_space::log_singletone::set_thread_log_prefix(std::string("[miner ") + std::to_string(th_local_index) + "]");
-    uint32_t nonce = m_starter_nonce + th_local_index;
+    uint64_t nonce = m_starter_nonce + th_local_index;
     uint64_t height = 0;
     difficulty_type local_diff = 0;
     uint32_t local_template_ver = 0;
     block b;
     blobdata block_blob;
+
     //for now have a copy of scratchpad for every thread
     //temporary solution(to avoid slow synchronization while mining), will be changed in few weeks to use one 
-    std::vector<crypto::hash> local_scratch_pad;
+    //std::vector<crypto::hash> local_scratch_pad;
     while(!m_stop)
     {
       if(m_pausers_count)//anti split workaround
@@ -389,12 +391,7 @@ namespace currency
         b = m_template;
         block_blob = get_block_hashing_blob(b);
         local_diff = m_diffic;
-        if(height != m_height)
-        {
-          height = m_height;
-          //copy new scratchpad
-          local_scratch_pad = m_scratchpad;
-        }    
+        height = m_height;
         CRITICAL_REGION_END();
         local_template_ver = m_template_no;
         nonce = m_starter_nonce + th_local_index;
@@ -407,12 +404,14 @@ namespace currency
         continue;
       }
 
-      *reinterpret_cast<uint32_t*>(&block_blob[1]) = nonce;
+      *reinterpret_cast<uint64_t*>(&block_blob[1]) = nonce;
       crypto::hash h;
+      SHARED_CRITICAL_REGION_BEGIN(m_scratchpad_access);
       get_blob_longhash(block_blob, h, height, [&](uint64_t index) -> crypto::hash&
-      {
-        return local_scratch_pad[index%local_scratch_pad.size()];
-      });
+         {
+           return m_scratchpad[index%m_scratchpad.size()];
+         });
+      CRITICAL_REGION_END();
 
       if(check_hash(h, local_diff))
       {
