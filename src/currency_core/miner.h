@@ -81,13 +81,14 @@ namespace currency
     {
       uint64_t current_extra_message_index;
       bool donation_decision_made;
-      bool donation_descision;
+      bool donation_decision;
       //TODO: add alias que here
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(current_extra_message_index)
         KV_SERIALIZE(donation_decision_made)
-        KV_SERIALIZE(donation_descision)
+        KV_SERIALIZE_N(donation_decision, "donation_descision")//  misprint fix
+        KV_SERIALIZE(donation_decision)
       END_KV_SERIALIZE_MAP()
     };
 

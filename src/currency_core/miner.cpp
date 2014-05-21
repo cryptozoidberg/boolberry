@@ -115,7 +115,7 @@ namespace currency
       extra_nonce = m_extra_messages[m_config.current_extra_message_index];
     }
     CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
-    if(!m_phandler->get_block_template(bl, m_mine_address, di, height, extra_nonce, m_config.donation_descision, m_alias_to_apply_in_block))
+    if(!m_phandler->get_block_template(bl, m_mine_address, di, height, extra_nonce, m_config.donation_decision, m_alias_to_apply_in_block))
     {
       LOG_ERROR("Failed to get_block_template()");
       return false;
@@ -176,9 +176,9 @@ namespace currency
       
       m_config.donation_decision_made = true;
       if(desc == "true")
-        m_config.donation_descision = true;
+        m_config.donation_decision = true;
       else 
-        m_config.donation_descision = false;
+        m_config.donation_decision = false;
     }
 
     if(command_line::has_arg(vm, arg_extra_messages))
@@ -239,7 +239,7 @@ namespace currency
   {
     LOG_PRINT_L0("Donations mode set to " << (do_donations?"true":"false"));
     m_config.donation_decision_made = true;
-    m_config.donation_descision = do_donations;
+    m_config.donation_decision = do_donations;
   }
   //----------------------------------------------------------------------------------------------------- 
   bool miner::start(const account_public_address& adr, size_t threads_count)
@@ -259,7 +259,7 @@ namespace currency
         << ENDL
         << "**********************************************************************");
       LOG_PRINT_CYAN("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", LOG_LEVEL_0);
-      m_config.donation_descision = true;
+      m_config.donation_decision = true;
     }
 
     m_mine_address = adr;
