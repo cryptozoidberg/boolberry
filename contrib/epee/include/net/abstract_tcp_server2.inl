@@ -121,9 +121,10 @@ PRAGMA_WARNING_DISABLE_VS(4355)
     long ip_ = boost::asio::detail::socket_ops::host_to_network_long(remote_ep.address().to_v4().to_ulong());
 
     context.set_details(boost::uuids::random_generator()(), ip_, remote_ep.port(), is_income);
-    LOG_PRINT_L3("[sock " << socket_.native_handle() << "] new connection from " << print_connection_context_short(context) <<
-      " to " << local_ep.address().to_string() << ':' << local_ep.port() <<
-      ", total sockets objects " << m_ref_sockets_count);
+   
+    LOG_PRINT_L3("[sock " << socket_.native_handle() << "] new connection, remote end_point: " << print_connection_context_short(context) <<
+        " local end_point: " << local_ep.address().to_string() << ':' << local_ep.port() <<
+        ", total sockets objects " << m_ref_sockets_count);
 
     if(m_pfilter && !m_pfilter->is_remote_ip_allowed(context.m_remote_ip))
     {
