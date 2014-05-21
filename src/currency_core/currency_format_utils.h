@@ -12,7 +12,8 @@
 #include "crypto/hash.h"
 #include "crypto/wild_keccak.h"
 
-#define MAX_ALIAS_LEN     255
+#define MAX_ALIAS_LEN         255
+#define VALID_ALIAS_CHARS     "0123456789abcdefghijklmnopqrstuvwxyz-."
 
 namespace currency
 {

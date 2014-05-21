@@ -653,6 +653,9 @@ bool simple_wallet::get_transfer_address(const std::string& adr_str, currency::a
     if(adr_str.size() < 2)
       return false;
     std::string pure_alias_name = adr_str.substr(1);
+    CHECK_AND_ASSERT_MES(validate_alias_name(pure_alias_name), false, "wrong name set in transfer command");
+
+
     currency::alias_info_base ai = AUTO_VAL_INIT(ai);
     if(!get_alias_from_daemon(pure_alias_name, ai))
       return false;

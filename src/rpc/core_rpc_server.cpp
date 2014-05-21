@@ -558,6 +558,11 @@ namespace currency
       return false;
     }
     alias_info_base aib = AUTO_VAL_INIT(aib);
+    if(!validate_alias_name(req.alias))
+    {      
+      res.status = "Alias have wrong name";
+      return false;
+    }
     if(!m_core.get_blockchain_storage().get_alias_info(req.alias, aib))
     {
       res.status = "Alias not found.";
