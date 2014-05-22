@@ -130,7 +130,7 @@ namespace tools
         return;
       a & m_unconfirmed_txs;
     }
-
+    static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
   private:
     bool store_keys(const std::string& keys_file_name, const std::string& password);
     void load_keys(const std::string& keys_file_name, const std::string& password);
@@ -142,10 +142,11 @@ namespace tools
     bool is_transfer_unlocked(const transfer_details& td) const;
     bool clear();
     void pull_blocks(size_t& blocks_added);
-    uint64_t select_transfers(uint64_t needed_money, bool add_dust, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
+    uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
     bool prepare_file_names(const std::string& file_path);
     void process_unconfirmed(const currency::transaction& tx);
     void add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount);
+    
 
     currency::account_base m_account;
     std::string m_daemon_address;
@@ -284,7 +285,7 @@ namespace tools
     }
 
     std::list<transfer_container::iterator> selected_transfers;
-    uint64_t found_money = select_transfers(needed_money, 0 == fake_outputs_count, dust_policy.dust_threshold, selected_transfers);
+    uint64_t found_money = select_transfers(needed_money, fake_outputs_count, dust_policy.dust_threshold, selected_transfers);
     CHECK_AND_THROW_WALLET_EX(found_money < needed_money, error::not_enough_money, found_money, needed_money - fee, fee);
 
     typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry out_entry;

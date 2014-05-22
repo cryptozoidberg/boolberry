@@ -185,11 +185,16 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::init(const boost::program_options::variables_map& vm)
   {
-
+#ifndef TESTNET
     ADD_HARDCODED_SEED_NODE("107.170.97.197:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
     ADD_HARDCODED_SEED_NODE("188.226.215.102:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
     ADD_HARDCODED_SEED_NODE("128.199.196.65:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
     ADD_HARDCODED_SEED_NODE("107.170.228.11:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));    
+#else
+    ADD_HARDCODED_SEED_NODE("162.243.210.156:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
+    ADD_HARDCODED_SEED_NODE("162.243.101.90:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
+#endif
+
 
     bool res = handle_command_line(vm);
     CHECK_AND_ASSERT_MES(res, false, "Failed to handle command line");

@@ -542,14 +542,60 @@ namespace
   }
 }
 //----------------------------------------------------------------------------------------------------
-uint64_t wallet2::select_transfers(uint64_t needed_money, bool add_dust, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers)
+uint64_t wallet2::select_indices_for_transfer(std::list<size_t>& selected_indexes, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money)
 {
+  uint64_t found_money = 0;
+  while(found_money < needed_money && found_free_amounts.size())
+  {
+    auto it = found_free_amounts.lower_bound(needed_money - found_money);
+    if(it != found_free_amounts.end() && it->second.size() )
+    {      
+      found_money += it->first;
+      selected_indexes.push_back(it->second.back());
+      break;
+    }else
+    {
+      it = --found_free_amounts.end();
+      CHECK_AND_ASSERT_MES(it->second.size(), 0, "internal error: empty found_free_amounts map");
+      found_money += it->first;
+      selected_indexes.push_back(it->second.back());
+
+      it->second.pop_back();
+      if(!it->second.size())
+        found_free_amounts.erase(it);
+    }
+  }
+  return found_money;
+}
+//----------------------------------------------------------------------------------------------------
+uint64_t wallet2::select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers)
+{
+  std::map<uint64_t, std::list<size_t> > found_free_amounts;
+
+  for (size_t i = 0; i < m_transfers.size(); ++i)
+  {
+    const transfer_details& td = m_transfers[i];
+    if (!td.m_spent && is_transfer_unlocked(td) && 
+      currency::is_mixattr_applicable_for_fake_outs_counter(boost::get<currency::txout_to_key>(td.m_tx.vout[td.m_internal_output_index].target).mix_attr, fake_outputs_count))
+    {
+      found_free_amounts[td.m_tx.vout[td.m_internal_output_index].amount].push_back(i);
+    }
+  }
+
+  std::list<size_t> selected_indexes;
+  uint64_t found_money = select_indices_for_transfer(selected_indexes, found_free_amounts, needed_money);
+  for(auto i: selected_indexes)
+    selected_transfers.push_back(m_transfers.begin() + i);
+  
+  return found_money;
+
+  /*
   std::vector<size_t> unused_transfers_indices;
   std::vector<size_t> unused_dust_indices;
   for (size_t i = 0; i < m_transfers.size(); ++i)
   {
     const transfer_details& td = m_transfers[i];
-    if (!td.m_spent && is_transfer_unlocked(td))
+    if (!td.m_spent && is_transfer_unlocked(td) )
     {
       if (dust < td.amount())
         unused_transfers_indices.push_back(i);
@@ -577,8 +623,9 @@ uint64_t wallet2::select_transfers(uint64_t needed_money, bool add_dust, uint64_
     selected_transfers.push_back(it);
     found_money += it->amount();
   }
-
+  
   return found_money;
+  */
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount)

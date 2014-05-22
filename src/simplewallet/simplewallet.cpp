@@ -720,7 +720,7 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   {
     currency::transaction tx;
     m_wallet->transfer(dsts, fake_outs_count, 0, DEFAULT_FEE, tx);
-    success_msg_writer(true) << "Money successfully sent, transaction " << get_transaction_hash(tx);
+    success_msg_writer(true) << "Money successfully sent, transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
   }
   catch (const tools::error::daemon_busy&)
   {

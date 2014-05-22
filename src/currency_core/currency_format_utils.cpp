@@ -214,6 +214,16 @@ namespace currency
     return total;
   }
   //---------------------------------------------------------------
+  bool is_mixattr_applicable_for_fake_outs_counter(uint8_t mix_attr, uint64_t fake_attr_count)
+  {
+    if(mix_attr > 1)
+      return fake_attr_count+1 >= mix_attr;
+    else if(mix_attr == CURRENCY_TO_KEY_OUT_FORCED_NO_MIX)
+      return fake_attr_count == 0;
+    else 
+      return true;
+  }  
+  //---------------------------------------------------------------
   bool parse_amount(uint64_t& amount, const std::string& str_amount_)
   {
     std::string str_amount = str_amount_;
