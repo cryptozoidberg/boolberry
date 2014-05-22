@@ -91,6 +91,7 @@ namespace currency
         txd_p.first->second.max_used_block_id = null_hash;
         txd_p.first->second.max_used_block_height = 0;
         txd_p.first->second.kept_by_block = kept_by_block;
+        txd_p.first->second.receive_time = time(nullptr);
         tvc.m_verifivation_impossible = true;
         tvc.m_added_to_pool = true;
       }else
@@ -112,6 +113,7 @@ namespace currency
       txd_p.first->second.max_used_block_height = max_used_block_height;
       txd_p.first->second.last_failed_height = 0;
       txd_p.first->second.last_failed_id = null_hash;
+      txd_p.first->second.receive_time = time(nullptr);
       tvc.m_added_to_pool = true;
 
       if(txd_p.first->second.fee > 0)
@@ -183,6 +185,29 @@ namespace currency
     fee = it->second.fee;
     remove_transaction_keyimages(it->second.tx);
     m_transactions.erase(it);
+    return true;
+  }
+  //---------------------------------------------------------------------------------
+  void tx_memory_pool::on_idle()
+  {
+    m_remove_stuck_tx_interval.do_call([this](){return remove_stuck_transactions();});
+  }
+  //---------------------------------------------------------------------------------
+  bool tx_memory_pool::remove_stuck_transactions()
+  {
+    CRITICAL_REGION_LOCAL(m_transactions_lock);
+    for(auto it = m_transactions.begin(); it!= m_transactions.end();)
+    {
+      uint64_t tx_age = time(nullptr) - it->second.receive_time;
+
+      if((tx_age > CURRENCY_MEMPOOL_TX_LIVETIME && !it->second.kept_by_block) || 
+         (tx_age > CURRENCY_MEMPOOL_TX_FROM_ALT_BLOCK_LIVETIME && it->second.kept_by_block) )
+      {
+        LOG_PRINT_L0("Tx " << it->first << " removed from tx pool due to outdated, age: " << tx_age );
+        m_transactions.erase(it++);
+      }else
+        ++it;
+    }
     return true;
   }
   //---------------------------------------------------------------------------------

@@ -15,6 +15,7 @@ using namespace epee;
 
 #include "string_tools.h"
 #include "syncobj.h"
+#include "math_helper.h"
 #include "currency_basic_impl.h"
 #include "verification_context.h"
 #include "crypto/hash.h"
@@ -43,6 +44,8 @@ namespace currency
 
     bool on_blockchain_inc(uint64_t new_block_height, const crypto::hash& top_block_id);
     bool on_blockchain_dec(uint64_t new_block_height, const crypto::hash& top_block_id);
+    
+    void on_idle();
 
     void lock();
     void unlock();
@@ -64,7 +67,7 @@ namespace currency
     bool inflate_pool(const std::strig& folder);
     */
 
-#define CURRENT_MEMPOOL_ARCHIVE_VER    9
+#define CURRENT_MEMPOOL_ARCHIVE_VER    10
 
     template<class archive_t>
     void serialize(archive_t & ar, const unsigned int version)
@@ -88,9 +91,11 @@ namespace currency
       //
       uint64_t last_failed_height;
       crypto::hash last_failed_id;
+      time_t receive_time;
     };
 
   private:
+    bool remove_stuck_transactions();
     bool is_transaction_ready_to_go(tx_details& txd);
     typedef std::unordered_map<crypto::hash, tx_details > transactions_container;
     typedef std::unordered_map<crypto::key_image, std::unordered_set<crypto::hash> > key_images_container;
@@ -98,34 +103,13 @@ namespace currency
     epee::critical_section m_transactions_lock;
     transactions_container m_transactions;
     key_images_container m_spent_key_images;
+    
+    epee::math_helper::once_a_time_seconds<30> m_remove_stuck_tx_interval;
 
     //transactions_container m_alternative_transactions;
 
     std::string m_config_folder;
     blockchain_storage& m_blockchain;
-    /************************************************************************/
-    /*                                                                      */
-    /************************************************************************/
-    /*class inputs_visitor: public boost::static_visitor<bool>
-    {
-      key_images_container& m_spent_keys;
-    public:
-      inputs_visitor(key_images_container& spent_keys): m_spent_keys(spent_keys)
-      {}
-      bool operator()(const txin_to_key& tx) const
-      {
-        auto pr = m_spent_keys.insert(tx.k_image);
-        CHECK_AND_ASSERT_MES(pr.second, false, "Tried to insert transaction with input seems already spent, input: " << epee::string_tools::pod_to_hex(tx.k_image));
-        return true;
-      }
-      bool operator()(const txin_gen& tx) const
-      {
-        CHECK_AND_ASSERT_MES(false, false, "coinbase transaction in memory pool");
-        return false;
-      }
-      bool operator()(const txin_to_script& tx) const {return false;}
-      bool operator()(const txin_to_scripthash& tx) const {return false;}
-    }; */
     /************************************************************************/
     /*                                                                      */
     /************************************************************************/
@@ -162,7 +146,7 @@ namespace boost
       ar & td.max_used_block_id;
       ar & td.last_failed_height;
       ar & td.last_failed_id;
-
+      ar & td.receive_time;
     }
   }
 }
