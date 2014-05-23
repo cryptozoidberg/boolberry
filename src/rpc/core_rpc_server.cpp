@@ -86,7 +86,10 @@ namespace currency
     res.white_peerlist_size = m_p2p.get_peerlist_manager().get_white_peers_count();
     res.grey_peerlist_size = m_p2p.get_peerlist_manager().get_gray_peers_count();
     res.current_blocks_median = m_core.get_blockchain_storage().get_current_comulative_blocksize_limit()/2;
-    res.current_network_hashrate = 0; //TODO:
+    res.current_network_hashrate_50 = m_core.get_blockchain_storage().get_current_hashrate(50);
+    res.current_network_hashrate_350 = m_core.get_blockchain_storage().get_current_hashrate(350);
+    res.scratchpad_size = m_core.get_blockchain_storage().get_scratchpad_size();
+    res.alias_count = m_core.get_blockchain_storage().get_aliases_count();
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }

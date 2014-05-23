@@ -1088,6 +1088,16 @@ bool blockchain_storage::handle_get_objects(NOTIFY_REQUEST_GET_OBJECTS::request&
   return true;
 }
 //------------------------------------------------------------------
+uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  if(m_blocks.size() <= aprox_count)
+    return 0;
+
+  return  (m_blocks.back().cumulative_difficulty - m_blocks[m_blocks.size() - aprox_count].cumulative_difficulty)/
+                              (m_blocks.back().bl.timestamp - m_blocks[m_blocks.size() - aprox_count].bl.timestamp);
+}
+//------------------------------------------------------------------
 bool blockchain_storage::get_alternative_blocks(std::list<block>& blocks)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -1467,6 +1477,18 @@ bool blockchain_storage::get_alias_info(const std::string& alias, alias_info_bas
     }
   }
   return false;
+}
+//------------------------------------------------------------------
+uint64_t blockchain_storage::get_aliases_count()
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  return m_aliases.size();
+}
+//------------------------------------------------------------------
+uint64_t blockchain_storage::get_scratchpad_size()
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  return m_scratchpad.size()*32;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::get_all_aliases(std::list<alias_info>& aliases)

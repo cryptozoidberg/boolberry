@@ -1,0 +1,15 @@
+#!/bin/bash
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title aliases
+graph_vlabel aliases
+graph_category boolb
+alias_count.label alias_count
+EOM
+        exit 0;;
+esac
+
+printf "alias_count.value "
+connectivity_tool --ip=127.0.0.1 --rpc_port=10102 --timeout=1000 --rpc_get_daemon_info | grep alias_count | cut -d ' ' -f2

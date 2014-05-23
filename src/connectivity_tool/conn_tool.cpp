@@ -210,8 +210,11 @@ bool handle_get_daemon_info(po::variables_map& vm)
   << "outgoing_connections_count: " << res.outgoing_connections_count << ENDL
   << "incoming_connections_count: " << res.incoming_connections_count << ENDL
   << "white_peerlist_size: " << res.white_peerlist_size << ENDL
-  << "grey_peerlist_size: " << res.grey_peerlist_size << ENDL;
-
+  << "grey_peerlist_size: " << res.grey_peerlist_size << ENDL
+  << "current_network_hashrate_50: " << res.current_network_hashrate_50 << ENDL
+  << "current_network_hashrate_350: " << res.current_network_hashrate_350 << ENDL
+  << "scratchpad_size: " << res.scratchpad_size << ENDL
+  << "alias_count: " << res.alias_count << ENDL;
   return true;
 }
 //---------------------------------------------------------------------------------------------------------------

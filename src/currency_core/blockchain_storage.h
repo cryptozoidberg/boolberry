@@ -104,12 +104,16 @@ namespace currency
     bool get_tx_outputs_gindexs(const crypto::hash& tx_id, std::vector<uint64_t>& indexs);
     bool get_alias_info(const std::string& alias, alias_info_base& info);
     bool get_all_aliases(std::list<alias_info>& aliases);
+    uint64_t get_aliases_count();
+    uint64_t get_scratchpad_size();
     bool store_blockchain();
     bool check_tx_input(const txin_to_key& txin, const crypto::hash& tx_prefix_hash, const std::vector<crypto::signature>& sig, uint64_t* pmax_related_block_height = NULL);
     bool check_tx_inputs(const transaction& tx, const crypto::hash& tx_prefix_hash, uint64_t* pmax_used_block_height = NULL);
     bool check_tx_inputs(const transaction& tx, uint64_t* pmax_used_block_height = NULL);
     bool check_tx_inputs(const transaction& tx, uint64_t& pmax_used_block_height, crypto::hash& max_used_block_id);
     uint64_t get_current_comulative_blocksize_limit();
+    uint64_t get_current_hashrate(size_t aprox_count);
+
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     uint64_t block_difficulty(size_t i);
     bool copy_scratchpad(std::vector<crypto::hash>& scr);//TODO: not the best way, add later update method instead of full copy
