@@ -240,6 +240,8 @@ namespace currency
       uint64_t incoming_connections_count;
       uint64_t white_peerlist_size;
       uint64_t grey_peerlist_size;
+      uint64_t current_blocks_median;
+      uint64_t current_network_hashrate;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -252,11 +254,11 @@ namespace currency
         KV_SERIALIZE(incoming_connections_count)
         KV_SERIALIZE(white_peerlist_size)
         KV_SERIALIZE(grey_peerlist_size)
+        KV_SERIALIZE(current_blocks_median)      
+        KV_SERIALIZE(current_network_hashrate)        
       END_KV_SERIALIZE_MAP()
     };
-  };
-
-    
+  };    
   //-----------------------------------------------
   struct COMMAND_RPC_STOP_MINING
   {

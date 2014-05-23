@@ -93,7 +93,7 @@ namespace tools
     void store();
     currency::account_base& get_account(){return m_account;}
 
-    void init(const std::string& daemon_address = "http://localhost:8080", uint64_t upper_transaction_size_limit = CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE*2 - CURRENCY_COINBASE_BLOB_RESERVED_SIZE);
+    void init(const std::string& daemon_address = "http://localhost:8080");
     bool deinit();
 
     void stop() { m_run.store(false, std::memory_order_relaxed); }
@@ -146,6 +146,7 @@ namespace tools
     bool prepare_file_names(const std::string& file_path);
     void process_unconfirmed(const currency::transaction& tx);
     void add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount);
+    void update_current_tx_limit();
     
 
     currency::account_base m_account;
@@ -386,6 +387,7 @@ namespace tools
 
     bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, tx, unlock_time);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
+    update_current_tx_limit();
     CHECK_AND_THROW_WALLET_EX(m_upper_transaction_size_limit <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
 
     std::string key_images;

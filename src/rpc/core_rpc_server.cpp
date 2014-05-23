@@ -85,6 +85,8 @@ namespace currency
     res.incoming_connections_count = total_conn - res.outgoing_connections_count;
     res.white_peerlist_size = m_p2p.get_peerlist_manager().get_white_peers_count();
     res.grey_peerlist_size = m_p2p.get_peerlist_manager().get_gray_peers_count();
+    res.current_blocks_median = m_core.get_blockchain_storage().get_current_comulative_blocksize_limit()/2;
+    res.current_network_hashrate = 0; //TODO:
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }

@@ -25,9 +25,9 @@ using namespace currency;
 namespace tools
 {
 //----------------------------------------------------------------------------------------------------
-void wallet2::init(const std::string& daemon_address, uint64_t upper_transaction_size_limit)
+void wallet2::init(const std::string& daemon_address)
 {
-  m_upper_transaction_size_limit = upper_transaction_size_limit;
+  m_upper_transaction_size_limit = 0;
   m_daemon_address = daemon_address;
 }
 //----------------------------------------------------------------------------------------------------
@@ -223,6 +223,18 @@ void wallet2::refresh(size_t & blocks_fetched)
 {
   bool received_money = false;
   refresh(blocks_fetched, received_money);
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::update_current_tx_limit()
+{
+  currency::COMMAND_RPC_GET_INFO::request req = AUTO_VAL_INIT(req);
+  currency::COMMAND_RPC_GET_INFO::response res = AUTO_VAL_INIT(res);
+  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/getinfo", req, res, m_http_client, WALLET_RCP_CONNECTION_TIMEOUT);
+  CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "getinfo");
+  CHECK_AND_THROW_WALLET_EX(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "getinfo");
+  CHECK_AND_THROW_WALLET_EX(res.status != CORE_RPC_STATUS_OK, error::get_blocks_error, res.status);
+  CHECK_AND_THROW_WALLET_EX(res.current_blocks_median < CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE, error::get_blocks_error, "bad median size");
+  m_upper_transaction_size_limit = res.current_blocks_median;
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::refresh(size_t & blocks_fetched, bool& received_money)

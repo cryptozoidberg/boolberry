@@ -770,7 +770,7 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   {
     currency::transaction tx = e.tx();
     fail_msg_writer() << "transaction " << get_transaction_hash(e.tx()) << " is too big. Transaction size: " <<
-      get_object_blobsize(e.tx()) << " bytes, transaction size limit: " << e.tx_size_limit() << " bytes";
+      get_object_blobsize(e.tx()) << " bytes, transaction size limit: " << e.tx_size_limit() << " bytes. Try to separate this payment into few smaller transfers.";
   }
   catch (const tools::error::zero_destination&)
   {
