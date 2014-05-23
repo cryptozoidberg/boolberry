@@ -39,7 +39,7 @@ To build, change to a directory where this file is located, and run this command
 ```bash
  mkdir build
  cd build
- cmake -G "Visual Studio 11 Win64 .."
+ cmake -G "Visual Studio 11 Win64" ..
 ```
 
 And then do Build.
