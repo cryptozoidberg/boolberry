@@ -52,10 +52,11 @@ namespace nodetool
     bool r = string_tools::hex_to_pod(P2P_MAINTAINERS_PUB_KEY, m_maintainers_pub_key);
     CHECK_AND_ASSERT_MES(r, false, "Failed to parse P2P_MAINTAINERS_PUB_KEY = " << P2P_MAINTAINERS_PUB_KEY);
 
-    make_default_config();
-
     std::string state_file_path = m_config_folder + "/" + P2P_NET_DATA_FILENAME;
     tools::unserialize_obj_from_file(*this, state_file_path);
+
+    //always use new id, to be able differ cloned computers
+    m_config.m_peer_id  = crypto::rand<uint64_t>();
     
     //at this moment we have hardcoded config
     m_config.m_net_config.handshake_interval = P2P_DEFAULT_HANDSHAKE_INTERVAL;
@@ -77,13 +78,6 @@ namespace nodetool
     m_net_server.get_config_object().foreach_connection([&](p2p_connection_context& cntx){
       return f(cntx, cntx.peer_id);
     });
-  }
-  //-----------------------------------------------------------------------------------
-  template<class t_payload_net_handler>
-  bool node_server<t_payload_net_handler>::make_default_config()
-  {
-    m_config.m_peer_id  = crypto::rand<uint64_t>();
-    return true;
   }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>

@@ -29,7 +29,7 @@
 using namespace epee;
 
 
-#define CURRENT_P2P_STORAGE_ARCHIVE_VER    6
+#define CURRENT_P2P_STORAGE_ARCHIVE_VER    7
 
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4355)
@@ -81,7 +81,6 @@ namespace nodetool
       if(ver < CURRENT_P2P_STORAGE_ARCHIVE_VER) 
         return;
       a & m_peerlist;
-      a & m_config.m_peer_id;
       a & m_maintainers_info_local;
       a & m_maintainers_entry_local;
       a & m_alert_mode;
