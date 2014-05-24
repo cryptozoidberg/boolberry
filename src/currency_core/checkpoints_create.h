@@ -12,6 +12,9 @@
 namespace currency {
   inline bool create_checkpoints(currency::checkpoints& checkpoints)
   {
+    ADD_CHECKPOINT(100,  "4a3783222d3f241bcfb8cec6803b5c5dbea73ddcd35c8f6f8b3320c90ad56c05");
+    ADD_CHECKPOINT(1000,  "60200d3f6405a2a338c47aae868128395856d6982dff114b98b04f3187e37fa0");
+    ADD_CHECKPOINT(5000,  "01a1a9fc533196000143b918ee5a47a5c49d2a19cad812d04e3a16fdcee97fbb");
     return true;
   }
 }

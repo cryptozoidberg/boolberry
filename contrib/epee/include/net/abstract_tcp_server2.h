@@ -88,6 +88,7 @@ namespace net_utils
     void get_context(t_connection_context& context_){context_ = context;}
 
     void call_back_starter();
+    bool is_shutdown(){return m_was_shutdown;}
   private:
     //----------------- i_service_endpoint ---------------------
     virtual bool do_send(const void* ptr, size_t cb);

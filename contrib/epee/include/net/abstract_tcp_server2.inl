@@ -112,7 +112,8 @@ PRAGMA_WARNING_DISABLE_VS(4355)
 
     boost::system::error_code ec;
     auto remote_ep = socket_.remote_endpoint(ec);
-    CHECK_AND_NO_ASSERT_MES(!ec, false, "Failed to get remote endpoint: " << ec.message() << ':' << ec.value());
+    CHECK_AND_NO_ASSERT_MES(!m_was_shutdown, false, "was shutdown on start connection");
+    CHECK_AND_NO_ASSERT_MES(!ec, false, "Failed to get remote endpoint(" << (is_income?"INT":"OUT") << "): " << ec.message() << ':' << ec.value());
 
     auto local_ep = socket_.local_endpoint(ec);
     CHECK_AND_NO_ASSERT_MES(!ec, false, "Failed to get local endpoint: " << ec.message() << ':' << ec.value());
@@ -787,7 +788,12 @@ POP_WARNINGS
           if(!sh_deadline->cancel())
           {
             cb(conn_context, boost::asio::error::operation_aborted);//this mean that deadline timer already queued callback with cancel operation, rare situation
-          }else
+          }else if(new_connection_l->is_shutdown())
+          {
+            //if deadline timer started and finished callback right after async_connect callback is started and before deadline timer sh_deadline->cancel() is called 
+            cb(conn_context, boost::asio::error::operation_aborted);
+          }
+          else
           {
             LOG_PRINT_L3("[sock " << new_connection_l->socket().native_handle() << "] Connected success to " << adr << ':' << port <<
               " from " << lep.address().to_string() << ':' << lep.port());
