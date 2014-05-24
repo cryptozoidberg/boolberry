@@ -512,14 +512,14 @@ public:
       CRITICAL_REGION_LOCAL1(m_invoke_response_handlers_lock);
       if(!m_pservice_endpoint->do_send(&head, sizeof(head)))
       {
-        LOG_ERROR_CC(m_connection_context, "Failed to do_send");
+        LOG_PRINT_CC_RED(m_connection_context, "Failed to do_send", LOG_LEVEL_2);
         err_code = LEVIN_ERROR_CONNECTION;
         break;
       }
 
       if(!m_pservice_endpoint->do_send(in_buff.data(), (int)in_buff.size()))
       {
-        LOG_ERROR_CC(m_connection_context, "Failed to do_send");
+        LOG_PRINT_CC_RED(m_connection_context, "Failed to do_send", LOG_LEVEL_2);
         err_code = LEVIN_ERROR_CONNECTION;
         break;
       }
