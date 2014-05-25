@@ -1,1 +1,15 @@
+2014, April 20: v0.1.1.9
 Project is separated from Cryptonote(forked bytecoin), moved to GitHub.
+
+2014, May 26: v0.1.1.9
+* added strict rules for alias use
+* miner turned to work on one shared scratchpad (more effective CPU cache memory utilize)
+* solved problem with stuck transactions
+  * added tx pool livetime
+  * added check in wallet that will note allow to produce to big transaction 
+  * changed wallet policy for collecting outs for transaction (7-8 times smaller transaction's size)
+* added checkpoints
+* added paramters to munin graph (network estimate hashrate, scratchpad size)
+* added blocking ip addresses that act with network rules violation (mining own blockchain without consider checkpoints, push peerlists with last_seen in futute, invalid blocks e.t.c)
+* cleaned up some network bugs, removing dead connections
+
