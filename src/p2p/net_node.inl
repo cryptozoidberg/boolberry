@@ -769,12 +769,14 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::remove_dead_connections()
   {
+    uint64_t curr_time = time(nullptr);
     m_net_server.get_config_object().foreach_connection([&](p2p_connection_context& cntx){
-      if(time(nullptr) - cntx.m_last_recv > P2P_IDLE_CONNECTION_KILL_INTERVAL && 
-         time(nullptr) - cntx.m_last_send > P2P_IDLE_CONNECTION_KILL_INTERVAL)
-         LOG_PRINT_CC_L1(cntx, "Connection dropped due to idle");
-         m_net_server.get_config_object().close(cntx.m_connection_id);
-         return true;
+      if(curr_time - cntx.m_last_recv > P2P_IDLE_CONNECTION_KILL_INTERVAL && curr_time - cntx.m_last_send > P2P_IDLE_CONNECTION_KILL_INTERVAL)
+      {
+        LOG_PRINT_CC_L1(cntx, "Connection dropped due to idle");
+        m_net_server.get_config_object().close(cntx.m_connection_id);        
+        return true;
+      }
     });
     return true;
   }
