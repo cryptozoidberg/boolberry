@@ -70,7 +70,7 @@ namespace currency
     //bool get_payload_sync_data(HANDSHAKE_DATA::request& hshd, currency_connection_context& context);
     bool request_missing_objects(currency_connection_context& context, bool check_having_blocks);
     size_t get_synchronizing_connections_count();
-    bool on_connection_synchronized();
+    bool on_connection_synchronized();    
     t_core& m_core;
 
     nodetool::p2p_endpoint_stub<connection_context> m_p2p_stub;

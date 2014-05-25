@@ -199,6 +199,7 @@ namespace currency
       {
         LOG_PRINT_CCONTEXT_L0("Tx verification failed, dropping connection");
         m_p2p->drop_connection(context);
+
         return 1;
       }
       if(tvc.m_should_be_relayed)
@@ -256,6 +257,7 @@ namespace currency
         LOG_ERROR_CCONTEXT("sent wrong block: failed to parse and validate block: \r\n" 
           << string_tools::buff_to_hex_nodelimer(block_entry.block) << "\r\n dropping connection");
         m_p2p->drop_connection(context);
+        m_p2p->add_ip_fail(context.m_remote_ip);
         return 1;
       }      
       //to avoid concurrency in core between connections, suspend connections which delivered block later then first one
@@ -331,12 +333,14 @@ namespace currency
         {
           LOG_PRINT_CCONTEXT_L0("Block verification failed, dropping connection");
           m_p2p->drop_connection(context);
+          m_p2p->add_ip_fail(context.m_remote_ip);
           return 1;
         }
         if(bvc.m_marked_as_orphaned)
         {
           LOG_PRINT_CCONTEXT_L0("Block received at sync phase was marked as orphaned, dropping connection");
           m_p2p->drop_connection(context);
+          m_p2p->add_ip_fail(context.m_remote_ip);
           return 1;
         }
 
@@ -458,6 +462,7 @@ namespace currency
     {
       LOG_ERROR_CCONTEXT("sent empty m_block_ids, dropping connection");
       m_p2p->drop_connection(context);
+      m_p2p->add_ip_fail(context.m_remote_ip);
       return 1;
     }
 
@@ -466,6 +471,7 @@ namespace currency
       LOG_ERROR_CCONTEXT("sent m_block_ids starting from unknown id: "
                                               << string_tools::pod_to_hex(arg.m_block_ids.front()) << " , dropping connection");
       m_p2p->drop_connection(context);
+      m_p2p->add_ip_fail(context.m_remote_ip);
       return 1;
     }
     

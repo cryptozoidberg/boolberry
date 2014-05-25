@@ -81,6 +81,46 @@ namespace nodetool
   }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::is_remote_ip_allowed(uint32_t addr)
+  {
+    CRITICAL_REGION_LOCAL(m_blocked_ips_lock);
+    auto it = m_blocked_ips.find(addr);
+    if(it == m_blocked_ips.end())
+      return true;
+    if(time(nullptr) - it->second > P2P_IP_BLOCKTIME )
+    {
+      m_blocked_ips.erase(it);
+      LOG_PRINT_YELLOW("Ip " << string_tools::get_ip_string_from_int32(addr) << "is unblocked.", LOG_LEVEL_0);
+      return true;
+    }
+    return false;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::block_ip(uint32_t addr)
+  {
+    CRITICAL_REGION_LOCAL(m_blocked_ips_lock);
+    m_blocked_ips[addr] = time(nullptr);
+    LOG_PRINT_YELLOW("Ip " << string_tools::get_ip_string_from_int32(addr) << " blocked.", LOG_LEVEL_0);
+    return true;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::add_ip_fail(uint32_t address)
+  {
+    CRITICAL_REGION_LOCAL(m_ip_fails_score_lock);
+    uint64_t fails = ++m_ip_fails_score[address];
+    if(fails > P2P_IP_FAILS_BEFOR_BLOCK)
+    {
+      auto it = m_ip_fails_score.find(address);
+      CHECK_AND_ASSERT_MES(it != m_ip_fails_score.end(), false, "internal error");
+      m_ip_fails_score.erase(it);
+      block_ip(address);
+    }
+    return true;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::parse_peer_from_string(nodetool::net_address& pe, const std::string& node_addr)
   {
     return string_tools::parse_peer_from_string(pe.ip, pe.port, node_addr);
@@ -189,7 +229,6 @@ namespace nodetool
     ADD_HARDCODED_SEED_NODE("162.243.101.90:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
 #endif
 
-
     bool res = handle_command_line(vm);
     CHECK_AND_ASSERT_MES(res, false, "Failed to handle command line");
     m_config_folder = command_line::get_arg(vm, command_line::arg_data_dir);
@@ -213,6 +252,7 @@ namespace nodetool
     m_net_server.set_threads_prefix("P2P");
     m_net_server.get_config_object().m_pcommands_handler = this;
     m_net_server.get_config_object().m_invoke_timeout = P2P_DEFAULT_INVOKE_TIMEOUT;
+    m_net_server.set_connection_filter(this);
 
     //try to bind
     LOG_PRINT_L0("Binding on " << m_bind_ip << ":" << m_port);
@@ -378,6 +418,7 @@ namespace nodetool
       if(!handle_remote_peerlist(rsp.local_peerlist, rsp.node_data.local_time, context))
       {
         LOG_ERROR_CCONTEXT("COMMAND_HANDSHAKE: failed to handle_remote_peerlist(...), closing connection.");
+        add_ip_fail(context.m_remote_ip);
         return;
       }
       hsh_result = true;
@@ -446,6 +487,7 @@ namespace nodetool
       {
         LOG_ERROR_CCONTEXT("COMMAND_TIMED_SYNC: failed to handle_remote_peerlist(...), closing connection.");
         m_net_server.get_config_object().close(context.m_connection_id );
+        add_ip_fail(context.m_remote_ip);
       }
       if(!context.m_is_income)
         m_peerlist.set_peer_just_seen(context.peer_id, context.m_remote_ip, context.m_remote_port);
@@ -612,6 +654,9 @@ namespace nodetool
       if(is_peer_used(pe))
         continue;
 
+      if(!is_remote_ip_allowed(pe.adr.ip))
+        continue;
+
       if(is_addr_recently_failed(pe.adr))
         continue;
 
@@ -722,11 +767,25 @@ namespace nodetool
   }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::remove_dead_connections()
+  {
+    m_net_server.get_config_object().foreach_connection([&](p2p_connection_context& cntx){
+      if(time(nullptr) - cntx.m_last_recv > P2P_IDLE_CONNECTION_KILL_INTERVAL && 
+         time(nullptr) - cntx.m_last_send > P2P_IDLE_CONNECTION_KILL_INTERVAL)
+         LOG_PRINT_CC_L1(cntx, "Connection dropped due to idle");
+         m_net_server.get_config_object().close(cntx.m_connection_id);
+         return true;
+    });
+    return true;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::idle_worker()
   {
     m_peer_handshake_idle_maker_interval.do_call(boost::bind(&node_server<t_payload_net_handler>::peer_sync_idle_maker, this));
     m_connections_maker_interval.do_call(boost::bind(&node_server<t_payload_net_handler>::connections_maker, this));
     m_peerlist_store_interval.do_call(boost::bind(&node_server<t_payload_net_handler>::store_config, this));
+    m_remove_dead_conn_interval.do_call([this](){return remove_dead_connections();});
 
     m_calm_alert_interval.do_call([&](){return clam_alert_worker();});
     m_urgent_alert_interval.do_call([&](){return urgent_alert_worker();});
@@ -1070,6 +1129,7 @@ namespace nodetool
 
       LOG_PRINT_CCONTEXT_L0("WRONG NETWORK AGENT CONNECTED! id=" << string_tools::get_str_from_guid_a(arg.node_data.network_id));
       drop_connection(context);
+      add_ip_fail(context.m_remote_ip);
       return 1;
     }
 
@@ -1077,6 +1137,7 @@ namespace nodetool
     {
       LOG_ERROR_CCONTEXT("COMMAND_HANDSHAKE came not from incoming connection");
       drop_connection(context);
+      add_ip_fail(context.m_remote_ip);
       return 1;
     }
 

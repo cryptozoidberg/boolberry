@@ -1452,6 +1452,9 @@ POP_WARNINGS
 #define CHECK_AND_NO_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_PRINT_L0(message); /*LOCAL_ASSERT(expr);*/ return fail_ret_val;};}while(0)
 #endif
 
+#ifndef CHECK_AND_NO_ASSERT_MES_LEVEL
+#define CHECK_AND_NO_ASSERT_MES_LEVEL(expr, fail_ret_val, message, log_level)   do{if(!(expr)) {LOG_PRINT(message, log_level); return fail_ret_val;};}while(0)
+#endif
 
 #ifndef CHECK_AND_ASSERT_MES_NO_RET
 #define CHECK_AND_ASSERT_MES_NO_RET(expr, message)   do{if(!(expr)) {LOG_ERROR(message); return;};}while(0)

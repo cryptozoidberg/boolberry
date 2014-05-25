@@ -113,7 +113,8 @@ PRAGMA_WARNING_DISABLE_VS(4355)
     boost::system::error_code ec;
     auto remote_ep = socket_.remote_endpoint(ec);
     CHECK_AND_NO_ASSERT_MES(!m_was_shutdown, false, "was shutdown on start connection");
-    CHECK_AND_NO_ASSERT_MES(!ec, false, "Failed to get remote endpoint(" << (is_income?"INT":"OUT") << "): " << ec.message() << ':' << ec.value());
+    
+    CHECK_AND_NO_ASSERT_MES_LEVEL(!ec, false, "Failed to get remote endpoint(" << (is_income?"INT":"OUT") << "): " << ec.message() << ':' << ec.value(), LOG_LEVEL_2);
 
     auto local_ep = socket_.local_endpoint(ec);
     CHECK_AND_NO_ASSERT_MES(!ec, false, "Failed to get local endpoint: " << ec.message() << ':' << ec.value());
@@ -122,12 +123,13 @@ PRAGMA_WARNING_DISABLE_VS(4355)
     long ip_ = boost::asio::detail::socket_ops::host_to_network_long(remote_ep.address().to_v4().to_ulong());
 
     context.set_details(boost::uuids::random_generator()(), ip_, remote_ep.port(), is_income);
+    context.m_last_send = context.m_last_recv = time(NULL);
    
     LOG_PRINT_L3("[sock " << socket_.native_handle() << "] new connection, remote end_point: " << print_connection_context_short(context) <<
         " local end_point: " << local_ep.address().to_string() << ':' << local_ep.port() <<
         ", total sockets objects " << m_ref_sockets_count);
 
-    if(m_pfilter && !m_pfilter->is_remote_ip_allowed(context.m_remote_ip))
+    if(is_income && m_pfilter && !m_pfilter->is_remote_ip_allowed(context.m_remote_ip))
     {
       LOG_PRINT_L0("[sock " << socket_.native_handle() << "] ip denied " << string_tools::get_ip_string_from_int32(context.m_remote_ip) << ", shutdowning connection");
       close();
@@ -639,8 +641,6 @@ POP_WARNINGS
         boost::asio::placeholders::error));
 
       bool r = conn->start(true, 1 < m_threads_count);
-      if (!r)
-        LOG_ERROR("[sock " << conn->socket().native_handle() << "] Failed to start connection, connections_count = " << m_sockets_count);
     }else
     {
       LOG_ERROR("Some problems at accept: " << e.message() << ", connections_count = " << m_sockets_count);
@@ -729,10 +729,6 @@ POP_WARNINGS
       new_connection_l->get_context(conn_context);
       //new_connection_l.reset(new connection<t_protocol_handler>(io_service_, m_config, m_sockets_count, m_pfilter));
     }
-    else
-    {
-      LOG_ERROR("[sock " << new_connection_->socket().native_handle() << "] Failed to start connection, connections_count = " << m_sockets_count);
-    }
 
     return r;
 
@@ -805,7 +801,6 @@ POP_WARNINGS
             }
             else
             {
-              LOG_PRINT_L3("[sock " << new_connection_l->socket().native_handle() << "] Failed to start connection to " << adr << ':' << port);
               cb(conn_context, boost::asio::error::fault);
             }
           }

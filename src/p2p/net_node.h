@@ -29,7 +29,7 @@
 using namespace epee;
 
 
-#define CURRENT_P2P_STORAGE_ARCHIVE_VER    7
+#define CURRENT_P2P_STORAGE_ARCHIVE_VER    8
 
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4355)
@@ -44,7 +44,8 @@ namespace nodetool
 
   template<class t_payload_net_handler>
   class node_server: public levin::levin_commands_handler<p2p_connection_context_t<typename t_payload_net_handler::connection_context> >,
-                     public i_p2p_endpoint<typename t_payload_net_handler::connection_context>
+                     public i_p2p_endpoint<typename t_payload_net_handler::connection_context>,
+                     public net_utils::i_connection_filter
   {
     struct by_conn_id{};
     struct by_peer_id{};
@@ -80,10 +81,18 @@ namespace nodetool
     {
       if(ver < CURRENT_P2P_STORAGE_ARCHIVE_VER) 
         return;
+      time_t local_time = time(nullptr);
+      a & local_time;
+      if(local_time > time(nullptr))
+      {
+        LOG_PRINT_L0("psp network state file have future time, skipped");
+        return;
+      }
       a & m_peerlist;
       a & m_maintainers_info_local;
       a & m_maintainers_entry_local;
       a & m_alert_mode;
+      a & m_blocked_ips;
     }
     // debug functions
     bool log_peerlist();
@@ -136,6 +145,10 @@ namespace nodetool
     virtual bool drop_connection(const epee::net_utils::connection_context_base& context);
     virtual void request_callback(const epee::net_utils::connection_context_base& context);
     virtual void for_each_connection(std::function<bool(typename t_payload_net_handler::connection_context&, peerid_type)> f);
+    virtual bool block_ip(uint32_t adress);
+    virtual bool add_ip_fail(uint32_t address);
+    //----------------- i_connection_filter  --------------------------------------------------------
+    virtual bool is_remote_ip_allowed(uint32_t adress);
     //-----------------------------------------------------------------------------------------------
     bool parse_peer_from_string(nodetool::net_address& pe, const std::string& node_addr);
     bool handle_command_line(const boost::program_options::variables_map& vm);
@@ -169,12 +182,12 @@ namespace nodetool
     bool clam_alert_worker();
     bool urgent_alert_worker();
     bool critical_alert_worker();
+    bool remove_dead_connections();
 
 
     //debug functions
     std::string print_connections_container();
-
-
+    
     typedef net_utils::boosted_tcp_server<levin::async_protocol_handler<p2p_connection_context> > net_server;
 
     struct config
@@ -208,6 +221,7 @@ namespace nodetool
     math_helper::once_a_time_seconds<P2P_DEFAULT_HANDSHAKE_INTERVAL> m_peer_handshake_idle_maker_interval;
     math_helper::once_a_time_seconds<1> m_connections_maker_interval;
     math_helper::once_a_time_seconds<60*30, false> m_peerlist_store_interval;
+    math_helper::once_a_time_seconds<60> m_remove_dead_conn_interval;
     
     /*this code is temporary here(to show regular message if need), until we get normal GUI*/
     math_helper::once_a_time_seconds<60, false>  m_calm_alert_interval;
@@ -234,6 +248,12 @@ namespace nodetool
     maintainers_entry m_maintainers_entry_local;
     uint8_t m_alert_mode;
     critical_section m_maintainers_local_lock;
+    
+    critical_section m_blocked_ips_lock;
+    std::map<uint32_t, time_t> m_blocked_ips;
+
+    critical_section m_ip_fails_score_lock;
+    std::map<uint32_t, uint64_t> m_ip_fails_score;
 
   };
 }

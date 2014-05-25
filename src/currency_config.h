@@ -88,7 +88,11 @@
 #define P2P_DEFAULT_HANDSHAKE_INVOKE_TIMEOUT            5000       //5 seconds
 #define P2P_MAINTAINERS_PUB_KEY                         "d2f6bc35dc4e4a43235ae12620df4612df590c6e1df0a18a55c5e12d81502aa7"
 #define P2P_DEFAULT_WHITELIST_CONNECTIONS_PERCENT       70
-#define P2P_FAILED_ADDR_FORGET_SECONDS                  60*60     //1 hour
+#define P2P_FAILED_ADDR_FORGET_SECONDS                  (60*60)     //1 hour
+
+#define P2P_IP_BLOCKTIME                                (60*60*24)  //24 hour
+#define P2P_IP_FAILS_BEFOR_BLOCK                        10
+#define P2P_IDLE_CONNECTION_KILL_INTERVAL               (5*60) //5 minutes
 
 
 /* This money will go to growth of the project */
