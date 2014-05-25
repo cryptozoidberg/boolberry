@@ -90,7 +90,7 @@ namespace nodetool
     if(time(nullptr) - it->second > P2P_IP_BLOCKTIME )
     {
       m_blocked_ips.erase(it);
-      LOG_PRINT_YELLOW("Ip " << string_tools::get_ip_string_from_int32(addr) << "is unblocked.", LOG_LEVEL_0);
+      LOG_PRINT_CYAN("Ip " << string_tools::get_ip_string_from_int32(addr) << "is unblocked.", LOG_LEVEL_0);
       return true;
     }
     return false;
@@ -101,7 +101,7 @@ namespace nodetool
   {
     CRITICAL_REGION_LOCAL(m_blocked_ips_lock);
     m_blocked_ips[addr] = time(nullptr);
-    LOG_PRINT_YELLOW("Ip " << string_tools::get_ip_string_from_int32(addr) << " blocked.", LOG_LEVEL_0);
+    LOG_PRINT_CYAN("Ip " << string_tools::get_ip_string_from_int32(addr) << " blocked.", LOG_LEVEL_0);
     return true;
   }
   //-----------------------------------------------------------------------------------
@@ -114,7 +114,7 @@ namespace nodetool
     {
       auto it = m_ip_fails_score.find(address);
       CHECK_AND_ASSERT_MES(it != m_ip_fails_score.end(), false, "internal error");
-      m_ip_fails_score.erase(it);
+      it->second = P2P_IP_FAILS_BEFOR_BLOCK/2;
       block_ip(address);
     }
     return true;

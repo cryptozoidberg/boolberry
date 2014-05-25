@@ -17,6 +17,7 @@
 #include "file_io_utils.h"
 #include "common/command_line.h"
 #include "string_coding.h"
+#include "version.h"
 #include "storages/portable_storage_template_helper.h"
 
 using namespace epee;
@@ -109,7 +110,7 @@ namespace currency
     block bl = AUTO_VAL_INIT(bl);
     difficulty_type di = AUTO_VAL_INIT(di);
     uint64_t height = AUTO_VAL_INIT(height);
-    currency::blobdata extra_nonce; 
+    currency::blobdata extra_nonce = PROJECT_VERSION_LONG "|"; 
     if(m_extra_messages.size() && m_config.current_extra_message_index < m_extra_messages.size())
     {
       extra_nonce = m_extra_messages[m_config.current_extra_message_index];
