@@ -777,6 +777,7 @@ namespace nodetool
         m_net_server.get_config_object().close(cntx.m_connection_id);        
         return true;
       }
+      return true;
     });
     return true;
   }
