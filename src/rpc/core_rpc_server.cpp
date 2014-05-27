@@ -31,7 +31,7 @@ namespace currency
     command_line::add_arg(desc, arg_rpc_bind_port);
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  core_rpc_server::core_rpc_server(core& cr, nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& p2p):m_core(cr), m_p2p(p2p)
+  core_rpc_server::core_rpc_server(core& cr, nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& p2p):m_core(cr), m_p2p(p2p), m_session_counter(0)
   {}
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::handle_command_line(const boost::program_options::variables_map& vm)
@@ -363,9 +363,9 @@ namespace currency
     }
 
     block b = AUTO_VAL_INIT(b);
-    currency::blobdata blob_reserve;
-    blob_reserve.resize(req.reserve_size, 0);
-    if(!m_core.get_block_template(b, acc, res.difficulty, res.height, blob_reserve, req.donate_to_developers, alias_info()))
+    currency::blobdata blob_reserve = PROJECT_VERSION_LONG;
+    blob_reserve.resize(blob_reserve.size() + 1 + req.reserve_size, 0);
+    if(!m_core.get_block_template(b, acc, res.difficulty, res.height, blob_reserve, req.dev_bounties_vote, alias_info()))
     {
       error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
       error_resp.message = "Internal error: failed to create block template";
@@ -374,23 +374,15 @@ namespace currency
     }
     blobdata block_blob = t_serializable_object_to_blob(b);
     crypto::public_key tx_pub_key = null_pkey;
-    currency::parse_and_validate_tx_extra(b.miner_tx, tx_pub_key);
-    if(tx_pub_key == null_pkey)
-    {
-      error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
-      error_resp.message = "Internal error: failed to create block template";
-      LOG_ERROR("Failed to  tx pub key in coinbase extra");
-      return false;
-    }
-    res.reserved_offset = slow_memmem((void*)block_blob.data(), block_blob.size(), &tx_pub_key, sizeof(tx_pub_key));
-    if(!res.reserved_offset)
+    std::string::size_type pos = block_blob.find(PROJECT_VERSION_LONG);
+    if(pos == std::string::npos)
     {
       error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
       error_resp.message = "Internal error: failed to create block template";
       LOG_ERROR("Failed to find tx pub key in blockblob");
       return false;
     }
-    res.reserved_offset += sizeof(tx_pub_key) + 3; //3 bytes: tag for TX_EXTRA_TAG_PUBKEY(1 byte), tag for TX_EXTRA_NONCE(1 byte), counter in TX_EXTRA_NONCE(1 byte)
+    res.reserved_offset  = pos + strlen(PROJECT_VERSION_LONG)+1;
     if(res.reserved_offset + req.reserve_size > block_blob.size())
     {
       error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
@@ -606,4 +598,198 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::get_addendum_for_hi(const mining::height_info& hi, std::list<mining::addendum>& res)
+  {
+
+    CHECK_AND_ASSERT_MES(hi.height >= m_core.get_current_blockchain_height(), false, "wrong height parameter passed: " << hi.height);
+
+    crypto::hash h = null_hash;
+    bool r = string_tools::hex_to_pod(hi.block_id, h);
+    CHECK_AND_ASSERT_MES(r, false, "wrong block_id parameter passed: " << hi.block_id);
+        
+
+    crypto::hash block_chain_id = m_core.get_blockchain_storage().get_block_id_by_height(hi.height);
+    CHECK_AND_ASSERT_MES(block_chain_id != null_hash, false, "internal error: can't get block id by height: " << hi.height);
+    uint64_t height = hi.height;
+    if(block_chain_id != h)
+    {
+      //probably split
+      CHECK_AND_ASSERT_MES(hi.height > 0, false, "wrong height passed");
+      --height;
+    }
+
+    std::list<block> blocks;
+    r = m_core.get_blockchain_storage().get_blocks(height + 1, m_core.get_current_blockchain_height() - (height+2), blocks);
+    CHECK_AND_ASSERT_MES(r, false, "failed to get blocks");
+    for(auto it = blocks.begin(); it!= blocks.end(); it++)
+    {
+      res.push_back(mining::addendum());
+      res.back().hi.height = get_block_height(*it);
+      res.back().hi.block_id = string_tools::pod_to_hex(get_block_hash(*it));
+      res.back().prev_id = string_tools::pod_to_hex(it->prev_id);
+      std::vector<crypto::hash> ad;
+      r = get_block_scratchpad_addendum(*it, ad);
+      CHECK_AND_ASSERT_MES(r, false, "Failed to add block addendum");
+      addendum_to_hexstr(ad, res.back().addm);      
+    }
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::get_current_hi(mining::height_info& hi)
+  {
+    block prev_block = AUTO_VAL_INIT(prev_block);
+    m_core.get_blockchain_storage().get_top_block(prev_block);
+    hi.block_id  = string_tools::pod_to_hex(currency::get_block_hash(prev_block));
+    hi.height = get_block_height(prev_block);
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  void core_rpc_server::set_session_blob(const std::string& session_id, const std::string& blob)
+  {
+    CRITICAL_REGION_LOCAL(m_session_jobs_lock);
+    m_session_jobs[session_id] = blob;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::get_session_blob(const std::string& session_id, std::string& blob)
+  {
+    CRITICAL_REGION_LOCAL(m_session_jobs_lock);
+    auto it = m_session_jobs.find(session_id);
+    if(it == m_session_jobs.end())
+      return false;
+
+    blob = it->second;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::get_job(const std::string& job_id, mining::job_details& job, epee::json_rpc::error& err, connection_context& cntx)
+  {
+    COMMAND_RPC_GETBLOCKTEMPLATE::request bt_req = AUTO_VAL_INIT(bt_req);
+    COMMAND_RPC_GETBLOCKTEMPLATE::response bt_res = AUTO_VAL_INIT(bt_res);
+
+    //bt_req.alias_details  - set alias here
+    bt_req.dev_bounties_vote = true; //set vote 
+    bt_req.reserve_size = 0; //if you want to put some data into extra
+    // !!!!!!!! SET YOUR WALLET ADDRESS HERE  !!!!!!!!
+    bt_req.wallet_address = "1HNJjUsofq5LYLoXem119dd491yFAb5g4bCHkecV4sPqigmuxw57Ci9am71fEN4CRmA9jgnvo5PDNfaq8QnprWmS5uLqnbq";
+    
+    if(!on_getblocktemplate(bt_req, bt_res, err, cntx))
+      return false;
+
+    set_session_blob(job_id, bt_res.blocktemplate_blob);
+    job.blob = bt_res.blocktemplate_blob;
+    //TODO: set up share difficulty here!
+    job.difficulty = std::to_string(bt_res.difficulty); //difficulty leaved as string field since it will be refactored into 128 bit format
+    job.job_id = "SOME_JOB_ID";
+    get_current_hi(job.prev_hi);
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_login(const mining::COMMAND_RPC_LOGIN::request& req, mining::COMMAND_RPC_LOGIN::response& res, connection_context& cntx)
+  {
+    if(!check_core_ready())
+    {
+      res.status = CORE_RPC_STATUS_BUSY;
+      return true;
+    }
+    
+    //TODO: add login information here
+
+    if(!get_addendum_for_hi(req.hi, res.addms))
+    {
+      res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
+      return true;
+    }
+
+    res.id =  std::to_string(m_session_counter++); //session id
+
+    epee::json_rpc::error err = AUTO_VAL_INIT(err);
+    if(!get_job(res.id, res.job, err, cntx))
+    {
+      res.status = err.message;
+      return true;
+    }
+
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_getjob(const mining::COMMAND_RPC_GETJOB::request& req, mining::COMMAND_RPC_GETJOB::response& res, connection_context& cntx)
+  {
+    if(!check_core_ready())
+    {
+      res.status = CORE_RPC_STATUS_BUSY;
+      return true;
+    }
+    
+    if(!get_addendum_for_hi(req.hi, res.addms))
+    {
+      res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
+      return true;
+    }
+
+    epee::json_rpc::error err = AUTO_VAL_INIT(err);
+    if(!get_job(req.id, res.jd, err, cntx))
+    {
+      res.status = err.message;
+      return true;
+    }
+
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_getscratchpad(const mining::COMMAND_RPC_GET_FULLSCRATCHPAD::request& req, mining::COMMAND_RPC_GET_FULLSCRATCHPAD::response& res, connection_context& cntx)
+  {
+    if(!check_core_ready())
+    {
+      res.status = CORE_RPC_STATUS_BUSY;
+      return true;
+    }
+    std::vector<crypto::hash> scratchpad_local;
+    m_core.get_blockchain_storage().copy_scratchpad(scratchpad_local);
+    addendum_to_hexstr(scratchpad_local, res.scratchpad_hex); 
+    get_current_hi(res.hi);
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_submit(const mining::COMMAND_RPC_SUBMITSHARE::request& req, mining::COMMAND_RPC_SUBMITSHARE::response& res, connection_context& cntx)
+  {
+    if(!check_core_ready())
+    {
+      res.status = CORE_RPC_STATUS_BUSY;
+      return true;
+    }
+    std::string job_blob_hex;
+    if(!get_session_blob(req.id, job_blob_hex))
+    {
+      res.status = "Wrong session id";
+      return true;
+    }
+    std::string bin_blob;
+    if(!string_tools::parse_hexstr_to_binbuff(job_blob_hex, bin_blob))
+    {
+      res.status = "Internal error, wrong session blob";
+      return true;
+    }
+    
+    //patch bloc with nonce
+    *reinterpret_cast<uint64_t*>(&bin_blob[1]) = req.nonce;
+    //TODO: check PoW in your pool before send to core
+    block b = AUTO_VAL_INIT(b);
+    if(!parse_and_validate_block_from_blob(bin_blob, b))
+    {
+      res.status = "Internal error, blob not unserialized";
+      return true;
+    }
+
+    if(!m_core.handle_block_found(b))
+    {
+      res.status = "Block not accepted";
+      return true;
+    }
+
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+
 }

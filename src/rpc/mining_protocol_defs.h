@@ -10,10 +10,6 @@
 
 namespace mining
 {
-  //-----------------------------------------------
-#define CORE_RPC_STATUS_OK   "OK"
-
-
   struct height_info
   {
     uint64_t height;
@@ -27,13 +23,13 @@ namespace mining
   struct job_details
   {
     std::string blob;
-    std::string target;
+    std::string difficulty;
     std::string job_id;
     height_info prev_hi;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(blob)
-      KV_SERIALIZE(target)
+      KV_SERIALIZE(difficulty)
       KV_SERIALIZE(job_id)
       KV_SERIALIZE(prev_hi)
     END_KV_SERIALIZE_MAP()
@@ -105,10 +101,12 @@ namespace mining
     {
         job_details jd;
         std::list<addendum> addms;
+        std::string status;
         
         BEGIN_KV_SERIALIZE_MAP()
           KV_SERIALIZE(jd)
           KV_SERIALIZE(addms)
+          KV_SERIALIZE(status)
         END_KV_SERIALIZE_MAP()
     };
   };
@@ -130,10 +128,12 @@ namespace mining
     {
       height_info hi;
       std::string scratchpad_hex;
+      std::string status;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(hi)
         KV_SERIALIZE(scratchpad_hex)
+        KV_SERIALIZE(status)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -146,14 +146,12 @@ namespace mining
     struct request
     {
       std::string id;
-      std::string nonce;
-      std::string result;
+      uint64_t nonce;
       std::string job_id;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(id)
         KV_SERIALIZE(nonce)
-        KV_SERIALIZE(result)
         KV_SERIALIZE(job_id)
       END_KV_SERIALIZE_MAP()
     };

@@ -35,7 +35,6 @@ namespace currency
     bool init(const boost::program_options::variables_map& vm);
     bool deinit();
     static void init_options(boost::program_options::options_description& desc);
-    bool set_block_template(const block& bl, const difficulty_type& diffic, uint64_t height);
     bool on_block_chain_update();
     bool start(const account_public_address& adr, size_t threads_count);
     uint64_t get_speed();
@@ -71,6 +70,7 @@ namespace currency
     }
 
   private:
+    bool set_block_template(const block& bl, const difficulty_type& diffic, uint64_t height);
     bool worker_thread();
     bool request_block_template();
     void  merge_hr();

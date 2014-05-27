@@ -5,7 +5,7 @@
 #pragma once 
 #include "net/http_client.h"
 #include "currency_protocol/blobdatatype.h"
-#include "simpleminer_protocol_defs.h"
+#include "rpc/mining_protocol_defs.h"
 namespace mining
 {
   class  simpleminer

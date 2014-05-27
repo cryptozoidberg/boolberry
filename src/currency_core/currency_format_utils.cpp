@@ -882,6 +882,26 @@ namespace currency
     return ss.str();
   }
   //------------------------------------------------------------------
+  bool addendum_to_hexstr(const std::vector<crypto::hash>& add, std::string& hex_buff)
+  {
+    for(const auto& h: add)
+      hex_buff += string_tools::pod_to_hex(h);
+    return true;
+  }
+  //------------------------------------------------------------------
+  bool hexstr_to_addendum(const std::string& hex_buff, std::vector<crypto::hash>& add)
+  {
+    CHECK_AND_ASSERT_MES(!(hex_buff.size()%(sizeof(crypto::hash)*2)), false, "wrong hex_buff size=" << hex_buff.size());
+    for(size_t i = 0; i + sizeof(crypto::hash)*2 <= hex_buff.size(); i += sizeof(crypto::hash)*2)
+    {
+      crypto::hash h = null_hash;
+      bool r = string_tools::hex_to_pod(hex_buff.substr(i, sizeof(crypto::hash)*2), h);
+      CHECK_AND_ASSERT_MES(r, false, "wrong scratchpad hex buff: " << hex_buff.substr(i, sizeof(crypto::hash)*2));
+      add.push_back(h);
+    }
+    return true;
+  }
+  //------------------------------------------------------------------
 #define ANTI_OVERFLOW_AMOUNT       1000000
 #define GET_PERECENTS_BIG_NUMBERS(per, total) (per/ANTI_OVERFLOW_AMOUNT)*100 / (total/ANTI_OVERFLOW_AMOUNT) 
 

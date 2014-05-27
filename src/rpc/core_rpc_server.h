@@ -12,6 +12,7 @@
 #include "currency_core/currency_core.h"
 #include "p2p/net_node.h"
 #include "currency_protocol/currency_protocol_handler.h"
+#include "mining_protocol_defs.h"
 
 namespace currency
 {
@@ -50,8 +51,13 @@ namespace currency
         MAP_JON_RPC_WE("getlastblockheader",     on_get_last_block_header,      COMMAND_RPC_GET_LAST_BLOCK_HEADER)
         MAP_JON_RPC_WE("getblockheaderbyhash",   on_get_block_header_by_hash,   COMMAND_RPC_GET_BLOCK_HEADER_BY_HASH)
         MAP_JON_RPC_WE("getblockheaderbyheight", on_get_block_header_by_height, COMMAND_RPC_GET_BLOCK_HEADER_BY_HEIGHT)
-        MAP_JON_RPC_WE("get_alias_details",      on_get_alias_details, COMMAND_RPC_GET_ALIAS_DETAILS)
-        MAP_JON_RPC_WE("get_all_alias_details",  on_get_all_aliases, COMMAND_RPC_GET_ALL_ALIASES)
+        MAP_JON_RPC_WE("get_alias_details",      on_get_alias_details,          COMMAND_RPC_GET_ALIAS_DETAILS)
+        MAP_JON_RPC_WE("get_all_alias_details",  on_get_all_aliases,            COMMAND_RPC_GET_ALL_ALIASES)
+        //remote miner rpc
+        MAP_JON_RPC_N(on_login,          mining::COMMAND_RPC_LOGIN)
+        MAP_JON_RPC_N(on_getjob,         mining::COMMAND_RPC_GETJOB)
+        MAP_JON_RPC_N(on_getscratchpad,  mining::COMMAND_RPC_GET_FULLSCRATCHPAD)
+        MAP_JON_RPC_N(on_submit,         mining::COMMAND_RPC_SUBMITSHARE)        
       END_JSON_RPC_MAP()
     END_URI_MAP2()
 
@@ -76,17 +82,32 @@ namespace currency
     bool on_get_block_header_by_height(const COMMAND_RPC_GET_BLOCK_HEADER_BY_HEIGHT::request& req, COMMAND_RPC_GET_BLOCK_HEADER_BY_HEIGHT::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
     bool on_get_alias_details(const COMMAND_RPC_GET_ALIAS_DETAILS::request& req, COMMAND_RPC_GET_ALIAS_DETAILS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
     bool on_get_all_aliases(const COMMAND_RPC_GET_ALL_ALIASES::request& req, COMMAND_RPC_GET_ALL_ALIASES::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
+    //mining rpc
+    bool on_login(const mining::COMMAND_RPC_LOGIN::request& req, mining::COMMAND_RPC_LOGIN::response& res, connection_context& cntx);
+    bool on_getjob(const mining::COMMAND_RPC_GETJOB::request& req, mining::COMMAND_RPC_GETJOB::response& res, connection_context& cntx);
+    bool on_getscratchpad(const mining::COMMAND_RPC_GET_FULLSCRATCHPAD::request& req, mining::COMMAND_RPC_GET_FULLSCRATCHPAD::response& res, connection_context& cntx);
+    bool on_submit(const mining::COMMAND_RPC_SUBMITSHARE::request& req, mining::COMMAND_RPC_SUBMITSHARE::response& res, connection_context& cntx);
+
     //-----------------------
     bool handle_command_line(const boost::program_options::variables_map& vm);
     bool check_core_ready();
-    
+    bool get_addendum_for_hi(const mining::height_info& hi, std::list<mining::addendum>& res);
+    bool get_job(const std::string& job_id, mining::job_details& job, epee::json_rpc::error& err, connection_context& cntx);
+    bool get_current_hi(mining::height_info& hi);
+
     //utils
     uint64_t get_block_reward(const block& blk);
     bool fill_block_header_responce(const block& blk, bool orphan_status, block_header_responce& responce);
+    void set_session_blob(const std::string& session_id, const std::string& blob);
+    bool get_session_blob(const std::string& session_id, std::string& blob);
     
     core& m_core;
     nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& m_p2p;
     std::string m_port;
     std::string m_bind_ip;
+    //mining stuff
+    epee::critical_section m_session_jobs_lock;
+    std::map<std::string, std::string> m_session_jobs; //session id -> blob
+    std::atomic<size_t> m_session_counter;
   };
 }

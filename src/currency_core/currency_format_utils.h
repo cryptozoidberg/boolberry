@@ -137,6 +137,10 @@ namespace currency
   std::string print_money(uint64_t amount);
   std::string dump_scratchpad(const std::vector<crypto::hash>& scr);
   std::string dump_patch(const std::map<uint64_t, crypto::hash>& patch);
+  
+  bool addendum_to_hexstr(const std::vector<crypto::hash>& add, std::string& hex_buff);
+  bool hexstr_to_addendum(const std::string& hex_buff, std::vector<crypto::hash>& add);
+
 
   void print_currency_details();
   

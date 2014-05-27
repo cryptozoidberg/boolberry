@@ -4,4 +4,4 @@
 
 #pragma once
 
-#define alloca(size) _alloca(size)
+//#define alloca(size) _alloca(size)

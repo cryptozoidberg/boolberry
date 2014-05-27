@@ -90,7 +90,7 @@ namespace mining
   {
     bool r = epee::string_tools::parse_hexstr_to_binbuff(job.blob, native_details.blob);
     CHECK_AND_ASSERT_MES(r, false, "wrong buffer sent from pool server");
-    r = epee::string_tools::parse_tpod_from_hex_string(job.target, native_details.target);
+    r = epee::string_tools::parse_tpod_from_hex_string(job.difficulty, native_details.target);
     CHECK_AND_ASSERT_MES(r, false, "wrong buffer sent from pool server");
     native_details.job_id = job.job_id;
     return true;
@@ -138,7 +138,7 @@ namespace mining
         }
         pool_session_id = resp.id;
         //78
-        if (resp.job.blob.empty() && resp.job.target.empty() && resp.job.job_id.empty())
+        if (resp.job.blob.empty() && resp.job.difficulty.empty() && resp.job.job_id.empty())
         {
             LOG_PRINT_L0("Job didn't change");
             continue;
@@ -204,7 +204,7 @@ namespace mining
         epee::misc_utils::sleep_no_w(1000);
         continue;
       }
-      if (getjob_response.jd.blob.empty() && getjob_response.jd.target.empty() && getjob_response.jd.job_id.empty())
+      if (getjob_response.jd.blob.empty() && getjob_response.jd.difficulty.empty() && getjob_response.jd.job_id.empty())
       {
         LOG_PRINT_L0("Job didn't change");
         continue;
@@ -218,8 +218,7 @@ namespace mining
       }
       last_job_ticks = epee::misc_utils::get_tick_count();
     }
-
     return true;
-
   }
 }
+

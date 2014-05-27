@@ -66,5 +66,22 @@ TEST(scratchpad_tests, test_alt_patch)
   {
     ASSERT_EQ(scratchpad[i], s[20].second[i]);
   }
+}
 
+TEST(test_appendum, test_appendum)
+{
+  std::vector<crypto::hash> scratchpad;
+  scratchpad.resize(20);
+  for(auto& h: scratchpad)
+    h = crypto::rand<crypto::hash>();
+
+  std::string hex_addendum;
+  bool r = addendum_to_hexstr(scratchpad, hex_addendum);
+  ASSERT_TRUE(r);
+
+  std::vector<crypto::hash> scratchpad2;
+  r = hexstr_to_addendum(hex_addendum, scratchpad2);
+  ASSERT_TRUE(r);
+
+  ASSERT_EQ(scratchpad, scratchpad2);
 }

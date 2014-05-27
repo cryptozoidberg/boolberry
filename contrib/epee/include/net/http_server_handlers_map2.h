@@ -307,6 +307,8 @@ namespace epee
   return true;\
 }
 
+#define MAP_JON_RPC_N(callback_f, command_type) MAP_JON_RPC(command_type::methodname(), callback_f, command_type)
+
 #define END_JSON_RPC_MAP() \
   epee::json_rpc::error_response rsp; \
   rsp.id = id_; \
