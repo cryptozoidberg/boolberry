@@ -375,7 +375,6 @@ namespace currency
       return false;
     }
     blobdata block_blob = t_serializable_object_to_blob(b);
-    crypto::public_key tx_pub_key = null_pkey;
     std::string::size_type pos = block_blob.find(PROJECT_VERSION_LONG);
     if(pos == std::string::npos)
     {
