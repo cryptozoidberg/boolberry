@@ -94,6 +94,7 @@ namespace mining
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(id)
+        KV_SERIALIZE(hi)
       END_KV_SERIALIZE_MAP()
     };
 

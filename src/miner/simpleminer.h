@@ -32,8 +32,8 @@ namespace mining
     };
 
     static bool text_job_details_to_native_job_details(const job_details& job, job_details_native& native_details);
-    bool text_height_info_to_native_height_info(const height_info& job, height_info_native& hi_native);
-    bool native_height_info_to_text_height_info(height_info& job, const height_info_native& hi_native);
+    static bool text_height_info_to_native_height_info(const height_info& job, height_info_native& hi_native);
+    static bool native_height_info_to_text_height_info(height_info& job, const height_info_native& hi_native);
 
     bool get_job();
     bool get_whole_scratchpad();

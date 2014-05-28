@@ -23,7 +23,7 @@ int main(int argc, char** argv)
   string_tools::set_module_name_and_folder(argv[0]);
 
   //set up logging options
-  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_4);
+  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_2);
   log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
   log_space::log_singletone::add_logger(LOGGER_FILE,
     log_space::log_singletone::get_default_log_file().c_str(),
@@ -111,8 +111,8 @@ namespace mining
     r = epee::string_tools::get_xtype_from_string(native_details.difficulty, job.difficulty);
     CHECK_AND_ASSERT_MES(r, false, "wrong buffer sent from pool server");
     native_details.job_id = job.job_id;
-    //native_details.height
-    return true;
+   
+    return text_height_info_to_native_height_info(job.prev_hi, native_details.prev_hi);
   }
   //--------------------------------------------------------------------------------------------------------------------------------
   bool simpleminer::run()
@@ -186,13 +186,18 @@ namespace mining
 
         if( currency::check_hash(h, m_job.difficulty))
         {
+          //<< ", id" << currency::get_blob_hash(m_job.blob) << ENDL
           //found!          
           COMMAND_RPC_SUBMITSHARE::request submit_request = AUTO_VAL_INIT(submit_request);
           COMMAND_RPC_SUBMITSHARE::response submit_response = AUTO_VAL_INIT(submit_response);
           submit_request.id     = m_pool_session_id;
           submit_request.job_id = m_job.job_id;
           submit_request.nonce  = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
-          LOG_PRINT_GREEN("Share found: nonce=" << submit_request.nonce << " for job=" << m_job.job_id << ", submitting...", LOG_LEVEL_0);
+          LOG_PRINT_GREEN("Share found: nonce=" << submit_request.nonce << " for job=" << m_job.job_id << ", diff: " << m_job.difficulty << ENDL             
+            << ", PoW:" << h << ", height:" << m_job.prev_hi.height+1 << ", submitting...", LOG_LEVEL_0);
+
+          //LOG_PRINT_L0("Block hashing blob: " << string_tools::buff_to_hex_nodelimer(m_job.blob));
+          //LOG_PRINT_L0("scratch_pad: " << currency::dump_scratchpad(m_scratchpad));
           if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_SUBMITSHARE>("/json_rpc", submit_request, submit_response, m_http_client))
           {
             LOG_PRINT_L0("Failed to submit share! disconnect and sleep....");
@@ -208,6 +213,7 @@ namespace mining
             break;
           }
           LOG_PRINT_GREEN("Share submitted successfully!", LOG_LEVEL_0);
+          get_job();
           break;
         }
       }
@@ -316,6 +322,7 @@ namespace mining
       CHECK_AND_ASSERT_MES(r, false, "failed to push_addendum()");
     }
     LOG_PRINT_L0("Numbers of blocks added to scratchpad: " << addms.size());
+    text_height_info_to_native_height_info(addms.back().hi, m_hi);
     return true;
   }
   //----------------------------------------------------------------------------------------------------------------------------------

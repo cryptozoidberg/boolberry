@@ -51,10 +51,12 @@ namespace currency
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::check_core_ready()
   {
+#ifndef TESTNET
     if(!m_p2p.get_payload_object().is_synchronized())
     {
       return false;
     }
+#endif
     if(m_p2p.get_payload_object().get_core().get_blockchain_storage().is_storing_blockchain())
     {
       return false;
@@ -435,8 +437,6 @@ namespace currency
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::fill_block_header_responce(const block& blk, bool orphan_status, block_header_responce& responce)
   {
-    
-
     responce.major_version = blk.major_version;
     responce.minor_version = blk.minor_version;
     responce.timestamp = blk.timestamp;
@@ -600,10 +600,10 @@ namespace currency
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::get_addendum_for_hi(const mining::height_info& hi, std::list<mining::addendum>& res)
   {
-    if(!hi.height)
+    if(!hi.height || hi.height + 1 == m_core.get_current_blockchain_height())
       return true;//do not make addendum for whole blockchain
 
-    CHECK_AND_ASSERT_MES(hi.height >= m_core.get_current_blockchain_height(), false, "wrong height parameter passed: " << hi.height);
+    CHECK_AND_ASSERT_MES(hi.height < m_core.get_current_blockchain_height(), false, "wrong height parameter passed: " << hi.height);
 
     crypto::hash h = null_hash;
     bool r = string_tools::hex_to_pod(hi.block_id, h);
@@ -621,7 +621,7 @@ namespace currency
     }
 
     std::list<block> blocks;
-    r = m_core.get_blockchain_storage().get_blocks(height + 1, m_core.get_current_blockchain_height() - (height+2), blocks);
+    r = m_core.get_blockchain_storage().get_blocks(height + 1, m_core.get_current_blockchain_height() - (height+1), blocks);
     CHECK_AND_ASSERT_MES(r, false, "failed to get blocks");
     for(auto it = blocks.begin(); it!= blocks.end(); it++)
     {
@@ -646,13 +646,13 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  void core_rpc_server::set_session_blob(const std::string& session_id, const std::string& blob)
+  void core_rpc_server::set_session_blob(const std::string& session_id, const currency::block& blob)
   {
     CRITICAL_REGION_LOCAL(m_session_jobs_lock);
     m_session_jobs[session_id] = blob;
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  bool core_rpc_server::get_session_blob(const std::string& session_id, std::string& blob)
+  bool core_rpc_server::get_session_blob(const std::string& session_id, currency::block& blob)
   {
     CRITICAL_REGION_LOCAL(m_session_jobs_lock);
     auto it = m_session_jobs.find(session_id);
@@ -677,8 +677,18 @@ namespace currency
     if(!on_getblocktemplate(bt_req, bt_res, err, cntx))
       return false;
 
-    set_session_blob(job_id, bt_res.blocktemplate_blob);
-    job.blob = bt_res.blocktemplate_blob;
+    //patch block blob if you need(bt_res.blocktemplate_blob), and than load block from blob template
+    //important: you can't change block size, since it could touch reward and block became invalid
+
+    block b = AUTO_VAL_INIT(b);
+    std::string bin_buff;
+    bool r = string_tools::parse_hexstr_to_binbuff(bt_res.blocktemplate_blob, bin_buff);
+    CHECK_AND_ASSERT_MES(r, false, "internal error, failed to parse hex block");
+    r = currency::parse_and_validate_block_from_blob(bin_buff, b);
+    CHECK_AND_ASSERT_MES(r, false, "internal error, failed to parse block");
+
+    set_session_blob(job_id, b);
+    job.blob = string_tools::buff_to_hex_nodelimer(currency::get_block_hashing_blob(b));
     //TODO: set up share difficulty here!
     job.difficulty = std::to_string(bt_res.difficulty); //difficulty leaved as string field since it will be refactored into 128 bit format
     job.job_id = "SOME_JOB_ID";
@@ -763,35 +773,25 @@ namespace currency
       res.status = CORE_RPC_STATUS_BUSY;
       return true;
     }
-    std::string job_blob_hex;
-    if(!get_session_blob(req.id, job_blob_hex))
+    block b = AUTO_VAL_INIT(b);
+    if(!get_session_blob(req.id, b))
     {
       res.status = "Wrong session id";
       return true;
     }
-    std::string bin_blob;
-    if(!string_tools::parse_hexstr_to_binbuff(job_blob_hex, bin_blob))
-    {
-      res.status = "Internal error, wrong session blob";
-      return true;
-    }
-    
-    //patch bloc with nonce
-    *reinterpret_cast<uint64_t*>(&bin_blob[1]) = req.nonce;
-    //TODO: check PoW in your pool before send to core
-    block b = AUTO_VAL_INIT(b);
-    if(!parse_and_validate_block_from_blob(bin_blob, b))
-    {
-      res.status = "Internal error, blob not unserialized";
-      return true;
-    }
+
+    b.nonce = req.nonce;
 
     if(!m_core.handle_block_found(b))
     {
       res.status = "Block not accepted";
+      LOG_ERROR("Submited block not accepted");
       return true;
     }
-
+    //@#@
+    //LOG_PRINT_L0("block_hash: " << get_block_hash(b));
+    //LOG_PRINT_L0("block_hashing_blob:" << string_tools::buff_to_hex_nodelimer(currency::get_block_hashing_blob(b)));
+    
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }

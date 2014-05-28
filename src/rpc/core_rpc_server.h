@@ -98,8 +98,8 @@ namespace currency
     //utils
     uint64_t get_block_reward(const block& blk);
     bool fill_block_header_responce(const block& blk, bool orphan_status, block_header_responce& responce);
-    void set_session_blob(const std::string& session_id, const std::string& blob);
-    bool get_session_blob(const std::string& session_id, std::string& blob);
+    void set_session_blob(const std::string& session_id, const currency::block& blob);
+    bool get_session_blob(const std::string& session_id, currency::block& blob);
     
     core& m_core;
     nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& m_p2p;
@@ -107,7 +107,7 @@ namespace currency
     std::string m_bind_ip;
     //mining stuff
     epee::critical_section m_session_jobs_lock;
-    std::map<std::string, std::string> m_session_jobs; //session id -> blob
+    std::map<std::string, currency::block> m_session_jobs; //session id -> blob
     std::atomic<size_t> m_session_counter;
   };
 }
