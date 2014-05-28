@@ -8,11 +8,12 @@
 #include "simpleminer.h"
 #include "target_helper.h"
 #include "net/http_server_handlers_map2.h"
-#include "simpleminer_protocol_defs.h"
+#include "rpc/mining_protocol_defs.h"
 #include "storages/http_abstract_invoke.h"
 #include "string_tools.h"
 #include "currency_core/account.h"
 #include "currency_core/currency_format_utils.h"
+#include "rpc/core_rpc_server_commands_defs.h"
 
 using namespace epee;
 namespace po = boost::program_options;
@@ -58,8 +59,6 @@ int main(int argc, char** argv)
   return 0;
 }
 
-
-
 namespace mining
 {
   const command_line::arg_descriptor<std::string, true> arg_pool_addr = {"pool-addr", ""};
@@ -73,6 +72,7 @@ namespace mining
     command_line::add_arg(desc, arg_login);
     command_line::add_arg(desc, arg_pass);
   }
+  //--------------------------------------------------------------------------------------------------------------------------------
   bool simpleminer::init(const boost::program_options::variables_map& vm)
   {
     std::string pool_addr = command_line::get_arg(vm, arg_pool_addr);
@@ -83,29 +83,44 @@ namespace mining
     m_pool_port = pool_addr.substr(p + 1, pool_addr.size());
     m_login = command_line::get_arg(vm, arg_login);
     m_pass = command_line::get_arg(vm, arg_pass);
+    m_hi = AUTO_VAL_INIT(m_hi);
+    m_last_job_ticks = 0;
+
     return true;
   }
-
+  //--------------------------------------------------------------------------------------------------------------------------------
+  bool simpleminer::text_height_info_to_native_height_info(const height_info& hi, height_info_native& hi_native)
+  {
+    hi_native.height = hi.height;
+    bool r = string_tools::hex_to_pod(hi.block_id, hi_native.id);
+    CHECK_AND_ASSERT_MES(r, false, "wrong block_id: " << hi.block_id);
+    return true;
+  }
+  //--------------------------------------------------------------------------------------------------------------------------------
+  bool simpleminer::native_height_info_to_text_height_info(height_info& hi, const height_info_native& hi_native)
+  {
+    hi.height = hi_native.height;
+    hi.block_id = string_tools::pod_to_hex(hi_native.id);
+    return true;
+  }
+  //--------------------------------------------------------------------------------------------------------------------------------
   bool simpleminer::text_job_details_to_native_job_details(const job_details& job, simpleminer::job_details_native& native_details)
   {
     bool r = epee::string_tools::parse_hexstr_to_binbuff(job.blob, native_details.blob);
     CHECK_AND_ASSERT_MES(r, false, "wrong buffer sent from pool server");
-    r = epee::string_tools::parse_tpod_from_hex_string(job.difficulty, native_details.target);
+    r = epee::string_tools::get_xtype_from_string(native_details.difficulty, job.difficulty);
     CHECK_AND_ASSERT_MES(r, false, "wrong buffer sent from pool server");
     native_details.job_id = job.job_id;
+    //native_details.height
     return true;
   }
-
+  //--------------------------------------------------------------------------------------------------------------------------------
   bool simpleminer::run()
   {
-    std::string pool_session_id;
-    simpleminer::job_details_native job = AUTO_VAL_INIT(job);
-    uint64_t last_job_ticks = 0;
-
+    m_job = AUTO_VAL_INIT(m_job);
     while(true)
     {
       //-----------------
-      last_job_ticks = epee::misc_utils::get_tick_count();
       if(!m_http_client.is_connected())
       {
         LOG_PRINT_L0("Connecting " << m_pool_ip << ":" << m_pool_port << "....");
@@ -121,60 +136,64 @@ namespace mining
         req.login = m_login;
         req.pass = m_pass;
         req.agent = "simpleminer/0.1";
+        native_height_info_to_text_height_info(req.hi, m_hi);
+        bool job_requested = m_hi.height ? true:false;
         COMMAND_RPC_LOGIN::response resp = AUTO_VAL_INIT(resp);
-        if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_LOGIN>("/", req, resp, m_http_client))
+        if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_LOGIN>("/json_rpc", req, resp, m_http_client))
         {
           LOG_PRINT_L0("Failed to invoke login " << m_pool_ip << ":" << m_pool_port << ", disconnect and sleep....");
           m_http_client.disconnect();
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
-        if(resp.status != "OK" || resp.id.empty())
+        if(resp.status != CORE_RPC_STATUS_OK || resp.id.empty())
         {
           LOG_PRINT_L0("Failed to login " << m_pool_ip << ":" << m_pool_port << ", disconnect and sleep....");
           m_http_client.disconnect();
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
-        pool_session_id = resp.id;
-        //78
-        if (resp.job.blob.empty() && resp.job.difficulty.empty() && resp.job.job_id.empty())
+        m_pool_session_id = resp.id;        
+        if(!m_hi.height || !m_scratchpad.size())
+        {
+          if(!get_whole_scratchpad())
+            continue;
+        }
+
+        if (job_requested && resp.job.blob.empty() && resp.job.difficulty.empty() && resp.job.job_id.empty())
         {
             LOG_PRINT_L0("Job didn't change");
             continue;
         }
-        else if(!text_job_details_to_native_job_details(resp.job, job))
+        else if(job_requested && !text_job_details_to_native_job_details(resp.job, m_job))
         {
           LOG_PRINT_L0("Failed to text_job_details_to_native_job_details(), disconnect and sleep....");
           m_http_client.disconnect();
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
-        last_job_ticks = epee::misc_utils::get_tick_count();
-
+        if(job_requested)
+          m_last_job_ticks = epee::misc_utils::get_tick_count();
       }
-      while(epee::misc_utils::get_tick_count() - last_job_ticks < 20000)
+      while(epee::misc_utils::get_tick_count() - m_last_job_ticks < 20000)
       {
-        //uint32_t c = (*((uint32_t*)&job.blob.data()[39]));
-        ++(*((uint32_t*)&job.blob.data()[39]));
+        ++(*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
         crypto::hash h = currency::null_hash;
-        currency::get_blob_longhash(job.blob, h, job.height, [&](uint64_t index) -> crypto::hash&
+        currency::get_blob_longhash(m_job.blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
         {
           return m_scratchpad[index%m_scratchpad.size()];
         });
 
-        if(  ((uint32_t*)&h)[7] < job.target )
+        if( currency::check_hash(h, m_job.difficulty))
         {
-          //found!
-          
+          //found!          
           COMMAND_RPC_SUBMITSHARE::request submit_request = AUTO_VAL_INIT(submit_request);
           COMMAND_RPC_SUBMITSHARE::response submit_response = AUTO_VAL_INIT(submit_response);
-          submit_request.id     = pool_session_id;
-          submit_request.job_id = job.job_id;
-          submit_request.nonce  = epee::string_tools::pod_to_hex((*((uint32_t*)&job.blob.data()[39])));
-          submit_request.result = epee::string_tools::pod_to_hex(h);
-          LOG_PRINT_L0("Share found: nonce=" << submit_request.nonce << " for job=" << job.job_id << ", submitting...");
-          if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_SUBMITSHARE>("/", submit_request, submit_response, m_http_client))
+          submit_request.id     = m_pool_session_id;
+          submit_request.job_id = m_job.job_id;
+          submit_request.nonce  = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
+          LOG_PRINT_GREEN("Share found: nonce=" << submit_request.nonce << " for job=" << m_job.job_id << ", submitting...", LOG_LEVEL_0);
+          if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_SUBMITSHARE>("/json_rpc", submit_request, submit_response, m_http_client))
           {
             LOG_PRINT_L0("Failed to submit share! disconnect and sleep....");
             m_http_client.disconnect();
@@ -192,33 +211,152 @@ namespace mining
           break;
         }
       }
-      //get next job
-      COMMAND_RPC_GETJOB::request getjob_request = AUTO_VAL_INIT(getjob_request);
-      COMMAND_RPC_GETJOB::response getjob_response = AUTO_VAL_INIT(getjob_response);
-      getjob_request.id = pool_session_id;
-      LOG_PRINT_L0("Getting next job...");
-      if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_GETJOB>("/", getjob_request, getjob_response, m_http_client))
-      {
-        LOG_PRINT_L0("Can't get new job! Disconnect and sleep....");
-        m_http_client.disconnect();
-        epee::misc_utils::sleep_no_w(1000);
-        continue;
-      }
-      if (getjob_response.jd.blob.empty() && getjob_response.jd.difficulty.empty() && getjob_response.jd.job_id.empty())
-      {
-        LOG_PRINT_L0("Job didn't change");
-        continue;
-      }
-      else if(!text_job_details_to_native_job_details(getjob_response.jd, job))
-      {
-        LOG_PRINT_L0("Failed to text_job_details_to_native_job_details(), disconnect and sleep....");
-        m_http_client.disconnect();
-        epee::misc_utils::sleep_no_w(1000);
-        continue;
-      }
-      last_job_ticks = epee::misc_utils::get_tick_count();
+      get_job();
     }
     return true;
   }
+  //----------------------------------------------------------------------------------------------------------------------------------
+  bool simpleminer::get_whole_scratchpad()
+  {
+    LOG_PRINT_L0("Getting scratchpad...");
+    mining::COMMAND_RPC_GET_FULLSCRATCHPAD::request scr_req = AUTO_VAL_INIT(scr_req);
+    mining::COMMAND_RPC_GET_FULLSCRATCHPAD::response scr_resp = AUTO_VAL_INIT(scr_resp);
+    if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_GET_FULLSCRATCHPAD>("/json_rpc", scr_req, scr_resp, m_http_client, 60*1000))
+    {
+      LOG_PRINT_L0("Failed to get scratchpad, disconnect and retry....");
+      m_http_client.disconnect();            
+      return false;
+    }
+    if(!currency::hexstr_to_addendum(scr_resp.scratchpad_hex, m_scratchpad))
+    {
+      LOG_ERROR("Failed to get scratchpad: hexstr_to_addendum failed, disconnect and retry....");
+      m_http_client.disconnect();            
+      return false;
+    }
+    bool r = text_height_info_to_native_height_info(scr_resp.hi, m_hi);
+    LOG_PRINT_L0("Scratchpad received ok, size: " << (m_scratchpad.size()*32)/1024 << "Kb, heigh=" << m_hi.height);
+    return true;
+  }
+  //----------------------------------------------------------------------------------------------------------------------------------
+  bool  simpleminer::pop_addendum(const addendum& add)
+  {
+    std::vector<crypto::hash> add_vec;
+    bool r = currency::hexstr_to_addendum(add.addm, add_vec);
+    CHECK_AND_ASSERT_MES(r, false, "failed to hexstr_to_addendum");
+    CHECK_AND_ASSERT_MES(m_scratchpad.size() > add_vec.size(), false, "error: to big addendum or to small local scratchpad");
+
+    std::map<uint64_t, crypto::hash> patch;
+    currency::get_scratchpad_patch(m_scratchpad.size() - add_vec.size(),  
+                                   0, 
+                                   add_vec.size(), 
+                                   add_vec, 
+                                   patch);
+    r = currency::apply_scratchpad_patch(m_scratchpad, patch);
+    CHECK_AND_ASSERT_MES(r, false, "failed to apply patch");
+    m_scratchpad.resize(m_scratchpad.size() - add_vec.size());  
+    return true;
+  }
+  //----------------------------------------------------------------------------------------------------------------------------------
+  bool  simpleminer::push_addendum(const addendum& add)
+  {
+    std::vector<crypto::hash> add_vec;
+    bool r = currency::hexstr_to_addendum(add.addm, add_vec);
+    CHECK_AND_ASSERT_MES(r, false, "failed to hexstr_to_addendum");
+    
+    std::map<uint64_t, crypto::hash> patch;
+    currency::get_scratchpad_patch(m_scratchpad.size(),  
+                                   0, 
+                                   add_vec.size(), 
+                                   add_vec, 
+                                   patch);
+    r = currency::apply_scratchpad_patch(m_scratchpad, patch);
+    CHECK_AND_ASSERT_MES(r, false, "failed to apply patch");
+    for(const auto& h: add_vec)
+      m_scratchpad.push_back(h);
+
+    return true;
+  }
+  //----------------------------------------------------------------------------------------------------------------------------------
+  bool simpleminer::apply_addendums(const std::list<addendum>& addms)
+  {
+    if(!addms.size())
+      return true;
+    crypto::hash pid = currency::null_hash;
+    bool r = string_tools::hex_to_pod(addms.begin()->prev_id, pid);
+    CHECK_AND_ASSERT_MES(r, false, "wrong prev_id");
+    if(pid != m_hi.id)
+    {
+      LOG_PRINT_L0("Split detected, looking for patch");
+
+      auto it = std::find_if(m_blocks_addendums.begin(), m_blocks_addendums.end(),[&](const mining::addendum& a){
+        if(a.hi.block_id == addms.begin()->prev_id)
+          return true;
+        else
+          return false;
+      });
+      if(it == m_blocks_addendums.end())
+        return false;
+      //unpatch
+      size_t count = 0;
+      for(auto it_to_patch = --m_blocks_addendums.end(); it_to_patch != it; --it)
+      {
+        r = pop_addendum(*it_to_patch);
+        CHECK_AND_ASSERT_MES(r, false, "failed to pop_addendum()");
+        ++count;
+      }
+      
+      m_blocks_addendums.erase(++it, m_blocks_addendums.end());
+      LOG_PRINT_L0("Numbers of blocks removed from scratchpad: " << count);
+    }
+
+    //append scratchpad with new blocks
+    for(const auto& a: addms)
+    {
+      r = push_addendum(a);
+      CHECK_AND_ASSERT_MES(r, false, "failed to push_addendum()");
+    }
+    LOG_PRINT_L0("Numbers of blocks added to scratchpad: " << addms.size());
+    return true;
+  }
+  //----------------------------------------------------------------------------------------------------------------------------------
+  bool simpleminer::get_job()
+  {
+    //get next job
+    COMMAND_RPC_GETJOB::request getjob_request = AUTO_VAL_INIT(getjob_request);
+    COMMAND_RPC_GETJOB::response getjob_response = AUTO_VAL_INIT(getjob_response);
+    getjob_request.id = m_pool_session_id;
+    native_height_info_to_text_height_info(getjob_request.hi, m_hi);
+    LOG_PRINT_L0("Getting next job...");
+    if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_GETJOB>("/json_rpc", getjob_request, getjob_response, m_http_client))
+    {
+      LOG_PRINT_L0("Can't get new job! Disconnect and sleep....");
+      m_http_client.disconnect();
+      epee::misc_utils::sleep_no_w(1000);
+      return true;
+    }
+    if (getjob_response.jd.blob.empty() && getjob_response.jd.difficulty.empty() && getjob_response.jd.job_id.empty())
+    {
+      LOG_PRINT_L0("Job didn't change");
+    }
+    else if(!text_job_details_to_native_job_details(getjob_response.jd, m_job))
+    {
+      LOG_PRINT_L0("Failed to text_job_details_to_native_job_details(), disconnect and sleep....");
+      m_http_client.disconnect();
+      epee::misc_utils::sleep_no_w(1000);
+      return true;
+    }
+    //apply addendum
+    if(!apply_addendums(getjob_response.addms))
+    {
+      LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
+      get_whole_scratchpad();
+      return true;
+    }
+
+    m_last_job_ticks = epee::misc_utils::get_tick_count();
+
+    return true;
+  }
+  //----------------------------------------------------------------------------------------------------------------------------------
 }
 

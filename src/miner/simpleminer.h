@@ -6,6 +6,7 @@
 #include "net/http_client.h"
 #include "currency_protocol/blobdatatype.h"
 #include "rpc/mining_protocol_defs.h"
+#include "currency_core/difficulty.h"
 namespace mining
 {
   class  simpleminer
@@ -15,18 +16,37 @@ namespace mining
     bool init(const boost::program_options::variables_map& vm);
     bool run();
   private: 
+
+    struct height_info_native
+    {
+      uint64_t height;
+      crypto::hash id;
+    };
+    
     struct job_details_native
     {
       currency::blobdata blob;
-      uint32_t target;
+      currency::difficulty_type difficulty;
       std::string job_id;
-      uint64_t height;
+      height_info_native prev_hi;
     };
 
     static bool text_job_details_to_native_job_details(const job_details& job, job_details_native& native_details);
+    bool text_height_info_to_native_height_info(const height_info& job, height_info_native& hi_native);
+    bool native_height_info_to_text_height_info(height_info& job, const height_info_native& hi_native);
 
-    std::vector<std::vector<crypto::hash> > m_blocks_addendums; //need to handle splits without re-downloading whole scratchpad
+    bool get_job();
+    bool get_whole_scratchpad();
+    bool apply_addendums(const std::list<addendum>& addms);
+    bool pop_addendum(const addendum& add);
+    bool push_addendum(const addendum& add);
+
+    std::vector<mining::addendum> m_blocks_addendums; //need to handle splits without re-downloading whole scratchpad
+    height_info_native m_hi;
     std::vector<crypto::hash> m_scratchpad;
+    uint64_t m_last_job_ticks;
+    std::string m_pool_session_id;
+    simpleminer::job_details_native m_job;
 
     std::string m_pool_ip;
     std::string m_pool_port;

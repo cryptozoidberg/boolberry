@@ -600,6 +600,8 @@ namespace currency
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::get_addendum_for_hi(const mining::height_info& hi, std::list<mining::addendum>& res)
   {
+    if(!hi.height)
+      return true;//do not make addendum for whole blockchain
 
     CHECK_AND_ASSERT_MES(hi.height >= m_core.get_current_blockchain_height(), false, "wrong height parameter passed: " << hi.height);
 
@@ -702,11 +704,14 @@ namespace currency
 
     res.id =  std::to_string(m_session_counter++); //session id
 
-    epee::json_rpc::error err = AUTO_VAL_INIT(err);
-    if(!get_job(res.id, res.job, err, cntx))
+    if(req.hi.height)
     {
-      res.status = err.message;
-      return true;
+      epee::json_rpc::error err = AUTO_VAL_INIT(err);
+      if(!get_job(res.id, res.job, err, cntx))
+      {
+        res.status = err.message;
+        return true;
+      }
     }
 
     res.status = CORE_RPC_STATUS_OK;
