@@ -81,6 +81,8 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
         m_callback->on_money_received(height, td.m_tx, td.m_internal_output_index);
     }
   }
+  
+  uint64_t tx_money_spent_in_ins = 0;
   // check all outputs for spending (compare key images)
   BOOST_FOREACH(auto& in, tx.vin)
   {
@@ -90,12 +92,30 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
     if(it != m_key_images.end())
     {
       LOG_PRINT_L0("Spent money: " << print_money(boost::get<currency::txin_to_key>(in).amount) << ", with tx: " << get_transaction_hash(tx));
+      tx_money_spent_in_ins += boost::get<currency::txin_to_key>(in).amount;
       transfer_details& td = m_transfers[it->second];
       td.m_spent = true;
       if (0 != m_callback)
         m_callback->on_money_spent(height, td.m_tx, td.m_internal_output_index, tx);
     }
   }
+
+    crypto::hash payment_id;
+    if(get_payment_id_from_tx_extra(tx, payment_id))
+    {
+      uint64_t received = (tx_money_spent_in_ins < tx_money_got_in_outs) ? tx_money_got_in_outs - tx_money_spent_in_ins : 0;
+      if (0 < received && null_hash != payment_id)
+      {
+        payment_details payment;
+        payment.m_tx_hash      = currency::get_transaction_hash(tx);
+        payment.m_amount       = received;
+        payment.m_block_height = height;
+        payment.m_unlock_time  = tx.unlock_time;
+        m_payments.emplace(payment_id, payment);
+        LOG_PRINT_L2("Payment found: " << payment_id << " / " << payment.m_tx_hash << " / " << payment.m_amount);
+      }
+    }
+
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::process_unconfirmed(const currency::transaction& tx)
@@ -310,6 +330,14 @@ void wallet2::detach_blockchain(uint64_t height)
   m_blockchain.erase(m_blockchain.begin()+height, m_blockchain.end());
   m_local_bc_height -= blocks_detached;
 
+  for (auto it = m_payments.begin(); it != m_payments.end(); )
+  {
+    if(height <= it->second.m_block_height)
+      it = m_payments.erase(it);
+    else
+      ++it;
+  }
+
   LOG_PRINT_L0("Detached blockchain on height " << height << ", transfers detached " << transfers_detached << ", blocks detached " << blocks_detached);
 }
 //----------------------------------------------------------------------------------------------------
@@ -503,6 +531,14 @@ void wallet2::get_transfers(wallet2::transfer_container& incoming_transfers) con
   incoming_transfers = m_transfers;
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::get_payments(const crypto::hash& payment_id, std::list<wallet2::payment_details>& payments) const
+{
+  auto range = m_payments.equal_range(payment_id);
+  std::for_each(range.first, range.second, [&payments](const payment_container::value_type& x) {
+    payments.push_back(x.second);
+  });
+}
+//----------------------------------------------------------------------------------------------------
 bool wallet2::is_transfer_unlocked(const transfer_details& td) const
 {
   if(!is_tx_spendtime_unlocked(td.m_tx.unlock_time))
@@ -649,16 +685,16 @@ void wallet2::add_unconfirmed_tx(const currency::transaction& tx, uint64_t chang
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-                       uint64_t unlock_time, uint64_t fee, currency::transaction& tx)
+                       uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx)
 {
-  transfer(dsts, fake_outputs_count, unlock_time, fee, detail::digit_split_strategy, tx_dust_policy(fee), tx);
+  transfer(dsts, fake_outputs_count, unlock_time, fee, extra, detail::digit_split_strategy, tx_dust_policy(fee), tx);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-                       uint64_t unlock_time, uint64_t fee)
+                       uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra)
 {
   currency::transaction tx;
-  transfer(dsts, fake_outputs_count, unlock_time, fee, tx);
+  transfer(dsts, fake_outputs_count, unlock_time, fee, extra, tx);
 }
 //----------------------------------------------------------------------------------------------------
 }

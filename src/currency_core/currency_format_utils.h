@@ -55,6 +55,7 @@ namespace currency
   {
     crypto::public_key m_tx_pub_key;
     alias_info m_alias;
+    std::string m_user_data_blob;
   };
 
   //---------------------------------------------------------------
@@ -88,6 +89,7 @@ namespace currency
   bool construct_tx_out(const account_public_address& destination_addr, const crypto::secret_key& tx_sec_key, size_t output_index, uint64_t amount, transaction& tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool validate_alias_name(const std::string& al);
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, transaction& tx, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
+  bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, const std::vector<uint8_t>& extra, transaction& tx, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool sign_update_alias(alias_info& ai, const crypto::public_key& pkey, const crypto::secret_key& skey);
   bool make_tx_extra_alias_entry(std::string& buff, const alias_info& alinfo, bool make_buff_to_sign = false);
   bool add_tx_extra_alias(transaction& tx, const alias_info& alinfo);
@@ -127,6 +129,7 @@ namespace currency
   bool check_outs_valid(const transaction& tx);
   blobdata get_block_hashing_blob(const block& b);
   bool parse_amount(uint64_t& amount, const std::string& str_amount);
+  bool parse_payment_id_from_hex_str(const std::string& payment_id_str, crypto::hash& payment_id);
 
   bool check_money_overflow(const transaction& tx);
   bool check_outs_overflow(const transaction& tx);
@@ -140,11 +143,32 @@ namespace currency
   
   bool addendum_to_hexstr(const std::vector<crypto::hash>& add, std::string& hex_buff);
   bool hexstr_to_addendum(const std::string& hex_buff, std::vector<crypto::hash>& add);
-
+  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const std::string& payment_id);
+  bool get_payment_id_from_tx_extra(const transaction& tx, std::string& payment_id);
 
   void print_currency_details();
-  
-  
+    
+  //---------------------------------------------------------------
+  template<class payment_id_type>
+  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const payment_id_type& payment_id)
+  {
+    std::string payment_id_blob;
+    epee::string_tools::apped_pod_to_strbuff(payment_id_blob, payment_id);
+    return set_payment_id_to_tx_extra(extra, payment_id_blob);
+  }
+  //---------------------------------------------------------------
+  template<class payment_id_type>
+  bool get_payment_id_from_tx_extra(const transaction& tx, payment_id_type& payment_id)
+  {
+     std::string payment_id_blob;
+     if(!get_payment_id_from_tx_extra(tx, payment_id_blob))
+       return false;
+
+     if(payment_id_blob.size() != sizeof(payment_id_type))
+       return false;
+     payment_id = *reinterpret_cast<const payment_id_type*>(payment_id_blob.data());
+     return true;
+  }
   //---------------------------------------------------------------
   bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector);
   struct get_scratchpad_param

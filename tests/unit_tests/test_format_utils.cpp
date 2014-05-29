@@ -50,6 +50,32 @@ TEST(parse_and_validate_tx_extra, is_correct_wrong_extra_nonce_double_entry)
   ASSERT_FALSE(r);
 }
 
+TEST(parse_and_validate_tx_extra, user_data_test)
+{
+  currency::transaction tx = AUTO_VAL_INIT(tx);
+  tx.extra.resize(20, 0);
+  tx.extra[0] = TX_EXTRA_TAG_USER_DATA;
+  tx.extra[1] = 18;
+  currency::tx_extra_info ei = AUTO_VAL_INIT(ei);
+  bool r = parse_and_validate_tx_extra(tx, ei);
+  ASSERT_TRUE(r);
+}
+
+
+TEST(parse_and_validate_tx_extra, test_payment_ids)
+{
+  currency::transaction tx = AUTO_VAL_INIT(tx);
+  crypto::hash h = crypto::rand<crypto::hash>();
+  bool r = currency::set_payment_id_to_tx_extra(tx.extra, h);
+  ASSERT_TRUE(r);
+  
+  crypto::hash h2 = AUTO_VAL_INIT(h2);
+  r = currency::get_payment_id_from_tx_extra(tx, h2);
+  ASSERT_TRUE(r);
+  ASSERT_EQ(h, h2);
+  
+}
+
 template<int sz>
 struct t_dummy
 {

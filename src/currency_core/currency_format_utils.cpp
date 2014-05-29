@@ -421,6 +421,8 @@ namespace currency
         ++i;
         CHECK_AND_ASSERT_MES(tx.extra.size()-1-i >= tx.extra[i], false, "Failed to parse transaction extra (TX_EXTRA_NONCE have wrong bytes counter) in tx " << get_transaction_hash(tx));
         tx_extra_user_data_found = true;
+        if(tx.extra[i])
+          extra.m_user_data_blob.assign(reinterpret_cast<const char*>(&tx.extra[i+1]), static_cast<size_t>(tx.extra[i]));
         i += tx.extra[i];//actually don't need to extract it now, just skip
       }else if(tx.extra[i] == TX_EXTRA_TAG_ALIAS)
       {
@@ -440,6 +442,19 @@ namespace currency
       }
       ++i;
     }
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool parse_payment_id_from_hex_str(const std::string& payment_id_str, crypto::hash& payment_id)
+  {
+    blobdata payment_id_data;
+    if(!string_tools::parse_hexstr_to_binbuff(payment_id_str, payment_id_data))
+      return false;
+
+    if(sizeof(crypto::hash) != payment_id_data.size())
+      return false;
+
+    payment_id = *reinterpret_cast<const crypto::hash*>(payment_id_data.data());
     return true;
   }
   //---------------------------------------------------------------
@@ -490,13 +505,22 @@ namespace currency
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
                                                              transaction& tx, 
+                                                             uint64_t unlock_time, 
+                                                             uint8_t tx_outs_attr)
+  {
+    return construct_tx(sender_account_keys, sources, destinations, std::vector<uint8_t>(), tx, unlock_time, tx_outs_attr);
+  }
+  bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
+                                                             const std::vector<tx_destination_entry>& destinations, 
+                                                             const std::vector<uint8_t>& extra,
+                                                             transaction& tx, 
                                                              uint64_t unlock_time,
                                                              uint8_t tx_outs_attr)
   {
     tx.vin.clear();
     tx.vout.clear();
     tx.signatures.clear();
-    tx.extra.clear();
+    tx.extra = extra;
 
     tx.version = CURRENT_TRANSACTION_VERSION;
     tx.unlock_time = unlock_time;
@@ -727,6 +751,49 @@ namespace currency
       }
       i++;
     }
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const std::string& payment_id)
+  {
+    if(!payment_id.size() || payment_id.size() >= TX_MAX_PAYMENT_ID_SIZE)
+      return false;
+
+    if(std::find(extra.begin(), extra.end(), TX_EXTRA_TAG_USER_DATA) != extra.end())
+      return false;
+
+    extra.push_back(TX_EXTRA_TAG_USER_DATA);
+    extra.push_back(static_cast<uint8_t>(payment_id.size()+2));
+    extra.push_back(TX_USER_DATA_TAG_PAYMENT_ID);
+    extra.push_back(static_cast<uint8_t>(payment_id.size()));
+    
+    const uint8_t* payment_id_ptr = reinterpret_cast<const uint8_t*>(payment_id.data());
+    std::copy(payment_id_ptr, payment_id_ptr + payment_id.size(), std::back_inserter(extra));
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool get_payment_id_from_user_data(const std::string& user_data, std::string& paymnet_id)
+  {
+    if(!user_data.size())
+      return false;
+    if(user_data[0] != TX_USER_DATA_TAG_PAYMENT_ID)
+      return false;
+    if(user_data.size() < 2)
+      return false;
+
+    paymnet_id = user_data.substr(2, static_cast<size_t>(user_data[1]));
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool get_payment_id_from_tx_extra(const transaction& tx, std::string& payment_id)
+  {
+    tx_extra_info tei = AUTO_VAL_INIT(tei);
+    bool r = parse_and_validate_tx_extra(tx, tei);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to parse and validate extra");
+    if(!tei.m_user_data_blob.size())
+      return false;
+    if(!get_payment_id_from_user_data(tei.m_user_data_blob, payment_id))
+      return false;
     return true;
   }
   //---------------------------------------------------------------

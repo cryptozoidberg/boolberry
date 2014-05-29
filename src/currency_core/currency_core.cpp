@@ -251,11 +251,25 @@ namespace currency
     //check if tx use different key images
     if(!check_tx_inputs_keyimages_diff(tx))
     {
-      LOG_PRINT_RED_L0("tx have to big size " << get_object_blobsize(tx) << ", expected not bigger than " << m_blockchain_storage.get_current_comulative_blocksize_limit() - CURRENCY_COINBASE_BLOB_RESERVED_SIZE);
+      LOG_PRINT_RED_L0("tx have the similar keyimages");
+      return false;
+    }
+    
+    if(!check_tx_extra(tx))
+    {
+      LOG_PRINT_RED_L0("Tx have wrong extra, rejected");
       return false;
     }
 
-
+    return true;
+  }
+  //-----------------------------------------------------------------------------------------------
+  bool core::check_tx_extra(const transaction& tx)
+  {
+    tx_extra_info ei = AUTO_VAL_INIT(ei);
+    bool r = parse_and_validate_tx_extra(tx, ei);
+    if(!r)
+      return false;
     return true;
   }
   //-----------------------------------------------------------------------------------------------

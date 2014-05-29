@@ -97,6 +97,7 @@ namespace currency
      bool add_new_block(const block& b, block_verification_context& bvc);
      bool load_state_data();
      bool parse_tx_from_blob(transaction& tx, crypto::hash& tx_hash, crypto::hash& tx_prefix_hash, const blobdata& blob);
+     bool check_tx_extra(const transaction& tx);
 
      bool check_tx_syntax(const transaction& tx);
      //check correct values, amounts and all lightweight checks not related with database

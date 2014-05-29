@@ -75,6 +75,16 @@ namespace tools
       time_t m_sent_time; 
     };
 
+    struct payment_details
+    {
+      crypto::hash m_tx_hash;
+      uint64_t m_amount;
+      uint64_t m_block_height;
+      uint64_t m_unlock_time;
+    };
+    
+    typedef std::unordered_multimap<crypto::hash, payment_details> payment_container;
+
     typedef std::vector<transfer_details> transfer_container;
 
     struct keys_file_data
@@ -109,13 +119,14 @@ namespace tools
     uint64_t balance();
     uint64_t unlocked_balance();
     template<typename T>
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, T destination_split_strategy, const tx_dust_policy& dust_policy);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy);
     template<typename T>
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee);
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, currency::transaction& tx);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx);
     bool check_connection();
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
+    void get_payments(const crypto::hash& payment_id, std::list<payment_details>& payments) const;
     uint64_t get_blockchain_current_height() const { return m_local_bc_height; }
     template <class t_archive>
     inline void serialize(t_archive &a, const unsigned int ver)
@@ -129,6 +140,9 @@ namespace tools
       if(ver < 6)
         return;
       a & m_unconfirmed_txs;
+      if(ver < 7)
+        return;
+      a & m_payments;
     }
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
   private:
@@ -159,6 +173,7 @@ namespace tools
     std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;
 
     transfer_container m_transfers;
+    payment_container m_payments;
     std::unordered_map<crypto::key_image, size_t> m_key_images;
     currency::account_public_address m_account_public_address;
     uint64_t m_upper_transaction_size_limit; //TODO: auto-calc this value or request from daemon, now use some fixed value
@@ -168,7 +183,7 @@ namespace tools
     i_wallet2_callback* m_callback;
   };
 }
-BOOST_CLASS_VERSION(tools::wallet2, 6)
+BOOST_CLASS_VERSION(tools::wallet2, 7)
 
 namespace boost
 {
@@ -193,6 +208,14 @@ namespace boost
       a & x.m_tx;
     }
 
+    template <class Archive>
+    inline void serialize(Archive& a, tools::wallet2::payment_details& x, const boost::serialization::version_type ver)
+    {
+      a & x.m_tx_hash;
+      a & x.m_amount;
+      a & x.m_block_height;
+      a & x.m_unlock_time;
+    }
 
   }
 }
@@ -264,15 +287,15 @@ namespace tools
   //----------------------------------------------------------------------------------------------------
   template<typename T>
   void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-    uint64_t unlock_time, uint64_t fee, T destination_split_strategy, const tx_dust_policy& dust_policy)
+    uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy)
   {
     currency::transaction tx;
-    transfer(dsts, fake_outputs_count, unlock_time, fee, destination_split_strategy, dust_policy, tx);
+    transfer(dsts, fake_outputs_count, unlock_time, fee, extra, destination_split_strategy, dust_policy, tx);
   }
 
   template<typename T>
   void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-    uint64_t unlock_time, uint64_t fee, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr)
+    uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr)
   {
     using namespace currency;
     CHECK_AND_THROW_WALLET_EX(dsts.empty(), error::zero_destination);
@@ -385,7 +408,7 @@ namespace tools
       splitted_dsts.push_back(currency::tx_destination_entry(dust, dust_policy.addr_for_dust));
     }
 
-    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, tx, unlock_time);
+    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, tx, unlock_time);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
     update_current_tx_limit();
     CHECK_AND_THROW_WALLET_EX(m_upper_transaction_size_limit <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);

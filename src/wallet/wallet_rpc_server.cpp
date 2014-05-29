@@ -88,8 +88,15 @@ namespace tools
     }
     try
     {
+      std::vector<uint8_t> extra;
+      crypto::hash payment_id = AUTO_VAL_INIT(payment_id);
+      if(currency::parse_payment_id_from_hex_str(req.paymnet_id_hex, payment_id))
+      {
+        currency::set_payment_id_to_tx_extra(extra, payment_id);
+      }
+
       currency::transaction tx;
-      m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, tx);
+      m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, extra, tx);
       res.tx_hash = boost::lexical_cast<std::string>(currency::get_transaction_hash(tx));
       return true;
     }

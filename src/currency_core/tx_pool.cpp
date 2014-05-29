@@ -73,7 +73,6 @@ namespace currency
       }
     }
 
-
     crypto::hash max_used_block_id = null_hash;
     uint64_t max_used_block_height = 0;
     bool ch_inp_res = m_blockchain.check_tx_inputs(tx, max_used_block_height, max_used_block_id);
