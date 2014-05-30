@@ -738,6 +738,7 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
     fail_msg_writer() << "mixin_count should be non-negative integer, got " << local_args[0];
     return true;
   }
+  local_args.erase(local_args.begin());
 
   std::vector<uint8_t> extra;
   if (1 == local_args.size() % 2)
@@ -761,7 +762,7 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   }
 
   vector<currency::tx_destination_entry> dsts;
-  for (size_t i = 1; i < local_args.size(); i += 2) 
+  for (size_t i = 0; i < local_args.size(); i += 2) 
   {
     currency::tx_destination_entry de;
     if(!get_transfer_address(local_args[i], de.addr))
