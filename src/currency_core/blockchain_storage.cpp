@@ -840,6 +840,14 @@ bool blockchain_storage::complete_timestamps_vector(uint64_t start_top_height, s
 //------------------------------------------------------------------
 bool blockchain_storage::handle_alternative_block(const block& b, const crypto::hash& id, block_verification_context& bvc)
 {
+  if(m_checkpoints.is_height_passed_zone(get_block_height(b), get_current_blockchain_height()-1))
+  {
+    LOG_PRINT_RED_L0("Block with id: " << id << ENDL << " for alternative chain, is under checkpoint zone, declined");
+    bvc.m_verifivation_failed = true;
+    return false;
+
+  }
+
   TRY_ENTRY();
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
 

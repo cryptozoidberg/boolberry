@@ -29,6 +29,20 @@ namespace currency
     return !m_points.empty() && (height <= (--m_points.end())->first);
   }
   //---------------------------------------------------------------------------
+  bool checkpoints::is_height_passed_zone(uint64_t height, uint64_t blockchain_last_block_height) const
+  {
+    if(height > blockchain_last_block_height)
+      return false;
+
+    auto it = m_points.lower_bound(height);
+    if(it == m_points.end())
+      return false;
+    if(it->first <= blockchain_last_block_height)
+      return true;
+    else 
+      return false;
+  }
+  //---------------------------------------------------------------------------
   bool checkpoints::check_block(uint64_t height, const crypto::hash& h) const
   {
     auto it = m_points.find(height);
