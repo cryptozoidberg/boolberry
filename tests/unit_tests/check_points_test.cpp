@@ -37,5 +37,5 @@ TEST(checkpoints_test, test_checkpoints_for_alternative)
   r = cp.is_height_passed_zone(10, 10);
   ASSERT_TRUE(r);
   r = cp.is_height_passed_zone(11, 12);
-  ASSERT_TRUE(r);
+  ASSERT_FALSE(r);
 }
