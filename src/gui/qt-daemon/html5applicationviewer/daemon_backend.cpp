@@ -1,58 +1,23 @@
-// Copyright (c) 2012-2013 The Cryptonote developers
+// Copyright (c) 2012-2013 The Boolberry developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-// node.cpp : Defines the entry point for the console application.
-//
-
-
-#include "include_base_utils.h"
-#include "version.h"
-
-using namespace epee;
-
 #include <boost/program_options.hpp>
-
-#include "crypto/hash.h"
-#include "console_handler.h"
-#include "p2p/net_node.h"
-#include "currency_core/checkpoints_create.h"
-#include "currency_core/currency_core.h"
-#include "rpc/core_rpc_server.h"
-#include "currency_protocol/currency_protocol_handler.h"
-#include "daemon_commands_handler.h"
-#include "common/miniupnp_helper.h"
-#include "version.h"
-
-#if defined(WIN32)
-#include <crtdbg.h>
-#endif
-
-//TODO: need refactoring here. (template classes can't be used in BOOST_CLASS_VERSION) 
-BOOST_CLASS_VERSION(nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >, CURRENT_P2P_STORAGE_ARCHIVE_VER);
-
+#include "daemon_backend.h"
 
 namespace po = boost::program_options;
 
-namespace
+bool daemon_backend::init(int argc, char* argv[])
 {
-}
-
-bool command_line_preprocessor(const boost::program_options::variables_map& vm);
-
-int main(int argc, char* argv[])
-{
-
-  string_tools::set_module_name_and_folder(argv[0]);
-#ifdef WIN32
+  #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-#endif
+  #endif
+
   log_space::get_set_log_detalisation_level(true, LOG_LEVEL_0);
   log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
-  LOG_PRINT_L0("Starting...");
+  LOG_PRINT_L0("Initing...");
 
-  TRY_ENTRY();  
-
+  TRY_ENTRY();
   po::options_description desc_cmd_only("Command line options");
   po::options_description desc_cmd_sett("Command line options and settings options");
 
@@ -67,7 +32,6 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_cmd_sett, command_line::arg_log_level);
   command_line::add_arg(desc_cmd_sett, command_line::arg_console);
   command_line::add_arg(desc_cmd_sett, command_line::arg_show_details);
-  
 
   currency::core::init_options(desc_cmd_sett);
   currency::core_rpc_server::init_options(desc_cmd_sett);
@@ -109,7 +73,8 @@ int main(int argc, char* argv[])
     return true;
   });
   if (!r)
-    return 1;
+    return false;
+
 
   //set up logging options
   boost::filesystem::path log_file_path(command_line::get_arg(vm, command_line::arg_log_file));
@@ -121,21 +86,16 @@ int main(int argc, char* argv[])
   log_space::log_singletone::add_logger(LOGGER_FILE, log_file_path.filename().string().c_str(), log_dir.c_str());
   LOG_PRINT_L0(CURRENCY_NAME << " v" << PROJECT_VERSION_LONG);
 
-  if (command_line_preprocessor(vm))
-  {
-    return 0;
-  }
-
   LOG_PRINT("Module folder: " << argv[0], LOG_LEVEL_0);
 
   bool res = true;
   currency::checkpoints checkpoints;
   res = currency::create_checkpoints(checkpoints);
-  CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize checkpoints");
+  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize checkpoints");
 
   //create objects and link them
   currency::core ccore(NULL);
-  ccore.set_checkpoints(std::move(checkpoints));  
+  ccore.set_checkpoints(std::move(checkpoints));
   currency::t_currency_protocol_handler<currency::core> cprotocol(ccore, NULL);
   nodetool::node_server<currency::t_currency_protocol_handler<currency::core> > p2psrv(cprotocol);
   currency::core_rpc_server rpc_server(ccore, p2psrv);
@@ -147,7 +107,7 @@ int main(int argc, char* argv[])
   //initialize objects
   LOG_PRINT_L0("Initializing p2p server...");
   res = p2psrv.init(vm);
-  CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize p2p server.");
+  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize p2p server.");
   LOG_PRINT_L0("P2p server initialized OK on port: " << p2psrv.get_this_peer_port());
 
   LOG_PRINT_L0("Starting UPnP");
@@ -155,35 +115,24 @@ int main(int argc, char* argv[])
 
   LOG_PRINT_L0("Initializing currency protocol...");
   res = cprotocol.init(vm);
-  CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize currency protocol.");
+  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize currency protocol.");
   LOG_PRINT_L0("Currency protocol initialized OK");
 
   LOG_PRINT_L0("Initializing core rpc server...");
   res = rpc_server.init(vm);
-  CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize core rpc server.");
+  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize core rpc server.");
   LOG_PRINT_GREEN("Core rpc server initialized OK on port: " << rpc_server.get_binded_port(), LOG_LEVEL_0);
 
   //initialize core here
   LOG_PRINT_L0("Initializing core...");
   res = ccore.init(vm);
-  CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize core");
+  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize core");
   LOG_PRINT_L0("Core initialized OK");
-  
-  // start components
-  if (!command_line::has_arg(vm, command_line::arg_console))
-  {
-    dch.start_handling();
-  }
 
   LOG_PRINT_L0("Starting core rpc server...");
   res = rpc_server.run(2, false);
-  CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize core rpc server.");
+  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize core rpc server.");
   LOG_PRINT_L0("Core rpc server started ok");
-
-  tools::signal_handler::install([&dch, &p2psrv] {
-    dch.stop_handling();
-    p2psrv.send_stop_signal();
-  });
 
   LOG_PRINT_L0("Starting p2p net loop...");
   p2psrv.run();
@@ -209,46 +158,7 @@ int main(int argc, char* argv[])
   cprotocol.set_p2p_endpoint(NULL);
 
   LOG_PRINT("Node stopped.", LOG_LEVEL_0);
-  return 0;
+  return true;
 
   CATCH_ENTRY_L0("main", 1);
-}
-
-bool command_line_preprocessor(const boost::program_options::variables_map& vm)
-{
-  bool exit = false;
-  if (command_line::get_arg(vm, command_line::arg_version))
-  {
-    std::cout << CURRENCY_NAME  << " v" << PROJECT_VERSION_LONG << ENDL;
-    exit = true;
-  }
-
-  if (command_line::get_arg(vm, command_line::arg_show_details))
-  {
-    currency::print_currency_details();
-    exit = true;
-  }
-  if (command_line::get_arg(vm, command_line::arg_os_version))
-  {
-    std::cout << "OS: " << tools::get_os_version_string() << ENDL;
-    exit = true;
-  }
-
-  if (exit)
-  {
-    return true;
-  }
-
-  int new_log_level = command_line::get_arg(vm, command_line::arg_log_level);
-  if(new_log_level < LOG_LEVEL_MIN || new_log_level > LOG_LEVEL_MAX)
-  {
-    LOG_PRINT_L0("Wrong log level value: ");
-  }
-  else if (log_space::get_set_log_detalisation_level(false) != new_log_level)
-  {
-    log_space::get_set_log_detalisation_level(true, new_log_level);
-    LOG_PRINT_L0("LOG_LEVEL set to " << new_log_level);
-  }
-
-  return false;
-}
+ }
