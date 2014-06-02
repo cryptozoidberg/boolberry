@@ -15,7 +15,7 @@ using namespace epee;
 #include "rpc/core_rpc_server.h"
 #include "currency_protocol/currency_protocol_handler.h"
 #include "daemon/daemon_commands_handler.h"
-#include "common/miniupnp_helper.h"
+//#include "common/miniupnp_helper.h"
 
 #if defined(WIN32)
 #include <crtdbg.h>
