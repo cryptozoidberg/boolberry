@@ -1,0 +1,30 @@
+html {
+    min-width: 1040px;
+    margin: 0;
+}
+
+body {
+    font: 16px/1.5em "Helvetica Neue", Helvetica, sans-serif;
+    margin: 1em 0 4em 0;
+}
+
+h1 {
+    color: #555;
+    font-size: 64px;
+    font-weight: 200;
+    letter-spacing: -2px;
+    white-space: nowrap;
+    margin-top: 20px;
+    margin-bottom: 80px;
+}
+
+h1,
+h2 {
+    text-rendering: optimizeLegibility;
+}
+
+.column {
+    margin: auto;
+    padding-right: 240px;
+    position: relative;
+}
