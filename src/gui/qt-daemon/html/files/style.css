@@ -1,10 +1,9 @@
 html {
-    min-width: 1040px;
     margin: 0;
 }
 
 body {
-    font: 16px/1.5em "Helvetica Neue", Helvetica, sans-serif;
+    /*font: 16px/1.5em "Helvetica Neue", Helvetica, sans-serif;*/
     margin: 1em 0 4em 0;
 }
 
@@ -27,4 +26,72 @@ h2 {
     margin: auto;
     padding-right: 240px;
     position: relative;
+}
+
+
+.inline_menu_bar
+{
+    border-bottom: 1px solid #ebebeb;
+    height: 40px;
+    line-height: 36px;
+    padding: 0;
+    position: relative;
+    display: block;
+}
+.inline_menu_bar_item
+{
+    color: #777;
+    font-size: 20px;
+    font-family: arial,sans-serif;
+    display: inline-block;
+    margin: 0 8px;
+    padding: 0 8px;
+    cursor:pointer;
+}
+
+.inline_menu_bar_item:hover
+{
+    color: #000;
+}
+
+.inline_menu_bar_selected_item
+{
+    border-bottom: 3px solid #dd4b39;
+    color: #dd4b39;
+    font-weight: bold;
+    height: 36px;
+    margin: 2px 8px 0;
+    padding: 0 8px;
+}
+
+.inline_menu_bar_selected_item:hover
+{
+    color: #dd4b39;
+}
+
+.menu_brackets_text
+{
+    /*font-weight: normal;*/
+    color: #6c98a5;
+}
+
+.view_hidden
+{
+    display: none;
+}
+
+.inline_menu_bar_item_disabled
+{
+    cursor: default;
+}
+
+.inline_menu_bar_item_disabled:hover
+{
+    color: #777;
+}
+
+.menu_view_inner_area
+{
+    padding-top: 12px;
+    padding-left: 12px;
 }

@@ -1,21 +1,39 @@
-<!DOCTYPE html>
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8">
-    <title>Boolberry</title>
-    <link rel="stylesheet" href="files/style.css">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;" />
+
+    <link rel="stylesheet" href="files/jquery-ui-1.10.2.custom.css" />
+    <link rel="stylesheet" type="text/css" href="files/style.css" />
+
+    <script src="files/http_code.jquery.com_jquery-latest.js"></script>
+    <script src="files/http_code.jquery.com_ui_1.10.2_jquery-ui.js"></script>
+    <script src="files/ui_helper.js" type="text/javascript" charset="utf-8"></script>
 </head>
 
 <body>
-<div class="column">
-    <br>
-    <h1>
-        <span style="margin-left: 10px">Boolberry</span>
-    </h1>
-    <div class="menu_bar"></div>
-</div>
 
-<div class="column">
-    <p><b>Daemon status:</b> <span id="daemon_status"></span>  </p>
-</div>
+<div id="container">
+    <div id="main_menu_bar" class="inline_menu_bar">
+        <div id="daemon_state_view_menu" class="inline_menu_bar_item"  view_name="daemon_state_view">General</div>
+        <div id="wallet_view_menu"  class="inline_menu_bar_item" view_name="wallet_view">Open wallet</div>
+    </div>
 
+    <div id="daemon_state_view" class="view_hidden menu_view_inner_area" >
+        <div class="small_text">some state text here</div>
+    </div>
+    <div id="wallet_view" class="view_hidden menu_view_inner_area" >
+        <div class="small_text">wallet text area</div>
+    </div>
+</div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+

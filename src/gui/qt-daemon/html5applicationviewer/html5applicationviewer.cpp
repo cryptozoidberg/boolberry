@@ -1196,6 +1196,8 @@ void Html5ApplicationViewer::showExpanded()
 #else
     show();
 #endif
+
+    this->setFixedSize(700, 400);
 }
 
 QGraphicsWebView *Html5ApplicationViewer::webView() const
