@@ -193,6 +193,7 @@ namespace mining
           submit_request.id     = m_pool_session_id;
           submit_request.job_id = m_job.job_id;
           submit_request.nonce  = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
+          submit_request.result = string_tools::buff_to_hex_nodelimer(std::string((char*) &h, HASH_SIZE));
           LOG_PRINT_GREEN("Share found: nonce=" << submit_request.nonce << " for job=" << m_job.job_id << ", diff: " << m_job.difficulty << ENDL             
             << ", PoW:" << h << ", height:" << m_job.prev_hi.height+1 << ", submitting...", LOG_LEVEL_0);
 
@@ -227,6 +228,7 @@ namespace mining
     LOG_PRINT_L0("Getting scratchpad...");
     mining::COMMAND_RPC_GET_FULLSCRATCHPAD::request scr_req = AUTO_VAL_INIT(scr_req);
     mining::COMMAND_RPC_GET_FULLSCRATCHPAD::response scr_resp = AUTO_VAL_INIT(scr_resp);
+    scr_req.id = m_pool_session_id;
     if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_GET_FULLSCRATCHPAD>("/json_rpc", scr_req, scr_resp, m_http_client, 60*1000))
     {
       LOG_PRINT_L0("Failed to get scratchpad, disconnect and retry....");
@@ -236,7 +238,7 @@ namespace mining
     if(!currency::hexstr_to_addendum(scr_resp.scratchpad_hex, m_scratchpad))
     {
       LOG_ERROR("Failed to get scratchpad: hexstr_to_addendum failed, disconnect and retry....");
-      m_http_client.disconnect();            
+      m_http_client.disconnect();
       return false;
     }
     bool r = text_height_info_to_native_height_info(scr_resp.hi, m_hi);
