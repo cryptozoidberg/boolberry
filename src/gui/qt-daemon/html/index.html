@@ -20,16 +20,35 @@
     </div>
 
     <div id="daemon_state_view" class="view_hidden menu_view_inner_area" >
-        <div class="small_text">some state text here</div>
+        <div >Status: <span id="daemon_status_text">Disconnected</span></div>
+        <div >Synchronization: <span id="daemon_synchronization_text">111</span></div>
+        <div >Connections: <span id="daemon_out_connections_text">111</span>(OUT)/<span id="daemon_inc_connections_text"></span>(INC) </div>
+        <div >Current difficulty: <span id="difficulty_text">111</span></div>
+        <div >Current network hashrate: <span id="hashrate_text">111</span></div>
     </div>
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >
         <div class="small_text">wallet text area</div>
     </div>
 </div>
+
+<script type="text/javascript">
+
+function on_update_daemon_state(str)
+{
+    $("#daemon_status_text").text(str);
+}
+
+$(function()
+{ // DOM ready
+    sdsdvsdvsv
+    on_update_daemon_state("zzz");
+    Qt.update_daemon_state.connect(on_update_daemon_state); // Connect signal sent from Qt to javascript function
+
+});
+
+</script>
 </body>
 </html>
-
-
 
 
 

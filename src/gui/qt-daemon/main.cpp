@@ -10,6 +10,6 @@ int main(int argc, char *argv[])
     viewer.showExpanded();
     viewer.setWindowTitle("Boolberry");
     viewer.loadFile(QLatin1String("html/index.html"));
-
+    viewer.after_load();
     return app.exec();
 }

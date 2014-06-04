@@ -18,7 +18,7 @@ INCLUDEPATH += C:/local/boost_1_55_0 \
 
 QMAKE_CXXFLAGS += /bigobj /MP /W2 /GS- /D_CRT_SECURE_NO_WARNINGS /wd4996 /wd4345 /D_WIN32_WINNT=0x0600 /DWIN32_LEAN_AND_MEAN /DGTEST_HAS_TR1_TUPLE=0 /D__SSE4_1__
 
-
+CONFIG(release, debug|release) {
 LIBS += Shell32.lib \
         ../../build/src/Release/rpc.lib \
         ../../build/src/Release/currency_core.lib \
@@ -34,6 +34,25 @@ LIBS += Shell32.lib \
         C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_serialization-vc120-mt-1_55.lib \
         C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_atomic-vc120-mt-1_55.lib \
         C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_program_options-vc120-mt-1_55.lib
+}else{
+LIBS += Shell32.lib \
+        ../../build/src/Debug/rpc.lib \
+        ../../build/src/Debug/currency_core.lib \
+        ../../build/src/Debug/crypto.lib \
+        ../../build/src/Debug/common.lib \
+        ../../build/contrib/miniupnpc/Debug/miniupnpc.lib \
+        C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_system-vc120-mt-gd-1_55.lib \
+        C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_filesystem-vc120-mt-gd-1_55.lib \
+        C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_thread-vc120-mt-gd-1_55.lib \
+        C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_date_time-vc120-mt-gd-1_55.lib \
+        C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_chrono-vc120-mt-gd-1_55.lib \
+        C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_regex-vc120-mt-gd-1_55.lib \
+        C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_serialization-vc120-mt-gd-1_55.lib \
+        C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_atomic-vc120-mt-gd-1_55.lib \
+        C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_program_options-vc120-mt-gd-1_55.lib
+}
+
+
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp
