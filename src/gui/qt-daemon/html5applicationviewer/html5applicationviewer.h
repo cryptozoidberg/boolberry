@@ -44,8 +44,6 @@ public:
 protected:
 
 
-signals:
-  void update_daemon_state(const QString &fileName);
 
 private:
     class Html5ApplicationViewerPrivate *m_d;

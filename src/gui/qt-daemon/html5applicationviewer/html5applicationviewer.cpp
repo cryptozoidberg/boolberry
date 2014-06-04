@@ -989,7 +989,7 @@ public:
 protected:
     virtual void javaScriptConsoleMessage( const QString & message, int lineNumber, const QString & sourceID )
     {
-        qDebug() << message << lineNumber << sourceID;
+        qDebug() << "[console]" << message << lineNumber << sourceID;
     }
 };
 
@@ -1076,6 +1076,8 @@ private slots:
 
 signals:
     void quitRequested();
+    void update_daemon_state(const QString &fileName);
+
 
 public:
     QGraphicsWebView *m_webView;
@@ -1210,6 +1212,9 @@ void Html5ApplicationViewer::showExpanded()
     show();
 #endif
     this->setFixedSize(700, 400);
+    m_d->m_webView->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
+    m_d->m_webView->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+
 }
 
 QGraphicsWebView *Html5ApplicationViewer::webView() const
@@ -1219,8 +1224,7 @@ QGraphicsWebView *Html5ApplicationViewer::webView() const
 
 void Html5ApplicationViewer::after_load()
 {
-  m_d->m_webView->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
-  update_daemon_state("from qt");
-  m_d->m_webView->page()->mainFrame()->evaluateJavaScript("console.log('testing test');");
+  qDebug() << "update_daemon_state()";
+  m_d->update_daemon_state("from qt");
 }
 #include "html5applicationviewer.moc"
