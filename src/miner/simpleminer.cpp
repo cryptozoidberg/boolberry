@@ -146,6 +146,12 @@ namespace mining
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
+        if(!apply_addendums(resp.addms))
+        {
+          LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
+          get_whole_scratchpad();
+          return true;
+        }
         if(resp.status != CORE_RPC_STATUS_OK || resp.id.empty())
         {
           LOG_PRINT_L0("Failed to login " << m_pool_ip << ":" << m_pool_port << ", disconnect and sleep....");
