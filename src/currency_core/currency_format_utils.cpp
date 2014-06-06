@@ -734,6 +734,9 @@ namespace currency
   //---------------------------------------------------------------
   bool lookup_acc_outs(const account_keys& acc, const transaction& tx, std::vector<size_t>& outs, uint64_t& money_transfered)
   {
+    crypto::public_key tx_pub_key = get_tx_pub_key_from_extra(tx);
+    if(null_pkey == tx_pub_key)
+      return false;
     return lookup_acc_outs(acc, tx, get_tx_pub_key_from_extra(tx), outs, money_transfered);
   }
   //---------------------------------------------------------------
