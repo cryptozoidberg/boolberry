@@ -48,6 +48,7 @@ add_dependencies(simplewallet version)
 target_link_libraries(simplewallet wallet rpc currency_core crypto common ${Boost_LIBRARIES})
 
 add_executable(simpleminer ${SIMPLEMINER})
+add_dependencies(simpleminer version)
 target_link_libraries(simpleminer currency_core crypto common ${Boost_LIBRARIES})
 
 set_property(TARGET common crypto currency_core rpc wallet PROPERTY FOLDER "libs")
