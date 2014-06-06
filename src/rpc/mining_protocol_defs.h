@@ -149,11 +149,13 @@ namespace mining
       std::string id;
       uint64_t nonce;
       std::string job_id;
+      std::string result;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(id)
         KV_SERIALIZE(nonce)
         KV_SERIALIZE(job_id)
+        KV_SERIALIZE(result)
       END_KV_SERIALIZE_MAP()
     };
 
