@@ -16,6 +16,7 @@ using namespace epee;
 #include "currency_protocol/currency_protocol_handler.h"
 #include "daemon/daemon_commands_handler.h"
 //#include "common/miniupnp_helper.h"
+#include "view_iface.h"
 
 #if defined(WIN32)
 #include <crtdbg.h>
@@ -24,12 +25,12 @@ using namespace epee;
 //TODO: need refactoring here. (template classes can't be used in BOOST_CLASS_VERSION)
 BOOST_CLASS_VERSION(nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >, CURRENT_P2P_STORAGE_ARCHIVE_VER);
 
-
 class daemon_backend
 {
 public:
-    bool init(int argc, char* argv[]);
-
+  daemon_backend();
+  bool init(int argc, char* argv[], view::i_view* pview_handler);
 private:
-
+  view::view_stub m_view_stub;
+  view::i_view* m_pview;
 };

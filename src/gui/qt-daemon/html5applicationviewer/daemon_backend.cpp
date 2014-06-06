@@ -7,8 +7,19 @@
 
 namespace po = boost::program_options;
 
-bool daemon_backend::init(int argc, char* argv[])
+daemon_backend::daemon_backend():m_pview(&m_view_stub)
+{}
+
+bool daemon_backend::init(int argc, char* argv[], view::i_view* pview_handler)
 {
+  if(pview_handler)
+    m_pview = pview_handler;
+
+  daemon_status_info dsi = AUTO_VAL_INIT(dsi);
+  dsi.difficulty = "---";
+  dsi.text_state = "Initializing...";
+  pview_handler->update_daemon_status(dsi);
+
   #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
   #endif
