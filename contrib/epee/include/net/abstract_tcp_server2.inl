@@ -35,9 +35,9 @@
 #include <boost/utility/value_init.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include "misc_language.h"
-#include "pragma_comp_defs.h"
+#include "warnings.h"
 
-PRAGMA_WARNING_PUSH
+PUSH_WARNINGS
 namespace epee
 {
 namespace net_utils
@@ -45,7 +45,7 @@ namespace net_utils
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
-PRAGMA_WARNING_DISABLE_VS(4355)
+DISABLE_VS_WARNINGS(4355)
 
   template<class t_protocol_handler>
   connection<t_protocol_handler>::connection(boost::asio::io_service& io_service,
@@ -60,7 +60,7 @@ PRAGMA_WARNING_DISABLE_VS(4355)
   {
     boost::interprocess::ipcdetail::atomic_inc32(&m_ref_sockets_count);
   }
-PRAGMA_WARNING_DISABLE_VS(4355)
+DISABLE_VS_WARNINGS(4355)
   //---------------------------------------------------------------------------------
   template<class t_protocol_handler>
   connection<t_protocol_handler>::~connection()
@@ -816,4 +816,4 @@ POP_WARNINGS
   }
 }
 }
-PRAGMA_WARNING_POP
+POP_WARNINGS

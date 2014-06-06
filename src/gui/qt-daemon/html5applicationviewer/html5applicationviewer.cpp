@@ -19,6 +19,8 @@
 #include <QGraphicsWebView>
 #include <QWebFrame>
 
+#include "warnings.h"
+
 #ifdef TOUCH_OPTIMIZED_NAVIGATION
 #include <QTimer>
 #include <QGraphicsSceneMouseEvent>
@@ -1076,7 +1078,7 @@ private slots:
 
 signals:
     void quitRequested();
-    void update_daemon_state(const QString &fileName);
+    void update_daemon_state(const view::daemon_status_info& dsi);
 
 
 public:
@@ -1168,7 +1170,8 @@ void Html5ApplicationViewer::loadUrl(const QUrl &url)
 {
     m_d->m_webView->setUrl(url);
 }
-
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4065)
 void Html5ApplicationViewer::setOrientation(ScreenOrientation orientation)
 {
     Qt::WidgetAttribute attribute;
@@ -1203,6 +1206,7 @@ void Html5ApplicationViewer::setOrientation(ScreenOrientation orientation)
     };
     setAttribute(attribute, true);
 }
+POP_WARNINGS
 
 void Html5ApplicationViewer::showExpanded()
 {
@@ -1219,12 +1223,19 @@ void Html5ApplicationViewer::showExpanded()
 
 QGraphicsWebView *Html5ApplicationViewer::webView() const
 {
-    return m_d->m_webView;
+  return m_d->m_webView;
+}
+
+bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info& info)
+{
+  m_d->update_daemon_state(info);
+
+  return true;
 }
 
 void Html5ApplicationViewer::after_load()
 {
   qDebug() << "update_daemon_state()";
-  m_d->update_daemon_state("from qt");
+  //m_d->update_daemon_state("from qt");
 }
 #include "html5applicationviewer.moc"

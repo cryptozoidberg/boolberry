@@ -69,10 +69,12 @@ namespace nodetool
 
     static void init_options(boost::program_options::options_description& desc);
 
-    bool run();
+    bool run(bool sync_call = true);
     bool init(const boost::program_options::variables_map& vm);
     bool deinit();
     bool send_stop_signal();
+    bool timed_wait_server_stop(size_t seconds_wait){return m_net_server.timed_wait_server_stop(seconds_wait);}
+
     uint32_t get_this_peer_port(){return m_listenning_port;}
     t_payload_net_handler& get_payload_object();
 

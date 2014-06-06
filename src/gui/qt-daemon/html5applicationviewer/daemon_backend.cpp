@@ -2,20 +2,27 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <boost/program_options.hpp>
+
 #include "daemon_backend.h"
 
-namespace po = boost::program_options;
 
-daemon_backend::daemon_backend():m_pview(&m_view_stub)
+
+daemon_backend::daemon_backend():m_pview(&m_view_stub),
+                                 m_stop_singal_sent(false),
+                                 m_ccore(&m_cprotocol),
+                                 m_cprotocol(m_ccore, &m_p2psrv),
+                                 m_p2psrv(m_cprotocol),
+                                 m_rpc_server(m_ccore, m_p2psrv),
+                                 m_rpc_proxy(m_rpc_server)
 {}
 
-bool daemon_backend::init(int argc, char* argv[], view::i_view* pview_handler)
+bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
 {
+  m_stop_singal_sent = false;
   if(pview_handler)
     m_pview = pview_handler;
 
-  daemon_status_info dsi = AUTO_VAL_INIT(dsi);
+  view::daemon_status_info dsi;// = AUTO_VAL_INIT(dsi);
   dsi.difficulty = "---";
   dsi.text_state = "Initializing...";
   pview_handler->update_daemon_status(dsi);
@@ -103,74 +110,157 @@ bool daemon_backend::init(int argc, char* argv[], view::i_view* pview_handler)
   currency::checkpoints checkpoints;
   res = currency::create_checkpoints(checkpoints);
   CHECK_AND_ASSERT_MES(res, false, "Failed to initialize checkpoints");
+  m_ccore.set_checkpoints(std::move(checkpoints));
 
-  //create objects and link them
-  currency::core ccore(NULL);
-  ccore.set_checkpoints(std::move(checkpoints));
-  currency::t_currency_protocol_handler<currency::core> cprotocol(ccore, NULL);
-  nodetool::node_server<currency::t_currency_protocol_handler<currency::core> > p2psrv(cprotocol);
-  currency::core_rpc_server rpc_server(ccore, p2psrv);
-  cprotocol.set_p2p_endpoint(&p2psrv);
-  ccore.set_currency_protocol(&cprotocol);
-  daemon_cmmands_handler dch(p2psrv);
+  m_main_worker_thread = std::thread([this, vm](){main_worker(vm);});
 
-  //tools::miniupnp_helper upnp_helper;
+  CATCH_ENTRY_L0("main", 1);
+ }
+
+bool daemon_backend::stop()
+{
+  m_stop_singal_sent = true;
+  m_main_worker_thread.join();
+  return true;
+}
+
+void daemon_backend::main_worker(const po::variables_map& vm)
+{
+  view::daemon_status_info dsi;// = AUTO_VAL_INIT(dsi);
+  dsi.difficulty = "---";
+  m_pview->update_daemon_status(dsi);
 
   //initialize objects
   LOG_PRINT_L0("Initializing p2p server...");
-  res = p2psrv.init(vm);
-  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize p2p server.");
-  LOG_PRINT_L0("P2p server initialized OK on port: " << p2psrv.get_this_peer_port());
+  dsi.text_state = "Initializing p2p server";
+  m_pview->update_daemon_status(dsi);
+  bool res = m_p2psrv.init(vm);
+  CHECK_AND_ASSERT_MES(res, void(), "Failed to initialize p2p server.");
+  LOG_PRINT_L0("P2p server initialized OK on port: " << m_p2psrv.get_this_peer_port());
 
   //LOG_PRINT_L0("Starting UPnP");
   //upnp_helper.run_port_mapping_loop(p2psrv.get_this_peer_port(), p2psrv.get_this_peer_port(), 20*60*1000);
 
   LOG_PRINT_L0("Initializing currency protocol...");
-  res = cprotocol.init(vm);
-  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize currency protocol.");
+  dsi.text_state = "Initializing currency protocol";
+  m_pview->update_daemon_status(dsi);
+  res = m_cprotocol.init(vm);
+  CHECK_AND_ASSERT_MES(res, void(), "Failed to initialize currency protocol.");
   LOG_PRINT_L0("Currency protocol initialized OK");
 
   LOG_PRINT_L0("Initializing core rpc server...");
-  res = rpc_server.init(vm);
-  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize core rpc server.");
-  LOG_PRINT_GREEN("Core rpc server initialized OK on port: " << rpc_server.get_binded_port(), LOG_LEVEL_0);
+  dsi.text_state = "Initializing core rpc server";
+  m_pview->update_daemon_status(dsi);
+  res = m_rpc_server.init(vm);
+  CHECK_AND_ASSERT_MES(res, void(), "Failed to initialize core rpc server.");
+  LOG_PRINT_GREEN("Core rpc server initialized OK on port: " << m_rpc_server.get_binded_port(), LOG_LEVEL_0);
 
   //initialize core here
   LOG_PRINT_L0("Initializing core...");
-  res = ccore.init(vm);
-  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize core");
+  dsi.text_state = "Initializing core";
+  m_pview->update_daemon_status(dsi);
+  res = m_ccore.init(vm);
+  CHECK_AND_ASSERT_MES(res, void(), "Failed to initialize core");
   LOG_PRINT_L0("Core initialized OK");
 
   LOG_PRINT_L0("Starting core rpc server...");
-  res = rpc_server.run(2, false);
-  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize core rpc server.");
+  dsi.text_state = "Starting core rpc server";
+  m_pview->update_daemon_status(dsi);
+  res = m_rpc_server.run(2, false);
+  CHECK_AND_ASSERT_MES(res, void(), "Failed to initialize core rpc server.");
   LOG_PRINT_L0("Core rpc server started ok");
 
   LOG_PRINT_L0("Starting p2p net loop...");
-  p2psrv.run();
+  dsi.text_state = "Starting network loop";
+  m_pview->update_daemon_status(dsi);
+  m_p2psrv.run(false);
   LOG_PRINT_L0("p2p net loop stopped");
+
+  //go to monitoring view loop
+  loop();
+
+  LOG_PRINT_L0("Stopping core p2p server...");
+  dsi.text_state = "Stopping p2p network server";
+  m_pview->update_daemon_status(dsi);
+  m_p2psrv.send_stop_signal();
+  m_p2psrv.timed_wait_server_stop(10);
 
   //stop components
   LOG_PRINT_L0("Stopping core rpc server...");
-  rpc_server.send_stop_signal();
-  rpc_server.timed_wait_server_stop(5000);
+  dsi.text_state = "Stopping rpc network server";
+  m_pview->update_daemon_status(dsi);
+
+  m_rpc_server.send_stop_signal();
+  m_rpc_server.timed_wait_server_stop(5000);
 
   //deinitialize components
+
   LOG_PRINT_L0("Deinitializing core...");
-  ccore.deinit();
+  dsi.text_state = "Deinitializing core";
+  m_pview->update_daemon_status(dsi);
+  m_ccore.deinit();
+
+
   LOG_PRINT_L0("Deinitializing rpc server ...");
-  rpc_server.deinit();
+  dsi.text_state = "Deinitializing rpc server";
+  m_pview->update_daemon_status(dsi);
+  m_rpc_server.deinit();
+
+
   LOG_PRINT_L0("Deinitializing currency_protocol...");
-  cprotocol.deinit();
+  dsi.text_state = "Deinitializing currency_protocol";
+  m_pview->update_daemon_status(dsi);
+  m_cprotocol.deinit();
+
+
   LOG_PRINT_L0("Deinitializing p2p...");
-  p2psrv.deinit();
+  dsi.text_state = "Deinitializing p2p";
+  m_pview->update_daemon_status(dsi);
 
+  m_p2psrv.deinit();
 
-  ccore.set_currency_protocol(NULL);
-  cprotocol.set_p2p_endpoint(NULL);
+  m_ccore.set_currency_protocol(NULL);
+  m_cprotocol.set_p2p_endpoint(NULL);
 
   LOG_PRINT("Node stopped.", LOG_LEVEL_0);
-  return true;
+  dsi.text_state = "Node stopped";
+  m_pview->update_daemon_status(dsi);
+}
 
-  CATCH_ENTRY_L0("main", 1);
- }
+bool daemon_backend::update_state_info()
+{
+  view::daemon_status_info dsi;// = AUTO_VAL_INIT(dsi);
+  dsi.difficulty = "---";
+  currency::COMMAND_RPC_GET_INFO::response inf = AUTO_VAL_INIT(inf);
+  if(!m_rpc_proxy.get_info(inf))
+  {
+    dsi.text_state = "get_info failed";
+    m_pview->update_daemon_status(dsi);
+    LOG_ERROR("Failed to call get_info");
+    return false;
+  }
+  dsi.difficulty = std::to_string(inf.difficulty);
+  dsi.hashrate = inf.current_network_hashrate_350;
+  dsi.inc_connections_count = inf.incoming_connections_count;
+  dsi.out_connections_count = inf.outgoing_connections_count;
+  switch(inf.daemon_network_state)
+  {
+  case currency::COMMAND_RPC_GET_INFO::daemon_network_state_connecting:     dsi.text_state = "Connecting";break;
+  case currency::COMMAND_RPC_GET_INFO::daemon_network_state_online:         dsi.text_state = "Synchronized OK";break;
+  case currency::COMMAND_RPC_GET_INFO::daemon_network_state_synchronizing:  dsi.text_state = "Synchronizing";break;
+  default: dsi.text_state = "unknown";break;
+  }
+  uint64_t percents = ((inf.height - inf.synchronization_start_height)*100)/(inf.max_net_seen_height - inf.synchronization_start_height);
+  dsi.sync_status = std::to_string(percents) + "%, " + std::to_string(inf.max_net_seen_height - inf.height) + " blocks behind";
+  m_pview->update_daemon_status(dsi);
+  return true;
+}
+
+void daemon_backend::loop()
+{
+  while(!m_stop_singal_sent)
+  {
+    update_state_info();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  }
+}

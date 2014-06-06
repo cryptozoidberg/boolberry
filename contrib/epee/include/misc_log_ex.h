@@ -50,6 +50,12 @@
 #include <unistd.h>
 #endif
 
+#include "warnings.h"
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4100)
+
+
+
 #include "static_initializer.h"
 #include "string_tools.h"
 #include "time_helper.h"
@@ -1466,4 +1472,7 @@ POP_WARNINGS
 #endif
 
 }
+
+POP_WARNINGS
+
 #endif //_MISC_LOG_EX_H_

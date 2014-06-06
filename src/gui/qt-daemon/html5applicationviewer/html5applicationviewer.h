@@ -12,10 +12,11 @@
 
 #include <QWidget>
 #include <QUrl>
+#include "view_iface.h"
 
 class QGraphicsWebView;
 
-class Html5ApplicationViewer : public QWidget
+class Html5ApplicationViewer : public QWidget, public view::i_view
 {
     Q_OBJECT
 
@@ -43,9 +44,10 @@ public:
 
 protected:
 
-
-
 private:
+    //------- i_view ---------
+    virtual bool update_daemon_status(const view::daemon_status_info& info);
+
     class Html5ApplicationViewerPrivate *m_d;
 };
 

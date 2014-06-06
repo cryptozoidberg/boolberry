@@ -32,7 +32,7 @@
 //#include <sqlext.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
-#include "pragma_comp_defs.h"
+#include "warnings.h"
 
 namespace epee
 {
@@ -59,10 +59,10 @@ namespace misc_utils
 
 		char tmpbuf[200] = {0};
 		tm* pt = NULL;
-PRAGMA_WARNING_PUSH
-PRAGMA_WARNING_DISABLE_VS(4996)
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4996)
 		pt = localtime(&time_);
-PRAGMA_WARNING_POP
+POP_WARNINGS
 
 		if(pt)
 			strftime( tmpbuf, 199, "%d.%m.%Y %H:%M:%S", pt );
@@ -81,10 +81,10 @@ PRAGMA_WARNING_POP
 
 		char tmpbuf[200] = {0};
 		tm* pt = NULL;
-PRAGMA_WARNING_PUSH
-PRAGMA_WARNING_DISABLE_VS(4996)
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4996)
 		pt = localtime(&time_);
-PRAGMA_WARNING_POP
+POP_WARNINGS
 
 		if(pt)
 			strftime( tmpbuf, 199, "%Y_%m_%d %H_%M_%S", pt );
@@ -109,10 +109,10 @@ PRAGMA_WARNING_POP
 	{
 		char tmpbuf[200] = {0};
 		tm* pt = NULL;
-PRAGMA_WARNING_PUSH
-PRAGMA_WARNING_DISABLE_VS(4996)
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4996)
 		pt = gmtime(&time_);
-PRAGMA_WARNING_POP
+POP_WARNINGS
 		strftime( tmpbuf, 199, "%a, %d %b %Y %H:%M:%S GMT", pt );
 		return tmpbuf;
 	}
@@ -121,8 +121,8 @@ PRAGMA_WARNING_POP
 	{
 		std::string res;
 		time_t tail = time_;
-PRAGMA_WARNING_PUSH
-PRAGMA_WARNING_DISABLE_VS(4244)
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4244)
 		int days = tail/(60*60*24);
 		tail = tail%(60*60*24);
 		int hours = tail/(60*60);
@@ -130,7 +130,7 @@ PRAGMA_WARNING_DISABLE_VS(4244)
 		int minutes = tail/(60);
 		tail = tail%(60);
 		int seconds = tail;
-PRAGMA_WARNING_POP
+POP_WARNINGS
 		res = std::string() + "d" + boost::lexical_cast<std::string>(days) + ".h" + boost::lexical_cast<std::string>(hours) + ".m" + boost::lexical_cast<std::string>(minutes) + ".s" + boost::lexical_cast<std::string>(seconds);
 		return res;
 	}

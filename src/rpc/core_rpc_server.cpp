@@ -92,6 +92,18 @@ namespace currency
     res.current_network_hashrate_350 = m_core.get_blockchain_storage().get_current_hashrate(350);
     res.scratchpad_size = m_core.get_blockchain_storage().get_scratchpad_size();
     res.alias_count = m_core.get_blockchain_storage().get_aliases_count();
+
+    if (!res.outgoing_connections_count)
+      res.daemon_network_state = COMMAND_RPC_GET_INFO::daemon_network_state_connecting;
+    else if (m_p2p.get_payload_object().is_synchronized())
+      res.daemon_network_state = COMMAND_RPC_GET_INFO::daemon_network_state_online;
+    else
+      res.daemon_network_state = COMMAND_RPC_GET_INFO::daemon_network_state_synchronizing;
+    
+    res.synchronization_start_height = m_p2p.get_payload_object().get_core_inital_height();
+    res.max_net_seen_height = m_p2p.get_payload_object().get_max_seen_height();
+
+    
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }

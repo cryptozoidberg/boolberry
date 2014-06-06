@@ -33,14 +33,13 @@
 
 <script type="text/javascript">
 
-function on_update_daemon_state(str)
+function on_update_daemon_state(daemon_info)
 {
-    $("#daemon_status_text").text(str);
+    $("#daemon_status_text").text(daemon_info.text_state);
 }
 
 $(function()
 { // DOM ready
-    on_update_daemon_state("zzz");
     Qt.update_daemon_state.connect(on_update_daemon_state); // Connect signal sent from Qt to javascript function
 
 });

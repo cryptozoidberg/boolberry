@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
   //create objects and link them
   currency::core ccore(NULL);
   ccore.set_checkpoints(std::move(checkpoints));  
-  currency::t_currency_protocol_handler<currency::core> cprotocol(ccore, NULL);
+  currency::t_currency_protocol_handler<currency::core> cprotocol(ccore, NULL );
   nodetool::node_server<currency::t_currency_protocol_handler<currency::core> > p2psrv(cprotocol);
   currency::core_rpc_server rpc_server(ccore, p2psrv);
   cprotocol.set_p2p_endpoint(&p2psrv);
