@@ -34,7 +34,7 @@ namespace currency
     //#9Protection from big transaction flood
     if(!kept_by_block && blob_size > m_blockchain.get_current_comulative_blocksize_limit() / 2)
     {
-      LOG_PRINT_L0("transaction is too big for current transaction flow, tx_id: " << id);
+      LOG_PRINT_L0("transaction is too big (" << blob_size << ")bytes for current transaction flow, tx_id: " << id);
       tvc.m_verifivation_failed = true;
       return false;
     }
