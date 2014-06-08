@@ -560,7 +560,7 @@ bool simple_wallet::show_incoming_transfers(const std::vector<std::string>& args
         std::setw(21) << print_money(td.amount()) << '\t' <<
         std::setw(3) << (td.m_spent ? 'T' : 'F') << "  \t" <<
         std::setw(12) << td.m_global_output_index << '\t' <<
-        get_transaction_hash(td.m_tx);
+        get_transaction_hash(td.m_tx) << "[" << td.m_block_height << "]";
     }
   }
 

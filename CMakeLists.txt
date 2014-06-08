@@ -12,6 +12,7 @@ add_definitions(-DSTATICLIB)
 
 set(TESTNET FALSE CACHE BOOL "Compile for testnet")
 if(TESTNET)
+  message("!!!!!! NOTICE: Project is building for TESTNET !!!!!!")  
   add_definitions(-DTESTNET)  
 endif()
 
