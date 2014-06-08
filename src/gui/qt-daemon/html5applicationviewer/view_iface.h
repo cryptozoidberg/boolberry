@@ -18,7 +18,7 @@ namespace view
 public:
 
     std::string text_state;
-    uint64_t status;
+    uint64_t daemon_network_state;
     uint64_t synchronization_start_height;
     uint64_t max_net_seen_height;
     uint64_t height;
@@ -29,7 +29,7 @@ public:
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(text_state)
-      KV_SERIALIZE(state)
+      KV_SERIALIZE(daemon_network_state)
       KV_SERIALIZE(synchronization_start_height)
       KV_SERIALIZE(max_net_seen_height)
       KV_SERIALIZE(height)

@@ -41,36 +41,36 @@ function on_update_daemon_state(daemon_info_str)
 {
     var info_obj = jQuery.parseJSON(daemon_info_str);
 
-    if(info_obj.status == 0)//daemon_network_state_connecting
+    if(info_obj.daemon_network_state == 0)//daemon_network_state_connecting
     {
         //do nothing
-    }else if(info_obj.status == 1)//daemon_network_state_synchronizing
+    }else if(info_obj.daemon_network_state == 1)//daemon_network_state_synchronizing
     {
         var percents = 0;
         if (info_obj.max_net_seen_height > info_obj.synchronization_start_height)
          percents = ((info_obj.height - info_obj.synchronization_start_height)*100)/(info_obj.max_net_seen_height - info_obj.synchronization_start_height);
         $("#synchronization_progressbar").progressbar( "option", "value", percents );
-
         $("#daemon_synchronization_text").text((info_obj.max_net_seen_height - info_obj.height).toString() + " blocks behind");
         //show progress
-    }else if(info_obj.status == 2)//daemon_network_state_online
+    }else if(info_obj.daemon_network_state == 2)//daemon_network_state_online
     {
         $("#synchronization_progressbar").hide();
+        $("#daemon_out_connections_text").addClass("daemon_view_general_status_value_success_text");
         //show OK
     }else
     {
         //set unknown status
+        $("#daemon_status_text").text("Unkonwn state");
+        return;
     }
 
     $("#daemon_status_text").text(info_obj.text_state);
 
     $("#daemon_out_connections_text").text(info_obj.out_connections_count.toString());
     $("#daemon_inc_connections_text").text(info_obj.inc_connections_count.toString());
-
     $("#difficulty_text").text(info_obj.difficulty);
     $("#hashrate_text").text(info_obj.hashrate.toString());
 }
-
 
 $(function()
 { // DOM ready
@@ -83,10 +83,3 @@ $(function()
 </script>
 </body>
 </html>
-
-
-
-
-
-
-

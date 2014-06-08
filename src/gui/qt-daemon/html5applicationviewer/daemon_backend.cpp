@@ -251,7 +251,7 @@ bool daemon_backend::update_state_info()
   case currency::COMMAND_RPC_GET_INFO::daemon_network_state_synchronizing:  dsi.text_state = "Synchronizing";break;
   default: dsi.text_state = "unknown";break;
   }
-  dsi.status = inf.status;
+  dsi.daemon_network_state = inf.daemon_network_state;
   dsi.synchronization_start_height = inf.synchronization_start_height;
   dsi.max_net_seen_height = inf.max_net_seen_height;
   dsi.height = inf.height;
