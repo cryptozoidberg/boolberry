@@ -251,11 +251,11 @@ bool daemon_backend::update_state_info()
   case currency::COMMAND_RPC_GET_INFO::daemon_network_state_synchronizing:  dsi.text_state = "Synchronizing";break;
   default: dsi.text_state = "unknown";break;
   }
-  uint64_t percents = 0;
-  if (inf.max_net_seen_height > inf.synchronization_start_height)
-    percents = ((inf.height - inf.synchronization_start_height)*100)/(inf.max_net_seen_height - inf.synchronization_start_height);
+  dsi.status = inf.status;
+  dsi.synchronization_start_height = inf.synchronization_start_height;
+  dsi.max_net_seen_height = inf.max_net_seen_height;
+  dsi.height = inf.height;
 
-  dsi.sync_status = std::to_string(percents) + "%, " + std::to_string(inf.max_net_seen_height - inf.height) + " blocks behind";
   m_pview->update_daemon_status(dsi);
   return true;
 }

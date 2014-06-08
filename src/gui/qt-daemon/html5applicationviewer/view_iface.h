@@ -6,7 +6,10 @@
 
 #include <stdint.h>
 #include <QObject>
+#ifndef Q_MOC_RUN
 #include "serialization/keyvalue_serialization.h"
+#include "storages/portable_storage_template_helper.h"
+#endif
 
 namespace view
 {
@@ -15,7 +18,10 @@ namespace view
 public:
 
     std::string text_state;
-    std::string sync_status;
+    uint64_t status;
+    uint64_t synchronization_start_height;
+    uint64_t max_net_seen_height;
+    uint64_t height;
     uint64_t out_connections_count;
     uint64_t inc_connections_count;
     std::string difficulty;
@@ -23,7 +29,10 @@ public:
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(text_state)
-      KV_SERIALIZE(sync_status)
+      KV_SERIALIZE(state)
+      KV_SERIALIZE(synchronization_start_height)
+      KV_SERIALIZE(max_net_seen_height)
+      KV_SERIALIZE(height)
       KV_SERIALIZE(out_connections_count)
       KV_SERIALIZE(inc_connections_count)
       KV_SERIALIZE(difficulty)

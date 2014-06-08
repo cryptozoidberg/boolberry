@@ -1231,7 +1231,7 @@ bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info
   //m_d->update_daemon_state(info);
   std::string json_str;
   epee::serialization::store_t_to_json(info, json_str);
-  m_d->update_daemon_state(json_str);
+  m_d->update_daemon_state(json_str.c_str());
   return true;
 }
 

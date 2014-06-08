@@ -15,16 +15,20 @@
 
 <div id="container">
     <div id="main_menu_bar" class="inline_menu_bar">
-        <div id="daemon_state_view_menu" class="inline_menu_bar_item"  view_name="daemon_state_view">General</div>
+        <div id="daemon_state_view_menu" class="inline_menu_bar_item"  view_name="daemon_state_view">Connectivity</div>
         <div id="wallet_view_menu"  class="inline_menu_bar_item" view_name="wallet_view">Open wallet</div>
     </div>
 
     <div id="daemon_state_view" class="view_hidden menu_view_inner_area" >
-        <div >Status: <span id="daemon_status_text">Disconnected</span></div>
-        <div >Synchronization: <span id="daemon_synchronization_text">111</span></div>
-        <div >Connections: <span id="daemon_out_connections_text">111</span>(OUT)/<span id="daemon_inc_connections_text"></span>(INC) </div>
-        <div >Current difficulty: <span id="difficulty_text">111</span></div>
-        <div >Current network hashrate: <span id="hashrate_text">111</span></div>
+        <div class="daemon_view_general_status_block"><span class="daemon_view_general_status_text">Status:</span> <span  id="daemon_status_text">Loading blockchain data...</span></div>
+        <div id="synchronization_progressbar_block">
+            <div style="width: 200px; height: 20px;float: left;" id="synchronization_progressbar"></div><span id="daemon_synchronization_text">100 blocks behind</span>
+        </div>
+        <div class="daemon_view_details_block">
+            <div class="daemon_view_details_status_block"><span class="daemon_view_details_status_text">Connections: </span><span class="daemon_view_details_status_value"><span id="daemon_out_connections_text">0</span>(out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> </div>
+            <div class="daemon_view_details_status_block"><span class="daemon_view_details_status_text">Current difficulty: </span><span class="daemon_view_details_status_value" id="difficulty_text">---</span></div>
+            <div class="daemon_view_details_status_block"><span class="daemon_view_details_status_text">Current network hashrate: </span><span class="daemon_view_details_status_value" id="hashrate_text">---</span></div>
+        </div>
     </div>
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >
         <div class="small_text">wallet text area</div>
@@ -36,20 +40,44 @@
 function on_update_daemon_state(daemon_info_str)
 {
     var info_obj = jQuery.parseJSON(daemon_info_str);
-    $("#daemon_status_text").text(info_obj.text_state);
-    $("#daemon_synchronization_text").text(info_obj.sync_status);
 
-    $("#daemon_out_connections_text").text(info_obj.out_connections_counttoString());
-    $("#daemon_inc_connections_text").text(info_obj.inc_connections_counttoString());
+    if(info_obj.status == 0)//daemon_network_state_connecting
+    {
+        //do nothing
+    }else if(info_obj.status == 1)//daemon_network_state_synchronizing
+    {
+        var percents = 0;
+        if (info_obj.max_net_seen_height > info_obj.synchronization_start_height)
+         percents = ((info_obj.height - info_obj.synchronization_start_height)*100)/(info_obj.max_net_seen_height - info_obj.synchronization_start_height);
+        $("#synchronization_progressbar").progressbar( "option", "value", percents );
+
+        $("#daemon_synchronization_text").text((info_obj.max_net_seen_height - info_obj.height).toString() + " blocks behind");
+        //show progress
+    }else if(info_obj.status == 2)//daemon_network_state_online
+    {
+        $("#synchronization_progressbar").hide();
+        //show OK
+    }else
+    {
+        //set unknown status
+    }
+
+    $("#daemon_status_text").text(info_obj.text_state);
+
+    $("#daemon_out_connections_text").text(info_obj.out_connections_count.toString());
+    $("#daemon_inc_connections_text").text(info_obj.inc_connections_count.toString());
 
     $("#difficulty_text").text(info_obj.difficulty);
     $("#hashrate_text").text(info_obj.hashrate.toString());
 }
 
+
 $(function()
 { // DOM ready
-    Qt.update_daemon_state.connect(on_update_daemon_state); // Connect signal sent from Qt to javascript function
 
+    $( "#synchronization_progressbar" ).progressbar({value: false });
+
+    Qt.update_daemon_state.connect(on_update_daemon_state); // Connect signal sent from Qt to javascript function
 });
 
 </script>

@@ -39,11 +39,12 @@
 #include <list>
 #include <map>
 #include <time.h>
+#ifndef Q_MOC_RUN
 #include <boost/cstdint.hpp>
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
-
+#endif
 #if defined(WIN32)
 #include <io.h>
 #else

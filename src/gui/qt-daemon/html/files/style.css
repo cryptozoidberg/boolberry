@@ -4,7 +4,7 @@ html {
 
 body {
     /*font: 16px/1.5em "Helvetica Neue", Helvetica, sans-serif;*/
-    margin: 1em 0 4em 0;
+    margin: 0em 0 0em 0;
 }
 
 h1 {
@@ -64,10 +64,17 @@ h2 {
     padding: 0 8px;
 }
 
+#daemon_state_view
+{
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
 .inline_menu_bar_selected_item:hover
 {
     color: #dd4b39;
 }
+
 
 .menu_brackets_text
 {
@@ -95,3 +102,50 @@ h2 {
     padding-top: 12px;
     padding-left: 12px;
 }
+
+/*dashboard styles*/
+.daemon_view_details_status_value
+{
+    position: absolute;
+    left:200px;
+    font-weight:bold;
+}
+
+.daemon_view_general_status_value_success_text
+{
+    color: #1a9d00;
+    font-weight:bold;
+}
+
+
+#synchronization_progressbar_block
+{
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+.daemon_view_details_block
+{
+    padding-top: 20px;
+}
+
+.daemon_view_general_status_block
+{
+    font-size: 30px;
+}
+
+.daemon_view_details_status_block
+{
+    font: 14px;
+}
+
+.daemon_view_general_status_text
+{
+    color: #787878;
+}
+
+.daemon_view_details_status_text
+{
+    color: #999;
+}
+
