@@ -1078,7 +1078,7 @@ private slots:
 
 signals:
     void quitRequested();
-    void update_daemon_state(const view::daemon_status_info& dsi);
+    void update_daemon_state(const QString str);
 
 
 public:
@@ -1228,8 +1228,10 @@ QGraphicsWebView *Html5ApplicationViewer::webView() const
 
 bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info& info)
 {
-  m_d->update_daemon_state(info);
-
+  //m_d->update_daemon_state(info);
+  std::string json_str;
+  epee::serialization::store_t_to_json(info, json_str);
+  m_d->update_daemon_state(json_str);
   return true;
 }
 

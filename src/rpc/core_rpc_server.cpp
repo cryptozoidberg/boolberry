@@ -76,7 +76,12 @@ namespace currency
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_info(const COMMAND_RPC_GET_INFO::request& req, COMMAND_RPC_GET_INFO::response& res, connection_context& cntx)
   {
-    CHECK_CORE_READY();
+    if (m_p2p.get_payload_object().get_core().get_blockchain_storage().is_storing_blockchain())
+    {
+      res.status = CORE_RPC_STATUS_BUSY; 
+      return true; 
+    }
+
     res.height = m_core.get_current_blockchain_height();
     res.difficulty = m_core.get_blockchain_storage().get_difficulty_for_next_block();
     res.tx_count = m_core.get_blockchain_storage().get_total_transactions() - res.height; //without coinbase

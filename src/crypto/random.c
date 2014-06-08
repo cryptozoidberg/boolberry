@@ -20,7 +20,11 @@ static void generate_system_random_bytes(size_t n, void *result);
 static void generate_system_random_bytes(size_t n, void *result) {
   HCRYPTPROV prov;
 #define must_succeed(x) do if (!(x)) assert(0); while (0)
-  must_succeed(CryptAcquireContext(&prov, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT));
+  if(!CryptAcquireContext(&prov, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+  {
+    int err = GetLastError();
+    assert(0);
+  }
   must_succeed(CryptGenRandom(prov, (DWORD)n, result));
   must_succeed(CryptReleaseContext(prov, 0));
 #undef must_succeed

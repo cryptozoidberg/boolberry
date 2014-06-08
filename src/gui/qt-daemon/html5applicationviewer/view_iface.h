@@ -6,19 +6,13 @@
 
 #include <stdint.h>
 #include <QObject>
-
+#include "serialization/keyvalue_serialization.h"
 
 namespace view
 {
-
-  struct daemon_status_info: public QObject
+  struct daemon_status_info
   {
-    Q_OBJECT
 public:
-    daemon_status_info(QObject* parent = 0):QObject(parent)
-      {
-         sync_status = out_connections_count = inc_connections_count = hashrate = 0;
-      }
 
     std::string text_state;
     std::string sync_status;
@@ -26,9 +20,15 @@ public:
     uint64_t inc_connections_count;
     std::string difficulty;
     uint64_t hashrate;
-  private:
-    Q_DISABLE_COPY(daemon_status_info)
 
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(text_state)
+      KV_SERIALIZE(sync_status)
+      KV_SERIALIZE(out_connections_count)
+      KV_SERIALIZE(inc_connections_count)
+      KV_SERIALIZE(difficulty)
+      KV_SERIALIZE(hashrate)
+    END_KV_SERIALIZE_MAP()
   };
 
 

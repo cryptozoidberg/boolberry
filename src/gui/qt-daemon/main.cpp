@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
     viewer.setWindowTitle("Boolberry");
     viewer.loadFile(QLatin1String("html/index.html"));
     daemon_backend daemb;
-    daemb.start(argc, argv, &viewer);
+    if(!daemb.start(argc, argv, &viewer))
+      return false;
     return app.exec();
 }

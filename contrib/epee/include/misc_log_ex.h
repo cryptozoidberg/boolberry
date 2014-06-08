@@ -373,6 +373,7 @@ namespace log_space
         m_have_to_kill_console = false;
 
       ::AllocConsole();
+      freopen("CONOUT$", "w", stdout);
 #endif
     }
 
