@@ -64,6 +64,10 @@ namespace mining
   const command_line::arg_descriptor<std::string, true> arg_pool_addr = {"pool-addr", ""};
   const command_line::arg_descriptor<std::string, true> arg_login = {"login", ""};
   const command_line::arg_descriptor<std::string, true> arg_pass = {"pass", ""};
+  const command_line::arg_descriptor<uint32_t> arg_mining_threads = { "mining-threads", "Specify mining threads count", 1, true };
+
+  static const int attempts_per_loop = 5000;
+
 
   //-----------------------------------------------------------------------------------------------------
   void simpleminer::init_options(boost::program_options::options_description& desc)
@@ -71,6 +75,7 @@ namespace mining
     command_line::add_arg(desc, arg_pool_addr);
     command_line::add_arg(desc, arg_login);
     command_line::add_arg(desc, arg_pass);
+    command_line::add_arg(desc, arg_mining_threads);
   }
   //--------------------------------------------------------------------------------------------------------------------------------
   bool simpleminer::init(const boost::program_options::variables_map& vm)
@@ -82,6 +87,12 @@ namespace mining
     m_pool_ip = pool_addr.substr(0, p);
     m_pool_port = pool_addr.substr(p + 1, pool_addr.size());
     m_login = command_line::get_arg(vm, arg_login);
+    m_threads_total = 1;
+    if(command_line::has_arg(vm, arg_mining_threads))
+    {
+      m_threads_total = command_line::get_arg(vm, arg_mining_threads);
+      LOG_PRINT_L0("Mining with " << m_threads_total << " threads ");
+    }
     m_pass = command_line::get_arg(vm, arg_pass);
     m_hi = AUTO_VAL_INIT(m_hi);
     m_last_job_ticks = 0;
@@ -114,6 +125,29 @@ namespace mining
    
     return text_height_info_to_native_height_info(job.prev_hi, native_details.prev_hi);
   }
+
+  //--------------------------------------------------------------------------------------------------------------------------------
+  void simpleminer::worker_thread(uint64_t start_nonce, uint32_t nonce_offset, std::atomic<uint32_t> *result) {
+    currency::blobdata blob = m_job.blob;
+    (*reinterpret_cast<uint64_t*>(&blob[1])) = (start_nonce+nonce_offset);
+
+    for (int i = 0; i < attempts_per_loop; i++) {
+      crypto::hash h = currency::null_hash;
+      currency::get_blob_longhash(blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
+      {
+	return m_scratchpad[index%m_scratchpad.size()];
+      });
+
+      if( currency::check_hash(h, m_job.difficulty))
+      {
+	(*result) = nonce_offset;
+	return;
+      }
+      nonce_offset++;
+      (*reinterpret_cast<uint64_t*>(&blob[1])) = (start_nonce+nonce_offset);
+    }
+  }
+
   //--------------------------------------------------------------------------------------------------------------------------------
   bool simpleminer::run()
   {
@@ -181,48 +215,77 @@ namespace mining
         if(job_requested)
           m_last_job_ticks = epee::misc_utils::get_tick_count();
       }
-      while(epee::misc_utils::get_tick_count() - m_last_job_ticks < 20000)
+
+      uint64_t start_nonce = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
+      std::list<boost::thread> threads;
+      std::atomic<uint32_t> results[128];
+      bool new_job_needed = false;
+
+      while(epee::misc_utils::get_tick_count() - m_last_job_ticks < 20000 && !new_job_needed)
       {
-        ++(*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
-        crypto::hash h = currency::null_hash;
-        currency::get_blob_longhash(m_job.blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
-        {
-          return m_scratchpad[index%m_scratchpad.size()];
-        });
+	if (m_threads_total > 128) { 
+	  LOG_PRINT_L0("Sorry - simpleminer does not support more than 128 threads right now");
+	  m_threads_total = 128;
+	}
 
-        if( currency::check_hash(h, m_job.difficulty))
-        {
-          //<< ", id" << currency::get_blob_hash(m_job.blob) << ENDL
-          //found!          
-          COMMAND_RPC_SUBMITSHARE::request submit_request = AUTO_VAL_INIT(submit_request);
-          COMMAND_RPC_SUBMITSHARE::response submit_response = AUTO_VAL_INIT(submit_response);
-          submit_request.id     = m_pool_session_id;
-          submit_request.job_id = m_job.job_id;
-          submit_request.nonce  = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
-          submit_request.result = string_tools::buff_to_hex_nodelimer(std::string((char*) &h, HASH_SIZE));
-          LOG_PRINT_GREEN("Share found: nonce=" << submit_request.nonce << " for job=" << m_job.job_id << ", diff: " << m_job.difficulty << ENDL             
-            << ", PoW:" << h << ", height:" << m_job.prev_hi.height+1 << ", submitting...", LOG_LEVEL_0);
+	uint32_t nonce_offset = 0;
+	for (unsigned int i = 0; i < m_threads_total; i++)
+	{
+	  results[i] = 0;
+	  threads.push_back(boost::thread(&simpleminer::worker_thread, this, start_nonce, nonce_offset, &results[i]));
+	  nonce_offset += attempts_per_loop;
+	}
+	BOOST_FOREACH(boost::thread& th, threads)
+	{
+	  th.join();
+	}
+	for (unsigned int i = 0; i < m_threads_total; i++) {
+	  if (results[i] != 0) {
+	    (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + results[i]);
+	    crypto::hash h = currency::null_hash;
+	    currency::get_blob_longhash(m_job.blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
+            {
+	      return m_scratchpad[index%m_scratchpad.size()];
+	    });
 
-          //LOG_PRINT_L0("Block hashing blob: " << string_tools::buff_to_hex_nodelimer(m_job.blob));
-          //LOG_PRINT_L0("scratch_pad: " << currency::dump_scratchpad(m_scratchpad));
-          if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_SUBMITSHARE>("/json_rpc", submit_request, submit_response, m_http_client))
-          {
-            LOG_PRINT_L0("Failed to submit share! disconnect and sleep....");
-            m_http_client.disconnect();
-            epee::misc_utils::sleep_no_w(1000);
-            break;
-          }
-          if(submit_response.status != "OK")
-          {
-            LOG_PRINT_L0("Failed to submit share! (submitted share rejected) disconnect and sleep....");
-            m_http_client.disconnect();
-            epee::misc_utils::sleep_no_w(1000);
-            break;
-          }
-          LOG_PRINT_GREEN("Share submitted successfully!", LOG_LEVEL_0);
-          get_job();
-          break;
-        }
+	    if( currency::check_hash(h, m_job.difficulty))
+	    {
+	      //<< ", id" << currency::get_blob_hash(m_job.blob) << ENDL
+	      //found!          
+	      COMMAND_RPC_SUBMITSHARE::request submit_request = AUTO_VAL_INIT(submit_request);
+	      COMMAND_RPC_SUBMITSHARE::response submit_response = AUTO_VAL_INIT(submit_response);
+	      submit_request.id     = m_pool_session_id;
+	      submit_request.job_id = m_job.job_id;
+	      submit_request.nonce  = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
+	      submit_request.result = string_tools::buff_to_hex_nodelimer(std::string((char*) &h, HASH_SIZE));
+	      LOG_PRINT_GREEN("Share found: nonce=" << submit_request.nonce << " for job=" << m_job.job_id << ", diff: " << m_job.difficulty << ENDL             
+              << ", PoW:" << h << ", height:" << m_job.prev_hi.height+1 << ", submitting...", LOG_LEVEL_0);
+
+	      //LOG_PRINT_L0("Block hashing blob: " << string_tools::buff_to_hex_nodelimer(m_job.blob));
+	      //LOG_PRINT_L0("scratch_pad: " << currency::dump_scratchpad(m_scratchpad));
+	      if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_SUBMITSHARE>("/json_rpc", submit_request, submit_response, m_http_client))
+              {
+		LOG_PRINT_L0("Failed to submit share! disconnect and sleep....");
+		m_http_client.disconnect();
+		epee::misc_utils::sleep_no_w(1000);
+		new_job_needed = true;
+		break;
+	      }
+	      if(submit_response.status != "OK")
+	      {
+		LOG_PRINT_L0("Failed to submit share! (submitted share rejected) disconnect and sleep....");
+		m_http_client.disconnect();
+		epee::misc_utils::sleep_no_w(1000);
+		new_job_needed = true;
+		break;
+	      }
+	      LOG_PRINT_GREEN("Share submitted successfully!", LOG_LEVEL_0);
+	      new_job_needed = true;
+	      break;
+	    }
+	  }
+	}
+	start_nonce += nonce_offset;
       }
       get_job();
     }
