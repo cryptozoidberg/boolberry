@@ -33,8 +33,10 @@ class daemon_backend
 {
 public:
   daemon_backend();
+  ~daemon_backend();
   bool start(int argc, char* argv[], view::i_view* pview_handler);
   bool stop();
+  bool send_stop_signal();
 private:
   void main_worker(const po::variables_map& vm);
   bool update_state_info();

@@ -44,11 +44,13 @@ public:
 
   struct i_view
   {
-     virtual bool update_daemon_status(const daemon_status_info& info)=0;
+    virtual bool update_daemon_status(const daemon_status_info& info)=0;
+    virtual bool on_backend_stopped()=0;
   };
 
   struct view_stub: public i_view
   {
     virtual bool update_daemon_status(const daemon_status_info& /*info*/){return true;}
+    virtual bool on_backend_stopped(){return true;}
   };
 }

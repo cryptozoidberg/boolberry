@@ -1072,6 +1072,7 @@ public:
 
 public slots:
     void quit();
+    void closeEvent(QCloseEvent *event);
 
 private slots:
     void addToJavaScript();
@@ -1088,6 +1089,11 @@ public:
 #endif // TOUCH_OPTIMIZED_NAVIGATION
 };
 
+void Html5ApplicationViewerPrivate::closeEvent(QCloseEvent *event)
+{
+
+}
+
 Html5ApplicationViewerPrivate::Html5ApplicationViewerPrivate(QWidget *parent)
     : QGraphicsView(parent)
 {
@@ -1098,8 +1104,10 @@ Html5ApplicationViewerPrivate::Html5ApplicationViewerPrivate(QWidget *parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     m_webView = new QGraphicsWebView;
-    m_webView->setAcceptTouchEvents(true);
-    m_webView->setAcceptHoverEvents(false);
+    //m_webView->setAcceptTouchEvents(true);
+    //m_webView->setAcceptHoverEvents(false);
+    m_webView->setAcceptTouchEvents(false);
+    m_webView->setAcceptHoverEvents(true);
     setAttribute(Qt::WA_AcceptTouchEvents, true);
     scene->addItem(m_webView);
     scene->setActiveWindow(m_webView);
@@ -1147,18 +1155,36 @@ void Html5ApplicationViewerPrivate::addToJavaScript()
 
 Html5ApplicationViewer::Html5ApplicationViewer(QWidget *parent)
     : QWidget(parent)
-    , m_d(new Html5ApplicationViewerPrivate(this))
+    , m_d(new Html5ApplicationViewerPrivate(this)),
+      m_quit_requested(false),
+      m_deinitialize_done(false)
 {
-    connect(m_d, SIGNAL(quitRequested()), SLOT(close()));
+    //connect(m_d, SIGNAL(quitRequested()), SLOT(close()));
+
+    connect(m_d, SIGNAL(quitRequested()), this, SLOT(on_request_quit()));
+
+
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(m_d);
     layout->setMargin(0);
     setLayout(layout);
 }
 
+
 Html5ApplicationViewer::~Html5ApplicationViewer()
 {
     delete m_d;
+}
+void Html5ApplicationViewer::closeEvent(QCloseEvent *event)
+{
+  if(!m_deinitialize_done)
+  {
+    on_request_quit();
+    event->ignore();
+  }else
+  {
+    event->accept();
+  }
 }
 
 void Html5ApplicationViewer::loadFile(const QString &fileName)
@@ -1226,6 +1252,36 @@ QGraphicsWebView *Html5ApplicationViewer::webView() const
   return m_d->m_webView;
 }
 
+bool Html5ApplicationViewer::on_request_quit()
+{
+  m_quit_requested = true;
+  m_backend.send_stop_signal();
+  return true;
+}
+
+bool Html5ApplicationViewer::do_close()
+{
+  this->close();
+  return true;
+}
+
+bool Html5ApplicationViewer::on_backend_stopped()
+{
+  if(m_quit_requested)
+  {
+    m_deinitialize_done = true;
+    bool r = QMetaObject::invokeMethod(this,         // obj
+                                 "do_close", // member
+                                 Qt::QueuedConnection/*,     // connection type
+                                 Q_ARG()*/);     // val1
+
+    r = r;
+
+    //m_d->close();
+  }
+  return true;
+}
+
 bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info& info)
 {
   //m_d->update_daemon_state(info);
@@ -1234,10 +1290,10 @@ bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info
   m_d->update_daemon_state(json_str.c_str());
   return true;
 }
-
-void Html5ApplicationViewer::after_load()
+bool Html5ApplicationViewer::start_backend(int argc, char* argv[])
 {
-  qDebug() << "update_daemon_state()";
-  //m_d->update_daemon_state("from qt");
+  return m_backend.start(argc, argv, this);
 }
+
+
 #include "html5applicationviewer.moc"

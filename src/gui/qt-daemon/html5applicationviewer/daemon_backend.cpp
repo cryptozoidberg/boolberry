@@ -16,6 +16,13 @@ daemon_backend::daemon_backend():m_pview(&m_view_stub),
                                  m_rpc_proxy(m_rpc_server)
 {}
 
+const command_line::arg_descriptor<bool> arg_alloc_win_console   = {"alloc-win-clonsole", "Allocates debug console with GUI", false};
+
+daemon_backend::~daemon_backend()
+{
+  stop();
+}
+
 bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
 {
   m_stop_singal_sent = false;
@@ -32,7 +39,6 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   #endif
 
   log_space::get_set_log_detalisation_level(true, LOG_LEVEL_0);
-  log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
   LOG_PRINT_L0("Initing...");
 
   TRY_ENTRY();
@@ -50,6 +56,8 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   command_line::add_arg(desc_cmd_sett, command_line::arg_log_level);
   command_line::add_arg(desc_cmd_sett, command_line::arg_console);
   command_line::add_arg(desc_cmd_sett, command_line::arg_show_details);
+  command_line::add_arg(desc_cmd_sett, arg_alloc_win_console);
+
 
   currency::core::init_options(desc_cmd_sett);
   currency::core_rpc_server::init_options(desc_cmd_sett);
@@ -95,6 +103,11 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
 
 
   //set up logging options
+  if(command_line::has_arg(vm, arg_alloc_win_console))
+  {
+     log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
+  }
+
   boost::filesystem::path log_file_path(command_line::get_arg(vm, command_line::arg_log_file));
   if (log_file_path.empty())
     log_file_path = log_space::log_singletone::get_default_log_file();
@@ -118,10 +131,17 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   CATCH_ENTRY_L0("main", 1);
  }
 
-bool daemon_backend::stop()
+bool daemon_backend::send_stop_signal()
 {
   m_stop_singal_sent = true;
-  m_main_worker_thread.join();
+  return true;
+}
+bool daemon_backend::stop()
+{
+  send_stop_signal();
+  if(m_main_worker_thread.joinable())
+    m_main_worker_thread.join();
+
   return true;
 }
 
@@ -179,7 +199,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
 
   //go to monitoring view loop
   loop();
-
+  dsi.daemon_network_state = 3;
   LOG_PRINT_L0("Stopping core p2p server...");
   dsi.text_state = "Stopping p2p network server";
   m_pview->update_daemon_status(dsi);
@@ -226,6 +246,8 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   LOG_PRINT("Node stopped.", LOG_LEVEL_0);
   dsi.text_state = "Node stopped";
   m_pview->update_daemon_status(dsi);
+
+  m_pview->on_backend_stopped();
 }
 
 bool daemon_backend::update_state_info()
@@ -247,7 +269,7 @@ bool daemon_backend::update_state_info()
   switch(inf.daemon_network_state)
   {
   case currency::COMMAND_RPC_GET_INFO::daemon_network_state_connecting:     dsi.text_state = "Connecting";break;
-  case currency::COMMAND_RPC_GET_INFO::daemon_network_state_online:         dsi.text_state = "Synchronized OK";break;
+  case currency::COMMAND_RPC_GET_INFO::daemon_network_state_online:         dsi.text_state = "Online";break;
   case currency::COMMAND_RPC_GET_INFO::daemon_network_state_synchronizing:  dsi.text_state = "Synchronizing";break;
   default: dsi.text_state = "unknown";break;
   }

@@ -3,7 +3,7 @@ html {
 }
 
 body {
-    /*font: 16px/1.5em "Helvetica Neue", Helvetica, sans-serif;*/
+    font: 16px/1.5em "Helvetica Neue", Helvetica, sans-serif;
     margin: 0em 0 0em 0;
 }
 
@@ -104,24 +104,43 @@ h2 {
 }
 
 /*dashboard styles*/
-.daemon_view_details_status_value
-{
-    position: absolute;
-    left:200px;
-    font-weight:bold;
-}
 
-.daemon_view_general_status_value_success_text
+span.daemon_view_general_status_value_success_text
 {
     color: #1a9d00;
     font-weight:bold;
 }
 
+.daemon_view_general_status_text
+{
+    color: #6c6c6c;
+}
+
+.daemon_view_param_title
+{
+    color: #999;
+}
+
+.daemon_view_param_value
+{
+    position: absolute;
+    left:220px;
+    font-weight:bold;
+    color: #6c6c6c;
+    font-size: 17px;
+}
+
+#open_wallet_button
+{
+    margin-top: 25px;
+    margin-left: 120px;
+    width: 200px;
+}
 
 #synchronization_progressbar_block
 {
-    padding-top: 10px;
-    padding-left: 10px;
+    padding-top: 25px;
+    padding-left: 15px;
 }
 
 .daemon_view_details_block
@@ -131,21 +150,12 @@ h2 {
 
 .daemon_view_general_status_block
 {
+    padding-top: 20px;
     font-size: 30px;
 }
 
 .daemon_view_details_status_block
 {
     font: 14px;
-}
-
-.daemon_view_general_status_text
-{
-    color: #787878;
-}
-
-.daemon_view_details_status_text
-{
-    color: #999;
 }
 

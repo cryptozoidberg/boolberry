@@ -13,6 +13,9 @@
 #include <QWidget>
 #include <QUrl>
 #include "view_iface.h"
+#ifndef Q_MOC_RUN
+#include "daemon_backend.h"
+#endif
 
 class QGraphicsWebView;
 
@@ -39,16 +42,24 @@ public:
     void showExpanded();
 
     QGraphicsWebView *webView() const;
-
-    void after_load();
-
+    bool start_backend(int argc, char* argv[]);
 protected:
 
+private slots:
+    bool do_close();
+    bool on_request_quit();
 private:
+    void closeEvent(QCloseEvent *event);
+
+
     //------- i_view ---------
     virtual bool update_daemon_status(const view::daemon_status_info& info);
+    virtual bool on_backend_stopped();
 
     class Html5ApplicationViewerPrivate *m_d;
+    daemon_backend m_backend;
+    std::atomic<bool> m_quit_requested;
+    std::atomic<bool> m_deinitialize_done;
 };
 
 #endif // HTML5APPLICATIONVIEWER_H

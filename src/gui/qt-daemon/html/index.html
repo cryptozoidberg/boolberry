@@ -3,11 +3,14 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html;" />
 
-    <link rel="stylesheet" href="files/jquery-ui-1.10.2.custom.css" />
+    <!--  <link rel="stylesheet" href="files/jquery-ui-1.10.2.custom.css" /> -->
+    <link rel="stylesheet" href="files/css/start/jquery-ui-1.10.4.custom.css"/>
     <link rel="stylesheet" type="text/css" href="files/style.css" />
 
-    <script src="files/http_code.jquery.com_jquery-latest.js"></script>
-    <script src="files/http_code.jquery.com_ui_1.10.2_jquery-ui.js"></script>
+    <!--  <script src="files/http_code.jquery.com_jquery-latest.js"></script> -->
+    <!--  <script src="files/http_code.jquery.com_ui_1.10.2_jquery-ui.js"></script> -->
+    <script src="files/js/jquery-1.10.2.js"></script>
+    <script src="files/js/jquery-ui-1.10.4.custom.js"></script>
     <script src="files/ui_helper.js" type="text/javascript" charset="utf-8"></script>
 </head>
 
@@ -22,13 +25,27 @@
     <div id="daemon_state_view" class="view_hidden menu_view_inner_area" >
         <div class="daemon_view_general_status_block"><span class="daemon_view_general_status_text">Status:</span> <span  id="daemon_status_text">Loading blockchain data...</span></div>
         <div id="synchronization_progressbar_block">
-            <div style="width: 200px; height: 20px;float: left;" id="synchronization_progressbar"></div><span id="daemon_synchronization_text">100 blocks behind</span>
+            <div style="width: 200px; height: 20px;float: left;" id="synchronization_progressbar"></div><span style="margin-left: 10px;" id="daemon_synchronization_text">--</span>
         </div>
         <div class="daemon_view_details_block">
-            <div class="daemon_view_details_status_block"><span class="daemon_view_details_status_text">Connections: </span><span class="daemon_view_details_status_value"><span id="daemon_out_connections_text">0</span>(out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> </div>
-            <div class="daemon_view_details_status_block"><span class="daemon_view_details_status_text">Current difficulty: </span><span class="daemon_view_details_status_value" id="difficulty_text">---</span></div>
-            <div class="daemon_view_details_status_block"><span class="daemon_view_details_status_text">Current network hashrate: </span><span class="daemon_view_details_status_value" id="hashrate_text">---</span></div>
+            <div class="daemon_view_details_status_block">
+                <span class="daemon_view_param_title">Connections: </span>
+                <span class="daemon_view_param_value" id="daemon_out_connections_text">0</span>  <!-- (out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> -->
+            </div>
+            <div class="daemon_view_details_status_block">
+                <span class="daemon_view_param_title">Height: </span>
+                <span class="daemon_view_param_value" id="daemon_height_text">0</span>  <!-- (out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> -->
+            </div>
+            <div class="daemon_view_details_status_block">
+                <span class="daemon_view_param_title">Current difficulty: </span>
+                <span class="daemon_view_param_value" id="difficulty_text">---</span>
+            </div>
+            <div class="daemon_view_details_status_block">
+                <span class="daemon_view_param_title">Current network hashrate: </span>
+                <span class="daemon_view_param_value" id="hashrate_text">---</span>
+            </div>
         </div>
+        <div id="open_wallet_button" class="common_button">Open wallet</div>
     </div>
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >
         <div class="small_text">wallet text area</div>
@@ -54,10 +71,21 @@ function on_update_daemon_state(daemon_info_str)
         //show progress
     }else if(info_obj.daemon_network_state == 2)//daemon_network_state_online
     {
-        $("#synchronization_progressbar").hide();
-        $("#daemon_out_connections_text").addClass("daemon_view_general_status_value_success_text");
+        $("#synchronization_progressbar_block").hide();
+        $("#daemon_status_text").addClass("daemon_view_general_status_value_success_text");
+        $("#open_wallet_button").button("enable");
         //show OK
-    }else
+    }else if(info_obj.daemon_network_state == 3)//daemon_network_state_online
+    {
+        $("#synchronization_progressbar_block").show();
+        $("#synchronization_progressbar" ).progressbar({value: false });
+        $("#daemon_synchronization_text").text("");
+
+        $("#daemon_status_text").removeClass("daemon_view_general_status_value_success_text");
+        $("#open_wallet_button").button("disable");
+        //show OK
+    }
+    else
     {
         //set unknown status
         $("#daemon_status_text").text("Unkonwn state");
@@ -67,16 +95,22 @@ function on_update_daemon_state(daemon_info_str)
     $("#daemon_status_text").text(info_obj.text_state);
 
     $("#daemon_out_connections_text").text(info_obj.out_connections_count.toString());
-    $("#daemon_inc_connections_text").text(info_obj.inc_connections_count.toString());
+    if(info_obj.out_connections_count >= 8)
+    {
+        $("#daemon_out_connections_text").addClass("daemon_view_general_status_value_success_text");
+    }
+    //$("#daemon_inc_connections_text").text(info_obj.inc_connections_count.toString());
+
+    $("#daemon_height_text").text(info_obj.height.toString());
     $("#difficulty_text").text(info_obj.difficulty);
     $("#hashrate_text").text(info_obj.hashrate.toString());
 }
 
 $(function()
 { // DOM ready
-
     $( "#synchronization_progressbar" ).progressbar({value: false });
-
+    $(".common_button").button();
+    $("#open_wallet_button").button("disable");
     Qt.update_daemon_state.connect(on_update_daemon_state); // Connect signal sent from Qt to javascript function
 });
 

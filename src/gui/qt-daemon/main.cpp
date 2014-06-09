@@ -2,7 +2,6 @@
 #include "html5applicationviewer.h"
 #include "qdebug.h"
 #include <thread>
-#include "daemon_backend.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,8 +12,7 @@ int main(int argc, char *argv[])
     viewer.showExpanded();
     viewer.setWindowTitle("Boolberry");
     viewer.loadFile(QLatin1String("html/index.html"));
-    daemon_backend daemb;
-    if(!daemb.start(argc, argv, &viewer))
+    if(!viewer.start_backend(argc, argv))
       return false;
     return app.exec();
 }
