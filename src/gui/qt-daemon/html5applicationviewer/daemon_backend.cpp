@@ -34,9 +34,9 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   dsi.text_state = "Initializing...";
   pview_handler->update_daemon_status(dsi);
 
-  #ifdef WIN32
-  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-  #endif
+  //#ifdef WIN32
+  //_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+  //#endif
 
   log_space::get_set_log_detalisation_level(true, LOG_LEVEL_0);
   LOG_PRINT_L0("Initing...");
