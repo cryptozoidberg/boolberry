@@ -290,3 +290,26 @@ void daemon_backend::loop()
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 }
+
+bool daemon_backend::open_wallet(const std::string& path, const std::string& password)
+{
+  return m_wallet.load(path, password);
+}
+
+void daemon_backend::on_new_block(uint64_t height, const currency::block& block)
+{
+
+}
+void daemon_backend::on_money_received(uint64_t height, const currency::transaction& tx, size_t out_index)
+{
+
+}
+void daemon_backend::on_money_spent(uint64_t height, const currency::transaction& in_tx, size_t out_index, const currency::transaction& spend_tx)
+{
+
+}
+
+
+
+
+
