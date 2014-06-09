@@ -7,6 +7,8 @@
 #include "currency_protocol/blobdatatype.h"
 #include "rpc/mining_protocol_defs.h"
 #include "currency_core/difficulty.h"
+#include <boost/atomic.hpp>
+#include <atomic>
 namespace mining
 {
   class  simpleminer
@@ -40,11 +42,13 @@ namespace mining
     bool apply_addendums(const std::list<addendum>& addms);
     bool pop_addendum(const addendum& add);
     bool push_addendum(const addendum& add);
+    void worker_thread(uint64_t start_nonce, uint32_t nonce_offset, std::atomic<uint32_t> *result);
 
     std::vector<mining::addendum> m_blocks_addendums; //need to handle splits without re-downloading whole scratchpad
     height_info_native m_hi;
     std::vector<crypto::hash> m_scratchpad;
     uint64_t m_last_job_ticks;
+    uint32_t m_threads_total;
     std::string m_pool_session_id;
     simpleminer::job_details_native m_job;
 
