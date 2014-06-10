@@ -137,6 +137,13 @@ namespace currency
       return true;
     });
     
+    
+    m_update_scratchpad_interval.do_call([&](){
+        if(is_mining())
+          update_scratchpad();
+        return true;
+      });
+
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
