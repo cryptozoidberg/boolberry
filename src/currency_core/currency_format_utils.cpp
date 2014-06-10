@@ -775,7 +775,7 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool get_payment_id_from_user_data(const std::string& user_data, std::string& paymnet_id)
+  bool get_payment_id_from_user_data(const std::string& user_data, std::string& payment_id)
   {
     if(!user_data.size())
       return false;
@@ -784,7 +784,7 @@ namespace currency
     if(user_data.size() < 2)
       return false;
 
-    paymnet_id = user_data.substr(2, static_cast<size_t>(user_data[1]));
+    payment_id = user_data.substr(2, static_cast<size_t>(user_data[1]));
     return true;
   }
   //---------------------------------------------------------------

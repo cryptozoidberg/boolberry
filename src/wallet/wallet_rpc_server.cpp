@@ -90,7 +90,7 @@ namespace tools
     {
       std::vector<uint8_t> extra;
       crypto::hash payment_id = AUTO_VAL_INIT(payment_id);
-      if(currency::parse_payment_id_from_hex_str(req.paymnet_id_hex, payment_id))
+      if(currency::parse_payment_id_from_hex_str(req.payment_id_hex, payment_id))
       {
         currency::set_payment_id_to_tx_extra(extra, payment_id);
       }
