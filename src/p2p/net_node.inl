@@ -802,7 +802,7 @@ namespace nodetool
     if(m_alert_mode != ALERT_TYPE_CALM)
       return true;
 
-    LOG_PRINT_L0("This software is is up to date, please update.");
+    LOG_PRINT_L0("This software is old, please update.");
     return true;
   }
   //-----------------------------------------------------------------------------------
@@ -812,7 +812,7 @@ namespace nodetool
     if(m_alert_mode  != ALERT_TYPE_URGENT)
       return true;
 
-    LOG_PRINT_CYAN("[URGENT]:This software is is up to date, please update.", LOG_LEVEL_0);
+    LOG_PRINT_CYAN("[URGENT]:This software is old, please update.", LOG_LEVEL_0);
     return true;
   }
   //-----------------------------------------------------------------------------------
@@ -822,7 +822,7 @@ namespace nodetool
     if(m_alert_mode  != ALERT_TYPE_CRITICAL)
       return true;
 
-    LOG_PRINT_RED("[CRITICAL]:This software is is up to date, please update.", LOG_LEVEL_0);
+    LOG_PRINT_RED("[CRITICAL]:This software is old, please update.", LOG_LEVEL_0);
     return true;
   }
   //-----------------------------------------------------------------------------------
