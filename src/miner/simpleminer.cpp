@@ -235,6 +235,9 @@ namespace mining
 	  threads.push_back(boost::thread(&simpleminer::worker_thread, this, start_nonce, nonce_offset, &results[i]));
 	  nonce_offset += attempts_per_loop;
 	}
+	(*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + nonce_offset);
+	
+
 	BOOST_FOREACH(boost::thread& th, threads)
 	{
 	  th.join();
@@ -281,6 +284,8 @@ namespace mining
 	      }
 	      LOG_PRINT_GREEN("Share submitted successfully!", LOG_LEVEL_0);
 	      new_job_needed = true;
+	      (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + nonce_offset);
+
 	      break;
 	    }
 	  }
