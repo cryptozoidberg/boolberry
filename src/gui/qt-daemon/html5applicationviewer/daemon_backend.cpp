@@ -294,9 +294,12 @@ bool daemon_backend::update_wallets()
   {//wallet is opened
     if(m_last_daemon_height != m_last_wallet_synch_height)
     {
-
+      wallet_status_info wsi = AUTO_VAL_INIT(wsi);
+      wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
+      m_pview->update_wallet_status(wsi);
       m_wallet.refresh();
-
+      wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
+      m_pview->update_wallet_status(wsi);
     }
   }
 }
@@ -325,9 +328,30 @@ bool daemon_backend::open_wallet(const std::string& path, const std::string& pas
   }
 
   m_wallet.init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
+  load_wallet_info();
   m_last_wallet_synch_height = 0;
   return true;
 }
+
+bool daemon_backend::load_wallet_info()
+{
+  tools::wallet2::transfer_container transfers;
+  m_wallet.get_transfers(transfers);
+  view::wallet_info wi = AUTO_VAL_INIT(wi);
+  wi.balance = m_wallet.balance();
+  wi.balance = m_wallet.unlocked_balance();
+  for(auto& tr: transfers)
+  {
+    wi.transfers.push_back(wallet_transfer_info());
+    wi.transfers.back().m_height = tr.m_block_height;
+    wi.transfers.back().tx_hash = currency::get_transaction_hash(tr.m_tx);
+    wi.transfers.back().m_amount = tr.amount();
+    wi.transfers.back().m_spent = tr.m_spent;
+    wi.transfers.back().m_is_income = true;
+  }
+  return true;
+}
+
 
 void daemon_backend::on_new_block(uint64_t height, const currency::block& block)
 {

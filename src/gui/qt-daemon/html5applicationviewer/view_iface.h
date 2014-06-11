@@ -41,12 +41,55 @@ public:
   };
 
 
+
+
   struct wallet_status_info
   {
+    enum state
+    {
+      wallet_state_synchronizing = 1,
+      wallet_state_ready = 2
+    };
+
+
     uint64_t wallet_state;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_state)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct wallet_transfer_info
+  {
+    uint64_t    m_amount;
+    std::string tx_hash;
+    uint64_t    m_height;
+    bool        m_spent;
+    bool        m_is_income;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(m_amount)
+      KV_SERIALIZE(tx_hash)
+      KV_SERIALIZE(m_height)
+      KV_SERIALIZE(m_spent)
+      KV_SERIALIZE(m_is_income)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct wallet_info
+  {
+    uint64_t unlocked_balance;
+    uint64_t balance;
+    std::list<wallet_transfer_info> m_transfers;
+    std::string m_address;
+    std::string m_tracking_hey;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(unlocked_balance)
+      KV_SERIALIZE(balance)
+      KV_SERIALIZE(m_transfers)
+      KV_SERIALIZE(m_address)
+      KV_SERIALIZE(m_tracking_hey)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -57,6 +100,7 @@ public:
     virtual bool on_backend_stopped()=0;
     virtual bool show_msg_box(const std::string& message)=0;
     virtual bool update_wallet_status(const wallet_status_info& wsi)=0;
+    virtual bool update_wallet_info(const wallet_info& wsi)=0;
   };
 
   struct view_stub: public i_view
@@ -64,5 +108,6 @@ public:
     virtual bool update_daemon_status(const daemon_status_info& /*info*/){return true;}
     virtual bool on_backend_stopped(){return true;}
     virtual bool update_wallet_status(const wallet_status_info& wsi){return true;}
+    virtual bool update_wallet_info(const wallet_info& wsi){return true;}
   };
 }
