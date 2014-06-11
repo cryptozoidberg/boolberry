@@ -57,6 +57,8 @@ namespace nodetool
 
     //always use new id, to be able differ cloned computers
     m_config.m_peer_id  = crypto::rand<uint64_t>();
+
+    handle_alert_conditions();
     
     //at this moment we have hardcoded config
     m_config.m_net_config.handshake_interval = P2P_DEFAULT_HANDSHAKE_INTERVAL;
@@ -345,8 +347,9 @@ namespace nodetool
                                                 "." << static_cast<uint32_t>(m_maintainers_info_local.ver_revision) <<
                                                 "." << static_cast<uint32_t>(m_maintainers_info_local.build_no) <<
                                                 ", current version: " <<  PROJECT_VERSION_LONG, LOG_LEVEL_0);
-      handle_alert_conditions();
     }
+    handle_alert_conditions();
+
     return true;
   }
   //-----------------------------------------------------------------------------------

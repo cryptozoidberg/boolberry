@@ -29,7 +29,7 @@
 using namespace epee;
 
 
-#define CURRENT_P2P_STORAGE_ARCHIVE_VER    8
+#define CURRENT_P2P_STORAGE_ARCHIVE_VER    9
 
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4355)
@@ -91,7 +91,6 @@ namespace nodetool
       a & m_peerlist;
       a & m_maintainers_info_local;
       a & m_maintainers_entry_local;
-      a & m_alert_mode;
       a & m_blocked_ips;
     }
     // debug functions
