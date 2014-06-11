@@ -152,6 +152,9 @@ namespace mining
   bool simpleminer::run()
   {
     m_job = AUTO_VAL_INIT(m_job);
+    uint64_t search_start = epee::misc_utils::get_tick_count();
+    uint64_t hashes_done = 0;
+
     while(true)
     {
       //-----------------
@@ -243,6 +246,7 @@ namespace mining
 	  th.join();
 	}
 	for (unsigned int i = 0; i < m_threads_total; i++) {
+	  hashes_done += attempts_per_loop; /* Approximate at easy diff */
 	  if (results[i] != 0) {
 	    (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + results[i]);
 	    crypto::hash h = currency::null_hash;
@@ -292,7 +296,14 @@ namespace mining
 	}
 	start_nonce += nonce_offset;
       }
+      uint64_t get_job_start_time = epee::misc_utils::get_tick_count();
       get_job();
+      uint64_t get_job_end_time  = epee::misc_utils::get_tick_count();
+      if ((get_job_end_time - get_job_start_time) > 1000) {
+	      LOG_PRINT_L0("slow pool response " << (get_job_end_time - get_job_start_time) << " ms");
+      }
+      uint64_t hash_rate = (hashes_done * 1000) / ((get_job_end_time - search_start) + 1);
+      LOG_PRINT_L0("avg hr: " << hash_rate);
     }
     return true;
   }
