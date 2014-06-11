@@ -101,6 +101,7 @@ namespace tools
     void generate(const std::string& wallet, const std::string& password);
     void load(const std::string& wallet, const std::string& password);
     void store();
+    std::string get_wallet_path(){ return m_keys_file; }
     currency::account_base& get_account(){return m_account;}
 
     void init(const std::string& daemon_address = "http://localhost:8080");

@@ -13,6 +13,7 @@ INCLUDEPATH += C:/local/boost_1_55_0 \
                ../../ \
                ../../../contrib\epee\include \
                ../../build/version/ \
+               ../../../build/version/ \
                ../../../contrib
 
 
@@ -20,11 +21,12 @@ QMAKE_CXXFLAGS += /bigobj /MP /GS- /D_CRT_SECURE_NO_WARNINGS /wd4100 /wd4996 /wd
 
 CONFIG(release, debug|release) {
 LIBS += Shell32.lib \
-        ../../build/src/Release/rpc.lib \
-        ../../build/src/Release/currency_core.lib \
-        ../../build/src/Release/crypto.lib \
-        ../../build/src/Release/common.lib \
-        ../../build/contrib/miniupnpc/Release/miniupnpc.lib \
+        ../../../build/src/Release/rpc.lib \
+        ../../../build/src/Release/currency_core.lib \
+        ../../../build/src/Release/crypto.lib \
+        ../../../build/src/Release/common.lib \
+        ../../../build/src/Release/wallet.lib \
+        ../../../build/contrib/miniupnpc/Release/miniupnpc.lib \
         C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_system-vc120-mt-1_55.lib \
         C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_filesystem-vc120-mt-1_55.lib \
         C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_thread-vc120-mt-1_55.lib \
@@ -36,11 +38,12 @@ LIBS += Shell32.lib \
         C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_program_options-vc120-mt-1_55.lib
 }else{
 LIBS += Shell32.lib \
-        ../../build/src/Debug/rpc.lib \
-        ../../build/src/Debug/currency_core.lib \
-        ../../build/src/Debug/crypto.lib \
-        ../../build/src/Debug/common.lib \
-        ../../build/contrib/miniupnpc/Debug/miniupnpc.lib \
+        ../../../build/src/Debug/rpc.lib \
+        ../../../build/src/Debug/currency_core.lib \
+        ../../../build/src/Debug/crypto.lib \
+        ../../../build/src/Debug/common.lib \
+        ../../../build/src/Debug/wallet.lib \
+        ../../../build/contrib/miniupnpc/Debug/miniupnpc.lib \
         C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_system-vc120-mt-gd-1_55.lib \
         C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_filesystem-vc120-mt-gd-1_55.lib \
         C:\local\boost_1_55_0\lib64-msvc-12.0\lib\libboost_thread-vc120-mt-gd-1_55.lib \

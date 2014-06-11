@@ -42,6 +42,7 @@ public:
 private:
   void main_worker(const po::variables_map& vm);
   bool update_state_info();
+  bool update_wallets();
   void loop();
 
   //----- tools::i_wallet2_callback ------
@@ -54,7 +55,10 @@ private:
   view::view_stub m_view_stub;
   view::i_view* m_pview;
   tools::daemon_rpc_proxy_fast m_rpc_proxy;
+  critical_section m_wallet_lock;
   tools::wallet2 m_wallet;
+  std::atomic<uint64_t> m_last_daemon_height;
+  std::atomic<uint64_t> m_last_wallet_synch_height;
 
   //daemon stuff
   currency::core m_ccore;

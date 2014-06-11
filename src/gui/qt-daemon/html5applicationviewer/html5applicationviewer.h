@@ -55,6 +55,7 @@ private:
     //------- i_view ---------
     virtual bool update_daemon_status(const view::daemon_status_info& info);
     virtual bool on_backend_stopped();
+    virtual bool show_msg_box(const std::string& message);
 
     class Html5ApplicationViewerPrivate *m_d;
     daemon_backend m_backend;

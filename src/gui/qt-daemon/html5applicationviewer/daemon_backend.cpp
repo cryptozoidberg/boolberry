@@ -13,8 +13,13 @@ daemon_backend::daemon_backend():m_pview(&m_view_stub),
                                  m_cprotocol(m_ccore, &m_p2psrv),
                                  m_p2psrv(m_cprotocol),
                                  m_rpc_server(m_ccore, m_p2psrv),
-                                 m_rpc_proxy(m_rpc_server)
-{}
+                                 m_rpc_proxy(m_rpc_server),
+                                 m_last_daemon_height(0),
+                                 m_last_wallet_synch_height(0)
+
+{
+  m_wallet.callback(this);
+}
 
 const command_line::arg_descriptor<bool> arg_alloc_win_console   = {"alloc-win-clonsole", "Allocates debug console with GUI", false};
 
@@ -276,10 +281,24 @@ bool daemon_backend::update_state_info()
   dsi.daemon_network_state = inf.daemon_network_state;
   dsi.synchronization_start_height = inf.synchronization_start_height;
   dsi.max_net_seen_height = inf.max_net_seen_height;
-  dsi.height = inf.height;
+  m_last_daemon_height = dsi.height = inf.height;
 
   m_pview->update_daemon_status(dsi);
   return true;
+}
+
+bool daemon_backend::update_wallets()
+{
+  CRITICAL_REGION_LOCAL(m_wallet_lock);
+  if(m_wallet.get_wallet_path().size())
+  {//wallet is opened
+    if(m_last_daemon_height != m_last_wallet_synch_height)
+    {
+
+      m_wallet.refresh();
+
+    }
+  }
 }
 
 void daemon_backend::loop()
@@ -287,13 +306,27 @@ void daemon_backend::loop()
   while(!m_stop_singal_sent)
   {
     update_state_info();
+    update_wallets();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 }
 
 bool daemon_backend::open_wallet(const std::string& path, const std::string& password)
 {
-  return m_wallet.load(path, password);
+  CRITICAL_REGION_LOCAL(m_wallet_lock);
+  try
+  {
+    m_wallet.load(path, password);
+  }
+  catch (const std::exception& e)
+  {
+    m_pview->show_msg_box(std::string("Failed to load waller: ") + e.what());
+    return false;
+  }
+
+  m_wallet.init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
+  m_last_wallet_synch_height = 0;
+  return true;
 }
 
 void daemon_backend::on_new_block(uint64_t height, const currency::block& block)

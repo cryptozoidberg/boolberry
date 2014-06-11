@@ -18,6 +18,7 @@
 #include <QGraphicsLinearLayout>
 #include <QGraphicsWebView>
 #include <QWebFrame>
+#include <QMessageBox>
 
 #include "warnings.h"
 
@@ -1287,6 +1288,13 @@ bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info
   m_d->update_daemon_state(json_str.c_str());
   return true;
 }
+
+bool Html5ApplicationViewer::show_msg_box(const std::string& message)
+{
+  QMessageBox::information(m_d, "Error", message.c_str(), QMessageBox::Ok);
+  return true;
+}
+
 bool Html5ApplicationViewer::start_backend(int argc, char* argv[])
 {
   return m_backend.start(argc, argv, this);

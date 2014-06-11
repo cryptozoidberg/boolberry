@@ -41,16 +41,28 @@ public:
   };
 
 
+  struct wallet_status_info
+  {
+    uint64_t wallet_state;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_state)
+    END_KV_SERIALIZE_MAP()
+  };
+
 
   struct i_view
   {
     virtual bool update_daemon_status(const daemon_status_info& info)=0;
     virtual bool on_backend_stopped()=0;
+    virtual bool show_msg_box(const std::string& message)=0;
+    virtual bool update_wallet_status(const wallet_status_info& wsi)=0;
   };
 
   struct view_stub: public i_view
   {
     virtual bool update_daemon_status(const daemon_status_info& /*info*/){return true;}
     virtual bool on_backend_stopped(){return true;}
+    virtual bool update_wallet_status(const wallet_status_info& wsi){return true;}
   };
 }
