@@ -335,9 +335,13 @@ bool daemon_backend::open_wallet(const std::string& path, const std::string& pas
 
 bool daemon_backend::load_wallet_info()
 {
+  CRITICAL_REGION_LOCAL(m_wallet_lock);
+
   tools::wallet2::transfer_container transfers;
   m_wallet.get_transfers(transfers);
   view::wallet_info wi = AUTO_VAL_INIT(wi);
+  wi.m_address = m_wallet.get_account().get_public_address_str();
+  wi.m_tracking_hey = string_tools::pod_to_hex(m_wallet.get_account().get_keys().m_view_secret_key);
   wi.balance = m_wallet.balance();
   wi.balance = m_wallet.unlocked_balance();
   for(auto& tr: transfers)
@@ -349,6 +353,7 @@ bool daemon_backend::load_wallet_info()
     wi.transfers.back().m_spent = tr.m_spent;
     wi.transfers.back().m_is_income = true;
   }
+  m_pview->update_wallet_info(wi);
   return true;
 }
 

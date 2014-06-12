@@ -1081,6 +1081,8 @@ private slots:
 signals:
     void quitRequested();
     void update_daemon_state(const QString str);
+    void update_wallet_status(const QString str);
+    void update_wallet_info(const QString str);
 
 
 public:
@@ -1300,5 +1302,20 @@ bool Html5ApplicationViewer::start_backend(int argc, char* argv[])
   return m_backend.start(argc, argv, this);
 }
 
+bool update_wallet_status(const wallet_status_info& wsi)
+{
+  std::string json_str;
+  epee::serialization::store_t_to_json(info, json_str);
+  m_d->update_daemon_state(json_str.c_str());
+  return true;
+}
+
+bool update_wallet_info(const wallet_info& wsi)
+{
+  std::string json_str;
+  epee::serialization::store_t_to_json(info, json_str);
+  m_d->update_daemon_state(json_str.c_str());
+  return true;
+}
 
 #include "html5applicationviewer.moc"

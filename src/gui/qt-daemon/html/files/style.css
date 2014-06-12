@@ -159,3 +159,73 @@ span.daemon_view_general_status_value_success_text
     font: 14px;
 }
 
+/*----- wallet ------*/
+
+#wallet_left_panel
+{
+    padding: 5px;
+    float: left;
+    width: 200px;
+    height: 300px;
+    background: rgb(241, 241, 241);
+}
+
+.balance_text
+{
+    margin-top: 20px;
+    color: rgb(95, 95, 95);
+    font: 14px;
+    font-weight: bold;
+}
+
+#wallet_transfer_panel
+{
+    background: rgb(241, 241, 241);
+    padding: 5px;
+    margin-left:220px;
+}
+
+#transfer_address_id
+{
+    height: 16px;
+    margin-left:2px;
+    width: 570px;
+    font-size: 10px;
+}
+#transfer_button_id,#close_wallet_button_id
+{
+    font-size: 12px;
+    margin-left: 2px;
+}
+
+.options_link_text
+{
+    font-size: 90%;
+    color:  #666666;
+}
+
+.transfer_extra_options
+{
+    color: #8f8f8f;
+    display: none;
+}
+
+#wallet_recent_transfers_panel
+{
+    /*background: rgb(241, 241, 241);*/
+    padding: 5px;
+    margin-top: 10px;
+    margin-left: 220px;
+}
+
+#synchronized_wallet_block
+{
+    color: #1a9d00;
+    font-weight:bold;
+}
+
+h2
+{
+    color: #6c6c6c;
+}
+

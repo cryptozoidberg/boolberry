@@ -19,7 +19,7 @@
 <div id="container">
     <div id="main_menu_bar" class="inline_menu_bar">
         <div id="daemon_state_view_menu" class="inline_menu_bar_item"  view_name="daemon_state_view">Connectivity</div>
-        <div id="wallet_view_menu"  class="inline_menu_bar_item" view_name="wallet_view">Open wallet</div>
+        <div id="wallet_view_menu"  class="inline_menu_bar_item" view_name="wallet_view">Wallet</div>
     </div>
 
     <div id="daemon_state_view" class="view_hidden menu_view_inner_area" >
@@ -48,7 +48,56 @@
         <div id="open_wallet_button" class="common_button">Open wallet</div>
     </div>
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >
-        <div class="small_text">wallet text area</div>
+        <div id="wallet_left_panel">
+            <div class="wallet_left_panel_entry">
+                <span class="balance_text">Balance:</span><br>
+                <span class="wallet_balance" id="wallet_balance">0.0</span>
+            </div>
+            <div class="wallet_left_panel_entry">
+                <span class="balance_text">Unlocked:</span><br>
+                <span class="wallet_balance" id="wallet_unlocked_balance">0.0</span>
+            </div>
+            <br>
+            <div id="synchronizing_wallet_block">
+                Synchronizing wallet...
+                <div style="width: 150px; height: 20px;" id="wallet_progressbar"></div>
+            </div>
+            <div id="synchronized_wallet_block" style="display: none">
+                Synchronized
+            </div>
+            <br>
+            <!-- <div id="close_wallet_button_id" class="common_button">Close wallet</div> -->
+        </div>
+        <div id="wallet_transfer_panel">
+            <div>
+                <table cellspacing="3px">
+                    <tr>
+                        <td width="90px">Address:</td>
+                        <td><input id="transfer_address_id"><br></td>
+                    </tr>
+                    <tr>
+                        <td>Amount:</td>
+                        <td><input pattern="[0-9]+(\.[0-9]{1,12})?" id="transfer_amount_id" value="0.0">  <a href="javascript:;" onclick="jQuery('.transfer_extra_options').toggle('fast');" class="options_link_text">More options...</a> </td>
+                    </tr>
+                    <tr>
+                        <td > <span class="transfer_extra_options">Payment id: </span> </td>
+                        <td > <span class="transfer_extra_options"><input id="payment_id"></span></td>
+                    </tr>
+                    <tr>
+                        <td > <span class="transfer_extra_options">Mixin: </span> </td>
+                        <td > <span class="transfer_extra_options"><input id="mixin_count_id" pattern="[0-9]{1,3}" value="0"></span></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><div id="transfer_button_id" class="common_button">Send</div></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="wallet_recent_transfers_panel">
+            <h2>Recent transfers:</h2>
+            <div id="recent_transfers_container_id"></div>
+        </div>
     </div>
 </div>
 
@@ -106,12 +155,53 @@ function on_update_daemon_state(daemon_info_str)
     $("#hashrate_text").text(info_obj.hashrate.toString());
 }
 
+
+
+function on_update_wallet_status(wal_status)
+{
+    if(wal_status.wallet_state == 1)
+    {
+        //syncmode
+        $("#transfer_button_id").button("disable");
+        $("#synchronizing_wallet_block").show();
+        $("#synchronized_wallet_block").hide();
+    }else if(wal_status.wallet_state == 2)
+    {
+        $("#transfer_button_id").button("enable");
+        $("#synchronizing_wallet_block").hide();
+        $("#synchronized_wallet_block").show();
+    }
+    else
+    {
+        alert("wrong state");
+    }
+}
+
+function on_update_wallet_info(wal_status)
+{
+    $("#wallet_balance").text(wal_status.balance.toString());
+    $("#wallet_unlocked_balance").text(wal_status.unlocked_balance.toString());
+
+    var text_to_puush;
+    for (var i = 0; i != wal_status.m_transfers.length; ++i)
+    {
+        text_to_puush += "<span style='color: green';> Height: " + wal_status.m_transfers[i].m_height.toString() + " tx: " + wal_status.m_transfers[i].tx_hash + re+ "</span>"
+
+    }
+
+    //#recent_transfers_container_id
+}
+
 $(function()
 { // DOM ready
     $( "#synchronization_progressbar" ).progressbar({value: false });
+    $( "#wallet_progressbar" ).progressbar({value: false });
     $(".common_button").button();
     $("#open_wallet_button").button("disable");
-    Qt.update_daemon_state.connect(on_update_daemon_state); // Connect signal sent from Qt to javascript function
+    $("#transfer_button_id").button("disable");
+    Qt.update_daemon_state.connect(on_update_daemon_state);
+    Qt.update_wallet_status.connect(on_update_wallet_status);
+    Qt.update_wallet_info.connect(on_update_wallet_info);
 });
 
 </script>
