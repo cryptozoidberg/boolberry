@@ -49,7 +49,7 @@ private slots:
     bool do_close();
     bool on_request_quit();
 public slots:
-    void open_wallet(const QString &file);
+    void open_wallet();
 
 private:
     void closeEvent(QCloseEvent *event);
@@ -63,6 +63,7 @@ private:
     virtual bool update_wallet_info(const view::wallet_info& wsi);
     virtual bool money_receive(const view::transfer_event_info& tei);
     virtual bool money_spent(const view::transfer_event_info& tei);
+    virtual bool show_wallet();
 
     class Html5ApplicationViewerPrivate *m_d;
     daemon_backend m_backend;

@@ -19,6 +19,8 @@
 #include <QGraphicsWebView>
 #include <QWebFrame>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QInputDialog>
 
 #include "warnings.h"
 
@@ -1085,6 +1087,7 @@ signals:
     void update_wallet_info(const QString str);
     void money_receive(const QString str);
     void money_spent(const QString str);
+    void show_wallet();
 
 
 
@@ -1309,7 +1312,7 @@ bool Html5ApplicationViewer::update_wallet_status(const view::wallet_status_info
 {
   std::string json_str;
   epee::serialization::store_t_to_json(wsi, json_str);
-  m_d->update_daemon_state(json_str.c_str());
+  m_d->update_wallet_status(json_str.c_str());
   return true;
 }
 
@@ -1317,7 +1320,7 @@ bool Html5ApplicationViewer::update_wallet_info(const view::wallet_info& wsi)
 {
   std::string json_str;
   epee::serialization::store_t_to_json(wsi, json_str);
-  m_d->update_daemon_state(json_str.c_str());
+  m_d->update_wallet_info(json_str.c_str());
   return true;
 }
 
@@ -1336,11 +1339,29 @@ bool Html5ApplicationViewer::money_spent(const view::transfer_event_info& tei)
   m_d->money_spent(json_str.c_str());
   return true;
 }
-
-void Html5ApplicationViewer::open_wallet(const QString &file)
+bool Html5ApplicationViewer::show_wallet()
 {
-  show_msg_box(file.toStdString());
+  m_d->show_wallet();
+  return true;
 }
 
+void Html5ApplicationViewer::open_wallet()
+{
+  QString path = QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                   "",
+                                                   tr("Files (*.*)"));
+  if(!path.length())
+    return;
+
+  //read password
+  bool ok;
+  QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
+                                            tr("Password:"), QLineEdit::Password,
+                                            QString(), &ok);
+  if(!ok)
+    return;
+
+  m_backend.open_wallet(path.toStdString(), pass.toStdString());
+}
 
 #include "html5applicationviewer.moc"

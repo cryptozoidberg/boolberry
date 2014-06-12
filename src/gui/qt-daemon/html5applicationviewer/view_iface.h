@@ -122,6 +122,7 @@ public:
     virtual bool update_wallet_info(const wallet_info& wsi)=0;
     virtual bool money_receive(const transfer_event_info& wsi)=0;
     virtual bool money_spent(const transfer_event_info& wsi)=0;
+    virtual bool show_wallet()=0;
   };
 
   struct view_stub: public i_view
@@ -133,5 +134,6 @@ public:
     virtual bool update_wallet_info(const wallet_info& /*wsi*/){return true;}
     virtual bool money_receive(const transfer_event_info& /*wsi*/){return true;}
     virtual bool money_spent(const transfer_event_info& /*wsi*/){return true;}
+    virtual bool show_wallet(){return true;}
   };
 }

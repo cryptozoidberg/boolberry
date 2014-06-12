@@ -331,6 +331,7 @@ bool daemon_backend::open_wallet(const std::string& path, const std::string& pas
   m_wallet.init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
   load_wallet_info();
   m_last_wallet_synch_height = 0;
+  m_pview->show_wallet();
   return true;
 }
 
@@ -344,7 +345,7 @@ bool daemon_backend::load_wallet_info()
   wi.address = m_wallet.get_account().get_public_address_str();
   wi.tracking_hey = string_tools::pod_to_hex(m_wallet.get_account().get_keys().m_view_secret_key);
   wi.balance = m_wallet.balance();
-  wi.balance = m_wallet.unlocked_balance();
+  wi.unlocked_balance = m_wallet.unlocked_balance();
   for(auto& tr: transfers)
   {
     wi.transfers.push_back(view::wallet_transfer_info());

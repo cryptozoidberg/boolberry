@@ -103,9 +103,9 @@
 
 <script type="text/javascript">
 
-function on_update_daemon_state(daemon_info_str)
+function on_update_daemon_state(info_obj)
 {
-    var info_obj = jQuery.parseJSON(daemon_info_str);
+    //var info_obj = jQuery.parseJSON(daemon_info_str);
 
     if(info_obj.daemon_network_state == 0)//daemon_network_state_connecting
     {
@@ -159,6 +159,7 @@ function on_update_daemon_state(daemon_info_str)
 
 function on_update_wallet_status(wal_status)
 {
+
     if(wal_status.wallet_state == 1)
     {
         //syncmode
@@ -177,6 +178,17 @@ function on_update_wallet_status(wal_status)
     }
 }
 
+function get_transfer_html_entry(tr)
+{
+    var res;
+    if(tr.is_income)
+        res = "<span style='color: darkgreen'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " received " + tr.amount.toString() + "</span><br>";
+    else
+        res = "<span style='color: darkmagenta'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " received " + tr.amount.toString() + "</span><br>";
+
+    return res;
+}
+
 function on_update_wallet_info(wal_status)
 {
     $("#wallet_balance").text(wal_status.balance.toString());
@@ -185,25 +197,38 @@ function on_update_wallet_info(wal_status)
     var text_to_puush = "";
     for (var i = 0; i != wal_status.transfers.length; ++i)
     {
-        text_to_puush += "<span style='color: green'> Height: " + wal_status.transfers[i].height.toString() + " tx: " + wal_status.transfers[i].tx_hash + " received " + wal_status.transfers[i].amount.toString() + "</span><br>";
+        text_to_puush += get_transfer_html_entry(wal_status.transfers[i]);
     }
     $("#recent_transfers_container_id").html(text_to_puush);
 }
 
 function on_money_recieved(tei)
 {
-
+    $("#recent_transfers_container_id").html( get_transfer_html_entry(tei) + $("#recent_transfers_container_id").html());
 }
 
 function on_money_spent(tei)
 {
-    
+    $("#recent_transfers_container_id").html( get_transfer_html_entry(tei) + $("#recent_transfers_container_id").html());
 }
 
 function on_open_wallet()
 {
-    Qt_parent.open_wallet("zzzzz");
+    Qt_parent.open_wallet();
 }
+
+function on_show_wallet()
+{
+    disable_tab(document.getElementById('wallet_view_menu'), false);
+    inline_menu_item_select(document.getElementById('wallet_view_menu'));
+}
+
+function str_to_obj(str)
+{
+    var info_obj = jQuery.parseJSON(str);
+    this.cb(info_obj);
+}
+
 
 $(function()
 { // DOM ready
@@ -212,6 +237,7 @@ $(function()
     $(".common_button").button();
     $("#open_wallet_button").button("disable");
     $("#transfer_button_id").button("disable");
+    $('#open_wallet_button').on('click',  on_open_wallet);
 
     /*
     on_update_wallet_info({
@@ -231,11 +257,12 @@ $(function()
         ]
     })*/
 
-    Qt.update_daemon_state.connect(on_update_daemon_state);
-    Qt.update_wallet_status.connect(on_update_wallet_status);
-    Qt.update_wallet_info.connect(on_update_wallet_info);
-    Qt.money_receive.connect(on_money_recieved);
-    Qt.money_spent.connect(on_money_spent);
+    Qt.update_daemon_state.connect(str_to_obj.bind({cb: on_update_daemon_state}));
+    Qt.update_wallet_status.connect(str_to_obj.bind({cb: on_update_wallet_status}));
+    Qt.update_wallet_info.connect(str_to_obj.bind({cb: on_update_wallet_info}));
+    Qt.money_receive.connect(str_to_obj.bind({cb: on_money_recieved}));
+    Qt.money_spent.connect(str_to_obj.bind({cb: on_money_spent}));
+    Qt.show_wallet.connect(on_show_wallet);
 });
 
 </script>

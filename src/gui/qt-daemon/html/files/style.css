@@ -3,7 +3,7 @@ html {
 }
 
 body {
-    font: 16px/1.5em "Helvetica Neue", Helvetica, sans-serif;
+    font: 16px/1.5em; /* "Helvetica Neue", Helvetica, sans-serif*/
     margin: 0em 0 0em 0;
 }
 
