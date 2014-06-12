@@ -154,6 +154,7 @@ namespace mining
     m_job = AUTO_VAL_INIT(m_job);
     uint64_t search_start = epee::misc_utils::get_tick_count();
     uint64_t hashes_done = 0;
+    uint32_t job_submit_failures = 0;
 
     while(true)
     {
@@ -272,38 +273,47 @@ namespace mining
 	      //LOG_PRINT_L0("scratch_pad: " << currency::dump_scratchpad(m_scratchpad));
 	      if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_SUBMITSHARE>("/json_rpc", submit_request, submit_response, m_http_client))
               {
-		LOG_PRINT_L0("Failed to submit share! disconnect and sleep....");
-		m_http_client.disconnect();
-		epee::misc_utils::sleep_no_w(1000);
+		/* Failed to submit a job.  This can happen because of disconnection,
+		 * server failure, or block expiry.  In any event, try to get
+		 * a new job.  If the job fetch fails, get_job will disconnect
+		 * and sleep for us */
+		LOG_PRINT_L0("Failed to submit share!  Updating job.");
+		job_submit_failures++;
 		new_job_needed = true;
 		break;
 	      }
 	      if(submit_response.status != "OK")
 	      {
-		LOG_PRINT_L0("Failed to submit share! (submitted share rejected) disconnect and sleep....");
-		m_http_client.disconnect();
-		epee::misc_utils::sleep_no_w(1000);
+		LOG_PRINT_L0("Failed to submit share! (submitted share rejected).  Updating job.");
+		job_submit_failures++;
 		new_job_needed = true;
 		break;
 	      }
 	      LOG_PRINT_GREEN("Share submitted successfully!", LOG_LEVEL_0);
 	      new_job_needed = true;
+	      job_submit_failures = 0;
 	      (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + nonce_offset);
-
 	      break;
 	    }
 	  }
 	}
 	start_nonce += nonce_offset;
       }
-      uint64_t get_job_start_time = epee::misc_utils::get_tick_count();
-      get_job();
-      uint64_t get_job_end_time  = epee::misc_utils::get_tick_count();
-      if ((get_job_end_time - get_job_start_time) > 1000) {
-	      LOG_PRINT_L0("slow pool response " << (get_job_end_time - get_job_start_time) << " ms");
+      if (job_submit_failures > 1)
+      {
+        m_http_client.disconnect();
+	epee::misc_utils::sleep_no_w(1000);
+      } else {
+        uint64_t get_job_start_time = epee::misc_utils::get_tick_count();
+        get_job();
+	uint64_t get_job_end_time  = epee::misc_utils::get_tick_count();
+	if ((get_job_end_time - get_job_start_time) > 1000) 
+        {
+	  LOG_PRINT_L0("slow pool response " << (get_job_end_time - get_job_start_time) << " ms");
+	}
+	uint64_t hash_rate = (hashes_done * 1000) / ((get_job_end_time - search_start) + 1);
+	LOG_PRINT_L0("avg hr: " << hash_rate);
       }
-      uint64_t hash_rate = (hashes_done * 1000) / ((get_job_end_time - search_start) + 1);
-      LOG_PRINT_L0("avg hr: " << hash_rate);
     }
     return true;
   }
