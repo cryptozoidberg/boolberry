@@ -294,7 +294,7 @@ bool daemon_backend::update_wallets()
   {//wallet is opened
     if(m_last_daemon_height != m_last_wallet_synch_height)
     {
-      wallet_status_info wsi = AUTO_VAL_INIT(wsi);
+      view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
       wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
       m_pview->update_wallet_status(wsi);
       m_wallet.refresh();
@@ -302,6 +302,7 @@ bool daemon_backend::update_wallets()
       m_pview->update_wallet_status(wsi);
     }
   }
+  return true;
 }
 
 void daemon_backend::loop()
@@ -340,30 +341,36 @@ bool daemon_backend::load_wallet_info()
   tools::wallet2::transfer_container transfers;
   m_wallet.get_transfers(transfers);
   view::wallet_info wi = AUTO_VAL_INIT(wi);
-  wi.m_address = m_wallet.get_account().get_public_address_str();
-  wi.m_tracking_hey = string_tools::pod_to_hex(m_wallet.get_account().get_keys().m_view_secret_key);
+  wi.address = m_wallet.get_account().get_public_address_str();
+  wi.tracking_hey = string_tools::pod_to_hex(m_wallet.get_account().get_keys().m_view_secret_key);
   wi.balance = m_wallet.balance();
   wi.balance = m_wallet.unlocked_balance();
   for(auto& tr: transfers)
   {
-    wi.transfers.push_back(wallet_transfer_info());
-    wi.transfers.back().m_height = tr.m_block_height;
-    wi.transfers.back().tx_hash = currency::get_transaction_hash(tr.m_tx);
-    wi.transfers.back().m_amount = tr.amount();
-    wi.transfers.back().m_spent = tr.m_spent;
-    wi.transfers.back().m_is_income = true;
+    wi.transfers.push_back(view::wallet_transfer_info());
+    wi.transfers.back().height = tr.m_block_height;
+    wi.transfers.back().tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tr.m_tx));
+    wi.transfers.back().amount = tr.amount();
+    wi.transfers.back().spent = tr.m_spent;
+    wi.transfers.back().is_income = true;
   }
   m_pview->update_wallet_info(wi);
   return true;
 }
 
-
-void daemon_backend::on_new_block(uint64_t height, const currency::block& block)
+void daemon_backend::on_new_block(uint64_t /*height*/, const currency::block& /*block*/)
 {
 
 }
 void daemon_backend::on_money_received(uint64_t height, const currency::transaction& tx, size_t out_index)
 {
+  view::transfer_event_info tei = AUTO_VAL_INIT(tei);
+  CHECK_AND_ASSERT_MES(out_index < tx.vout.size(), void(), "Wrong out_index: " << out_index << "");
+  tei.ti.amount = tx.vout[out_index].amount;
+  tei.ti.height = height;
+  tei.ti.is_income = true;
+  tei.ti.spent = false;
+  tei.ti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
 
 }
 void daemon_backend::on_money_spent(uint64_t height, const currency::transaction& in_tx, size_t out_index, const currency::transaction& spend_tx)

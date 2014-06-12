@@ -31,9 +31,9 @@ namespace tools
   class i_wallet2_callback
   {
   public:
-    virtual void on_new_block(uint64_t height, const currency::block& block) {}
-    virtual void on_money_received(uint64_t height, const currency::transaction& tx, size_t out_index) {}
-    virtual void on_money_spent(uint64_t height, const currency::transaction& in_tx, size_t out_index, const currency::transaction& spend_tx) {}
+    virtual void on_new_block(uint64_t /*height*/, const currency::block& /*block*/) {}
+    virtual void on_money_received(uint64_t /*height*/, const currency::transaction& /*tx*/, size_t /*out_index*/) {}
+    virtual void on_money_spent(uint64_t /*height*/, const currency::transaction& /*in_tx*/, size_t /*out_index*/, const currency::transaction& /*spend_tx*/) {}
   };
 
   struct tx_dust_policy

@@ -11,7 +11,10 @@
 #include "currency_protocol/currency_protocol_handler.h"
 #include "common/util.h"
 #include "crypto/hash.h"
+#include "warnings.h"
 
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4100)
 
 class daemon_cmmands_handler
 {
@@ -64,7 +67,7 @@ private:
     return ss.str();
   }
   //--------------------------------------------------------------------------------
-  bool help(const std::vector<std::string>& args)
+  bool help(const std::vector<std::string>& /*args*/)
   {
     std::cout << get_commands_str() << ENDL;
     return true;
@@ -356,3 +359,4 @@ private:
     return true;
   }
 };
+POP_WARNINGS

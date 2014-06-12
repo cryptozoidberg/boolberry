@@ -24,11 +24,11 @@ namespace currency
   /************************************************************************/
   struct currency_protocol_stub: public i_currency_protocol
   {
-    virtual bool relay_block(NOTIFY_NEW_BLOCK::request& arg, currency_connection_context& exclude_context)
+    virtual bool relay_block(NOTIFY_NEW_BLOCK::request& /*arg*/, currency_connection_context& /*exclude_context*/)
     {
       return false;
     }
-    virtual bool relay_transactions(NOTIFY_NEW_TRANSACTIONS::request& arg, currency_connection_context& exclude_context)
+    virtual bool relay_transactions(NOTIFY_NEW_TRANSACTIONS::request& /*arg*/, currency_connection_context& /*exclude_context*/)
     {
       return false;
     }

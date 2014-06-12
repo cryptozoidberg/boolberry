@@ -182,14 +182,27 @@ function on_update_wallet_info(wal_status)
     $("#wallet_balance").text(wal_status.balance.toString());
     $("#wallet_unlocked_balance").text(wal_status.unlocked_balance.toString());
 
-    var text_to_puush;
-    for (var i = 0; i != wal_status.m_transfers.length; ++i)
+    var text_to_puush = "";
+    for (var i = 0; i != wal_status.transfers.length; ++i)
     {
-        text_to_puush += "<span style='color: green';> Height: " + wal_status.m_transfers[i].m_height.toString() + " tx: " + wal_status.m_transfers[i].tx_hash + re+ "</span>"
-
+        text_to_puush += "<span style='color: green'> Height: " + wal_status.transfers[i].height.toString() + " tx: " + wal_status.transfers[i].tx_hash + " received " + wal_status.transfers[i].amount.toString() + "</span><br>";
     }
+    $("#recent_transfers_container_id").html(text_to_puush);
+}
 
-    //#recent_transfers_container_id
+function on_money_recieved(tei)
+{
+
+}
+
+function on_money_spent(tei)
+{
+    
+}
+
+function on_open_wallet()
+{
+    Qt_parent.open_wallet("zzzzz");
 }
 
 $(function()
@@ -199,9 +212,30 @@ $(function()
     $(".common_button").button();
     $("#open_wallet_button").button("disable");
     $("#transfer_button_id").button("disable");
+
+    /*
+    on_update_wallet_info({
+        balance: 100000000,
+        unlocked_balance: 110000000,
+        transfers: [
+            {
+                height: 100,
+                tx_hash: "dfc98dc4a801ba924b6936f3dd14dcf5c8d526ae80ed042078c1b1d1666286c4",
+                amount: 1000000
+            },
+            {
+                height: 101,
+                tx_hash: "dfc98dc4a801ba924b6936f3dd14dcf5c8d526ae80ed042078c1b1d1666286c4",
+                amount: 10500000
+            }
+        ]
+    })*/
+
     Qt.update_daemon_state.connect(on_update_daemon_state);
     Qt.update_wallet_status.connect(on_update_wallet_status);
     Qt.update_wallet_info.connect(on_update_wallet_info);
+    Qt.money_receive.connect(on_money_recieved);
+    Qt.money_spent.connect(on_money_spent);
 });
 
 </script>

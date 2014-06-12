@@ -3,7 +3,12 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #pragma once
+
 #include <boost/program_options.hpp>
+#include "warnings.h"
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4100)
+DISABLE_VS_WARNINGS(4503)
 #include "include_base_utils.h"
 #include "version.h"
 
@@ -20,6 +25,8 @@ using namespace epee;
 #include "view_iface.h"
 #include "daemon_rpc_proxy.h"
 #include "wallet/wallet2.h"
+
+POP_WARNINGS
 
 namespace po = boost::program_options;
 
@@ -44,6 +51,7 @@ private:
   bool update_state_info();
   bool update_wallets();
   void loop();
+  bool load_wallet_info();
 
   //----- tools::i_wallet2_callback ------
   virtual void on_new_block(uint64_t height, const currency::block& block);

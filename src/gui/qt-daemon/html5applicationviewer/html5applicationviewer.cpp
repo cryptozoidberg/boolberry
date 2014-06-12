@@ -1083,6 +1083,9 @@ signals:
     void update_daemon_state(const QString str);
     void update_wallet_status(const QString str);
     void update_wallet_info(const QString str);
+    void money_receive(const QString str);
+    void money_spent(const QString str);
+
 
 
 public:
@@ -1153,6 +1156,7 @@ void Html5ApplicationViewerPrivate::quit()
 
 void Html5ApplicationViewerPrivate::addToJavaScript()
 {
+    m_webView->page()->mainFrame()->addToJavaScriptWindowObject("Qt_parent", QGraphicsView::parent());
     m_webView->page()->mainFrame()->addToJavaScriptWindowObject("Qt", this);
 }
 
@@ -1276,7 +1280,6 @@ bool Html5ApplicationViewer::on_backend_stopped()
     bool r = QMetaObject::invokeMethod(this,
                                  "do_close",
                                  Qt::QueuedConnection);
-
     r = r;
   }
   return true;
@@ -1302,20 +1305,42 @@ bool Html5ApplicationViewer::start_backend(int argc, char* argv[])
   return m_backend.start(argc, argv, this);
 }
 
-bool update_wallet_status(const wallet_status_info& wsi)
+bool Html5ApplicationViewer::update_wallet_status(const view::wallet_status_info& wsi)
 {
   std::string json_str;
-  epee::serialization::store_t_to_json(info, json_str);
+  epee::serialization::store_t_to_json(wsi, json_str);
   m_d->update_daemon_state(json_str.c_str());
   return true;
 }
 
-bool update_wallet_info(const wallet_info& wsi)
+bool Html5ApplicationViewer::update_wallet_info(const view::wallet_info& wsi)
 {
   std::string json_str;
-  epee::serialization::store_t_to_json(info, json_str);
+  epee::serialization::store_t_to_json(wsi, json_str);
   m_d->update_daemon_state(json_str.c_str());
   return true;
 }
+
+bool Html5ApplicationViewer::money_receive(const view::transfer_event_info& tei)
+{
+  std::string json_str;
+  epee::serialization::store_t_to_json(tei, json_str);
+  m_d->money_receive(json_str.c_str());
+  return true;
+}
+
+bool Html5ApplicationViewer::money_spent(const view::transfer_event_info& tei)
+{
+  std::string json_str;
+  epee::serialization::store_t_to_json(tei, json_str);
+  m_d->money_spent(json_str.c_str());
+  return true;
+}
+
+void Html5ApplicationViewer::open_wallet(const QString &file)
+{
+  show_msg_box(file.toStdString());
+}
+
 
 #include "html5applicationviewer.moc"

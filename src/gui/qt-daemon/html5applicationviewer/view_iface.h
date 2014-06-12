@@ -7,8 +7,15 @@
 #include <stdint.h>
 #include <QObject>
 #ifndef Q_MOC_RUN
+#include "warnings.h"
+
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4100)
+DISABLE_VS_WARNINGS(4503)
 #include "serialization/keyvalue_serialization.h"
 #include "storages/portable_storage_template_helper.h"
+POP_WARNINGS
+
 #endif
 
 namespace view
@@ -61,18 +68,18 @@ public:
 
   struct wallet_transfer_info
   {
-    uint64_t    m_amount;
+    uint64_t    amount;
     std::string tx_hash;
-    uint64_t    m_height;
-    bool        m_spent;
-    bool        m_is_income;
+    uint64_t    height;
+    bool        spent;
+    bool        is_income;
 
     BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(m_amount)
+      KV_SERIALIZE(amount)
       KV_SERIALIZE(tx_hash)
-      KV_SERIALIZE(m_height)
-      KV_SERIALIZE(m_spent)
-      KV_SERIALIZE(m_is_income)
+      KV_SERIALIZE(height)
+      KV_SERIALIZE(spent)
+      KV_SERIALIZE(is_income)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -80,19 +87,31 @@ public:
   {
     uint64_t unlocked_balance;
     uint64_t balance;
-    std::list<wallet_transfer_info> m_transfers;
-    std::string m_address;
-    std::string m_tracking_hey;
+    std::list<wallet_transfer_info> transfers;
+    std::string address;
+    std::string tracking_hey;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(unlocked_balance)
       KV_SERIALIZE(balance)
-      KV_SERIALIZE(m_transfers)
-      KV_SERIALIZE(m_address)
-      KV_SERIALIZE(m_tracking_hey)
+      KV_SERIALIZE(transfers)
+      KV_SERIALIZE(address)
+      KV_SERIALIZE(tracking_hey)
     END_KV_SERIALIZE_MAP()
   };
 
+  struct transfer_event_info
+  {
+    wallet_transfer_info ti;
+    uint64_t unlocked_balance;
+    uint64_t balance;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(ti)
+      KV_SERIALIZE(unlocked_balance)
+      KV_SERIALIZE(balance)
+    END_KV_SERIALIZE_MAP()
+  };
 
   struct i_view
   {
@@ -101,13 +120,18 @@ public:
     virtual bool show_msg_box(const std::string& message)=0;
     virtual bool update_wallet_status(const wallet_status_info& wsi)=0;
     virtual bool update_wallet_info(const wallet_info& wsi)=0;
+    virtual bool money_receive(const transfer_event_info& wsi)=0;
+    virtual bool money_spent(const transfer_event_info& wsi)=0;
   };
 
   struct view_stub: public i_view
   {
     virtual bool update_daemon_status(const daemon_status_info& /*info*/){return true;}
     virtual bool on_backend_stopped(){return true;}
-    virtual bool update_wallet_status(const wallet_status_info& wsi){return true;}
-    virtual bool update_wallet_info(const wallet_info& wsi){return true;}
+    virtual bool show_msg_box(const std::string& /*message*/){return true;}
+    virtual bool update_wallet_status(const wallet_status_info& /*wsi*/){return true;}
+    virtual bool update_wallet_info(const wallet_info& /*wsi*/){return true;}
+    virtual bool money_receive(const transfer_event_info& /*wsi*/){return true;}
+    virtual bool money_spent(const transfer_event_info& /*wsi*/){return true;}
   };
 }

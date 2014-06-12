@@ -48,6 +48,9 @@ protected:
 private slots:
     bool do_close();
     bool on_request_quit();
+public slots:
+    void open_wallet(const QString &file);
+
 private:
     void closeEvent(QCloseEvent *event);
 
@@ -56,6 +59,10 @@ private:
     virtual bool update_daemon_status(const view::daemon_status_info& info);
     virtual bool on_backend_stopped();
     virtual bool show_msg_box(const std::string& message);
+    virtual bool update_wallet_status(const view::wallet_status_info& wsi);
+    virtual bool update_wallet_info(const view::wallet_info& wsi);
+    virtual bool money_receive(const view::transfer_event_info& tei);
+    virtual bool money_spent(const view::transfer_event_info& tei);
 
     class Html5ApplicationViewerPrivate *m_d;
     daemon_backend m_backend;
