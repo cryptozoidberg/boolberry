@@ -20,6 +20,47 @@ POP_WARNINGS
 
 namespace view
 {
+
+  /*slots structures*/
+  struct transfer_destination
+  {
+    std::string address;
+    std::string amount;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(address)
+      KV_SERIALIZE(amount)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct transfer_params
+  {
+    std::list<transfer_destination> destinations;
+    uint64_t mixin_count;
+    std::string payment_id;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(destinations)
+      KV_SERIALIZE(mixin_count)
+      KV_SERIALIZE(payment_id)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct transfer_response
+  {
+    bool success;
+    std::string tx_hash;
+    uint64_t    tx_blob_size;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(success)
+      KV_SERIALIZE(tx_hash)
+      KV_SERIALIZE(tx_blob_size)
+    END_KV_SERIALIZE_MAP()
+  };
+
+
+  /*signal structures*/
   struct daemon_status_info
   {
 public:
@@ -68,7 +109,7 @@ public:
 
   struct wallet_transfer_info
   {
-    uint64_t    amount;
+    std::string amount;
     std::string tx_hash;
     uint64_t    height;
     bool        spent;
@@ -85,16 +126,14 @@ public:
 
   struct wallet_info
   {
-    uint64_t unlocked_balance;
-    uint64_t balance;
-    std::list<wallet_transfer_info> transfers;
+    std::string unlocked_balance;
+    std::string balance;
     std::string address;
     std::string tracking_hey;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(unlocked_balance)
       KV_SERIALIZE(balance)
-      KV_SERIALIZE(transfers)
       KV_SERIALIZE(address)
       KV_SERIALIZE(tracking_hey)
     END_KV_SERIALIZE_MAP()
@@ -103,8 +142,8 @@ public:
   struct transfer_event_info
   {
     wallet_transfer_info ti;
-    uint64_t unlocked_balance;
-    uint64_t balance;
+    std::string unlocked_balance;
+    std::string balance;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(ti)

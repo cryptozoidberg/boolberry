@@ -81,11 +81,11 @@
                     </tr>
                     <tr>
                         <td > <span class="transfer_extra_options">Payment id: </span> </td>
-                        <td > <span class="transfer_extra_options"><input id="payment_id"></span></td>
+                        <td > <span class="transfer_extra_options"><input style="width: 400px" id="payment_id"></span></td>
                     </tr>
                     <tr>
                         <td > <span class="transfer_extra_options">Mixin: </span> </td>
-                        <td > <span class="transfer_extra_options"><input id="mixin_count_id" pattern="[0-9]{1,3}" value="0"></span></td>
+                        <td > <span class="transfer_extra_options"><input type="number" style="width: 40px" id="mixin_count_id" value="0"></span></td>
                     </tr>
                     <tr>
                         <td></td>
@@ -182,34 +182,31 @@ function get_transfer_html_entry(tr)
 {
     var res;
     if(tr.is_income)
-        res = "<span style='color: darkgreen'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " received " + tr.amount.toString() + "</span><br>";
+        res = "<span style='color: darkgreen'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " received " + tr.amount + "</span><br>";
     else
-        res = "<span style='color: darkmagenta'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " received " + tr.amount.toString() + "</span><br>";
+        res = "<span style='color: darkmagenta'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " received " + tr.amount + "</span><br>";
 
     return res;
 }
 
 function on_update_wallet_info(wal_status)
 {
-    $("#wallet_balance").text(wal_status.balance.toString());
-    $("#wallet_unlocked_balance").text(wal_status.unlocked_balance.toString());
-
-    var text_to_puush = "";
-    for (var i = 0; i != wal_status.transfers.length; ++i)
-    {
-        text_to_puush += get_transfer_html_entry(wal_status.transfers[i]);
-    }
-    $("#recent_transfers_container_id").html(text_to_puush);
+    $("#wallet_balance").text(wal_status.balance);
+    $("#wallet_unlocked_balance").text(wal_status.unlocked_balance);
 }
 
 function on_money_recieved(tei)
 {
-    $("#recent_transfers_container_id").html( get_transfer_html_entry(tei) + $("#recent_transfers_container_id").html());
+    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti) );
+    $("#wallet_balance").text(tei.balance);
+    $("#wallet_unlocked_balance").text(tei.unlocked_balance);
 }
 
 function on_money_spent(tei)
 {
-    $("#recent_transfers_container_id").html( get_transfer_html_entry(tei) + $("#recent_transfers_container_id").html());
+    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti) );
+    $("#wallet_balance").text(tei.balance);
+    $("#wallet_unlocked_balance").text(tei.unlocked_balance);
 }
 
 function on_open_wallet()
@@ -223,12 +220,46 @@ function on_show_wallet()
     inline_menu_item_select(document.getElementById('wallet_view_menu'));
 }
 
+function on_transfer()
+{
+    var transfer_obj = {
+        destinations:[
+            {
+                address: $('#transfer_address_id').val(),
+                amount: $('#transfer_amount_id').val()
+            }
+        ],
+        mixin_count: 0,
+        payment_id: $('#payment_id').val()
+    };
+
+    transfer_obj.mixin_count = parseInt($('#mixin_count_id').val());
+    if(!(transfer_obj.mixin_count >= 0 && transfer_obj.mixin_count < 11))
+    {
+        Qt_parent.message_box("Wrong Mixin parameter value, please set values in range 0-10");
+        return;
+    }
+
+    var transfer_res_str = Qt_parent.transfer(JSON.stringify(transfer_obj));
+    var transfer_res_obj = jQuery.parseJSON(transfer_res_str);
+
+    if(transfer_res_obj.success)
+    {
+        $('#transfer_address_id').val("");
+        $('#transfer_amount_id').val("");
+        $('#payment_id').val("");
+        $('#mixin_count_id').val(0);
+
+    }
+    else
+        return;
+}
+
 function str_to_obj(str)
 {
     var info_obj = jQuery.parseJSON(str);
     this.cb(info_obj);
 }
-
 
 $(function()
 { // DOM ready
@@ -236,26 +267,19 @@ $(function()
     $( "#wallet_progressbar" ).progressbar({value: false });
     $(".common_button").button();
     $("#open_wallet_button").button("disable");
-    $("#transfer_button_id").button("disable");
+    //$("#transfer_button_id").button("disable");
     $('#open_wallet_button').on('click',  on_open_wallet);
+    $('#transfer_button_id').on('click',  on_transfer);
 
-    /*
-    on_update_wallet_info({
-        balance: 100000000,
-        unlocked_balance: 110000000,
-        transfers: [
-            {
-                height: 100,
-                tx_hash: "dfc98dc4a801ba924b6936f3dd14dcf5c8d526ae80ed042078c1b1d1666286c4",
-                amount: 1000000
-            },
-            {
-                height: 101,
-                tx_hash: "dfc98dc4a801ba924b6936f3dd14dcf5c8d526ae80ed042078c1b1d1666286c4",
-                amount: 10500000
-            }
-        ]
-    })*/
+
+    /*on_money_recieved({
+        height: 10,
+        tx_hash: "980809809809808",
+        amount: "10.1111"
+    });*/
+
+    inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
+    //inline_menu_item_select(document.getElementById('wallet_view_menu'));
 
     Qt.update_daemon_state.connect(str_to_obj.bind({cb: on_update_daemon_state}));
     Qt.update_wallet_status.connect(str_to_obj.bind({cb: on_update_wallet_status}));
@@ -263,6 +287,10 @@ $(function()
     Qt.money_receive.connect(str_to_obj.bind({cb: on_money_recieved}));
     Qt.money_spent.connect(str_to_obj.bind({cb: on_money_spent}));
     Qt.show_wallet.connect(on_show_wallet);
+
+    // put it here to disable wallet tab only in qt-mode
+    disable_tab(document.getElementById('wallet_view_menu'), true);
+
 });
 
 </script>

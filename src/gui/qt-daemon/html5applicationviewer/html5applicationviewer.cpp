@@ -1251,10 +1251,10 @@ void Html5ApplicationViewer::showExpanded()
 #else
     show();
 #endif
-    this->setFixedSize(700, 400);
+    this->setMinimumWidth(700);
+    this->setMinimumHeight(400);
     m_d->m_webView->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
     m_d->m_webView->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
-
 }
 
 QGraphicsWebView *Html5ApplicationViewer::webView() const
@@ -1343,6 +1343,40 @@ bool Html5ApplicationViewer::show_wallet()
 {
   m_d->show_wallet();
   return true;
+}
+
+QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
+{
+  view::transfer_params tp = AUTO_VAL_INIT(tp);
+  view::transfer_response tr = AUTO_VAL_INIT(tr);
+  tr.success = false;
+  if(!epee::serialization::load_t_from_json(tp, json_transfer_object.toStdString()))
+  {
+    show_msg_box("Internal error: failed to load transfer params");
+    return epee::serialization::store_t_to_json(tr).c_str();
+  }
+
+  if(!tp.destinations.size())
+  {
+    show_msg_box("Internal error: empty destinations");
+    return epee::serialization::store_t_to_json(tr).c_str();
+  }
+
+  currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
+
+  if(!m_backend.transfer(tp, res_tx))
+  {
+    return epee::serialization::store_t_to_json(tr).c_str();
+  }
+  tr.success = true;
+  tr.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(res_tx));
+
+  return epee::serialization::store_t_to_json(tr).c_str();
+}
+
+void Html5ApplicationViewer::message_box(const QString& msg)
+{
+  show_msg_box(msg.toStdString());
 }
 
 void Html5ApplicationViewer::open_wallet()

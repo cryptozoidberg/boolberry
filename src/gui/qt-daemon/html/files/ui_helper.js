@@ -53,9 +53,6 @@ function on_inline_menu_bar_item_click(e)
 function init_controls()
 {
     $('.inline_menu_bar_item').on('click',  on_inline_menu_bar_item_click);
-    inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
-    //inline_menu_item_select(document.getElementById('wallet_view_menu'));
-    disable_tab(document.getElementById('wallet_view_menu'), true);
 }
 
 $(document).ready(function()

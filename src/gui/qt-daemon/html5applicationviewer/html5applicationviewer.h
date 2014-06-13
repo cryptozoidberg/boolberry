@@ -50,6 +50,8 @@ private slots:
     bool on_request_quit();
 public slots:
     void open_wallet();
+    QString transfer(const QString& json_transfer_object);
+    void message_box(const QString& msg);
 
 private:
     void closeEvent(QCloseEvent *event);

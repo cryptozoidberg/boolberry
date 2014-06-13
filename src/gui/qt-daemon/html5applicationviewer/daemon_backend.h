@@ -46,12 +46,13 @@ public:
   bool stop();
   bool send_stop_signal();
   bool open_wallet(const std::string& path, const std::string& password);
+  bool transfer(const view::transfer_params& tp, currency::transaction& res_tx);
 private:
   void main_worker(const po::variables_map& vm);
   bool update_state_info();
   bool update_wallets();
   void loop();
-  bool load_wallet_info();
+  bool update_wallet_info();
 
   //----- tools::i_wallet2_callback ------
   virtual void on_new_block(uint64_t height, const currency::block& block);

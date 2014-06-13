@@ -204,7 +204,19 @@ void daemon_backend::main_worker(const po::variables_map& vm)
 
   //go to monitoring view loop
   loop();
+
   dsi.daemon_network_state = 3;
+
+  CRITICAL_REGION_BEGIN(m_wallet_lock);
+  if(m_wallet.get_wallet_path().size())
+  {
+    LOG_PRINT_L0("Storing wallet data...");
+    dsi.text_state = "Storing wallet data...";
+    m_pview->update_daemon_status(dsi);
+    m_wallet.store();
+  }
+  CRITICAL_REGION_END();
+
   LOG_PRINT_L0("Stopping core p2p server...");
   dsi.text_state = "Stopping p2p network server";
   m_pview->update_daemon_status(dsi);
@@ -297,9 +309,11 @@ bool daemon_backend::update_wallets()
       view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
       wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
       m_pview->update_wallet_status(wsi);
-      m_wallet.refresh();
+      m_wallet.refresh();      
+      m_last_wallet_synch_height = m_ccore.get_current_blockchain_height();
       wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
       m_pview->update_wallet_status(wsi);
+      update_wallet_info();
     }
   }
   return true;
@@ -329,32 +343,84 @@ bool daemon_backend::open_wallet(const std::string& path, const std::string& pas
   }
 
   m_wallet.init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
-  load_wallet_info();
+  update_wallet_info();
   m_last_wallet_synch_height = 0;
   m_pview->show_wallet();
   return true;
 }
 
-bool daemon_backend::load_wallet_info()
+bool daemon_backend::transfer(const view::transfer_params& tp, currency::transaction& res_tx)
+{
+  std::vector<currency::tx_destination_entry> dsts;
+  if(!tp.destinations.size())
+  {
+    m_pview->show_msg_box("Internal error: empty destinations");
+    return false;
+  }
+
+  for(auto& d: tp.destinations)
+  {
+    dsts.push_back(currency::tx_destination_entry());
+    if(!get_account_address_from_str(dsts.back().addr, d.address))
+    {
+      m_pview->show_msg_box("Failed to send transaction: wrong address");
+      return false;
+    }
+    if(!currency::parse_amount(dsts.back().amount, d.amount))
+    {
+      m_pview->show_msg_box("Failed to send transaction: wrong amount");
+      return false;
+    }
+  }
+  //payment_id
+  std::vector<uint8_t> extra;
+  if(tp.payment_id.size())
+  {
+
+    crypto::hash payment_id;
+    if(!currency::parse_payment_id_from_hex_str(tp.payment_id, payment_id))
+    {
+      m_pview->show_msg_box("Failed to send transaction: wrong payment_id");
+      return false;
+    }
+    if(!currency::set_payment_id_to_tx_extra(extra, payment_id))
+    {
+      m_pview->show_msg_box("Failed to send transaction: internal error, failed to set payment id");
+      return false;
+    }
+  }
+
+  try
+  {
+    m_wallet.transfer(dsts, tp.mixin_count, 0, DEFAULT_FEE, extra, res_tx);
+    update_wallet_info();
+  }
+  catch (const std::exception& e)
+  {
+    LOG_ERROR("Transfer error: " << e.what());
+    m_pview->show_msg_box(std::string("Failed to send transaction: ") + e.what());
+    return false;
+  }
+  catch (...)
+  {
+    LOG_ERROR("Transfer error: unknown error");
+    m_pview->show_msg_box("Failed to send transaction: unknown error");
+    return false;
+  }
+
+  return true;
+}
+
+bool daemon_backend::update_wallet_info()
 {
   CRITICAL_REGION_LOCAL(m_wallet_lock);
 
-  tools::wallet2::transfer_container transfers;
-  m_wallet.get_transfers(transfers);
+
   view::wallet_info wi = AUTO_VAL_INIT(wi);
   wi.address = m_wallet.get_account().get_public_address_str();
   wi.tracking_hey = string_tools::pod_to_hex(m_wallet.get_account().get_keys().m_view_secret_key);
-  wi.balance = m_wallet.balance();
-  wi.unlocked_balance = m_wallet.unlocked_balance();
-  for(auto& tr: transfers)
-  {
-    wi.transfers.push_back(view::wallet_transfer_info());
-    wi.transfers.back().height = tr.m_block_height;
-    wi.transfers.back().tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tr.m_tx));
-    wi.transfers.back().amount = tr.amount();
-    wi.transfers.back().spent = tr.m_spent;
-    wi.transfers.back().is_income = true;
-  }
+  wi.balance = currency::print_money(m_wallet.balance());
+  wi.unlocked_balance = currency::print_money(m_wallet.unlocked_balance());
   m_pview->update_wallet_info(wi);
   return true;
 }
@@ -367,16 +433,28 @@ void daemon_backend::on_money_received(uint64_t height, const currency::transact
 {
   view::transfer_event_info tei = AUTO_VAL_INIT(tei);
   CHECK_AND_ASSERT_MES(out_index < tx.vout.size(), void(), "Wrong out_index: " << out_index << "");
-  tei.ti.amount = tx.vout[out_index].amount;
+  tei.ti.amount = currency::print_money(tx.vout[out_index].amount);
   tei.ti.height = height;
   tei.ti.is_income = true;
   tei.ti.spent = false;
   tei.ti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
-
+  tei.balance = currency::print_money(m_wallet.balance());
+  tei.unlocked_balance = currency::print_money(m_wallet.unlocked_balance());
+  m_pview->money_receive(tei);
 }
+
 void daemon_backend::on_money_spent(uint64_t height, const currency::transaction& in_tx, size_t out_index, const currency::transaction& spend_tx)
 {
-
+  view::transfer_event_info tei = AUTO_VAL_INIT(tei);
+  CHECK_AND_ASSERT_MES(out_index < in_tx.vout.size(), void(), "Wrong out_index: " << out_index << "");
+  tei.ti.amount = currency::print_money(in_tx.vout[out_index].amount);
+  tei.ti.height = height;
+  tei.ti.is_income = false;
+  tei.ti.spent = true;
+  tei.ti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(in_tx));
+  tei.balance = currency::print_money(m_wallet.balance());
+  tei.unlocked_balance = currency::print_money(m_wallet.unlocked_balance());
+  m_pview->money_spent(tei);
 }
 
 
