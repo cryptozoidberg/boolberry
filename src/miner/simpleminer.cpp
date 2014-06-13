@@ -232,7 +232,7 @@ namespace mining
         LOG_PRINT_L0("slow pool response " << (get_job_end_time - get_job_start_time) << " ms");
       }
 
-      uint64_t start_nonce = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
+      uint64_t start_nonce = (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) + 1000000;
       std::list<boost::thread> threads;
       std::atomic<uint32_t> results[128];
       std::atomic<bool> do_reset(false);
