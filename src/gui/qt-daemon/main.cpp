@@ -1,5 +1,5 @@
 #include <QApplication>
-#include "html5applicationviewer.h"
+#include "html5applicationviewer/html5applicationviewer.h"
 #include "qdebug.h"
 #include <thread>
 

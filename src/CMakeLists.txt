@@ -12,6 +12,11 @@ file(GLOB_RECURSE CONN_TOOL connectivity_tool/*)
 file(GLOB_RECURSE WALLET wallet/*)
 file(GLOB_RECURSE MINER miner/*)
 
+if(BUILD_GUI)
+  file(GLOB_RECURSE QTDAEMON gui/qt-daemon/*.cpp gui/qt-daemon/*.h)
+endif()
+
+
 source_group(common FILES ${COMMON})
 source_group(crypto FILES ${CRYPTO})
 source_group(currency_core FILES ${CURRENCY_CORE})
@@ -23,6 +28,10 @@ source_group(simplewallet FILES ${SIMPLEWALLET})
 source_group(simpleminer FILES ${SIMPLEMINER})
 source_group(connectivity-tool FILES ${CONN_TOOL})
 source_group(wallet FILES ${WALLET})
+
+if(BUILD_GUI)
+  source_group(qtdaemon FILES ${QTDAEMON})
+endif()
 
 
 add_library(common ${COMMON})
@@ -54,6 +63,16 @@ target_link_libraries(simpleminer currency_core crypto common ${Boost_LIBRARIES}
 set_property(TARGET common crypto currency_core rpc wallet PROPERTY FOLDER "libs")
 set_property(TARGET daemon simplewallet simpleminer connectivity_tool PROPERTY FOLDER "prog")
 set_property(TARGET daemon PROPERTY OUTPUT_NAME "boolbd")
+
+if(BUILD_GUI)
+  set(CMAKE_AUTOMOC ON)
+  set(CMAKE_INCLUDE_CURRENT_DIR ON)
+  add_executable(qt-boolb WIN32 ${QTDAEMON})	  
+  QT5_USE_MODULES(qt-boolb WebKit WebKitWidgets)
+  target_link_libraries(qt-boolb wallet rpc currency_core crypto common Qt5::Widgets ${Boost_LIBRARIES} )
+  set_property(TARGET qt-boolb PROPERTY FOLDER "prog")
+  set(CMAKE_AUTOMOC OFF)
+endif()
 
 if(APPLE)
   set(SIMPLE_BUNDLE 1)
