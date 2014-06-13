@@ -1370,6 +1370,7 @@ QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
   }
   tr.success = true;
   tr.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(res_tx));
+  tr.tx_blob_size = currency::get_object_blobsize(res_tx);
 
   return epee::serialization::store_t_to_json(tr).c_str();
 }

@@ -50,14 +50,11 @@
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >
         <div id="wallet_left_panel">
             <div class="wallet_left_panel_entry">
-                <span class="balance_text">Balance:</span><br>
+                <span class="balance_text">Balance:</span>
                 <span class="wallet_balance" id="wallet_balance">0.0</span>
-            </div>
-            <div class="wallet_left_panel_entry">
-                <span class="balance_text">Unlocked:</span><br>
+                <span class="balance_text">Unlocked:</span>
                 <span class="wallet_balance" id="wallet_unlocked_balance">0.0</span>
             </div>
-            <br>
             <div id="synchronizing_wallet_block">
                 Synchronizing wallet...
                 <div style="width: 150px; height: 20px;" id="wallet_progressbar"></div>
@@ -65,7 +62,6 @@
             <div id="synchronized_wallet_block" style="display: none">
                 Synchronized
             </div>
-            <br>
             <!-- <div id="close_wallet_button_id" class="common_button">Close wallet</div> -->
         </div>
         <div id="wallet_transfer_panel">
@@ -95,7 +91,7 @@
             </div>
         </div>
         <div id="wallet_recent_transfers_panel">
-            <h2>Recent transfers:</h2>
+            <h3 class="balance_text">Recent transfers:</h3>
             <div id="recent_transfers_container_id"></div>
         </div>
     </div>
@@ -124,7 +120,7 @@ function on_update_daemon_state(info_obj)
         $("#daemon_status_text").addClass("daemon_view_general_status_value_success_text");
         $("#open_wallet_button").button("enable");
         //show OK
-    }else if(info_obj.daemon_network_state == 3)//daemon_network_state_online
+    }else if(info_obj.daemon_network_state == 3)//deinit
     {
         $("#synchronization_progressbar_block").show();
         $("#synchronization_progressbar" ).progressbar({value: false });
@@ -132,6 +128,9 @@ function on_update_daemon_state(info_obj)
 
         $("#daemon_status_text").removeClass("daemon_view_general_status_value_success_text");
         $("#open_wallet_button").button("disable");
+
+        inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
+        disable_tab(document.getElementById('wallet_view_menu'), true);
         //show OK
     }
     else
@@ -184,7 +183,7 @@ function get_transfer_html_entry(tr)
     if(tr.is_income)
         res = "<span style='color: darkgreen'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " received " + tr.amount + "</span><br>";
     else
-        res = "<span style='color: darkmagenta'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " received " + tr.amount + "</span><br>";
+        res = "<span style='color: darkmagenta'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " spent " + tr.amount + "</span><br>";
 
     return res;
 }
@@ -250,6 +249,7 @@ function on_transfer()
         $('#payment_id').val("");
         $('#mixin_count_id').val(0);
 
+        $("#recent_transfers_container_id").prepend("<span style='color: darkblue'> Money successfully sent, transaction " + transfer_res_obj.tx_hash + ", " + transfer_res_obj.tx_blob_size + " bytes</span><br>");
     }
     else
         return;
