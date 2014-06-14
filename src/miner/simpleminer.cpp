@@ -159,6 +159,7 @@ namespace mining
     uint64_t search_start = epee::misc_utils::get_tick_count();
     uint64_t hashes_done = 0;
     uint32_t job_submit_failures = 0;
+    bool re_get_scratchpad = false;
 
     while(true)
     {
@@ -188,12 +189,6 @@ namespace mining
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
-        if(!apply_addendums(resp.addms))
-        {
-          LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
-          get_whole_scratchpad();
-          return true;
-        }
         if(resp.status != CORE_RPC_STATUS_OK || resp.id.empty())
         {
           LOG_PRINT_L0("Failed to login " << m_pool_ip << ":" << m_pool_port << ", disconnect and sleep....");
@@ -201,11 +196,18 @@ namespace mining
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
+
         m_pool_session_id = resp.id;        
-        if(!m_hi.height || !m_scratchpad.size())
+	if (re_get_scratchpad || !m_hi.height || !m_scratchpad.size())
         {
-          if(!get_whole_scratchpad())
-            continue;
+	  if (!get_whole_scratchpad())
+	    continue;
+          re_get_scratchpad = false;
+        }
+        else if(!apply_addendums(resp.addms))
+        {
+          LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
+          get_whole_scratchpad();
         }
 
         if (job_requested && resp.job.blob.empty() && resp.job.difficulty.empty() && resp.job.job_id.empty())
@@ -322,6 +324,15 @@ namespace mining
       m_hashes_done = 0;
 
       (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = start_nonce;
+      if (job_submit_failures == 10)
+      {
+        LOG_PRINT_L0("Too many submission failures.  Something is very wrong.");
+      }
+      if (job_submit_failures > 3)
+      {
+        m_http_client.disconnect();
+	epee::misc_utils::sleep_no_w(1000);
+      }
       if (job_submit_failures > 1)
       {
         m_http_client.disconnect();
