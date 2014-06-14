@@ -330,8 +330,8 @@ namespace mining
       }
       if (job_submit_failures > 3)
       {
-        m_http_client.disconnect();
-	epee::misc_utils::sleep_no_w(1000);
+	re_get_scratchpad = true;
+	/* note fallthrough into next case to also reconnect */
       }
       if (job_submit_failures > 1)
       {
