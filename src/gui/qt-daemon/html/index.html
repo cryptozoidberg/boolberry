@@ -50,6 +50,9 @@
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >
         <div id="wallet_left_panel">
             <div class="wallet_left_panel_entry">
+                <span class="balance_text">Address:</span>
+                <span class="wallet_balance" id="wallet_address"></span><br>
+
                 <span class="balance_text">Balance:</span>
                 <span class="wallet_balance" id="wallet_balance">0.0</span>
                 <span class="balance_text">Unlocked:</span>
@@ -192,6 +195,7 @@ function on_update_wallet_info(wal_status)
 {
     $("#wallet_balance").text(wal_status.balance);
     $("#wallet_unlocked_balance").text(wal_status.unlocked_balance);
+    $("#wallet_address").text(wal_status.address);
 }
 
 function on_money_recieved(tei)
