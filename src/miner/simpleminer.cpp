@@ -52,9 +52,13 @@ int main(int argc, char** argv)
   if (!r)
     return 1;
 
-  mining::simpleminer miner;
-  r = miner.init(vm);
-  r = r && miner.run(); // Never returns...
+  while (1) {
+    mining::simpleminer miner;
+    r = miner.init(vm);
+    r = r && miner.run(); // Returns on too many failures
+    LOG_PRINT_L0("Excessive failures.  Sleeping 10 seconds and restarting...");
+    epee::misc_utils::sleep_no_w(10000);
+  }
 
   return 0;
 }
@@ -327,6 +331,7 @@ namespace mining
       if (job_submit_failures == 10)
       {
         LOG_PRINT_L0("Too many submission failures.  Something is very wrong.");
+        return false;
       }
       if (job_submit_failures > 3)
       {
