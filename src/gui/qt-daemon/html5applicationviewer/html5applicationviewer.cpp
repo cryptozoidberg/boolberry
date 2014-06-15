@@ -1351,6 +1351,10 @@ bool Html5ApplicationViewer::show_wallet()
   m_d->show_wallet();
   return true;
 }
+QString Html5ApplicationViewer::get_version()
+{
+  return PROJECT_VERSION_LONG;
+}
 
 QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
 {

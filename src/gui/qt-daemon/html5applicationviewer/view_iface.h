@@ -74,7 +74,6 @@ public:
     uint64_t inc_connections_count;
     std::string difficulty;
     uint64_t hashrate;
-    std::string version;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(text_state)
@@ -86,7 +85,6 @@ public:
       KV_SERIALIZE(inc_connections_count)
       KV_SERIALIZE(difficulty)
       KV_SERIALIZE(hashrate)
-      KV_SERIALIZE(version)
     END_KV_SERIALIZE_MAP()
   };
 

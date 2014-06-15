@@ -149,14 +149,18 @@ span.daemon_view_general_status_value_success_text
 
 #logo_entry
 {
+    align:
     margin-top: 5px;
     margin-right: 5px;
     float: right;
     display: block;
+    width: 200px;
+    text-align: right;
 }
 
 #version_text
 {
+    /*float: right;*/
     position: absolute;
     font-size: 12px;
     top: 20px;

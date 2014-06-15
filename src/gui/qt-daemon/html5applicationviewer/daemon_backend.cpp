@@ -36,7 +36,6 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
     m_pview = pview_handler;
 
   view::daemon_status_info dsi;// = AUTO_VAL_INIT(dsi);
-  dsi.version = PROJECT_VERSION_BUILD_NO_STR;
   dsi.difficulty = "---";
   dsi.text_state = "Initializing...";
   pview_handler->update_daemon_status(dsi);
@@ -156,7 +155,6 @@ void daemon_backend::main_worker(const po::variables_map& vm)
 {
   view::daemon_status_info dsi;// = AUTO_VAL_INIT(dsi);
   dsi.difficulty = "---";
-  dsi.version = PROJECT_VERSION_BUILD_NO_STR;
   m_pview->update_daemon_status(dsi);
 
   //initialize objects
@@ -274,7 +272,6 @@ bool daemon_backend::update_state_info()
 {
   view::daemon_status_info dsi;// = AUTO_VAL_INIT(dsi);
   dsi.difficulty = "---";
-  dsi.version = PROJECT_VERSION_BUILD_NO_STR;
   currency::COMMAND_RPC_GET_INFO::response inf = AUTO_VAL_INIT(inf);
   if(!m_rpc_proxy.get_info(inf))
   {

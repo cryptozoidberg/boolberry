@@ -20,11 +20,11 @@
     <div id="main_menu_bar" class="inline_menu_bar">
         <div id="daemon_state_view_menu" class="inline_menu_bar_item"  view_name="daemon_state_view">Connectivity</div>
         <div id="wallet_view_menu"  class="inline_menu_bar_item" view_name="wallet_view">Wallet</div>
-        <div id="logo_entry">
-            <img src="files/logo2.svg" height="25px" alt="" style="display: block" />
-            <span id="version_text">unkonwn build</span>
+        <!--<div id="logo_entry">
+            <img src="files/logo2.svg" height="25px" alt="" style="display: block;" />
+            <span id="version_text">unkonwn buildunkonwn </span>
 
-        </div>
+        </div>-->
     </div>
 
     <div id="daemon_state_view" class="view_hidden menu_view_inner_area" >
@@ -173,7 +173,6 @@ function on_update_daemon_state(info_obj)
     $("#daemon_height_text").text(info_obj.height.toString());
     $("#difficulty_text").text(info_obj.difficulty);
     $("#hashrate_text").text(info_obj.hashrate.toString());
-    $("#version_text").text(info_obj.version);
 }
 
 
@@ -328,7 +327,7 @@ $(function()
 
     // put it here to disable wallet tab only in qt-mode
     disable_tab(document.getElementById('wallet_view_menu'), true);
-
+    $("#version_text").text(Qt_parent.get_version());
 });
 
 </script>
