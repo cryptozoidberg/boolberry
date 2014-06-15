@@ -7,6 +7,7 @@ body {
     font: 16px/1.5em; /* "Helvetica Neue", Helvetica, sans-serif*/
     margin: 0em 0 0em 0;
     height:100%;
+    -webkit-font-smoothing: antialiased;
 }
 
 #container{
@@ -33,27 +34,36 @@ h2 {
     text-rendering: optimizeLegibility;
 }
 
-.column {
-    margin: auto;
-    padding-right: 240px;
-    position: relative;
-}
 
+.top_menu_bar
+{
+    background: rgb(25, 26, 51);
+}
 
 .inline_menu_bar
 {
-    border-bottom: 1px solid #ebebeb;
-    height: 45px;
+    /*height: 45px;*/
     line-height: 36px;
     padding: 0;
     position: relative;
-    display: block;
+    display: inline-block;
+    background: rgb(25, 26, 51);
+    vertical-align: top;
+    margin-top: 20px;
+    margin-left: 20px;
 }
+.menu_bar_logo, .menu_bar_tabs
+{
+    display: inline-block;
+}
+
+
 .inline_menu_bar_item
 {
-    color: #777;
+    color: #ffffff;
     font-size: 20px;
     font-family: arial,sans-serif;
+    font-weight: bold;
     display: inline-block;
     margin: 0 8px;
     padding: 0 8px;
@@ -62,7 +72,7 @@ h2 {
 
 .inline_menu_bar_item:hover
 {
-    color: #000;
+    color: rgb(0, 152, 218);
 }
 
 .inline_menu_bar_selected_item
@@ -70,7 +80,7 @@ h2 {
     border-bottom: 3px solid #dd4b39;
     color: #dd4b39;
     font-weight: bold;
-    height: 41px;
+    /*height: 41px;*/
     margin: 2px 8px 0;
     padding: 0 8px;
 }
@@ -226,7 +236,7 @@ span.daemon_view_general_status_value_success_text
     width: 570px;
     font-size: 10px;
 }
-#transfer_button_id,#close_wallet_button_id
+#transfer_button_id,#close_wallet_button_id,#payment_id,#mixin_count_id
 {
     font-size: 12px;
     margin-left: 2px;
