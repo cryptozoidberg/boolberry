@@ -18,7 +18,8 @@ daemon_backend::daemon_backend():m_pview(&m_view_stub),
                                  m_last_wallet_synch_height(0)
 
 {
-  m_wallet.callback(this);
+  m_wallet.reset(new tools::wallet2());
+  m_wallet->callback(this);
 }
 
 const command_line::arg_descriptor<bool> arg_alloc_win_console   = {"alloc-win-clonsole", "Allocates debug console with GUI", false};
@@ -35,6 +36,7 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
     m_pview = pview_handler;
 
   view::daemon_status_info dsi;// = AUTO_VAL_INIT(dsi);
+  dsi.version = PROJECT_VERSION_BUILD_NO_STR;
   dsi.difficulty = "---";
   dsi.text_state = "Initializing...";
   pview_handler->update_daemon_status(dsi);
@@ -154,6 +156,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
 {
   view::daemon_status_info dsi;// = AUTO_VAL_INIT(dsi);
   dsi.difficulty = "---";
+  dsi.version = PROJECT_VERSION_BUILD_NO_STR;
   m_pview->update_daemon_status(dsi);
 
   //initialize objects
@@ -208,12 +211,12 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   dsi.daemon_network_state = 3;
 
   CRITICAL_REGION_BEGIN(m_wallet_lock);
-  if(m_wallet.get_wallet_path().size())
+  if(m_wallet->get_wallet_path().size())
   {
     LOG_PRINT_L0("Storing wallet data...");
     dsi.text_state = "Storing wallet data...";
     m_pview->update_daemon_status(dsi);
-    m_wallet.store();
+    m_wallet->store();
   }
   CRITICAL_REGION_END();
 
@@ -271,6 +274,7 @@ bool daemon_backend::update_state_info()
 {
   view::daemon_status_info dsi;// = AUTO_VAL_INIT(dsi);
   dsi.difficulty = "---";
+  dsi.version = PROJECT_VERSION_BUILD_NO_STR;
   currency::COMMAND_RPC_GET_INFO::response inf = AUTO_VAL_INIT(inf);
   if(!m_rpc_proxy.get_info(inf))
   {
@@ -302,14 +306,14 @@ bool daemon_backend::update_state_info()
 bool daemon_backend::update_wallets()
 {
   CRITICAL_REGION_LOCAL(m_wallet_lock);
-  if(m_wallet.get_wallet_path().size())
+  if(m_wallet->get_wallet_path().size())
   {//wallet is opened
     if(m_last_daemon_height != m_last_wallet_synch_height)
     {
       view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
       wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
       m_pview->update_wallet_status(wsi);
-      m_wallet.refresh();      
+      m_wallet->refresh();      
       m_last_wallet_synch_height = m_ccore.get_current_blockchain_height();
       wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
       m_pview->update_wallet_status(wsi);
@@ -334,20 +338,55 @@ bool daemon_backend::open_wallet(const std::string& path, const std::string& pas
   CRITICAL_REGION_LOCAL(m_wallet_lock);
   try
   {
-    m_wallet.load(path, password);
+    if (m_wallet->get_wallet_path().size())
+    {
+      m_wallet->store();
+      m_wallet.reset(new tools::wallet2());
+    }
+    
+    m_wallet->load(path, password);
   }
   catch (const std::exception& e)
   {
-    m_pview->show_msg_box(std::string("Failed to load waller: ") + e.what());
+    m_pview->show_msg_box(std::string("Failed to load wallet: ") + e.what());
     return false;
   }
 
-  m_wallet.init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
+  m_wallet->init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
   update_wallet_info();
   m_last_wallet_synch_height = 0;
   m_pview->show_wallet();
   return true;
 }
+
+
+bool daemon_backend::generate_wallet(const std::string& path, const std::string& password)
+{
+  CRITICAL_REGION_LOCAL(m_wallet_lock);
+  try
+  {
+    if (m_wallet->get_wallet_path().size())
+    {
+      m_wallet->store();
+      m_wallet.reset(new tools::wallet2());
+    }
+
+    m_wallet->generate(path, password);
+  }
+  catch (const std::exception& e)
+  {
+    m_pview->show_msg_box(std::string("Failed to generate wallet: ") + e.what());
+    return false;
+  }
+
+  m_wallet->init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
+  update_wallet_info();
+  m_last_wallet_synch_height = 0;
+  m_pview->show_wallet();
+  return true;
+
+}
+
 
 bool daemon_backend::transfer(const view::transfer_params& tp, currency::transaction& res_tx)
 {
@@ -392,7 +431,7 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
 
   try
   {
-    m_wallet.transfer(dsts, tp.mixin_count, 0, DEFAULT_FEE, extra, res_tx);
+    m_wallet->transfer(dsts, tp.mixin_count, 0, DEFAULT_FEE, extra, res_tx);
     update_wallet_info();
   }
   catch (const std::exception& e)
@@ -417,10 +456,11 @@ bool daemon_backend::update_wallet_info()
 
 
   view::wallet_info wi = AUTO_VAL_INIT(wi);
-  wi.address = m_wallet.get_account().get_public_address_str();
-  wi.tracking_hey = string_tools::pod_to_hex(m_wallet.get_account().get_keys().m_view_secret_key);
-  wi.balance = currency::print_money(m_wallet.balance());
-  wi.unlocked_balance = currency::print_money(m_wallet.unlocked_balance());
+  wi.address = m_wallet->get_account().get_public_address_str();
+  wi.tracking_hey = string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
+  wi.balance = currency::print_money(m_wallet->balance());
+  wi.unlocked_balance = currency::print_money(m_wallet->unlocked_balance());
+  wi.path = m_wallet->get_wallet_path();
   m_pview->update_wallet_info(wi);
   return true;
 }
@@ -438,8 +478,8 @@ void daemon_backend::on_money_received(uint64_t height, const currency::transact
   tei.ti.is_income = true;
   tei.ti.spent = false;
   tei.ti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
-  tei.balance = currency::print_money(m_wallet.balance());
-  tei.unlocked_balance = currency::print_money(m_wallet.unlocked_balance());
+  tei.balance = currency::print_money(m_wallet->balance());
+  tei.unlocked_balance = currency::print_money(m_wallet->unlocked_balance());
   m_pview->money_receive(tei);
 }
 
@@ -452,8 +492,8 @@ void daemon_backend::on_money_spent(uint64_t height, const currency::transaction
   tei.ti.is_income = false;
   tei.ti.spent = true;
   tei.ti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(in_tx));
-  tei.balance = currency::print_money(m_wallet.balance());
-  tei.unlocked_balance = currency::print_money(m_wallet.unlocked_balance());
+  tei.balance = currency::print_money(m_wallet->balance());
+  tei.unlocked_balance = currency::print_money(m_wallet->unlocked_balance());
   m_pview->money_spent(tei);
 }
 

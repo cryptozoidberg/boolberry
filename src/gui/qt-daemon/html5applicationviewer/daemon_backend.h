@@ -46,6 +46,7 @@ public:
   bool stop();
   bool send_stop_signal();
   bool open_wallet(const std::string& path, const std::string& password);
+  bool generate_wallet(const std::string& path, const std::string& password);
   bool transfer(const view::transfer_params& tp, currency::transaction& res_tx);
 private:
   void main_worker(const po::variables_map& vm);
@@ -65,7 +66,7 @@ private:
   view::i_view* m_pview;
   tools::daemon_rpc_proxy_fast m_rpc_proxy;
   critical_section m_wallet_lock;
-  tools::wallet2 m_wallet;
+  std::unique_ptr<tools::wallet2> m_wallet;
   std::atomic<uint64_t> m_last_daemon_height;
   std::atomic<uint64_t> m_last_wallet_synch_height;
 

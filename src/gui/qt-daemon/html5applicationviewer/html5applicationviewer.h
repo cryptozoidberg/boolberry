@@ -50,6 +50,7 @@ private slots:
     bool on_request_quit();
 public slots:
     void open_wallet();
+    void generate_wallet();
     QString transfer(const QString& json_transfer_object);
     void message_box(const QString& msg);
 
@@ -66,6 +67,7 @@ private:
     virtual bool money_receive(const view::transfer_event_info& tei);
     virtual bool money_spent(const view::transfer_event_info& tei);
     virtual bool show_wallet();
+    virtual bool hide_wallet();
 
     class Html5ApplicationViewerPrivate *m_d;
     daemon_backend m_backend;

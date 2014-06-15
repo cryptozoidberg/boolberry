@@ -43,7 +43,7 @@ h2 {
 .inline_menu_bar
 {
     border-bottom: 1px solid #ebebeb;
-    height: 40px;
+    height: 45px;
     line-height: 36px;
     padding: 0;
     position: relative;
@@ -70,7 +70,7 @@ h2 {
     border-bottom: 3px solid #dd4b39;
     color: #dd4b39;
     font-weight: bold;
-    height: 36px;
+    height: 41px;
     margin: 2px 8px 0;
     padding: 0 8px;
 }
@@ -141,11 +141,25 @@ span.daemon_view_general_status_value_success_text
     font-size: 17px;
 }
 
-#open_wallet_button
+.buttons_group
 {
     margin-top: 25px;
-    margin-left: 120px;
-    width: 200px;
+    margin-left: 30px;
+}
+
+#logo_entry
+{
+    margin-top: 5px;
+    margin-right: 5px;
+    float: right;
+    display: block;
+}
+
+#version_text
+{
+    position: absolute;
+    font-size: 12px;
+    top: 20px;
 }
 
 #synchronization_progressbar_block

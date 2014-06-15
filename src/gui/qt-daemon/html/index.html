@@ -20,6 +20,11 @@
     <div id="main_menu_bar" class="inline_menu_bar">
         <div id="daemon_state_view_menu" class="inline_menu_bar_item"  view_name="daemon_state_view">Connectivity</div>
         <div id="wallet_view_menu"  class="inline_menu_bar_item" view_name="wallet_view">Wallet</div>
+        <div id="logo_entry">
+            <img src="files/logo2.svg" height="25px" alt="" style="display: block" />
+            <span id="version_text">unkonwn build</span>
+
+        </div>
     </div>
 
     <div id="daemon_state_view" class="view_hidden menu_view_inner_area" >
@@ -45,11 +50,17 @@
                 <span class="daemon_view_param_value" id="hashrate_text">---</span>
             </div>
         </div>
-        <div id="open_wallet_button" class="common_button">Open wallet</div>
+        <div class="buttons_group">
+            <div id="open_wallet_button" class="common_button">Open wallet</div>
+            <div id="generate_wallet_button" class="common_button">Generate new wallet</div>
+            <div id="domining_button" class="common_button">Generate coins</div>
+        </div>
     </div>
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >
         <div id="wallet_left_panel">
             <div class="wallet_left_panel_entry">
+                <span class="balance_text">Path:</span>
+                <span class="wallet_balance" id="wallet_path"></span><br>
                 <span class="balance_text">Address:</span>
                 <span class="wallet_balance" id="wallet_address"></span><br>
 
@@ -116,12 +127,17 @@ function on_update_daemon_state(info_obj)
          percents = ((info_obj.height - info_obj.synchronization_start_height)*100)/(info_obj.max_net_seen_height - info_obj.synchronization_start_height);
         $("#synchronization_progressbar").progressbar( "option", "value", percents );
         $("#daemon_synchronization_text").text((info_obj.max_net_seen_height - info_obj.height).toString() + " blocks behind");
+        $("#open_wallet_button").button("disable");
+        $("#generate_wallet_button").button("disable");
+        $("#domining_button").button("disable");
         //show progress
     }else if(info_obj.daemon_network_state == 2)//daemon_network_state_online
     {
         $("#synchronization_progressbar_block").hide();
         $("#daemon_status_text").addClass("daemon_view_general_status_value_success_text");
         $("#open_wallet_button").button("enable");
+        $("#generate_wallet_button").button("enable");
+        //$("#domining_button").button("enable");
         //show OK
     }else if(info_obj.daemon_network_state == 3)//deinit
     {
@@ -131,6 +147,8 @@ function on_update_daemon_state(info_obj)
 
         $("#daemon_status_text").removeClass("daemon_view_general_status_value_success_text");
         $("#open_wallet_button").button("disable");
+        $("#generate_wallet_button").button("disable");
+        //$("#domining_button").button("disable");
 
         inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
         disable_tab(document.getElementById('wallet_view_menu'), true);
@@ -155,6 +173,7 @@ function on_update_daemon_state(info_obj)
     $("#daemon_height_text").text(info_obj.height.toString());
     $("#difficulty_text").text(info_obj.difficulty);
     $("#hashrate_text").text(info_obj.hashrate.toString());
+    $("#version_text").text(info_obj.version);
 }
 
 
@@ -196,6 +215,7 @@ function on_update_wallet_info(wal_status)
     $("#wallet_balance").text(wal_status.balance);
     $("#wallet_unlocked_balance").text(wal_status.unlocked_balance);
     $("#wallet_address").text(wal_status.address);
+    $("#wallet_path").text(wal_status.path);
 }
 
 function on_money_recieved(tei)
@@ -221,6 +241,14 @@ function on_show_wallet()
 {
     disable_tab(document.getElementById('wallet_view_menu'), false);
     inline_menu_item_select(document.getElementById('wallet_view_menu'));
+    $("#recent_transfers_container_id").html("");
+}
+
+function on_hide_wallet()
+{
+    disable_tab(document.getElementById('wallet_view_menu'), true);
+    inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
+    $("#recent_transfers_container_id").html("");
 }
 
 function on_transfer()
@@ -270,7 +298,12 @@ $(function()
     $( "#synchronization_progressbar" ).progressbar({value: false });
     $( "#wallet_progressbar" ).progressbar({value: false });
     $(".common_button").button();
+
     $("#open_wallet_button").button("disable");
+    $("#generate_wallet_button").button("disable");
+    $("#domining_button").button("disable");
+
+
     //$("#transfer_button_id").button("disable");
     $('#open_wallet_button').on('click',  on_open_wallet);
     $('#transfer_button_id').on('click',  on_transfer);
@@ -291,6 +324,7 @@ $(function()
     Qt.money_receive.connect(str_to_obj.bind({cb: on_money_recieved}));
     Qt.money_spent.connect(str_to_obj.bind({cb: on_money_spent}));
     Qt.show_wallet.connect(on_show_wallet);
+    Qt.hide_wallet.connect(on_hide_wallet);
 
     // put it here to disable wallet tab only in qt-mode
     disable_tab(document.getElementById('wallet_view_menu'), true);

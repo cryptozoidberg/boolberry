@@ -74,6 +74,7 @@ public:
     uint64_t inc_connections_count;
     std::string difficulty;
     uint64_t hashrate;
+    std::string version;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(text_state)
@@ -85,6 +86,7 @@ public:
       KV_SERIALIZE(inc_connections_count)
       KV_SERIALIZE(difficulty)
       KV_SERIALIZE(hashrate)
+      KV_SERIALIZE(version)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -130,12 +132,14 @@ public:
     std::string balance;
     std::string address;
     std::string tracking_hey;
+    std::string path;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(unlocked_balance)
       KV_SERIALIZE(balance)
       KV_SERIALIZE(address)
       KV_SERIALIZE(tracking_hey)
+      KV_SERIALIZE(path)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -162,6 +166,7 @@ public:
     virtual bool money_receive(const transfer_event_info& wsi)=0;
     virtual bool money_spent(const transfer_event_info& wsi)=0;
     virtual bool show_wallet()=0;
+    virtual bool hide_wallet() = 0;
   };
 
   struct view_stub: public i_view
@@ -174,5 +179,6 @@ public:
     virtual bool money_receive(const transfer_event_info& /*wsi*/){return true;}
     virtual bool money_spent(const transfer_event_info& /*wsi*/){return true;}
     virtual bool show_wallet(){return true;}
+    virtual bool hide_wallet(){ return true; }
   };
 }

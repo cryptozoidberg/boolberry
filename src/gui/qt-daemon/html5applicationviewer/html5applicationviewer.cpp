@@ -1088,6 +1088,7 @@ signals:
     void money_receive(const QString str);
     void money_spent(const QString str);
     void show_wallet();
+    void hide_wallet();
 
 
 
@@ -1339,6 +1340,12 @@ bool Html5ApplicationViewer::money_spent(const view::transfer_event_info& tei)
   m_d->money_spent(json_str.c_str());
   return true;
 }
+
+bool Html5ApplicationViewer::hide_wallet()
+{
+  m_d->hide_wallet();
+  return true;
+}
 bool Html5ApplicationViewer::show_wallet()
 {
   m_d->show_wallet();
@@ -1380,9 +1387,30 @@ void Html5ApplicationViewer::message_box(const QString& msg)
   show_msg_box(msg.toStdString());
 }
 
+void Html5ApplicationViewer::generate_wallet()
+{
+  QString path = QFileDialog::getSaveFileName(this, tr("Wallet file to store"),
+    "",
+    tr("Files (*.*)"));
+  
+  if (!path.length())
+    return;
+
+  //read password
+  bool ok;
+  QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
+    tr("Password:"), QLineEdit::Password,
+    QString(), &ok);
+  
+  if (!ok)
+    return;
+
+  m_backend.generate_wallet(path.toStdString(), pass.toStdString());
+}
+
 void Html5ApplicationViewer::open_wallet()
 {
-  QString path = QFileDialog::getOpenFileName(this, tr("Open File"),
+  QString path = QFileDialog::getOpenFileName(this, tr("Open wallet File"),
                                                    "",
                                                    tr("Files (*.*)"));
   if(!path.length())
