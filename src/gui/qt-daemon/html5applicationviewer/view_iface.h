@@ -183,6 +183,7 @@ public:
     virtual bool money_spent(const transfer_event_info& wsi)=0;
     virtual bool show_wallet()=0;
     virtual bool hide_wallet() = 0;
+    virtual bool switch_view(int view_no)=0;
   };
 
   struct view_stub: public i_view
@@ -196,5 +197,6 @@ public:
     virtual bool money_spent(const transfer_event_info& /*wsi*/){return true;}
     virtual bool show_wallet(){return true;}
     virtual bool hide_wallet(){ return true; }
+    virtual bool switch_view(int /*view_no*/){ return true; }
   };
 }

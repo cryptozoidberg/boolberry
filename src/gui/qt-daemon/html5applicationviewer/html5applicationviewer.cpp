@@ -1084,6 +1084,8 @@ signals:
     void money_spent(const QString str);
     void show_wallet();
     void hide_wallet();
+    void switch_view(const QString str);
+
 
 
 
@@ -1345,6 +1347,21 @@ bool Html5ApplicationViewer::show_wallet()
   m_d->show_wallet();
   return true;
 }
+
+bool Html5ApplicationViewer::switch_view(int view_no)
+{
+  struct t_local
+  {
+    int view;
+  };
+  t_local t;
+  t.view = view_no;
+  std::string json_str;
+  epee::serialization::store_t_to_json(t, json_str);
+  m_d->money_spent(json_str.c_str());
+  return true;
+}
+
 QString Html5ApplicationViewer::get_version()
 {
   return PROJECT_VERSION_LONG;

@@ -64,6 +64,7 @@ private:
     virtual bool money_spent(const view::transfer_event_info& tei);
     virtual bool show_wallet();
     virtual bool hide_wallet();
+    virtual bool switch_view(int view_no);
 
     class Html5ApplicationViewerPrivate *m_d;
     daemon_backend m_backend;

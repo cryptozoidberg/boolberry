@@ -51,75 +51,79 @@
             </div>
         </div>
         <div class="buttons_group">
-            <div id="open_wallet_button" class="common_button">Open wallet</div>
-            <div id="generate_wallet_button" class="common_button">Generate new wallet</div>
             <div id="domining_button" class="common_button">Generate coins</div>
         </div>
     </div>
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >
-        <div class="wallet_panel">
-            <div class="wallet_left_panel_entry">
-                <span class="balance_text">Path:</span>
-                <span class="my_addres_text" id="wallet_path">C:\home\projects\boolberry\build\src\Release\wallet.bin</span><br>
-                <span class="balance_text">Address:</span>
-                <span class="my_addres_text" id="wallet_address">1HNJjUsofq5LYLoXem119dd491yFAb5g4bCHkecV4sPqigmuxw57Ci9am71fEN4CRmA9jgnvo5PDNfaq8QnprWmS5uLqnbq</span><br>
-
-                <span class="balance_text">Balance:</span>
-                <span class="wallet_balance" id="wallet_balance">0.0</span>
-                <span class="balance_text">Unlocked:</span>
-                <span class="wallet_balance" id="wallet_unlocked_balance">0.0</span>
-            </div>
-            <div id="synchronizing_wallet_block">
-                Synchronizing wallet...
-                <div style="width: 150px; height: 20px;" id="wallet_progressbar"></div>
-            </div>
-            <div id="synchronized_wallet_block" style="display: none">
-                Synchronized
-            </div>
-            <!-- <div id="close_wallet_button_id" class="common_button">Close wallet</div> -->
+        <div id="wallet_welcome_screen_area">
+            <div id="open_wallet_button" class="common_button">Open wallet</div><br><br><span id="id_wallet_or_text">or</span> <br><br>
+            <div id="generate_wallet_button" class="common_button">Generate new wallet</div>
         </div>
-        <div class="wallet_separator">Send payment</div>
-        <div class="wallet_panel">
-            <div>
-                <table cellspacing="3px">
-                    <tr>
-                        <td width="90px">Address:</td>
-                        <td><input id="transfer_address_id"><br></td>
-                    </tr>
-                    <tr>
-                        <td>Amount:</td>
-                        <td><input pattern="[0-9]+(\.[0-9]{1,12})?" id="transfer_amount_id" value="0.0">  <a href="javascript:;" onclick="jQuery('.transfer_extra_options').toggle('fast');" class="options_link_text">More options...</a> </td>
-                    </tr>
-                    <tr>
-                        <td > <span class="transfer_extra_options">Payment id: </span> </td>
-                        <td > <span class="transfer_extra_options"><input style="width: 400px" id="payment_id"></span></td>
-                    </tr>
-                    <tr>
-                        <td > <span class="transfer_extra_options">Mixin: </span> </td>
-                        <td > <span class="transfer_extra_options"><input type="number" style="width: 40px" id="mixin_count_id" value="0"></span></td>
-                    </tr>
-                    <tr>
-                        <td > <span class="transfer_extra_options">Fee: </span> </td>
-                        <td > <span class="transfer_extra_options"><input style="width: 130px" id="tx_fee" value="0.000000001000"></span></td>
-                    </tr>
+        <div id="wallet_workspace_area">
+            <div class="wallet_panel">
+                <div class="wallet_left_panel_entry">
+                    <span class="balance_text">Path:</span>
+                    <span class="my_addres_text" id="wallet_path">C:\home\projects\boolberry\build\src\Release\wallet.bin</span><br>
+                    <span class="balance_text">Address:</span>
+                    <span class="my_addres_text" id="wallet_address">1HNJjUsofq5LYLoXem119dd491yFAb5g4bCHkecV4sPqigmuxw57Ci9am71fEN4CRmA9jgnvo5PDNfaq8QnprWmS5uLqnbq</span><br>
 
-                    <tr>
-                        <td></td>
-                        <td align="right"><div id="transfer_button_id" class="common_button">Send</div></td>
-                    </tr>
-                </table>
-                <div id="transfer_result_zone" style="display: none">
+                    <span class="balance_text">Balance:</span>
+                    <span class="wallet_balance" id="wallet_balance">0.0</span>
+                    <span class="balance_text">Unlocked:</span>
+                    <span class="wallet_balance" id="wallet_unlocked_balance">0.0</span>
+                </div>
+                <div id="synchronizing_wallet_block">
+                    Synchronizing wallet...
+                    <div style="width: 150px; height: 20px;" id="wallet_progressbar"></div>
+                </div>
+                <div id="synchronized_wallet_block" style="display: none">
+                    Synchronized
+                </div>
+                <!-- <div id="close_wallet_button_id" class="common_button">Close wallet</div> -->
+            </div>
+            <div class="wallet_separator">Send payment</div>
+            <div class="wallet_panel">
+                <div>
+                    <table cellspacing="3px">
+                        <tr>
+                            <td width="90px">Address:</td>
+                            <td><input id="transfer_address_id"><br></td>
+                        </tr>
+                        <tr>
+                            <td>Amount:</td>
+                            <td><input pattern="[0-9]+(\.[0-9]{1,12})?" id="transfer_amount_id" value="0.0">  <a href="javascript:;" onclick="jQuery('.transfer_extra_options').toggle('fast');" class="options_link_text">More options...</a> </td>
+                        </tr>
+                        <tr>
+                            <td > <span class="transfer_extra_options">Payment id: </span> </td>
+                            <td > <span class="transfer_extra_options"><input style="width: 400px" id="payment_id"></span></td>
+                        </tr>
+                        <tr>
+                            <td > <span class="transfer_extra_options">Mixin: </span> </td>
+                            <td > <span class="transfer_extra_options"><input type="number" style="width: 40px" id="mixin_count_id" value="0"></span></td>
+                        </tr>
+                        <tr>
+                            <td > <span class="transfer_extra_options">Fee: </span> </td>
+                            <td > <span class="transfer_extra_options"><input style="width: 130px" id="tx_fee" value="0.000000001000"></span></td>
+                        </tr>
+
+                        <tr>
+                            <td></td>
+                            <td align="right"><div id="transfer_button_id" class="common_button">Send</div></td>
+                        </tr>
+                    </table>
+                    <div id="transfer_result_zone" style="display: none">
                     <span id="transfer_result_span">
 
                     </span>
-                    <a href="javascript:;" onclick="jQuery('#transfer_result_zone').toggle('fast');" class="options_link_text">Hide</a>
-                </div>
+                        <a href="javascript:;" onclick="jQuery('#transfer_result_zone').toggle('fast');" class="options_link_text">Hide</a>
+                    </div>
 
+                </div>
             </div>
-        </div>
-        <div class="wallet_separator">Recent transfers</div>
-        <div class="wallet_panet_transparent">
-            <div id="recent_transfers_container_id"></div>
+            <div class="wallet_separator">Recent transfers</div>
+            <div class="wallet_panet_transparent">
+                <div id="recent_transfers_container_id"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -150,6 +154,7 @@ function on_update_daemon_state(info_obj)
         $("#daemon_status_text").addClass("daemon_view_general_status_value_success_text");
         $("#open_wallet_button").button("enable");
         $("#generate_wallet_button").button("enable");
+        disable_tab(document.getElementById('wallet_view_menu'), false);
         //$("#domining_button").button("enable");
         //show OK
     }else if(info_obj.daemon_network_state == 3)//deinit
@@ -163,6 +168,7 @@ function on_update_daemon_state(info_obj)
         $("#generate_wallet_button").button("disable");
         //$("#domining_button").button("disable");
 
+        hide_wallet();
         inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
         disable_tab(document.getElementById('wallet_view_menu'), true);
         //show OK
@@ -302,17 +308,36 @@ function on_generate_new_wallet()
 
 function on_show_wallet()
 {
-    disable_tab(document.getElementById('wallet_view_menu'), false);
-    inline_menu_item_select(document.getElementById('wallet_view_menu'));
+    //disable_tab(document.getElementById('wallet_view_menu'), false);
+    //inline_menu_item_select(document.getElementById('wallet_view_menu'));
+    $("#wallet_workspace_area").show();
+    $("#wallet_welcome_screen_area").hide();
     $("#recent_transfers_container_id").html("");
 }
 
-function on_hide_wallet()
+function hide_wallet()
 {
-    disable_tab(document.getElementById('wallet_view_menu'), true);
-    inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
-    $("#recent_transfers_container_id").html("");
+    $("#wallet_workspace_area").hide();
+    $("#wallet_welcome_screen_area").show();
 }
+
+function on_switch_view(swi)
+{
+    if(swi.view === 1)
+    {
+        //switch to dashboard view
+        inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
+    }else if(swi.view === 2)
+    {
+        //switch to wallet view
+        inline_menu_item_select(document.getElementById('wallet_view_menu'));
+    }else
+    {
+        Qt_parent.message_box("Wrong view at on_switch_view");
+    }
+}
+
+
 var last_timerId;
 function on_transfer()
 {
@@ -426,6 +451,8 @@ $(function()
     Qt.money_spent.connect(str_to_obj.bind({cb: on_money_spent}));
     Qt.show_wallet.connect(on_show_wallet);
     Qt.hide_wallet.connect(on_hide_wallet);
+    Qt.switch_view.connect(on_switch_view);
+
 
     // put it here to disable wallet tab only in qt-mode
     disable_tab(document.getElementById('wallet_view_menu'), true);

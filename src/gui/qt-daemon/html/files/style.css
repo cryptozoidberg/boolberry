@@ -15,10 +15,22 @@ body {
     height:100%;
 }
 
-#wallet_view
+#wallet_welcome_screen_area
 {
-    height:100%;
+    text-align: center;
+    margin-top: 80px;
 }
+
+#id_wallet_or_text
+{
+    font-size: 30px;
+}
+
+#wallet_workspace_area
+{
+    display: none;
+}
+
 
 h1 {
     color: #555;
@@ -123,6 +135,7 @@ h2 {
 
 .inline_menu_bar_item_disabled
 {
+    color: #777;
     cursor: default;
 }
 
