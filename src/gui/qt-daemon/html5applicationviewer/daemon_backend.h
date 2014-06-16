@@ -47,6 +47,7 @@ public:
   bool send_stop_signal();
   bool open_wallet(const std::string& path, const std::string& password);
   bool generate_wallet(const std::string& path, const std::string& password);
+  bool close_wallet();
   bool transfer(const view::transfer_params& tp, currency::transaction& res_tx);
 private:
   void main_worker(const po::variables_map& vm);

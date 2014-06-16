@@ -62,6 +62,20 @@ namespace view
   };
 
 
+  struct switch_view_info
+  {
+    enum ui_views
+    {
+      ui_view_dashboard = 1,
+      ui_view_wallet = 2
+    };
+
+    int view;
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(view)
+    END_KV_SERIALIZE_MAP()
+  };
+
   /*signal structures*/
   struct daemon_status_info
   {

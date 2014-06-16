@@ -301,6 +301,11 @@ span.daemon_view_general_status_value_success_text
     margin-left: 2px;
 }
 
+#close_wallet_button_id
+{
+    margin-left: 480px;
+}
+
 .options_link_text
 {
     font-size: 90%;

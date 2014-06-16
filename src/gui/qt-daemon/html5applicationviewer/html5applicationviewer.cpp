@@ -1348,16 +1348,17 @@ bool Html5ApplicationViewer::show_wallet()
   return true;
 }
 
+void Html5ApplicationViewer::close_wallet()
+{
+  m_backend.close_wallet();
+}
+
 bool Html5ApplicationViewer::switch_view(int view_no)
 {
-  struct t_local
-  {
-    int view;
-  };
-  t_local t;
-  t.view = view_no;
+  view::switch_view_info swi = AUTO_VAL_INIT(swi);
+  swi.view = view_no;
   std::string json_str;
-  epee::serialization::store_t_to_json(t, json_str);
+  epee::serialization::store_t_to_json(swi, json_str);
   m_d->money_spent(json_str.c_str());
   return true;
 }

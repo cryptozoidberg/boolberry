@@ -384,6 +384,26 @@ bool daemon_backend::generate_wallet(const std::string& path, const std::string&
 
 }
 
+bool daemon_backend::close_wallet()
+{
+  CRITICAL_REGION_LOCAL(m_wallet_lock);
+  try
+  {
+    if (m_wallet->get_wallet_path().size())
+    {
+      m_wallet->store();
+      m_wallet.reset(new tools::wallet2());
+    }
+  }
+
+  catch (const std::exception& e)
+  {
+    m_pview->show_msg_box(std::string("Failed to close wallet: ") + e.what());
+    return false;
+  }
+  m_pview->hide_wallet();
+  return true;
+}
 
 bool daemon_backend::transfer(const view::transfer_params& tp, currency::transaction& res_tx)
 {
