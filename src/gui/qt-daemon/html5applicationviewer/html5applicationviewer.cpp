@@ -1284,7 +1284,6 @@ bool Html5ApplicationViewer::on_backend_stopped()
     bool r = QMetaObject::invokeMethod(this,
                                  "do_close",
                                  Qt::QueuedConnection);
-    r = r;
   }
   return true;
 }
