@@ -52,9 +52,13 @@ int main(int argc, char** argv)
   if (!r)
     return 1;
 
-  mining::simpleminer miner;
-  r = miner.init(vm);
-  r = r && miner.run(); // Never returns...
+  while (1) {
+    mining::simpleminer miner;
+    r = miner.init(vm);
+    r = r && miner.run(); // Returns on too many failures
+    LOG_PRINT_L0("Excessive failures.  Sleeping 10 seconds and restarting...");
+    epee::misc_utils::sleep_no_w(10000);
+  }
 
   return 0;
 }
@@ -127,24 +131,28 @@ namespace mining
   }
 
   //--------------------------------------------------------------------------------------------------------------------------------
-  void simpleminer::worker_thread(uint64_t start_nonce, uint32_t nonce_offset, std::atomic<uint32_t> *result) {
+  void simpleminer::worker_thread(uint64_t start_nonce, uint32_t nonce_offset, std::atomic<uint32_t> *result, std::atomic<bool> *do_reset, std::atomic<bool> *done) {
+	  //	  printf("Worker thread starting at %lu + %u\n", start_nonce, nonce_offset);
     currency::blobdata blob = m_job.blob;
-    (*reinterpret_cast<uint64_t*>(&blob[1])) = (start_nonce+nonce_offset);
-
-    for (int i = 0; i < attempts_per_loop; i++) {
-      crypto::hash h = currency::null_hash;
-      currency::get_blob_longhash(blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
-      {
+    while (!*do_reset) {
+      m_hashes_done += attempts_per_loop;
+      for (int i = 0; i < attempts_per_loop; i++) {
+	(*reinterpret_cast<uint64_t*>(&blob[1])) = (start_nonce+nonce_offset);
+        crypto::hash h = currency::null_hash;
+	currency::get_blob_longhash(blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
+						{
 	return m_scratchpad[index%m_scratchpad.size()];
-      });
+	});
 
-      if( currency::check_hash(h, m_job.difficulty))
-      {
-	(*result) = nonce_offset;
-	return;
+	if( currency::check_hash(h, m_job.difficulty))
+        {
+	  (*result) = nonce_offset;
+	  (*done) = true;
+	  return;
+        }
+	nonce_offset++;
       }
-      nonce_offset++;
-      (*reinterpret_cast<uint64_t*>(&blob[1])) = (start_nonce+nonce_offset);
+      nonce_offset += ((m_threads_total-1) * attempts_per_loop);
     }
   }
 
@@ -154,6 +162,8 @@ namespace mining
     m_job = AUTO_VAL_INIT(m_job);
     uint64_t search_start = epee::misc_utils::get_tick_count();
     uint64_t hashes_done = 0;
+    uint32_t job_submit_failures = 0;
+    bool re_get_scratchpad = false;
 
     while(true)
     {
@@ -183,12 +193,6 @@ namespace mining
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
-        if(!apply_addendums(resp.addms))
-        {
-          LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
-          get_whole_scratchpad();
-          return true;
-        }
         if(resp.status != CORE_RPC_STATUS_OK || resp.id.empty())
         {
           LOG_PRINT_L0("Failed to login " << m_pool_ip << ":" << m_pool_port << ", disconnect and sleep....");
@@ -196,11 +200,18 @@ namespace mining
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
+
         m_pool_session_id = resp.id;        
-        if(!m_hi.height || !m_scratchpad.size())
+	if (re_get_scratchpad || !m_hi.height || !m_scratchpad.size())
         {
-          if(!get_whole_scratchpad())
-            continue;
+	  if (!get_whole_scratchpad())
+	    continue;
+          re_get_scratchpad = false;
+        }
+        else if(!apply_addendums(resp.addms))
+        {
+          LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
+          get_whole_scratchpad();
         }
 
         if (job_requested && resp.job.blob.empty() && resp.job.difficulty.empty() && resp.job.job_id.empty())
@@ -219,91 +230,123 @@ namespace mining
           m_last_job_ticks = epee::misc_utils::get_tick_count();
       }
 
-      uint64_t start_nonce = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
+      uint64_t get_job_start_time = epee::misc_utils::get_tick_count();
+      get_job(); /* Next version:  Handle this asynchronously */
+      uint64_t get_job_end_time  = epee::misc_utils::get_tick_count();
+      if ((get_job_end_time - get_job_start_time) > 1000) 
+      {
+        LOG_PRINT_L0("slow pool response " << (get_job_end_time - get_job_start_time) << " ms");
+      }
+
+      uint64_t start_nonce = (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) + 1000000;
       std::list<boost::thread> threads;
       std::atomic<uint32_t> results[128];
-      bool new_job_needed = false;
+      std::atomic<bool> do_reset(false);
+      std::atomic<bool> done(false);
 
-      while(epee::misc_utils::get_tick_count() - m_last_job_ticks < 20000 && !new_job_needed)
+      if (m_threads_total > 128) { 
+	LOG_PRINT_L0("Sorry - simpleminer does not support more than 128 threads right now");
+	m_threads_total = 128;
+      }
+
+      m_hashes_done = 0; /* Used to calculate offset to push back into job */
+
+      uint32_t nonce_offset = 0;
+      for (unsigned int i = 0; i < m_threads_total; i++)
       {
-	if (m_threads_total > 128) { 
-	  LOG_PRINT_L0("Sorry - simpleminer does not support more than 128 threads right now");
-	  m_threads_total = 128;
-	}
+	results[i] = 0;
+	threads.push_back(boost::thread(&simpleminer::worker_thread, this, start_nonce, nonce_offset, &results[i], &do_reset, &done));
+	nonce_offset += attempts_per_loop;
+      }
 
-	uint32_t nonce_offset = 0;
-	for (unsigned int i = 0; i < m_threads_total; i++)
-	{
-	  results[i] = 0;
-	  threads.push_back(boost::thread(&simpleminer::worker_thread, this, start_nonce, nonce_offset, &results[i]));
-	  nonce_offset += attempts_per_loop;
-	}
-	(*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + nonce_offset);
-	
 
-	BOOST_FOREACH(boost::thread& th, threads)
-	{
-	  th.join();
-	}
-	for (unsigned int i = 0; i < m_threads_total; i++) {
-	  hashes_done += attempts_per_loop; /* Approximate at easy diff */
-	  if (results[i] != 0) {
-	    (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + results[i]);
-	    crypto::hash h = currency::null_hash;
-	    currency::get_blob_longhash(m_job.blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
+      while(!done && epee::misc_utils::get_tick_count() - m_last_job_ticks < 20000)
+      {
+	/* Next version - time wait on a cond var to reduce latency more */
+        epee::misc_utils::sleep_no_w(1000);
+      }
+
+      do_reset = true;
+      BOOST_FOREACH(boost::thread& th, threads)
+      {
+        th.join();
+      }
+      for (unsigned int i = 0; i < m_threads_total; i++) {
+	if (results[i] != 0) {
+	  (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + results[i]);
+	  crypto::hash h = currency::null_hash;
+	  currency::get_blob_longhash(m_job.blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
+          {
+	    return m_scratchpad[index%m_scratchpad.size()];
+	  });
+
+	  if( currency::check_hash(h, m_job.difficulty))
+	  {
+	    //<< ", id" << currency::get_blob_hash(m_job.blob) << ENDL
+	    //found!          
+	    COMMAND_RPC_SUBMITSHARE::request submit_request = AUTO_VAL_INIT(submit_request);
+	    COMMAND_RPC_SUBMITSHARE::response submit_response = AUTO_VAL_INIT(submit_response);
+	    submit_request.id     = m_pool_session_id;
+	    submit_request.job_id = m_job.job_id;
+	    submit_request.nonce  = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
+	    submit_request.result = string_tools::buff_to_hex_nodelimer(std::string((char*) &h, HASH_SIZE));
+	    LOG_PRINT_GREEN("Share found: nonce=" << submit_request.nonce << " for job=" << m_job.job_id << ", diff: " << m_job.difficulty << ENDL             
+            << ", PoW:" << h << ", height:" << m_job.prev_hi.height+1 << ", submitting...", LOG_LEVEL_0);
+
+	    //LOG_PRINT_L0("Block hashing blob: " << string_tools::buff_to_hex_nodelimer(m_job.blob));
+	    //LOG_PRINT_L0("scratch_pad: " << currency::dump_scratchpad(m_scratchpad));
+	    if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_SUBMITSHARE>("/json_rpc", submit_request, submit_response, m_http_client))
             {
-	      return m_scratchpad[index%m_scratchpad.size()];
-	    });
-
-	    if( currency::check_hash(h, m_job.difficulty))
-	    {
-	      //<< ", id" << currency::get_blob_hash(m_job.blob) << ENDL
-	      //found!          
-	      COMMAND_RPC_SUBMITSHARE::request submit_request = AUTO_VAL_INIT(submit_request);
-	      COMMAND_RPC_SUBMITSHARE::response submit_response = AUTO_VAL_INIT(submit_response);
-	      submit_request.id     = m_pool_session_id;
-	      submit_request.job_id = m_job.job_id;
-	      submit_request.nonce  = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
-	      submit_request.result = string_tools::buff_to_hex_nodelimer(std::string((char*) &h, HASH_SIZE));
-	      LOG_PRINT_GREEN("Share found: nonce=" << submit_request.nonce << " for job=" << m_job.job_id << ", diff: " << m_job.difficulty << ENDL             
-              << ", PoW:" << h << ", height:" << m_job.prev_hi.height+1 << ", submitting...", LOG_LEVEL_0);
-
-	      //LOG_PRINT_L0("Block hashing blob: " << string_tools::buff_to_hex_nodelimer(m_job.blob));
-	      //LOG_PRINT_L0("scratch_pad: " << currency::dump_scratchpad(m_scratchpad));
-	      if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_SUBMITSHARE>("/json_rpc", submit_request, submit_response, m_http_client))
-              {
-		LOG_PRINT_L0("Failed to submit share! disconnect and sleep....");
-		m_http_client.disconnect();
-		epee::misc_utils::sleep_no_w(1000);
-		new_job_needed = true;
-		break;
-	      }
-	      if(submit_response.status != "OK")
-	      {
-		LOG_PRINT_L0("Failed to submit share! (submitted share rejected) disconnect and sleep....");
-		m_http_client.disconnect();
-		epee::misc_utils::sleep_no_w(1000);
-		new_job_needed = true;
-		break;
-	      }
-	      LOG_PRINT_GREEN("Share submitted successfully!", LOG_LEVEL_0);
-	      new_job_needed = true;
-	      (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + nonce_offset);
-
-	      break;
+	      /* Failed to submit a job.  This can happen because of disconnection,
+	       * server failure, or block expiry.  In any event, try to get
+	       * a new job.  If the job fetch fails, get_job will disconnect
+	       * and sleep for us */
+	      LOG_PRINT_L0("Failed to submit share!  Updating job.");
+	      job_submit_failures++;
 	    }
+	    else if(submit_response.status != "OK")
+	    {
+	      LOG_PRINT_L0("Failed to submit share! (submitted share rejected).  Updating job.");
+	      job_submit_failures++;
+	    }
+	    else
+	    {
+	      LOG_PRINT_GREEN("Share submitted successfully!", LOG_LEVEL_0);
+	      job_submit_failures = 0;
+	    }
+	    break; /* One submission per job id */
+	  } 
+          else 
+          {
+	    LOG_PRINT_L0("share did not pass diff revalidation");
 	  }
 	}
-	start_nonce += nonce_offset;
       }
-      uint64_t get_job_start_time = epee::misc_utils::get_tick_count();
-      get_job();
-      uint64_t get_job_end_time  = epee::misc_utils::get_tick_count();
-      if ((get_job_end_time - get_job_start_time) > 1000) {
-	      LOG_PRINT_L0("slow pool response " << (get_job_end_time - get_job_start_time) << " ms");
+
+      start_nonce += m_hashes_done;
+      hashes_done += m_hashes_done;
+      m_hashes_done = 0;
+
+      (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = start_nonce;
+      if (job_submit_failures == 10)
+      {
+        LOG_PRINT_L0("Too many submission failures.  Something is very wrong.");
+        return false;
       }
-      uint64_t hash_rate = (hashes_done * 1000) / ((get_job_end_time - search_start) + 1);
-      LOG_PRINT_L0("avg hr: " << hash_rate);
+      if (job_submit_failures > 3)
+      {
+	re_get_scratchpad = true;
+	/* note fallthrough into next case to also reconnect */
+      }
+      if (job_submit_failures > 1)
+      {
+        m_http_client.disconnect();
+	epee::misc_utils::sleep_no_w(1000);
+      } else {
+	uint64_t loop_end_time = epee::misc_utils::get_tick_count();
+	uint64_t hash_rate = (hashes_done * 1000) / ((loop_end_time - search_start) + 1);
+	LOG_PRINT_L0("avg hr: " << hash_rate);
+      }
     }
     return true;
   }
