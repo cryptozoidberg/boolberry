@@ -8,6 +8,7 @@ body {
     margin: 0em 0 0em 0;
     height:100%;
     -webkit-font-smoothing: antialiased;
+    background: rgb(231, 231, 231);
 }
 
 #container{
@@ -55,8 +56,20 @@ h2 {
 .menu_bar_logo, .menu_bar_tabs
 {
     display: inline-block;
+    color: #ffffff;
 }
 
+
+.wallet_separator
+{
+    /*font-weight: bold;*/
+    font-size: 20px;
+    color: #ffffff;
+    padding: 5px;
+    padding-left: 20px;
+
+    background: rgb(25, 26, 51);
+}
 
 .inline_menu_bar_item
 {
@@ -200,16 +213,35 @@ span.daemon_view_general_status_value_success_text
 
 /*----- wallet ------*/
 
-#wallet_left_panel
+.wallet_panel
 {
     /*padding: 5px;*/
     /*float: left;*/
     /*width: 200px;*/
     /*height: 100px;*/
-    border: 1px solid #787878;
-    margin:10px;
+    /*border: 1px solid #787878;*/
+    margin:15px;
+    margin-top: 0px;
     padding:10px;
-    background: rgb(228, 228, 228);
+    background: rgb(247, 247, 247);
+}
+.wallet_panet_transparent
+{
+    margin:15px;
+    margin-top: 0px;
+}
+.transfer_entry_line
+{
+    padding-left: 10px;
+    padding-top: 5px;
+    margin-top: 2px;
+    background: rgb(247, 247, 247);
+}
+.transfer_entry_line_details
+{
+    display: none;
+    margin-left: 60px;
+    color: rgb(95, 95, 95);
 }
 
 .balance_text
@@ -291,3 +323,9 @@ h2
     color: #6c6c6c;
 }
 
+
+.my_addres_text
+{
+    font-size: 80%;
+    color:  #666666;
+}

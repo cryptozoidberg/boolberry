@@ -435,7 +435,7 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
 
   try
   {
-    m_wallet->transfer(dsts, tp.mixin_count, 0, DEFAULT_FEE, extra, res_tx);
+    m_wallet->transfer(dsts, tp.mixin_count, 0, fee, extra, res_tx);
     update_wallet_info();
   }
   catch (const std::exception& e)

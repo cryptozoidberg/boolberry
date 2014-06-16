@@ -57,12 +57,12 @@
         </div>
     </div>
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >
-        <div id="wallet_left_panel">
+        <div class="wallet_panel">
             <div class="wallet_left_panel_entry">
                 <span class="balance_text">Path:</span>
-                <span class="wallet_balance" id="wallet_path"></span><br>
+                <span class="my_addres_text" id="wallet_path">C:\home\projects\boolberry\build\src\Release\wallet.bin</span><br>
                 <span class="balance_text">Address:</span>
-                <span class="wallet_balance" id="wallet_address"></span><br>
+                <span class="my_addres_text" id="wallet_address">1HNJjUsofq5LYLoXem119dd491yFAb5g4bCHkecV4sPqigmuxw57Ci9am71fEN4CRmA9jgnvo5PDNfaq8QnprWmS5uLqnbq</span><br>
 
                 <span class="balance_text">Balance:</span>
                 <span class="wallet_balance" id="wallet_balance">0.0</span>
@@ -78,7 +78,8 @@
             </div>
             <!-- <div id="close_wallet_button_id" class="common_button">Close wallet</div> -->
         </div>
-        <div id="wallet_transfer_panel">
+        <div class="wallet_separator">Send payment</div>
+        <div class="wallet_panel">
             <div>
                 <table cellspacing="3px">
                     <tr>
@@ -104,16 +105,21 @@
 
                     <tr>
                         <td></td>
-                        <td><div id="transfer_button_id" class="common_button">Send</div></td>
+                        <td align="right"><div id="transfer_button_id" class="common_button">Send</div></td>
                     </tr>
                 </table>
+                <div id="transfer_result_zone" style="display: none">
+                    <span id="transfer_result_span">
+
+                    </span>
+                    <a href="javascript:;" onclick="jQuery('#transfer_result_zone').toggle('fast');" class="options_link_text">Hide</a>
+                </div>
+
             </div>
         </div>
-        <div id="wallet_recent_transfers_panel">
-            <h3 class="balance_text">Recent transfers:</h3>
-            <table>
-                <div id="recent_transfers_container_id"></div>
-            </table>
+        <div class="wallet_separator">Recent transfers</div>
+        <div class="wallet_panet_transparent">
+            <div id="recent_transfers_container_id"></div>
         </div>
     </div>
 </div>
@@ -207,7 +213,7 @@ function on_update_wallet_status(wal_status)
 
 function get_details_block(td, div_id_str, transaction_id)
 {
-    var res = "<div style='display: none; margin-left: 100px;' id='" + div_id_str + "'> <span class='balance_text'>Transaction ID:</span> " +  transaction_id + "<br>";
+    var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='balance_text'>Transaction ID:</span> " +  transaction_id + "<br>";
     for(var i=0; i < td.rcv.length; i++)
     {
         res += "<img src='files/recv.png' height='12px' /> " + td.rcv[i] + "<br>";
@@ -243,14 +249,16 @@ function get_transfer_html_entry(tr)
 
     var dt = new Date(tr.timestamp*1000);
 
-    res = "<span style='color: " + color_str + "'>";
-    res += "<img src='" + img_ref + "' height='15px'>";
+    res = "<div class='transfer_entry_line' style='color: " + color_str + "'>";
+    res += "<img  src='" + img_ref + "' height='15px'>";
     res += "<span class='transfer_text_time_span'>" + dt.toLocaleTimeString() + "</span>";
     res += "<span class='transfer_text_amount_span'>" + tr.amount + "</span>";
     res += "<span class='transfer_text_details_span'>" + "<a href='javascript:;' onclick=\"jQuery('#" + tr.tx_hash + "_id" + "').toggle('fast');\" class=\"options_link_text\">" + "</span>";
     res += " Details...";
-    res += "</a></span><br>";
+    res += "</a>";
     res += get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash);
+    res += "</div>";
+
     return res;
 }
 
@@ -294,7 +302,7 @@ function on_hide_wallet()
     inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
     $("#recent_transfers_container_id").html("");
 }
-
+var last_timerId;
 function on_transfer()
 {
     var transfer_obj = {
@@ -322,12 +330,18 @@ function on_transfer()
 
     if(transfer_res_obj.success)
     {
+
+
         $('#transfer_address_id').val("");
         $('#transfer_amount_id').val("");
         $('#payment_id').val("");
         $('#mixin_count_id').val(0);
+        $("#transfer_result_span").html("<span style='color: #1b9700'> Money successfully sent, transaction " + transfer_res_obj.tx_hash + ", " + transfer_res_obj.tx_blob_size + " bytes</span><br>");
+        if(last_timerId !== undefined)
+            clearTimeout(last_timerId);
 
-        $("#recent_transfers_container_id").prepend("<span style='color: darkblue'> Money successfully sent, transaction " + transfer_res_obj.tx_hash + ", " + transfer_res_obj.tx_blob_size + " bytes</span><br>");
+        $("#transfer_result_zone").show("fast");
+        last_timerId = setTimeout(function(){$("#transfer_result_zone").hide("fast");}, 15000);
     }
     else
         return;
