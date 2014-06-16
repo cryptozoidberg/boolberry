@@ -113,6 +113,12 @@ public:
   {
     std::list<std::string> rcv;
     std::list<std::string> spn;
+    
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(rcv)
+      KV_SERIALIZE(spn)
+    END_KV_SERIALIZE_MAP()
+
   };
 
   struct wallet_transfer_info

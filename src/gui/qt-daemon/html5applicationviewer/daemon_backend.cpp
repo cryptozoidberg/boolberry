@@ -508,7 +508,7 @@ void daemon_backend::on_money_spent2(const currency::block& b, const currency::t
 {
   view::transfer_event_info tei = AUTO_VAL_INIT(tei);
   tei.ti.timestamp = b.timestamp;
-  tei.ti.amount = amount;
+  tei.ti.amount = currency::print_money(amount);
   tei.ti.height = currency::get_block_height(b);
   tei.ti.is_income = false;
   tei.ti.spent = true;

@@ -43,7 +43,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
   r = lookup_acc_outs(m_account.get_keys(), tx, tx_pub_key, outs, tx_money_got_in_outs);
   CHECK_AND_THROW_WALLET_EX(!r, error::acc_outs_lookup_error, tx, tx_pub_key, m_account.get_keys());
 
-  money_transfer2_details td;
+  money_transfer2_details mtd;
 
   if(!outs.empty() && tx_money_got_in_outs)
   {
@@ -65,7 +65,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       CHECK_AND_THROW_WALLET_EX(tx.vout.size() <= o, error::wallet_internal_error, "wrong out in transaction: internal index=" +
         std::to_string(o) + ", total_outs=" + std::to_string(tx.vout.size()));
 
-      td.receive_indices.push_back(o);
+      mtd.receive_indices.push_back(o);
 
       m_transfers.push_back(boost::value_initialized<transfer_details>());
       transfer_details& td = m_transfers.back();
@@ -101,7 +101,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       transfer_details& td = m_transfers[it->second];
       td.m_spent = true;
       
-      td.spent_indices.push_back(i);
+      mtd.spent_indices.push_back(i);
 
       if (0 != m_callback)
         m_callback->on_money_spent(height, td.m_tx, td.m_internal_output_index, tx);
@@ -130,18 +130,18 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       {//this actually is transfer transaction, notify about spend
         if (tx_money_spent_in_ins > tx_money_got_in_outs)
         {//usual transfer 
-          m_callback->on_money_spent2(b, tx, tx_money_spent_in_ins - tx_money_got_in_outs, td);
+          m_callback->on_money_spent2(b, tx, tx_money_spent_in_ins - tx_money_got_in_outs, mtd);
         }
-        else(tx_money_spent_in_ins <= tx_money_got_in_outs)
+        else
         {//strange transfer, seems that in one transaction have transfers from different wallets.
-          LOG_PRINT_RED_L0("Unusual transaction " << get_transaction_hash(tx) << ", tx_money_spent_in_ins: " << tx_money_spent_in_ins << ", tx_money_got_in_outs: " << tx_money_got_in_outs);
-          m_callback->on_money_spent2(b, tx, tx_money_spent_in_ins, td);
-          m_callback->on_money_received2(b, tx, tx_money_got_in_outs, td);
+          LOG_PRINT_RED_L0("Unusual transaction " << currency::get_transaction_hash(tx) << ", tx_money_spent_in_ins: " << tx_money_spent_in_ins << ", tx_money_got_in_outs: " << tx_money_got_in_outs);
+          m_callback->on_money_spent2(b, tx, tx_money_spent_in_ins, mtd);
+          m_callback->on_money_received2(b, tx, tx_money_got_in_outs, mtd);
         }
       }
       else
       {
-        m_callback->on_money_received2(b, tx, tx_money_got_in_outs, td);
+        m_callback->on_money_received2(b, tx, tx_money_got_in_outs, mtd);
       }
     }
 

@@ -33,7 +33,7 @@ namespace tools
   {
     std::vector<size_t> receive_indices;
     std::vector<size_t> spent_indices;
-  }
+  };
 
   class i_wallet2_callback
   {
