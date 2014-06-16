@@ -28,30 +28,36 @@
     </div>
 
     <div id="daemon_state_view" class="view_hidden menu_view_inner_area" >
-        <div class="daemon_view_general_status_block"><span class="daemon_view_general_status_text">Status:</span> <span  id="daemon_status_text">Loading blockchain data...</span></div>
-        <div id="synchronization_progressbar_block">
-            <div style="width: 200px; height: 20px;float: left;" id="synchronization_progressbar"></div><span style="margin-left: 10px;" id="daemon_synchronization_text">--</span>
-        </div>
-        <div class="daemon_view_details_block">
-            <div class="daemon_view_details_status_block">
-                <span class="daemon_view_param_title">Connections: </span>
-                <span class="daemon_view_param_value" id="daemon_out_connections_text">0</span>  <!-- (out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> -->
+        <div id="daemon_state_internal_panel" class="wallet_panel">
+            <div class="daemon_view_general_status_block"><span class="daemon_view_general_status_text">Status:</span> <span  id="daemon_status_text">Loading blockchain data...</span></div>
+            <div id="synchronization_progressbar_block">
+                <div style="width: 200px; height: 20px;float: left;" id="synchronization_progressbar"></div><span style="margin-left: 10px;" id="daemon_synchronization_text">--</span>
             </div>
-            <div class="daemon_view_details_status_block">
-                <span class="daemon_view_param_title">Height: </span>
-                <span class="daemon_view_param_value" id="daemon_height_text">0</span>  <!-- (out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> -->
+            <div class="daemon_view_details_block">
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Connections: </span>
+                    <span class="daemon_view_param_value" id="daemon_out_connections_text">0</span>  <!-- (out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> -->
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Height: </span>
+                    <span class="daemon_view_param_value" id="daemon_height_text">0</span>  <!-- (out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> -->
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Current difficulty: </span>
+                    <span class="daemon_view_param_value" id="difficulty_text">---</span>
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Current network hashrate: </span>
+                    <span class="daemon_view_param_value" id="hashrate_text">---</span>
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Software version: </span>
+                    <span class="daemon_view_param_value" id="version_text">---</span>
+                </div>
             </div>
-            <div class="daemon_view_details_status_block">
-                <span class="daemon_view_param_title">Current difficulty: </span>
-                <span class="daemon_view_param_value" id="difficulty_text">---</span>
+            <div class="buttons_group">
+                <!-- <div id="domining_button" class="common_button">Generate coins</div> -->
             </div>
-            <div class="daemon_view_details_status_block">
-                <span class="daemon_view_param_title">Current network hashrate: </span>
-                <span class="daemon_view_param_value" id="hashrate_text">---</span>
-            </div>
-        </div>
-        <div class="buttons_group">
-            <!-- <div id="domining_button" class="common_button">Generate coins</div> -->
         </div>
     </div>
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >

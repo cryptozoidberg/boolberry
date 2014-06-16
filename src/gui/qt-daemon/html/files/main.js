@@ -280,8 +280,11 @@ $(function()
     $('#generate_wallet_button').on('click',  on_generate_new_wallet);
     $('#close_wallet_button_id').on('click',  on_close_wallet);
 
-
-
+    /****************************************************************************/
+    //some testing stuff
+    //to make it available in browser mode
+    show_wallet();
+    on_update_wallet_status({wallet_state: 2});
     var tttt = {
         ti:{
             height: 10,
@@ -313,12 +316,8 @@ $(function()
     tttt.ti.tx_hash = "q19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
     on_money_recieved(tttt);
+    /****************************************************************************/
 
-
-
-    //to make it available in browser mode
-    show_wallet();
-    on_update_wallet_status({wallet_state: 2});
 
 
     inline_menu_item_select(document.getElementById('daemon_state_view_menu'));

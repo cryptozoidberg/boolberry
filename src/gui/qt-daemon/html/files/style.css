@@ -109,11 +109,9 @@ h2 {
     margin: 2px 8px 0;
     padding: 0 8px;
 }
-
-#daemon_state_view
+#daemon_state_internal_panel
 {
-    margin-top: 10px;
-    margin-left: 10px;
+    padding-left: 110px;
 }
 
 .inline_menu_bar_selected_item:hover
@@ -156,22 +154,40 @@ span.daemon_view_general_status_value_success_text
 {
     color: #1a9d00;
     font-weight:bold;
+    margin-left: 20px;
+}
+
+
+.daemon_view_general_status_block
+{
+    color: rgb(55,52,53);
+    padding-top: 20px;
+    font-size: 30px;
+}
+
+#daemon_status_text
+{
+    font-weight:bold;
+    margin-left: 20px;
 }
 
 .daemon_view_general_status_text
 {
-    color: #6c6c6c;
+    color: rgb(55,52,53);
+    margin-left: 40px;
+    font-weight:bold;
 }
 
 .daemon_view_param_title
 {
-    color: #999;
+    font-size: 17px;
+    color: rgb(55,52,53);
 }
 
 .daemon_view_param_value
 {
     position: absolute;
-    left:220px;
+    left:320px;
     font-weight:bold;
     color: #6c6c6c;
     font-size: 17px;
@@ -193,14 +209,6 @@ span.daemon_view_general_status_value_success_text
     text-align: right;
 }
 
-#version_text
-{
-    /*float: right;*/
-    position: absolute;
-    font-size: 12px;
-    top: 20px;
-}
-
 #synchronization_progressbar_block
 {
     padding-top: 25px;
@@ -212,15 +220,11 @@ span.daemon_view_general_status_value_success_text
     padding-top: 20px;
 }
 
-.daemon_view_general_status_block
-{
-    padding-top: 20px;
-    font-size: 30px;
-}
 
 .daemon_view_details_status_block
 {
     font: 14px;
+    margin-top: 5px;
 }
 
 /*----- wallet ------*/

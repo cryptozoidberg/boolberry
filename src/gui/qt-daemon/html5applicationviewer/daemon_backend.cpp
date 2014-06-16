@@ -346,6 +346,7 @@ bool daemon_backend::open_wallet(const std::string& path, const std::string& pas
   catch (const std::exception& e)
   {
     m_pview->show_msg_box(std::string("Failed to load wallet: ") + e.what());
+    m_wallet.reset(new tools::wallet2());
     return false;
   }
 
@@ -373,6 +374,7 @@ bool daemon_backend::generate_wallet(const std::string& path, const std::string&
   catch (const std::exception& e)
   {
     m_pview->show_msg_box(std::string("Failed to generate wallet: ") + e.what());
+    m_wallet.reset(new tools::wallet2());
     return false;
   }
 
