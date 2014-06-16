@@ -229,6 +229,21 @@ span.daemon_view_general_status_value_success_text
     /*margin-left:220px;*/
 }
 
+.transfer_text_time_span
+{
+    margin-left: 20px;
+}
+
+.transfer_text_amount_span
+{
+    margin-left: 80px;
+}
+
+.transfer_text_details_span
+{
+    margin-left: 40px;
+}
+
 #transfer_address_id
 {
     height: 16px;
@@ -236,7 +251,7 @@ span.daemon_view_general_status_value_success_text
     width: 570px;
     font-size: 10px;
 }
-#transfer_button_id,#close_wallet_button_id,#payment_id,#mixin_count_id
+#transfer_button_id,#close_wallet_button_id,#payment_id,#mixin_count_id,#tx_fee
 {
     font-size: 12px;
     margin-left: 2px;

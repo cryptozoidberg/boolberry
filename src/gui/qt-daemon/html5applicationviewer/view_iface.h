@@ -38,11 +38,13 @@ namespace view
     std::list<transfer_destination> destinations;
     uint64_t mixin_count;
     std::string payment_id;
+    std::string fee;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(destinations)
       KV_SERIALIZE(mixin_count)
       KV_SERIALIZE(payment_id)
+      KV_SERIALIZE(fee)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -107,13 +109,21 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct wallet_transfer_info_details
+  {
+    std::list<std::string> rcv;
+    std::list<std::string> spn;
+  };
+
   struct wallet_transfer_info
   {
     std::string amount;
+    uint64_t    timestamp;
     std::string tx_hash;
     uint64_t    height;
     bool        spent;
     bool        is_income;
+    wallet_transfer_info_details td;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(amount)
@@ -121,6 +131,8 @@ public:
       KV_SERIALIZE(height)
       KV_SERIALIZE(spent)
       KV_SERIALIZE(is_income)
+      KV_SERIALIZE(timestamp)      
+      KV_SERIALIZE(td)
     END_KV_SERIALIZE_MAP()
   };
 

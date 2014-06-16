@@ -393,6 +393,13 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
     m_pview->show_msg_box("Internal error: empty destinations");
     return false;
   }
+  uint64_t fee = 0;
+  if (!currency::parse_amount(fee, tp.fee))
+  {
+    m_pview->show_msg_box("Failed to send transaction: wrong fee amount");
+    return false;
+  }
+
 
   for(auto& d: tp.destinations)
   {
@@ -466,31 +473,49 @@ void daemon_backend::on_new_block(uint64_t /*height*/, const currency::block& /*
 {
 
 }
-void daemon_backend::on_money_received(uint64_t height, const currency::transaction& tx, size_t out_index)
+
+void fill_transfer_details(const currency::transaction& tx, const tools::money_transfer2_details& td, view::wallet_transfer_info_details& res_td)
+{
+  for (auto si: td.spent_indices)
+  {
+    CHECK_AND_ASSERT_MES(si < tx.vin.size(), void(), "Internal error: wrong tx transfer details: spend index=" << si << " is greater than transaction inputs vector " << tx.vin.size());
+    res_td.spn.push_back(currency::print_money(boost::get<currency::txin_to_key>(tx.vin[si]).amount));
+  }
+  
+  for (auto ri : td.receive_indices)
+  {
+    CHECK_AND_ASSERT_MES(ri < tx.vout.size(), void(), "Internal error: wrong tx transfer details: reciev index=" << ri << " is greater than transaction outputs vector " << tx.vout.size());
+    res_td.rcv.push_back(currency::print_money(tx.vout[ri].amount));
+  }
+}
+
+void daemon_backend::on_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const tools::money_transfer2_details& td)
 {
   view::transfer_event_info tei = AUTO_VAL_INIT(tei);
-  CHECK_AND_ASSERT_MES(out_index < tx.vout.size(), void(), "Wrong out_index: " << out_index << "");
-  tei.ti.amount = currency::print_money(tx.vout[out_index].amount);
-  tei.ti.height = height;
+  tei.ti.amount = currency::print_money(amount);
+  tei.ti.timestamp = b.timestamp;
+  tei.ti.height = currency::get_block_height(b);
   tei.ti.is_income = true;
   tei.ti.spent = false;
   tei.ti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
   tei.balance = currency::print_money(m_wallet->balance());
   tei.unlocked_balance = currency::print_money(m_wallet->unlocked_balance());
+  fill_transfer_details(tx, td, tei.ti.td);
   m_pview->money_receive(tei);
 }
 
-void daemon_backend::on_money_spent(uint64_t height, const currency::transaction& in_tx, size_t out_index, const currency::transaction& spend_tx)
+void daemon_backend::on_money_spent2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const tools::money_transfer2_details& td)
 {
   view::transfer_event_info tei = AUTO_VAL_INIT(tei);
-  CHECK_AND_ASSERT_MES(out_index < in_tx.vout.size(), void(), "Wrong out_index: " << out_index << "");
-  tei.ti.amount = currency::print_money(in_tx.vout[out_index].amount);
-  tei.ti.height = height;
+  tei.ti.timestamp = b.timestamp;
+  tei.ti.amount = amount;
+  tei.ti.height = currency::get_block_height(b);
   tei.ti.is_income = false;
   tei.ti.spent = true;
-  tei.ti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(in_tx));
+  tei.ti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
   tei.balance = currency::print_money(m_wallet->balance());
   tei.unlocked_balance = currency::print_money(m_wallet->unlocked_balance());
+  fill_transfer_details(tx, td, tei.ti.td);
   m_pview->money_spent(tei);
 }
 

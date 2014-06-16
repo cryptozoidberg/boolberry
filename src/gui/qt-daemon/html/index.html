@@ -98,6 +98,11 @@
                         <td > <span class="transfer_extra_options"><input type="number" style="width: 40px" id="mixin_count_id" value="0"></span></td>
                     </tr>
                     <tr>
+                        <td > <span class="transfer_extra_options">Fee: </span> </td>
+                        <td > <span class="transfer_extra_options"><input style="width: 130px" id="tx_fee" value="0.000000001000"></span></td>
+                    </tr>
+
+                    <tr>
                         <td></td>
                         <td><div id="transfer_button_id" class="common_button">Send</div></td>
                     </tr>
@@ -106,7 +111,9 @@
         </div>
         <div id="wallet_recent_transfers_panel">
             <h3 class="balance_text">Recent transfers:</h3>
-            <div id="recent_transfers_container_id"></div>
+            <table>
+                <div id="recent_transfers_container_id"></div>
+            </table>
         </div>
     </div>
 </div>
@@ -198,14 +205,52 @@ function on_update_wallet_status(wal_status)
     }
 }
 
+function get_details_block(td, div_id_str, transaction_id)
+{
+    var res = "<div style='display: none; margin-left: 100px;' id='" + div_id_str + "'> <span class='balance_text'>Transaction ID:</span> " +  transaction_id + "<br>";
+    for(var i=0; i < td.rcv.length; i++)
+    {
+        res += "<img src='files/recv.png' height='12px' /> " + td.rcv[i] + "<br>";
+    }
+    for(var i=0; i < td.spn.length; i++)
+    {
+        res += "<img src='files/sent.png' height='12px' /> " + td.spn[i] + "<br>";
+    }
+
+    res += "</div>";
+    return res;
+}
+
+
 function get_transfer_html_entry(tr)
 {
     var res;
-    if(tr.is_income)
-        res = "<span style='color: darkgreen'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " received " + tr.amount + "</span><br>";
-    else
-        res = "<span style='color: darkmagenta'> Height: " + tr.height.toString() + " tx: " + tr.tx_hash + " spent " + tr.amount + "</span><br>";
+    var color_str;
+    var img_ref;
+    var action_text;
 
+    if(tr.is_income)
+    {
+        color_str = "darkgreen";
+        img_ref = "files/recv.png"
+    }
+    else
+    {
+        color_str = "darkmagenta";
+        img_ref = "files/sent.png"
+    }
+
+
+    var dt = new Date(tr.timestamp*1000);
+
+    res = "<span style='color: " + color_str + "'>";
+    res += "<img src='" + img_ref + "' height='15px'>";
+    res += "<span class='transfer_text_time_span'>" + dt.toLocaleTimeString() + "</span>";
+    res += "<span class='transfer_text_amount_span'>" + tr.amount + "</span>";
+    res += "<span class='transfer_text_details_span'>" + "<a href='javascript:;' onclick=\"jQuery('#" + tr.tx_hash + "_id" + "').toggle('fast');\" class=\"options_link_text\">" + "</span>";
+    res += " Details...";
+    res += "</a></span><br>";
+    res += get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash);
     return res;
 }
 
@@ -219,14 +264,14 @@ function on_update_wallet_info(wal_status)
 
 function on_money_recieved(tei)
 {
-    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti) );
+    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti));
     $("#wallet_balance").text(tei.balance);
     $("#wallet_unlocked_balance").text(tei.unlocked_balance);
 }
 
 function on_money_spent(tei)
 {
-    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti) );
+    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti));
     $("#wallet_balance").text(tei.balance);
     $("#wallet_unlocked_balance").text(tei.unlocked_balance);
 }
@@ -264,6 +309,8 @@ function on_transfer()
     };
 
     transfer_obj.mixin_count = parseInt($('#mixin_count_id').val());
+    transfer_obj.fee = $('#tx_fee').val();
+
     if(!(transfer_obj.mixin_count >= 0 && transfer_obj.mixin_count < 11))
     {
         Qt_parent.message_box("Wrong Mixin parameter value, please set values in range 0-10");
@@ -308,11 +355,40 @@ $(function()
     $('#transfer_button_id').on('click',  on_transfer);
 
 
-    /*on_money_recieved({
-        height: 10,
-        tx_hash: "980809809809808",
-        amount: "10.1111"
-    });*/
+    var tttt = {
+        ti:{
+            height: 10,
+            tx_hash: "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c212fe",
+            amount: "10.1111",
+            is_income: true,
+            timestamp: 1402878665,
+            td: {
+                rcv: ["0.0000001000", "0.0000001000", "0.0000001000", "0.0000001000"],
+                spn: ["0.0000001000", "0.0000001000"]
+            }
+        },
+        balance: "0.0000001000",
+        unlocked_balance: "0.0000001000"
+    };
+    on_money_recieved(tttt);
+    tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
+    tttt.ti.is_income = false;
+    on_money_recieved(tttt);
+
+    tttt.ti.tx_hash = "u19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
+    tttt.ti.is_income = false;
+    on_money_recieved(tttt);
+
+    tttt.ti.tx_hash = "s19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
+    tttt.ti.is_income = true;
+    on_money_recieved(tttt);
+
+    tttt.ti.tx_hash = "q19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
+    tttt.ti.is_income = false;
+    on_money_recieved(tttt);
+
+
+
 
     inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
     //inline_menu_item_select(document.getElementById('wallet_view_menu'));
