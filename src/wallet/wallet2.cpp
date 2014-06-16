@@ -110,7 +110,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
   }
 
     crypto::hash payment_id;
-    if(get_payment_id_from_tx_extra(tx, payment_id))
+    if (tx_money_got_in_outs && get_payment_id_from_tx_extra(tx, payment_id))
     {
       uint64_t received = (tx_money_spent_in_ins < tx_money_got_in_outs) ? tx_money_got_in_outs - tx_money_spent_in_ins : 0;
       if (0 < received && null_hash != payment_id)
@@ -141,7 +141,8 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       }
       else
       {
-        m_callback->on_money_received2(b, tx, tx_money_got_in_outs, mtd);
+        if(tx_money_got_in_outs)
+          m_callback->on_money_received2(b, tx, tx_money_got_in_outs, mtd);
       }
     }
 
