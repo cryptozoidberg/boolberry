@@ -25,6 +25,8 @@ int main(int argc, char** argv)
   timer.start();
 
   TEST_PERFORMANCE0(test_keccak);
+  TEST_PERFORMANCE0(test_keccak_alt1);  
+
   TEST_PERFORMANCE0(test_keccak_generic);
   TEST_PERFORMANCE0(test_keccak_generic_with_mul);
   TEST_PERFORMANCE1(test_wild_keccak, 400);

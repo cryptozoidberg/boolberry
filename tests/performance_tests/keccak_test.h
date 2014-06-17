@@ -64,7 +64,7 @@ class test_keccak_alt1: public test_keccak_base
       {
       pretest();
       crypto::hash h;
-      keccak1(reinterpret_cast<uint8_t*>(&h), reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), , sizeof(h));
+      keccak1(reinterpret_cast<uint8_t*>(&h), reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size());
       LOG_PRINT_L4(h);
       return true;
       }
