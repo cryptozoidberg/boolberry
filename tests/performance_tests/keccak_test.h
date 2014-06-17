@@ -6,6 +6,7 @@
 
 #include "crypto/crypto.h"
 #include "currency_core/currency_basic.h"
+#include "crypto/alt_keccack1.h"
 
 extern "C" {
 #include "crypto/keccak.h"
@@ -51,9 +52,26 @@ public:
     pretest();
     crypto::hash h;
     keccak(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h), sizeof(h));
+    LOG_PRINT_L4(h);
     return true;
   }
 };
+
+class test_keccak_alt1: public test_keccak_base
+  {
+  public:
+    bool test()
+      {
+      pretest();
+      crypto::hash h;
+      keccak1(reinterpret_cast<uint8_t*>(&h), reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), , sizeof(h));
+      LOG_PRINT_L4(h);
+      return true;
+      }
+  };
+
+
+
 
 class test_keccak_generic: public test_keccak_base
 {
@@ -63,6 +81,7 @@ public:
     pretest();
     crypto::hash h;
     crypto::keccak_generic<crypto::regular_f>(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h), sizeof(h));
+    LOG_PRINT_L4(h);
     return true;
   }
 };
