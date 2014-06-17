@@ -76,7 +76,12 @@ namespace currency
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_info(const COMMAND_RPC_GET_INFO::request& req, COMMAND_RPC_GET_INFO::response& res, connection_context& cntx)
   {
-    CHECK_CORE_READY();
+    if (m_p2p.get_payload_object().get_core().get_blockchain_storage().is_storing_blockchain())
+    {
+      res.status = CORE_RPC_STATUS_BUSY; 
+      return true; 
+    }
+
     res.height = m_core.get_current_blockchain_height();
     res.difficulty = m_core.get_blockchain_storage().get_difficulty_for_next_block();
     res.tx_count = m_core.get_blockchain_storage().get_total_transactions() - res.height; //without coinbase
@@ -92,6 +97,18 @@ namespace currency
     res.current_network_hashrate_350 = m_core.get_blockchain_storage().get_current_hashrate(350);
     res.scratchpad_size = m_core.get_blockchain_storage().get_scratchpad_size();
     res.alias_count = m_core.get_blockchain_storage().get_aliases_count();
+
+    if (!res.outgoing_connections_count)
+      res.daemon_network_state = COMMAND_RPC_GET_INFO::daemon_network_state_connecting;
+    else if (m_p2p.get_payload_object().is_synchronized())
+      res.daemon_network_state = COMMAND_RPC_GET_INFO::daemon_network_state_online;
+    else
+      res.daemon_network_state = COMMAND_RPC_GET_INFO::daemon_network_state_synchronizing;
+    
+    res.synchronization_start_height = m_p2p.get_payload_object().get_core_inital_height();
+    res.max_net_seen_height = m_p2p.get_payload_object().get_max_seen_height();
+
+    
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }

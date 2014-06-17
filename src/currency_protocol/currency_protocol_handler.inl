@@ -13,7 +13,9 @@ namespace currency
     t_currency_protocol_handler<t_core>::t_currency_protocol_handler(t_core& rcore, nodetool::i_p2p_endpoint<connection_context>* p_net_layout):m_core(rcore), 
                                                                                                               m_p2p(p_net_layout),
                                                                                                               m_syncronized_connections_count(0),
-                                                                                                              m_synchronized(false)
+                                                                                                              m_synchronized(false),
+                                                                                                              m_max_height_seen(0),
+                                                                                                              m_core_inital_height(0)
 
   {
     if(!m_p2p)
@@ -117,7 +119,25 @@ namespace currency
     LOG_PRINT_CCONTEXT_L2("requesting callback");
     ++context.m_callback_request_count;
     m_p2p->request_callback(context);
+    //update progres vars 
+    if (m_max_height_seen < hshd.current_height)
+      m_max_height_seen = hshd.current_height;
+    if (!m_core_inital_height)
+      m_core_inital_height = m_core.get_current_blockchain_height();
+
     return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------  
+  template<class t_core>
+  uint64_t t_currency_protocol_handler<t_core>::get_core_inital_height()
+  {
+    return m_core_inital_height;
+  }
+  //------------------------------------------------------------------------------------------------------------------------  
+  template<class t_core>
+  uint64_t t_currency_protocol_handler<t_core>::get_max_seen_height()
+  {
+    return m_max_height_seen;
   }
   //------------------------------------------------------------------------------------------------------------------------  
   template<class t_core> 

@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;" />
+
+    <!--  <link rel="stylesheet" href="files/jquery-ui-1.10.2.custom.css" /> -->
+    <link rel="stylesheet" href="files/css/start/jquery-ui-1.10.4.custom.css"/>
+    <link rel="stylesheet" type="text/css" href="files/style.css" />
+
+    <!--  <script src="files/http_code.jquery.com_jquery-latest.js"></script> -->
+    <!--  <script src="files/http_code.jquery.com_ui_1.10.2_jquery-ui.js"></script> -->
+    <script src="files/js/jquery-1.10.2.js"></script>
+    <script src="files/js/jquery-ui-1.10.4.custom.js"></script>
+    <script src="files/ui_helper.js" type="text/javascript" charset="utf-8"></script>
+</head>
+
+<body>
+
+<div id="container">
+    <div class="top_menu_bar">
+        <div class="menu_bar_logo"><img src="files/text_and_logo.png" height="80px" /></div>
+        <div class="inline_menu_bar">
+            <div class="menu_bar_tabs">
+                <div id="daemon_state_view_menu" class="inline_menu_bar_item"  view_name="daemon_state_view">Connectivity</div>
+                <div id="wallet_view_menu"  class="inline_menu_bar_item" view_name="wallet_view">Wallet</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="daemon_state_view" class="view_hidden menu_view_inner_area" >
+        <div id="daemon_state_internal_panel" class="wallet_panel">
+            <div class="daemon_view_general_status_block"><span class="daemon_view_general_status_text">Status:</span> <span  id="daemon_status_text">Loading blockchain data...</span></div>
+            <div id="synchronization_progressbar_block">
+                <div style="width: 200px; height: 20px;float: left;" id="synchronization_progressbar"></div><span style="margin-left: 10px;" id="daemon_synchronization_text">--</span>
+            </div>
+            <div class="daemon_view_details_block">
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Connections: </span>
+                    <span class="daemon_view_param_value" id="daemon_out_connections_text">0</span>  <!-- (out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> -->
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Height: </span>
+                    <span class="daemon_view_param_value" id="daemon_height_text">0</span>  <!-- (out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> -->
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Current difficulty: </span>
+                    <span class="daemon_view_param_value" id="difficulty_text">---</span>
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Current network hashrate: </span>
+                    <span class="daemon_view_param_value" id="hashrate_text">---</span>
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Software version: </span>
+                    <span class="daemon_view_param_value" id="version_text">---</span>
+                </div>
+            </div>
+            <div class="buttons_group">
+                <!-- <div id="domining_button" class="common_button">Generate coins</div> -->
+            </div>
+        </div>
+    </div>
+    <div id="wallet_view" class="view_hidden menu_view_inner_area" >
+        <div id="wallet_welcome_screen_area">
+            <div id="open_wallet_button" class="common_button">Open wallet</div><br><br><span id="id_wallet_or_text">or</span> <br><br>
+            <div id="generate_wallet_button" class="common_button">Generate new wallet</div>
+        </div>
+        <div id="wallet_workspace_area">
+            <div class="wallet_panel">
+                <div class="wallet_left_panel_entry">
+                    <span class="balance_text">Path:</span>
+                    <span class="my_addres_text" id="wallet_path">C:\home\projects\boolberry\build\src\Release\wallet.bin</span><br>
+                    <span class="balance_text">Address:</span>
+                    <span class="my_addres_text" id="wallet_address">1HNJjUsofq5LYLoXem119dd491yFAb5g4bCHkecV4sPqigmuxw57Ci9am71fEN4CRmA9jgnvo5PDNfaq8QnprWmS5uLqnbq</span><br>
+
+                    <span class="balance_text">Balance:</span>
+                    <span class="wallet_balance" id="wallet_balance">0.0</span>
+                    <span class="balance_text">Unlocked:</span>
+                    <span class="wallet_balance" id="wallet_unlocked_balance">0.0</span>
+                </div>
+                <div id="synchronizing_wallet_block">
+                    Synchronizing wallet...
+                    <div style="width: 150px; height: 20px;" id="wallet_progressbar"></div>
+                </div>
+                <div id="synchronized_wallet_block" style="display: none">
+                    Synchronized <div id="close_wallet_button_id" class="common_button">Close wallet</div>
+                </div>
+            </div>
+            <div class="wallet_separator">Send payment</div>
+            <div class="wallet_panel">
+                <div>
+                    <table cellspacing="3px">
+                        <tr>
+                            <td width="90px">Address:</td>
+                            <td><input id="transfer_address_id"><br></td>
+                        </tr>
+                        <tr>
+                            <td>Amount:</td>
+                            <td><input pattern="[0-9]+(\.[0-9]{1,12})?" id="transfer_amount_id" value="0.0">  <a href="javascript:;" onclick="jQuery('.transfer_extra_options').toggle('fast');" class="options_link_text">More options...</a> </td>
+                        </tr>
+                        <tr>
+                            <td > <span class="transfer_extra_options">Payment id: </span> </td>
+                            <td > <span class="transfer_extra_options"><input style="width: 400px" id="payment_id"></span></td>
+                        </tr>
+                        <tr>
+                            <td > <span class="transfer_extra_options">Mixin: </span> </td>
+                            <td > <span class="transfer_extra_options"><input type="number" style="width: 40px" id="mixin_count_id" value="0"></span></td>
+                        </tr>
+                        <tr>
+                            <td > <span class="transfer_extra_options">Fee: </span> </td>
+                            <td > <span class="transfer_extra_options"><input style="width: 130px" id="tx_fee" value="0.000000001000"></span></td>
+                        </tr>
+
+                        <tr>
+                            <td></td>
+                            <td align="right"><div id="transfer_button_id" class="common_button">Send</div></td>
+                        </tr>
+                    </table>
+                    <div id="transfer_result_zone" style="display: none">
+                    <span id="transfer_result_span">
+
+                    </span>
+                        <a href="javascript:;" onclick="jQuery('#transfer_result_zone').toggle('fast');" class="options_link_text">Hide</a>
+                    </div>
+
+                </div>
+            </div>
+            <div class="wallet_separator">Recent transfers</div>
+            <div class="wallet_panet_transparent">
+                <div id="recent_transfers_container_id"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="files/main.js" type="text/javascript" charset="utf-8"></script>
+
+</body>
+</html>

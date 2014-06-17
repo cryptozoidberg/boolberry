@@ -31,7 +31,7 @@ void wallet2::init(const std::string& daemon_address)
   m_daemon_address = daemon_address;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t height)
+void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b)
 {
   process_unconfirmed(tx);
   std::vector<size_t> outs;
@@ -42,6 +42,8 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
 
   r = lookup_acc_outs(m_account.get_keys(), tx, tx_pub_key, outs, tx_money_got_in_outs);
   CHECK_AND_THROW_WALLET_EX(!r, error::acc_outs_lookup_error, tx, tx_pub_key, m_account.get_keys());
+
+  money_transfer2_details mtd;
 
   if(!outs.empty() && tx_money_got_in_outs)
   {
@@ -62,6 +64,8 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
     {
       CHECK_AND_THROW_WALLET_EX(tx.vout.size() <= o, error::wallet_internal_error, "wrong out in transaction: internal index=" +
         std::to_string(o) + ", total_outs=" + std::to_string(tx.vout.size()));
+
+      mtd.receive_indices.push_back(o);
 
       m_transfers.push_back(boost::value_initialized<transfer_details>());
       transfer_details& td = m_transfers.back();
@@ -84,6 +88,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
   
   uint64_t tx_money_spent_in_ins = 0;
   // check all outputs for spending (compare key images)
+  size_t i = 0;
   BOOST_FOREACH(auto& in, tx.vin)
   {
     if(in.type() != typeid(currency::txin_to_key))
@@ -95,13 +100,17 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       tx_money_spent_in_ins += boost::get<currency::txin_to_key>(in).amount;
       transfer_details& td = m_transfers[it->second];
       td.m_spent = true;
+      
+      mtd.spent_indices.push_back(i);
+
       if (0 != m_callback)
         m_callback->on_money_spent(height, td.m_tx, td.m_internal_output_index, tx);
     }
+    i++;
   }
 
     crypto::hash payment_id;
-    if(get_payment_id_from_tx_extra(tx, payment_id))
+    if (tx_money_got_in_outs && get_payment_id_from_tx_extra(tx, payment_id))
     {
       uint64_t received = (tx_money_spent_in_ins < tx_money_got_in_outs) ? tx_money_got_in_outs - tx_money_spent_in_ins : 0;
       if (0 < received && null_hash != payment_id)
@@ -113,6 +122,27 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
         payment.m_unlock_time  = tx.unlock_time;
         m_payments.emplace(payment_id, payment);
         LOG_PRINT_L2("Payment found: " << payment_id << " / " << payment.m_tx_hash << " / " << payment.m_amount);
+      }
+    }
+    if (m_callback)
+    {
+      if (tx_money_spent_in_ins)
+      {//this actually is transfer transaction, notify about spend
+        if (tx_money_spent_in_ins > tx_money_got_in_outs)
+        {//usual transfer 
+          m_callback->on_money_spent2(b, tx, tx_money_spent_in_ins - tx_money_got_in_outs, mtd);
+        }
+        else
+        {//strange transfer, seems that in one transaction have transfers from different wallets.
+          LOG_PRINT_RED_L0("Unusual transaction " << currency::get_transaction_hash(tx) << ", tx_money_spent_in_ins: " << tx_money_spent_in_ins << ", tx_money_got_in_outs: " << tx_money_got_in_outs);
+          m_callback->on_money_spent2(b, tx, tx_money_spent_in_ins, mtd);
+          m_callback->on_money_received2(b, tx, tx_money_got_in_outs, mtd);
+        }
+      }
+      else
+      {
+        if(tx_money_got_in_outs)
+          m_callback->on_money_received2(b, tx, tx_money_got_in_outs, mtd);
       }
     }
 
@@ -135,7 +165,7 @@ void wallet2::process_new_blockchain_entry(const currency::block& b, currency::b
   if(b.timestamp + 60*60*24 > m_account.get_createtime())
   {
     TIME_MEASURE_START(miner_tx_handle_time);
-    process_new_transaction(b.miner_tx, height);
+    process_new_transaction(b.miner_tx, height, b);
     TIME_MEASURE_FINISH(miner_tx_handle_time);
 
     TIME_MEASURE_START(txs_handle_time);
@@ -144,7 +174,7 @@ void wallet2::process_new_blockchain_entry(const currency::block& b, currency::b
       currency::transaction tx;
       bool r = parse_and_validate_tx_from_blob(txblob, tx);
       CHECK_AND_THROW_WALLET_EX(!r, error::tx_parse_error, txblob);
-      process_new_transaction(tx, height);
+      process_new_transaction(tx, height, b);
     }
     TIME_MEASURE_FINISH(txs_handle_time);
     LOG_PRINT_L2("Processed block: " << bl_id << ", height " << height << ", " <<  miner_tx_handle_time + txs_handle_time << "(" << miner_tx_handle_time << "/" << txs_handle_time <<")ms");

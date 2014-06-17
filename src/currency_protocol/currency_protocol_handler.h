@@ -53,6 +53,8 @@ namespace currency
     t_core& get_core(){return m_core;}
     bool is_synchronized(){return m_synchronized;}
     void log_connections();
+    uint64_t get_core_inital_height();
+    uint64_t get_max_seen_height();
   private:
     //----------------- commands handlers ----------------------------------------------
     int handle_notify_new_block(int command, NOTIFY_NEW_BLOCK::request& arg, currency_connection_context& context);
@@ -77,6 +79,8 @@ namespace currency
     nodetool::i_p2p_endpoint<connection_context>* m_p2p;
     std::atomic<uint32_t> m_syncronized_connections_count;
     std::atomic<bool> m_synchronized;
+    std::atomic<uint64_t> m_max_height_seen;
+    std::atomic<uint64_t> m_core_inital_height;
 
     template<class t_parametr>
       bool post_notify(typename t_parametr::request& arg, currency_connection_context& context)

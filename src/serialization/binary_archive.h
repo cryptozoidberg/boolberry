@@ -17,6 +17,7 @@
 
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4244)
+DISABLE_VS_WARNINGS(4100)
 
 //TODO: fix size_t warning in x32 platform
 

@@ -39,16 +39,23 @@
 #include <list>
 #include <map>
 #include <time.h>
+#ifndef Q_MOC_RUN
 #include <boost/cstdint.hpp>
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
-
+#endif
 #if defined(WIN32)
 #include <io.h>
 #else
 #include <unistd.h>
 #endif
+
+#include "warnings.h"
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4100)
+
+
 
 #include "static_initializer.h"
 #include "string_tools.h"
@@ -367,6 +374,7 @@ namespace log_space
         m_have_to_kill_console = false;
 
       ::AllocConsole();
+      freopen("CONOUT$", "w", stdout);
 #endif
     }
 
@@ -1466,4 +1474,7 @@ POP_WARNINGS
 #endif
 
 }
+
+POP_WARNINGS
+
 #endif //_MISC_LOG_EX_H_

@@ -120,13 +120,13 @@ namespace currency
       {
         return tx.amount;
       }
-      uint64_t operator()(const txin_gen& tx) const
+      uint64_t operator()(const txin_gen& /*tx*/) const
       {
         CHECK_AND_ASSERT_MES(false, false, "coinbase transaction in memory pool");
         return 0;
       }
-      uint64_t operator()(const txin_to_script& tx) const {return 0;}
-      uint64_t operator()(const txin_to_scripthash& tx) const {return 0;}
+      uint64_t operator()(const txin_to_script& /*tx*/) const {return 0;}
+      uint64_t operator()(const txin_to_scripthash& /*tx*/) const {return 0;}
     };
 
   };

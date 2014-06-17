@@ -101,6 +101,8 @@ namespace epee
       return load_t_from_binary(out, f_buff);
     }
     //-----------------------------------------------------------------------------------------------------------
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4100)
     template<class t_struct>
     bool store_t_to_binary(t_struct& str_in, std::string& binary_buff, size_t indent = 0)
     {
@@ -108,6 +110,7 @@ namespace epee
       str_in.store(ps);
       return ps.store_to_binary(binary_buff);
     }
+POP_WARNINGS
     //-----------------------------------------------------------------------------------------------------------
     template<class t_struct>
     std::string store_t_to_binary(t_struct& str_in, size_t indent = 0)

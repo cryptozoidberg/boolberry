@@ -275,7 +275,7 @@ namespace nodetool
   }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
-  bool node_server<t_payload_net_handler>::run()
+  bool node_server<t_payload_net_handler>::run(bool sync_call)
   {
     //here you can set worker threads count
     int thrds_count = 10;
@@ -285,12 +285,13 @@ namespace nodetool
 
     //go to loop
     LOG_PRINT("Run net_service loop( " << thrds_count << " threads)...", LOG_LEVEL_0);
-    if(!m_net_server.run_server(thrds_count))
+    if(!m_net_server.run_server(thrds_count, sync_call))
     {
       LOG_ERROR("Failed to run net tcp server!");
     }
 
-    LOG_PRINT("net_service loop stopped.", LOG_LEVEL_0);
+    if(sync_call)
+      LOG_PRINT("net_service loop stopped.", LOG_LEVEL_0);
     return true;
   }
 

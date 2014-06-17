@@ -143,7 +143,7 @@ namespace epee
 
 
     template<class t_stream, class t_type>
-    void dump_as_json(t_stream& strm, const t_type& v, size_t indent)
+    void dump_as_json(t_stream& strm, const t_type& v, size_t /*indent*/)
     {
       strm << v;
     }

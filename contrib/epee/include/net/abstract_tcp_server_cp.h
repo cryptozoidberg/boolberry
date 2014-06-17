@@ -40,7 +40,7 @@
 #define ENABLE_PROFILING
 #include "profile_tools.h"
 #include "net_utils_base.h"
-#include "pragma_comp_defs.h"
+#include "warnings.h"
 
 #define LEVIN_DEFAULT_DATA_BUFF_SIZE       2000  
 
@@ -82,8 +82,8 @@ namespace net_utils
 			char Buffer[1];
 		};
 
-PRAGMA_WARNING_PUSH
-PRAGMA_WARNING_DISABLE_VS(4355)
+PUSH_WARNINGS
+DISABLE_VS_WARNINGS(4355)
 		template<class TProtocol>
 		struct connection: public net_utils::i_service_endpoint
 		{
@@ -204,7 +204,7 @@ PRAGMA_WARNING_DISABLE_VS(4355)
 			volatile LONG m_asked_to_shutdown;			
 			volatile LONG m_connection_shutwoned;			
 		};
-PRAGMA_WARNING_POP
+POP_WARNINGS
 
 		bool worker_thread_member();
 		static unsigned CALLBACK worker_thread(void* param);

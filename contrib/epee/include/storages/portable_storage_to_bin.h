@@ -45,8 +45,8 @@ namespace epee
       return sizeof(pack_value);
     }
 
-    PRAGMA_WARNING_PUSH
-      PRAGMA_GCC("GCC diagnostic ignored \"-Wstrict-aliasing\"")
+    PUSH_WARNINGS
+    DISABLE_GCC_WARNING(strict-aliasing)
       template<class t_stream>
     size_t pack_varint(t_stream& strm, size_t val)
     {   //the first two bits always reserved for size information
@@ -67,7 +67,7 @@ namespace epee
         return pack_varint_t<uint64_t>(strm, PORTABLE_RAW_SIZE_MARK_INT64, val);
       }
     }
-    PRAGMA_WARNING_POP
+    POP_WARNINGS
 
       template<class t_stream>
     bool put_string(t_stream& strm, const std::string& v)

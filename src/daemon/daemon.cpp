@@ -36,12 +36,6 @@ namespace po = boost::program_options;
 
 namespace
 {
-  const command_line::arg_descriptor<std::string> arg_config_file = {"config-file", "Specify configuration file", std::string(CURRENCY_NAME_SHORT ".conf")};
-  const command_line::arg_descriptor<bool>        arg_os_version  = {"os-version", ""};
-  const command_line::arg_descriptor<std::string> arg_log_file    = {"log-file", "", ""};
-  const command_line::arg_descriptor<int>         arg_log_level   = {"log-level", "", LOG_LEVEL_0};
-  const command_line::arg_descriptor<bool>        arg_console     = {"no-console", "Disable daemon console commands"};
-  const command_line::arg_descriptor<bool>        arg_show_details     = {"currency-details", "Display currency details"};
 }
 
 bool command_line_preprocessor(const boost::program_options::variables_map& vm);
@@ -64,15 +58,15 @@ int main(int argc, char* argv[])
 
   command_line::add_arg(desc_cmd_only, command_line::arg_help);
   command_line::add_arg(desc_cmd_only, command_line::arg_version);
-  command_line::add_arg(desc_cmd_only, arg_os_version);
+  command_line::add_arg(desc_cmd_only, command_line::arg_os_version);
   // tools::get_default_data_dir() can't be called during static initialization
   command_line::add_arg(desc_cmd_only, command_line::arg_data_dir, tools::get_default_data_dir());
-  command_line::add_arg(desc_cmd_only, arg_config_file);
+  command_line::add_arg(desc_cmd_only, command_line::arg_config_file);
 
-  command_line::add_arg(desc_cmd_sett, arg_log_file);
-  command_line::add_arg(desc_cmd_sett, arg_log_level);
-  command_line::add_arg(desc_cmd_sett, arg_console);
-  command_line::add_arg(desc_cmd_sett, arg_show_details);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_log_file);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_log_level);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_console);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_show_details);
   
 
   currency::core::init_options(desc_cmd_sett);
@@ -96,7 +90,7 @@ int main(int argc, char* argv[])
     }
 
     std::string data_dir = command_line::get_arg(vm, command_line::arg_data_dir);
-    std::string config = command_line::get_arg(vm, arg_config_file);
+    std::string config = command_line::get_arg(vm, command_line::arg_config_file);
 
     boost::filesystem::path data_dir_path(data_dir);
     boost::filesystem::path config_path(config);
@@ -118,7 +112,7 @@ int main(int argc, char* argv[])
     return 1;
 
   //set up logging options
-  boost::filesystem::path log_file_path(command_line::get_arg(vm, arg_log_file));
+  boost::filesystem::path log_file_path(command_line::get_arg(vm, command_line::arg_log_file));
   if (log_file_path.empty())
     log_file_path = log_space::log_singletone::get_default_log_file();
   std::string log_dir;
@@ -142,7 +136,7 @@ int main(int argc, char* argv[])
   //create objects and link them
   currency::core ccore(NULL);
   ccore.set_checkpoints(std::move(checkpoints));  
-  currency::t_currency_protocol_handler<currency::core> cprotocol(ccore, NULL);
+  currency::t_currency_protocol_handler<currency::core> cprotocol(ccore, NULL );
   nodetool::node_server<currency::t_currency_protocol_handler<currency::core> > p2psrv(cprotocol);
   currency::core_rpc_server rpc_server(ccore, p2psrv);
   cprotocol.set_p2p_endpoint(&p2psrv);
@@ -176,7 +170,7 @@ int main(int argc, char* argv[])
   LOG_PRINT_L0("Core initialized OK");
   
   // start components
-  if(!command_line::has_arg(vm, arg_console))
+  if (!command_line::has_arg(vm, command_line::arg_console))
   {
     dch.start_handling();
   }
@@ -229,12 +223,12 @@ bool command_line_preprocessor(const boost::program_options::variables_map& vm)
     exit = true;
   }
 
-  if(command_line::get_arg(vm, arg_show_details))
+  if (command_line::get_arg(vm, command_line::arg_show_details))
   {
     currency::print_currency_details();
     exit = true;
   }
-  if (command_line::get_arg(vm, arg_os_version))
+  if (command_line::get_arg(vm, command_line::arg_os_version))
   {
     std::cout << "OS: " << tools::get_os_version_string() << ENDL;
     exit = true;
@@ -245,7 +239,7 @@ bool command_line_preprocessor(const boost::program_options::variables_map& vm)
     return true;
   }
 
-  int new_log_level = command_line::get_arg(vm, arg_log_level);
+  int new_log_level = command_line::get_arg(vm, command_line::arg_log_level);
   if(new_log_level < LOG_LEVEL_MIN || new_log_level > LOG_LEVEL_MAX)
   {
     LOG_PRINT_L0("Wrong log level value: ");

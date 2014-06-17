@@ -13,10 +13,10 @@
 #include "crypto/hash.h"
 #include "crypto-tests.h"
 #include "../io.h"
-#include "pragma_comp_defs.h"
+#include "warnings.h"
 
-PRAGMA_WARNING_PUSH
-PRAGMA_GCC("GCC diagnostic ignored \"-Wstrict-aliasing\"")
+PUSH_WARNINGS
+DISABLE_GCC_WARNING(strict-aliasing)
 
 
 using namespace std;
@@ -250,4 +250,4 @@ error:
   }
   return error ? 1 : 0;
 }
-PRAGMA_WARNING_POP
+POP_WARNINGS

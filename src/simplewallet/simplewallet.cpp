@@ -750,7 +750,6 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
     bool r = parse_payment_id_from_hex_str(payment_id_str, payment_id);
     if(r)
     {
-      std::string extra_nonce;
       r = set_payment_id_to_tx_extra(extra, payment_id);
     }
 

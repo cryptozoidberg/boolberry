@@ -255,6 +255,13 @@ namespace currency
       END_KV_SERIALIZE_MAP()
     };
 
+    enum
+    {
+      daemon_network_state_connecting = 0,
+      daemon_network_state_synchronizing = 1,
+      daemon_network_state_online = 2
+    };
+
     struct response
     {
       std::string status;
@@ -272,6 +279,9 @@ namespace currency
       uint64_t current_network_hashrate_350;
       uint64_t scratchpad_size;
       uint64_t alias_count;
+      uint64_t daemon_network_state;
+      uint64_t synchronization_start_height;
+      uint64_t max_net_seen_height;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -289,6 +299,9 @@ namespace currency
         KV_SERIALIZE(current_network_hashrate_350)
         KV_SERIALIZE(scratchpad_size)
         KV_SERIALIZE(alias_count)
+        KV_SERIALIZE(daemon_network_state)
+        KV_SERIALIZE(synchronization_start_height)
+        KV_SERIALIZE(max_net_seen_height)
       END_KV_SERIALIZE_MAP()
     };
   };    

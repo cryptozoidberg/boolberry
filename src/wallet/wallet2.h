@@ -28,12 +28,21 @@
 
 namespace tools
 {
+
+  struct money_transfer2_details
+  {
+    std::vector<size_t> receive_indices;
+    std::vector<size_t> spent_indices;
+  };
+
   class i_wallet2_callback
   {
   public:
-    virtual void on_new_block(uint64_t height, const currency::block& block) {}
-    virtual void on_money_received(uint64_t height, const currency::transaction& tx, size_t out_index) {}
-    virtual void on_money_spent(uint64_t height, const currency::transaction& in_tx, size_t out_index, const currency::transaction& spend_tx) {}
+    virtual void on_new_block(uint64_t /*height*/, const currency::block& /*block*/) {}
+    virtual void on_money_received(uint64_t /*height*/, const currency::transaction& /*tx*/, size_t /*out_index*/) {}
+    virtual void on_money_spent(uint64_t /*height*/, const currency::transaction& /*in_tx*/, size_t /*out_index*/, const currency::transaction& /*spend_tx*/) {}
+    virtual void on_money_received2(const currency::block& /*b*/, const currency::transaction& /*tx*/, uint64_t /*amount*/, const money_transfer2_details& td) {}
+    virtual void on_money_spent2(const currency::block& /*b*/, const currency::transaction& /*in_tx*/, uint64_t /*amount*/, const money_transfer2_details& td) {}
   };
 
   struct tx_dust_policy
@@ -101,6 +110,7 @@ namespace tools
     void generate(const std::string& wallet, const std::string& password);
     void load(const std::string& wallet, const std::string& password);
     void store();
+    std::string get_wallet_path(){ return m_keys_file; }
     currency::account_base& get_account(){return m_account;}
 
     void init(const std::string& daemon_address = "http://localhost:8080");
@@ -148,7 +158,7 @@ namespace tools
   private:
     bool store_keys(const std::string& keys_file_name, const std::string& password);
     void load_keys(const std::string& keys_file_name, const std::string& password);
-    void process_new_transaction(const currency::transaction& tx, uint64_t height);
+    void process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b);
     void process_new_blockchain_entry(const currency::block& b, currency::block_complete_entry& bche, crypto::hash& bl_id, uint64_t height);
     void detach_blockchain(uint64_t height);
     void get_short_chain_history(std::list<crypto::hash>& ids);
