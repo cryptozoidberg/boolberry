@@ -3,13 +3,16 @@ html {
     height: 100%;
 }
 
+
 body {
-    font: 16px/1.5em; /* "Helvetica Neue", Helvetica, sans-serif*/
-    margin: 0em 0 0em 0;
-    height:100%;
-    -webkit-font-smoothing: antialiased;
-    background: rgb(231, 231, 231);
-}
+     font-family: Helvetica, Arial, sans-serif;
+     color: #34495e;
+     background-color: #ffffff;
+     margin: 0em 0 0em 0;
+     height:100%;
+     -webkit-font-smoothing: antialiased;
+     background: rgb(231, 231, 231);
+ }
 
 #container{
     height:100%;
