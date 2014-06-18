@@ -151,6 +151,8 @@ namespace mining
         {
 	  (*result) = nonce_offset;
 	  (*done) = true;
+	  (*do_reset) = true;
+	  m_work_done_cond.notify_one();
 	  return;
         }
 	nonce_offset++;
@@ -265,8 +267,8 @@ namespace mining
 
       while(!done && epee::misc_utils::get_tick_count() - m_last_job_ticks < 20000)
       {
-	/* Next version - time wait on a cond var to reduce latency more */
-        epee::misc_utils::sleep_no_w(1000);
+	std::unique_lock<std::mutex> lck(m_work_mutex);
+	m_work_done_cond.wait_for(lck, std::chrono::seconds(1));
       }
 
       do_reset = true;
