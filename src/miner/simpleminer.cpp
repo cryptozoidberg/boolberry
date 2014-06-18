@@ -52,12 +52,15 @@ int main(int argc, char** argv)
   if (!r)
     return 1;
 
+
+  srandom(epee::misc_utils::get_tick_count());
+
   while (1) {
     mining::simpleminer miner;
     r = miner.init(vm);
     r = r && miner.run(); // Returns on too many failures
-    LOG_PRINT_L0("Excessive failures.  Sleeping 10 seconds and restarting...");
-    epee::misc_utils::sleep_no_w(10000);
+    LOG_PRINT_L0("Excessive failures.  Sleeping 10-ish seconds and restarting...");
+    epee::misc_utils::sleep_no_w(10000 + (random() % 5000));
   }
 
   return 0;
@@ -148,6 +151,8 @@ namespace mining
         {
 	  (*result) = nonce_offset;
 	  (*done) = true;
+	  (*do_reset) = true;
+	  m_work_done_cond.notify_one();
 	  return;
         }
 	nonce_offset++;
@@ -262,8 +267,8 @@ namespace mining
 
       while(!done && epee::misc_utils::get_tick_count() - m_last_job_ticks < 20000)
       {
-	/* Next version - time wait on a cond var to reduce latency more */
-        epee::misc_utils::sleep_no_w(1000);
+	std::unique_lock<std::mutex> lck(m_work_mutex);
+	m_work_done_cond.wait_for(lck, std::chrono::seconds(1));
       }
 
       do_reset = true;
@@ -328,7 +333,7 @@ namespace mining
       m_hashes_done = 0;
 
       (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = start_nonce;
-      if (job_submit_failures == 10)
+      if (job_submit_failures == 5)
       {
         LOG_PRINT_L0("Too many submission failures.  Something is very wrong.");
         return false;
