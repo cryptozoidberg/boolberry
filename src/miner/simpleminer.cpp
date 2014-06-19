@@ -364,17 +364,27 @@ namespace mining
     scr_req.id = m_pool_session_id;
     if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_GET_FULLSCRATCHPAD>("/json_rpc", scr_req, scr_resp, m_http_client, 60*1000))
     {
-      LOG_PRINT_L0("Failed to get scratchpad, disconnect and retry....");
+      LOG_PRINT_L0("Failed to get scratchpad.  Disconnecting and retrying...");
       m_http_client.disconnect();            
       return false;
     }
     if(!currency::hexstr_to_addendum(scr_resp.scratchpad_hex, m_scratchpad))
     {
-      LOG_ERROR("Failed to get scratchpad: hexstr_to_addendum failed, disconnect and retry....");
+      LOG_ERROR("Failed to get scratchpad: hexstr_to_addendum failed.  Disconnecting and retrying...");
       m_http_client.disconnect();
       return false;
     }
     bool r = text_height_info_to_native_height_info(scr_resp.hi, m_hi);
+    if (m_scratchpad.size() == 0)
+    {
+      LOG_ERROR("Server sent empty scratchpad.  Disconnecting and retrying...");
+      /* Sleep a bit longer here.  Rationale:  If the server is sending bad
+       * scratchpad data, it's probably having problems, so let's not slam it
+       * with requests and make things worse. */
+      epee::misc_utils::sleep_no_w(5000);
+      m_http_client.disconnect();
+      return false;
+    }
     LOG_PRINT_L0("Scratchpad received ok, size: " << (m_scratchpad.size()*32)/1024 << "Kb, heigh=" << m_hi.height);
     return true;
   }
