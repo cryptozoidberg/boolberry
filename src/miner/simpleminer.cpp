@@ -52,12 +52,15 @@ int main(int argc, char** argv)
   if (!r)
     return 1;
 
+
+  srandom(epee::misc_utils::get_tick_count());
+
   while (1) {
     mining::simpleminer miner;
     r = miner.init(vm);
     r = r && miner.run(); // Returns on too many failures
-    LOG_PRINT_L0("Excessive failures.  Sleeping 10 seconds and restarting...");
-    epee::misc_utils::sleep_no_w(10000);
+    LOG_PRINT_L0("Excessive failures.  Sleeping 10-ish seconds and restarting...");
+    epee::misc_utils::sleep_no_w(10000 + (random() % 5000));
   }
 
   return 0;
@@ -148,6 +151,8 @@ namespace mining
         {
 	  (*result) = nonce_offset;
 	  (*done) = true;
+	  (*do_reset) = true;
+	  m_work_done_cond.notify_one();
 	  return;
         }
 	nonce_offset++;
@@ -262,8 +267,8 @@ namespace mining
 
       while(!done && epee::misc_utils::get_tick_count() - m_last_job_ticks < 20000)
       {
-	/* Next version - time wait on a cond var to reduce latency more */
-        epee::misc_utils::sleep_no_w(1000);
+	std::unique_lock<std::mutex> lck(m_work_mutex);
+	m_work_done_cond.wait_for(lck, std::chrono::seconds(1));
       }
 
       do_reset = true;
@@ -328,7 +333,7 @@ namespace mining
       m_hashes_done = 0;
 
       (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = start_nonce;
-      if (job_submit_failures == 10)
+      if (job_submit_failures == 5)
       {
         LOG_PRINT_L0("Too many submission failures.  Something is very wrong.");
         return false;
@@ -359,17 +364,27 @@ namespace mining
     scr_req.id = m_pool_session_id;
     if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_GET_FULLSCRATCHPAD>("/json_rpc", scr_req, scr_resp, m_http_client, 60*1000))
     {
-      LOG_PRINT_L0("Failed to get scratchpad, disconnect and retry....");
+      LOG_PRINT_L0("Failed to get scratchpad.  Disconnecting and retrying...");
       m_http_client.disconnect();            
       return false;
     }
     if(!currency::hexstr_to_addendum(scr_resp.scratchpad_hex, m_scratchpad))
     {
-      LOG_ERROR("Failed to get scratchpad: hexstr_to_addendum failed, disconnect and retry....");
+      LOG_ERROR("Failed to get scratchpad: hexstr_to_addendum failed.  Disconnecting and retrying...");
       m_http_client.disconnect();
       return false;
     }
     bool r = text_height_info_to_native_height_info(scr_resp.hi, m_hi);
+    if (m_scratchpad.size() == 0)
+    {
+      LOG_ERROR("Server sent empty scratchpad.  Disconnecting and retrying...");
+      /* Sleep a bit longer here.  Rationale:  If the server is sending bad
+       * scratchpad data, it's probably having problems, so let's not slam it
+       * with requests and make things worse. */
+      epee::misc_utils::sleep_no_w(5000);
+      m_http_client.disconnect();
+      return false;
+    }
     LOG_PRINT_L0("Scratchpad received ok, size: " << (m_scratchpad.size()*32)/1024 << "Kb, heigh=" << m_hi.height);
     return true;
   }

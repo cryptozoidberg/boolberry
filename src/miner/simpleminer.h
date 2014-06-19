@@ -52,6 +52,8 @@ namespace mining
     std::atomic<uint64_t> m_hashes_done;
     std::string m_pool_session_id;
     simpleminer::job_details_native m_job;
+    std::condition_variable m_work_done_cond;
+    std::mutex m_work_mutex;
 
     std::string m_pool_ip;
     std::string m_pool_port;
