@@ -12,6 +12,10 @@
 #include <string.h>
 #include "crypto.h"
 
+extern "C" {
+#include "crypto/alt/KeccakNISTInterface.h"
+  }
+
 #ifndef KECCAK_ROUNDS
 #define KECCAK_ROUNDS 24
 #endif
@@ -26,6 +30,16 @@
 
 namespace crypto
 {
+
+inline
+  void wild_keccak_dbl_opt(const uint8_t *in, size_t inlen, uint8_t *md, size_t mdlen, const uint64_t* pscr, uint64_t scr_sz)
+    {      
+      Hash(256, in, inlen*8, md, pscr, scr_sz);
+      Hash(256, md, mdlen*8, md, pscr, scr_sz);
+    }
+
+
+
   template<typename pod_operand_a, typename pod_operand_b>
   pod_operand_a xor_pod(const pod_operand_a& a, const pod_operand_b& b)
   {

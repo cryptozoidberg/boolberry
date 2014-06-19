@@ -1,5 +1,5 @@
 #define Unrolling 24
-#define UseBebigokimisa
+//#define UseBebigokimisa
 //#define UseSSE
 //#define UseOnlySIMD64
 //#define UseMMX

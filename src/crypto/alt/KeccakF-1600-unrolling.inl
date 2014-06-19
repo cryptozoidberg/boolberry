@@ -11,6 +11,87 @@ and related or neighboring rights to the source code in this file.
 http://creativecommons.org/publicdomain/zero/1.0/
 */
 
+
+#define readScratchPadData(base_addr, off) pscratchpd[base_addr##_0] ^ pscratchpd[base_addr##_1] ^ pscratchpd[base_addr##_2] ^ pscratchpd[base_addr##_3]
+
+#define prepareScratchPadAddr(base_addr, no, Xx) base_addr##_##no = ((Xx)%scr_hashes_size)<<3 
+
+#define updateWildStateBlock(block_no, A, B, C, D) \
+  prepareScratchPadAddr(base_addr_##block_no, 0, A); \
+  prepareScratchPadAddr(base_addr_##block_no, 1, B); \
+  prepareScratchPadAddr(base_addr_##block_no, 2, C); \
+  prepareScratchPadAddr(base_addr_##block_no, 3, D); \
+  A ^= readScratchPadData(base_addr_##block_no, 0); \
+  B ^= readScratchPadData(base_addr_##block_no, 1); \
+  C ^= readScratchPadData(base_addr_##block_no, 2); \
+  D ^= readScratchPadData(base_addr_##block_no, 3); 
+
+
+#define updateWildToState(X) \
+  { \
+  scr_hashes_size = pscratchpd_sz >> 2; \
+  updateWildStateBlock(0, X##ba, X##be, X##bi, X##bo); \
+  updateWildStateBlock(1, X##bu, X##ga, X##ge, X##gi); \
+  updateWildStateBlock(2, X##go, X##gu, X##ka, X##ke); \
+  updateWildStateBlock(3, X##ki, X##ko, X##ku, X##ma); \
+  updateWildStateBlock(4, X##me, X##mi, X##mo, X##mu); \
+  updateWildStateBlock(5, X##sa, X##se, X##si, X##so); \
+  }
+
+
+
+#define wild_rounds \
+  /*prepareWildTheta */ \
+  /*wildThetaRhoPiChiIotaPrepareTheta( 0, A, E)*/ \
+  /*updateWildToState(E)*/ \
+  /*wildThetaRhoPiChiIotaPrepareTheta( 1, E, A)*/ \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta( 2, A, E) \
+  updateWildToState(E) \
+  wildThetaRhoPiChiIotaPrepareTheta( 3, E, A) \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta( 4, A, E) \
+  updateWildToState(E) \
+  wildThetaRhoPiChiIotaPrepareTheta( 5, E, A) \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta( 6, A, E) \
+  updateWildToState(E) \
+  wildThetaRhoPiChiIotaPrepareTheta( 7, E, A) \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta( 8, A, E) \
+  updateWildToState(E) \
+  wildThetaRhoPiChiIotaPrepareTheta( 9, E, A) \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta(10, A, E) \
+  updateWildToState(E) \
+  wildThetaRhoPiChiIotaPrepareTheta(11, E, A) \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta(12, A, E) \
+  updateWildToState(E) \
+  wildThetaRhoPiChiIotaPrepareTheta(13, E, A) \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta(14, A, E) \
+  updateWildToState(E) \
+  wildThetaRhoPiChiIotaPrepareTheta(15, E, A) \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta(16, A, E) \
+  updateWildToState(E) \
+  wildThetaRhoPiChiIotaPrepareTheta(17, E, A) \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta(18, A, E) \
+  updateWildToState(E) \
+  wildThetaRhoPiChiIotaPrepareTheta(19, E, A) \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta(20, A, E) \
+  updateWildToState(E) \
+  wildThetaRhoPiChiIotaPrepareTheta(21, E, A) \
+  updateWildToState(A) \
+  wildThetaRhoPiChiIotaPrepareTheta(22, A, E) \
+  updateWildToState(E) \
+  thetaRhoPiChiIota(23, E, A) \
+  copyToState(state, A)
+
+
 #if (Unrolling == 24)
 #define rounds \
     prepareTheta \

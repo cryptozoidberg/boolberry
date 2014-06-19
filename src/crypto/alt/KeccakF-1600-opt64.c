@@ -17,9 +17,10 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include "KeccakF-1600-opt64-settings.h"
 #include "KeccakF-1600-interface.h"
 
+#include <immintrin.h>
 
 typedef unsigned char UINT8;
-typedef unsigned long long int UINT64;
+
 
 #if defined(__GNUC__)
 #define ALIGN __attribute__ ((aligned(32)))
@@ -30,7 +31,7 @@ typedef unsigned long long int UINT64;
 #endif
 
 #if defined(UseSSE)
-    #include <x86intrin.h>
+    //#include <x86intrin.h>
     typedef __m128i V64;
     typedef __m128i V128;
     typedef union {
@@ -171,10 +172,10 @@ ALIGN const UINT64 rot_39_41[2] = {39, 41};
     #define ROL64(a, offset) ((((UINT64)a) << offset) ^ (((UINT64)a) >> (64-offset)))
     #endif
 
-    #include "KeccakF-1600-64.macros"
+    #include "KeccakF-1600-64.inl"
 #endif
 
-#include "KeccakF-1600-unrolling.macros"
+#include "KeccakF-1600-unrolling.inl"
 
 void KeccakPermutationOnWords(UINT64 *state)
 {
@@ -256,15 +257,173 @@ void KeccakPermutationOnWordsAfterXoring1024bits(UINT64 *state, const UINT64 *in
 #endif
 
 #ifdef ProvideFast1088
-void KeccakPermutationOnWordsAfterXoring1088bits(UINT64 *state, const UINT64 *input)
+void KeccakPermutationOnWordsAfterXoring1088bits(UINT64 *state, const UINT64 *input, const UINT64* pscratchpd, UINT64 pscratchpd_sz)
 {
-    declareABCDE
+    declareWildABCDE
 #if (Unrolling != 24)
     unsigned int i;
 #endif
 
-    copyFromStateAndXor1088bits(A, state, input)
-    rounds
+    //copyFromStateAndXor1088bits(A, state, input);
+    Aba = state[ 0]^input[ 0]; 
+    Abe = state[ 1]^input[ 1]; 
+    Abi = state[ 2]^input[ 2];
+    Abo = state[ 3]^input[ 3];
+    Abu = state[ 4]^input[ 4];
+    Aga = state[ 5]^input[ 5]; 
+    Age = state[ 6]^input[ 6]; 
+    Agi = state[ 7]^input[ 7]; 
+    Ago = state[ 8]^input[ 8]; 
+    Agu = state[ 9]^input[ 9]; 
+    Aka = state[10]^input[10]; 
+    Ake = state[11]^input[11]; 
+    Aki = state[12]^input[12]; 
+    Ako = state[13]^input[13]; 
+    Aku = state[14]^input[14]; 
+    Ama = state[15]^input[15]; 
+    Ame = state[16]^input[16]; 
+    Ami = state[17]; 
+    Amo = state[18]; 
+    Amu = state[19]; 
+    Asa = state[20]; 
+    Ase = state[21]; 
+    Asi = state[22]; 
+    Aso = state[23]; 
+    Asu = state[24]; 
+
+    /*Ca = Aba^Aga^Aka*Ama*Asa; 
+    Ce = Abe^Age^Ake*Ame*Ase; 
+    Ci = Abi^Agi^Aki*Ami*Asi; 
+    Co = Abo^Ago^Ako*Amo*Aso; 
+    Cu = Abu^Agu^Aku*Amu*Asu; 
+    
+    Da = Cu^ROL64(Ce, 1);
+    De = Ca^ROL64(Ci, 1);
+    Di = Ce^ROL64(Co, 1);
+    Do = Ci^ROL64(Cu, 1);
+    Du = Co^ROL64(Ca, 1);
+
+    Aba ^= Da;
+    Bba = Aba;
+    Age ^= De;
+    Bbe = ROL64(Age, 44);
+    Aki ^= Di;
+    Bbi = ROL64(Aki, 43);
+    Amo ^= Do;
+    Bbo = ROL64(Amo, 21);
+    Asu ^= Du;
+    Bbu = ROL64(Asu, 14);
+    Eba =   Bba ^((~Bbe)&  Bbi );
+    Eba ^= KeccakF1600RoundConstants[0];
+    Ca = Eba;
+    Ebe =   Bbe ^((~Bbi)&  Bbo );
+    Ce = Ebe;
+    Ebi =   Bbi ^((~Bbo)&  Bbu );
+    Ci = Ebi;
+    Ebo =   Bbo ^((~Bbu)&  Bba );
+    Co = Ebo;
+    Ebu =   Bbu ^((~Bba)&  Bbe );
+    Cu = Ebu;
+
+    Abo ^= Do;
+    Bga = ROL64(Abo, 28);
+    Agu ^= Du;
+    Bge = ROL64(Agu, 20);
+    Aka ^= Da;
+    Bgi = ROL64(Aka, 3);
+    Ame ^= De;
+    Bgo = ROL64(Ame, 45);
+    Asi ^= Di;
+    Bgu = ROL64(Asi, 61);
+    Ega =   Bga ^((~Bge)&  Bgi );
+    Ca ^= Ega;
+    Ege =   Bge ^((~Bgi)&  Bgo );
+    Ce ^= Ege;
+    Egi =   Bgi ^((~Bgo)&  Bgu );
+    Ci ^= Egi;
+    Ego =   Bgo ^((~Bgu)&  Bga );
+    Co ^= Ego;
+    Egu =   Bgu ^((~Bga)&  Bge );
+    Cu ^= Egu;
+
+    Abe ^= De;
+    Bka = ROL64(Abe, 1);
+    Agi ^= Di;
+    Bke = ROL64(Agi, 6);
+    Ako ^= Do;
+    Bki = ROL64(Ako, 25);
+    Amu ^= Du;
+    Bko = ROL64(Amu, 8);
+    Asa ^= Da;
+    Bku = ROL64(Asa, 18);
+    Eka =   Bka ^((~Bke)&  Bki );
+    Cam = Eka;
+    Eke =   Bke ^((~Bki)&  Bko );
+    Cem = Eke;
+    Eki =   Bki ^((~Bko)&  Bku );
+    Cim = Eki;
+    Eko =   Bko ^((~Bku)&  Bka );
+    Com = Eko;
+    Eku =   Bku ^((~Bka)&  Bke );
+    Cum = Eku;
+
+    Abu ^= Du;
+    Bma = ROL64(Abu, 27);
+    Aga ^= Da;
+    Bme = ROL64(Aga, 36);
+    Ake ^= De;
+    Bmi = ROL64(Ake, 10);
+    Ami ^= Di;
+    Bmo = ROL64(Ami, 15);
+    Aso ^= Do;
+    Bmu = ROL64(Aso, 56);
+    Ema =   Bma ^((~Bme)&  Bmi );
+    Cam *= Ema;
+    Eme =   Bme ^((~Bmi)&  Bmo );
+    Cem *= Eme;
+    Emi =   Bmi ^((~Bmo)&  Bmu );
+    Cim *= Emi;
+    Emo =   Bmo ^((~Bmu)&  Bma );
+    Com *= Emo;
+    Emu =   Bmu ^((~Bma)&  Bme );
+    Cum *= Emu;
+
+    Abi ^= Di;
+    Bsa = ROL64(Abi, 62);
+    Ago ^= Do;
+    Bse = ROL64(Ago, 55);
+    Aku ^= Du;
+    Bsi = ROL64(Aku, 39);
+    Ama ^= Da;
+    Bso = ROL64(Ama, 41);
+    Ase ^= De;
+    Bsu = ROL64(Ase, 2);
+    Esa =   Bsa ^((~Bse)&  Bsi );
+    Cam *= Esa;
+    Ca ^= Cam;
+    Ese =   Bse ^((~Bsi)&  Bso );
+    Cem *= Ese;
+    Ce ^= Cem;
+    Esi =   Bsi ^((~Bso)&  Bsu );
+    Cim *= Esi;
+    Ci ^= Cim;
+    Eso =   Bso ^((~Bsu)&  Bsa );
+    Com *= Eso;
+    Co ^= Com;
+    Esu =   Bsu ^((~Bsa)&  Bse );
+    Cum *= Esu;
+    Cu ^= Cum;*/
+
+    prepareWildTheta
+    wildThetaRhoPiChiIotaPrepareTheta( 0, A, E)
+    copyToState(state, E)  
+    updateWildToState(E)
+    copyToState(state, E)  
+    wildThetaRhoPiChiIotaPrepareTheta( 1, E, A)
+    copyToState(state, E)  
+
+
+    wild_rounds
 #if defined(UseMMX)
     _mm_empty();
 #endif
@@ -384,10 +543,10 @@ void KeccakAbsorb1024bits(unsigned char *state, const unsigned char *data)
 #endif
 
 #ifdef ProvideFast1088
-void KeccakAbsorb1088bits(unsigned char *state, const unsigned char *data)
+void KeccakAbsorb1088bits(unsigned char *state, const unsigned char *data, const UINT64* pscratchpd, UINT64 pscratchpd_sz)
 {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    KeccakPermutationOnWordsAfterXoring1088bits((UINT64*)state, (const UINT64*)data);
+    KeccakPermutationOnWordsAfterXoring1088bits((UINT64*)state, (const UINT64*)data, pscratchpd, pscratchpd_sz);
 #else
     UINT64 dataAsWords[17];
     unsigned int i;
@@ -504,3 +663,12 @@ void KeccakExtract(const unsigned char *state, unsigned char *data, unsigned int
     }
 #endif
 }
+
+/*
+void keccak_2(const unsigned char *in, size_t count, unsigned char* phash, size_t hash_len)
+{
+  unsigned char state[200];
+  KeccakInitializeState(state); 
+  KeccakAbsorb(state, in, count/8);
+  KeccakExtract(state, phash, hash_len/8);
+}*/

@@ -6,11 +6,13 @@
 
 #include "crypto/crypto.h"
 #include "currency_core/currency_basic.h"
-#include "crypto/alt_keccack1.h"
+
 
 extern "C" {
 #include "crypto/keccak.h"
+#include "crypto/alt/KeccakNISTInterface.h"
 }
+
 
 #include "crypto/wild_keccak.h"
 
@@ -64,7 +66,10 @@ class test_keccak_alt1: public test_keccak_base
       {
       pretest();
       crypto::hash h;
-      keccak1(reinterpret_cast<uint8_t*>(&h), reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size());
+      //Hash(256, reinterpret_cast<const unsigned char*>(&m_buff[0]), m_buff.size()*8, reinterpret_cast<unsigned char*>(&h));
+      //crypto::hash h2;
+      //keccak(reinterpret_cast<const unsigned char*>(&m_buff[0]), m_buff.size(), reinterpret_cast<unsigned char*>(&h2), sizeof(h2));
+
       LOG_PRINT_L4(h);
       return true;
       }
@@ -114,15 +119,25 @@ public:
   bool test()
   {
     pretest();
+    uint64_t* pst =  (uint64_t*)&m_scratchpad_vec[0];
+    uint64_t sz = m_scratchpad_vec.size()*4;
+    for(size_t i = 0; i != sz; i++)
+      pst[i] = i;
+
     crypto::hash h;
     crypto::wild_keccak_dbl<crypto::mul_f>(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h), sizeof(h), [&](crypto::state_t_m& st, crypto::mixin_t& mix)
     {
 #define SCR_I(i) m_scratchpad_vec[st[i]%m_scratchpad_vec.size()]
       for(size_t i = 0; i!=6; i++)
       {
-        *(crypto::hash*)&mix[i*4]  = XOR_5(SCR_I(i*5), SCR_I(i*5+1), SCR_I(i*5+2), SCR_I(i*5+3), SCR_I(i*5+4));  
+        *(crypto::hash*)&mix[i*4]  = XOR_4(SCR_I(i*4), SCR_I(i*4+1), SCR_I(i*4+2), SCR_I(i*4+3));  
       }
     });
+
+    crypto::hash h2;
+    crypto::wild_keccak_dbl_opt(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h2), sizeof(h2), (uint64_t*)&m_scratchpad_vec[0], m_scratchpad_vec.size()*4);
+    if(h2 != h)
+      return false;
 
     return true;
   }
