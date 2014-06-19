@@ -49,7 +49,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
   UINT64 Bma, Bme, Bmi, Bmo, Bmu; \
   UINT64 Bsa, Bse, Bsi, Bso, Bsu; \
   UINT64 Ca, Ce, Ci, Co, Cu; \
-  UINT64 Cam, Cem, Cim, Com, Cum; \
+  /*UINT64 Cam, Cem, Cim, Com, Cum; */\
   UINT64 Da, De, Di, Do, Du; \
   UINT64 Eba, Ebe, Ebi, Ebo, Ebu; \
   UINT64 Ega, Ege, Egi, Ego, Egu; \
@@ -70,12 +70,12 @@ http://creativecommons.org/publicdomain/zero/1.0/
     Cu = Abu^Agu^Aku^Amu^Asu; \
 
 
-#define prepareWildTheta \
-  Ca = Aba^Aga^Aka*Ama*Asa; \
-  Ce = Abe^Age^Ake*Ame*Ase; \
-  Ci = Abi^Agi^Aki*Ami*Asi; \
-  Co = Abo^Ago^Ako*Amo*Aso; \
-  Cu = Abu^Agu^Aku*Amu*Asu; \
+#define prepareWildTheta(X) \
+  Ca = X##ba^X##ga^X##ka*X##ma*X##sa; \
+  Ce = X##be^X##ge^X##ke*X##me*X##se; \
+  Ci = X##bi^X##gi^X##ki*X##mi*X##si; \
+  Co = X##bo^X##go^X##ko*X##mo*X##so; \
+  Cu = X##bu^X##gu^X##ku*X##mu*X##su; \
 
 
 #ifdef UseBebigokimisa
@@ -194,125 +194,6 @@ http://creativecommons.org/publicdomain/zero/1.0/
     E##su =   Bsu ^(  Bsa &  Bse ); \
     Cu ^= E##su; \
 \
-
-#define wildThetaRhoPiChiIotaPrepareTheta(i, A, E) \
-  Da = Cu^ROL64(Ce, 1); \
-  De = Ca^ROL64(Ci, 1); \
-  Di = Ce^ROL64(Co, 1); \
-  Do = Ci^ROL64(Cu, 1); \
-  Du = Co^ROL64(Ca, 1); \
-  \
-  A##ba ^= Da; \
-  Bba = A##ba; \
-  A##ge ^= De; \
-  Bbe = ROL64(A##ge, 44); \
-  A##ki ^= Di; \
-  Bbi = ROL64(A##ki, 43); \
-  A##mo ^= Do; \
-  Bbo = ROL64(A##mo, 21); \
-  A##su ^= Du; \
-  Bbu = ROL64(A##su, 14); \
-  E##ba =   Bba ^(  Bbe |  Bbi ); \
-  E##ba ^= KeccakF1600RoundConstants[i]; \
-  Ca = E##ba; \
-  E##be =   Bbe ^((~Bbi)|  Bbo ); \
-  Ce = E##be; \
-  E##bi =   Bbi ^(  Bbo &  Bbu ); \
-  Ci = E##bi; \
-  E##bo =   Bbo ^(  Bbu |  Bba ); \
-  Co = E##bo; \
-  E##bu =   Bbu ^(  Bba &  Bbe ); \
-  Cu = E##bu; \
-  \
-  A##bo ^= Do; \
-  Bga = ROL64(A##bo, 28); \
-  A##gu ^= Du; \
-  Bge = ROL64(A##gu, 20); \
-  A##ka ^= Da; \
-  Bgi = ROL64(A##ka, 3); \
-  A##me ^= De; \
-  Bgo = ROL64(A##me, 45); \
-  A##si ^= Di; \
-  Bgu = ROL64(A##si, 61); \
-  E##ga =   Bga ^(  Bge |  Bgi ); \
-  Ca ^= E##ga; \
-  E##ge =   Bge ^(  Bgi &  Bgo ); \
-  Ce ^= E##ge; \
-  E##gi =   Bgi ^(  Bgo |(~Bgu)); \
-  Ci ^= E##gi; \
-  E##go =   Bgo ^(  Bgu |  Bga ); \
-  Co ^= E##go; \
-  E##gu =   Bgu ^(  Bga &  Bge ); \
-  Cu ^= E##gu; \
-  \
-  A##be ^= De; \
-  Bka = ROL64(A##be, 1); \
-  A##gi ^= Di; \
-  Bke = ROL64(A##gi, 6); \
-  A##ko ^= Do; \
-  Bki = ROL64(A##ko, 25); \
-  A##mu ^= Du; \
-  Bko = ROL64(A##mu, 8); \
-  A##sa ^= Da; \
-  Bku = ROL64(A##sa, 18); \
-  E##ka =   Bka ^(  Bke |  Bki ); \
-  Cam = E##ka; \
-  E##ke =   Bke ^(  Bki &  Bko ); \
-  Cem = E##ke; \
-  E##ki =   Bki ^((~Bko)&  Bku ); \
-  Cim = E##ki; \
-  E##ko = (~Bko)^(  Bku |  Bka ); \
-  Com = E##ko; \
-  E##ku =   Bku ^(  Bka &  Bke ); \
-  Cum = E##ku; \
-  \
-  A##bu ^= Du; \
-  Bma = ROL64(A##bu, 27); \
-  A##ga ^= Da; \
-  Bme = ROL64(A##ga, 36); \
-  A##ke ^= De; \
-  Bmi = ROL64(A##ke, 10); \
-  A##mi ^= Di; \
-  Bmo = ROL64(A##mi, 15); \
-  A##so ^= Do; \
-  Bmu = ROL64(A##so, 56); \
-  E##ma =   Bma ^(  Bme &  Bmi ); \
-  Cam *= E##ma; \
-  E##me =   Bme ^(  Bmi |  Bmo ); \
-  Cem *= E##me; \
-  E##mi =   Bmi ^((~Bmo)|  Bmu ); \
-  Cim *= E##mi; \
-  E##mo = (~Bmo)^(  Bmu &  Bma ); \
-  Com *= E##mo; \
-  E##mu =   Bmu ^(  Bma |  Bme ); \
-  Cum *= E##mu; \
-  \
-  A##bi ^= Di; \
-  Bsa = ROL64(A##bi, 62); \
-  A##go ^= Do; \
-  Bse = ROL64(A##go, 55); \
-  A##ku ^= Du; \
-  Bsi = ROL64(A##ku, 39); \
-  A##ma ^= Da; \
-  Bso = ROL64(A##ma, 41); \
-  A##se ^= De; \
-  Bsu = ROL64(A##se, 2); \
-  E##sa =   Bsa ^((~Bse)&  Bsi ); \
-  Cam *= E##sa; \
-  Ca ^= Cam; \
-  E##se = (~Bse)^(  Bsi |  Bso ); \
-  Cem *= E##se; \
-  Ce ^= Cem; \
-  E##si =   Bsi ^(  Bso &  Bsu ); \
-  Cim *= E##si; \
-  Ci ^= Cim; \
-  E##so =   Bso ^(  Bsu |  Bsa ); \
-  Com *= E##so; \
-  Co ^= Com; \
-  E##su =   Bsu ^(  Bsa &  Bse ); \
-  Cum *= E##su; \
-  Cu ^= Cum; \
-
 
 // --- Code for round (lane complementing pattern 'bebigokimisa')
 // --- 64-bit lanes mapped to 64-bit words

@@ -13,6 +13,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "brg_endian.h"
 #include "KeccakF-1600-opt64-settings.h"
 #include "KeccakF-1600-interface.h"
@@ -256,6 +257,19 @@ void KeccakPermutationOnWordsAfterXoring1024bits(UINT64 *state, const UINT64 *in
 }
 #endif
 
+
+void print_state(UINT64* state, const char* comm)
+{
+  int i;
+  printf("optim_funct: %s \r\n", comm);
+  
+  for(i = 0; i != 25; i++)
+    {
+      printf("[%i]: %p\r\n", i, state[i]);
+    }
+}
+
+
 #ifdef ProvideFast1088
 void KeccakPermutationOnWordsAfterXoring1088bits(UINT64 *state, const UINT64 *input, const UINT64* pscratchpd, UINT64 pscratchpd_sz)
 {
@@ -291,139 +305,109 @@ void KeccakPermutationOnWordsAfterXoring1088bits(UINT64 *state, const UINT64 *in
     Aso = state[23]; 
     Asu = state[24]; 
 
-    /*Ca = Aba^Aga^Aka*Ama*Asa; 
+
+
+    /*//prepareWildTheta
+    Ca = Aba^Aga^Aka*Ama*Asa; 
     Ce = Abe^Age^Ake*Ame*Ase; 
     Ci = Abi^Agi^Aki*Ami*Asi; 
     Co = Abo^Ago^Ako*Amo*Aso; 
-    Cu = Abu^Agu^Aku*Amu*Asu; 
+    Cu = Abu^Agu^Aku*Amu*Asu; */
+    // ---------  updateWildToState(E) ------------------
+    /*scr_hashes_size = pscratchpd_sz >> 2;
+    //updateWildStateBlock(0, Eba, Ebe, Ebi, Ebo);
     
-    Da = Cu^ROL64(Ce, 1);
-    De = Ca^ROL64(Ci, 1);
-    Di = Ce^ROL64(Co, 1);
-    Do = Ci^ROL64(Cu, 1);
-    Du = Co^ROL64(Ca, 1);
+    //prepareScratchPadAddr(base_addr_0, 0, Eba); 
+    base_addr_0_0 = ((Eba)%scr_hashes_size)<<2;
+    prepareScratchPadAddr(base_addr_0, 1, Ebe); 
+    prepareScratchPadAddr(base_addr_0, 2, Ebi);
+    prepareScratchPadAddr(base_addr_0, 3, Ebo);
+    //Eba ^= readScratchPadData(base_addr_0, 0); 
+    Eba ^= pscratchpd[base_addr_0_0] ^ pscratchpd[base_addr_0_1] ^ pscratchpd[base_addr_0_2] ^ pscratchpd[base_addr_0_3];
 
-    Aba ^= Da;
-    Bba = Aba;
-    Age ^= De;
-    Bbe = ROL64(Age, 44);
-    Aki ^= Di;
-    Bbi = ROL64(Aki, 43);
-    Amo ^= Do;
-    Bbo = ROL64(Amo, 21);
-    Asu ^= Du;
-    Bbu = ROL64(Asu, 14);
-    Eba =   Bba ^((~Bbe)&  Bbi );
-    Eba ^= KeccakF1600RoundConstants[0];
-    Ca = Eba;
-    Ebe =   Bbe ^((~Bbi)&  Bbo );
-    Ce = Ebe;
-    Ebi =   Bbi ^((~Bbo)&  Bbu );
-    Ci = Ebi;
-    Ebo =   Bbo ^((~Bbu)&  Bba );
-    Co = Ebo;
-    Ebu =   Bbu ^((~Bba)&  Bbe );
-    Cu = Ebu;
+    Ebe ^= readScratchPadData(base_addr_0, 1); 
+    Ebi ^= readScratchPadData(base_addr_0, 2); 
+    Ebo ^= readScratchPadData(base_addr_0, 3); 
 
-    Abo ^= Do;
-    Bga = ROL64(Abo, 28);
-    Agu ^= Du;
-    Bge = ROL64(Agu, 20);
-    Aka ^= Da;
-    Bgi = ROL64(Aka, 3);
-    Ame ^= De;
-    Bgo = ROL64(Ame, 45);
-    Asi ^= Di;
-    Bgu = ROL64(Asi, 61);
-    Ega =   Bga ^((~Bge)&  Bgi );
-    Ca ^= Ega;
-    Ege =   Bge ^((~Bgi)&  Bgo );
-    Ce ^= Ege;
-    Egi =   Bgi ^((~Bgo)&  Bgu );
-    Ci ^= Egi;
-    Ego =   Bgo ^((~Bgu)&  Bga );
-    Co ^= Ego;
-    Egu =   Bgu ^((~Bga)&  Bge );
-    Cu ^= Egu;
 
-    Abe ^= De;
-    Bka = ROL64(Abe, 1);
-    Agi ^= Di;
-    Bke = ROL64(Agi, 6);
-    Ako ^= Do;
-    Bki = ROL64(Ako, 25);
-    Amu ^= Du;
-    Bko = ROL64(Amu, 8);
-    Asa ^= Da;
-    Bku = ROL64(Asa, 18);
-    Eka =   Bka ^((~Bke)&  Bki );
-    Cam = Eka;
-    Eke =   Bke ^((~Bki)&  Bko );
-    Cem = Eke;
-    Eki =   Bki ^((~Bko)&  Bku );
-    Cim = Eki;
-    Eko =   Bko ^((~Bku)&  Bka );
-    Com = Eko;
-    Eku =   Bku ^((~Bka)&  Bke );
-    Cum = Eku;
+    updateWildStateBlock(1, Ebu, Ega, Ege, Egi);
+    updateWildStateBlock(2, Ego, Egu, Eka, Eke);
+    updateWildStateBlock(3, Eki, Eko, Eku, Ema);
+    updateWildStateBlock(4, Eme, Emi, Emo, Emu);
+    updateWildStateBlock(5, Esa, Ese, Esi, Eso);*/
 
-    Abu ^= Du;
-    Bma = ROL64(Abu, 27);
-    Aga ^= Da;
-    Bme = ROL64(Aga, 36);
-    Ake ^= De;
-    Bmi = ROL64(Ake, 10);
-    Ami ^= Di;
-    Bmo = ROL64(Ami, 15);
-    Aso ^= Do;
-    Bmu = ROL64(Aso, 56);
-    Ema =   Bma ^((~Bme)&  Bmi );
-    Cam *= Ema;
-    Eme =   Bme ^((~Bmi)&  Bmo );
-    Cem *= Eme;
-    Emi =   Bmi ^((~Bmo)&  Bmu );
-    Cim *= Emi;
-    Emo =   Bmo ^((~Bmu)&  Bma );
-    Com *= Emo;
-    Emu =   Bmu ^((~Bma)&  Bme );
-    Cum *= Emu;
+     //---------  !!! updateWildToState(E) ------------------
+    print_state(state, "befor raund 0");
+    // round 0
+    prepareWildTheta(A)
+      copyToState(state, A)  
+    thetaRhoPiChiIota( 0, A, E)
+      copyToState(state, E)  
+      print_state(state, "after permut raund 0");
 
-    Abi ^= Di;
-    Bsa = ROL64(Abi, 62);
-    Ago ^= Do;
-    Bse = ROL64(Ago, 55);
-    Aku ^= Du;
-    Bsi = ROL64(Aku, 39);
-    Ama ^= Da;
-    Bso = ROL64(Ama, 41);
-    Ase ^= De;
-    Bsu = ROL64(Ase, 2);
-    Esa =   Bsa ^((~Bse)&  Bsi );
-    Cam *= Esa;
-    Ca ^= Cam;
-    Ese =   Bse ^((~Bsi)&  Bso );
-    Cem *= Ese;
-    Ce ^= Cem;
-    Esi =   Bsi ^((~Bso)&  Bsu );
-    Cim *= Esi;
-    Ci ^= Cim;
-    Eso =   Bso ^((~Bsu)&  Bsa );
-    Com *= Eso;
-    Co ^= Com;
-    Esu =   Bsu ^((~Bsa)&  Bse );
-    Cum *= Esu;
-    Cu ^= Cum;*/
+#define wild_debug_round(no, S, T) \
+    updateWildToState(S) \
+      copyToState(state, S)  \
+      print_state(state, "befo r permut raund " no); \
+    prepareWildTheta(S) \
+      copyToState(state, S)   \
+      thetaRhoPiChiIota( 0, S, T) \
+      copyToState(state, T)   \
+      print_state(state, "after permut raund " no); \
 
-    prepareWildTheta
-    wildThetaRhoPiChiIotaPrepareTheta( 0, A, E)
-    copyToState(state, E)  
+    wild_debug_round("1", E, A);
+    wild_debug_round("2", A, E);
+    wild_debug_round("3", E, A);
+    wild_debug_round("4", A, E);
+    wild_debug_round("5", E, A);
+    wild_debug_round("6", A, E);
+    wild_debug_round("7", E, A);
+    wild_debug_round("8", A, E);
+    wild_debug_round("9", E, A);
+    wild_debug_round("10", A, E);
+    wild_debug_round("11", E, A);
+    wild_debug_round("12", A, E);
+    wild_debug_round("13", E, A);
+    wild_debug_round("14", A, E);
+    wild_debug_round("15", E, A);
+    wild_debug_round("16", A, E);
+    wild_debug_round("17", E, A);
+    wild_debug_round("18", A, E);
+    wild_debug_round("19", E, A);
+    wild_debug_round("20", A, E);
+    wild_debug_round("21", E, A);
+    wild_debug_round("22", A, E);
+    wild_debug_round("23", E, A);
+
+
+    /*
+    //round 1
     updateWildToState(E)
-    copyToState(state, E)  
-    wildThetaRhoPiChiIotaPrepareTheta( 1, E, A)
-    copyToState(state, E)  
+      copyToState(state, E)  
+      print_state(state, "befor permut raund 1");
+    prepareWildTheta(E)
+      copyToState(state, E)  
+    thetaRhoPiChiIota( 0, E, A)
+      copyToState(state, A)  
+      print_state(state, "after permut raund 1");
+    
+
+    //round 2
+    updateWildToState(A)
+      copyToState(state, A)  
+      print_state(state, "befor permut raund 2");
+    prepareWildTheta(A)
+      copyToState(state, A)  
+    thetaRhoPiChiIota( 0, A, E)
+      copyToState(state, E)  
+      print_state(state, "after permut raund 2");
+
+    */
 
 
-    wild_rounds
+    //wild_rounds
+    copyToState(state, A)
+    print_state(state, "after permut raund 23");
 #if defined(UseMMX)
     _mm_empty();
 #endif

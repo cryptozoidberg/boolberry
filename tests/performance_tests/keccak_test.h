@@ -130,7 +130,13 @@ public:
 #define SCR_I(i) m_scratchpad_vec[st[i]%m_scratchpad_vec.size()]
       for(size_t i = 0; i!=6; i++)
       {
-        *(crypto::hash*)&mix[i*4]  = XOR_4(SCR_I(i*4), SCR_I(i*4+1), SCR_I(i*4+2), SCR_I(i*4+3));  
+
+        const crypto::hash& h_0 = SCR_I(i*4);
+        const crypto::hash& h_1 = SCR_I(i*4+1);
+        const crypto::hash& h_2 = SCR_I(i*4+2);
+        const crypto::hash& h_3 = SCR_I(i*4+3);
+
+        *(crypto::hash*)&mix[i*4]  = XOR_4(h_0, h_1, h_2, h_3);  
       }
     });
 

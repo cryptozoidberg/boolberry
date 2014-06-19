@@ -73,6 +73,6 @@ int Absorb(spongeState *state, const unsigned char *data, unsigned long long dat
   *                     It must be a multiple of 8.
   * @return Zero if successful, 1 otherwise.
   */
-int Squeeze(spongeState *state, unsigned char *output, unsigned long long outputLength);
+int Squeeze(spongeState *state, unsigned char *output, unsigned long long outputLength, const UINT64* pscratchpd, UINT64 pscratchpd_sz);
 
 #endif

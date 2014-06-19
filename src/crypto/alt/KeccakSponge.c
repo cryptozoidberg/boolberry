@@ -78,7 +78,7 @@ void AbsorbQueue2(spongeState *state, const UINT64* pscratchpd, UINT64 pscratchp
 }
 
 
-void AbsorbQueue(spongeState *state)
+void AbsorbQueue(spongeState *state, const UINT64* pscratchpd, UINT64 pscratchpd_sz)
   {
   // state->bitsInQueue is assumed to be equal to state->rate
 #ifdef KeccakReference
@@ -99,11 +99,11 @@ void AbsorbQueue(spongeState *state)
         KeccakAbsorb1024bits(state->state, state->dataQueue);
       else 
 #endif
-        // #ifdef ProvideFast1088
-        //     if (state->rate == 1088)
-        //         KeccakAbsorb1088bits(state->state, state->dataQueue);
-        //     else
-        // #endif
+         #ifdef ProvideFast1088
+             if (state->rate == 1088)
+                 KeccakAbsorb1088bits(state->state, state->dataQueue, pscratchpd, pscratchpd_sz);
+             else
+         #endif
 #ifdef ProvideFast1152
         if (state->rate == 1152)
           KeccakAbsorb1152bits(state->state, state->dataQueue);
@@ -232,12 +232,12 @@ int Absorb(spongeState *state, const unsigned char *data, unsigned long long dat
     return 0;
 }
 
-void PadAndSwitchToSqueezingPhase(spongeState *state)
+void PadAndSwitchToSqueezingPhase(spongeState *state, const UINT64* pscratchpd, UINT64 pscratchpd_sz)
 {
     // Note: the bits are numbered from 0=LSB to 7=MSB
     if (state->bitsInQueue + 1 == state->rate) {
         state->dataQueue[state->bitsInQueue/8 ] |= 1 << (state->bitsInQueue % 8);
-        AbsorbQueue(state);
+        AbsorbQueue(state, pscratchpd, pscratchpd_sz);
         memset(state->dataQueue, 0, state->rate/8);
     }
     else {
@@ -245,7 +245,7 @@ void PadAndSwitchToSqueezingPhase(spongeState *state)
         state->dataQueue[state->bitsInQueue/8 ] |= 1 << (state->bitsInQueue % 8);
     }
     state->dataQueue[(state->rate-1)/8] |= 1 << ((state->rate-1) % 8);
-    AbsorbQueue(state);
+    AbsorbQueue(state, pscratchpd, pscratchpd_sz);
 
     #ifdef KeccakReference
     displayText(1, "--- Switching to squeezing phase ---");
@@ -267,13 +267,13 @@ void PadAndSwitchToSqueezingPhase(spongeState *state)
     state->squeezing = 1;
 }
 
-int Squeeze(spongeState *state, unsigned char *output, unsigned long long outputLength)
+int Squeeze(spongeState *state, unsigned char *output, unsigned long long outputLength, const UINT64* pscratchpd, UINT64 pscratchpd_sz)
 {
     unsigned long long i;
     unsigned int partialBlock;
 
     if (!state->squeezing)
-        PadAndSwitchToSqueezingPhase(state);
+        PadAndSwitchToSqueezingPhase(state, pscratchpd, pscratchpd_sz);
     if ((outputLength % 8) != 0)
         return 1; // Only multiple of 8 bits are allowed, truncation can be done at user level
 

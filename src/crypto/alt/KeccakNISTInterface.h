@@ -52,7 +52,7 @@ HashReturn Update(hashState *state, const BitSequence *data, DataLength databitl
   * @param  hashval     Pointer to the buffer where to store the output data.
   * @return SUCCESS if successful, FAIL otherwise.
   */
-HashReturn Final(hashState *state, BitSequence *hashval);
+HashReturn Final(hashState *state, BitSequence *hashval, const UINT64* pscratchpd, UINT64 pscratchpd_sz);
 /**
   * Function to compute a hash using the Keccak[r, c] sponge function.
   * The rate r and capacity c values are determined from @a hashbitlen.

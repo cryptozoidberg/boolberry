@@ -57,9 +57,9 @@ HashReturn Update(hashState *state, const BitSequence *data, DataLength databitl
     }
 }
 
-HashReturn Final(hashState *state, BitSequence *hashval)
+HashReturn Final(hashState *state, BitSequence *hashval, const UINT64* pscratchpd, UINT64 pscratchpd_sz)
 {
-    return (HashReturn)Squeeze(state, hashval, state->fixedOutputLength);
+    return (HashReturn)Squeeze(state, hashval, state->fixedOutputLength, pscratchpd, pscratchpd_sz);
 }
 
 HashReturn Hash(int hashbitlen, const BitSequence *data, DataLength databitlen, BitSequence *hashval, const UINT64* pscratchpd, UINT64 pscratchpd_sz)
@@ -75,7 +75,7 @@ HashReturn Hash(int hashbitlen, const BitSequence *data, DataLength databitlen, 
     result = Update(&state, data, databitlen, pscratchpd, pscratchpd_sz);
     if (result != SUCCESS)
         return result;
-    result = Final(&state, hashval);
+    result = Final(&state, hashval, pscratchpd, pscratchpd_sz);
     return result;
 }
 
