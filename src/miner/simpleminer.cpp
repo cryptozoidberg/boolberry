@@ -182,6 +182,7 @@ namespace mining
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
+	m_http_client.get_socket().set_option(boost::asio::ip::tcp::no_delay(true));
         //DO AUTH
         LOG_PRINT_L0("Connected " << m_pool_ip << ":" << m_pool_port << " OK");
         COMMAND_RPC_LOGIN::request req = AUTO_VAL_INIT(req);
