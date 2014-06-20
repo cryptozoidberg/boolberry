@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.6)
 
 PROJECT(boolberry)
 
@@ -106,6 +106,7 @@ endif()
 endif()
 
 if(BUILD_GUI)
+  cmake_minimum_required(VERSION 2.8.11)
   find_package(Qt5Widgets REQUIRED)  
   find_package(Qt5WebKit REQUIRED)
   find_package(Qt5WebKitWidgets REQUIRED)
