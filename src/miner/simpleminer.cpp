@@ -216,7 +216,8 @@ namespace mining
         else if(!apply_addendums(resp.addms))
         {
           LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
-          get_whole_scratchpad();
+          if (!get_whole_scratchpad())
+	    continue;
         }
 
         if (job_requested && resp.job.blob.empty() && resp.job.difficulty.empty() && resp.job.job_id.empty())
