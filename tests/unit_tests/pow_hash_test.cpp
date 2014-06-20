@@ -78,12 +78,12 @@ const char* test_hashes[51] = {
   
   hash_result expected_results[] = 
   {
-    /*{1,0,"b2767f554a15e3471c854118f62c2cc0959ccd6c67a70e75f80f85f548a715bb"},
+    {1,0,"b2767f554a15e3471c854118f62c2cc0959ccd6c67a70e75f80f85f548a715bb"},
     {10,0,"7071b26139d8469916adba2ada612adc7c767344564907e977bb7466d7cc69ab"},
     {100,0,"3fd77bcacf0c579618a9b5f054223692a5cf56926f95a1a5df4a57e044100a20"},
     {1000,0,"5a7fc927e8eff077557cc4ad6a4691d4036548ba3131374a543d685e94ea1ea0"},
     {10000,0,"d672d0d532fcd0e3a6796975a1ee976f0eae0572d531c5eb45fe0c178099f48f"},
-    {100000,0,"c7cadb46cbb5575d5bd01d9a8272e427a0f5bc5df69e400c93f5595da78c52d1"},*/
+    {100000,0,"c7cadb46cbb5575d5bd01d9a8272e427a0f5bc5df69e400c93f5595da78c52d1"},
     {1,1,"1a7656a4f0403c3cd2ef7a1471bd5d7a18c7965921e1d03ad12209cca6302cb9"},
     {10,1,"94a747ddb33cb6d3908a1e47930903dfd06c365020db0a176b4b5609a37a19f3"},
     {100,1,"bcabc30513f4f2b7ff907e86d0fed06894b11a3b11e3e273c26e08f7b5f0666f"},
@@ -158,18 +158,5 @@ TEST(pow_tests, test_reference_func)
     return get_blob_longhash_opt(blob, scratchpad);
   });
   ASSERT_TRUE(r);
-
-  /*for(size_t i = 0; i < sizeof(expected_results)/sizeof(expected_results[0]); i++) 
-  {
-    std::vector<crypto::hash> scratchpad;
-    get_scratchpad(expected_results[i].scratch_size, scratchpad);
-    crypto::hash res = get_blob_longhash(test_srings[expected_results[i].string_no], 1, scratchpad);
-    std::cout << "{" << 
-      expected_results[i].scratch_size  << "," <<  
-      expected_results[i].string_no << "," << "\"" << epee::string_tools::pod_to_hex(res ) << "\"}," << ENDL;
-  }*/
-  
-  //std::vector<crypto::hash> scratchpad;
-  //for(size_t i = 0; i <= 10000000;)
 }
 

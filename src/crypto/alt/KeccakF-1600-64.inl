@@ -57,7 +57,8 @@ http://creativecommons.org/publicdomain/zero/1.0/
   UINT64 Ema, Eme, Emi, Emo, Emu; \
   UINT64 Esa, Ese, Esi, Eso, Esu; \
   UINT64 declareBlAdr(0), declareBlAdr(1), declareBlAdr(2), declareBlAdr(3); \
-  UINT64 declareBlAdr(4), declareBlAdr(5), scr_hashes_size;
+  UINT64 declareBlAdr(4), declareBlAdr(5), scr_hashes_size; \
+  scr_hashes_size = pscratchpd_sz >> 2;
  
 
 

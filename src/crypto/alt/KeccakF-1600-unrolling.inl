@@ -48,8 +48,8 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #define wild_rounds \
   prepareWildTheta(A)  \
   thetaRhoPiChiIota( 0, A, E) \
-  /*wild_round(E, A)*/ \
-  /*wild_round(A, E)*/ \
+  wild_round(E, A) \
+  wild_round(A, E) \
   wild_round(E, A) \
   wild_round(A, E) \
   wild_round(E, A) \

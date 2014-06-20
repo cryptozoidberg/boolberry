@@ -100,7 +100,7 @@ inline
 
     return 0;
   }
-  inline 
+  /*inline 
   void print_state(UINT64* state, const char* comment, size_t rount)
     {
     printf("master_funct: %s round: %d\r\n", comment, rount);
@@ -109,7 +109,7 @@ inline
       {
       printf("[%i]: %p\r\n", i, state[i]);
       }
-    }
+    }*/
 
   template<class f_traits, class callback_t>
   int wild_keccak(const uint8_t *in, size_t inlen, uint8_t *md, size_t mdlen, callback_t cb)
@@ -137,9 +137,9 @@ inline
           for (size_t k = 0; k < KK_MIXIN_SIZE; k++)
             st[k] ^= mix_in[k];
         }
-        print_state(&st[0], "before_permut", ll);
+        //print_state(&st[0], "before_permut", ll);
         f_traits::keccakf(st, 1);
-        print_state(&st[0], "after_permut", ll);
+        //print_state(&st[0], "after_permut", ll);
       }
     }
 
