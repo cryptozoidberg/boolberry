@@ -12,7 +12,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 */
 
 
-#define readScratchPadData(base_addr, off) pscratchpd[base_addr##_0] ^ pscratchpd[base_addr##_1] ^ pscratchpd[base_addr##_2] ^ pscratchpd[base_addr##_3]
+#define readScratchPadData(base_addr, off) pscratchpd[base_addr##_0 + off] ^ pscratchpd[base_addr##_1 + off] ^ pscratchpd[base_addr##_2 + off] ^ pscratchpd[base_addr##_3 + off]
 
 #define prepareScratchPadAddr(base_addr, no, Xx) base_addr##_##no = ((Xx)%scr_hashes_size)<<2 
 
@@ -29,7 +29,6 @@ http://creativecommons.org/publicdomain/zero/1.0/
 
 #define updateWildToState(X) \
   { \
-  scr_hashes_size = pscratchpd_sz >> 2; \
   updateWildStateBlock(0, X##ba, X##be, X##bi, X##bo); \
   updateWildStateBlock(1, X##bu, X##ga, X##ge, X##gi); \
   updateWildStateBlock(2, X##go, X##gu, X##ka, X##ke); \

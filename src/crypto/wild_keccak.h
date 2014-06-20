@@ -32,12 +32,11 @@ namespace crypto
 {
 
 inline
-  void wild_keccak_dbl_opt(const uint8_t *in, size_t inlen, uint8_t *md, size_t mdlen, const uint64_t* pscr, uint64_t scr_sz)
+  void wild_keccak_dbl_opt(const uint8_t *in, size_t inlen, uint8_t *md, size_t mdlen, const UINT64* pscr, UINT64 scr_sz)
     {      
       Hash(256, in, inlen*8, md, pscr, scr_sz);
       Hash(256, md, mdlen*8, md, pscr, scr_sz);
     }
-
 
 
   template<typename pod_operand_a, typename pod_operand_b>

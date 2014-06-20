@@ -277,6 +277,7 @@ void KeccakPermutationOnWordsAfterXoring1088bits(UINT64 *state, const UINT64 *in
 #if (Unrolling != 24)
     unsigned int i;
 #endif
+    scr_hashes_size = pscratchpd_sz >> 2;
 
     //copyFromStateAndXor1088bits(A, state, input);
     Aba = state[ 0]^input[ 0]; 
@@ -344,6 +345,46 @@ void KeccakPermutationOnWordsAfterXoring1088bits(UINT64 *state, const UINT64 *in
     thetaRhoPiChiIota( 0, A, E)
       copyToState(state, E)  
       print_state(state, "after permut raund 0");
+
+
+    //---updateWildToState(E) 
+    
+    /*updateWildStateBlock(0, Eba, Ebe, Ebi, Ebo); 
+    ////updateWildStateBlock(1, Ebu, Ega, Ege, Egi); 
+    
+    //prepareScratchPadAddr(base_addr_##block_no, 0, Eba); 
+    //prepareScratchPadAddr(base_addr_##block_no, 1, Ebe); 
+    //prepareScratchPadAddr(base_addr_##block_no, 2, Ebi); 
+    //prepareScratchPadAddr(base_addr_##block_no, 3, Ebo); 
+    base_addr_0_0 = ((Ebu)%scr_hashes_size)<<2 ;
+    base_addr_0_1 = ((Ega)%scr_hashes_size)<<2 ;
+    base_addr_0_2 = ((Ege)%scr_hashes_size)<<2 ;
+    base_addr_0_3 = ((Egi)%scr_hashes_size)<<2 ;
+    //prepareScratchPadAddr(base_addr_##block_no, 1, Ebe); 
+    //prepareScratchPadAddr(base_addr_##block_no, 2, Ebi); 
+    //prepareScratchPadAddr(base_addr_##block_no, 3, Ebo); 
+    //Eba ^= readScratchPadData(base_addr_0, 3); 
+    Ebu ^=  pscratchpd[base_addr_0_0] ^ pscratchpd[base_addr_0_1] ^ pscratchpd[base_addr_0_2] ^ pscratchpd[base_addr_0_3];
+    Ega ^= readScratchPadData(base_addr_0, 1); 
+    Ege ^= readScratchPadData(base_addr_0, 2); 
+    Egi ^= readScratchPadData(base_addr_0, 3); 
+    //-!--updateWildStateBlock(0, Eba, Ebe, Ebi, Ebo); 
+
+    //updateWildStateBlock(1, Ebu, Ega, Ege, Egi); 
+    updateWildStateBlock(2, Ego, Egu, Eka, Eke); 
+    updateWildStateBlock(3, Eki, Eko, Eku, Ema); 
+    updateWildStateBlock(4, Eme, Emi, Emo, Emu); 
+    updateWildStateBlock(5, Esa, Ese, Esi, Eso); 
+    //-!-updateWildToState(E) 
+
+      copyToState(state, E)  
+      print_state(state, "befo r permut raund 1"); 
+      prepareWildTheta(E) 
+      copyToState(state, E)   
+      thetaRhoPiChiIota( 0, E, A) 
+      copyToState(state, A)   
+      print_state(state, "after permut raund 1"); */
+
 
 #define wild_debug_round(no, S, T) \
     updateWildToState(S) \

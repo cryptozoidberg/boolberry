@@ -122,9 +122,9 @@ public:
     uint64_t* pst =  (uint64_t*)&m_scratchpad_vec[0];
     uint64_t sz = m_scratchpad_vec.size()*4;
     for(size_t i = 0; i != sz; i++)
-      pst[i] = i;
+      pst[i] = i * 0xd8c4ffa4fbbfada5;
 
-    crypto::hash h;
+    crypto::hash h = currency::null_hash;
     crypto::wild_keccak_dbl<crypto::mul_f>(reinterpret_cast<const uint8_t*>(&m_buff[0]), m_buff.size(), reinterpret_cast<uint8_t*>(&h), sizeof(h), [&](crypto::state_t_m& st, crypto::mixin_t& mix)
     {
 #define SCR_I(i) m_scratchpad_vec[st[i]%m_scratchpad_vec.size()]

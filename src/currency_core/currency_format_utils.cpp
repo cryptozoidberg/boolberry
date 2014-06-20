@@ -885,6 +885,25 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------
+  crypto::hash get_blob_longhash(const blobdata& bd, uint64_t height, const std::vector<crypto::hash>& scratchpad)
+  {
+    crypto::hash h = null_hash;
+    get_blob_longhash(bd, h, height, [&](uint64_t index) -> const crypto::hash&
+    {
+      return scratchpad[index%scratchpad.size()];
+    });
+    return h;
+  }
+  //---------------------------------------------------------------
+  crypto::hash get_blob_longhash_opt(const std::string& blob, const std::vector<crypto::hash>& scratchpad)
+  {
+    if(!scratchpad.size())
+      return get_blob_longhash(blob, 0, scratchpad);
+    crypto::hash h2 = null_hash;
+    crypto::wild_keccak_dbl_opt(reinterpret_cast<const uint8_t*>(&blob[0]), blob.size(), reinterpret_cast<uint8_t*>(&h2), sizeof(h2), (const UINT64*)&scratchpad[0], scratchpad.size()*4);
+    return h2;
+  }
+  //---------------------------------------------------------------
   bool push_block_scratchpad_data(size_t global_start_entry, const block& b, std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch)
   {
     size_t start_offset = scratchpd.size();
