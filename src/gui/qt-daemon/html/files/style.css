@@ -280,19 +280,26 @@ span.daemon_view_general_status_value_success_text
     /*margin-left:220px;*/
 }
 
+.transfer_text_img_span
+{
+
+}
 .transfer_text_time_span
 {
-    margin-left: 20px;
+    position: absolute;
+    left: 20px;
 }
 
 .transfer_text_amount_span
 {
-    margin-left: 80px;
+    position: absolute;
+    left: 250px;
 }
 
 .transfer_text_details_span
 {
-    margin-left: 40px;
+    position: absolute;
+    left: 350px;
 }
 
 #transfer_address_id
