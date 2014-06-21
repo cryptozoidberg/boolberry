@@ -134,9 +134,9 @@ function get_transfer_html_entry(tr)
     res += "<img  class='transfer_text_img_span' src='" + img_ref + "' height='15px'>";
     res += "<span class='transfer_text_time_span'>" + dt.toLocaleTimeString() + "</span>";
     res += "<span class='transfer_text_amount_span'>" + tr.amount + "</span>";
-    res += "<span class='transfer_text_details_span'>" + "<a href='javascript:;' onclick=\"jQuery('#" + tr.tx_hash + "_id" + "').toggle('fast');\" class=\"options_link_text\">" + "</span>";
+    res += "<span class='transfer_text_details_span'>" + "<a href='javascript:;' onclick=\"jQuery('#" + tr.tx_hash + "_id" + "').toggle('fast');\" class=\"options_link_text\">";
     res += " Details...";
-    res += "</a>";
+    res += "</a></span>";
     res += get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash);
     res += "</div>";
 
@@ -304,7 +304,7 @@ $(function()
     tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
     tttt.ti.timestamp = 1402171355;
-    tttt.ti.amount =  "10.11";
+    tttt.ti.amount =  "10.123000000000";
 
     on_money_recieved(tttt);
 

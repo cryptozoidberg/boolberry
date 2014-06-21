@@ -287,19 +287,19 @@ span.daemon_view_general_status_value_success_text
 .transfer_text_time_span
 {
     position: absolute;
-    left: 20px;
+    left: 50px;
 }
 
 .transfer_text_amount_span
 {
     position: absolute;
-    left: 250px;
+    left: 180px;
 }
 
 .transfer_text_details_span
 {
     position: absolute;
-    left: 350px;
+    left: 340px;
 }
 
 #transfer_address_id
