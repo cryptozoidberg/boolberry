@@ -415,10 +415,15 @@ namespace currency
       *reinterpret_cast<uint64_t*>(&block_blob[1]) = nonce;
       crypto::hash h;
       SHARED_CRITICAL_REGION_BEGIN(m_scratchpad_access);
+#if defined(WIN32)
+      h = get_blob_longhash_opt(block_blob, m_scratchpad);
+#else
       get_blob_longhash(block_blob, h, height, [&](uint64_t index) -> crypto::hash&
-         {
-           return m_scratchpad[index%m_scratchpad.size()];
-         });
+      {
+        return m_scratchpad[index%m_scratchpad.size()];
+      });
+#endif
+
       CRITICAL_REGION_END();
 
       if(check_hash(h, local_diff))
