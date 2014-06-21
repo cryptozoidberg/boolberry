@@ -146,11 +146,11 @@ class test_wild_keccak2: public test_keccak_base
   };
 
 #define max_measere_scratchpad 1000000000
-#define measere_rounds 10000
+#define measere_rounds 100000
 void measure_keccak_over_scratchpad()
 {
-  std::cout << std::setw(20) << std::left << "sz" << 
-    std::setw(10) << "original" <<
+  std::cout << std::setw(20) << std::left << "sz\t" << 
+    std::setw(10) << "original\t" <<
     std::setw(10) << "opt" << ENDL;   
 
   std::vector<crypto::hash> scratchpad_vec;
@@ -176,8 +176,8 @@ void measure_keccak_over_scratchpad()
       res_h = currency::get_blob_longhash_opt(has_str, scratchpad_vec);
     } 
     uint64_t ticks_c = epee::misc_utils::get_tick_count();
-    std::cout << std::setw(20) << std::left << i << 
-                 std::setw(10) << ticks_b - ticks_a <<
+    std::cout << std::setw(20) << std::left << scratchpad_vec.size()*sizeof(crypto::hash) << "\t" <<
+                 std::setw(10) << ticks_b - ticks_a << "\t" <<
                  std::setw(10) << ticks_c - ticks_b << ENDL;   
   }
 }

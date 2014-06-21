@@ -27,10 +27,10 @@ using namespace nodetool;
 
 namespace
 {
-  const command_line::arg_descriptor<std::string, true> arg_ip           = {"ip", "set ip"};
+  const command_line::arg_descriptor<std::string> arg_ip                 = {"ip", "set ip"};
   const command_line::arg_descriptor<size_t>      arg_port               = {"port", "set port"};
   const command_line::arg_descriptor<size_t>      arg_rpc_port           = {"rpc_port", "set rpc port", RPC_DEFAULT_PORT};
-  const command_line::arg_descriptor<uint32_t, true> arg_timeout         = {"timeout", "set timeout"};
+  const command_line::arg_descriptor<uint32_t>    arg_timeout            = {"timeout", "set timeout"};
   const command_line::arg_descriptor<std::string> arg_priv_key           = {"private_key", "private key to subscribe debug command", "", true};
   const command_line::arg_descriptor<uint64_t>    arg_peer_id            = {"peer_id", "peer_id if known(if not - will be requested)", 0};
   const command_line::arg_descriptor<bool>        arg_generate_keys      = {"generate_keys_pair", "generate private and public keys pair"};
@@ -39,6 +39,7 @@ namespace
   const command_line::arg_descriptor<bool>        arg_get_daemon_info    = {"rpc_get_daemon_info", "request daemon state info vie rpc (--rpc_port option should be set ).", "", true};
   const command_line::arg_descriptor<bool>        arg_get_aliases        = {"rpc_get_aliases", "request daemon aliases all list", "", true};
   const command_line::arg_descriptor<std::string> arg_upate_maintainers_info = {"upate_maintainers_info", "Push maintainers info into the network, upate_maintainers_info=file_with_info.json", "", true};
+  const command_line::arg_descriptor<std::string> arg_update_build_no    = {"update_build_no", "Updated version number in version template file", "", true};
 }
 
 typedef COMMAND_REQUEST_STAT_INFO_T<t_currency_protocol_handler<core>::stat_info> COMMAND_REQUEST_STAT_INFO;
