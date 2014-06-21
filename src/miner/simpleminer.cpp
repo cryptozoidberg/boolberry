@@ -53,14 +53,12 @@ int main(int argc, char** argv)
     return 1;
 
 
-  srandom(epee::misc_utils::get_tick_count());
-
   while (1) {
     mining::simpleminer miner;
     r = miner.init(vm);
     r = r && miner.run(); // Returns on too many failures
     LOG_PRINT_L0("Excessive failures.  Sleeping 10-ish seconds and restarting...");
-    epee::misc_utils::sleep_no_w(10000 + (random() % 5000));
+    epee::misc_utils::sleep_no_w(10000 + (crypto::rand<size_t>() % 5000));
   }
 
   return 0;
