@@ -180,6 +180,7 @@ namespace mining
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
+	m_http_client.get_socket().set_option(boost::asio::ip::tcp::no_delay(true));
         //DO AUTH
         LOG_PRINT_L0("Connected " << m_pool_ip << ":" << m_pool_port << " OK");
         COMMAND_RPC_LOGIN::request req = AUTO_VAL_INIT(req);
@@ -214,7 +215,8 @@ namespace mining
         else if(!apply_addendums(resp.addms))
         {
           LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
-          get_whole_scratchpad();
+          if (!get_whole_scratchpad())
+	    continue;
         }
 
         if (job_requested && resp.job.blob.empty() && resp.job.difficulty.empty() && resp.job.job_id.empty())
