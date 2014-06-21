@@ -361,7 +361,8 @@ namespace currency
           << "max_used_block_height: " << txd.max_used_block_height << ENDL
           << "max_used_block_id: " << txd.max_used_block_id << ENDL
           << "last_failed_height: " << txd.last_failed_height << ENDL
-          << "last_failed_id: " << txd.last_failed_id << ENDL;
+          << "last_failed_id: " << txd.last_failed_id << ENDL
+          << "live_time: " << epee::misc_utils::get_time_interval_string(time(nullptr) - txd.receive_time) << ENDL;
       }else
       {
         tx_details& txd = txe.second;
@@ -373,7 +374,8 @@ namespace currency
           << "max_used_block_height: " << txd.max_used_block_height << ENDL
           << "max_used_block_id: " << txd.max_used_block_id << ENDL
           << "last_failed_height: " << txd.last_failed_height << ENDL
-          << "last_failed_id: " << txd.last_failed_id << ENDL;
+          << "last_failed_id: " << txd.last_failed_id << ENDL
+          << "live_time: " << epee::misc_utils::get_time_interval_string(time(nullptr) - txd.receive_time) << ENDL;
       }
 
     }

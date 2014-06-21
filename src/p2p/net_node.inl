@@ -338,6 +338,17 @@ namespace nodetool
   }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::get_maintainers_info(maintainers_info_external& me)
+  {
+    me.ver_major = m_maintainers_info_local.ver_major;
+    me.ver_minor = m_maintainers_info_local.ver_minor;
+    me.ver_revision = m_maintainers_info_local.ver_revision;
+    me.build_no = m_maintainers_info_local.build_no;
+    me.mode = m_alert_mode;
+    return true;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::on_maintainers_entry_update()
   {
     LOG_PRINT_MAGENTA("Fresh maintainers info recieved(timestamp: " << m_maintainers_info_local.timestamp << ")", LOG_LEVEL_0);

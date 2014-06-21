@@ -282,6 +282,7 @@ namespace currency
       uint64_t daemon_network_state;
       uint64_t synchronization_start_height;
       uint64_t max_net_seen_height;
+      nodetool::maintainers_info_external mi;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -302,6 +303,7 @@ namespace currency
         KV_SERIALIZE(daemon_network_state)
         KV_SERIALIZE(synchronization_start_height)
         KV_SERIALIZE(max_net_seen_height)
+        KV_SERIALIZE(mi)
       END_KV_SERIALIZE_MAP()
     };
   };    

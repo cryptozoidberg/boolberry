@@ -107,7 +107,7 @@ namespace currency
     
     res.synchronization_start_height = m_p2p.get_payload_object().get_core_inital_height();
     res.max_net_seen_height = m_p2p.get_payload_object().get_max_seen_height();
-
+    m_p2p.get_maintainers_info(res.mi);
     
     res.status = CORE_RPC_STATUS_OK;
     return true;

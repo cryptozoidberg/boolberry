@@ -155,6 +155,24 @@ namespace nodetool
       KV_SERIALIZE_VAL_POD_AS_BLOB(sign)
     END_KV_SERIALIZE_MAP()
   };
+
+  struct maintainers_info_external
+  {
+    uint8_t  ver_major;
+    uint8_t  ver_minor;
+    uint8_t  ver_revision;
+    uint32_t build_no;
+    uint8_t  mode;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(ver_major)
+      KV_SERIALIZE(ver_minor)
+      KV_SERIALIZE(ver_revision)
+      KV_SERIALIZE(build_no)
+      KV_SERIALIZE(mode)
+    END_KV_SERIALIZE_MAP()
+  };
+
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
