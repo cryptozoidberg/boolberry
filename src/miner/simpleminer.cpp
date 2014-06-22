@@ -14,6 +14,7 @@
 #include "currency_core/account.h"
 #include "currency_core/currency_format_utils.h"
 #include "rpc/core_rpc_server_commands_defs.h"
+#include <sys/mman.h>
 
 using namespace epee;
 namespace po = boost::program_options;
@@ -101,6 +102,8 @@ namespace mining
     m_pass = command_line::get_arg(vm, arg_pass);
     m_hi = AUTO_VAL_INIT(m_hi);
     m_last_job_ticks = 0;
+    m_fast_scratchpad_pages = 0;
+    m_fast_scratchpad = NULL;
 
     return true;
   }
@@ -142,7 +145,7 @@ namespace mining
         crypto::hash h = currency::null_hash;
 	currency::get_blob_longhash(blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
 						{
-	return m_scratchpad[index%m_scratchpad.size()];
+	return m_fast_scratchpad[index%m_scratchpad.size()];
 	});
 
 	if( currency::check_hash(h, m_job.difficulty))
@@ -237,6 +240,7 @@ namespace mining
 
       uint64_t get_job_start_time = epee::misc_utils::get_tick_count();
       get_job(); /* Next version:  Handle this asynchronously */
+      update_fast_scratchpad();
       uint64_t get_job_end_time  = epee::misc_utils::get_tick_count();
       if ((get_job_end_time - get_job_start_time) > 1000) 
       {
@@ -388,6 +392,40 @@ namespace mining
     LOG_PRINT_L0("Scratchpad received ok, size: " << (m_scratchpad.size()*32)/1024 << "Kb, heigh=" << m_hi.height);
     return true;
   }
+  //----------------------------------------------------------------------------------------------------------------------------------
+  void simpleminer::update_fast_scratchpad()
+  {
+    
+    /* Check size - reallocate fast scratch if necessary */
+    size_t cur_scratchpad_size = m_scratchpad.size() * sizeof(crypto::hash);
+    size_t cur_scratchpad_pages = (cur_scratchpad_size / 4096) + 1;
+    if (cur_scratchpad_pages > m_fast_scratchpad_pages)
+    {
+      if (m_fast_scratchpad) 
+      {
+        if (m_fast_mmapped)
+        {
+	  munmap(m_fast_scratchpad, m_fast_scratchpad_pages*4096);
+	} else {
+	  free(m_fast_scratchpad);
+	}
+      }
+      void *addr = MAP_FAILED;
+      size_t mapsize = cur_scratchpad_pages * 4096;
+#ifdef MAP_HUGETLB
+      addr = mmap(0, mapsize, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_HUGETLB|MAP_POPULATE, 0, 0);
+#endif
+      if (addr == MAP_FAILED) {
+        addr = malloc(mapsize);
+      } else {
+        m_fast_mmapped = true;
+      }
+      m_fast_scratchpad = (crypto::hash *)addr;
+    }
+
+    memcpy(m_fast_scratchpad, &m_scratchpad[0], m_scratchpad.size() * sizeof(crypto::hash));
+  }
+	
   //----------------------------------------------------------------------------------------------------------------------------------
   bool  simpleminer::pop_addendum(const addendum& add)
   {

@@ -43,11 +43,15 @@ namespace mining
     bool pop_addendum(const addendum& add);
     bool push_addendum(const addendum& add);
     void worker_thread(uint64_t start_nonce, uint32_t nonce_offset, std::atomic<uint32_t> *result, std::atomic<bool> *do_reset, std::atomic<bool> *done);
+    void update_fast_scratchpad();
 
     std::vector<mining::addendum> m_blocks_addendums; //need to handle splits without re-downloading whole scratchpad
     height_info_native m_hi;
     std::vector<crypto::hash> m_scratchpad;
+    crypto::hash *m_fast_scratchpad;
+    uint32_t m_fast_scratchpad_pages;
     uint64_t m_last_job_ticks;
+    bool m_fast_mmapped;
     uint32_t m_threads_total;
     std::atomic<uint64_t> m_hashes_done;
     std::string m_pool_session_id;
