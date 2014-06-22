@@ -22,16 +22,16 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #define KeccakMaximumRateInBytes (KeccakMaximumRate/8)
 
 #if defined(__GNUC__)
-#define ALIGN __attribute__ ((aligned(32)))
+#define KALIGN __attribute__ ((aligned(32)))
 #elif defined(_MSC_VER)
-#define ALIGN __declspec(align(32))
+#define KALIGN __declspec(align(32))
 #else
-#define ALIGN
+#define KALIGN
 #endif
 
-ALIGN typedef struct spongeStateStruct {
-    ALIGN unsigned char state[KeccakPermutationSizeInBytes];
-    ALIGN unsigned char dataQueue[KeccakMaximumRateInBytes];
+KALIGN typedef struct spongeStateStruct {
+    KALIGN unsigned char state[KeccakPermutationSizeInBytes];
+    KALIGN unsigned char dataQueue[KeccakMaximumRateInBytes];
     unsigned int rate;
     unsigned int capacity;
     unsigned int bitsInQueue;
