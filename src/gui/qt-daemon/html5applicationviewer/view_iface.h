@@ -62,6 +62,17 @@ namespace view
   };
 
 
+  enum ui_last_build_displaymode
+  {
+    ui_lb_dm_actual = 0,
+    ui_lb_dm_new = 1,
+    ui_lb_dm_new_alert_calm = 2,
+    ui_lb_dm_new_alert_urgent = 3,
+    ui_lb_dm_new_alert_critical = 4
+  };
+
+
+
   struct switch_view_info
   {
     enum ui_views
@@ -90,6 +101,8 @@ public:
     uint64_t inc_connections_count;
     std::string difficulty;
     uint64_t hashrate;
+    uint64_t last_build_displaymode;
+    std::string last_build_available;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(text_state)
@@ -101,6 +114,8 @@ public:
       KV_SERIALIZE(inc_connections_count)
       KV_SERIALIZE(difficulty)
       KV_SERIALIZE(hashrate)
+      KV_SERIALIZE(last_build_displaymode)
+      KV_SERIALIZE(last_build_available)
     END_KV_SERIALIZE_MAP()
   };
 

@@ -1,4 +1,33 @@
 
+
+function update_last_ver_view(mode)
+{
+    if(mode == 0)
+        $('#last_actual_version_text').hide();
+    else if(mode == 1)
+    {
+        $('#last_actual_version_text').show();
+        $('#last_actual_version_text').removeClass();
+        $('#last_actual_version_text').addClass("daemon_view_param_value_last_ver_info_new");
+    }else if(mode == 2)
+    {
+        $('#last_actual_version_text').show();
+        $('#last_actual_version_text').removeClass();
+        $('#last_actual_version_text').addClass("daemon_view_param_value_last_ver_info_calm");
+    }else if(mode == 3)
+    {
+        $('#last_actual_version_text').show();
+        $('#last_actual_version_text').removeClass();
+        $('#last_actual_version_text').addClass("daemon_view_param_value_last_ver_info_urgent");
+    }else if(mode == 4)
+    {
+        $('#last_actual_version_text').show();
+        $('#last_actual_version_text').removeClass();
+        $('#last_actual_version_text').addClass("daemon_view_param_value_last_ver_info_critical");
+    }
+
+}
+
 function on_update_daemon_state(info_obj)
 {
     //var info_obj = jQuery.parseJSON(daemon_info_str);
@@ -61,9 +90,12 @@ function on_update_daemon_state(info_obj)
     $("#daemon_height_text").text(info_obj.height.toString());
     $("#difficulty_text").text(info_obj.difficulty);
     $("#hashrate_text").text(info_obj.hashrate.toString());
+    if(info_obj.last_build_displaymode < 3)
+        $("#last_actual_version_text").text("(out of date, last version: " + info_obj.last_build_available + ")");
+    else
+        $("#last_actual_version_text").text("(Critical update: " + info_obj.last_build_available + ")");
+    update_last_ver_view(info_obj.last_build_displaymode);
 }
-
-
 
 function on_update_wallet_status(wal_status)
 {

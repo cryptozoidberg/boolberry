@@ -302,6 +302,66 @@ span.daemon_view_general_status_value_success_text
     left: 340px;
 }
 
+.daemon_view_param_value_last_ver_info
+{
+    display: none;
+}
+
+.daemon_view_param_value_last_ver_info_new
+{
+    color: cornflowerblue;
+}
+
+.daemon_view_param_value_last_ver_info_calm
+{
+    color: #2b01f2;
+}
+
+.daemon_view_param_value_last_ver_info_urgent
+{
+    color: #7143a9;
+}
+
+@keyframes blinker {
+    0% { visibility: visible; }
+    50% { visibility: hidden; }
+    100% { visibility: visible; }
+}
+
+@-moz-keyframes blinker {
+    0% { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}
+
+@-webkit-keyframes blinker {
+    0% { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}
+
+@keyframes blinker {
+    0% { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}
+
+.daemon_view_param_value_last_ver_info_critical
+{
+    color: #a91308;
+    -webkit-animation-name: blinker;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-timing-function: linear;
+    -webkit-animation-iteration-count: infinite;
+
+    animation-name: blinker;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+
+
 #transfer_address_id
 {
     height: 16px;

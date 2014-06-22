@@ -294,6 +294,27 @@ bool daemon_backend::update_state_info()
   dsi.daemon_network_state = inf.daemon_network_state;
   dsi.synchronization_start_height = inf.synchronization_start_height;
   dsi.max_net_seen_height = inf.max_net_seen_height;
+
+  dsi.last_build_available = std::to_string(inf.mi.ver_major)
+    + "." + std::to_string(inf.mi.ver_minor)
+    + "." + std::to_string(inf.mi.ver_revision)
+    + "." + std::to_string(inf.mi.build_no);
+
+  if (inf.mi.mode)
+  {
+    dsi.last_build_displaymode = inf.mi.mode + 1;
+  }
+  else
+  {
+    if (inf.mi.build_no > PROJECT_VERSION_BUILD_NO)
+      dsi.last_build_displaymode = view::ui_last_build_displaymode::ui_lb_dm_new;
+    else
+    {
+      dsi.last_build_displaymode = view::ui_last_build_displaymode::ui_lb_dm_actual;
+    }
+  }
+
+
   m_last_daemon_height = dsi.height = inf.height;
 
   m_pview->update_daemon_status(dsi);
