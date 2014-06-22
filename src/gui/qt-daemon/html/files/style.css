@@ -293,13 +293,13 @@ span.daemon_view_general_status_value_success_text
 .transfer_text_amount_span
 {
     position: absolute;
-    left: 180px;
+    left: 270px;
 }
 
 .transfer_text_details_span
 {
     position: absolute;
-    left: 340px;
+    left: 440px;
 }
 
 .daemon_view_param_value_last_ver_info
