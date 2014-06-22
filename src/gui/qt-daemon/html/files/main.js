@@ -91,7 +91,7 @@ function on_update_daemon_state(info_obj)
     $("#difficulty_text").text(info_obj.difficulty);
     $("#hashrate_text").text(info_obj.hashrate.toString());
     if(info_obj.last_build_displaymode < 3)
-        $("#last_actual_version_text").text("(out of date, last version: " + info_obj.last_build_available + ")");
+        $("#last_actual_version_text").text("(available version: " + info_obj.last_build_available + ")");
     else
         $("#last_actual_version_text").text("(Critical update: " + info_obj.last_build_available + ")");
     update_last_ver_view(info_obj.last_build_displaymode);
