@@ -44,6 +44,7 @@ namespace mining
     bool push_addendum(const addendum& add);
     void worker_thread(uint64_t start_nonce, uint32_t nonce_offset, std::atomic<uint32_t> *result, std::atomic<bool> *do_reset, std::atomic<bool> *done);
     void update_fast_scratchpad();
+    void free_fast_scratchpad();
 
     std::vector<mining::addendum> m_blocks_addendums; //need to handle splits without re-downloading whole scratchpad
     height_info_native m_hi;

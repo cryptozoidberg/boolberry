@@ -340,6 +340,7 @@ namespace mining
       if (job_submit_failures == 5)
       {
         LOG_PRINT_L0("Too many submission failures.  Something is very wrong.");
+	free_fast_scratchpad();
         return false;
       }
       if (job_submit_failures > 3)
@@ -357,6 +358,7 @@ namespace mining
 	LOG_PRINT_L0("avg hr: " << hash_rate);
       }
     }
+    free_fast_scratchpad();
     return true;
   }
   //----------------------------------------------------------------------------------------------------------------------------------
@@ -393,6 +395,20 @@ namespace mining
     return true;
   }
   //----------------------------------------------------------------------------------------------------------------------------------
+  void simpleminer::free_fast_scratchpad()
+  {
+    if (m_fast_scratchpad) 
+    {
+      if (m_fast_mmapped)
+      {
+        munmap(m_fast_scratchpad, m_fast_scratchpad_pages*4096);
+      } else {
+	free(m_fast_scratchpad);
+      }
+      m_fast_scratchpad = NULL;
+    }
+  }
+
   void simpleminer::update_fast_scratchpad()
   {
     
@@ -401,15 +417,7 @@ namespace mining
     size_t cur_scratchpad_pages = (cur_scratchpad_size / 4096) + 1;
     if (cur_scratchpad_pages > m_fast_scratchpad_pages)
     {
-      if (m_fast_scratchpad) 
-      {
-        if (m_fast_mmapped)
-        {
-	  munmap(m_fast_scratchpad, m_fast_scratchpad_pages*4096);
-	} else {
-	  free(m_fast_scratchpad);
-	}
-      }
+      free_fast_scratchpad();
       void *addr = MAP_FAILED;
       size_t mapsize = cur_scratchpad_pages * 4096;
 #ifdef MAP_HUGETLB
@@ -420,6 +428,7 @@ namespace mining
       } else {
         m_fast_mmapped = true;
       }
+      m_fast_scratchpad_pages = cur_scratchpad_pages;
       m_fast_scratchpad = (crypto::hash *)addr;
     }
 
