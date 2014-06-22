@@ -422,6 +422,10 @@ namespace mining
       size_t mapsize = cur_scratchpad_pages * 4096;
 #ifdef MAP_HUGETLB
       addr = mmap(0, mapsize, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_HUGETLB|MAP_POPULATE, 0, 0);
+      if (addr == MAP_FAILED)
+      {
+        LOG_PRINT_L0("Unable to mmap huge pages.  Enable for faster operation.");
+      }
 #endif
       if (addr == MAP_FAILED) {
         addr = malloc(mapsize);
