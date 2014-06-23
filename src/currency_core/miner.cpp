@@ -81,7 +81,7 @@ namespace currency
     CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
     if(m_bc.get_alias_info(m_alias_to_apply_in_block.m_alias, dummy))
     {
-      LOG_PRINT_L0("Alias \"" << m_alias_to_apply_in_block.m_alias << "\" got used bye someone else, canceled." );
+      LOG_PRINT_L0("Alias \"" << m_alias_to_apply_in_block.m_alias << "\" got used by someone else, canceled." );
       m_alias_to_apply_in_block = AUTO_VAL_INIT(m_alias_to_apply_in_block);
       return false;
     }
@@ -256,14 +256,14 @@ namespace currency
     {
       LOG_PRINT_CYAN("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", LOG_LEVEL_0);
       LOG_PRINT_L0(ENDL << "**********************************************************************" << ENDL 
-        << "NOTICE: Each block in blockchain have a vote, that takes into account "<< ENDL 
-        << "when calculating the reward amount for project team(once a day)." << ENDL 
+        << "NOTICE: Each block in the blockchain has a vote that is taken into account "<< ENDL 
+        << "when calculating the reward amount for project team (once per day)." << ENDL 
         << ENDL
-        << "Be sure to specify an option that expresses your attitude to work that make the project developers."  << ENDL 
+        << "Be sure to specify an option that expresses your attitude to work by the project developers."  << ENDL 
         << "If you support the project, leave donations enabled. If you disagree with the actions of the team,"
-        << "vote against donations.(by entering command \"set_donations false\")"  << ENDL 
+        << "vote against donations (by entering command \"set_donations false\")."  << ENDL 
         << ENDL 
-        << "By default, if you didn't refuse it explicitely, donations set to enabled." << ENDL 
+        << "By default, if you don't disable them explicitly, donations will be enabled." << ENDL 
         << ENDL
         << "**********************************************************************");
       LOG_PRINT_CYAN("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", LOG_LEVEL_0);
@@ -276,13 +276,13 @@ namespace currency
     CRITICAL_REGION_LOCAL(m_threads_lock);
     if(is_mining())
     {
-      LOG_ERROR("Starting miner but it's already started");
+      LOG_ERROR("Starting miner canceled:  miner already running");
       return false;
     }
 
     if(!m_threads.empty())
     {
-      LOG_ERROR("Unable to start miner because there are active mining threads");
+      LOG_ERROR("Starting miner canceled:  there are still active mining threads");
       return false;
     }
 
