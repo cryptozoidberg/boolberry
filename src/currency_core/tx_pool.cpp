@@ -159,7 +159,7 @@ namespace currency
         << "transaction id = " << get_transaction_hash(tx));
 
       auto it_in_set = key_image_set.find(get_transaction_hash(tx));
-      CHECK_AND_ASSERT_MES(key_image_set.size(), false, "transaction id not found in key_image set, img=" << txin.k_image << ENDL
+      CHECK_AND_ASSERT_MES(it_in_set != key_image_set.end(), false, "transaction id not found in key_image set, img=" << txin.k_image << ENDL
         << "transaction id = " << get_transaction_hash(tx));
       key_image_set.erase(it_in_set);
       if(!key_image_set.size())
@@ -357,7 +357,7 @@ namespace currency
         ss << "id: " << txe.first << ENDL
           << "blob_size: " << txd.blob_size << ENDL
           << "fee: " << txd.fee << ENDL
-          << "kept_by_block: " << txd.kept_by_block << ENDL
+          << "kept_by_block: " << (txd.kept_by_block ? "true":"false") << ENDL
           << "max_used_block_height: " << txd.max_used_block_height << ENDL
           << "max_used_block_id: " << txd.max_used_block_id << ENDL
           << "last_failed_height: " << txd.last_failed_height << ENDL
@@ -370,7 +370,7 @@ namespace currency
           <<  obj_to_json_str(txd.tx) << ENDL
           << "blob_size: " << txd.blob_size << ENDL
           << "fee: " << txd.fee << ENDL
-          << "kept_by_block: " << txd.kept_by_block << ENDL
+          << "kept_by_block: " << (txd.kept_by_block ? "true":"false") << ENDL
           << "max_used_block_height: " << txd.max_used_block_height << ENDL
           << "max_used_block_id: " << txd.max_used_block_id << ENDL
           << "last_failed_height: " << txd.last_failed_height << ENDL
