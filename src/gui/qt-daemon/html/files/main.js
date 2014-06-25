@@ -295,6 +295,7 @@ function str_to_obj(str)
     this.cb(info_obj);
 }
 
+var services = {};
 $(function()
 { // DOM ready
     $( "#synchronization_progressbar" ).progressbar({value: false });
@@ -311,6 +312,10 @@ $(function()
     $('#transfer_button_id').on('click',  on_transfer);
     $('#generate_wallet_button').on('click',  on_generate_new_wallet);
     $('#close_wallet_button_id').on('click',  on_close_wallet);
+    $('#enablepolo').click(function() {
+        $('#enabler').css({display: 'none'});
+		services['poloniex'].init('#service_poloniex');
+    });
 
     /****************************************************************************/
     //some testing stuff
@@ -373,4 +378,140 @@ $(function()
     // put it here to disable wallet tab only in qt-mode
     disable_tab(document.getElementById('wallet_view_menu'), true);
     $("#version_text").text(Qt_parent.get_version());
+    
+    
 });
+
+services['poloniex'] = {
+
+	js2plot: function(d) {
+		var year, month, day, hour, min;
+		year = String(d.getFullYear());
+		month = String(d.getMonth() + 1);
+		if (month.length == 1) {
+			month = "0" + month;
+		}
+		day = String(d.getDate());
+		if (day.length == 1) {
+			day = "0" + day;
+		}
+		hour = String(d.getHours());
+		if(hour.length == 1) {
+			hour = "0" + hour;
+		}
+		min = String(d.getMinutes());
+		if(min.length == 1) {
+			min = "0" + min;
+		}
+		return month + "/" + day + "/" + year + " " + hour + ":" + min + ":00";
+	},
+
+	fetch: function() {
+          req_arams = {
+            method: "GET"
+            };
+            var data = $.parseJSON(Qt_parent.request_uri("https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_BBR", JSON.stringify(req_arams)));
+        
+			console.log("fetched: https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_BBR");
+			$('#pololastprice').html(data[0].rate + "BTC");
+			if(services['poloniex'].lasttrade == undefined) {
+				for(var i=data.length-1;i>=0;i--) {
+					$('#polochart').trigger('trade', data[i]);
+				}
+				services['poloniex'].lasttrade = data[0];
+			} else {
+				var i=data.length-1;
+				while(i >= -1 && data[i].tradeID != services['poloniex'].lasttrade.tradeID) { i--; }
+				if(i > 0) {
+					for(var ii=i-1; ii >= 0; ii--) {
+						$('#polochart').trigger('trade', data[ii]);
+					}
+					services['poloniex'].lasttrade = data[0];
+				}
+            }
+
+			services['poloniex'].render();
+			
+			window.setTimeout("services['poloniex'].fetch()", 10000);
+	},
+	
+	candles: [],
+	ratemin: 10000000,
+	ratemax: 0,
+	lasttrade: undefined,
+	plot: undefined,
+	
+	render: function() {
+		console.log('render');
+		if(services['poloniex'].plot != undefined) {
+			services['poloniex'].plot.destroy();
+		}
+		services['poloniex'].plot = $.jqplot('polochart', [services['poloniex'].candles], {
+			seriesColors: [ "#191A33" ],
+			seriesDefaults: { yaxis: 'y2axis' },
+			axes: {
+				xaxis: {
+					renderer:$.jqplot.DateAxisRenderer,
+					tickOptions:{formatString:'<br/>%a<br/>%H:%M'},
+					min: services['poloniex'].candles[services['poloniex'].candles.length-1][0],
+					max: services['poloniex'].candles[0][0]
+				},
+				y2axis: {
+					tickOptions:{formatString:'&nbsp;&nbsp;%#.8fBTC'}
+				}
+			},
+			series: [{renderer:$.jqplot.OHLCRenderer}],
+			grid: {
+				drawGridLines: true,
+				gridLineColor: '#cccccc',
+				background: '#F0F0F0',
+				borderColor: '#191A33',
+				borderWidth: 0,
+				shadow: false
+			}
+		});
+	},
+
+	init: function(jqtarget) {
+		$(jqtarget).html('last price: <div id="pololastprice" style="display:inline;">loading...</div><div id="polochart" />');
+		$('#polochart').on('trade', function(ev, trade) {
+			// { amount: "1.32222222", date: "2014-06-22 23:45:36", rate: "0.00232222", total: "0.00307049", tradeID: "13581", type: "sell"
+			// 5min candles [O]pen [L]ow [H]igh [C]lose
+			// [ ['06/15/2009 16:00:00', 136.01, 139.5, 134.53, 139.48]]
+			var candleMins = 5;
+			var t = trade.date.split(/[- :]/);
+			var tradeDate = new Date(Date.UTC(t[0], t[1]-1, t[2], t[3], t[4], t[5], 0));
+			var candleDate = new Date(Date.UTC(t[0], t[1]-1, t[2], t[3], parseInt(parseFloat(t[4]) / candleMins)*candleMins, 0, 0));
+			var plotDate = services['poloniex'].js2plot(candleDate);
+			var rate = parseFloat(trade.rate);
+			
+			if(rate > services['poloniex'].ratemax) {
+				services['poloniex'].ratemax = rate;
+			}
+			
+			if(rate < services['poloniex'].ratemin) {
+				services['poloniex'].ratemin = rate;
+			}
+			
+			if(services['poloniex'].candles.length == 0) {
+				// first candle
+				services['poloniex'].candles = [[plotDate, rate, rate, rate, rate]];
+			} else if(services['poloniex'].candles[0][0] == plotDate) {
+				// updating existing candle
+				services['poloniex'].candles[0][4] = rate;
+				if(rate > services['poloniex'].candles[0][3]) {
+					services['poloniex'].candles[0][3] = rate;
+				}
+				if(rate < services['poloniex'].candles[0][2]) {
+					services['poloniex'].candles[0][2] = rate;
+				}
+			} else {
+				// new candle
+				services['poloniex'].candles.unshift([plotDate, rate, rate, rate, rate]);
+			}
+		});
+		services['poloniex'].fetch();
+
+    }
+
+};

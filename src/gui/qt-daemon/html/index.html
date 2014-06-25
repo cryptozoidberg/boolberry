@@ -9,9 +9,15 @@
 
     <!--  <script src="files/http_code.jquery.com_jquery-latest.js"></script> -->
     <!--  <script src="files/http_code.jquery.com_ui_1.10.2_jquery-ui.js"></script> -->
-    <script src="files/js/jquery-1.10.2.js"></script>
+    <script src="files/js/jquery.min.js"></script>
     <script src="files/js/jquery-ui-1.10.4.custom.js"></script>
     <script src="files/ui_helper.js" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="files/jquery.jqplot.min.css" />
+	<script type="text/javascript" src="files/js/jquery.jqplot.min.js"></script>
+	<script type="text/javascript" src="files/js/plugins/jqplot.dateAxisRenderer.min.js"></script>
+	<script type="text/javascript" src="files/js/plugins/jqplot.ohlcRenderer.min.js"></script>
+	<script type="text/javascript" src="files/js/plugins/jqplot.highlighter.min.js"></script>
+    
 </head>
 
 <body>
@@ -23,6 +29,7 @@
             <div class="menu_bar_tabs">
                 <div id="daemon_state_view_menu" class="inline_menu_bar_item"  view_name="daemon_state_view">Connectivity</div>
                 <div id="wallet_view_menu"  class="inline_menu_bar_item" view_name="wallet_view">Wallet</div>
+                <div id="wallet_services"  class="inline_menu_bar_item" view_name="wallet_services_view">Services</div>
             </div>
         </div>
     </div>
@@ -132,8 +139,17 @@
             </div>
         </div>
     </div>
-</div>
+    <div id="wallet_services_view" class="view_hidden menu_view_inner_area" >
+        <div id = "enabler"class="wallet_panel">
+            Do you want to enable Poloniex price charts?
+            <div id="enablepolo" class="common_button">ENABLE</div>
+            </div>
+        <div class="wallet_separator">Poloniex</div>
+        <div id="service_poloniex" style="height:500px;" class="wallet_panel">please enable above...
+        </div>
+    </div>    
 
+</div>
 <script src="files/main.js" type="text/javascript" charset="utf-8"></script>
 
 </body>
