@@ -16,6 +16,9 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include "warnings.h"
 #include "net/http_client.h"
 
@@ -1375,7 +1378,7 @@ bool is_uri_allowed(const QString& uri)
   return true;
 }
 
-QString Html5ApplicationViewer::request_uri(const QString& uri, const QString& params)
+QString Html5ApplicationViewer::request_uri(const QString& url_str, const QString& params)
 {
   view::request_uri_params prms;
   if (!epee::serialization::load_t_from_json(prms, params.toStdString()))
@@ -1383,27 +1386,18 @@ QString Html5ApplicationViewer::request_uri(const QString& uri, const QString& p
     show_msg_box("Internal error: failed to load request_uri params");
     return "";
   }
+  QNetworkAccessManager NAManager;
+  QUrl url(url_str);
+  QNetworkRequest request(url);
+  QNetworkReply *reply = NAManager.get(request);
+  QEventLoop eventLoop;
+  connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+  eventLoop.exec();
 
-  epee::net_utils::http::fields_list fs;
-  for (auto h : prms.headers)
-  {
-    fs.push_back(std::pair<std::string, std::string>(h.field, h.val));
-  }
-
-  epee::net_utils::http::http_simple_client transport;
-  const epee::net_utils::http::http_response_info* ppresponse_info = nullptr;
-  if (!epee::net_utils::http::invoke_request(uri.toStdString(), transport, 2000, &ppresponse_info, prms.method, prms.data, fs))
-  {
-    show_msg_box("Internal error: failed to load request_uri, network_fail");
-    return "";
-  }
   
-  if (!ppresponse_info)
-  {
-    show_msg_box("Internal error: failed to load request_uri, response info not set");
-    return "";
-  }
-  return ppresponse_info->m_body.c_str();
+  QByteArray res = reply->readAll();
+   return res;
+  
 }
 
 QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
