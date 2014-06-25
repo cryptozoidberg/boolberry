@@ -50,20 +50,20 @@ add_dependencies(wallet version)
 
 add_executable(daemon ${DAEMON} ${P2P} ${CURRENCY_PROTOCOL})
 add_dependencies(daemon version)
-target_link_libraries(daemon rpc currency_core crypto common upnpc-static ${Boost_LIBRARIES})
+target_link_libraries(daemon rpc currency_core crypto common upnpc-static ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
                      
 add_executable(connectivity_tool ${CONN_TOOL})
 add_dependencies(connectivity_tool version)
-target_link_libraries(connectivity_tool currency_core crypto common ${Boost_LIBRARIES})
+target_link_libraries(connectivity_tool currency_core crypto common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
 
 add_executable(simplewallet ${SIMPLEWALLET})
 add_dependencies(simplewallet version)
-target_link_libraries(simplewallet wallet rpc currency_core crypto common ${Boost_LIBRARIES})
+target_link_libraries(simplewallet wallet rpc currency_core crypto common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
 add_executable(simpleminer ${SIMPLEMINER})
 add_dependencies(simpleminer version)
-target_link_libraries(simpleminer currency_core crypto common ${Boost_LIBRARIES})
+target_link_libraries(simpleminer currency_core crypto common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
 set_property(TARGET common crypto currency_core rpc wallet PROPERTY FOLDER "libs")
 set_property(TARGET daemon simplewallet simpleminer connectivity_tool PROPERTY FOLDER "prog")
@@ -74,7 +74,7 @@ if(BUILD_GUI)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
   add_executable(qt-boolb WIN32 ${QTDAEMON} )	  
   QT5_USE_MODULES(qt-boolb WebKit WebKitWidgets)
-  target_link_libraries(qt-boolb wallet rpc currency_core crypto common Qt5::Widgets ${Boost_LIBRARIES} )
+  target_link_libraries(qt-boolb wallet rpc currency_core crypto common Qt5::Widgets ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} )
   set_property(TARGET qt-boolb PROPERTY FOLDER "prog")
   set(CMAKE_AUTOMOC OFF)
 endif()
@@ -89,7 +89,7 @@ if(SIMPLE_BUNDLE)
       RUNTIME DESTINATION "${INSTALL_DIR}" COMPONENT Runtime
   )
 
-  install(FILES ${Boost_LIBRARIES} DESTINATION "${INSTALL_DIR}/lib")
+  install(FILES ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} DESTINATION "${INSTALL_DIR}/lib")
 
   if(APPLE)
     set(FIXUP_COMMAND ${CMAKE_SOURCE_DIR}/utils/macosx_fixup.sh " " ${INSTALL_DIR})

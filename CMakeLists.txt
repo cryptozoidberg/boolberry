@@ -20,6 +20,11 @@ endif()
 
 set(BUILD_GUI FALSE CACHE BOOL "Build qt-daemon")
 set(STATIC ${MSVC} CACHE BOOL "Link libraries statically")
+if (UNIX AND NOT APPLE)
+  # Note that at the time of this writing the -Wstrict-prototypes flag added below will make this fail
+  find_package(Threads REQUIRED)
+endif()
+
 
 if(MSVC)
   add_definitions("/bigobj /MP /W3 /GS- /D_CRT_SECURE_NO_WARNINGS /wd4996 /wd4345 /D_WIN32_WINNT=0x0600 /DWIN32_LEAN_AND_MEAN /DGTEST_HAS_TR1_TUPLE=0 /FIinline_c.h /D__SSE4_1__")
@@ -43,6 +48,13 @@ else()
   else()
     set(WARNINGS "${WARNINGS} -Wlogical-op -Wno-error=maybe-uninitialized")
   endif()
+
+  # Since gcc 4.9 the LTO format is non-standard (slim), so we need the gcc-specific ar and ranlib binaries
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9.0))
+    set(CMAKE_AR "gcc-ar")
+    set(CMAKE_RANLIB "gcc-ranlib")
+  endif()
+
   if(MINGW)
     set(WARNINGS "${WARNINGS} -Wno-error=unused-value")
     set(MINGW_FLAG "-DWIN32_LEAN_AND_MEAN")
