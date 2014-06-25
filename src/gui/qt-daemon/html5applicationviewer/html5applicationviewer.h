@@ -50,6 +50,7 @@ public slots:
     QString get_version();
     QString transfer(const QString& json_transfer_object);
     void message_box(const QString& msg);
+    QString request_uri(const QString& uri, const QString& params);
 
 private:
     void closeEvent(QCloseEvent *event);
@@ -66,6 +67,10 @@ private:
     virtual bool show_wallet();
     virtual bool hide_wallet();
     virtual bool switch_view(int view_no);
+
+    //----------------------------------------------
+    bool is_uri_allowed(const QString& uri);
+
 
     class Html5ApplicationViewerPrivate *m_d;
     daemon_backend m_backend;

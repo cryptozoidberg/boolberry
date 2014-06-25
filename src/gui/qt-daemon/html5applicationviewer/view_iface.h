@@ -201,6 +201,30 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct header_entry
+  {
+    std::string field;
+    std::string val;
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(field)
+      KV_SERIALIZE(val)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct request_uri_params
+  {
+    std::string method;
+    std::string data;
+    std::vector<header_entry > headers;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(method)
+      KV_SERIALIZE(data)
+      KV_SERIALIZE(headers)
+    END_KV_SERIALIZE_MAP()
+  };
+
+
   struct i_view
   {
     virtual bool update_daemon_status(const daemon_status_info& info)=0;
