@@ -125,18 +125,6 @@ namespace mining
     return true;
   }
   //--------------------------------------------------------------------------------------------------------------------------------
-  bool simpleminer::text_job_details_to_native_job_details(const job_details& job, simpleminer::job_details_native& native_details)
-  {
-    bool r = epee::string_tools::parse_hexstr_to_binbuff(job.blob, native_details.blob);
-    CHECK_AND_ASSERT_MES(r, false, "wrong buffer sent from pool server");
-    r = epee::string_tools::get_xtype_from_string(native_details.difficulty, job.difficulty);
-    CHECK_AND_ASSERT_MES(r, false, "wrong buffer sent from pool server");
-    native_details.job_id = job.job_id;
-
-    return text_height_info_to_native_height_info(job.prev_hi, native_details.prev_hi);
-  }
-
-  //--------------------------------------------------------------------------------------------------------------------------------
   void simpleminer::worker_thread(uint64_t start_nonce, uint32_t nonce_offset, std::atomic<uint32_t> *result, std::atomic<bool> *do_reset, std::atomic<bool> *done) {
     //	  printf("Worker thread starting at %lu + %u\n", start_nonce, nonce_offset);
     currency::blobdata blob = m_job.blob;
@@ -241,7 +229,10 @@ namespace mining
       }
 
       uint64_t get_job_start_time = epee::misc_utils::get_tick_count();
-      get_job(); /* Next version:  Handle this asynchronously */
+      if(!get_job()) /* Next version:  Handle this asynchronously */
+      {
+        continue;
+      }
       update_fast_scratchpad();
       uint64_t get_job_end_time  = epee::misc_utils::get_tick_count();
       if ((get_job_end_time - get_job_start_time) > 1000) 
@@ -541,18 +532,18 @@ namespace mining
       LOG_PRINT_L0("Can't get new job! Disconnect and sleep....");
       m_http_client.disconnect();
       epee::misc_utils::sleep_no_w(1000);
-      return true;
+      return false;
     }
-    if (getjob_response.jd.blob.empty() && getjob_response.jd.difficulty.empty() && getjob_response.jd.job_id.empty())
+    if (getjob_response.blob.empty() && getjob_response.difficulty.empty() && getjob_response.job_id.empty())
     {
       LOG_PRINT_L0("Job didn't change");
     }
-    else if(!text_job_details_to_native_job_details(getjob_response.jd, m_job))
+    else if(!text_job_details_to_native_job_details(getjob_response, m_job))
     {
       LOG_PRINT_L0("Failed to text_job_details_to_native_job_details(), disconnect and sleep....");
       m_http_client.disconnect();
       epee::misc_utils::sleep_no_w(1000);
-      return true;
+      return false;
     }
     //apply addendum
     if(!apply_addendums(getjob_response.addms))

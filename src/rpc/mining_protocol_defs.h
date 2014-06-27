@@ -106,7 +106,8 @@ namespace mining
         BEGIN_KV_SERIALIZE_MAP()
           KV_SERIALIZE(addms)
           KV_SERIALIZE(status)
-          KV_CHAIN_MAP(*static_cast<job_details*>(this) )
+          //KV_CHAIN_MAP(*static_cast<job_details*>(this) )
+          KV_CHAIN_BASE(job_details)
         END_KV_SERIALIZE_MAP()
     };
   };
