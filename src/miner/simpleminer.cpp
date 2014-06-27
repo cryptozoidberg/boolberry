@@ -425,7 +425,7 @@ namespace mining
       void *addr = nullptr;
       size_t mapsize = cur_scratchpad_pages * 4096;
 #ifdef MAP_HUGETLB
-      addr = MAP_FAILED;
+      *addr = MAP_FAILED;
       addr = mmap(0, mapsize, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_HUGETLB|MAP_POPULATE, 0, 0);
       if (addr == MAP_FAILED)
       {
