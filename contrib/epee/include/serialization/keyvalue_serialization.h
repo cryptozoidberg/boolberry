@@ -86,7 +86,7 @@ public: \
 #define KV_SERIALIZE_CONTAINER_POD_AS_BLOB(varialble)     KV_SERIALIZE_CONTAINER_POD_AS_BLOB_N(varialble, #varialble)
 
 #define KV_CHAIN_MAP(variable_obj) epee::namespace_accessor<decltype(this_ref.variable_obj)>::template serialize_map<is_store>(this_ref.variable_obj, stg, hparent_section);
-#define KV_CHAIN_BASE(base_type) base_type::serialize_map<is_store>(static_cast<base_type>(this_ref), stg, hparent_section);
+#define KV_CHAIN_BASE(base_type) base_type::serialize_map<is_store>(static_cast<base_type&>(this_ref), stg, hparent_section);
 }
 
 
