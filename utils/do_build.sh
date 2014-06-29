@@ -20,13 +20,13 @@ rm -rf build; mkdir -p build/release; cd build/release;
 cmake -D STATIC=true -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH" -D CMAKE_BUILD_TYPE=Release ../..
 if [ $? -ne 0 ]; then
     echo "Failed to run cmake"
-    exit $?
+    exit 1
 fi
 
 make daemon qt-boolb simplewallet simpleminer connectivity_tool;
 if [ $? -ne 0 ]; then
-    echo "Failed to run cmake"
-    exit $?
+    echo "Failed to make!"
+    exit 1
 fi
 
  
@@ -42,7 +42,7 @@ cp -Rv $QT_BINARIES_PATH/libs .
 tar -cjvf linux-x64-$version_str.tar.bz2 html qt-boolb.sh libs boolbd qt-boolb simplewallet simpleminer connectivity_tool
 if [ $? -ne 0 ]; then
     echo "Failed to pack"
-    exit $?
+    exit 1
 fi
 
 
