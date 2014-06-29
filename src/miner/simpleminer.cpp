@@ -14,7 +14,9 @@
 #include "currency_core/account.h"
 #include "currency_core/currency_format_utils.h"
 #include "rpc/core_rpc_server_commands_defs.h"
+#ifndef WIN32
 #include <sys/mman.h>
+#endif
 
 using namespace epee;
 namespace po = boost::program_options;
@@ -130,33 +132,33 @@ namespace mining
     r = epee::string_tools::get_xtype_from_string(native_details.difficulty, job.difficulty);
     CHECK_AND_ASSERT_MES(r, false, "wrong buffer sent from pool server");
     native_details.job_id = job.job_id;
-   
+
     return text_height_info_to_native_height_info(job.prev_hi, native_details.prev_hi);
   }
 
   //--------------------------------------------------------------------------------------------------------------------------------
   void simpleminer::worker_thread(uint64_t start_nonce, uint32_t nonce_offset, std::atomic<uint32_t> *result, std::atomic<bool> *do_reset, std::atomic<bool> *done) {
-	  //	  printf("Worker thread starting at %lu + %u\n", start_nonce, nonce_offset);
+    //	  printf("Worker thread starting at %lu + %u\n", start_nonce, nonce_offset);
     currency::blobdata blob = m_job.blob;
     while (!*do_reset) {
       m_hashes_done += attempts_per_loop;
       for (int i = 0; i < attempts_per_loop; i++) {
-	(*reinterpret_cast<uint64_t*>(&blob[1])) = (start_nonce+nonce_offset);
+        (*reinterpret_cast<uint64_t*>(&blob[1])) = (start_nonce+nonce_offset);
         crypto::hash h = currency::null_hash;
-	currency::get_blob_longhash(blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
-						{
-	return m_fast_scratchpad[index%m_scratchpad.size()];
-	});
-
-	if( currency::check_hash(h, m_job.difficulty))
+        currency::get_blob_longhash(blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
         {
-	  (*result) = nonce_offset;
-	  (*done) = true;
-	  (*do_reset) = true;
-	  m_work_done_cond.notify_one();
-	  return;
+          return m_fast_scratchpad[index%m_scratchpad.size()];
+        });
+
+        if( currency::check_hash(h, m_job.difficulty))
+        {
+          (*result) = nonce_offset;
+          (*done) = true;
+          (*do_reset) = true;
+          m_work_done_cond.notify_one();
+          return;
         }
-	nonce_offset++;
+        nonce_offset++;
       }
       nonce_offset += ((m_threads_total-1) * attempts_per_loop);
     }
@@ -183,7 +185,7 @@ namespace mining
           epee::misc_utils::sleep_no_w(1000);
           continue;
         }
-	m_http_client.get_socket().set_option(boost::asio::ip::tcp::no_delay(true));
+        m_http_client.get_socket().set_option(boost::asio::ip::tcp::no_delay(true));
         //DO AUTH
         LOG_PRINT_L0("Connected " << m_pool_ip << ":" << m_pool_port << " OK");
         COMMAND_RPC_LOGIN::request req = AUTO_VAL_INIT(req);
@@ -209,23 +211,23 @@ namespace mining
         }
 
         m_pool_session_id = resp.id;        
-	if (re_get_scratchpad || !m_hi.height || !m_scratchpad.size())
+        if (re_get_scratchpad || !m_hi.height || !m_scratchpad.size())
         {
-	  if (!get_whole_scratchpad())
-	    continue;
+          if (!get_whole_scratchpad())
+            continue;
           re_get_scratchpad = false;
         }
         else if(!apply_addendums(resp.addms))
         {
           LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
           if (!get_whole_scratchpad())
-	    continue;
+            continue;
         }
 
         if (job_requested && resp.job.blob.empty() && resp.job.difficulty.empty() && resp.job.job_id.empty())
         {
-            LOG_PRINT_L0("Job didn't change");
-            continue;
+          LOG_PRINT_L0("Job didn't change");
+          continue;
         }
         else if(job_requested && !text_job_details_to_native_job_details(resp.job, m_job))
         {
@@ -254,8 +256,8 @@ namespace mining
       std::atomic<bool> done(false);
 
       if (m_threads_total > 128) { 
-	LOG_PRINT_L0("Sorry - simpleminer does not support more than 128 threads right now");
-	m_threads_total = 128;
+        LOG_PRINT_L0("Sorry - simpleminer does not support more than 128 threads right now");
+        m_threads_total = 128;
       }
 
       m_hashes_done = 0; /* Used to calculate offset to push back into job */
@@ -263,16 +265,16 @@ namespace mining
       uint32_t nonce_offset = 0;
       for (unsigned int i = 0; i < m_threads_total; i++)
       {
-	results[i] = 0;
-	threads.push_back(boost::thread(&simpleminer::worker_thread, this, start_nonce, nonce_offset, &results[i], &do_reset, &done));
-	nonce_offset += attempts_per_loop;
+        results[i] = 0;
+        threads.push_back(boost::thread(&simpleminer::worker_thread, this, start_nonce, nonce_offset, &results[i], &do_reset, &done));
+        nonce_offset += attempts_per_loop;
       }
 
 
       while(!done && epee::misc_utils::get_tick_count() - m_last_job_ticks < 20000)
       {
-	std::unique_lock<std::mutex> lck(m_work_mutex);
-	m_work_done_cond.wait_for(lck, std::chrono::seconds(1));
+        std::unique_lock<std::mutex> lck(m_work_mutex);
+        m_work_done_cond.wait_for(lck, std::chrono::seconds(1));
       }
 
       do_reset = true;
@@ -281,55 +283,55 @@ namespace mining
         th.join();
       }
       for (unsigned int i = 0; i < m_threads_total; i++) {
-	if (results[i] != 0) {
-	  (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + results[i]);
-	  crypto::hash h = currency::null_hash;
-	  currency::get_blob_longhash(m_job.blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
+        if (results[i] != 0) {
+          (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) = (start_nonce + results[i]);
+          crypto::hash h = currency::null_hash;
+          currency::get_blob_longhash(m_job.blob, h, m_job.prev_hi.height+1, [&](uint64_t index) -> crypto::hash&
           {
-	    return m_scratchpad[index%m_scratchpad.size()];
-	  });
+            return m_scratchpad[index%m_scratchpad.size()];
+          });
 
-	  if( currency::check_hash(h, m_job.difficulty))
-	  {
-	    //<< ", id" << currency::get_blob_hash(m_job.blob) << ENDL
-	    //found!          
-	    COMMAND_RPC_SUBMITSHARE::request submit_request = AUTO_VAL_INIT(submit_request);
-	    COMMAND_RPC_SUBMITSHARE::response submit_response = AUTO_VAL_INIT(submit_response);
-	    submit_request.id     = m_pool_session_id;
-	    submit_request.job_id = m_job.job_id;
-	    submit_request.nonce  = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
-	    submit_request.result = string_tools::buff_to_hex_nodelimer(std::string((char*) &h, HASH_SIZE));
-	    LOG_PRINT_GREEN("Share found: nonce=" << submit_request.nonce << " for job=" << m_job.job_id << ", diff: " << m_job.difficulty << ENDL             
-            << ", PoW:" << h << ", height:" << m_job.prev_hi.height+1 << ", submitting...", LOG_LEVEL_0);
+          if( currency::check_hash(h, m_job.difficulty))
+          {
+            //<< ", id" << currency::get_blob_hash(m_job.blob) << ENDL
+            //found!          
+            COMMAND_RPC_SUBMITSHARE::request submit_request = AUTO_VAL_INIT(submit_request);
+            COMMAND_RPC_SUBMITSHARE::response submit_response = AUTO_VAL_INIT(submit_response);
+            submit_request.id     = m_pool_session_id;
+            submit_request.job_id = m_job.job_id;
+            submit_request.nonce  = (*reinterpret_cast<uint64_t*>(&m_job.blob[1]));
+            submit_request.result = string_tools::buff_to_hex_nodelimer(std::string((char*) &h, HASH_SIZE));
+            LOG_PRINT_GREEN("Share found: nonce=" << submit_request.nonce << " for job=" << m_job.job_id << ", diff: " << m_job.difficulty << ENDL             
+              << ", PoW:" << h << ", height:" << m_job.prev_hi.height+1 << ", submitting...", LOG_LEVEL_0);
 
-	    //LOG_PRINT_L0("Block hashing blob: " << string_tools::buff_to_hex_nodelimer(m_job.blob));
-	    //LOG_PRINT_L0("scratch_pad: " << currency::dump_scratchpad(m_scratchpad));
-	    if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_SUBMITSHARE>("/json_rpc", submit_request, submit_response, m_http_client))
+            //LOG_PRINT_L0("Block hashing blob: " << string_tools::buff_to_hex_nodelimer(m_job.blob));
+            //LOG_PRINT_L0("scratch_pad: " << currency::dump_scratchpad(m_scratchpad));
+            if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_SUBMITSHARE>("/json_rpc", submit_request, submit_response, m_http_client))
             {
-	      /* Failed to submit a job.  This can happen because of disconnection,
-	       * server failure, or block expiry.  In any event, try to get
-	       * a new job.  If the job fetch fails, get_job will disconnect
-	       * and sleep for us */
-	      LOG_PRINT_L0("Failed to submit share!  Updating job.");
-	      job_submit_failures++;
-	    }
-	    else if(submit_response.status != "OK")
-	    {
-	      LOG_PRINT_L0("Failed to submit share! (submitted share rejected).  Updating job.");
-	      job_submit_failures++;
-	    }
-	    else
-	    {
-	      LOG_PRINT_GREEN("Share submitted successfully!", LOG_LEVEL_0);
-	      job_submit_failures = 0;
-	    }
-	    break; /* One submission per job id */
-	  } 
+              /* Failed to submit a job.  This can happen because of disconnection,
+              * server failure, or block expiry.  In any event, try to get
+              * a new job.  If the job fetch fails, get_job will disconnect
+              * and sleep for us */
+              LOG_PRINT_L0("Failed to submit share!  Updating job.");
+              job_submit_failures++;
+            }
+            else if(submit_response.status != "OK")
+            {
+              LOG_PRINT_L0("Failed to submit share! (submitted share rejected).  Updating job.");
+              job_submit_failures++;
+            }
+            else
+            {
+              LOG_PRINT_GREEN("Share submitted successfully!", LOG_LEVEL_0);
+              job_submit_failures = 0;
+            }
+            break; /* One submission per job id */
+          } 
           else 
           {
-	    LOG_PRINT_L0("share did not pass diff revalidation");
-	  }
-	}
+            LOG_PRINT_L0("share did not pass diff revalidation");
+          }
+        }
       }
 
       start_nonce += m_hashes_done;
@@ -340,22 +342,22 @@ namespace mining
       if (job_submit_failures == 5)
       {
         LOG_PRINT_L0("Too many submission failures.  Something is very wrong.");
-	free_fast_scratchpad();
+        free_fast_scratchpad();
         return false;
       }
       if (job_submit_failures > 3)
       {
-	re_get_scratchpad = true;
-	/* note fallthrough into next case to also reconnect */
+        re_get_scratchpad = true;
+        /* note fallthrough into next case to also reconnect */
       }
       if (job_submit_failures > 1)
       {
         m_http_client.disconnect();
-	epee::misc_utils::sleep_no_w(1000);
+        epee::misc_utils::sleep_no_w(1000);
       } else {
-	uint64_t loop_end_time = epee::misc_utils::get_tick_count();
-	uint64_t hash_rate = (hashes_done * 1000) / ((loop_end_time - search_start) + 1);
-	LOG_PRINT_L0("avg hr: " << hash_rate);
+        uint64_t loop_end_time = epee::misc_utils::get_tick_count();
+        uint64_t hash_rate = (hashes_done * 1000) / ((loop_end_time - search_start) + 1);
+        LOG_PRINT_L0("avg hr: " << hash_rate);
       }
     }
     free_fast_scratchpad();
@@ -385,8 +387,8 @@ namespace mining
     {
       LOG_ERROR("Server sent empty scratchpad.  Disconnecting and retrying...");
       /* Sleep a bit longer here.  Rationale:  If the server is sending bad
-       * scratchpad data, it's probably having problems, so let's not slam it
-       * with requests and make things worse. */
+      * scratchpad data, it's probably having problems, so let's not slam it
+      * with requests and make things worse. */
       epee::misc_utils::sleep_no_w(5000);
       m_http_client.disconnect();
       return false;
@@ -401,9 +403,11 @@ namespace mining
     {
       if (m_fast_mmapped)
       {
+#ifndef WIN32
         munmap(m_fast_scratchpad, m_fast_scratchpad_pages*4096);
+#endif
       } else {
-	free(m_fast_scratchpad);
+        free(m_fast_scratchpad);
       }
       m_fast_scratchpad = NULL;
     }
@@ -411,23 +415,25 @@ namespace mining
 
   void simpleminer::update_fast_scratchpad()
   {
-    
+
     /* Check size - reallocate fast scratch if necessary */
     size_t cur_scratchpad_size = m_scratchpad.size() * sizeof(crypto::hash);
     size_t cur_scratchpad_pages = (cur_scratchpad_size / 4096) + 1;
     if (cur_scratchpad_pages > m_fast_scratchpad_pages)
     {
       free_fast_scratchpad();
-      void *addr = MAP_FAILED;
+      void *addr = nullptr;
       size_t mapsize = cur_scratchpad_pages * 4096;
 #ifdef MAP_HUGETLB
+      addr = MAP_FAILED;
       addr = mmap(0, mapsize, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_HUGETLB|MAP_POPULATE, 0, 0);
       if (addr == MAP_FAILED)
       {
         LOG_PRINT_L0("Unable to mmap huge pages.  Enable for faster operation.");
+        addr = nullptr;
       }
 #endif
-      if (addr == MAP_FAILED) {
+      if (addr == nullptr) {
         addr = malloc(mapsize);
       } else {
         m_fast_mmapped = true;
@@ -438,7 +444,7 @@ namespace mining
 
     memcpy(m_fast_scratchpad, &m_scratchpad[0], m_scratchpad.size() * sizeof(crypto::hash));
   }
-	
+
   //----------------------------------------------------------------------------------------------------------------------------------
   bool  simpleminer::pop_addendum(const addendum& add)
   {
@@ -449,10 +455,10 @@ namespace mining
 
     std::map<uint64_t, crypto::hash> patch;
     currency::get_scratchpad_patch(m_scratchpad.size() - add_vec.size(),  
-                                   0, 
-                                   add_vec.size(), 
-                                   add_vec, 
-                                   patch);
+      0, 
+      add_vec.size(), 
+      add_vec, 
+      patch);
     r = currency::apply_scratchpad_patch(m_scratchpad, patch);
     CHECK_AND_ASSERT_MES(r, false, "failed to apply patch");
     m_scratchpad.resize(m_scratchpad.size() - add_vec.size());  
@@ -464,13 +470,13 @@ namespace mining
     std::vector<crypto::hash> add_vec;
     bool r = currency::hexstr_to_addendum(add.addm, add_vec);
     CHECK_AND_ASSERT_MES(r, false, "failed to hexstr_to_addendum");
-    
+
     std::map<uint64_t, crypto::hash> patch;
     currency::get_scratchpad_patch(m_scratchpad.size(),  
-                                   0, 
-                                   add_vec.size(), 
-                                   add_vec, 
-                                   patch);
+      0, 
+      add_vec.size(), 
+      add_vec, 
+      patch);
     r = currency::apply_scratchpad_patch(m_scratchpad, patch);
     CHECK_AND_ASSERT_MES(r, false, "failed to apply patch");
     for(const auto& h: add_vec)
@@ -506,7 +512,7 @@ namespace mining
         CHECK_AND_ASSERT_MES(r, false, "failed to pop_addendum()");
         ++count;
       }
-      
+
       m_blocks_addendums.erase(++it, m_blocks_addendums.end());
       LOG_PRINT_L0("Numbers of blocks removed from scratchpad: " << count);
     }
