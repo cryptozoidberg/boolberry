@@ -100,8 +100,12 @@ else()
 endif()
 
 
-if(STATIC)
+if(MSVC)
   set(Boost_USE_STATIC_LIBS ON)
+endif()
+
+if(STATIC)  
+  set(Boost_USE_STATIC_LIBS ON)  
   set(Boost_USE_STATIC_RUNTIME ON)
 endif()
 find_package(Boost 1.53 REQUIRED COMPONENTS system filesystem thread date_time chrono regex serialization atomic program_options)
