@@ -41,6 +41,7 @@ endif()
 add_library(common ${COMMON})
 add_library(crypto ${CRYPTO})
 add_library(currency_core ${CURRENCY_CORE})
+add_dependencies(currency_core version)
 add_library(rpc ${RPC})
 
 add_dependencies(rpc version)

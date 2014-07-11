@@ -190,7 +190,7 @@ span.daemon_view_general_status_value_success_text
 .daemon_view_param_value
 {
     position: absolute;
-    left:320px;
+    left:360px;
     font-weight:bold;
     color: #6c6c6c;
     font-size: 17px;
