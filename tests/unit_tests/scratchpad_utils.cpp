@@ -133,7 +133,7 @@ TEST(scratchpad_tests, test_revert_scratchpad_cpuminer)
     h = crypto::rand<crypto::hash>();
 
   std::list<std::vector<crypto::hash> > addms; 
-  for(int l = 0;  l != 12; l++)
+  for(int l = 0;  l != 10; l++)
   {
     std::vector<crypto::hash> addend;
     addend.resize(10);
