@@ -1128,7 +1128,8 @@ bool blockchain_storage::extport_scratchpad_to_file(const std::string& path)
   };
   #pragma pack(pop)
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  export_scratchpad_file_header fh = {0};
+  export_scratchpad_file_header fh;
+  memset(&fh, 0, sizeof(fh));
 
   fh.current_hi.prevhash = currency::get_block_hash(m_blocks.back().bl);
   fh.current_hi.height = m_blocks.size()-1;
