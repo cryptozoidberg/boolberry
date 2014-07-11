@@ -113,6 +113,7 @@ namespace currency
     bool check_tx_inputs(const transaction& tx, uint64_t& pmax_used_block_height, crypto::hash& max_used_block_id);
     uint64_t get_current_comulative_blocksize_limit();
     uint64_t get_current_hashrate(size_t aprox_count);
+    bool extport_scratchpad_to_file(const std::string& path);
 
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     uint64_t block_difficulty(size_t i);

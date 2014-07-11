@@ -55,6 +55,7 @@ namespace currency
     bool on_getjob(const mining::COMMAND_RPC_GETJOB::request& req, mining::COMMAND_RPC_GETJOB::response& res, connection_context& cntx);
     bool on_getscratchpad(const mining::COMMAND_RPC_GET_FULLSCRATCHPAD::request& req, mining::COMMAND_RPC_GET_FULLSCRATCHPAD::response& res, connection_context& cntx);
     bool on_submit(const mining::COMMAND_RPC_SUBMITSHARE::request& req, mining::COMMAND_RPC_SUBMITSHARE::response& res, connection_context& cntx);
+    bool on_store_scratchpad(const mining::COMMAND_RPC_STORE_SCRATCHPAD::request& req, mining::COMMAND_RPC_STORE_SCRATCHPAD::response& res, connection_context& cntx);
 
   private:
 
@@ -82,10 +83,11 @@ namespace currency
         MAP_JON_RPC_WE("get_alias_details",      on_get_alias_details,          COMMAND_RPC_GET_ALIAS_DETAILS)
         MAP_JON_RPC_WE("get_all_alias_details",  on_get_all_aliases,            COMMAND_RPC_GET_ALL_ALIASES)
         //remote miner rpc
-        MAP_JON_RPC_N(on_login,          mining::COMMAND_RPC_LOGIN)
-        MAP_JON_RPC_N(on_getjob,         mining::COMMAND_RPC_GETJOB)
-        MAP_JON_RPC_N(on_getscratchpad,  mining::COMMAND_RPC_GET_FULLSCRATCHPAD)
-        MAP_JON_RPC_N(on_submit,         mining::COMMAND_RPC_SUBMITSHARE)        
+        MAP_JON_RPC_N(on_login,            mining::COMMAND_RPC_LOGIN)
+        MAP_JON_RPC_N(on_getjob,           mining::COMMAND_RPC_GETJOB)
+        MAP_JON_RPC_N(on_getscratchpad,    mining::COMMAND_RPC_GET_FULLSCRATCHPAD)
+        MAP_JON_RPC_N(on_submit,           mining::COMMAND_RPC_SUBMITSHARE)        
+        MAP_JON_RPC_N(on_store_scratchpad, mining::COMMAND_RPC_STORE_SCRATCHPAD)        
       END_JSON_RPC_MAP()
     END_URI_MAP2()
 

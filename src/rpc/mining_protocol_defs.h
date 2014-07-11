@@ -107,7 +107,7 @@ namespace mining
           KV_SERIALIZE(addms)
           KV_SERIALIZE(status)
           //KV_CHAIN_MAP(*static_cast<job_details*>(this) )
-          KV_CHAIN_BASE(job_details)
+          //KV_CHAIN_BASE(job_details)
         END_KV_SERIALIZE_MAP()
     };
   };
@@ -168,5 +168,32 @@ namespace mining
       END_KV_SERIALIZE_MAP()
     };
   };
+
+
+  struct COMMAND_RPC_STORE_SCRATCHPAD
+  {
+    RPC_METHOD_NAME("store_scratchpad");
+
+    struct request
+    {
+      std::string local_file_path;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(local_file_path)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+
+
 }
 

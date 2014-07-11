@@ -1106,6 +1106,60 @@ uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
                               (m_blocks.back().bl.timestamp - m_blocks[m_blocks.size() - aprox_count].bl.timestamp);
 }
 //------------------------------------------------------------------
+bool blockchain_storage::extport_scratchpad_to_file(const std::string& path)
+{
+  #pragma pack (push, 1)
+  #define WILD_KECCAK_ADDENDUMS_ARRAY_SIZE  10
+  struct  export_scratchpad_hi
+  {
+    crypto::hash prevhash;
+    uint64_t height;
+  };
+  struct export_addendums_array_entry
+  {
+    export_scratchpad_hi prev_hi;
+    uint64_t add_size;
+  };
+  struct export_scratchpad_file_header
+  {
+    export_scratchpad_hi current_hi;
+    export_addendums_array_entry add_arr[WILD_KECCAK_ADDENDUMS_ARRAY_SIZE];
+    uint64_t scratchpad_size;
+  };
+  #pragma pack(pop)
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  export_scratchpad_file_header fh = {0};
+
+  fh.current_hi.prevhash = currency::get_block_hash(m_blocks.back().bl);
+  fh.current_hi.height = m_blocks.size()-1;
+  fh.scratchpad_size = m_scratchpad.size()*4;
+  
+  try
+  {
+    std::ofstream fstream;
+    fstream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    fstream.open(path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+    fstream.write((const char*)&fh, sizeof(fh));
+    fstream.write((const char*)&m_scratchpad[0], m_scratchpad.size()*32);
+    fstream.close();
+    LOG_PRINT_L0("Scratchpad exported to " << path << ", " << (m_scratchpad.size()*32)/1024 << "kbytes" );
+    return true;
+  }
+  catch(const std::exception& e)
+  {
+    LOG_PRINT_L0("Failed to store scratchpad, error: " << e.what());
+    return false;
+  }
+
+  catch(...)
+  {
+    LOG_PRINT_L0("Failed to store scratchpad, unknown error" );
+    return false;
+  }
+
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::get_alternative_blocks(std::list<block>& blocks)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);

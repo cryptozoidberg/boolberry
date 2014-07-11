@@ -765,12 +765,12 @@ namespace currency
       return true;
     }
 
-    epee::json_rpc::error err = AUTO_VAL_INIT(err);
+    /*epee::json_rpc::error err = AUTO_VAL_INIT(err);
     if(!get_job(req.id, res.jd, err, cntx))
     {
       res.status = err.message;
       return true;
-    }
+    }*/
 
     return true;
   }
@@ -816,6 +816,22 @@ namespace currency
     //LOG_PRINT_L0("block_hashing_blob:" << string_tools::buff_to_hex_nodelimer(currency::get_block_hashing_blob(b)));
     
     res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_store_scratchpad(const mining::COMMAND_RPC_STORE_SCRATCHPAD::request& req, mining::COMMAND_RPC_STORE_SCRATCHPAD::response& res, connection_context& cntx)
+  {
+    if(!check_core_ready())
+    {
+      res.status = CORE_RPC_STATUS_BUSY;
+      return true;
+    }
+
+    if(!m_core.get_blockchain_storage().extport_scratchpad_to_file(req.local_file_path))    
+      res.status = CORE_RPC_STATUS_BUSY;
+    else
+      res.status = CORE_RPC_STATUS_OK;
+
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
