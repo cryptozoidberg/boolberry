@@ -51,6 +51,8 @@ int test_big_difficulties(const char* dataFile)
     if (!data.eof()) {
         data.clear(fstream::badbit);
     }
+    
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
