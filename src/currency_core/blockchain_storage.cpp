@@ -1137,12 +1137,18 @@ bool blockchain_storage::extport_scratchpad_to_file(const std::string& path)
   
   try
   {
+
+    std::string tmp_path = path + ".tmp";
     std::ofstream fstream;
     fstream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fstream.open(path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+    fstream.open(tmp_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
     fstream.write((const char*)&fh, sizeof(fh));
     fstream.write((const char*)&m_scratchpad[0], m_scratchpad.size()*32);
     fstream.close();
+
+    boost::filesystem::remove(path);
+    boost::filesystem::rename(tmp_path, path);
+
     LOG_PRINT_L0("Scratchpad exported to " << path << ", " << (m_scratchpad.size()*32)/1024 << "kbytes" );
     return true;
   }
