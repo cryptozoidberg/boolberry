@@ -24,8 +24,8 @@ struct addendums_array_entry
 
 uint64_t* pscratchpad_buff = NULL;
 volatile uint64_t  scratchpad_size = 0;
-struct scratchpad_hi current_scratchpad_hi = {0};
-struct addendums_array_entry add_arr[WILD_KECCAK_ADDENDUMS_ARRAY_SIZE] = {0};
+struct scratchpad_hi current_scratchpad_hi;
+struct addendums_array_entry add_arr[WILD_KECCAK_ADDENDUMS_ARRAY_SIZE];
 
 bool patch_scratchpad_with_addendum(uint64_t* pscratchpad_buff, uint64_t global_add_startpoint, uint64_t* padd_buff, size_t count/*uint64 units*/)
 {
