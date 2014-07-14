@@ -409,6 +409,7 @@ namespace currency
       return false;
     }
     res.blocktemplate_blob = string_tools::buff_to_hex_nodelimer(block_blob);
+    res.status = CORE_RPC_STATUS_OK;
 
     return true;
   }
