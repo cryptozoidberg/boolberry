@@ -323,8 +323,8 @@ std::string get_nix_version_display_string()
   std::string get_default_user_dir()
   {
     //namespace fs = boost::filesystem;
-    // Windows < Vista: C:\Documents and Settings\Username\
-        // Windows >= Vista: C:\Users\Username\AppData\Roaming\CURRENCY_NAME_SHORT
+    // Windows < Vista: C:\Documents and Settings\Username 
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\CURRENCY_NAME_SHORT
     // Mac: ~/Library/Application Support/CURRENCY_NAME_SHORT
     // Unix: ~/.CURRENCY_NAME_SHORT
     std::string wallets_dir;
@@ -349,9 +349,9 @@ std::string get_nix_version_display_string()
   {
 #ifdef WIN32
     // Windows
-    char* psz_username = getenv("USERNAME");
+    const char* psz_username = getenv("USERNAME");
 #else
-    char* psz_username = getenv("USER");
+    const char* psz_username = getenv("USER");
 #endif
     if (psz_username == NULL || strlen(psz_username) == 0)
       psz_username = "unknown_user";
