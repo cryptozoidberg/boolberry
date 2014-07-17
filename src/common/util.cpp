@@ -356,7 +356,7 @@ std::string get_nix_version_display_string()
     if (psz_username == NULL || strlen(psz_username) == 0)
       psz_username = "unknown_user";
 
-    return psz_username;
+    return std::string(psz_username);
   }
 
 
