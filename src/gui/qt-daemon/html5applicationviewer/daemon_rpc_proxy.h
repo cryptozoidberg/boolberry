@@ -19,8 +19,32 @@ namespace tools
 
       return m_rpc.on_get_info(res, info, stub_cntxt);
     }
+
+    bool get_aliases(currency::COMMAND_RPC_GET_ALL_ALIASES::response& aliases)
+    {
+      currency::core_rpc_server::connection_context stub_cntxt = AUTO_VAL_INIT(stub_cntxt);
+      currency::COMMAND_RPC_GET_ALL_ALIASES::request res = AUTO_VAL_INIT(res);
+      epee::json_rpc::error error_resp;
+
+      return m_rpc.on_get_all_aliases(res, aliases, error_resp, stub_cntxt);
+    }
+
+    bool get_alias_info(const std::string& alias, currency::COMMAND_RPC_GET_ALIAS_DETAILS::response& alias_info)
+    {
+      currency::core_rpc_server::connection_context stub_cntxt = AUTO_VAL_INIT(stub_cntxt);
+      currency::COMMAND_RPC_GET_ALIAS_DETAILS::request req = AUTO_VAL_INIT(req);
+      req.alias = alias;
+      epee::json_rpc::error error_resp;
+
+      return m_rpc.on_get_alias_details(req, alias_info, error_resp, stub_cntxt);
+    }
+
+
   private:
     currency::core_rpc_server & m_rpc;
   };
 
 }
+
+
+

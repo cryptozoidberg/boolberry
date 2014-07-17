@@ -28,6 +28,32 @@ function update_last_ver_view(mode)
 
 }
 
+var aliases_set = {};
+function update_aliases_autocompletion()
+{
+    if(aliases_set.aliases)
+        return;
+
+    aliases_set = jQuery.parseJSON(Qt_parent.request_aliases());
+    if(aliases_set.aliases)
+    {
+        console.log("aliases loaded: " + aliases_set.aliases.length);
+        var availableTags = [];
+        for(var i=0; i < aliases_set.aliases.length; i++)
+        {
+            availableTags.push("@" + aliases_set.aliases[i].alias);
+        }
+        $( "#transfer_address_id" ).autocomplete({
+            source: availableTags,
+            minLength: 2
+        });
+    }
+    else
+    {
+        console.log("internal error: aliases  not loaded");
+    }
+}
+
 function on_update_daemon_state(info_obj)
 {
     //var info_obj = jQuery.parseJSON(daemon_info_str);
@@ -53,6 +79,8 @@ function on_update_daemon_state(info_obj)
         $("#open_wallet_button").button("enable");
         $("#generate_wallet_button").button("enable");
         disable_tab(document.getElementById('wallet_view_menu'), false);
+        //load aliases
+        update_aliases_autocompletion();
         //$("#domining_button").button("enable");
         //show OK
     }else if(info_obj.daemon_network_state == 3)//deinit
@@ -257,6 +285,8 @@ function on_transfer()
         mixin_count: 0,
         payment_id: $('#payment_id').val()
     };
+
+    //if(transfer_obj.destinations[0].address )
 
     transfer_obj.mixin_count = parseInt($('#mixin_count_id').val());
     transfer_obj.fee = $('#tx_fee').val();

@@ -51,6 +51,7 @@ public slots:
     QString transfer(const QString& json_transfer_object);
     void message_box(const QString& msg);
     QString request_uri(const QString& uri, const QString& params);
+    QString request_aliases();
 
 private:
     void closeEvent(QCloseEvent *event);

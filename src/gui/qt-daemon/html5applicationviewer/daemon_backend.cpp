@@ -428,6 +428,53 @@ bool daemon_backend::close_wallet()
   return true;
 }
 
+bool daemon_backend::get_aliases(view::alias_set& al_set)
+{
+  currency::COMMAND_RPC_GET_ALL_ALIASES::response aliases = AUTO_VAL_INIT(aliases);
+  if (m_rpc_proxy.get_aliases(aliases) && aliases.status == CORE_RPC_STATUS_OK)
+  {
+    al_set.aliases = aliases.aliases;
+    return true;
+  }
+
+  return false;
+}
+
+bool daemon_backend::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
+{  
+  if (!adr_str.size())
+    return false;
+
+  std::string addr_str_local = adr_str;
+
+  if (adr_str[0] == '@')
+  {
+    //referred by alias name
+    if (adr_str.size() < 2)
+      return false;
+    std::string pure_alias_name = adr_str.substr(1);
+    CHECK_AND_ASSERT_MES(currency::validate_alias_name(pure_alias_name), false, "wrong name set in transfer command");
+
+    //currency::alias_info_base ai = AUTO_VAL_INIT(ai);
+    currency::COMMAND_RPC_GET_ALIAS_DETAILS::response alias_info = AUTO_VAL_INIT(alias_info);
+
+    if (!m_rpc_proxy.get_alias_info(pure_alias_name, alias_info))
+      return false;
+
+    if (alias_info.status != CORE_RPC_STATUS_OK)
+      return false;
+    
+    addr_str_local = alias_info.alias_details.address;
+    return true;
+  }
+
+  if (!get_account_address_from_str(addr, addr_str_local))
+  {
+    return false;
+  }
+  return true;
+}
+
 bool daemon_backend::transfer(const view::transfer_params& tp, currency::transaction& res_tx)
 {
   std::vector<currency::tx_destination_entry> dsts;
@@ -443,11 +490,10 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
     return false;
   }
 
-
   for(auto& d: tp.destinations)
   {
     dsts.push_back(currency::tx_destination_entry());
-    if(!get_account_address_from_str(dsts.back().addr, d.address))
+    if (!get_transfer_address(d.address, dsts.back().addr))
     {
       m_pview->show_msg_box("Failed to send transaction: wrong address");
       return false;
