@@ -67,7 +67,8 @@ function on_update_daemon_state(info_obj)
         if (info_obj.max_net_seen_height > info_obj.synchronization_start_height)
             percents = ((info_obj.height - info_obj.synchronization_start_height)*100)/(info_obj.max_net_seen_height - info_obj.synchronization_start_height);
         $("#synchronization_progressbar").progressbar( "option", "value", percents );
-        $("#daemon_synchronization_text").text((info_obj.max_net_seen_height - info_obj.height).toString() + " blocks behind");
+        if(info_obj.max_net_seen_height)
+            $("#daemon_synchronization_text").text((info_obj.max_net_seen_height - info_obj.height).toString() + " blocks behind");
         $("#open_wallet_button").button("disable");
         $("#generate_wallet_button").button("disable");
         $("#domining_button").button("disable");

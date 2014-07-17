@@ -130,5 +130,5 @@
 #define CURRENCY_BLOCKCHAINDATA_FILENAME                "blockchain.bin"
 #define CURRENCY_BLOCKCHAINDATA_TEMP_FILENAME           "blockchain.bin.tmp"
 #define P2P_NET_DATA_FILENAME                           "p2pstate.bin"
-#define MINER_CONFIG_FILE_NAME                          "miner_conf.json"
-
+#define MINER_CONFIG_FILENAME                           "miner_conf.json"
+#define GUI_CONFIG_FILENAME                             "gui_conf.json"

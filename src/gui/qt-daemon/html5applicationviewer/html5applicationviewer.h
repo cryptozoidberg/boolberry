@@ -10,9 +10,11 @@
 #include "view_iface.h"
 #ifndef Q_MOC_RUN
 #include "daemon_backend.h"
+#include "gui_config.h"
 #endif
 
 class QGraphicsWebView;
+
 
 class Html5ApplicationViewer : public QWidget, public view::i_view
 {
@@ -52,10 +54,12 @@ public slots:
     void message_box(const QString& msg);
     QString request_uri(const QString& uri, const QString& params);
     QString request_aliases();
+    bool init_config();
 
 private:
     void closeEvent(QCloseEvent *event);
-
+    
+    bool store_config();
 
     //------- i_view ---------
     virtual bool update_daemon_status(const view::daemon_status_info& info);
@@ -77,6 +81,7 @@ private:
     daemon_backend m_backend;
     std::atomic<bool> m_quit_requested;
     std::atomic<bool> m_deinitialize_done;
+    gui_config m_config;
 };
 
 #endif // HTML5APPLICATIONVIEWER_H

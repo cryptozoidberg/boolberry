@@ -85,10 +85,10 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
       return false;
     }
 
-    std::string data_dir = command_line::get_arg(vm, command_line::arg_data_dir);
+    m_data_dir = command_line::get_arg(vm, command_line::arg_data_dir);
     std::string config = command_line::get_arg(vm, command_line::arg_config_file);
 
-    boost::filesystem::path data_dir_path(data_dir);
+    boost::filesystem::path data_dir_path(m_data_dir);
     boost::filesystem::path config_path(config);
     if (!config_path.has_parent_path())
     {
@@ -106,7 +106,6 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   });
   if (!r)
     return false;
-
 
   //set up logging options
   if(command_line::has_arg(vm, arg_alloc_win_console))
@@ -142,6 +141,7 @@ bool daemon_backend::send_stop_signal()
   m_stop_singal_sent = true;
   return true;
 }
+
 bool daemon_backend::stop()
 {
   send_stop_signal();
@@ -149,6 +149,11 @@ bool daemon_backend::stop()
     m_main_worker_thread.join();
 
   return true;
+}
+
+std::string daemon_backend::get_config_folder()
+{
+  return m_data_dir;
 }
 
 void daemon_backend::main_worker(const po::variables_map& vm)

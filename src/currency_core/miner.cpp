@@ -175,7 +175,7 @@ namespace currency
   bool miner::init(const boost::program_options::variables_map& vm)
   {
     m_config_folder = command_line::get_arg(vm, command_line::arg_data_dir);
-    epee::serialization::load_t_from_json_file(m_config, m_config_folder + "/" + MINER_CONFIG_FILE_NAME);
+    epee::serialization::load_t_from_json_file(m_config, m_config_folder + "/" + MINER_CONFIG_FILENAME);
 
     if(command_line::has_arg(vm, arg_set_donation_mode))
     {
@@ -234,7 +234,7 @@ namespace currency
       LOG_PRINT_L0("Failed to create data directory: " << m_config_folder);
       return false;
     }
-    epee::serialization::store_t_to_json_file(m_config, m_config_folder + "/" + MINER_CONFIG_FILE_NAME);
+    epee::serialization::store_t_to_json_file(m_config, m_config_folder + "/" + MINER_CONFIG_FILENAME);
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
@@ -451,7 +451,7 @@ namespace currency
         }else
         {
           //success, let's update config
-          epee::serialization::store_t_to_json_file(m_config, m_config_folder + "/" + MINER_CONFIG_FILE_NAME);
+          epee::serialization::store_t_to_json_file(m_config, m_config_folder + "/" + MINER_CONFIG_FILENAME);
           if(ai_local.m_alias.size())
           {
             tx_extra_info tei = AUTO_VAL_INIT(tei);

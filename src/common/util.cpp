@@ -319,6 +319,47 @@ std::string get_nix_version_display_string()
     return config_folder;
   }
 
+
+  std::string get_default_user_dir()
+  {
+    //namespace fs = boost::filesystem;
+    // Windows < Vista: C:\Documents and Settings\Username\
+        // Windows >= Vista: C:\Users\Username\AppData\Roaming\CURRENCY_NAME_SHORT
+    // Mac: ~/Library/Application Support/CURRENCY_NAME_SHORT
+    // Unix: ~/.CURRENCY_NAME_SHORT
+    std::string wallets_dir;
+#ifdef WIN32
+    // Windows
+    wallets_dir = get_special_folder_path(CSIDL_PERSONAL, true) + "/" + CURRENCY_NAME_BASE;
+#else
+    std::string pathRet;
+    char* pszHome = getenv("HOME");
+    if (pszHome == NULL || strlen(pszHome) == 0)
+      pathRet = "/";
+    else
+      pathRet = pszHome;
+
+    wallets_dir = (pathRet + "/" + CURRENCY_NAME_BASE);
+
+#endif
+    return wallets_dir;
+  }
+
+  std::string get_current_username()
+  {
+#ifdef WIN32
+    // Windows
+    char* psz_username = getenv("USERNAME");
+#else
+    char* psz_username = getenv("USER");
+#endif
+    if (psz_username == NULL || strlen(psz_username) == 0)
+      psz_username = "unknown_user";
+
+    return psz_username;
+  }
+
+
   bool create_directories_if_necessary(const std::string& path)
   {
     namespace fs = boost::filesystem;
