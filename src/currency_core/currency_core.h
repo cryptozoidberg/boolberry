@@ -48,6 +48,7 @@ namespace currency
      bool set_genesis_block(const block& b);
      bool deinit();
      uint64_t get_current_blockchain_height();
+     std::string get_config_folder();
      bool get_blockchain_top(uint64_t& heeight, crypto::hash& top_id);
      bool get_blocks(uint64_t start_offset, size_t count, std::list<block>& blocks, std::list<transaction>& txs);
      bool get_blocks(uint64_t start_offset, size_t count, std::list<block>& blocks);

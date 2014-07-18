@@ -14,6 +14,7 @@ DISABLE_VS_WARNINGS(4100)
 DISABLE_VS_WARNINGS(4503)
 #include "serialization/keyvalue_serialization.h"
 #include "storages/portable_storage_template_helper.h"
+#include "rpc/core_rpc_server_commands_defs.h"
 POP_WARNINGS
 
 #endif
@@ -223,6 +224,17 @@ public:
       KV_SERIALIZE(headers)
     END_KV_SERIALIZE_MAP()
   };
+
+  struct alias_set
+  {
+    std::list<currency::alias_rpc_details> aliases;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(aliases)
+    END_KV_SERIALIZE_MAP()
+  };
+
+
 
 
   struct i_view
