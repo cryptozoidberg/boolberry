@@ -500,7 +500,7 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
     dsts.push_back(currency::tx_destination_entry());
     if (!get_transfer_address(d.address, dsts.back().addr))
     {
-      m_pview->show_msg_box("Failed to send transaction: wrong address");
+      m_pview->show_msg_box("Failed to send transaction: invalid address");
       return false;
     }
     if(!currency::parse_amount(dsts.back().amount, d.amount))
