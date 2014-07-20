@@ -365,6 +365,7 @@ bool daemon_backend::open_wallet(const std::string& path, const std::string& pas
     {
       m_wallet->store();
       m_wallet.reset(new tools::wallet2());
+      m_wallet->callback(this);
     }
     
     m_wallet->load(path, password);
