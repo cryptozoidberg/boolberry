@@ -114,6 +114,7 @@ namespace currency
     uint64_t get_current_comulative_blocksize_limit();
     uint64_t get_current_hashrate(size_t aprox_count);
     bool extport_scratchpad_to_file(const std::string& path);
+    bool print_transactions_statistics();
 
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     uint64_t block_difficulty(size_t i);

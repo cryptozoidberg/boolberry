@@ -818,6 +818,36 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
   return false;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::print_transactions_statistics()
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  LOG_PRINT_L0("Started to collect transaction statistics, pleas wait...");
+  size_t total_count = 0;
+  size_t coinbase_count = 0;
+  size_t total_full_blob = 0;
+  size_t total_cropped_blob = 0;
+  for(auto tx_entry: m_transactions)
+  {
+    ++total_count;
+    if(is_coinbase(tx_entry.second.tx))
+      ++coinbase_count;
+    else
+    {
+      total_full_blob += get_object_blobsize<transaction>(tx_entry.second.tx);
+      transaction tx = tx_entry.second.tx;
+      tx.signatures.clear();
+      total_cropped_blob += get_object_blobsize<transaction>(tx);
+    }    
+  }
+  LOG_PRINT_L0("Done" << ENDL
+      << "total transactions: " << total_count << ENDL 
+      << "coinbase transactions: " << coinbase_count << ENDL 
+      << "avarage size of transaction: " << total_full_blob/(total_count-coinbase_count) << ENDL
+      << "avarage size of transaction without ring signatures: " << total_cropped_blob/(total_count-coinbase_count) << ENDL
+      );
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::complete_timestamps_vector(uint64_t start_top_height, std::vector<uint64_t>& timestamps)
 {
 
