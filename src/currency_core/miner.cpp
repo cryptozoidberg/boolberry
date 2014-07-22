@@ -64,7 +64,7 @@ namespace currency
     stop();
   }
   //-----------------------------------------------------------------------------------------------------
-  bool miner::set_block_template(const block& bl, const difficulty_type& di, uint64_t height)
+  bool miner::set_block_template(const block& bl, const wide_difficulty_type& di, uint64_t height)
   {
     CRITICAL_REGION_LOCAL(m_template_lock);
     m_template = bl;
@@ -108,7 +108,7 @@ namespace currency
   bool miner::request_block_template()
   {
     block bl = AUTO_VAL_INIT(bl);
-    difficulty_type di = AUTO_VAL_INIT(di);
+    wide_difficulty_type di = AUTO_VAL_INIT(di);
     uint64_t height = AUTO_VAL_INIT(height);
     currency::blobdata extra_nonce = PROJECT_VERSION_LONG "|"; 
     if(m_extra_messages.size() && m_config.current_extra_message_index < m_extra_messages.size())
@@ -377,7 +377,7 @@ namespace currency
     log_space::log_singletone::set_thread_log_prefix(std::string("[miner ") + std::to_string(th_local_index) + "]");
     uint64_t nonce = m_starter_nonce + th_local_index;
     uint64_t height = 0;
-    difficulty_type local_diff = 0;
+    wide_difficulty_type local_diff = 0;
     uint32_t local_template_ver = 0;
     block b;
     blobdata block_blob;

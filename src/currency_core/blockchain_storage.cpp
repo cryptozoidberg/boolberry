@@ -380,11 +380,11 @@ void blockchain_storage::get_all_known_block_ids(std::list<crypto::hash> &main, 
     invalid.push_back(v.first);
 }
 //------------------------------------------------------------------
-difficulty_type blockchain_storage::get_difficulty_for_next_block()
+wide_difficulty_type blockchain_storage::get_difficulty_for_next_block()
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   std::vector<uint64_t> timestamps;
-  std::vector<difficulty_type> commulative_difficulties;
+  std::vector<wide_difficulty_type> commulative_difficulties;
   size_t offset = m_blocks.size() - std::min(m_blocks.size(), static_cast<size_t>(DIFFICULTY_BLOCKS_COUNT));
   if(!offset)
     ++offset;//skip genesis block
@@ -482,10 +482,10 @@ bool blockchain_storage::switch_to_alternative_blockchain(std::list<blocks_ext_b
   return true;
 }
 //------------------------------------------------------------------
-difficulty_type blockchain_storage::get_next_difficulty_for_alternative_chain(const std::list<blocks_ext_by_hash::iterator>& alt_chain, block_extended_info& bei)
+wide_difficulty_type blockchain_storage::get_next_difficulty_for_alternative_chain(const std::list<blocks_ext_by_hash::iterator>& alt_chain, block_extended_info& bei)
 {
   std::vector<uint64_t> timestamps;
-  std::vector<difficulty_type> commulative_difficulties;
+  std::vector<wide_difficulty_type> commulative_difficulties;
   if(alt_chain.size()< DIFFICULTY_BLOCKS_COUNT)
   {
     CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -722,7 +722,7 @@ uint64_t blockchain_storage::get_current_comulative_blocksize_limit()
   return m_current_block_cumul_sz_limit;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::create_block_template(block& b, const account_public_address& miner_address, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai)
+bool blockchain_storage::create_block_template(block& b, const account_public_address& miner_address, wide_difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai)
 {
   size_t median_size;
   uint64_t already_generated_coins;
@@ -963,7 +963,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
         alt_scratchppad_patch[ml.first] = crypto::xor_pod(alt_scratchppad_patch[ml.first], ml.second);
     }
 
-    difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
+    wide_difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
     CHECK_AND_ASSERT_MES(current_diff, false, "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!");
     crypto::hash proof_of_work = null_hash;
     // POW
@@ -1132,8 +1132,9 @@ uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
   if(m_blocks.size() <= aprox_count)
     return 0;
 
-  return  (m_blocks.back().cumulative_difficulty - m_blocks[m_blocks.size() - aprox_count].cumulative_difficulty)/
+  wide_difficulty_type w_hr = (m_blocks.back().cumulative_difficulty - m_blocks[m_blocks.size() - aprox_count].cumulative_difficulty)/
                               (m_blocks.back().bl.timestamp - m_blocks[m_blocks.size() - aprox_count].bl.timestamp);
+  return w_hr.convert_to<uint64_t>();
 }
 //------------------------------------------------------------------
 bool blockchain_storage::extport_scratchpad_to_file(const std::string& path)
@@ -1353,7 +1354,7 @@ bool blockchain_storage::find_blockchain_supplement(const std::list<crypto::hash
   return true;
 }
 //------------------------------------------------------------------
-uint64_t blockchain_storage::block_difficulty(size_t i)
+wide_difficulty_type blockchain_storage::block_difficulty(size_t i)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   CHECK_AND_ASSERT_MES(i < m_blocks.size(), false, "wrong block index i = " << i << " at blockchain_storage::block_difficulty()");
@@ -1946,7 +1947,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
 
   //check proof of work
   TIME_MEASURE_START(target_calculating_time);
-  difficulty_type current_diffic = get_difficulty_for_next_block();
+  wide_difficulty_type current_diffic = get_difficulty_for_next_block();
   CHECK_AND_ASSERT_MES(current_diffic, false, "!!!!!!!!! difficulty overhead !!!!!!!!!");
   TIME_MEASURE_FINISH(target_calculating_time);
   TIME_MEASURE_START(longhash_calculating_time);

@@ -20,6 +20,7 @@
 #include "currency_protocol/currency_protocol_defs.h"
 #include "rpc/core_rpc_server_commands_defs.h"
 #include "difficulty.h"
+#include "common/difficulty_boost_serialization.h"
 #include "currency_core/currency_format_utils.h"
 #include "verification_context.h"
 #include "crypto/hash.h"
@@ -46,7 +47,7 @@ namespace currency
       block   bl;
       uint64_t height;
       size_t block_cumulative_size;
-      difficulty_type cumulative_difficulty;
+      wide_difficulty_type cumulative_difficulty;
       uint64_t already_generated_coins;
       uint64_t already_donated_coins;
       uint64_t scratch_offset;
@@ -85,10 +86,10 @@ namespace currency
     crypto::hash get_top_block_id();
     crypto::hash get_top_block_id(uint64_t& height);
     bool get_top_block(block& b);
-    difficulty_type get_difficulty_for_next_block();
+    wide_difficulty_type get_difficulty_for_next_block();
     bool add_new_block(const block& bl_, block_verification_context& bvc);
     bool reset_and_set_genesis_block(const block& b);
-    bool create_block_template(block& b, const account_public_address& miner_address, difficulty_type& di, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai);
+    bool create_block_template(block& b, const account_public_address& miner_address, wide_difficulty_type& di, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai);
     bool have_block(const crypto::hash& id);
     size_t get_total_transactions();
     bool get_outs(uint64_t amount, std::list<crypto::public_key>& pkeys);
@@ -116,7 +117,7 @@ namespace currency
     bool print_transactions_statistics();
 
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
-    uint64_t block_difficulty(size_t i);
+    wide_difficulty_type block_difficulty(size_t i);
     bool copy_scratchpad(std::vector<crypto::hash>& scr);//TODO: not the best way, add later update method instead of full copy
 
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
@@ -212,7 +213,7 @@ namespace currency
     bool handle_block_to_main_chain(const block& bl, block_verification_context& bvc);
     bool handle_block_to_main_chain(const block& bl, const crypto::hash& id, block_verification_context& bvc);
     bool handle_alternative_block(const block& b, const crypto::hash& id, block_verification_context& bvc);
-    difficulty_type get_next_difficulty_for_alternative_chain(const std::list<blocks_ext_by_hash::iterator>& alt_chain, block_extended_info& bei);
+    wide_difficulty_type get_next_difficulty_for_alternative_chain(const std::list<blocks_ext_by_hash::iterator>& alt_chain, block_extended_info& bei);
     bool prevalidate_miner_transaction(const block& b, uint64_t height);
     bool validate_miner_transaction(const block& b, size_t cumulative_block_size, uint64_t fee, uint64_t& base_reward, uint64_t already_generated_coins, uint64_t already_donated_coins, uint64_t& donation_total);
     bool validate_transaction(const block& b, uint64_t height, const transaction& tx);
@@ -247,13 +248,14 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          22
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          23
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     2
+  #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 
   template<class archive_t>
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
   {
-    if(version < CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER)
+    if(version < 22)
       return;
     CHECK_PROJECT_NAME();
     CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -360,4 +362,5 @@ namespace currency
 
 BOOST_CLASS_VERSION(currency::blockchain_storage, CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER)
 BOOST_CLASS_VERSION(currency::blockchain_storage::transaction_chain_entry, CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER)
+BOOST_CLASS_VERSION(currency::blockchain_storage::block_extended_info, CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER)
   

@@ -15,7 +15,7 @@ namespace boost
     {
       ar & te.tx;
       ar & te.m_keeper_block_height;
-      if(version < CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER)
+      if(version < 2)
       {
         size_t fake;
         ar & fake;
@@ -28,7 +28,16 @@ namespace boost
     {
       ar & ei.bl;
       ar & ei.height;
-      ar & ei.cumulative_difficulty;
+      if(version < 1)
+      {
+        CHECK_AND_ASSERT_THROW_MES(archive_t::is_loading::value, "Wrong version at storing blockchain storage file");
+        difficulty_type old_dif = 0;
+        ar & old_dif;
+        ei.cumulative_difficulty = old_dif;
+      }else
+      {
+        ar & ei.cumulative_difficulty;
+      }
       ar & ei.block_cumulative_size;
       ar & ei.already_generated_coins;
       ar & ei.already_donated_coins;

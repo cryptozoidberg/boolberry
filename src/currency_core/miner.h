@@ -19,7 +19,7 @@ namespace currency
   struct i_miner_handler
   {
     virtual bool handle_block_found(block& b) = 0;
-    virtual bool get_block_template(block& b, const account_public_address& adr, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai) = 0;
+    virtual bool get_block_template(block& b, const account_public_address& adr, wide_difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai) = 0;
   protected:
     ~i_miner_handler(){};
   };
@@ -51,7 +51,7 @@ namespace currency
     bool set_alias_info(const alias_info& ai);
 
     template<typename callback_t>
-    static bool find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height, callback_t scratch_accessor)
+    static bool find_nonce_for_given_block(block& bl, const wide_difficulty_type& diffic, uint64_t height, callback_t scratch_accessor)
     {
       blobdata bd = get_block_hashing_blob(bl);
       for(; bl.nonce != std::numeric_limits<uint32_t>::max(); bl.nonce++)
@@ -70,7 +70,7 @@ namespace currency
     }
 
   private:
-    bool set_block_template(const block& bl, const difficulty_type& diffic, uint64_t height);
+    bool set_block_template(const block& bl, const wide_difficulty_type& diffic, uint64_t height);
     bool worker_thread();
     bool request_block_template();
     void  merge_hr();
@@ -98,7 +98,7 @@ namespace currency
     block m_template;
     std::atomic<uint32_t> m_template_no;
     std::atomic<uint32_t> m_starter_nonce;
-    difficulty_type m_diffic;
+    wide_difficulty_type m_diffic;
     uint64_t m_height;
     volatile uint32_t m_thread_index; 
     volatile uint32_t m_threads_total;

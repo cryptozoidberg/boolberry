@@ -83,7 +83,7 @@ namespace currency
     }
 
     res.height = m_core.get_current_blockchain_height();
-    res.difficulty = m_core.get_blockchain_storage().get_difficulty_for_next_block();
+    res.difficulty = m_core.get_blockchain_storage().get_difficulty_for_next_block().convert_to<uint64_t>();
     res.tx_count = m_core.get_blockchain_storage().get_total_transactions() - res.height; //without coinbase
     res.tx_pool_size = m_core.get_pool_transactions_count();
     res.alt_blocks_count = m_core.get_blockchain_storage().get_alternative_blocks_count();
@@ -384,13 +384,15 @@ namespace currency
     block b = AUTO_VAL_INIT(b);
     currency::blobdata blob_reserve = PROJECT_VERSION_LONG;
     blob_reserve.resize(blob_reserve.size() + 1 + req.reserve_size, 0);
-    if(!m_core.get_block_template(b, acc, res.difficulty, res.height, blob_reserve, req.dev_bounties_vote, alias_info()))
+    wide_difficulty_type dt = 0;
+    if(!m_core.get_block_template(b, acc, dt, res.height, blob_reserve, req.dev_bounties_vote, alias_info()))
     {
       error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
       error_resp.message = "Internal error: failed to create block template";
       LOG_ERROR("Failed to create block template");
       return false;
     }
+    res.difficulty = dt.convert_to<uint64_t>();
     blobdata block_blob = t_serializable_object_to_blob(b);
     std::string::size_type pos = block_blob.find(PROJECT_VERSION_LONG);
     if(pos == std::string::npos)
@@ -470,7 +472,7 @@ namespace currency
     responce.height = get_block_height(blk);
     responce.depth = m_core.get_current_blockchain_height() - responce.height - 1;
     responce.hash = string_tools::pod_to_hex(get_block_hash(blk));
-    responce.difficulty = m_core.get_blockchain_storage().block_difficulty(responce.height);
+    responce.difficulty = m_core.get_blockchain_storage().block_difficulty(responce.height).convert_to<uint64_t>();
     responce.reward = get_block_reward(blk);
     return true;
   }
