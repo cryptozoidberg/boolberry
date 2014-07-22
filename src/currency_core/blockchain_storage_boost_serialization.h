@@ -15,7 +15,11 @@ namespace boost
     {
       ar & te.tx;
       ar & te.m_keeper_block_height;
-      ar & te.m_blob_size;
+      if(version < CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER)
+      {
+        size_t fake;
+        ar & fake;
+      }
       ar & te.m_global_output_indexes;
     }
 

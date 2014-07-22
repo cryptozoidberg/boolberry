@@ -38,7 +38,6 @@ namespace currency
     {
       transaction tx;
       uint64_t m_keeper_block_height;
-      size_t m_blob_size;
       std::vector<uint64_t> m_global_output_indexes;
     };
 
@@ -248,7 +247,8 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER    22
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          22
+  #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     2
 
   template<class archive_t>
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
@@ -359,3 +359,5 @@ namespace currency
 
 
 BOOST_CLASS_VERSION(currency::blockchain_storage, CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER)
+BOOST_CLASS_VERSION(currency::blockchain_storage::transaction_chain_entry, CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER)
+  
