@@ -874,7 +874,7 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
 bool simple_wallet::run()
 {
   std::string addr_start = m_wallet->get_account().get_public_address_str().substr(0, 6);
-  return m_cmd_binder.run_handling("[wallet " CURRENCY_NAME_BASE + addr_start + "]: ", "");
+  return m_cmd_binder.run_handling("[" CURRENCY_NAME_BASE " wallet " + addr_start + "]: ", "");
 }
 //----------------------------------------------------------------------------------------------------
 void simple_wallet::stop()
