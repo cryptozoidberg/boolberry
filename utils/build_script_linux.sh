@@ -39,7 +39,7 @@ cp -Rv $QT_BINARIES_PATH/qt-boolb.sh .
 cp -Rv $QT_BINARIES_PATH/libs .
 
 
-tar -cjvf linux-x64-$version_str.tar.bz2 html qt-boolb.sh libs boolbd qt-boolb simplewallet simpleminer connectivity_tool
+tar -cjvf bbr-linux-x64-$version_str.tar.bz2 html qt-boolb.sh libs boolbd qt-boolb simplewallet simpleminer connectivity_tool
 if [ $? -ne 0 ]; then
     echo "Failed to pack"
     exit 1
