@@ -336,7 +336,29 @@ bool daemon_backend::update_wallets()
       view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
       wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
       m_pview->update_wallet_status(wsi);
-      m_wallet->refresh();      
+      try
+      {
+        m_wallet->refresh();
+      }
+      
+      catch (const tools::error::daemon_busy& /*e*/)
+      {
+        LOG_PRINT_L0("Daemon busy while wallet refresh");
+        return true;
+      }
+
+      catch (const std::exception& e)
+      {
+        LOG_PRINT_L0("Failed to refresh wallet: " << e.what());
+        return false;
+      }
+
+      catch (...)
+      {
+        LOG_PRINT_L0("Failed to refresh wallet, unknownk exception");
+        return false;
+      }
+
       m_last_wallet_synch_height = m_ccore.get_current_blockchain_height();
       wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
       m_pview->update_wallet_status(wsi);
