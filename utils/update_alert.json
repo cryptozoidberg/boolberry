@@ -2,14 +2,10 @@
    "maj":0,
    "min":2,
    "rev":0,
-   "build":24,
+   "build":28,
    "cs":[
       {
-         "build":15,
-         "mode":2
-      },
-      {
-         "build":2,
+         "build":28,
          "mode":3
       }
    ]
