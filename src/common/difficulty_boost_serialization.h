@@ -18,25 +18,48 @@ namespace boost
       {
         //load high part
         uint64_t v = 0;        
+#ifdef DEBUG_DIFFICULTY_SERIALIZATION
+        std::cout << "loading" << ENDL;
+#endif
         a & v; 
         x = v;
+#ifdef DEBUG_DIFFICULTY_SERIALIZATION
+        std::cout << "hight part: " << std::hex << v << ENDL;
+#endif
         //load low part
         x = x << 64;
         a & v;
+#ifdef DEBUG_DIFFICULTY_SERIALIZATION
+        std::cout << "low part: " << std::hex << v << ENDL;
+#endif
         x += v;
+#ifdef DEBUG_DIFFICULTY_SERIALIZATION
+        std::cout << "loaded value: " << std::hex << x << ENDL;
+#endif
       }else
       {
+#ifdef DEBUG_DIFFICULTY_SERIALIZATION
         std::cout << "storing" << ENDL;
+#endif
         //store high part
         currency::wide_difficulty_type x_ = x;
+#ifdef DEBUG_DIFFICULTY_SERIALIZATION
+        std::cout << "original: " << std::hex << x_ << ENDL;
+#endif
         x_ = x_ >> 64;
         uint64_t v = x_.convert_to<uint64_t>();
+#ifdef DEBUG_DIFFICULTY_SERIALIZATION
+        std::cout << "hight part: " << std::hex << v << ENDL;
+#endif
         a & v;         
         //store low part
         x_ = x;
-        x_ << 64;
-        x_ >> 64;
+        x_ = x_ << 64;
+        x_ = x_ >> 64;
         v = x_.convert_to<uint64_t>();
+#ifdef DEBUG_DIFFICULTY_SERIALIZATION
+        std::cout << "low part: " << std::hex << v << ENDL;
+#endif
         a & v;
       }      
     }
