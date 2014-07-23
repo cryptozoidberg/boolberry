@@ -37,7 +37,7 @@ TEST(block_pack_unpack, basic_struct_packing)
 TEST(boost_multiprecision_serizlization, basic_struct_packing)
 {
   std::vector<currency::wide_difficulty_type> v_origial;
-  for(int i = 0; i != 100; i++)
+  for(int i = 0; i != 1; i++)
   {
     v_origial.push_back(currency::wide_difficulty_type("117868131154734361989189100"));
     if(v_origial.size() > 1)

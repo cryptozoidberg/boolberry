@@ -26,6 +26,7 @@ namespace boost
         x += v;
       }else
       {
+        std::cout << "storing" << ENDL;
         //store high part
         currency::wide_difficulty_type x_ = x;
         x_ = x_ >> 64;
