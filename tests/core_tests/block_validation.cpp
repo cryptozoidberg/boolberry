@@ -524,7 +524,7 @@ bool gen_block_invalid_binary_format::generate(std::vector<test_event_entry>& ev
 {
   BLOCK_VALIDATION_INIT_GENERATE();
 
-  wide_difficulty_type cummulative_diff = 1;
+  //wide_difficulty_type cummulative_diff = 1;
 
   // Unlock blk_0 outputs
   block blk_last = blk_0;
