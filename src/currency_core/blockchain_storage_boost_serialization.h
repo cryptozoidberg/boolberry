@@ -31,7 +31,7 @@ namespace boost
       if(version < 1)
       {
         CHECK_AND_ASSERT_THROW_MES(archive_t::is_loading::value, "Wrong version at storing blockchain storage file");
-        difficulty_type old_dif = 0;
+        currency::difficulty_type old_dif = 0;
         ar & old_dif;
         ei.cumulative_difficulty = old_dif;
       }else
