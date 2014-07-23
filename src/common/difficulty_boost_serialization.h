@@ -21,14 +21,14 @@ namespace boost
         a & v; 
         x = v;
         //load low part
-        x << 64;
+        x = x << 64;
         a & v;
         x += v;
       }else
       {
         //store high part
-        wide_difficulty_type x_ = x;
-        x_ >> 64;
+        currency::wide_difficulty_type x_ = x;
+        x_ = x_ >> 64;
         uint64_t v = x_.convert_to<uint64_t>();
         a & v;         
         //store low part
@@ -41,5 +41,3 @@ namespace boost
     }
   }
 }
-
-//}

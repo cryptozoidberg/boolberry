@@ -10,6 +10,8 @@
 #include "currency_core/currency_format_utils.h"
 #include "common/boost_serialization_helper.h"
 #include "currency_core/currency_boost_serialization.h"
+#include "currency_core/difficulty.h"
+#include "common/difficulty_boost_serialization.h"
 
 TEST(block_pack_unpack, basic_struct_packing)
 {
@@ -31,3 +33,32 @@ TEST(block_pack_unpack, basic_struct_packing)
   crypto::hash loaded_boost_id = get_block_hash(b_loaded_from_boost);
   ASSERT_EQ(original_id, loaded_boost_id);
 }
+
+TEST(boost_multiprecision_serizlization, basic_struct_packing)
+{
+  std::vector<currency::wide_difficulty_type> v_origial;
+  for(int i = 0; i != 100; i++)
+  {
+    v_origial.push_back(currency::wide_difficulty_type("117868131154734361989189100"));
+    if(v_origial.size() > 1)
+      v_origial.back() *= v_origial[v_origial.size()-2];
+  }
+   
+
+  std::stringstream ss;
+  boost::archive::binary_oarchive a(ss);
+  a << v_origial;
+
+  std::vector<currency::wide_difficulty_type> v_unserialized;
+
+  boost::archive::binary_iarchive a2(ss);
+  a2 >> v_unserialized;
+
+  if(v_origial != v_unserialized)
+  {
+    ASSERT_EQ(v_origial, v_unserialized);
+  }
+  ASSERT_EQ(v_origial, v_unserialized);
+}
+
+

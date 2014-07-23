@@ -46,7 +46,7 @@ namespace currency {
     return a + b < a || (c && a + b == (uint64_t) -1);
   }
 
-  bool check_hash(const crypto::hash &hash, difficulty_type difficulty) {
+  bool check_hash_old(const crypto::hash &hash, difficulty_type difficulty) {
     uint64_t low, high, top, cur;
     // First check the highest word, this will most likely fail for a random hash.
     mul(swap64le(((const uint64_t *) &hash)[3]), difficulty, top, high);
@@ -102,7 +102,7 @@ namespace currency {
     return (hashVal * difficulty > max256bit);
   }
 
-  difficulty_type next_difficulty(vector<uint64_t> timestamps, vector<difficulty_type> cumulative_difficulties, size_t target_seconds) {
+  difficulty_type next_difficulty_old(vector<uint64_t> timestamps, vector<difficulty_type> cumulative_difficulties, size_t target_seconds) {
     //cutoff DIFFICULTY_LAG
     if(timestamps.size() > DIFFICULTY_WINDOW)
     {
@@ -182,9 +182,9 @@ namespace currency {
     return res.convert_to<wide_difficulty_type>();
   }
 
-  difficulty_type next_difficulty(vector<uint64_t> timestamps, vector<difficulty_type> cumulative_difficulties)
+  difficulty_type next_difficulty_old(vector<uint64_t> timestamps, vector<difficulty_type> cumulative_difficulties)
   {
-    return next_difficulty(std::move(timestamps), std::move(cumulative_difficulties), DIFFICULTY_TARGET);
+    return next_difficulty_old(std::move(timestamps), std::move(cumulative_difficulties), DIFFICULTY_TARGET);
   }
 
   wide_difficulty_type next_difficulty(vector<uint64_t> timestamps, vector<wide_difficulty_type> cumulative_difficulties)
