@@ -392,6 +392,7 @@ namespace currency
       }
       if(!currency::get_account_address_from_str(ai.m_address, req.alias_details.details.address))
       {
+        LOG_ERROR("Invalid alias address: " << req.alias_details.details.address);
         error_resp.code = CORE_RPC_ERROR_CODE_INVALID_ALIAS_ADDRESS;
         error_resp.message = "Invalid alias address";
         return false;

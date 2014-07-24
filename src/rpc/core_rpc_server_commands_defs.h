@@ -36,7 +36,7 @@ namespace currency
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(alias)
-      KV_CHAIN_MAP(details)
+      KV_SERIALIZE(details)
     END_KV_SERIALIZE_MAP()
   };
 

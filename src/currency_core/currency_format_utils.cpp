@@ -942,7 +942,7 @@ namespace currency
 
     for(const auto ch: al)
     {
-      CHECK_AND_ASSERT_MES( alphabet[static_cast<unsigned char>(ch)], false, "Wrong character in alias" << MAX_ALIAS_LEN );
+      CHECK_AND_ASSERT_MES( alphabet[static_cast<unsigned char>(ch)], false, "Wrong character in alias: '" << ch << "'");
     }
     return true;
   }
