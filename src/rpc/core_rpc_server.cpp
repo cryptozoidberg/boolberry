@@ -387,7 +387,7 @@ namespace currency
       if(!validate_alias_name(req.alias_details.alias))
       {
         error_resp.code = CORE_RPC_ERROR_CODE_INVALID_ALIAS_NAME;
-        error_resp.message = "Invalid aliase name";
+        error_resp.message = "Invalid alias name";
         return false;
       }
       if(!currency::get_account_address_from_str(ai.m_address, req.alias_details.details.address))
