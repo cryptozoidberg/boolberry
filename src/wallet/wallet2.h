@@ -91,6 +91,16 @@ namespace tools
       uint64_t m_block_height;
       uint64_t m_unlock_time;
     };
+
+    struct transfer_history_entry
+    {
+      bool is_income;
+      crypto::hash tx_id;
+      uint32_t tx_blob_size;
+      crypto::hash payment_id;
+      uint64_t amount;
+    };
+
     
     typedef std::unordered_multimap<crypto::hash, payment_details> payment_container;
 
@@ -189,6 +199,7 @@ namespace tools
     uint64_t m_upper_transaction_size_limit; //TODO: auto-calc this value or request from daemon, now use some fixed value
 
     std::atomic<bool> m_run;
+    std::<> transfer_history;
 
     i_wallet2_callback* m_callback;
   };
