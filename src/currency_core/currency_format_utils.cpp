@@ -1027,10 +1027,7 @@ namespace currency
       std::vector<bool> votes(CURRENCY_DONATIONS_INTERVAL, true);
       uint64_t max_possible_donation_reward = get_donations_anount_for_day(already_donated_coins, votes);
       already_donated_coins += max_possible_donation_reward;
-
     }
-
-
   }
   //------------------------------------------------------------------
   void print_currency_details()
