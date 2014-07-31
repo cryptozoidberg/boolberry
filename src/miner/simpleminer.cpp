@@ -74,7 +74,7 @@ namespace mining
   const command_line::arg_descriptor<std::string, true> arg_login = {"login", ""};
   const command_line::arg_descriptor<std::string, true> arg_pass = {"pass", ""};
   const command_line::arg_descriptor<uint32_t> arg_mining_threads = { "mining-threads", "Specify mining threads count", 1, true };
-  const command_line::arg_descriptor<std::string, true> arg_scratchpad_url = { "remote_scratchpad", "Specify URL to remote scratchpad ", "", true };
+  const command_line::arg_descriptor<std::string, true> arg_scratchpad_url = { "remote_scratchpad", "Specify URL to remote scratchpad"};
   const command_line::arg_descriptor<std::string> arg_scratchpad_local = { "local_scratchpad", "Specify URL to remote scratchpad ", "", true };
 
   static const int attempts_per_loop = 5000;
@@ -87,6 +87,8 @@ namespace mining
     command_line::add_arg(desc, arg_login);
     command_line::add_arg(desc, arg_pass);
     command_line::add_arg(desc, arg_mining_threads);
+    command_line::add_arg(desc, arg_scratchpad_url);
+    command_line::add_arg(desc, arg_scratchpad_local);
   }
   //-----------------------------------------------------------------------------------------------------
   bool try_mkdir_chdir(const std::string& dirn)
@@ -117,6 +119,8 @@ namespace mining
     std::string default_local_path = getenv(phome_var_name);
 #if !defined(_WIN64) && !defined(_WIN32)
     default_local_path += "/.cache";
+#else 
+    default_local_path += "/"CURRENCY_NAME;
 #endif
     if (!try_mkdir_chdir(default_local_path) )
     {
@@ -131,6 +135,7 @@ namespace mining
     m_blocks_addendums.clear();
     m_hi = AUTO_VAL_INIT(m_hi);
     m_scratchpad.clear();
+    return true;
   }
   //--------------------------------------------------------------------------------------------------------------------------------
   bool simpleminer::load_scratchpad_from_file(const std::string& path)
@@ -141,11 +146,26 @@ namespace mining
       LOG_ERROR("Empty scratchpad file path");
       return false;
     }
+    boost::system::error_code ec;
+    time_t file_time = boost::filesystem::last_write_time(path, ec);
+    if(ec)
+    {
+      LOG_PRINT_L0("Local scratchpad cache (" << path << ") not found");
+      return false;
+    }
+
+    if(time(NULL) - file_time > 60*60*25*5) 
+    {
+      /*scratchpad older than 5 days, better to redownload*/
+      LOG_PRINT_L0("Local scratchpad cache (" << path << ") is older that 5 days, downloading new...");
+      return false;
+    }
+
 
     std::string buff;
     if(!epee::file_io_utils::load_file_to_string(path, buff))
     {
-      LOG_ERROR("Failed to load scratchpad file " << path);
+      LOG_PRINT_L0("Local scratchpad cache (" << path << ") not found");
       return false;
     }
 
@@ -195,13 +215,19 @@ namespace mining
       }
 
       epee::net_utils::http::http_simple_client http_client;
-      epee::net_utils::http::http_response_info *prespinfo = NULL;
+      const epee::net_utils::http::http_response_info *prespinfo = NULL;
+      LOG_PRINT_L0("Downloading remote scrathcpad from " << m_scratchpad_url << "...");
       if(!epee::net_utils::http::invoke_request(m_scratchpad_url, http_client, 10000, &prespinfo))
       {
         LOG_ERROR("Local scratchpad chache not found, and scratchpad url not found");
         return false;        
       }
-      file_io_utils::save_string_to_file(m_scratchpad_local_path, prespinfo->m_body);
+      LOG_PRINT_L0("Remote scratchpad downloaded, size " << prespinfo->m_body.size()/1024 << "Kb");
+      if(!file_io_utils::save_string_to_file(m_scratchpad_local_path, prespinfo->m_body))
+      {
+        LOG_ERROR("Failed to store local scratchpad file to path " << m_scratchpad_local_path);
+        return false;
+      }
      
       //let's try to load it once again
       if(!load_scratchpad_from_file(m_scratchpad_local_path))
@@ -212,7 +238,7 @@ namespace mining
     }
     update_fast_scratchpad();
     
-    LOG_LEVEL_0("Scratchpad loaded okay, hashes count: " << m_scratchpad.size());
+    LOG_PRINT_L0("Scratchpad loaded okay, hashes count: " << m_scratchpad.size());
     return true;
   }
   //--------------------------------------------------------------------------------------------------------------------------------
@@ -234,17 +260,18 @@ namespace mining
     m_pass = command_line::get_arg(vm, arg_pass);
     m_hi = AUTO_VAL_INIT(m_hi);
     m_last_job_ticks = 0;
+    m_last_scratchpad_store_time = 0;
     m_fast_scratchpad_pages = 0;
     m_fast_scratchpad = NULL;
 
     if(command_line::has_arg(vm, arg_scratchpad_url))
     {
-      m_scratchpad_url = command_line::has_arg(vm, arg_scratchpad_url);
+      m_scratchpad_url = command_line::get_arg(vm, arg_scratchpad_url);
     }
 
     if(command_line::has_arg(vm, arg_scratchpad_local))
     {
-      m_scratchpad_local_path = command_line::has_arg(vm, arg_scratchpad_local);
+      m_scratchpad_local_path = command_line::get_arg(vm, arg_scratchpad_local);
     }else
     {
       m_scratchpad_local_path = get_default_local_cache_path();
@@ -310,6 +337,7 @@ namespace mining
 
     while(true)
     {
+      bool job_received = false;
       //-----------------
       if(!m_http_client.is_connected())
       {
@@ -348,14 +376,14 @@ namespace mining
         m_pool_session_id = resp.id;        
         if (re_get_scratchpad || !m_hi.height || !m_scratchpad.size())
         {
-          if (!get_whole_scratchpad())
+          if (!reinit_scratchpad())
             continue;
           re_get_scratchpad = false;
         }
         else if(!apply_addendums(resp.addms))
         {
           LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
-          if (!get_whole_scratchpad())
+          if (!reinit_scratchpad())
             continue;
         }
 
@@ -372,20 +400,29 @@ namespace mining
           continue;
         }
         if(job_requested)
+        {
           m_last_job_ticks = epee::misc_utils::get_tick_count();
+          job_received = true;
+        }
+
       }
 
-      uint64_t get_job_start_time = epee::misc_utils::get_tick_count();
-      if(!get_job()) /* Next version:  Handle this asynchronously */
+      if(!job_received)
       {
-        continue;
+        uint64_t get_job_start_time = epee::misc_utils::get_tick_count();
+        if(!get_job()) /* Next version:  Handle this asynchronously */
+        {
+          continue;
+        }
+
+        uint64_t get_job_end_time  = epee::misc_utils::get_tick_count();
+        if ((get_job_end_time - get_job_start_time) > 1000) 
+        {
+          LOG_PRINT_L0("slow pool response " << (get_job_end_time - get_job_start_time) << " ms");
+        }
       }
+
       update_fast_scratchpad();
-      uint64_t get_job_end_time  = epee::misc_utils::get_tick_count();
-      if ((get_job_end_time - get_job_start_time) > 1000) 
-      {
-        LOG_PRINT_L0("slow pool response " << (get_job_end_time - get_job_start_time) << " ms");
-      }
 
       uint64_t start_nonce = (*reinterpret_cast<uint64_t*>(&m_job.blob[1])) + 1000000;
       std::list<boost::thread> threads;
@@ -502,36 +539,9 @@ namespace mining
     return true;
   }
   //----------------------------------------------------------------------------------------------------------------------------------
-  bool simpleminer::get_whole_scratchpad()
+  bool simpleminer::reinit_scratchpad()
   {
-    LOG_PRINT_L0("Getting scratchpad...");
-    mining::COMMAND_RPC_GET_FULLSCRATCHPAD::request scr_req = AUTO_VAL_INIT(scr_req);
-    mining::COMMAND_RPC_GET_FULLSCRATCHPAD::response scr_resp = AUTO_VAL_INIT(scr_resp);
-    scr_req.id = m_pool_session_id;
-    if(!epee::net_utils::invoke_http_json_rpc<mining::COMMAND_RPC_GET_FULLSCRATCHPAD>("/json_rpc", scr_req, scr_resp, m_http_client, 60*1000))
-    {
-      LOG_PRINT_L0("Failed to get scratchpad.  Disconnecting and retrying...");
-      m_http_client.disconnect();            
-      return false;
-    }
-    if(!currency::hexstr_to_addendum(scr_resp.scratchpad_hex, m_scratchpad))
-    {
-      LOG_ERROR("Failed to get scratchpad: hexstr_to_addendum failed.  Disconnecting and retrying...");
-      m_http_client.disconnect();
-      return false;
-    }
-    bool r = text_height_info_to_native_height_info(scr_resp.hi, m_hi);
-    if (m_scratchpad.size() == 0)
-    {
-      LOG_ERROR("Server sent empty scratchpad.  Disconnecting and retrying...");
-      /* Sleep a bit longer here.  Rationale:  If the server is sending bad
-      * scratchpad data, it's probably having problems, so let's not slam it
-      * with requests and make things worse. */
-      epee::misc_utils::sleep_no_w(5000);
-      m_http_client.disconnect();
-      return false;
-    }
-    LOG_PRINT_L0("Scratchpad received ok, size: " << (m_scratchpad.size()*32)/1024 << "Kb, heigh=" << m_hi.height);
+    init_scratchpad();
     return true;
   }
   //----------------------------------------------------------------------------------------------------------------------------------
@@ -696,7 +706,7 @@ namespace mining
     if(!apply_addendums(getjob_response.addms))
     {
       LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
-      get_whole_scratchpad();
+      reinit_scratchpad();
       return true;
     }
 

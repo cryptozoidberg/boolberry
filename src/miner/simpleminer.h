@@ -54,7 +54,7 @@ namespace mining
 
 
     bool get_job();
-    bool get_whole_scratchpad();
+    bool reinit_scratchpad();
     bool apply_addendums(const std::list<addendum>& addms);
     bool pop_addendum(const addendum& add);
     bool push_addendum(const addendum& add);
