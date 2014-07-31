@@ -20,20 +20,6 @@ namespace mining
     END_KV_SERIALIZE_MAP()
   };
 
-  struct job_details
-  {
-    std::string blob;
-    std::string difficulty;
-    std::string job_id;
-    height_info prev_hi;
-
-    BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(blob)
-      KV_SERIALIZE(difficulty)
-      KV_SERIALIZE(job_id)
-      KV_SERIALIZE(prev_hi)
-    END_KV_SERIALIZE_MAP()
-  };
 
   struct addendum
   {
@@ -45,6 +31,23 @@ namespace mining
       KV_SERIALIZE(hi)
       KV_SERIALIZE(prev_id)
       KV_SERIALIZE(addm)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct job_details
+  {
+    std::string blob;
+    std::string difficulty;
+    std::string job_id;
+    height_info prev_hi;
+    std::list<addendum> addms;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(blob)
+      KV_SERIALIZE(difficulty)
+      KV_SERIALIZE(job_id)
+      KV_SERIALIZE(prev_hi)
+      KV_SERIALIZE(addms)      
     END_KV_SERIALIZE_MAP()
   };
 
@@ -72,13 +75,11 @@ namespace mining
       std::string status;
       std::string id;
       job_details job;
-      std::list<addendum> addms;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
         KV_SERIALIZE(id)
         KV_SERIALIZE(job)
-        KV_SERIALIZE(addms)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -100,15 +101,12 @@ namespace mining
 
     struct response
     {
-        std::list<addendum> addms;
         std::string status;
         job_details jd;
         
         BEGIN_KV_SERIALIZE_MAP()
-          KV_SERIALIZE(addms)
           KV_SERIALIZE(status)
           KV_CHAIN_MAP(jd)
-          //KV_CHAIN_BASE(job_details)
         END_KV_SERIALIZE_MAP()
     };
   };

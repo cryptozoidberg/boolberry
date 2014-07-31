@@ -120,7 +120,7 @@ namespace mining
 #if !defined(_WIN64) && !defined(_WIN32)
     default_local_path += "/.cache";
 #else 
-    default_local_path += "/"CURRENCY_NAME;
+    default_local_path += "/" CURRENCY_NAME;
 #endif
     if (!try_mkdir_chdir(default_local_path) )
     {
@@ -403,7 +403,7 @@ namespace mining
             continue;
           re_get_scratchpad = false;
         }
-        else if(!apply_addendums(resp.addms))
+        else if(!apply_addendums(resp.job.addms))
         {
           LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
           if (!reinit_scratchpad())
@@ -726,7 +726,7 @@ namespace mining
       return false;
     }
     //apply addendum
-    if(!apply_addendums(getjob_response.addms))
+    if(!apply_addendums(getjob_response.jd.addms))
     {
       LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
       reinit_scratchpad();
