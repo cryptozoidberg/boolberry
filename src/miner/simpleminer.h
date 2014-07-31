@@ -9,6 +9,8 @@
 #include "currency_core/difficulty.h"
 #include <boost/atomic.hpp>
 #include <atomic>
+
+
 namespace mining
 {
   class  simpleminer
@@ -59,6 +61,9 @@ namespace mining
     void worker_thread(uint64_t start_nonce, uint32_t nonce_offset, std::atomic<uint32_t> *result, std::atomic<bool> *do_reset, std::atomic<bool> *done);
     void update_fast_scratchpad();
     void free_fast_scratchpad();
+    bool init_scratchpad();
+    bool reset_scratchpad();
+    bool load_scratchpad_from_file(const std::string& path);
 
     std::vector<mining::addendum> m_blocks_addendums; //need to handle splits without re-downloading whole scratchpad
     height_info_native m_hi;
@@ -73,6 +78,8 @@ namespace mining
     simpleminer::job_details_native m_job;
     std::condition_variable m_work_done_cond;
     std::mutex m_work_mutex;
+    std::string m_scratchpad_url;
+    std::string m_scratchpad_local_path;
 
     std::string m_pool_ip;
     std::string m_pool_port;

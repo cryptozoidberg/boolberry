@@ -98,15 +98,16 @@ namespace mining
       END_KV_SERIALIZE_MAP()
     };
 
-    struct response: public job_details
+    struct response
     {
         std::list<addendum> addms;
         std::string status;
+        job_details jd;
         
         BEGIN_KV_SERIALIZE_MAP()
           KV_SERIALIZE(addms)
           KV_SERIALIZE(status)
-          //KV_CHAIN_MAP(*static_cast<job_details*>(this) )
+          KV_CHAIN_MAP(jd)
           //KV_CHAIN_BASE(job_details)
         END_KV_SERIALIZE_MAP()
     };

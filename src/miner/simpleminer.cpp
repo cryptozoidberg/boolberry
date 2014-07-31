@@ -14,6 +14,7 @@
 #include "currency_core/account.h"
 #include "currency_core/currency_format_utils.h"
 #include "rpc/core_rpc_server_commands_defs.h"
+#include "currency_core/miner_common.h"
 #ifndef WIN32
 #include <sys/mman.h>
 #endif
@@ -73,6 +74,8 @@ namespace mining
   const command_line::arg_descriptor<std::string, true> arg_login = {"login", ""};
   const command_line::arg_descriptor<std::string, true> arg_pass = {"pass", ""};
   const command_line::arg_descriptor<uint32_t> arg_mining_threads = { "mining-threads", "Specify mining threads count", 1, true };
+  const command_line::arg_descriptor<std::string, true> arg_scratchpad_url = { "remote_scratchpad", "Specify URL to remote scratchpad ", "", true };
+  const command_line::arg_descriptor<std::string> arg_scratchpad_local = { "local_scratchpad", "Specify URL to remote scratchpad ", "", true };
 
   static const int attempts_per_loop = 5000;
 
@@ -84,6 +87,133 @@ namespace mining
     command_line::add_arg(desc, arg_login);
     command_line::add_arg(desc, arg_pass);
     command_line::add_arg(desc, arg_mining_threads);
+  }
+  //-----------------------------------------------------------------------------------------------------
+  bool try_mkdir_chdir(const std::string& dirn)
+  {
+    boost::system::error_code ec;
+    if(boost::filesystem::exists(dirn, ec))
+    {
+      return true;
+    }
+
+    boost::filesystem::create_directories("/some/path", ec);
+    return !ec;
+  }
+  //-----------------------------------------------------------------------------------------------------
+  std::string get_default_local_cache_path()
+  {
+#if defined(_WIN64) || defined(_WIN32)
+    const char* phome_var_name = "LOCALAPPDATA";
+#else 
+    const char* phome_var_name = "HOME";
+#endif
+    if (!getenv(phome_var_name)) 
+    {
+      LOG_ERROR("Env variable " << phome_var_name << " not set");
+      return "";
+    }
+
+    std::string default_local_path = getenv(phome_var_name);
+#if !defined(_WIN64) && !defined(_WIN32)
+    default_local_path += "/.cache";
+#endif
+    if (!try_mkdir_chdir(default_local_path) )
+    {
+      LOG_ERROR("Failed to create a dir " << getenv(phome_var_name));
+      return "";
+    }
+    return default_local_path + "/" SCRATCHPAD_DEFAULT_FILENAME;
+  }
+  //--------------------------------------------------------------------------------------------------------------------------------
+  bool simpleminer::reset_scratchpad()
+  {
+    m_blocks_addendums.clear();
+    m_hi = AUTO_VAL_INIT(m_hi);
+    m_scratchpad.clear();
+  }
+  //--------------------------------------------------------------------------------------------------------------------------------
+  bool simpleminer::load_scratchpad_from_file(const std::string& path)
+  {
+    reset_scratchpad();
+    if(!path.size())
+    {
+      LOG_ERROR("Empty scratchpad file path");
+      return false;
+    }
+
+    std::string buff;
+    if(!epee::file_io_utils::load_file_to_string(path, buff))
+    {
+      LOG_ERROR("Failed to load scratchpad file " << path);
+      return false;
+    }
+
+    if(buff.size() < sizeof(export_scratchpad_file_header))
+    {
+      LOG_ERROR("Wrong scratchpad file size: " << buff.size() << " in file " << path);
+      return false;
+    }
+    
+    const uint8_t* pbuff = reinterpret_cast<const uint8_t*>(buff.data());
+    const export_scratchpad_file_header* pscr_header = reinterpret_cast<const export_scratchpad_file_header*>(pbuff);
+
+    if(pscr_header->scratchpad_size*8 != buff.size()-sizeof(export_scratchpad_file_header) || pscr_header->scratchpad_size%4)
+    {
+      LOG_ERROR("File size and export_scratchpad_file_header mismatch, " << path);
+      return false;
+    }
+
+    /*
+    TODO: refactor copy addendums array
+    for(int i = 0;  i != WILD_KECCAK_ADDENDUMS_ARRAY_SIZE; i++)
+    {
+      m_blocks_addendums.push_back(mining::addendum());
+      m_blocks_addendums.back().hi.block_id = pscr_header->add_arr[i].prev_hi      
+    }*/
+
+    m_hi.height = pscr_header->current_hi.height;
+    m_hi.id = pscr_header->current_hi.prevhash;
+    m_scratchpad.resize(pscr_header->scratchpad_size/4);
+    
+    pbuff+= sizeof(export_scratchpad_file_header);
+    memcpy(&m_scratchpad[0], pbuff, buff.size()-sizeof(export_scratchpad_file_header));
+
+    return true;
+  }
+  //--------------------------------------------------------------------------------------------------------------------------------
+  bool simpleminer::init_scratchpad()
+  {
+    //let's try to lookup scratchpad in local cache and then, if it not there - try to fetch it from server
+    if(!load_scratchpad_from_file(m_scratchpad_local_path))
+    {
+      //failed, try to fetch it from server
+      if(!m_scratchpad_url.size())
+      {
+        LOG_ERROR("Local scratchpad chache not found, and scratchpad url not found");
+        return false;
+      }
+
+      epee::net_utils::http::http_simple_client http_client;
+      epee::net_utils::http::http_response_info *prespinfo = NULL;
+      if(!epee::net_utils::http::invoke_request(m_scratchpad_url, http_client, 10000, &prespinfo))
+      {
+        LOG_ERROR("Local scratchpad chache not found, and scratchpad url not found");
+        return false;        
+      }
+      file_io_utils::save_string_to_file(m_scratchpad_local_path, prespinfo->m_body);
+     
+      //let's try to load it once again
+      if(!load_scratchpad_from_file(m_scratchpad_local_path))
+      {
+        LOG_ERROR("Local scratchpad chache not found, and scratchpad url not found");
+        return false;        
+      }
+    }
+    update_fast_scratchpad();
+    
+    LOG_LEVEL_0("Scratchpad loaded okay, hashes count: " << m_scratchpad.size());
+    return true;
   }
   //--------------------------------------------------------------------------------------------------------------------------------
   bool simpleminer::init(const boost::program_options::variables_map& vm)
@@ -107,6 +237,23 @@ namespace mining
     m_fast_scratchpad_pages = 0;
     m_fast_scratchpad = NULL;
 
+    if(command_line::has_arg(vm, arg_scratchpad_url))
+    {
+      m_scratchpad_url = command_line::has_arg(vm, arg_scratchpad_url);
+    }
+
+    if(command_line::has_arg(vm, arg_scratchpad_local))
+    {
+      m_scratchpad_local_path = command_line::has_arg(vm, arg_scratchpad_local);
+    }else
+    {
+      m_scratchpad_local_path = get_default_local_cache_path();
+    }
+    if(!init_scratchpad())
+    {
+      LOG_ERROR("Failed to init scratchpad");
+      return false;
+    }
     return true;
   }
   //--------------------------------------------------------------------------------------------------------------------------------
@@ -534,11 +681,11 @@ namespace mining
       epee::misc_utils::sleep_no_w(1000);
       return false;
     }
-    if (getjob_response.blob.empty() && getjob_response.difficulty.empty() && getjob_response.job_id.empty())
+    if (getjob_response.jd.blob.empty() && getjob_response.jd.difficulty.empty() && getjob_response.jd.job_id.empty())
     {
       LOG_PRINT_L0("Job didn't change");
     }
-    else if(!text_job_details_to_native_job_details(getjob_response, m_job))
+    else if(!text_job_details_to_native_job_details(getjob_response.jd, m_job))
     {
       LOG_PRINT_L0("Failed to text_job_details_to_native_job_details(), disconnect and sleep....");
       m_http_client.disconnect();

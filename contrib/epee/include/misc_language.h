@@ -53,8 +53,6 @@ namespace epee
   template<class base_class>
   class namespace_accessor: public base_class{};
 
-
-
 #define AUTO_VAL_INIT(v)   boost::value_initialized<decltype(v)>()
 
 #define STRINGIFY_EXPAND(s) STRINGIFY(s)
