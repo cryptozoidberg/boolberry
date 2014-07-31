@@ -138,6 +138,28 @@ namespace mining
     return true;
   }
   //--------------------------------------------------------------------------------------------------------------------------------
+  bool simpleminer::store_scratchpad_to_file(const std::string& path)
+  {
+    std::string buff;
+    buff.resize(sizeof(export_scratchpad_file_header) + m_scratchpad.size()*256, 0);
+
+    uint8_t* pbuff = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(buff.data()));
+    export_scratchpad_file_header* pheader = reinterpret_cast<export_scratchpad_file_header*>(pbuff);
+    pheader->current_hi.height = m_hi.height;
+    pheader->current_hi.prevhash = m_hi.id;
+    pheader->scratchpad_size = m_scratchpad.size()*4;
+    pbuff += sizeof(export_scratchpad_file_header);
+    memcpy(pbuff, &m_scratchpad[0], m_scratchpad.size()*256);
+
+    if(!file_io_utils::save_string_to_file(path, buff))
+    {
+      LOG_ERROR("Failed to save scratchpad local cache to " << path);
+      return false;
+    }
+    m_last_scratchpad_store_time = time(NULL);
+    return true;
+  }
+  //--------------------------------------------------------------------------------------------------------------------------------
   bool simpleminer::load_scratchpad_from_file(const std::string& path)
   {
     reset_scratchpad();
@@ -154,7 +176,7 @@ namespace mining
       return false;
     }
 
-    if(time(NULL) - file_time > 60*60*25*5) 
+    if(time(NULL) - file_time > LOCAL_SCRATCHPAD_CACHE_EXPIRATION_INTERVAL ) 
     {
       /*scratchpad older than 5 days, better to redownload*/
       LOG_PRINT_L0("Local scratchpad cache (" << path << ") is older that 5 days, downloading new...");
@@ -198,6 +220,7 @@ namespace mining
     
     pbuff+= sizeof(export_scratchpad_file_header);
     memcpy(&m_scratchpad[0], pbuff, buff.size()-sizeof(export_scratchpad_file_header));
+    m_last_scratchpad_store_time = file_time;
 
     return true;
   }
@@ -708,6 +731,11 @@ namespace mining
       LOG_PRINT_L0("Failed to apply_addendum, requesting full scratchpad...");
       reinit_scratchpad();
       return true;
+    }
+
+    if(time(NULL) - m_last_scratchpad_store_time > LOCAL_SCRATCHPAD_CACHE_STORE_INTERVAL)
+    {
+      store_scratchpad_to_file(m_scratchpad_local_path);
     }
 
     m_last_job_ticks = epee::misc_utils::get_tick_count();

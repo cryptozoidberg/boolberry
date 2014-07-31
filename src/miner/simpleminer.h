@@ -11,6 +11,10 @@
 #include <atomic>
 
 
+#define LOCAL_SCRATCHPAD_CACHE_EXPIRATION_INTERVAL 60*60*24*5   //5 days
+#define LOCAL_SCRATCHPAD_CACHE_STORE_INTERVAL      60*60*12     //12 hours
+
+
 namespace mining
 {
   class  simpleminer
@@ -64,6 +68,7 @@ namespace mining
     bool init_scratchpad();
     bool reset_scratchpad();
     bool load_scratchpad_from_file(const std::string& path);
+    bool store_scratchpad_to_file(const std::string& path);
 
     std::vector<mining::addendum> m_blocks_addendums; //need to handle splits without re-downloading whole scratchpad
     height_info_native m_hi;
@@ -71,6 +76,7 @@ namespace mining
     crypto::hash *m_fast_scratchpad;
     uint32_t m_fast_scratchpad_pages;
     uint64_t m_last_job_ticks;
+    uint64_t m_last_scratchpad_store_time;
     bool m_fast_mmapped;
     uint32_t m_threads_total;
     std::atomic<uint64_t> m_hashes_done;
