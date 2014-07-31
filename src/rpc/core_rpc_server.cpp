@@ -768,7 +768,7 @@ namespace currency
     
     //TODO: add login information here
 
-    if(!get_addendum_for_hi(req.hi, res.addms))
+    if(!get_addendum_for_hi(req.hi, res.job.addms))
     {
       res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
       return true;
@@ -798,7 +798,7 @@ namespace currency
       return true;
     }
     
-    if(!get_addendum_for_hi(req.hi, res.addms))
+    if(!get_addendum_for_hi(req.hi, res.jd.addms))
     {
       res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
       return true;
