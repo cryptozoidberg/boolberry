@@ -141,7 +141,7 @@ namespace mining
   bool simpleminer::store_scratchpad_to_file(const std::string& path)
   {
     std::string buff;
-    buff.resize(sizeof(export_scratchpad_file_header) + m_scratchpad.size()*256, 0);
+    buff.resize(sizeof(export_scratchpad_file_header) + m_scratchpad.size()*32, 0);
 
     uint8_t* pbuff = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(buff.data()));
     export_scratchpad_file_header* pheader = reinterpret_cast<export_scratchpad_file_header*>(pbuff);
@@ -149,7 +149,7 @@ namespace mining
     pheader->current_hi.prevhash = m_hi.id;
     pheader->scratchpad_size = m_scratchpad.size()*4;
     pbuff += sizeof(export_scratchpad_file_header);
-    memcpy(pbuff, &m_scratchpad[0], m_scratchpad.size()*256);
+    memcpy(pbuff, &m_scratchpad[0], m_scratchpad.size()*32);
 
     if(!file_io_utils::save_string_to_file(path, buff))
     {
