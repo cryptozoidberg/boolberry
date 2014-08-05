@@ -71,7 +71,7 @@ uint64_t test_generator::get_already_donated_coins(const crypto::hash& blk_id) c
   return it->second.already_donated;
 }
 
-currency::difficulty_type test_generator::get_block_difficulty(const crypto::hash& blk_id) const
+currency::wide_difficulty_type test_generator::get_block_difficulty(const crypto::hash& blk_id) const
 {
   auto it = m_blocks_info.find(blk_id);
   if (it == m_blocks_info.end())
@@ -94,7 +94,7 @@ uint64_t test_generator::get_already_generated_coins(const currency::block& blk)
 void test_generator::add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, 
                                uint64_t already_generated_coins, 
                                uint64_t already_donated_coins, 
-                               difficulty_type cum_diff)
+                               wide_difficulty_type cum_diff)
 {
   const size_t block_size = tsx_size + get_object_blobsize(blk.miner_tx);
   uint64_t block_reward;
@@ -199,7 +199,7 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
   std::vector<const block_info*> blocks;
   get_block_chain(blocks, blk.prev_id, std::numeric_limits<size_t>::max());
 
-  difficulty_type a_diffic = get_difficulty_for_next_block(blocks);
+  wide_difficulty_type a_diffic = get_difficulty_for_next_block(blocks);
   // Nonce search...
   blk.nonce = 0;
   while (!find_nounce(blk, blocks, a_diffic, height))
@@ -210,7 +210,7 @@ bool test_generator::construct_block(currency::block& blk, uint64_t height, cons
   return true;
 }
 
-currency::difficulty_type test_generator::get_difficulty_for_next_block(const crypto::hash& head_id)
+currency::wide_difficulty_type test_generator::get_difficulty_for_next_block(const crypto::hash& head_id)
 {
   std::vector<const block_info*> blocks;
   get_block_chain(blocks, head_id, std::numeric_limits<size_t>::max());
@@ -218,10 +218,10 @@ currency::difficulty_type test_generator::get_difficulty_for_next_block(const cr
   return get_difficulty_for_next_block(blocks);
 }
 
-difficulty_type test_generator::get_difficulty_for_next_block(const std::vector<const block_info*>& blocks)
+currency::wide_difficulty_type test_generator::get_difficulty_for_next_block(const std::vector<const block_info*>& blocks)
 {
   std::vector<uint64_t> timestamps;
-  std::vector<difficulty_type> commulative_difficulties;
+  std::vector<wide_difficulty_type> commulative_difficulties;
   size_t offset = blocks.size() - std::min(blocks.size(), static_cast<size_t>(DIFFICULTY_BLOCKS_COUNT));
   if(!offset)
     ++offset;//skip genesis block
@@ -234,7 +234,7 @@ difficulty_type test_generator::get_difficulty_for_next_block(const std::vector<
 }
 
 
-bool test_generator::find_nounce(block& blk, std::vector<const block_info*>& blocks, difficulty_type dif, uint64_t height)
+bool test_generator::find_nounce(block& blk, std::vector<const block_info*>& blocks, wide_difficulty_type dif, uint64_t height)
 {
   if(height != blocks.size())
     throw std::runtime_error("wrong height in find_nounce");
@@ -293,7 +293,7 @@ bool test_generator::construct_block(currency::block& blk, const currency::block
 bool test_generator::construct_block_manually(block& blk, const block& prev_block, const account_base& miner_acc,
                                               int actual_params/* = bf_none*/, uint8_t major_ver/* = 0*/,
                                               uint8_t minor_ver/* = 0*/, uint64_t timestamp/* = 0*/,
-                                              const crypto::hash& prev_id/* = crypto::hash()*/, const difficulty_type& diffic/* = 1*/,
+                                              const crypto::hash& prev_id/* = crypto::hash()*/, const wide_difficulty_type& diffic/* = 1*/,
                                               const transaction& miner_tx/* = transaction()*/,
                                               const std::vector<crypto::hash>& tx_hashes/* = std::vector<crypto::hash>()*/,
                                               size_t txs_sizes/* = 0*/)
@@ -327,7 +327,7 @@ bool test_generator::construct_block_manually(block& blk, const block& prev_bloc
   std::vector<const block_info*> blocks;
   get_block_chain(blocks, blk.prev_id, std::numeric_limits<size_t>::max());
 
-  difficulty_type a_diffic = actual_params & bf_diffic ? diffic : get_difficulty_for_next_block(blocks);
+  wide_difficulty_type a_diffic = actual_params & bf_diffic ? diffic : get_difficulty_for_next_block(blocks);
   find_nounce(blk, blocks, a_diffic, height);
 
   add_block(blk, txs_sizes, block_sizes, already_generated_coins, already_donated_coins, blocks.size() ? blocks.back()->cumul_difficulty + a_diffic: a_diffic);
@@ -595,7 +595,7 @@ void fill_tx_sources_and_destinations(const std::vector<test_event_entry>& event
 }
 
 /*
-void fill_nonce(currency::block& blk, const difficulty_type& diffic, uint64_t height)
+void fill_nonce(currency::block& blk, const wide_difficulty_type& diffic, uint64_t height)
 {
   blk.nonce = 0;
   while (!miner::find_nonce_for_given_block(blk, diffic, height))

@@ -50,6 +50,11 @@ namespace currency
   {
   }
   //-----------------------------------------------------------------------------------------------
+  std::string core::get_config_folder()
+  {
+    return m_config_folder;
+  }
+  //-----------------------------------------------------------------------------------------------
   bool core::handle_command_line(const boost::program_options::variables_map& vm)
   {
     m_config_folder = command_line::get_arg(vm, command_line::arg_data_dir);
@@ -321,7 +326,7 @@ namespace currency
     return m_mempool.add_tx(tx, tx_hash, blob_size, tvc, keeped_by_block);
   }
   //-----------------------------------------------------------------------------------------------
-  bool core::get_block_template(block& b, const account_public_address& adr, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai)
+  bool core::get_block_template(block& b, const account_public_address& adr, wide_difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai)
   {
     return m_blockchain_storage.create_block_template(b, adr, diffic, height, ex_nonce, vote_for_donation, ai);
   }

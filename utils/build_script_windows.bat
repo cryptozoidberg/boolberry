@@ -99,7 +99,7 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "Add html"
 
 cd ..\..\..\src\gui\qt-daemon\
-zip -r ..\..\..\..\builds\bbr-win64-%version%.zip html
+zip -r ..\..\..\..\builds\bbr-win-x64-%version%.zip html
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )

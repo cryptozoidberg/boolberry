@@ -1175,17 +1175,33 @@ Html5ApplicationViewer::Html5ApplicationViewer(QWidget *parent)
 
     connect(m_d, SIGNAL(quitRequested()), this, SLOT(on_request_quit()));
 
-
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(m_d);
     layout->setMargin(0);
     setLayout(layout);
 }
 
+bool Html5ApplicationViewer::init_config()
+{  
+  epee::serialization::load_t_from_json_file(m_config, m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME);
+  if (!m_config.wallets_last_used_dir.size())
+  {
+    m_config.wallets_last_used_dir = tools::get_default_user_dir();
+    tools::create_directories_if_necessary(m_config.wallets_last_used_dir);
+  }
+  return true;
+}
+
+bool Html5ApplicationViewer::store_config()
+{
+  epee::serialization::store_t_to_json_file(m_config, m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME);
+  return true;
+}
 
 Html5ApplicationViewer::~Html5ApplicationViewer()
 {
-    delete m_d;
+  store_config();
+  delete m_d;
 }
 void Html5ApplicationViewer::closeEvent(QCloseEvent *event)
 {
@@ -1296,6 +1312,20 @@ bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info
   epee::serialization::store_t_to_json(info, json_str);
   m_d->update_daemon_state(json_str.c_str());
   return true;
+}
+
+QString Html5ApplicationViewer::request_aliases()
+{
+  QString res = "{}";
+  view::alias_set al_set;
+  if (m_backend.get_aliases(al_set))
+  {
+    std::string json_str;
+    epee::serialization::store_t_to_json(al_set, json_str);
+
+    res = json_str.c_str();
+  }
+  return res;
 }
 
 bool Html5ApplicationViewer::show_msg_box(const std::string& message)
@@ -1437,12 +1467,16 @@ void Html5ApplicationViewer::message_box(const QString& msg)
 
 void Html5ApplicationViewer::generate_wallet()
 {
-  QString path = QFileDialog::getSaveFileName(this, tr("Wallet file to store"),
-    "",
-    tr("Files (*.*)"));
+  QFileDialog dialogFile(this);  
+  std::string default_file = (tools::get_current_username() + "_wallet.bbr").c_str();
+  QString path = dialogFile.getSaveFileName(this, tr("Wallet file to store"),
+    (m_config.wallets_last_used_dir + "/" + default_file).c_str(),
+    tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
   
   if (!path.length())
     return;
+
+  m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
 
   //read password
   bool ok;
@@ -1459,10 +1493,13 @@ void Html5ApplicationViewer::generate_wallet()
 void Html5ApplicationViewer::open_wallet()
 {
   QString path = QFileDialog::getOpenFileName(this, tr("Open wallet File"),
-                                                   "",
-                                                   tr("Files (*.*)"));
+                                                   m_config.wallets_last_used_dir.c_str(),
+                                                   tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
   if(!path.length())
     return;
+
+  m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
+
 
   //read password
   bool ok;

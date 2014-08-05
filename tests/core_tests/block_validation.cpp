@@ -11,15 +11,15 @@ using namespace currency;
 namespace
 {
   bool lift_up_difficulty(std::vector<test_event_entry>& events, std::vector<uint64_t>& timestamps,
-                          std::vector<difficulty_type>& cummulative_difficulties, test_generator& generator,
+                          std::vector<wide_difficulty_type>& cummulative_difficulties, test_generator& generator,
                           size_t new_block_count, const block blk_last, const account_base& miner_account)
   {
-    difficulty_type commulative_diffic = cummulative_difficulties.empty() ? 0 : cummulative_difficulties.back();
+    wide_difficulty_type commulative_diffic = cummulative_difficulties.empty() ? 0 : cummulative_difficulties.back();
     block blk_prev = blk_last;
     for (size_t i = 0; i < new_block_count; ++i)
     {
       block blk_next;
-      difficulty_type diffic = next_difficulty(timestamps, cummulative_difficulties);
+      wide_difficulty_type diffic = next_difficulty(timestamps, cummulative_difficulties);
       if (!generator.construct_block_manually(blk_next, blk_prev, miner_account,
         test_generator::bf_timestamp | test_generator::bf_diffic, 0, 0, blk_prev.timestamp, crypto::hash(), diffic))
         return false;
@@ -144,12 +144,12 @@ bool gen_block_invalid_nonce::generate(std::vector<test_event_entry>& events) co
   BLOCK_VALIDATION_INIT_GENERATE();
 
   std::vector<uint64_t> timestamps;
-  std::vector<difficulty_type> commulative_difficulties;
+  std::vector<wide_difficulty_type> commulative_difficulties;
   if (!lift_up_difficulty(events, timestamps, commulative_difficulties, generator, 2, blk_0, miner_account))
     return false;
 
   // Create invalid nonce
-  difficulty_type diffic = next_difficulty(timestamps, commulative_difficulties);
+  wide_difficulty_type diffic = next_difficulty(timestamps, commulative_difficulties);
   assert(1 < diffic);
   const block& blk_last = boost::get<block>(events.back());
   uint64_t timestamp = blk_last.timestamp;
@@ -524,7 +524,7 @@ bool gen_block_invalid_binary_format::generate(std::vector<test_event_entry>& ev
 {
   BLOCK_VALIDATION_INIT_GENERATE();
 
-  difficulty_type cummulative_diff = 1;
+  //wide_difficulty_type cummulative_diff = 1;
 
   // Unlock blk_0 outputs
   block blk_last = blk_0;
@@ -536,7 +536,7 @@ bool gen_block_invalid_binary_format::generate(std::vector<test_event_entry>& ev
   }
 
   // Lifting up takes a while
-  difficulty_type diffic;
+  wide_difficulty_type diffic;
   do
   {
     MAKE_NEXT_BLOCK(events, blk_curr, blk_last, miner_account);

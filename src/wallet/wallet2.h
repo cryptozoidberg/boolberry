@@ -421,7 +421,7 @@ namespace tools
     bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, tx, unlock_time);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
     //update_current_tx_limit();
-    CHECK_AND_THROW_WALLET_EX(CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE-CURRENCY_COINBASE_BLOB_RESERVED_SIZE*2 <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
+    CHECK_AND_THROW_WALLET_EX(CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
 
     std::string key_images;
     bool all_are_txin_to_key = std::all_of(tx.vin.begin(), tx.vin.end(), [&](const txin_v& s_e) -> bool

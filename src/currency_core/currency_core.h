@@ -39,7 +39,7 @@ namespace currency
 
      //-------------------- i_miner_handler -----------------------
      virtual bool handle_block_found( block& b);
-     virtual bool get_block_template(block& b, const account_public_address& adr, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai);
+     virtual bool get_block_template(block& b, const account_public_address& adr, wide_difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai);
 
 
      miner& get_miner(){return m_miner;}
@@ -48,6 +48,7 @@ namespace currency
      bool set_genesis_block(const block& b);
      bool deinit();
      uint64_t get_current_blockchain_height();
+     std::string get_config_folder();
      bool get_blockchain_top(uint64_t& heeight, crypto::hash& top_id);
      bool get_blocks(uint64_t start_offset, size_t count, std::list<block>& blocks, std::list<transaction>& txs);
      bool get_blocks(uint64_t start_offset, size_t count, std::list<block>& blocks);

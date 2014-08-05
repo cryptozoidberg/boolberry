@@ -175,7 +175,7 @@ public:
     {
     }
 
-    block_info(const currency::block& b_, uint64_t an_already_generated_coins, uint64_t an_already_donated_coins, size_t a_block_size, currency::difficulty_type diff)
+    block_info(const currency::block& b_, uint64_t an_already_generated_coins, uint64_t an_already_donated_coins, size_t a_block_size, currency::wide_difficulty_type diff)
       : b(b_)
       , already_generated_coins(an_already_generated_coins)
       , already_donated(an_already_donated_coins)
@@ -188,7 +188,7 @@ public:
     uint64_t already_generated_coins;
     uint64_t already_donated;
     size_t block_size;
-    currency::difficulty_type cumul_difficulty;
+    currency::wide_difficulty_type cumul_difficulty;
   };
 
   enum block_fields
@@ -203,17 +203,17 @@ public:
     bf_diffic    = 1 << 6
   };
 
-  currency::difficulty_type get_difficulty_for_next_block(const std::vector<const block_info*>& blocks);
-  currency::difficulty_type get_difficulty_for_next_block(const crypto::hash& head_id);
+  currency::wide_difficulty_type get_difficulty_for_next_block(const std::vector<const block_info*>& blocks);
+  currency::wide_difficulty_type get_difficulty_for_next_block(const crypto::hash& head_id);
   void get_block_chain(std::vector<const block_info*>& blockchain, const crypto::hash& head, size_t n) const;
   void get_last_n_block_sizes(std::vector<size_t>& block_sizes, const crypto::hash& head, size_t n) const;
   
   uint64_t get_already_donated_coins(const crypto::hash& blk_id) const;
   uint64_t get_already_generated_coins(const crypto::hash& blk_id) const;
   uint64_t get_already_generated_coins(const currency::block& blk) const;
-  currency::difficulty_type get_block_difficulty(const crypto::hash& blk_id) const;
+  currency::wide_difficulty_type get_block_difficulty(const crypto::hash& blk_id) const;
 
-  void add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins, uint64_t already_donated_coins, currency::difficulty_type cum_diff);
+  void add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins, uint64_t already_donated_coins, currency::wide_difficulty_type cum_diff);
   bool construct_block(currency::block& blk, uint64_t height, const crypto::hash& prev_id,
     const currency::account_base& miner_acc, uint64_t timestamp, uint64_t already_generated_coins, uint64_t already_donated_coins, 
     std::vector<size_t>& block_sizes, const std::list<currency::transaction>& tx_list, const currency::alias_info& ai = currency::alias_info());
@@ -224,19 +224,19 @@ public:
   bool construct_block_manually(currency::block& blk, const currency::block& prev_block,
     const currency::account_base& miner_acc, int actual_params = bf_none, uint8_t major_ver = 0,
     uint8_t minor_ver = 0, uint64_t timestamp = 0, const crypto::hash& prev_id = crypto::hash(),
-    const currency::difficulty_type& diffic = 1, const currency::transaction& miner_tx = currency::transaction(),
+    const currency::wide_difficulty_type& diffic = 1, const currency::transaction& miner_tx = currency::transaction(),
     const std::vector<crypto::hash>& tx_hashes = std::vector<crypto::hash>(), size_t txs_sizes = 0);
   bool construct_block_manually_tx(currency::block& blk, const currency::block& prev_block,
     const currency::account_base& miner_acc, const std::vector<crypto::hash>& tx_hashes, size_t txs_size);
-  bool find_nounce(currency::block& blk, std::vector<const block_info*>& blocks, currency::difficulty_type dif, uint64_t height);
-  //bool find_nounce(currency::block& blk, currency::difficulty_type dif, uint64_t height);
+  bool find_nounce(currency::block& blk, std::vector<const block_info*>& blocks, currency::wide_difficulty_type dif, uint64_t height);
+  //bool find_nounce(currency::block& blk, currency::wide_difficulty_type dif, uint64_t height);
 
 private:
   std::unordered_map<crypto::hash, block_info> m_blocks_info;
 };
 
-inline currency::difficulty_type get_test_difficulty() {return 1;}
-void fill_nonce(currency::block& blk, const currency::difficulty_type& diffic, uint64_t height);
+inline currency::wide_difficulty_type get_test_difficulty() {return 1;}
+void fill_nonce(currency::block& blk, const currency::wide_difficulty_type& diffic, uint64_t height);
 
 bool construct_miner_tx_manually(size_t height, uint64_t already_generated_coins,
                                  const currency::account_public_address& miner_address, currency::transaction& tx,

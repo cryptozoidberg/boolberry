@@ -85,10 +85,10 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
       return false;
     }
 
-    std::string data_dir = command_line::get_arg(vm, command_line::arg_data_dir);
+    m_data_dir = command_line::get_arg(vm, command_line::arg_data_dir);
     std::string config = command_line::get_arg(vm, command_line::arg_config_file);
 
-    boost::filesystem::path data_dir_path(data_dir);
+    boost::filesystem::path data_dir_path(m_data_dir);
     boost::filesystem::path config_path(config);
     if (!config_path.has_parent_path())
     {
@@ -106,7 +106,6 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   });
   if (!r)
     return false;
-
 
   //set up logging options
   if(command_line::has_arg(vm, arg_alloc_win_console))
@@ -142,6 +141,7 @@ bool daemon_backend::send_stop_signal()
   m_stop_singal_sent = true;
   return true;
 }
+
 bool daemon_backend::stop()
 {
   send_stop_signal();
@@ -149,6 +149,11 @@ bool daemon_backend::stop()
     m_main_worker_thread.join();
 
   return true;
+}
+
+std::string daemon_backend::get_config_folder()
+{
+  return m_data_dir;
 }
 
 void daemon_backend::main_worker(const po::variables_map& vm)
@@ -331,7 +336,29 @@ bool daemon_backend::update_wallets()
       view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
       wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
       m_pview->update_wallet_status(wsi);
-      m_wallet->refresh();      
+      try
+      {
+        m_wallet->refresh();
+      }
+      
+      catch (const tools::error::daemon_busy& /*e*/)
+      {
+        LOG_PRINT_L0("Daemon busy while wallet refresh");
+        return true;
+      }
+
+      catch (const std::exception& e)
+      {
+        LOG_PRINT_L0("Failed to refresh wallet: " << e.what());
+        return false;
+      }
+
+      catch (...)
+      {
+        LOG_PRINT_L0("Failed to refresh wallet, unknownk exception");
+        return false;
+      }
+
       m_last_wallet_synch_height = m_ccore.get_current_blockchain_height();
       wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
       m_pview->update_wallet_status(wsi);
@@ -360,6 +387,7 @@ bool daemon_backend::open_wallet(const std::string& path, const std::string& pas
     {
       m_wallet->store();
       m_wallet.reset(new tools::wallet2());
+      m_wallet->callback(this);
     }
     
     m_wallet->load(path, password);
@@ -428,6 +456,52 @@ bool daemon_backend::close_wallet()
   return true;
 }
 
+bool daemon_backend::get_aliases(view::alias_set& al_set)
+{
+  currency::COMMAND_RPC_GET_ALL_ALIASES::response aliases = AUTO_VAL_INIT(aliases);
+  if (m_rpc_proxy.get_aliases(aliases) && aliases.status == CORE_RPC_STATUS_OK)
+  {
+    al_set.aliases = aliases.aliases;
+    return true;
+  }
+
+  return false;
+}
+
+bool daemon_backend::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
+{  
+  if (!adr_str.size())
+    return false;
+
+  std::string addr_str_local = adr_str;
+
+  if (adr_str[0] == '@')
+  {
+    //referred by alias name
+    if (adr_str.size() < 2)
+      return false;
+    std::string pure_alias_name = adr_str.substr(1);
+    CHECK_AND_ASSERT_MES(currency::validate_alias_name(pure_alias_name), false, "wrong name set in transfer command");
+
+    //currency::alias_info_base ai = AUTO_VAL_INIT(ai);
+    currency::COMMAND_RPC_GET_ALIAS_DETAILS::response alias_info = AUTO_VAL_INIT(alias_info);
+
+    if (!m_rpc_proxy.get_alias_info(pure_alias_name, alias_info))
+      return false;
+
+    if (alias_info.status != CORE_RPC_STATUS_OK)
+      return false;
+    
+    addr_str_local = alias_info.alias_details.address;   
+  }
+
+  if (!get_account_address_from_str(addr, addr_str_local))
+  {
+    return false;
+  }
+  return true;
+}
+
 bool daemon_backend::transfer(const view::transfer_params& tp, currency::transaction& res_tx)
 {
   std::vector<currency::tx_destination_entry> dsts;
@@ -443,13 +517,12 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
     return false;
   }
 
-
   for(auto& d: tp.destinations)
   {
     dsts.push_back(currency::tx_destination_entry());
-    if(!get_account_address_from_str(dsts.back().addr, d.address))
+    if (!get_transfer_address(d.address, dsts.back().addr))
     {
-      m_pview->show_msg_box("Failed to send transaction: wrong address");
+      m_pview->show_msg_box("Failed to send transaction: invalid address");
       return false;
     }
     if(!currency::parse_amount(dsts.back().amount, d.amount))

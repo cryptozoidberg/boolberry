@@ -31,6 +31,7 @@
 #define CURRENCY_REWARD_BLOCKS_WINDOW                 400
 #define CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE       30000 //size of block (bytes) after which reward for block calculated using block size
 #define CURRENCY_COINBASE_BLOB_RESERVED_SIZE          600
+#define CURRENCY_MAX_TRANSACTION_BLOB_SIZE            (CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE - CURRENCY_COINBASE_BLOB_RESERVED_SIZE*2) 
 #define CURRENCY_DISPLAY_DECIMAL_POINT                12
 
 // COIN - number of smallest units in one coin
@@ -129,5 +130,5 @@
 #define CURRENCY_BLOCKCHAINDATA_FILENAME                "blockchain.bin"
 #define CURRENCY_BLOCKCHAINDATA_TEMP_FILENAME           "blockchain.bin.tmp"
 #define P2P_NET_DATA_FILENAME                           "p2pstate.bin"
-#define MINER_CONFIG_FILE_NAME                          "miner_conf.json"
-
+#define MINER_CONFIG_FILENAME                           "miner_conf.json"
+#define GUI_CONFIG_FILENAME                             "gui_conf.json"

@@ -85,6 +85,7 @@ namespace misc_utils
       {
         val.clear();
         bool escape_mode = false;
+        val.reserve(buf_end - star_end_string);
         std::string::const_iterator it = star_end_string;
         ++it;
         for(;it != buf_end;it++)

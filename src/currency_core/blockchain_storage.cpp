@@ -22,7 +22,7 @@
 #include "common/boost_serialization_helper.h"
 #include "warnings.h"
 #include "crypto/hash.h"
-//#include "serialization/json_archive.h"
+#include "miner_common.h"
 
 using namespace std;
 using namespace epee;
@@ -380,11 +380,11 @@ void blockchain_storage::get_all_known_block_ids(std::list<crypto::hash> &main, 
     invalid.push_back(v.first);
 }
 //------------------------------------------------------------------
-difficulty_type blockchain_storage::get_difficulty_for_next_block()
+wide_difficulty_type blockchain_storage::get_difficulty_for_next_block()
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   std::vector<uint64_t> timestamps;
-  std::vector<difficulty_type> commulative_difficulties;
+  std::vector<wide_difficulty_type> commulative_difficulties;
   size_t offset = m_blocks.size() - std::min(m_blocks.size(), static_cast<size_t>(DIFFICULTY_BLOCKS_COUNT));
   if(!offset)
     ++offset;//skip genesis block
@@ -482,10 +482,10 @@ bool blockchain_storage::switch_to_alternative_blockchain(std::list<blocks_ext_b
   return true;
 }
 //------------------------------------------------------------------
-difficulty_type blockchain_storage::get_next_difficulty_for_alternative_chain(const std::list<blocks_ext_by_hash::iterator>& alt_chain, block_extended_info& bei)
+wide_difficulty_type blockchain_storage::get_next_difficulty_for_alternative_chain(const std::list<blocks_ext_by_hash::iterator>& alt_chain, block_extended_info& bei)
 {
   std::vector<uint64_t> timestamps;
-  std::vector<difficulty_type> commulative_difficulties;
+  std::vector<wide_difficulty_type> commulative_difficulties;
   if(alt_chain.size()< DIFFICULTY_BLOCKS_COUNT)
   {
     CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -722,7 +722,7 @@ uint64_t blockchain_storage::get_current_comulative_blocksize_limit()
   return m_current_block_cumul_sz_limit;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::create_block_template(block& b, const account_public_address& miner_address, difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai)
+bool blockchain_storage::create_block_template(block& b, const account_public_address& miner_address, wide_difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai)
 {
   size_t median_size;
   uint64_t already_generated_coins;
@@ -816,6 +816,36 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
   }
   LOG_ERROR("Failed to create_block_template with " << 10 << " tries");
   return false;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::print_transactions_statistics()
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  LOG_PRINT_L0("Started to collect transaction statistics, pleas wait...");
+  size_t total_count = 0;
+  size_t coinbase_count = 0;
+  size_t total_full_blob = 0;
+  size_t total_cropped_blob = 0;
+  for(auto tx_entry: m_transactions)
+  {
+    ++total_count;
+    if(is_coinbase(tx_entry.second.tx))
+      ++coinbase_count;
+    else
+    {
+      total_full_blob += get_object_blobsize<transaction>(tx_entry.second.tx);
+      transaction tx = tx_entry.second.tx;
+      tx.signatures.clear();
+      total_cropped_blob += get_object_blobsize<transaction>(tx);
+    }    
+  }
+  LOG_PRINT_L0("Done" << ENDL
+      << "total transactions: " << total_count << ENDL 
+      << "coinbase transactions: " << coinbase_count << ENDL 
+      << "avarage size of transaction: " << total_full_blob/(total_count-coinbase_count) << ENDL
+      << "avarage size of transaction without ring signatures: " << total_cropped_blob/(total_count-coinbase_count) << ENDL
+      );
+  return true;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::complete_timestamps_vector(uint64_t start_top_height, std::vector<uint64_t>& timestamps)
@@ -933,7 +963,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
         alt_scratchppad_patch[ml.first] = crypto::xor_pod(alt_scratchppad_patch[ml.first], ml.second);
     }
 
-    difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
+    wide_difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
     CHECK_AND_ASSERT_MES(current_diff, false, "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!");
     crypto::hash proof_of_work = null_hash;
     // POW
@@ -1102,8 +1132,51 @@ uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
   if(m_blocks.size() <= aprox_count)
     return 0;
 
-  return  (m_blocks.back().cumulative_difficulty - m_blocks[m_blocks.size() - aprox_count].cumulative_difficulty)/
+  wide_difficulty_type w_hr = (m_blocks.back().cumulative_difficulty - m_blocks[m_blocks.size() - aprox_count].cumulative_difficulty)/
                               (m_blocks.back().bl.timestamp - m_blocks[m_blocks.size() - aprox_count].bl.timestamp);
+  return w_hr.convert_to<uint64_t>();
+}
+//------------------------------------------------------------------
+bool blockchain_storage::extport_scratchpad_to_file(const std::string& path)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  export_scratchpad_file_header fh;
+  memset(&fh, 0, sizeof(fh));
+
+  fh.current_hi.prevhash = currency::get_block_hash(m_blocks.back().bl);
+  fh.current_hi.height = m_blocks.size()-1;
+  fh.scratchpad_size = m_scratchpad.size()*4;
+  
+  try
+  {
+
+    std::string tmp_path = path + ".tmp";
+    std::ofstream fstream;
+    fstream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    fstream.open(tmp_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+    fstream.write((const char*)&fh, sizeof(fh));
+    fstream.write((const char*)&m_scratchpad[0], m_scratchpad.size()*32);
+    fstream.close();
+
+    boost::filesystem::remove(path);
+    boost::filesystem::rename(tmp_path, path);
+
+    LOG_PRINT_L0("Scratchpad exported to " << path << ", " << (m_scratchpad.size()*32)/1024 << "kbytes" );
+    return true;
+  }
+  catch(const std::exception& e)
+  {
+    LOG_PRINT_L0("Failed to store scratchpad, error: " << e.what());
+    return false;
+  }
+
+  catch(...)
+  {
+    LOG_PRINT_L0("Failed to store scratchpad, unknown error" );
+    return false;
+  }
+
+  return true;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::get_alternative_blocks(std::list<block>& blocks)
@@ -1262,7 +1335,7 @@ bool blockchain_storage::find_blockchain_supplement(const std::list<crypto::hash
   return true;
 }
 //------------------------------------------------------------------
-uint64_t blockchain_storage::block_difficulty(size_t i)
+wide_difficulty_type blockchain_storage::block_difficulty(size_t i)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   CHECK_AND_ASSERT_MES(i < m_blocks.size(), false, "wrong block index i = " << i << " at blockchain_storage::block_difficulty()");
@@ -1855,7 +1928,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
 
   //check proof of work
   TIME_MEASURE_START(target_calculating_time);
-  difficulty_type current_diffic = get_difficulty_for_next_block();
+  wide_difficulty_type current_diffic = get_difficulty_for_next_block();
   CHECK_AND_ASSERT_MES(current_diffic, false, "!!!!!!!!! difficulty overhead !!!!!!!!!");
   TIME_MEASURE_FINISH(target_calculating_time);
   TIME_MEASURE_START(longhash_calculating_time);

@@ -83,7 +83,7 @@ namespace currency
     }
 
     res.height = m_core.get_current_blockchain_height();
-    res.difficulty = m_core.get_blockchain_storage().get_difficulty_for_next_block();
+    res.difficulty = m_core.get_blockchain_storage().get_difficulty_for_next_block().convert_to<uint64_t>();
     res.tx_count = m_core.get_blockchain_storage().get_total_transactions() - res.height; //without coinbase
     res.tx_pool_size = m_core.get_pool_transactions_count();
     res.alt_blocks_count = m_core.get_blockchain_storage().get_alternative_blocks_count();
@@ -380,17 +380,55 @@ namespace currency
       error_resp.message = "Failed to parse wallet address";
       return false;
     }
+    alias_info ai = AUTO_VAL_INIT(ai);
+    if(req.alias_details.alias.size())
+    {
+      //have alias requested to register
+      if(!validate_alias_name(req.alias_details.alias))
+      {
+        error_resp.code = CORE_RPC_ERROR_CODE_INVALID_ALIAS_NAME;
+        error_resp.message = "Invalid alias name";
+        return false;
+      }
+      if(!currency::get_account_address_from_str(ai.m_address, req.alias_details.details.address))
+      {
+        LOG_ERROR("Invalid alias address: " << req.alias_details.details.address);
+        error_resp.code = CORE_RPC_ERROR_CODE_INVALID_ALIAS_ADDRESS;
+        error_resp.message = "Invalid alias address";
+        return false;
+      }
+      if(req.alias_details.details.comment.size() > std::numeric_limits<uint8_t>::max())
+      {
+        error_resp.code = CORE_RPC_ERROR_CODE_ALIAS_COMMENT_TO_LONG;
+        error_resp.message = "Alias comment is too long";
+        return false;
+      }
+      if(req.alias_details.details.tracking_key.size())
+      {//load tracking key
+        if(!string_tools::parse_tpod_from_hex_string(req.alias_details.details.tracking_key, ai.m_view_key))
+        {
+          error_resp.code = CORE_RPC_ERROR_CODE_INVALID_ALIAS_ADDRESS;
+          error_resp.message = "Invalid alias address";
+          return false;
+        }
+      }
+      ai.m_alias = req.alias_details.alias;
+      ai.m_text_comment = req.alias_details.details.comment;
+      LOG_PRINT_L1("COMMAND_RPC_GETBLOCKTEMPLATE: Alias requested for " << ai.m_alias << " -->>" << req.alias_details.details.address);
+    }
 
     block b = AUTO_VAL_INIT(b);
     currency::blobdata blob_reserve = PROJECT_VERSION_LONG;
     blob_reserve.resize(blob_reserve.size() + 1 + req.reserve_size, 0);
-    if(!m_core.get_block_template(b, acc, res.difficulty, res.height, blob_reserve, req.dev_bounties_vote, alias_info()))
+    wide_difficulty_type dt = 0;
+    if(!m_core.get_block_template(b, acc, dt, res.height, blob_reserve, req.dev_bounties_vote, ai))
     {
       error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
       error_resp.message = "Internal error: failed to create block template";
       LOG_ERROR("Failed to create block template");
       return false;
     }
+    res.difficulty = dt.convert_to<uint64_t>();
     blobdata block_blob = t_serializable_object_to_blob(b);
     std::string::size_type pos = block_blob.find(PROJECT_VERSION_LONG);
     if(pos == std::string::npos)
@@ -409,6 +447,7 @@ namespace currency
       return false;
     }
     res.blocktemplate_blob = string_tools::buff_to_hex_nodelimer(block_blob);
+    res.status = CORE_RPC_STATUS_OK;
 
     return true;
   }
@@ -469,7 +508,7 @@ namespace currency
     responce.height = get_block_height(blk);
     responce.depth = m_core.get_current_blockchain_height() - responce.height - 1;
     responce.hash = string_tools::pod_to_hex(get_block_hash(blk));
-    responce.difficulty = m_core.get_blockchain_storage().block_difficulty(responce.height);
+    responce.difficulty = m_core.get_blockchain_storage().block_difficulty(responce.height).convert_to<uint64_t>();
     responce.reward = get_block_reward(blk);
     return true;
   }
@@ -729,7 +768,7 @@ namespace currency
     
     //TODO: add login information here
 
-    if(!get_addendum_for_hi(req.hi, res.addms))
+    if(!get_addendum_for_hi(req.hi, res.job.addms))
     {
       res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
       return true;
@@ -759,18 +798,18 @@ namespace currency
       return true;
     }
     
-    if(!get_addendum_for_hi(req.hi, res.addms))
+    if(!get_addendum_for_hi(req.hi, res.jd.addms))
     {
       res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
       return true;
     }
 
-    epee::json_rpc::error err = AUTO_VAL_INIT(err);
+    /*epee::json_rpc::error err = AUTO_VAL_INIT(err);
     if(!get_job(req.id, res.jd, err, cntx))
     {
       res.status = err.message;
       return true;
-    }
+    }*/
 
     return true;
   }
@@ -816,6 +855,22 @@ namespace currency
     //LOG_PRINT_L0("block_hashing_blob:" << string_tools::buff_to_hex_nodelimer(currency::get_block_hashing_blob(b)));
     
     res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_store_scratchpad(const mining::COMMAND_RPC_STORE_SCRATCHPAD::request& req, mining::COMMAND_RPC_STORE_SCRATCHPAD::response& res, connection_context& cntx)
+  {
+    if(!check_core_ready())
+    {
+      res.status = CORE_RPC_STATUS_BUSY;
+      return true;
+    }
+
+    if(!m_core.get_blockchain_storage().extport_scratchpad_to_file(req.local_file_path))    
+      res.status = CORE_RPC_STATUS_BUSY;
+    else
+      res.status = CORE_RPC_STATUS_OK;
+
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
