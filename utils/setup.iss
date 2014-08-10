@@ -2,10 +2,11 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Boolberry"
-#define MyAppVersion "0.2.0.31"
+;#define MyAppVersion "0.2.0.31"
 #define MyAppPublisher "Boolberry Team"
-#define MyAppURL "http://boolberry.org"
+#define MyAppURL "http://boolberry.com"
 #define MyAppExeName "qt-boolb.exe"
+;#define BinariesPath "C:\jenkins\workdir\builds\bbr-win-x64-v0.2.0.31(5d85ebf)"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -24,9 +25,12 @@ DefaultGroupName={#MyAppName}
 OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
+ChangesAssociations=yes
 ArchitecturesInstallIn64BitMode=x64
-WizardImageFile=resources\bg.bmp
-WizardSmallImageFile=resources\icon.bmp
+WizardImageFile=../resources/bg.bmp
+WizardSmallImageFile=../resources/icon.bmp
+;SetupIconFile=../resources/app.ico
+
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -34,98 +38,108 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
+[Registry]
+Root: HKCR; Subkey: ".bbr"; ValueType: string; ValueName: ""; ValueData: "BoolberryWalletDataFile"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: ".bbr.keys"; ValueType: string; ValueName: ""; ValueData: "BoolberryWalletDataKyesFile"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "BoolberryWalletDataFile"; ValueType: string; ValueName: ""; ValueData: "Boolberry Wallet's Data File"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "BoolberryWalletDataKyesFile"; ValueType: string; ValueName: ""; ValueData: "Boolberry Wallet's Keys File"; Flags: uninsdeletekey
+
+Root: HKCR; Subkey: "BoolberryWalletDataFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\qt-boolb.exe,0"
+Root: HKCR; Subkey: "BoolberryWalletDataKyesFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\qt-boolb.exe,0"
+
+
 [Files]
-Source: "boolbd.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "d3dcompiler_47.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Enginio.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "icudt52.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "icuin52.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "icuuc52.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "libEGL.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "msvcp120.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "msvcr120.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Bluetooth.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5CLucene.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Concurrent.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Declarative.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Designer.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5DesignerComponentsd.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Help.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Multimedia.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5MultimediaQuick_p.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5MultimediaWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Network.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Nfc.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5OpenGL.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Positioning.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5PrintSupport.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Qml.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Quick.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5QuickParticles.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5QuickTest.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5QuickWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Script.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5ScriptTools.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Sensors.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5SerialPort.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Sql.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Svg.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Test.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5WebKit.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5WebKitWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5WebSockets.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5WinExtras.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5Xml.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Qt5XmlPatterns.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "qt-boolb.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "simpleminer.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "simplewallet.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "html\index.html"; DestDir: "{app}\html"; Flags: ignoreversion
-Source: "html\files\logo.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\logo2.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\main.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\recv.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\sent.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\style.css"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\text_and_logo.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\ui_helper.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\css\start\images\animated-overlay.gif"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-bg_flat_55_999999_40x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-bg_flat_75_aaaaaa_40x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-bg_glass_45_0078ae_1x400.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-bg_glass_55_f8da4e_1x400.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-bg_glass_75_79c9ec_1x400.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-bg_gloss-wave_45_e14f1c_500x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-bg_gloss-wave_50_6eac2c_500x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-bg_gloss-wave_75_2191c0_500x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-bg_inset-hard_100_fcfdfd_1x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-icons_0078ae_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-icons_056b93_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-icons_d8e7f3_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-icons_e0fdff_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-icons_f5e175_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-icons_f7a50d_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\images\ui-icons_fcd113_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "html\files\css\start\jquery-ui-1.10.4.custom.css"; DestDir: "{app}\html\files\css\start"; Flags: ignoreversion
-Source: "html\files\css\start\jquery-ui-1.10.4.custom.min.css"; DestDir: "{app}\html\files\css\start"; Flags: ignoreversion
-Source: "html\files\js\jquery-1.10.2.js"; DestDir: "{app}\html\files\js"; Flags: ignoreversion
-Source: "html\files\js\jquery-ui-1.10.4.custom.js"; DestDir: "{app}\html\files\js"; Flags: ignoreversion
-Source: "html\files\js\jquery-ui-1.10.4.custom.min.js"; DestDir: "{app}\html\files\js"; Flags: ignoreversion
-Source: "html\files\logo.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\logo2.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\main.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\recv.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\sent.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\style.css"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\text_and_logo.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "html\files\ui_helper.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "platforms\qminimal.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
-Source: "platforms\qoffscreen.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
-Source: "platforms\qwindows.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
+Source: "{#BinariesPath}\boolbd.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\d3dcompiler_47.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Enginio.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\icudt52.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\icuin52.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\icuuc52.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\libEGL.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\msvcp120.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\msvcr120.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Bluetooth.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5CLucene.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Concurrent.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Declarative.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Designer.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5DesignerComponentsd.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Help.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Multimedia.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5MultimediaQuick_p.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5MultimediaWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Network.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Nfc.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5OpenGL.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Positioning.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5PrintSupport.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Qml.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Quick.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5QuickParticles.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5QuickTest.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5QuickWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Script.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5ScriptTools.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Sensors.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5SerialPort.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Sql.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Svg.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Test.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5WebKit.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5WebKitWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5WebSockets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5WinExtras.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5Xml.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\Qt5XmlPatterns.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\qt-boolb.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\simpleminer.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\simplewallet.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\platforms\qminimal.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
+Source: "{#BinariesPath}\platforms\qoffscreen.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
+Source: "{#BinariesPath}\platforms\qwindows.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\index.html"; DestDir: "{app}\html"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\logo.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\logo2.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\main.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\recv.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\sent.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\style.css"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\text_and_logo.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\ui_helper.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\animated-overlay.gif"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_flat_55_999999_40x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_flat_75_aaaaaa_40x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_glass_45_0078ae_1x400.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_glass_55_f8da4e_1x400.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_glass_75_79c9ec_1x400.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_gloss-wave_45_e14f1c_500x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_gloss-wave_50_6eac2c_500x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_gloss-wave_75_2191c0_500x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_inset-hard_100_fcfdfd_1x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_0078ae_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_056b93_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_d8e7f3_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_e0fdff_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_f5e175_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_f7a50d_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_fcd113_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\jquery-ui-1.10.4.custom.css"; DestDir: "{app}\html\files\css\start"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\css\start\jquery-ui-1.10.4.custom.min.css"; DestDir: "{app}\html\files\css\start"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\js\jquery-1.10.2.js"; DestDir: "{app}\html\files\js"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\js\jquery-ui-1.10.4.custom.js"; DestDir: "{app}\html\files\js"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\js\jquery-ui-1.10.4.custom.min.js"; DestDir: "{app}\html\files\js"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\logo.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\logo2.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\main.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\recv.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\sent.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\style.css"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\text_and_logo.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\ui_helper.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -133,6 +147,7 @@ Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\{cm:ProgramOnTheWeb,{#MyAppName}}"; Filename: "{#MyAppURL}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
