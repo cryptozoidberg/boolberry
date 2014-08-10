@@ -1,5 +1,7 @@
 SET QT_PREFIX_PATH=C:\Qt\Qt5.3.0\5.3\msvc2013_64
+SET INNOSETUP_PATH=C:\Program Files (x86)\Inno Setup 5\ISCC.exe
 SET QT_BINARIES_PATH=C:\home\projects\binaries\qt-daemon
+SET ACHIVE_NAME_PREFIX=bbr-win-x64-
 
 
 cd boolberry
@@ -51,7 +53,7 @@ set version=%version:~0,-2%
 echo '%version%'
 
 cd src\release
-zip ..\..\..\..\builds\bbr-win64-%version%.zip boolbd.exe simplewallet.exe simpleminer.exe
+zip ..\..\..\..\builds\%ACHIVE_NAME_PREFIX%%version%.zip boolbd.exe simplewallet.exe simpleminer.exe
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -90,7 +92,7 @@ IF %ERRORLEVEL% NEQ 0 (
 endlocal
 
 cd src\release
-zip ..\..\..\..\builds\bbr-win64-%version%.zip qt-boolb.exe
+zip ..\..\..\..\builds\%ACHIVE_NAME_PREFIX%%version%.zip qt-boolb.exe
 
 IF %ERRORLEVEL% NEQ 0 (
   goto error
@@ -99,7 +101,7 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "Add html"
 
 cd ..\..\..\src\gui\qt-daemon\
-zip -r ..\..\..\..\builds\bbr-win-x64-%version%.zip html
+zip -r ..\..\..\..\builds\%ACHIVE_NAME_PREFIX%%version%.zip html
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -108,18 +110,38 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "Add qt stuff"
 
 cd %QT_BINARIES_PATH%
-zip -r C:\jenkins\workdir\builds\bbr-win64-%version%.zip *.*
+zip -r C:\jenkins\workdir\builds\%ACHIVE_NAME_PREFIX%%version%.zip *.*
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
 
-cd ..
+cd ..\..\..\build
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
+
+@echo "---------------------------------------------------------------"
+@echo "-------------------Building installer--------------------------"
+@echo "---------------------------------------------------------------"
+
+mkdir installer_src
+
+
+unzip C:\jenkins\workdir\builds\%ACHIVE_NAME_PREFIX%%version%.zip -d installer_src
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
+"%INNOSETUP_PATH%" /DMyAppVersion=%version% /DBinariesPath=../build/installer_src /oC:\jenkins\workdir\builds\ /f%ACHIVE_NAME_PREFIX%%version%-installer ..\utils\setup.iss 
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
 
 @echo "---------------------------------------------------------------"
 @echo "---------------------------------------------------------------"
-
-
 
 
 
@@ -131,4 +153,8 @@ exit /B %ERRORLEVEL%
 
 :success
 echo "BUILD SUCCESS"
+
+pause
+
+
 

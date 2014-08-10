@@ -22,7 +22,7 @@
 #include "common/boost_serialization_helper.h"
 #include "warnings.h"
 #include "crypto/hash.h"
-//#include "serialization/json_archive.h"
+#include "miner_common.h"
 
 using namespace std;
 using namespace epee;
@@ -1139,25 +1139,6 @@ uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
 //------------------------------------------------------------------
 bool blockchain_storage::extport_scratchpad_to_file(const std::string& path)
 {
-  #pragma pack (push, 1)
-  #define WILD_KECCAK_ADDENDUMS_ARRAY_SIZE  10
-  struct  export_scratchpad_hi
-  {
-    crypto::hash prevhash;
-    uint64_t height;
-  };
-  struct export_addendums_array_entry
-  {
-    export_scratchpad_hi prev_hi;
-    uint64_t add_size;
-  };
-  struct export_scratchpad_file_header
-  {
-    export_scratchpad_hi current_hi;
-    export_addendums_array_entry add_arr[WILD_KECCAK_ADDENDUMS_ARRAY_SIZE];
-    uint64_t scratchpad_size;
-  };
-  #pragma pack(pop)
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   export_scratchpad_file_header fh;
   memset(&fh, 0, sizeof(fh));
