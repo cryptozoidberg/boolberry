@@ -75,7 +75,6 @@ private:
     //----------------------------------------------
     bool is_uri_allowed(const QString& uri);
 
-
     class Html5ApplicationViewerPrivate *m_d;
     daemon_backend m_backend;
     std::atomic<bool> m_quit_requested;

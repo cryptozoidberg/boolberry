@@ -573,8 +573,6 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
 bool daemon_backend::update_wallet_info()
 {
   CRITICAL_REGION_LOCAL(m_wallet_lock);
-
-
   view::wallet_info wi = AUTO_VAL_INIT(wi);
   wi.address = m_wallet->get_account().get_public_address_str();
   wi.tracking_hey = string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);

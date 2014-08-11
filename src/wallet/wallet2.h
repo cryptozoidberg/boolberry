@@ -59,7 +59,6 @@ namespace tools
     }
   };
 
-
   class wallet2
   {
     wallet2(const wallet2&) : m_run(true), m_callback(0) {};
@@ -92,40 +91,6 @@ namespace tools
       uint64_t m_block_height;
       uint64_t m_unlock_time;
     };
-
-
-    /*struct transfer_history_entry_details
-    {
-      std::list<uint64_t> rcv;
-      std::list<uint64_t> spn;
-
-      BEGIN_KV_SERIALIZE_MAP()
-        KV_SERIALIZE(rcv)
-        KV_SERIALIZE(spn)
-      END_KV_SERIALIZE_MAP()
-    };
-
-    struct transfer_history_entry
-    {
-      bool is_income;
-      crypto::hash tx_id;
-      uint32_t tx_blob_size;
-      crypto::hash payment_id;
-      uint64_t amount;      
-      std::string recipient; //optional
-      transfer_history_entry_details details;
-
-      BEGIN_KV_SERIALIZE_MAP()
-        KV_SERIALIZE(is_income)
-        KV_SERIALIZE(tx_id)
-        KV_SERIALIZE(tx_blob_size)
-        KV_SERIALIZE(payment_id)
-        KV_SERIALIZE(amount)
-        KV_SERIALIZE(recipient)
-        KV_SERIALIZE(details)
-      END_KV_SERIALIZE_MAP()
-    };*/
-
     
     typedef std::unordered_multimap<crypto::hash, payment_details> payment_container;
 
@@ -143,11 +108,12 @@ namespace tools
     };
 
     void generate(const std::string& wallet, const std::string& password);
-    void load(const std::string& wallet, const std::string& password);
+    void load(const std::string& wallet, const std::string& password);    
     void store();
     std::string get_wallet_path(){ return m_keys_file; }
     currency::account_base& get_account(){return m_account;}
 
+    void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
     void init(const std::string& daemon_address = "http://localhost:8080");
     bool deinit();
 
