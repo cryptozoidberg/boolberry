@@ -169,6 +169,16 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct transfers_array
+  {
+    std::vector<tools::wallet_rpc::wallet_transfer_info> history;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(history)
+    END_KV_SERIALIZE_MAP()
+
+  };
+
   struct header_entry
   {
     std::string field;
@@ -213,8 +223,9 @@ public:
     virtual bool update_wallet_info(const wallet_info& wsi)=0;
     virtual bool money_transfer(const transfer_event_info& wsi) = 0;
     virtual bool show_wallet()=0;
-    virtual bool hide_wallet() = 0;
+    virtual bool hide_wallet()= 0;
     virtual bool switch_view(int view_no)=0;
+    virtual bool set_recent_transfers(const transfers_array& ta) = 0;
   };
 
   struct view_stub: public i_view
@@ -228,5 +239,6 @@ public:
     virtual bool show_wallet(){return true;}
     virtual bool hide_wallet(){ return true; }
     virtual bool switch_view(int /*view_no*/){ return true; }
+    virtual bool set_recent_transfers(const transfers_array& /*ta*/){ return true; }
   };
 }

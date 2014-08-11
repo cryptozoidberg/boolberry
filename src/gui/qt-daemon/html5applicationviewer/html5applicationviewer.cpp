@@ -1088,6 +1088,7 @@ signals:
     void show_wallet();
     void hide_wallet();
     void switch_view(const QString str);
+    void set_recent_transfers(const QString str);
 
 
 
@@ -1386,6 +1387,13 @@ bool Html5ApplicationViewer::switch_view(int view_no)
   epee::serialization::store_t_to_json(swi, json_str);
   m_d->switch_view(json_str.c_str());
   return true;
+}
+
+bool Html5ApplicationViewer::set_recent_transfers(const view::transfers_array& ta)
+{
+  std::string json_str;
+  epee::serialization::store_t_to_json(ta, json_str);
+  m_d->set_recent_transfers(json_str.c_str());
 }
 
 QString Html5ApplicationViewer::get_version()

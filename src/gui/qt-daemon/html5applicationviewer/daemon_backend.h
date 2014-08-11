@@ -57,6 +57,7 @@ private:
   bool update_wallets();
   void loop();
   bool update_wallet_info();
+  bool load_recent_transfers();
   bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
 
   //----- tools::i_wallet2_callback ------

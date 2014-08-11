@@ -334,6 +334,18 @@ function on_transfer()
         return;
 }
 
+function on_set_recent_transfers(arr)
+{
+    if(arr === undefined || arr.length === undefined)
+        return;
+
+    //write cycle here, for(int)
+    get_transfer_html_entry(tei.ti)
+
+    $("#recent_transfers_container_id").prepend( );
+}
+
+
 function str_to_obj(str)
 {
     var info_obj = jQuery.parseJSON(str);
@@ -411,6 +423,8 @@ $(function()
     Qt.show_wallet.connect(show_wallet);
     Qt.hide_wallet.connect(hide_wallet);
     Qt.switch_view.connect(on_switch_view);
+    Qt.set_recent_transfers.connect(str_to_obj.bind({cb: on_set_recent_transfers}));
+
 
     hide_wallet();
     on_update_wallet_status({wallet_state: 1});

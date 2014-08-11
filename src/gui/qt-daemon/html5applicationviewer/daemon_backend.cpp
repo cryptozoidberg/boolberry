@@ -401,11 +401,18 @@ bool daemon_backend::open_wallet(const std::string& path, const std::string& pas
 
   m_wallet->init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
   update_wallet_info();
+  load_recent_transfers();
   m_last_wallet_synch_height = 0;
   m_pview->show_wallet();
   return true;
 }
 
+bool daemon_backend::load_recent_transfers()
+{
+  view::transfers_array tr_hist;
+  m_wallet->get_recent_transfers_history(tr_hist.history, 0, 1000);
+  return m_pview->set_recent_transfers(tr_hist);
+}
 
 bool daemon_backend::generate_wallet(const std::string& path, const std::string& password)
 {

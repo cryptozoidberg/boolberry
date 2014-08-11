@@ -71,6 +71,7 @@ private:
     virtual bool show_wallet();
     virtual bool hide_wallet();
     virtual bool switch_view(int view_no);
+    virtual bool set_recent_transfers(const view::transfers_array& ta);
 
     //----------------------------------------------
     bool is_uri_allowed(const QString& uri);
