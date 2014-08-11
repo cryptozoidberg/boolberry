@@ -25,6 +25,23 @@ using namespace currency;
 namespace tools
 {
 //----------------------------------------------------------------------------------------------------
+
+void fill_transfer_details(const currency::transaction& tx, const tools::money_transfer2_details& td, tools::wallet_rpc::wallet_transfer_info_details& res_td)
+{
+  for (auto si : td.spent_indices)
+  {
+    CHECK_AND_ASSERT_MES(si < tx.vin.size(), void(), "Internal error: wrong tx transfer details: spend index=" << si << " is greater than transaction inputs vector " << tx.vin.size());
+    res_td.spn.push_back(currency::print_money(boost::get<currency::txin_to_key>(tx.vin[si]).amount));
+  }
+
+  for (auto ri : td.receive_indices)
+  {
+    CHECK_AND_ASSERT_MES(ri < tx.vout.size(), void(), "Internal error: wrong tx transfer details: reciev index=" << ri << " is greater than transaction outputs vector " << tx.vout.size());
+    res_td.rcv.push_back(currency::print_money(tx.vout[ri].amount));
+  }
+}
+
+
 void wallet2::init(const std::string& daemon_address)
 {
   m_upper_transaction_size_limit = 0;
@@ -33,7 +50,8 @@ void wallet2::init(const std::string& daemon_address)
 //----------------------------------------------------------------------------------------------------
 void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b)
 {
-  process_unconfirmed(tx);
+  std::string recipient;
+  process_unconfirmed(tx, recipient);
   std::vector<size_t> outs;
   uint64_t tx_money_got_in_outs = 0;
   crypto::public_key tx_pub_key = null_pkey;
@@ -124,35 +142,71 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
         LOG_PRINT_L2("Payment found: " << payment_id << " / " << payment.m_tx_hash << " / " << payment.m_amount);
       }
     }
-    if (m_callback)
-    {
-      if (tx_money_spent_in_ins)
-      {//this actually is transfer transaction, notify about spend
-        if (tx_money_spent_in_ins > tx_money_got_in_outs)
-        {//usual transfer 
-          m_callback->on_money_spent2(b, tx, tx_money_spent_in_ins - tx_money_got_in_outs, mtd);
-        }
-        else
-        {//strange transfer, seems that in one transaction have transfers from different wallets.
-          LOG_PRINT_RED_L0("Unusual transaction " << currency::get_transaction_hash(tx) << ", tx_money_spent_in_ins: " << tx_money_spent_in_ins << ", tx_money_got_in_outs: " << tx_money_got_in_outs);
-          m_callback->on_money_spent2(b, tx, tx_money_spent_in_ins, mtd);
-          m_callback->on_money_received2(b, tx, tx_money_got_in_outs, mtd);
-        }
+
+    if (tx_money_spent_in_ins)
+    {//this actually is transfer transaction, notify about spend
+      if (tx_money_spent_in_ins > tx_money_got_in_outs)
+      {//usual transfer 
+        handle_money_spent2(b, tx, tx_money_spent_in_ins - tx_money_got_in_outs, mtd);
       }
       else
-      {
-        if(tx_money_got_in_outs)
-          m_callback->on_money_received2(b, tx, tx_money_got_in_outs, mtd);
+      {//strange transfer, seems that in one transaction have transfers from different wallets.
+        LOG_PRINT_RED_L0("Unusual transaction " << currency::get_transaction_hash(tx) << ", tx_money_spent_in_ins: " << tx_money_spent_in_ins << ", tx_money_got_in_outs: " << tx_money_got_in_outs);
+        handle_money_spent2(b, tx, tx_money_spent_in_ins, mtd, recipient);
+        handle_money_received2(b, tx, tx_money_got_in_outs, mtd);
       }
     }
-
+    else
+    {
+      if(tx_money_got_in_outs)
+        handle_money_received2(b, tx, tx_money_got_in_outs, mtd);
+    }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::process_unconfirmed(const currency::transaction& tx)
+void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td)
+{
+  wti.tx = tx;
+  wti.amount = amount;
+  wti.height = currency::get_block_height(b);
+  crypto::hash pid;
+  if(currency::get_payment_id_from_tx_extra(tx, pid))
+    wti.payment_id = string_tools::pod_to_hex(pid);
+  fill_transfer_details(tx, td, wti.td);
+  wti.timestamp = b.timestamp;//TODO: figure out if this correct
+  wti.tx_blob_size = currency::get_object_blobsize(wti.tx);
+  wti.tx_hash = string_tools::pod_to_hex(currency::get_object_hash(tx));
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td)
+{
+  m_transfer_history.push_back(wallet_rpc::wallet_transfer_info());
+  wallet_rpc::wallet_transfer_info& wti = m_transfer_history.back();
+  prepare_wti(wti, b, tx, amount, td);
+  wti.is_income = true;
+
+  if (m_callback)
+    m_callback->on_money_received2(wti);
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::handle_money_spent2(const currency::block& b, const currency::transaction& in_tx, uint64_t amount, const money_transfer2_details& td, const std::string& recipient)
+{
+  m_transfer_history.push_back(wallet_rpc::wallet_transfer_info());
+  wallet_rpc::wallet_transfer_info& wti = m_transfer_history.back();
+  prepare_wti(wti, b, in_tx, amount, td);
+  wti.is_income = false;
+  wti.recipient = recipient;
+
+  if (m_callback)
+    m_callback->on_money_spent2(wti);
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::process_unconfirmed(const currency::transaction& tx, const std::string& m_recipient)
 {
   auto unconf_it = m_unconfirmed_txs.find(get_transaction_hash(tx));
-  if(unconf_it != m_unconfirmed_txs.end())
+  if (unconf_it != m_unconfirmed_txs.end())
+  {
     m_unconfirmed_txs.erase(unconf_it);
+  }
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::process_new_blockchain_entry(const currency::block& b, currency::block_complete_entry& bche, crypto::hash& bl_id, uint64_t height)

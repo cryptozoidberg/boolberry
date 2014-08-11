@@ -578,8 +578,8 @@ bool daemon_backend::update_wallet_info()
   view::wallet_info wi = AUTO_VAL_INIT(wi);
   wi.address = m_wallet->get_account().get_public_address_str();
   wi.tracking_hey = string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
-  wi.balance = currency::print_money(m_wallet->balance());
-  wi.unlocked_balance = currency::print_money(m_wallet->unlocked_balance());
+  wi.balance = m_wallet->balance();
+  wi.unlocked_balance = m_wallet->unlocked_balance();
   wi.path = m_wallet->get_wallet_path();
   m_pview->update_wallet_info(wi);
   return true;
@@ -590,52 +590,13 @@ void daemon_backend::on_new_block(uint64_t /*height*/, const currency::block& /*
 
 }
 
-void fill_transfer_details(const currency::transaction& tx, const tools::money_transfer2_details& td, view::wallet_transfer_info_details& res_td)
-{
-  for (auto si: td.spent_indices)
-  {
-    CHECK_AND_ASSERT_MES(si < tx.vin.size(), void(), "Internal error: wrong tx transfer details: spend index=" << si << " is greater than transaction inputs vector " << tx.vin.size());
-    res_td.spn.push_back(currency::print_money(boost::get<currency::txin_to_key>(tx.vin[si]).amount));
-  }
-  
-  for (auto ri : td.receive_indices)
-  {
-    CHECK_AND_ASSERT_MES(ri < tx.vout.size(), void(), "Internal error: wrong tx transfer details: reciev index=" << ri << " is greater than transaction outputs vector " << tx.vout.size());
-    res_td.rcv.push_back(currency::print_money(tx.vout[ri].amount));
-  }
-}
-
-void daemon_backend::on_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const tools::money_transfer2_details& td)
+void daemon_backend::on_transfer2(const tools::wallet_rpc::wallet_transfer_info& wti)
 {
   view::transfer_event_info tei = AUTO_VAL_INIT(tei);
-  tei.ti.amount = currency::print_money(amount);
-  tei.ti.timestamp = b.timestamp;
-  tei.ti.height = currency::get_block_height(b);
-  tei.ti.is_income = true;
-  tei.ti.spent = false;
-  tei.ti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
-  tei.balance = currency::print_money(m_wallet->balance());
-  tei.unlocked_balance = currency::print_money(m_wallet->unlocked_balance());
-  fill_transfer_details(tx, td, tei.ti.td);
-  m_pview->money_receive(tei);
+  tei.ti = wti;
+  tei.balance = m_wallet->balance();
+  tei.unlocked_balance = m_wallet->unlocked_balance();
+  m_pview->money_transfer(tei);
 }
-
-void daemon_backend::on_money_spent2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const tools::money_transfer2_details& td)
-{
-  view::transfer_event_info tei = AUTO_VAL_INIT(tei);
-  tei.ti.timestamp = b.timestamp;
-  tei.ti.amount = currency::print_money(amount);
-  tei.ti.height = currency::get_block_height(b);
-  tei.ti.is_income = false;
-  tei.ti.spent = true;
-  tei.ti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
-  tei.balance = currency::print_money(m_wallet->balance());
-  tei.unlocked_balance = currency::print_money(m_wallet->unlocked_balance());
-  fill_transfer_details(tx, td, tei.ti.td);
-  m_pview->money_spent(tei);
-}
-
-
-
 
 

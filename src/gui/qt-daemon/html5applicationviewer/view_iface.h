@@ -139,39 +139,6 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
-  struct wallet_transfer_info_details
-  {
-    std::list<std::string> rcv;
-    std::list<std::string> spn;
-    
-    BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(rcv)
-      KV_SERIALIZE(spn)
-    END_KV_SERIALIZE_MAP()
-
-  };
-
-  struct wallet_transfer_info
-  {
-    std::string amount;
-    uint64_t    timestamp;
-    std::string tx_hash;
-    uint64_t    height;
-    bool        spent;
-    bool        is_income;
-    wallet_transfer_info_details td;
-
-    BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(amount)
-      KV_SERIALIZE(tx_hash)
-      KV_SERIALIZE(height)
-      KV_SERIALIZE(spent)
-      KV_SERIALIZE(is_income)
-      KV_SERIALIZE(timestamp)      
-      KV_SERIALIZE(td)
-    END_KV_SERIALIZE_MAP()
-  };
-
   struct wallet_info
   {
     std::string unlocked_balance;
@@ -191,9 +158,9 @@ public:
 
   struct transfer_event_info
   {
-    wallet_transfer_info ti;
-    std::string unlocked_balance;
-    std::string balance;
+    tools::wallet_rpc::wallet_transfer_info ti;
+    uint64_t unlocked_balance;
+    uint64_t balance;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(ti)
@@ -244,8 +211,7 @@ public:
     virtual bool show_msg_box(const std::string& message)=0;
     virtual bool update_wallet_status(const wallet_status_info& wsi)=0;
     virtual bool update_wallet_info(const wallet_info& wsi)=0;
-    virtual bool money_receive(const transfer_event_info& wsi)=0;
-    virtual bool money_spent(const transfer_event_info& wsi)=0;
+    virtual bool money_transfer(const transfer_event_info& wsi) = 0;
     virtual bool show_wallet()=0;
     virtual bool hide_wallet() = 0;
     virtual bool switch_view(int view_no)=0;
@@ -258,8 +224,7 @@ public:
     virtual bool show_msg_box(const std::string& /*message*/){return true;}
     virtual bool update_wallet_status(const wallet_status_info& /*wsi*/){return true;}
     virtual bool update_wallet_info(const wallet_info& /*wsi*/){return true;}
-    virtual bool money_receive(const transfer_event_info& /*wsi*/){return true;}
-    virtual bool money_spent(const transfer_event_info& /*wsi*/){return true;}
+    virtual bool money_transfer(const transfer_event_info& /*wsi*/){ return true; }
     virtual bool show_wallet(){return true;}
     virtual bool hide_wallet(){ return true; }
     virtual bool switch_view(int /*view_no*/){ return true; }

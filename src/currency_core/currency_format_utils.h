@@ -267,6 +267,14 @@ namespace currency
   }
   //---------------------------------------------------------------
   template<class t_object>
+  crypto::hash& get_object_hash(const t_object& o)
+  {
+    crypto::hash h;
+    get_object_hash(o, h);
+    return h;
+  }
+  //---------------------------------------------------------------
+  template<class t_object>
   size_t get_object_blobsize(const t_object& o)
   {
     blobdata b = t_serializable_object_to_blob(o);

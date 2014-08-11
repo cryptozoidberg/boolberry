@@ -14,6 +14,48 @@ namespace wallet_rpc
 #define WALLET_RPC_STATUS_OK      "OK"
 #define WALLET_RPC_STATUS_BUSY    "BUSY"
 
+
+  struct wallet_transfer_info_details
+  {
+    std::list<uint64_t> rcv;
+    std::list<uint64_t> spn;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(rcv)
+      KV_SERIALIZE(spn)
+    END_KV_SERIALIZE_MAP()
+
+  };
+
+  struct wallet_transfer_info
+  {
+    uint64_t      amount;
+    uint64_t      timestamp;
+    std::string   tx_hash;
+    uint64_t      height;
+    uint32_t      tx_blob_size;
+    std::string   payment_id;
+    std::string   recipient; //optional
+    bool          is_income;
+    wallet_transfer_info_details td;
+    
+    //not included in serialization map
+    currency::transaction tx;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(amount)
+      KV_SERIALIZE(tx_hash)
+      KV_SERIALIZE(height)
+      KV_SERIALIZE(tx_blob_size)
+      KV_SERIALIZE(payment_id)
+      KV_SERIALIZE(recipient)      
+      KV_SERIALIZE(is_income)
+      KV_SERIALIZE(timestamp)
+      KV_SERIALIZE(td)
+    END_KV_SERIALIZE_MAP()
+  };
+
+
   struct COMMAND_RPC_GET_BALANCE
   {
     struct request

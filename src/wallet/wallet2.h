@@ -16,6 +16,7 @@
 #include "net/http_client.h"
 #include "storages/http_abstract_invoke.h"
 #include "rpc/core_rpc_server_commands_defs.h"
+#include "wallet_rpc_server_commans_defs.h"
 #include "currency_core/currency_format_utils.h"
 #include "common/unordered_containers_boost_serialization.h"
 #include "crypto/chacha8.h"
@@ -41,8 +42,7 @@ namespace tools
     virtual void on_new_block(uint64_t /*height*/, const currency::block& /*block*/) {}
     virtual void on_money_received(uint64_t /*height*/, const currency::transaction& /*tx*/, size_t /*out_index*/) {}
     virtual void on_money_spent(uint64_t /*height*/, const currency::transaction& /*in_tx*/, size_t /*out_index*/, const currency::transaction& /*spend_tx*/) {}
-    virtual void on_money_received2(const currency::block& /*b*/, const currency::transaction& /*tx*/, uint64_t /*amount*/, const money_transfer2_details& td) {}
-    virtual void on_money_spent2(const currency::block& /*b*/, const currency::transaction& /*in_tx*/, uint64_t /*amount*/, const money_transfer2_details& td) {}
+    virtual void on_transfer2(const wallet_rpc::wallet_transfer_info& wti) {}
   };
 
   struct tx_dust_policy
@@ -80,8 +80,9 @@ namespace tools
     struct unconfirmed_transfer_details
     {
       currency::transaction m_tx;
-      uint64_t m_change;
-      time_t m_sent_time; 
+      uint64_t      m_change;
+      time_t        m_sent_time; 
+      std::string   m_recipient;
     };
 
     struct payment_details
@@ -92,14 +93,38 @@ namespace tools
       uint64_t m_unlock_time;
     };
 
+
+    /*struct transfer_history_entry_details
+    {
+      std::list<uint64_t> rcv;
+      std::list<uint64_t> spn;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(rcv)
+        KV_SERIALIZE(spn)
+      END_KV_SERIALIZE_MAP()
+    };
+
     struct transfer_history_entry
     {
       bool is_income;
       crypto::hash tx_id;
       uint32_t tx_blob_size;
       crypto::hash payment_id;
-      uint64_t amount;
-    };
+      uint64_t amount;      
+      std::string recipient; //optional
+      transfer_history_entry_details details;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(is_income)
+        KV_SERIALIZE(tx_id)
+        KV_SERIALIZE(tx_blob_size)
+        KV_SERIALIZE(payment_id)
+        KV_SERIALIZE(amount)
+        KV_SERIALIZE(recipient)
+        KV_SERIALIZE(details)
+      END_KV_SERIALIZE_MAP()
+    };*/
 
     
     typedef std::unordered_multimap<crypto::hash, payment_details> payment_container;
@@ -163,6 +188,10 @@ namespace tools
       if(ver < 7)
         return;
       a & m_payments;
+      if (ver < 8)
+        return;
+      a & m_transfer_history;
+
     }
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
   private:
@@ -178,9 +207,12 @@ namespace tools
     void pull_blocks(size_t& blocks_added);
     uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
     bool prepare_file_names(const std::string& file_path);
-    void process_unconfirmed(const currency::transaction& tx);
+    void process_unconfirmed(const currency::transaction& tx, const std::string& recipient);
     void add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount);
     void update_current_tx_limit();
+    void prepare_wti(wallet_rpc::wallet_transfer_info& wti, const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
+    void handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
+    void handle_money_spent2(const currency::block& b, const currency::transaction& in_tx, uint64_t amount, const money_transfer2_details& td, const std::string& recipient);
     
 
     currency::account_base m_account;
@@ -199,12 +231,15 @@ namespace tools
     uint64_t m_upper_transaction_size_limit; //TODO: auto-calc this value or request from daemon, now use some fixed value
 
     std::atomic<bool> m_run;
-    std::<> transfer_history;
+    std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
 
     i_wallet2_callback* m_callback;
   };
 }
-BOOST_CLASS_VERSION(tools::wallet2, 7)
+
+
+BOOST_CLASS_VERSION(tools::wallet2, 8)
+BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 2)
 
 namespace boost
 {
@@ -227,6 +262,9 @@ namespace boost
       a & x.m_change;
       a & x.m_sent_time;
       a & x.m_tx;
+      if (ver < 2)
+        return;
+      a & x.m_recipient;
     }
 
     template <class Archive>

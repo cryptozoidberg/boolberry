@@ -67,8 +67,7 @@ private:
     virtual bool show_msg_box(const std::string& message);
     virtual bool update_wallet_status(const view::wallet_status_info& wsi);
     virtual bool update_wallet_info(const view::wallet_info& wsi);
-    virtual bool money_receive(const view::transfer_event_info& tei);
-    virtual bool money_spent(const view::transfer_event_info& tei);
+    virtual bool money_transfer(const view::transfer_event_info& tei);
     virtual bool show_wallet();
     virtual bool hide_wallet();
     virtual bool switch_view(int view_no);

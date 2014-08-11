@@ -1084,8 +1084,7 @@ signals:
     void update_daemon_state(const QString str);
     void update_wallet_status(const QString str);
     void update_wallet_info(const QString str);
-    void money_receive(const QString str);
-    void money_spent(const QString str);
+    void money_transfer(const QString str);
     void show_wallet();
     void hide_wallet();
     void switch_view(const QString str);
@@ -1355,19 +1354,11 @@ bool Html5ApplicationViewer::update_wallet_info(const view::wallet_info& wsi)
   return true;
 }
 
-bool Html5ApplicationViewer::money_receive(const view::transfer_event_info& tei)
+bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei)
 {
   std::string json_str;
   epee::serialization::store_t_to_json(tei, json_str);
-  m_d->money_receive(json_str.c_str());
-  return true;
-}
-
-bool Html5ApplicationViewer::money_spent(const view::transfer_event_info& tei)
-{
-  std::string json_str;
-  epee::serialization::store_t_to_json(tei, json_str);
-  m_d->money_spent(json_str.c_str());
+  m_d->money_transfer(json_str.c_str());
   return true;
 }
 
@@ -1393,7 +1384,7 @@ bool Html5ApplicationViewer::switch_view(int view_no)
   swi.view = view_no;
   std::string json_str;
   epee::serialization::store_t_to_json(swi, json_str);
-  m_d->money_spent(json_str.c_str());
+  m_d->switch_view(json_str.c_str());
   return true;
 }
 

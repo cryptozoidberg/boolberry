@@ -147,6 +147,28 @@ function on_update_wallet_status(wal_status)
     }
 }
 
+function build_prefix(count)
+{
+    var result = "";
+    for(var i = 0; i != count; i++)
+        result += "0";
+
+    return result;
+}
+
+function print_money(amount)
+{
+    var am_str  = amount.toString();
+    if(am_str.length <= 12)
+    {
+        am_str = build_prefix(13 - am_str.length) + am_str;
+    }
+    am_str = am_str.slice(0, am_str.length - 12) + "." + am_str.slice(am_str.length - 12);
+    return am_str;
+}
+
+
+
 function get_details_block(td, div_id_str, transaction_id)
 {
     var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='balance_text'>Transaction ID:</span> " +  transaction_id + "<br>";
@@ -154,14 +176,14 @@ function get_details_block(td, div_id_str, transaction_id)
     {
         for(var i=0; i < td.rcv.length; i++)
         {
-            res += "<img src='files/recv.png' height='12px' /> " + td.rcv[i] + "<br>";
+            res += "<img src='files/recv.png' height='12px' /> " + print_money(td.rcv[i]) + "<br>";
         }
     }
     if(td.spn !== undefined)
     {
         for(var i=0; i < td.spn.length; i++)
         {
-            res += "<img src='files/sent.png' height='12px' /> " + td.spn[i] + "<br>";
+            res += "<img src='files/sent.png' height='12px' /> " + print_money(td.spn[i]) + "<br>";
         }
     }
 
@@ -188,13 +210,12 @@ function get_transfer_html_entry(tr)
         img_ref = "files/sent.png"
     }
 
-
     var dt = new Date(tr.timestamp*1000);
 
     res = "<div class='transfer_entry_line' style='color: " + color_str + "'>";
     res += "<img  class='transfer_text_img_span' src='" + img_ref + "' height='15px'>";
     res += "<span class='transfer_text_time_span'>" + dt.toLocaleTimeString() + "</span>";
-    res += "<span class='transfer_text_amount_span'>" + tr.amount + "</span>";
+    res += "<span class='transfer_text_amount_span'>" + print_money(tr.amount) + "</span>";
     res += "<span class='transfer_text_details_span'>" + "<a href='javascript:;' onclick=\"jQuery('#" + tr.tx_hash + "_id" + "').toggle('fast');\" class=\"options_link_text\">";
     res += " Details...";
     res += "</a></span>";
@@ -212,18 +233,11 @@ function on_update_wallet_info(wal_status)
     $("#wallet_path").text(wal_status.path);
 }
 
-function on_money_recieved(tei)
+function on_money_transfer(tei)
 {
     $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti));
-    $("#wallet_balance").text(tei.balance);
-    $("#wallet_unlocked_balance").text(tei.unlocked_balance);
-}
-
-function on_money_spent(tei)
-{
-    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti));
-    $("#wallet_balance").text(tei.balance);
-    $("#wallet_unlocked_balance").text(tei.unlocked_balance);
+    $("#wallet_balance").text(print_money(tei.balance));
+    $("#wallet_unlocked_balance").text(print_money(tei.unlocked_balance));
 }
 
 function on_open_wallet()
@@ -352,36 +366,36 @@ $(function()
         ti:{
             height: 10,
             tx_hash: "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c212fe",
-            amount: "10.1111",
+            amount: 10111100000000,
             is_income: true,
             timestamp: 1402878665,
             td: {
-                rcv: ["0.0000001000", "0.0000001000", "0.0000001000", "0.0000001000"],
-                spn: ["0.0000001000", "0.0000001000"]
+                rcv: [1000, 1000, 1000, 1000],//rcv: ["0.0000001000", "0.0000001000", "0.0000001000", "0.0000001000"],
+                spn: [1000, 1000]//spn: ["0.0000001000", "0.0000001000"]
             }
         },
-        balance: "0.0000001000",
-        unlocked_balance: "0.0000001000"
+        balance: 1000,
+        unlocked_balance: 1000
     };
-    on_money_recieved(tttt);
+    on_money_transfer(tttt);
     tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
     tttt.ti.timestamp = 1402171355;
-    tttt.ti.amount =  "10.123000000000";
+    tttt.ti.amount =  10123000000000;
 
-    on_money_recieved(tttt);
+    on_money_transfer(tttt);
 
     tttt.ti.tx_hash = "u19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
-    on_money_recieved(tttt);
+    on_money_transfer(tttt);
 
     tttt.ti.tx_hash = "s19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = true;
-    on_money_recieved(tttt);
+    on_money_transfer(tttt);
 
     tttt.ti.tx_hash = "q19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
-    on_money_recieved(tttt);
+    on_money_transfer(tttt);
     /****************************************************************************/
 
 
@@ -393,8 +407,7 @@ $(function()
     Qt.update_daemon_state.connect(str_to_obj.bind({cb: on_update_daemon_state}));
     Qt.update_wallet_status.connect(str_to_obj.bind({cb: on_update_wallet_status}));
     Qt.update_wallet_info.connect(str_to_obj.bind({cb: on_update_wallet_info}));
-    Qt.money_receive.connect(str_to_obj.bind({cb: on_money_recieved}));
-    Qt.money_spent.connect(str_to_obj.bind({cb: on_money_spent}));
+    Qt.money_transfer.connect(str_to_obj.bind({cb: on_money_transfer}));
     Qt.show_wallet.connect(show_wallet);
     Qt.hide_wallet.connect(hide_wallet);
     Qt.switch_view.connect(on_switch_view);
