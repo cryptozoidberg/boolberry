@@ -1394,6 +1394,13 @@ bool Html5ApplicationViewer::set_recent_transfers(const view::transfers_array& t
   std::string json_str;
   epee::serialization::store_t_to_json(ta, json_str);
   m_d->set_recent_transfers(json_str.c_str());
+  return true;
+}
+
+bool Html5ApplicationViewer::set_html_path(const std::string& path)
+{  
+  loadFile(QLatin1String((path + "/index.html").c_str()));
+  return true;
 }
 
 QString Html5ApplicationViewer::get_version()

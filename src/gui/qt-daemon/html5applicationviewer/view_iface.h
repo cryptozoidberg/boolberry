@@ -15,6 +15,7 @@ DISABLE_VS_WARNINGS(4503)
 #include "serialization/keyvalue_serialization.h"
 #include "storages/portable_storage_template_helper.h"
 #include "rpc/core_rpc_server_commands_defs.h"
+#include "wallet/wallet_rpc_server_commans_defs.h"
 POP_WARNINGS
 
 #endif
@@ -141,8 +142,8 @@ public:
 
   struct wallet_info
   {
-    std::string unlocked_balance;
-    std::string balance;
+    uint64_t unlocked_balance;
+    uint64_t balance;
     std::string address;
     std::string tracking_hey;
     std::string path;
@@ -226,6 +227,7 @@ public:
     virtual bool hide_wallet()= 0;
     virtual bool switch_view(int view_no)=0;
     virtual bool set_recent_transfers(const transfers_array& ta) = 0;
+    virtual bool set_html_path(const std::string& path)=0;
   };
 
   struct view_stub: public i_view
@@ -240,5 +242,6 @@ public:
     virtual bool hide_wallet(){ return true; }
     virtual bool switch_view(int /*view_no*/){ return true; }
     virtual bool set_recent_transfers(const transfers_array& /*ta*/){ return true; }
+    virtual bool set_html_path(const std::string& path){ return true; };
   };
 }

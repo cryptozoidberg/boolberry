@@ -3,9 +3,18 @@ html {
     height: 100%;
 }
 
+@font-face {
+    font-family: UbuntuMedium;
+    src: url(Ubuntu-M.ttf);
+}
+
+@font-face {
+    font-family: UbuntuCond;
+    src: url(Ubuntu-C.ttf);
+}
 
 body {
-     font-family: Helvetica, Arial, sans-serif;
+     font-family: UbuntuMedium;/*, Arial, sans-serif;*/
      color: #34495e;
      background-color: #ffffff;
      margin: 0em 0 0em 0;
@@ -90,7 +99,7 @@ h2 {
 {
     color: #ffffff;
     font-size: 20px;
-    font-family: arial,sans-serif;
+    /*font-family: arial,sans-serif;*/
     font-weight: bold;
     display: inline-block;
     margin: 0 8px;
@@ -246,19 +255,23 @@ span.daemon_view_general_status_value_success_text
 }
 .wallet_panet_transparent
 {
+    padding-top: 2px;
     margin:15px;
     margin-top: 0px;
 }
 .transfer_entry_line
 {
+    font-family: UbuntuCond;
     padding-left: 10px;
-    padding-top: 5px;
+    padding-top: 0px;
+    padding-bottom: 4px;
     margin-top: 2px;
     background: rgb(247, 247, 247);
 }
 .transfer_entry_line_details
 {
     display: none;
+    margin-top: 7px;
     margin-left: 60px;
     color: rgb(95, 95, 95);
 }
@@ -290,16 +303,27 @@ span.daemon_view_general_status_value_success_text
     left: 50px;
 }
 
+.transfer_text_status_span
+{
+    position: absolute;
+    left: 180px;
+}
 .transfer_text_amount_span
 {
     position: absolute;
-    left: 270px;
+    left: 340px;
+}
+
+.transfer_text_recipient_span
+{
+    position: absolute;
+    left: 480px;
 }
 
 .transfer_text_details_span
 {
     position: absolute;
-    left: 440px;
+    left: 250px;
 }
 
 .daemon_view_param_value_last_ver_info

@@ -17,8 +17,7 @@ int main(int argc, char *argv[])
     viewer.setOrientation(Html5ApplicationViewer::ScreenOrientationAuto);
     viewer.showExpanded();
     viewer.setWindowTitle("Boolberry");
-    
-    viewer.loadFile(QLatin1String((string_tools::get_current_module_folder() + "/html/index.html").c_str()));
+        
     if(!viewer.start_backend(argc, argv))
       return false;
     viewer.init_config();

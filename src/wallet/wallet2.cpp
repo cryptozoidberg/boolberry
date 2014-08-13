@@ -31,13 +31,13 @@ void fill_transfer_details(const currency::transaction& tx, const tools::money_t
   for (auto si : td.spent_indices)
   {
     CHECK_AND_ASSERT_MES(si < tx.vin.size(), void(), "Internal error: wrong tx transfer details: spend index=" << si << " is greater than transaction inputs vector " << tx.vin.size());
-    res_td.spn.push_back(currency::print_money(boost::get<currency::txin_to_key>(tx.vin[si]).amount));
+    res_td.spn.push_back(boost::get<currency::txin_to_key>(tx.vin[si]).amount);
   }
 
   for (auto ri : td.receive_indices)
   {
     CHECK_AND_ASSERT_MES(ri < tx.vout.size(), void(), "Internal error: wrong tx transfer details: reciev index=" << ri << " is greater than transaction outputs vector " << tx.vout.size());
-    res_td.rcv.push_back(currency::print_money(tx.vout[ri].amount));
+    res_td.rcv.push_back(tx.vout[ri].amount);
   }
 }
 
@@ -147,7 +147,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
     {//this actually is transfer transaction, notify about spend
       if (tx_money_spent_in_ins > tx_money_got_in_outs)
       {//usual transfer 
-        handle_money_spent2(b, tx, tx_money_spent_in_ins - tx_money_got_in_outs, mtd);
+        handle_money_spent2(b, tx, tx_money_spent_in_ins - tx_money_got_in_outs, mtd, recipient);
       }
       else
       {//strange transfer, seems that in one transaction have transfers from different wallets.
@@ -173,7 +173,7 @@ void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, const currency:
     wti.payment_id = string_tools::pod_to_hex(pid);
   fill_transfer_details(tx, td, wti.td);
   wti.timestamp = b.timestamp;//TODO: figure out if this correct
-  wti.tx_blob_size = currency::get_object_blobsize(wti.tx);
+  wti.tx_blob_size = static_cast<uint32_t>(currency::get_object_blobsize(wti.tx));
   wti.tx_hash = string_tools::pod_to_hex(currency::get_object_hash(tx));
 }
 //----------------------------------------------------------------------------------------------------
@@ -185,7 +185,7 @@ void wallet2::handle_money_received2(const currency::block& b, const currency::t
   wti.is_income = true;
 
   if (m_callback)
-    m_callback->on_money_received2(wti);
+    m_callback->on_transfer2(wti);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::handle_money_spent2(const currency::block& b, const currency::transaction& in_tx, uint64_t amount, const money_transfer2_details& td, const std::string& recipient)
@@ -197,14 +197,15 @@ void wallet2::handle_money_spent2(const currency::block& b, const currency::tran
   wti.recipient = recipient;
 
   if (m_callback)
-    m_callback->on_money_spent2(wti);
+    m_callback->on_transfer2(wti);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::process_unconfirmed(const currency::transaction& tx, const std::string& m_recipient)
+void wallet2::process_unconfirmed(const currency::transaction& tx, std::string& recipient)
 {
   auto unconf_it = m_unconfirmed_txs.find(get_transaction_hash(tx));
   if (unconf_it != m_unconfirmed_txs.end())
   {
+    recipient = unconf_it->second.m_recipient;
     m_unconfirmed_txs.erase(unconf_it);
   }
 }
@@ -625,9 +626,13 @@ void wallet2::get_payments(const crypto::hash& payment_id, std::list<wallet2::pa
 //----------------------------------------------------------------------------------------------------
 void wallet2::get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count)
 {
-  for (size_t i = offset; i < m_transfer_history.size() && offset - i < count;)
-    trs.push_back(m_transfer_history[i]);
+  if (offset >= m_transfer_history.size())
+    return;
 
+  auto start = m_transfer_history.rbegin() + offset;
+  auto stop = m_transfer_history.size() - offset >= count ? start + count : m_transfer_history.rend();
+
+  trs.insert(trs.end(), start, stop);
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::is_transfer_unlocked(const transfer_details& td) const
@@ -767,12 +772,13 @@ uint64_t wallet2::select_transfers(uint64_t needed_money, size_t fake_outputs_co
   */
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount)
+void wallet2::add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient)
 {
   unconfirmed_transfer_details& utd = m_unconfirmed_txs[currency::get_transaction_hash(tx)];
   utd.m_change = change_amount;
   utd.m_sent_time = time(NULL);
   utd.m_tx = tx;
+  utd.m_recipient = recipient;
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,

@@ -191,51 +191,85 @@ function get_details_block(td, div_id_str, transaction_id)
     return res;
 }
 
+// format implementation used from http://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format/4673436#4673436
+// by Brad Larson, fearphage
+if (!String.prototype.format) {
+    String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+            return typeof args[number] != 'undefined'
+                ? args[number]
+                : match
+                ;
+        });
+    };
+}
 
-function get_transfer_html_entry(tr)
+function get_transfer_html_entry(tr, is_recent)
 {
     var res;
     var color_str;
     var img_ref;
     var action_text;
 
+    if(is_recent)
+    {
+        color_str = "#6c6c6c";
+    }else
+    {
+        color_str = "#008DD2";
+    }
+
     if(tr.is_income)
     {
-        color_str = "darkgreen";
         img_ref = "files/recv.png"
+        action_text = "Received";
     }
     else
     {
-        color_str = "darkmagenta";
-        img_ref = "files/sent.png"
+        img_ref = "files/sent.png";
+        action_text = "Sent";
     }
 
     var dt = new Date(tr.timestamp*1000);
 
-    res = "<div class='transfer_entry_line' style='color: " + color_str + "'>";
-    res += "<img  class='transfer_text_img_span' src='" + img_ref + "' height='15px'>";
-    res += "<span class='transfer_text_time_span'>" + dt.toLocaleTimeString() + "</span>";
-    res += "<span class='transfer_text_amount_span'>" + print_money(tr.amount) + "</span>";
-    res += "<span class='transfer_text_details_span'>" + "<a href='javascript:;' onclick=\"jQuery('#" + tr.tx_hash + "_id" + "').toggle('fast');\" class=\"options_link_text\">";
-    res += " Details...";
-    res += "</a></span>";
-    res += get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash);
-    res += "</div>";
+    var transfer_line_tamplate = "<div class='transfer_entry_line' style='color: {0}'>";
+    transfer_line_tamplate +=       "<img  class='transfer_text_img_span' src='{1}' height='15px'>";
+    transfer_line_tamplate +=       "<span class='transfer_text_time_span'>{2}</span>";
+    transfer_line_tamplate +=       "<span class='transfer_text_status_span'>{6}</span>";
+    transfer_line_tamplate +=       "<span class='transfer_text_details_span'>";
+    transfer_line_tamplate +=          "<a href='javascript:;' onclick=\"jQuery('#{4}_id').toggle('fast');\" class=\"options_link_text\">TX</a>";
+    transfer_line_tamplate +=       "</span>";
+    transfer_line_tamplate +=       "<span class='transfer_text_amount_span'>{3}</span>";
+    transfer_line_tamplate +=       "<span class='transfer_text_recipient_span' title='{7}'>{8}</span>";
+    transfer_line_tamplate +=       "{5}";
+    transfer_line_tamplate +=     "</div>";
 
-    return res;
+    var short_string = tr.recipient.length > 50 ?  (tr.recipient.substr(0, 8) + "..." +  tr.recipient.substr(tr.recipient.length - 8, 8) ) : tr.recipient;
+    transfer_line_tamplate = transfer_line_tamplate.format(color_str,
+        img_ref,
+        dt.format("yyyy-mm-dd HH:MM"),
+        print_money(tr.amount),
+        tr.tx_hash,
+        get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash),
+        action_text,
+        tr.recipient,
+        short_string);
+
+    return transfer_line_tamplate;
 }
 
 function on_update_wallet_info(wal_status)
 {
-    $("#wallet_balance").text(wal_status.balance);
-    $("#wallet_unlocked_balance").text(wal_status.unlocked_balance);
+    $("#wallet_balance").text(print_money(wal_status.balance));
+    $("#wallet_unlocked_balance").text(print_money(wal_status.unlocked_balance));
     $("#wallet_address").text(wal_status.address);
     $("#wallet_path").text(wal_status.path);
 }
 
 function on_money_transfer(tei)
 {
-    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti));
+    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti, false));
     $("#wallet_balance").text(print_money(tei.balance));
     $("#wallet_unlocked_balance").text(print_money(tei.unlocked_balance));
 }
@@ -334,15 +368,17 @@ function on_transfer()
         return;
 }
 
-function on_set_recent_transfers(arr)
+function on_set_recent_transfers(o)
 {
-    if(arr === undefined || arr.length === undefined)
+    if(o === undefined || o.history === undefined || o.history.length === undefined)
         return;
 
-    //write cycle here, for(int)
-    get_transfer_html_entry(tei.ti)
-
-    $("#recent_transfers_container_id").prepend( );
+    var str = "";
+    for(var i=0; i < o.history.length; i++)
+    {
+        str += get_transfer_html_entry(o.history[i], true);
+    }
+    $("#recent_transfers_container_id").prepend(str);
 }
 
 
@@ -384,11 +420,16 @@ $(function()
             td: {
                 rcv: [1000, 1000, 1000, 1000],//rcv: ["0.0000001000", "0.0000001000", "0.0000001000", "0.0000001000"],
                 spn: [1000, 1000]//spn: ["0.0000001000", "0.0000001000"]
-            }
+            },
+            recipient: "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz"
         },
         balance: 1000,
         unlocked_balance: 1000
     };
+
+    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tttt.ti, true));
+    $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tttt.ti, true));
+
     on_money_transfer(tttt);
     tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;

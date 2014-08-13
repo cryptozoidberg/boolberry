@@ -173,8 +173,8 @@ namespace tools
     void pull_blocks(size_t& blocks_added);
     uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
     bool prepare_file_names(const std::string& file_path);
-    void process_unconfirmed(const currency::transaction& tx, const std::string& recipient);
-    void add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount);
+    void process_unconfirmed(const currency::transaction& tx, std::string& recipient);
+    void add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient);
     void update_current_tx_limit();
     void prepare_wti(wallet_rpc::wallet_transfer_info& wti, const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
     void handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
@@ -240,6 +240,28 @@ namespace boost
       a & x.m_amount;
       a & x.m_block_height;
       a & x.m_unlock_time;
+    }
+    
+    template <class Archive>
+    inline void serialize(Archive& a, tools::wallet_rpc::wallet_transfer_info_details& x, const boost::serialization::version_type ver)
+    {
+      a & x.rcv;
+      a & x.spn;
+    }
+
+    template <class Archive>
+    inline void serialize(Archive& a, tools::wallet_rpc::wallet_transfer_info& x, const boost::serialization::version_type ver)
+    {      
+      a & x.amount;
+      a & x.timestamp;
+      a & x.tx_hash;
+      a & x.height;
+      a & x.tx_blob_size;
+      a & x.payment_id;
+      a & x.recipient; 
+      a & x.is_income;
+      a & x.td;
+      a & x.tx;
     }
 
   }
@@ -454,8 +476,15 @@ namespace tools
     CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "sendrawtransaction");
     CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
     CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status != CORE_RPC_STATUS_OK, error::tx_rejected, tx, daemon_send_resp.status);
-
-    add_unconfirmed_tx(tx, change_dts.amount);
+    
+    std::string recipient;
+    for (const auto& d : dsts)
+    {
+      if (recipient.size())
+        recipient += ", ";
+      recipient += get_account_address_as_str(d.addr);
+    }
+    add_unconfirmed_tx(tx, change_dts.amount, recipient);
 
     LOG_PRINT_L2("transaction " << get_transaction_hash(tx) << " generated ok and sent to daemon, key_images: [" << key_images << "]");
 

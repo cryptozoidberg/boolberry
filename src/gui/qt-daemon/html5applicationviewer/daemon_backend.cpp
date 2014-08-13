@@ -22,7 +22,8 @@ daemon_backend::daemon_backend():m_pview(&m_view_stub),
   m_wallet->callback(this);
 }
 
-const command_line::arg_descriptor<bool> arg_alloc_win_console   = {"alloc-win-clonsole", "Allocates debug console with GUI", false};
+const command_line::arg_descriptor<bool> arg_alloc_win_console = {"alloc-win-clonsole", "Allocates debug console with GUI", false};
+const command_line::arg_descriptor<std::string> arg_html_folder = {"html-path", "Manually set GUI html folder path", "",  true};
 
 daemon_backend::~daemon_backend()
 {
@@ -63,6 +64,8 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   command_line::add_arg(desc_cmd_sett, command_line::arg_console);
   command_line::add_arg(desc_cmd_sett, command_line::arg_show_details);
   command_line::add_arg(desc_cmd_sett, arg_alloc_win_console);
+  command_line::add_arg(desc_cmd_sett, arg_html_folder);
+  
 
 
   currency::core::init_options(desc_cmd_sett);
@@ -108,10 +111,22 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
     return false;
 
   //set up logging options
-  if(command_line::has_arg(vm, arg_alloc_win_console))
+  if (command_line::has_arg(vm, arg_alloc_win_console))
   {
      log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
   }
+
+  std::string path_to_html;
+  if (!command_line::has_arg(vm, arg_html_folder))
+  {
+    path_to_html = string_tools::get_current_module_folder() + "/html";
+  }
+  else
+  {
+    path_to_html = command_line::get_arg(vm, arg_html_folder);
+  }
+
+  m_pview->set_html_path(path_to_html);
 
   boost::filesystem::path log_file_path(command_line::get_arg(vm, command_line::arg_log_file));
   if (log_file_path.empty())
@@ -401,9 +416,9 @@ bool daemon_backend::open_wallet(const std::string& path, const std::string& pas
 
   m_wallet->init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
   update_wallet_info();
-  load_recent_transfers();
-  m_last_wallet_synch_height = 0;
   m_pview->show_wallet();
+  load_recent_transfers();
+  m_last_wallet_synch_height = 0;  
   return true;
 }
 
