@@ -207,6 +207,7 @@ void wallet2::process_unconfirmed(const currency::transaction& tx, std::string& 
   if (unconf_it != m_unconfirmed_txs.end())
   {
     recipient = unconf_it->second.m_recipient;
+    recipient_alias = unconf_it->second.m_recipient_alias;
     m_unconfirmed_txs.erase(unconf_it);
   }
 }

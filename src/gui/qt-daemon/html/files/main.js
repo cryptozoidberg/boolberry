@@ -169,21 +169,21 @@ function print_money(amount)
 
 
 
-function get_details_block(td, div_id_str, transaction_id)
+function get_details_block(td, div_id_str, transaction_id, blob_size)
 {
-    var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='balance_text'>Transaction ID:</span> " +  transaction_id + "<br>";
+    var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='balance_text'>Transaction ID:</span> " +  transaction_id + ", <b>size</b>: " + blob_size.toString()  + " bytes<br>";
     if(td.rcv !== undefined)
     {
         for(var i=0; i < td.rcv.length; i++)
         {
-            res += "<img src='files/recv.png' height='12px' /> " + print_money(td.rcv[i]) + "<br>";
+            res += "<img class='transfer_text_img_span' src='files/income_ico.png' height='15px' /> " + print_money(td.rcv[i]) + "<br>";
         }
     }
     if(td.spn !== undefined)
     {
         for(var i=0; i < td.spn.length; i++)
         {
-            res += "<img src='files/sent.png' height='12px' /> " + print_money(td.spn[i]) + "<br>";
+            res += "<img class='transfer_text_img_span' src='files/outcome_ico.png' height='15px' /> " + print_money(td.spn[i]) + "<br>";
         }
     }
 
@@ -245,13 +245,13 @@ function get_transfer_html_entry(tr, is_recent)
     transfer_line_tamplate +=       "{5}";
     transfer_line_tamplate +=     "</div>";
 
-    var short_string = tr.recipient_alias.length ?  tr.recipient_alias : (tr.recipient.substr(0, 8) + "..." +  tr.recipient.substr(tr.recipient.length - 8, 8) );
+    var short_string = tr.recipient_alias.length ?  "@" + tr.recipient_alias : (tr.recipient.substr(0, 8) + "..." +  tr.recipient.substr(tr.recipient.length - 8, 8) );
     transfer_line_tamplate = transfer_line_tamplate.format(color_str,
         img_ref,
         dt.format("yyyy-mm-dd HH:MM"),
         print_money(tr.amount),
         tr.tx_hash,
-        get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash),
+        get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash, tr.tx_blob_size),
         action_text,
         tr.recipient,
         short_string);
@@ -415,13 +415,15 @@ $(function()
             height: 10,
             tx_hash: "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c212fe",
             amount: 10111100000000,
+            tx_blob_size: 1222,
             is_income: true,
             timestamp: 1402878665,
             td: {
                 rcv: [1000, 1000, 1000, 1000],//rcv: ["0.0000001000", "0.0000001000", "0.0000001000", "0.0000001000"],
                 spn: [1000, 1000]//spn: ["0.0000001000", "0.0000001000"]
             },
-            recipient: "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz"
+            recipient: "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz",
+            recipient_alias: "just-mike"
         },
         balance: 1000,
         unlocked_balance: 1000

@@ -208,6 +208,8 @@ namespace tools
 
 BOOST_CLASS_VERSION(tools::wallet2, 8)
 BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 3)
+BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 2)
+
 
 namespace boost
 {
@@ -267,6 +269,9 @@ namespace boost
       a & x.is_income;
       a & x.td;
       a & x.tx;
+      if (ver < 2)
+        return;
+      a & x.recipient_alias;
     }
 
   }
