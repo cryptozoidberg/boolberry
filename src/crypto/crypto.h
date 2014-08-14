@@ -185,7 +185,7 @@ namespace crypto {
   }
 }
 
-CRYPTO_MAKE_COMPARABLE(public_key)
-CRYPTO_MAKE_COMPARABLE(secret_key)
-CRYPTO_MAKE_HASHABLE(key_image)
-CRYPTO_MAKE_COMPARABLE(signature)
+POD_MAKE_COMPARABLE(crypto, public_key)
+POD_MAKE_COMPARABLE(crypto, secret_key)
+POD_MAKE_HASHABLE(crypto, key_image)
+POD_MAKE_COMPARABLE(crypto, signature)

@@ -243,11 +243,6 @@ span.daemon_view_general_status_value_success_text
 
 .wallet_panel
 {
-    /*padding: 5px;*/
-    /*float: left;*/
-    /*width: 200px;*/
-    /*height: 100px;*/
-    /*border: 1px solid #787878;*/
     margin:15px;
     margin-top: 0px;
     padding:10px;
@@ -295,7 +290,8 @@ span.daemon_view_general_status_value_success_text
 
 .transfer_text_img_span
 {
-
+    margin-top: 4px;
+    margin-bottom: -2px;
 }
 .transfer_text_time_span
 {
@@ -323,7 +319,7 @@ span.daemon_view_general_status_value_success_text
 .transfer_text_details_span
 {
     position: absolute;
-    left: 250px;
+    left: 280px;
 }
 
 .daemon_view_param_value_last_ver_info

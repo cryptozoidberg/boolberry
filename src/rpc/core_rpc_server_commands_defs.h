@@ -12,8 +12,10 @@
 namespace currency
 {
   //-----------------------------------------------
-#define CORE_RPC_STATUS_OK     "OK"
-#define CORE_RPC_STATUS_BUSY   "BUSY"
+#define CORE_RPC_STATUS_OK          "OK"
+#define CORE_RPC_STATUS_BUSY        "BUSY"
+#define CORE_RPC_STATUS_NOT_FOUND   "NOT FOUND"
+#define CORE_RPC_STATUS_FAILED        "FAILED"
 
 
   struct alias_rpc_details_base
@@ -540,6 +542,23 @@ namespace currency
     };
   };
 
+
+  struct COMMAND_RPC_GET_ALIASES_BY_ADDRESS
+  {
+
+    typedef std::string request;
+
+    struct response
+    {
+      std::string alias;
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(alias)
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
 
 }
 

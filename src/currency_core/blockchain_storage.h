@@ -26,6 +26,8 @@
 #include "crypto/hash.h"
 #include "checkpoints.h"
 
+POD_MAKE_HASHABLE(currency, account_public_address);
+
 namespace currency
 {
 
@@ -103,6 +105,7 @@ namespace currency
     bool get_backward_blocks_sizes(size_t from_height, std::vector<size_t>& sz, size_t count);
     bool get_tx_outputs_gindexs(const crypto::hash& tx_id, std::vector<uint64_t>& indexs);
     bool get_alias_info(const std::string& alias, alias_info_base& info);
+    std::string get_alias_by_address(const account_public_address& addr);
     bool get_all_aliases(std::list<alias_info>& aliases);
     uint64_t get_aliases_count();
     uint64_t get_scratchpad_size();
@@ -175,6 +178,7 @@ namespace currency
     typedef std::unordered_map<crypto::hash, block> blocks_by_hash;
     typedef std::map<uint64_t, std::vector<std::pair<crypto::hash, size_t>>> outputs_container; //crypto::hash - tx hash, size_t - index of out in transaction
     typedef std::map<std::string, std::list<alias_info_base>> aliases_container; //alias can be address address address + view key
+    typedef std::unordered_map<account_public_address, std::string> address_to_aliases_container;
 
     tx_memory_pool& m_tx_pool;
     critical_section m_blockchain_lock; // TODO: add here reader/writer lock
@@ -194,6 +198,7 @@ namespace currency
     blocks_ext_by_hash m_invalid_blocks;     // crypto::hash -> block_extended_info
     outputs_container m_outputs;
     aliases_container m_aliases;
+    address_to_aliases_container m_addr_to_alias;
     std::vector<crypto::hash> m_scratchpad;
 
     std::string m_config_folder;
@@ -203,6 +208,7 @@ namespace currency
 
     account_keys m_donations_account;
     account_keys m_royalty_account;
+
 
     bool switch_to_alternative_blockchain(std::list<blocks_ext_by_hash::iterator>& alt_chain);
     bool pop_block_from_blockchain();
@@ -241,6 +247,7 @@ namespace currency
     bool validate_donations_value(uint64_t donation, uint64_t royalty);
     //uint64_t get_block_avr_donation_vote(const block& b);
     bool get_required_donations_value_for_next_block(uint64_t& don_am); //applicable only for each CURRENCY_DONATIONS_INTERVAL-th block
+    void fill_addr_to_alias_dict();
   };
 
 
@@ -248,7 +255,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          23
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          24
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     2
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 
@@ -269,6 +276,7 @@ namespace currency
     ar & m_current_block_cumul_sz_limit;
     ar & m_aliases;
     ar & m_scratchpad;
+    
     /*serialization bug workaround*/
     
     uint64_t total_check_count = m_blocks.size() + m_blocks_index.size() + m_transactions.size() + m_spent_keys.size() + m_alternative_chains.size() + m_outputs.size() + m_invalid_blocks.size() + m_current_block_cumul_sz_limit;
@@ -357,6 +365,7 @@ namespace currency
     return true;
   }
 }
+
 
 
 

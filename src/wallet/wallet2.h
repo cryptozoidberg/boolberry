@@ -82,6 +82,7 @@ namespace tools
       uint64_t      m_change;
       time_t        m_sent_time; 
       std::string   m_recipient;
+      std::string   m_recipient_alias;
     };
 
     struct payment_details
@@ -173,12 +174,13 @@ namespace tools
     void pull_blocks(size_t& blocks_added);
     uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
     bool prepare_file_names(const std::string& file_path);
-    void process_unconfirmed(const currency::transaction& tx, std::string& recipient);
+    void process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias);
     void add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient);
     void update_current_tx_limit();
     void prepare_wti(wallet_rpc::wallet_transfer_info& wti, const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
     void handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
-    void handle_money_spent2(const currency::block& b, const currency::transaction& in_tx, uint64_t amount, const money_transfer2_details& td, const std::string& recipient);
+    void handle_money_spent2(const currency::block& b, const currency::transaction& in_tx, uint64_t amount, const money_transfer2_details& td, const std::string& recipient, const std::string& recipient_alias);
+    std::string get_alias_for_address(const std::string& addr);
     
 
     currency::account_base m_account;
@@ -205,7 +207,7 @@ namespace tools
 
 
 BOOST_CLASS_VERSION(tools::wallet2, 8)
-BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 2)
+BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 3)
 
 namespace boost
 {
@@ -231,6 +233,9 @@ namespace boost
       if (ver < 2)
         return;
       a & x.m_recipient;
+      if (ver < 3)
+        return;
+      a & x.m_recipient_alias;
     }
 
     template <class Archive>

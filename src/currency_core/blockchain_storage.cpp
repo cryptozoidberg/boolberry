@@ -70,6 +70,17 @@ uint64_t blockchain_storage::get_current_blockchain_height()
   return m_blocks.size();
 }
 //------------------------------------------------------------------
+void blockchain_storage::fill_addr_to_alias_dict()
+{
+  for (const auto& a : m_aliases)
+  {
+    if (a.second.size())
+    {
+      m_addr_to_alias[a.second.back().m_address] = a.first;
+    }
+  }
+}
+//------------------------------------------------------------------
 bool blockchain_storage::init(const std::string& config_folder)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -97,6 +108,8 @@ bool blockchain_storage::init(const std::string& config_folder)
   uint64_t timestamp_diff = time(NULL) - m_blocks.back().bl.timestamp;
   if(!m_blocks.back().bl.timestamp)
     timestamp_diff = time(NULL) - 1341378000;
+
+  fill_addr_to_alias_dict();
   LOG_PRINT_GREEN("Blockchain initialized. last block: " << m_blocks.size()-1 << ", " << misc_utils::get_time_interval_string(timestamp_diff) <<  " time ago, current difficulty: " << get_difficulty_for_next_block(), LOG_LEVEL_0);
   return true;
 }
@@ -1587,13 +1600,38 @@ bool blockchain_storage::get_all_aliases(std::list<alias_info>& aliases)
   return true;
 }
 //------------------------------------------------------------------
+std::string blockchain_storage::get_alias_by_address(const account_public_address& addr)
+{
+  auto it = m_addr_to_alias.find(addr);
+  if (it != m_addr_to_alias.end())
+    return it->second;
+  
+  return "";
+}
+//------------------------------------------------------------------
 bool blockchain_storage::pop_alias_info(const alias_info& ai)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   CHECK_AND_ASSERT_MES(ai.m_alias.size(), false, "empty name in pop_alias_info");
   aliases_container::mapped_type& alias_history = m_aliases[ai.m_alias];
   CHECK_AND_ASSERT_MES(alias_history.size(), false, "empty name list in pop_alias_info");
+  
+  auto it = m_addr_to_alias.find(alias_history.back().m_address);
+  if (it != m_addr_to_alias.end())
+  {
+    m_addr_to_alias.erase(it);
+  }
+  else
+  {
+    LOG_ERROR("In m_addr_to_alias not found " << get_account_address_as_str(alias_history.back().m_address));
+  }
+
   alias_history.pop_back();
+  if (alias_history.size())
+  {
+    m_addr_to_alias[alias_history.back().m_address] = ai.m_alias;
+  }
+  
   return true;
 }
 //------------------------------------------------------------------
@@ -1607,6 +1645,7 @@ bool blockchain_storage::put_alias_info(const alias_info& ai)
   {//adding new alias, check sat name is free
     CHECK_AND_ASSERT_MES(!alias_history.size(), false, "alias " << ai.m_alias << " already in use");
     alias_history.push_back(ai);
+    m_addr_to_alias[alias_history.back().m_address] = ai.m_alias;
   }else
   {
     //update procedure
@@ -1616,7 +1655,14 @@ bool blockchain_storage::put_alias_info(const alias_info& ai)
     bool r = crypto::check_signature(get_blob_hash(signed_buff), alias_history.back().m_address.m_spend_public_key, ai.m_sign);
     CHECK_AND_ASSERT_MES(r, false, "Failed to check signature, alias update failed");
     //update granted
+    auto it = m_addr_to_alias.find(alias_history.back().m_address);
+    if (it != m_addr_to_alias.end())
+      m_addr_to_alias.erase(it);
+    else
+      LOG_ERROR("Wromg m_addr_to_alias state: address not found " << get_account_address_as_str(alias_history.back().m_address));
+
     alias_history.push_back(ai);
+    m_addr_to_alias[alias_history.back().m_address] = ai.m_alias;
   }
   return true;
 }

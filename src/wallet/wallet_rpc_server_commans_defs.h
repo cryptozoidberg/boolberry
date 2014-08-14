@@ -36,6 +36,7 @@ namespace wallet_rpc
     uint32_t      tx_blob_size;
     std::string   payment_id;
     std::string   recipient; //optional
+    std::string   recipient_alias; //optional
     bool          is_income;
     wallet_transfer_info_details td;
     
@@ -49,6 +50,7 @@ namespace wallet_rpc
       KV_SERIALIZE(tx_blob_size)
       KV_SERIALIZE(payment_id)
       KV_SERIALIZE(recipient)      
+      KV_SERIALIZE(recipient_alias)
       KV_SERIALIZE(is_income)
       KV_SERIALIZE(timestamp)
       KV_SERIALIZE(td)

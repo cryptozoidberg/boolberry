@@ -43,4 +43,4 @@ namespace crypto {
 
 }
 
-CRYPTO_MAKE_HASHABLE(hash)
+POD_MAKE_HASHABLE(crypto, hash)

@@ -828,6 +828,21 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_alias_by_address(const COMMAND_RPC_GET_ALIASES_BY_ADDRESS::request& req, COMMAND_RPC_GET_ALIASES_BY_ADDRESS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
+  {
+    account_public_address addr = AUTO_VAL_INIT(addr);
+    if (!get_account_address_from_str(addr, req))
+    {
+      res.status = CORE_RPC_STATUS_FAILED;
+    }
+    res.alias = m_core.get_blockchain_storage().get_alias_by_address(addr);
+    if (res.alias.size())
+      res.status = CORE_RPC_STATUS_OK;
+    else
+      res.status = CORE_RPC_STATUS_NOT_FOUND;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_submit(const mining::COMMAND_RPC_SUBMITSHARE::request& req, mining::COMMAND_RPC_SUBMITSHARE::response& res, connection_context& cntx)
   {
     if(!check_core_ready())

@@ -222,12 +222,12 @@ function get_transfer_html_entry(tr, is_recent)
 
     if(tr.is_income)
     {
-        img_ref = "files/recv.png"
+        img_ref = "files/income_ico.png"
         action_text = "Received";
     }
     else
     {
-        img_ref = "files/sent.png";
+        img_ref = "files/outcome_ico.png";
         action_text = "Sent";
     }
 
@@ -238,14 +238,14 @@ function get_transfer_html_entry(tr, is_recent)
     transfer_line_tamplate +=       "<span class='transfer_text_time_span'>{2}</span>";
     transfer_line_tamplate +=       "<span class='transfer_text_status_span'>{6}</span>";
     transfer_line_tamplate +=       "<span class='transfer_text_details_span'>";
-    transfer_line_tamplate +=          "<a href='javascript:;' onclick=\"jQuery('#{4}_id').toggle('fast');\" class=\"options_link_text\">TX</a>";
+    transfer_line_tamplate +=          "<a href='javascript:;' onclick=\"jQuery('#{4}_id').toggle('fast');\" class=\"options_link_text\"><img src='files/tx_icon.png' height='12px' style='padding-top: 4px'></a>";
     transfer_line_tamplate +=       "</span>";
     transfer_line_tamplate +=       "<span class='transfer_text_amount_span'>{3}</span>";
     transfer_line_tamplate +=       "<span class='transfer_text_recipient_span' title='{7}'>{8}</span>";
     transfer_line_tamplate +=       "{5}";
     transfer_line_tamplate +=     "</div>";
 
-    var short_string = tr.recipient.length > 50 ?  (tr.recipient.substr(0, 8) + "..." +  tr.recipient.substr(tr.recipient.length - 8, 8) ) : tr.recipient;
+    var short_string = tr.recipient_alias.length ?  tr.recipient_alias : (tr.recipient.substr(0, 8) + "..." +  tr.recipient.substr(tr.recipient.length - 8, 8) );
     transfer_line_tamplate = transfer_line_tamplate.format(color_str,
         img_ref,
         dt.format("yyyy-mm-dd HH:MM"),
