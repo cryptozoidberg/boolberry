@@ -38,8 +38,7 @@ namespace currency
       tvc.m_verifivation_failed = true;
       return false;
     }
-    //TODO: add rule for relay, based on tx size/fee ratio
-
+    
     if(!check_inputs_types_supported(tx))
     {
       tvc.m_verifivation_failed = true;
@@ -68,6 +67,14 @@ namespace currency
       if(have_tx_keyimges_as_spent(tx))
       {
         LOG_ERROR("Transaction with id= "<< id << " used already spent key images");
+        tvc.m_verifivation_failed = true;
+        return false;
+      }
+
+      //transaction spam protection, soft rule
+      if (inputs_amount - outputs_amount < DEFAULT_FEE)
+      {
+        LOG_ERROR("Transaction with id= " << id << " has to small fee: " << inputs_amount - outputs_amount << ", expected fee: " << DEFAULT_FEE);
         tvc.m_verifivation_failed = true;
         return false;
       }
