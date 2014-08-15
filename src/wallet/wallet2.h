@@ -43,6 +43,7 @@ namespace tools
     virtual void on_money_received(uint64_t /*height*/, const currency::transaction& /*tx*/, size_t /*out_index*/) {}
     virtual void on_money_spent(uint64_t /*height*/, const currency::transaction& /*in_tx*/, size_t /*out_index*/, const currency::transaction& /*spend_tx*/) {}
     virtual void on_transfer2(const wallet_rpc::wallet_transfer_info& wti) {}
+    virtual void on_money_sent(const wallet_rpc::wallet_transfer_info& wti) {}
   };
 
   struct tx_dust_policy
@@ -115,6 +116,7 @@ namespace tools
     currency::account_base& get_account(){return m_account;}
 
     void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
+    void get_unconfirmed_transfers(std::vector<wallet_rpc::wallet_transfer_info>& trs);
     void init(const std::string& daemon_address = "http://localhost:8080");
     bool deinit();
 
@@ -177,10 +179,11 @@ namespace tools
     void process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias);
     void add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient);
     void update_current_tx_limit();
-    void prepare_wti(wallet_rpc::wallet_transfer_info& wti, const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
+    void prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height, uint64_t timestamp, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
     void handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
     void handle_money_spent2(const currency::block& b, const currency::transaction& in_tx, uint64_t amount, const money_transfer2_details& td, const std::string& recipient, const std::string& recipient_alias);
     std::string get_alias_for_address(const std::string& addr);
+    void wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& utd, wallet_rpc::wallet_transfer_info& wti);
     
 
     currency::account_base m_account;

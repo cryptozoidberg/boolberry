@@ -220,20 +220,27 @@ function get_transfer_html_entry(tr, is_recent)
         color_str = "#008DD2";
     }
 
-    if(tr.is_income)
+    if(tr.height != 0)
     {
-        img_ref = "files/income_ico.png"
-        action_text = "Received";
-    }
-    else
+        if(tr.is_income)
+        {
+            img_ref = "files/income_ico.png"
+            action_text = "Received";
+        }
+        else
+        {
+            img_ref = "files/outcome_ico.png";
+            action_text = "Sent";
+        }
+    }else
     {
-        img_ref = "files/outcome_ico.png";
-        action_text = "Sent";
+        img_ref = "files/sandwatch.png";
+        action_text = "Unconfirmed";
     }
 
     var dt = new Date(tr.timestamp*1000);
 
-    var transfer_line_tamplate = "<div class='transfer_entry_line' style='color: {0}'>";
+    var transfer_line_tamplate = "<div class='transfer_entry_line' id='transfer_entry_line_{4}_id' style='color: {0}'>";
     transfer_line_tamplate +=       "<img  class='transfer_text_img_span' src='{1}' height='15px'>";
     transfer_line_tamplate +=       "<span class='transfer_text_time_span'>{2}</span>";
     transfer_line_tamplate +=       "<span class='transfer_text_status_span'>{6}</span>";
@@ -267,8 +274,17 @@ function on_update_wallet_info(wal_status)
     $("#wallet_path").text(wal_status.path);
 }
 
+function on_money_sent_unconfirmed(tei)
+{
+    $("#unconfirmed_transfers_container_id").prepend( get_transfer_html_entry(tei.ti, false));
+    $("#wallet_balance").text(print_money(tei.balance));
+    $("#wallet_unlocked_balance").text(print_money(tei.unlocked_balance));
+}
+
 function on_money_transfer(tei)
 {
+    var id = "#" + "transfer_entry_line_" + tei.ti.tx_hash +"_id";
+    $(id).remove();
     $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tei.ti, false));
     $("#wallet_balance").text(print_money(tei.balance));
     $("#wallet_unlocked_balance").text(print_money(tei.unlocked_balance));
@@ -291,6 +307,7 @@ function show_wallet()
     $("#wallet_workspace_area").show();
     $("#wallet_welcome_screen_area").hide();
     $("#recent_transfers_container_id").html("");
+    $("#unconfirmed_transfers_container_id").html("");
 }
 
 function hide_wallet()
@@ -379,6 +396,15 @@ function on_set_recent_transfers(o)
         str += get_transfer_html_entry(o.history[i], true);
     }
     $("#recent_transfers_container_id").prepend(str);
+
+    str = "";
+    for(var i=0; i < o.unconfirmed.length; i++)
+    {
+        str += get_transfer_html_entry(o.unconfirmed[i], false);
+    }
+    $("#unconfirmed_transfers_container_id").prepend(str);
+
+
 }
 
 
@@ -430,18 +456,26 @@ $(function()
     };
 
     $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tttt.ti, true));
+    tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c2152";
     $("#recent_transfers_container_id").prepend( get_transfer_html_entry(tttt.ti, true));
+    tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c2122";
 
     on_money_transfer(tttt);
     tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
     tttt.ti.timestamp = 1402171355;
     tttt.ti.amount =  10123000000000;
+    tttt.ti.recipient = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
+    tttt.ti.recipient_alias = "zoidberg";
+
 
     on_money_transfer(tttt);
 
     tttt.ti.tx_hash = "u19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
+    tttt.ti.recipient = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
+    tttt.ti.recipient_alias = "tifozi";
+
     on_money_transfer(tttt);
 
     tttt.ti.tx_hash = "s19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
@@ -450,7 +484,13 @@ $(function()
 
     tttt.ti.tx_hash = "q19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
+    tttt.ti.height = 0;
     on_money_transfer(tttt);
+    //
+    tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c2152";
+    $("#unconfirmed_transfers_container_id").prepend( get_transfer_html_entry(tttt.ti, false));
+
+
     /****************************************************************************/
 
 
@@ -463,6 +503,8 @@ $(function()
     Qt.update_wallet_status.connect(str_to_obj.bind({cb: on_update_wallet_status}));
     Qt.update_wallet_info.connect(str_to_obj.bind({cb: on_update_wallet_info}));
     Qt.money_transfer.connect(str_to_obj.bind({cb: on_money_transfer}));
+    Qt.money_sent_unconfirmed.connect(str_to_obj.bind({cb: on_money_sent_unconfirmed}));
+
     Qt.show_wallet.connect(show_wallet);
     Qt.hide_wallet.connect(hide_wallet);
     Qt.switch_view.connect(on_switch_view);

@@ -172,9 +172,11 @@ public:
 
   struct transfers_array
   {
+    std::vector<tools::wallet_rpc::wallet_transfer_info> unconfirmed;
     std::vector<tools::wallet_rpc::wallet_transfer_info> history;
 
     BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(unconfirmed)
       KV_SERIALIZE(history)
     END_KV_SERIALIZE_MAP()
 
@@ -223,6 +225,7 @@ public:
     virtual bool update_wallet_status(const wallet_status_info& wsi)=0;
     virtual bool update_wallet_info(const wallet_info& wsi)=0;
     virtual bool money_transfer(const transfer_event_info& wsi) = 0;
+    virtual bool money_sent_unconfirmed(const transfer_event_info& wsi) = 0;
     virtual bool show_wallet()=0;
     virtual bool hide_wallet()= 0;
     virtual bool switch_view(int view_no)=0;
@@ -238,6 +241,7 @@ public:
     virtual bool update_wallet_status(const wallet_status_info& /*wsi*/){return true;}
     virtual bool update_wallet_info(const wallet_info& /*wsi*/){return true;}
     virtual bool money_transfer(const transfer_event_info& /*wsi*/){ return true; }
+    virtual bool money_sent_unconfirmed(const transfer_event_info& wsi){ return true; }
     virtual bool show_wallet(){return true;}
     virtual bool hide_wallet(){ return true; }
     virtual bool switch_view(int /*view_no*/){ return true; }

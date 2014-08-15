@@ -72,7 +72,7 @@ namespace currency
       }
 
       //transaction spam protection, soft rule
-      if (inputs_amount - outputs_amount < DEFAULT_FEE)
+      if (inputs_amount - outputs_amount < TX_POOL_MINIMUM_FEE)
       {
         LOG_ERROR("Transaction with id= " << id << " has to small fee: " << inputs_amount - outputs_amount << ", expected fee: " << DEFAULT_FEE);
         tvc.m_verifivation_failed = true;

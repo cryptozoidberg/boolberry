@@ -44,6 +44,7 @@ signals:
     void update_wallet_status(const QString str);
     void update_wallet_info(const QString str);
     void money_transfer(const QString str);
+    void money_sent_unconfirmed(const QString str);
     void show_wallet();
     void hide_wallet();
     void switch_view(const QString str);
@@ -230,6 +231,7 @@ void Html5ApplicationViewer::showExpanded()
 #endif
     this->setMinimumWidth(700);
     this->setMinimumHeight(400);
+    this->setFixedSize(800, 600);
     m_d->m_webView->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
     m_d->m_webView->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 }
@@ -318,6 +320,14 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
 {
   std::string json_str;
   epee::serialization::store_t_to_json(tei, json_str);
+  m_d->money_transfer(json_str.c_str());
+  return true;
+}
+
+bool Html5ApplicationViewer::money_sent_unconfirmed(const view::transfer_event_info& wsi)
+{
+  std::string json_str;
+  epee::serialization::store_t_to_json(wsi, json_str);
   m_d->money_transfer(json_str.c_str());
   return true;
 }

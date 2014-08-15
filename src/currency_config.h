@@ -39,6 +39,8 @@
 #define DEFAULT_DUST_THRESHOLD                          ((uint64_t)1000000) // pow(10, 6)
 
 #define DEFAULT_FEE                                     ((uint64_t)1000000000) // pow(10, 9)
+#define TX_POOL_MINIMUM_FEE                             ((uint64_t)10000000) // pow(10, 7)
+
 
 
 #define ORPHANED_BLOCKS_MAX_COUNT                       100
