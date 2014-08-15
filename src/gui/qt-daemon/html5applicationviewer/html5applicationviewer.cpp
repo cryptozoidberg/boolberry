@@ -229,9 +229,10 @@ void Html5ApplicationViewer::showExpanded()
 #else
     show();
 #endif
-    this->setMinimumWidth(700);
-    this->setMinimumHeight(400);
-    this->setFixedSize(800, 600);
+    this->setMouseTracking(true);
+    this->setMinimumWidth(800);
+    this->setMinimumHeight(600);
+    //this->setFixedSize(800, 600);
     m_d->m_webView->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
     m_d->m_webView->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 }
