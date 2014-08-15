@@ -102,44 +102,7 @@ Source: "{#BinariesPath}\platforms\qminimal.dll"; DestDir: "{app}\platforms"; Fl
 Source: "{#BinariesPath}\platforms\qoffscreen.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qwindows.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "..\src\gui\qt-daemon\html\index.html"; DestDir: "{app}\html"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\logo.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\logo2.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\main.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\recv.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\sent.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\style.css"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\text_and_logo.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\ui_helper.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\animated-overlay.gif"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_flat_55_999999_40x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_flat_75_aaaaaa_40x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_glass_45_0078ae_1x400.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_glass_55_f8da4e_1x400.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_glass_75_79c9ec_1x400.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_gloss-wave_45_e14f1c_500x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_gloss-wave_50_6eac2c_500x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_gloss-wave_75_2191c0_500x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-bg_inset-hard_100_fcfdfd_1x100.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_0078ae_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_056b93_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_d8e7f3_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_e0fdff_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_f5e175_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_f7a50d_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\images\ui-icons_fcd113_256x240.png"; DestDir: "{app}\html\files\css\start\images"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\jquery-ui-1.10.4.custom.css"; DestDir: "{app}\html\files\css\start"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\css\start\jquery-ui-1.10.4.custom.min.css"; DestDir: "{app}\html\files\css\start"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\js\jquery-1.10.2.js"; DestDir: "{app}\html\files\js"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\js\jquery-ui-1.10.4.custom.js"; DestDir: "{app}\html\files\js"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\js\jquery-ui-1.10.4.custom.min.js"; DestDir: "{app}\html\files\js"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\logo.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\logo2.svg"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\main.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\recv.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\sent.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\style.css"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\text_and_logo.png"; DestDir: "{app}\html\files"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\ui_helper.js"; DestDir: "{app}\html\files"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\*"; DestDir: "{app}\html\files"; Flags: ignoreversion recursesubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
