@@ -866,10 +866,6 @@ namespace currency
       LOG_ERROR("Submited block not accepted");
       return true;
     }
-    //@#@
-    //LOG_PRINT_L0("block_hash: " << get_block_hash(b));
-    //LOG_PRINT_L0("block_hashing_blob:" << string_tools::buff_to_hex_nodelimer(currency::get_block_hashing_blob(b)));
-    
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
@@ -907,6 +903,23 @@ namespace currency
 
     //TODO: remove this code
     LOG_PRINT_L0("[getfullscratchpad2]: json prefix len: " << str_len << ", JSON: " << json_hi);
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_addendums(const COMMAND_RPC_GET_ADDENDUMS::request& req, COMMAND_RPC_GET_ADDENDUMS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
+  {
+    if (!check_core_ready())
+    {
+      res.status = CORE_RPC_STATUS_BUSY;
+      return true;
+    }
+
+    if (!get_addendum_for_hi(req, res.addms))
+    {
+      res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
+      return true;
+    }
+    res.status = CORE_RPC_STATUS_OK;
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
