@@ -825,6 +825,7 @@ namespace currency
     m_core.get_blockchain_storage().copy_scratchpad(scratchpad_local);
     addendum_to_hexstr(scratchpad_local, res.scratchpad_hex); 
     get_current_hi(res.hi);
+    res.status = CORE_RPC_STATUS_OK;
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
@@ -886,6 +887,26 @@ namespace currency
     else
       res.status = CORE_RPC_STATUS_OK;
 
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_getfullscratchpad2(const epee::net_utils::http::http_request_info& query_info, epee::net_utils::http::http_response_info& response_info, connection_context& cntx)
+  {
+    if (!check_core_ready())
+    {
+      return true;
+    }
+    mining::height_info hi = AUTO_VAL_INIT(hi);
+    get_current_hi(hi);
+    std::string json_hi;
+    epee::serialization::store_t_to_json(hi, json_hi);
+    uint32_t str_len = static_cast<uint32_t>(json_hi.size());
+    response_info.m_body.append(reinterpret_cast<const char*>(&str_len), sizeof(str_len));
+    response_info.m_body.append(json_hi.data(), json_hi.size());
+    m_core.get_blockchain_storage().copy_scratchpad(response_info.m_body);    
+
+    //TODO: remove this code
+    LOG_PRINT_L0("[getfullscratchpad2]: json prefix len: " << str_len << ", JSON: " << json_hi);
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------

@@ -121,7 +121,8 @@ namespace currency
 
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     wide_difficulty_type block_difficulty(size_t i);
-    bool copy_scratchpad(std::vector<crypto::hash>& scr);//TODO: not the best way, add later update method instead of full copy
+    bool copy_scratchpad(std::vector<crypto::hash>& dst);//TODO: not the best way, add later update method instead of full copy
+    bool copy_scratchpad(std::string& dst);
 
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
     bool get_blocks(const t_ids_container& block_ids, t_blocks_container& blocks, t_missed_container& missed_bs)

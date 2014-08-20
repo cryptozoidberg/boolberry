@@ -197,6 +197,16 @@ bool blockchain_storage::copy_scratchpad(std::vector<crypto::hash>& scr)
   return true;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::copy_scratchpad(std::string& dst)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  if (m_scratchpad.size())
+  {
+    dst.append(reinterpret_cast<const char*>(&m_scratchpad[0]), m_scratchpad.size() * 32);
+  }
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::purge_transaction_keyimages_from_blockchain(const transaction& tx, bool strict_check)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);

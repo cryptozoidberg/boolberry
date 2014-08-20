@@ -47,6 +47,7 @@
 #define BEGIN_URI_MAP2()   template<class t_context> bool handle_http_request_map(const epee::net_utils::http::http_request_info& query_info, \
   epee::net_utils::http::http_response_info& response_info, \
   t_context& m_conn_context) { \
+  LOG_PRINT_L1("[HTTP][" << query_info.m_URI << "]"); \
   bool handled = false; \
   if(false) return true; //just a stub to have "else if"
 
