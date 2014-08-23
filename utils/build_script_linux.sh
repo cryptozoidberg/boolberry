@@ -33,13 +33,17 @@ fi
 read version_str <<< $(./src/boolbd --version | awk '/^Boolberry / { print $2 }')
 echo $version_str
 
-cd src
-cp -Rv ../../../src/gui/qt-daemon/html .
-cp -Rv $QT_BINARIES_PATH/qt-boolb.sh .
-cp -Rv $QT_BINARIES_PATH/libs .
+
+mkdir -p boolberry;
+
+cp -Rv ../../src/gui/qt-daemon/html ./boolberry
+cp -Rv $QT_BINARIES_PATH/qt-boolb.sh ./boolberry
+cp -Rv $QT_BINARIES_PATH/libs ./boolberry
+cp -Rv $QT_BINARIES_PATH/libs ./boolberry
+cp -Rv src/boolbd src/qt-boolb src/simplewallet src/simpleminer src/connectivity_tool ./boolberry
 
 
-tar -cjvf bbr-linux-x64-$version_str.tar.bz2 html qt-boolb.sh libs boolbd qt-boolb simplewallet simpleminer connectivity_tool
+tar -cjvf bbr-linux-x64-$version_str.tar.bz2 boolberry
 if [ $? -ne 0 ]; then
     echo "Failed to pack"
     exit 1
