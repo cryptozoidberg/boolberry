@@ -322,10 +322,8 @@ namespace nodetool
     }
 
     std::string state_file_path = m_config_folder + "/" + P2P_NET_DATA_FILENAME;
-    tools::serialize_obj_to_file(*this, state_file_path);
-    return true;
+    tools::serialize_obj_to_file(*this, state_file_path);    
     CATCH_ENTRY_L0("node_server<t_payload_net_handler>::save", false);
-
     return true;
   }
   //-----------------------------------------------------------------------------------
