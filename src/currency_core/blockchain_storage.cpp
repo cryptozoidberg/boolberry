@@ -212,9 +212,13 @@ bool blockchain_storage::purge_transaction_keyimages_from_blockchain(const trans
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
     struct purge_transaction_visitor: public boost::static_visitor<bool>
   {
+    blockchain_storage& m_bcs;
     key_images_container& m_spent_keys;
     bool m_strict_check;
-    purge_transaction_visitor(key_images_container& spent_keys, bool strict_check):m_spent_keys(spent_keys), m_strict_check(strict_check){}
+    purge_transaction_visitor(blockchain_storage& bcs, key_images_container& spent_keys, bool strict_check):
+      m_bcs(bcs),
+      m_spent_keys(spent_keys), 
+      m_strict_check(strict_check){}
 
     bool operator()(const txin_to_key& inp) const
     {
@@ -227,6 +231,18 @@ bool blockchain_storage::purge_transaction_keyimages_from_blockchain(const trans
       {
         CHECK_AND_ASSERT_MES(!m_strict_check, false, "purge_block_data_from_blockchain: key image in transaction not found");
       }
+
+      if(inp.key_offsets.size() == 1)
+      {
+        //direct spend detected
+        if(!m_bcs.update_spent_tx_flags_for_input(inp.amount, inp.key_offsets[0], false))
+        {
+          //internal error
+          LOG_PRINT_L0("Failed to  update_spent_tx_flags_for_input");
+          return false;
+        }
+      }
+
       return true;
     }
     bool operator()(const txin_gen& inp) const
@@ -246,7 +262,7 @@ bool blockchain_storage::purge_transaction_keyimages_from_blockchain(const trans
 
   BOOST_FOREACH(const txin_v& in, tx.vin)
   {
-    bool r = boost::apply_visitor(purge_transaction_visitor(m_spent_keys, strict_check), in);
+    bool r = boost::apply_visitor(purge_transaction_visitor(*this, m_spent_keys, strict_check), in);
     CHECK_AND_ASSERT_MES(!strict_check || r, false, "failed to process purge_transaction_visitor");
   }
   return true;
@@ -699,23 +715,6 @@ bool blockchain_storage::validate_miner_transaction(const block& b, size_t cumul
     return false;
   }  
 
-  //check donation value if set
-  /*if(donation)
-  {
-    if(donation + royalty > max_donation) 
-    {
-      LOG_ERROR("coinbase transaction gives too big donation: d" << print_money(donation) << " + r" << print_money(royalty) << ", expected maximum: " << max_donation);
-      return false;
-    }
-    uint64_t expected_donation = 0; 
-    uint64_t expected_royalty = 0;
-    get_donation_parts(donation + royalty, expected_royalty, expected_donation);
-    if(expected_royalty != royalty || expected_donation != donation) 
-    {
-      LOG_ERROR("coinbase transaction have wrong donation values, donation: " << print_money(donation) << " royalty: " << print_money(royalty) << ", expected donation: " << expected_donation << ", expected royalty: " << expected_royalty);
-      return false;
-    }
-  }*/
   donation_total = royalty + donation;
   return true;
 }
@@ -1230,6 +1229,12 @@ bool blockchain_storage::add_out_to_get_random_outs(std::vector<std::pair<crypto
   transaction& tx = tx_it->second.tx;
   CHECK_AND_ASSERT_MES(tx.vout[amount_outs[i].second].target.type() == typeid(txout_to_key), false, "unknown tx out type");
 
+  CHECK_AND_ASSERT_MES(tx_it->second.m_spent_flags.size() == tx.vout.size(), false, "internal error");
+
+  //do not use outputs that obviously spent for mixins
+  if(tx_it->second.m_spent_flags[amount_outs[i].second])
+    return false;
+
   //check if transaction is unlocked
   if(!is_tx_spendtime_unlocked(tx.unlock_time))
     return false;
@@ -1308,6 +1313,48 @@ bool blockchain_storage::get_random_outs_for_amounts(const COMMAND_RPC_GET_RANDO
         add_out_to_get_random_outs(amount_outs, result_outs, amount, i, req.outs_count, req.use_forced_mix_outs);
     }
   }
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  auto it = m_outputs.find(amount);
+  CHECK_AND_ASSERT_MES(it != m_outputs.end(), false, "Amount " << amount << " have not found during update_spent_tx_flags_for_input()");
+  CHECK_AND_ASSERT_MES(global_index < it->second.size(), false, "Gloabl index" << global_index << " for amount " << amount << " bigger value than amount's vector size()=" << it->second.size());
+
+
+  auto tx_it = m_transactions.find(it->second[global_index].first);
+  CHECK_AND_ASSERT_MES(tx_it != m_transactions.end(), false, "Can't find transaction id: " << it->second[global_index].first << ", refferenced in amount=" << amount << ", global index=" << global_index);
+
+  CHECK_AND_ASSERT_MES(it->second[global_index].second < tx_it->second.m_spent_flags.size() , false, "Wrong input offset: " << it->second[global_index].second << " in transaction id: " << it->second[global_index].first << ", refferenced in amount=" << amount << ", global index=" << global_index);
+   
+  tx_it->second.m_spent_flags[it->second[global_index].second] = spent;
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::resync_spent_tx_flags()
+{
+  LOG_PRINT_L0("Started re-building spent tx outputs data...");
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  for(auto& tx: m_transactions)
+  {
+    if(is_coinbase(tx.second.tx))
+      continue;
+
+    for(auto& in: tx.second.tx.vin)
+    {      
+      CHECKED_GET_SPECIFIC_VARIANT(in, txin_to_key, in_to_key, false);
+      if(in_to_key.key_offsets.size() != 1)
+        continue;
+
+      //direct spending
+      if(!update_spent_tx_flags_for_input(in_to_key.amount, in_to_key.key_offsets[0], true))
+        return false;
+
+    }
+  }
+  LOG_PRINT_L0("Finished re-building spent tx outputs data");
   return true;
 }
 //------------------------------------------------------------------
@@ -1700,10 +1747,15 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
 
   struct add_transaction_input_visitor: public boost::static_visitor<bool>
   {
+    blockchain_storage& m_bcs;
     key_images_container& m_spent_keys;
     const crypto::hash& m_tx_id;
     const crypto::hash& m_bl_id;
-    add_transaction_input_visitor(key_images_container& spent_keys, const crypto::hash& tx_id, const crypto::hash& bl_id):m_spent_keys(spent_keys), m_tx_id(tx_id), m_bl_id(bl_id)
+    add_transaction_input_visitor(blockchain_storage& bcs, key_images_container& spent_keys, const crypto::hash& tx_id, const crypto::hash& bl_id):
+      m_bcs(bcs),
+      m_spent_keys(spent_keys), 
+      m_tx_id(tx_id), 
+      m_bl_id(bl_id)
     {}
     bool operator()(const txin_to_key& in) const
     {
@@ -1715,6 +1767,19 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
         LOG_PRINT_L0("tx with id: " << m_tx_id << " in block id: " << m_bl_id << " have input marked as spent with key image: " << ki << ", block declined");
         return false;
       }
+
+      if(in.key_offsets.size() == 1)
+      {
+        //direct spend detected
+        if(!m_bcs.update_spent_tx_flags_for_input(in.amount, in.key_offsets[0], true))
+        {
+          //internal error
+          LOG_PRINT_L0("Failed to  update_spent_tx_flags_for_input");
+          return false;
+        }
+      }
+
+
       return true;
     }
 
@@ -1725,7 +1790,7 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
 
   BOOST_FOREACH(const txin_v& in, tx.vin)
   {
-    if(!boost::apply_visitor(add_transaction_input_visitor(m_spent_keys, tx_id, bl_id), in))
+    if(!boost::apply_visitor(add_transaction_input_visitor(*this, m_spent_keys, tx_id, bl_id), in))
     {
       LOG_ERROR("critical internal error: add_transaction_input_visitor failed. but key_images should be already checked");
       purge_transaction_keyimages_from_blockchain(tx, false);
@@ -1736,6 +1801,7 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
   }
   transaction_chain_entry ch_e;
   ch_e.m_keeper_block_height = bl_height;
+  ch_e.m_spent_flags.resize(tx.vout.size(), false);
   ch_e.tx = tx;
   auto i_r = m_transactions.insert(std::pair<crypto::hash, transaction_chain_entry>(tx_id, ch_e));
   if(!i_r.second)

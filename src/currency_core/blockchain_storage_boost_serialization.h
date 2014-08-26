@@ -21,6 +21,12 @@ namespace boost
         ar & fake;
       }
       ar & te.m_global_output_indexes;
+      if(version < 3)
+      {
+        te.m_spent_flags.resize(te.tx.vout.size(), false);
+        return;
+      }
+      ar & te.m_spent_flags;
     }
 
     template<class archive_t>
