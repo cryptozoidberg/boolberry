@@ -72,8 +72,8 @@ int main(int argc, char* argv[])
     CALL_TEST("TRANSACTIONS TESTS", test_transactions);
   }
   else //if (command_line::get_arg(vm, arg_generate_and_play_test_data))
-  {
-
+  {    
+    GENERATE_AND_PLAY(get_random_outs_test);
     GENERATE_AND_PLAY(mix_attr_tests);
     GENERATE_AND_PLAY(gen_simple_chain_001);
     GENERATE_AND_PLAY(gen_simple_chain_split_1);
