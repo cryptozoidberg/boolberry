@@ -1274,8 +1274,7 @@ size_t blockchain_storage::find_end_of_allowed_index(const std::vector<std::pair
 }
 //------------------------------------------------------------------
 bool blockchain_storage::get_random_outs_for_amounts(const COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::request& req, COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::response& res)
-{
-  srand(static_cast<unsigned int>(time(NULL)));
+{  
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   BOOST_FOREACH(uint64_t amount, req.amounts)
   {
@@ -1298,7 +1297,7 @@ bool blockchain_storage::get_random_outs_for_amounts(const COMMAND_RPC_GET_RANDO
       size_t try_count = 0;
       for(uint64_t j = 0; j != req.outs_count && try_count < up_index_limit;)
       {
-        size_t i = rand()%up_index_limit;
+        size_t i = crypto::rand<size_t>()%up_index_limit;
         if(used.count(i))
           continue;
         bool added = add_out_to_get_random_outs(amount_outs, result_outs, amount, i, req.outs_count, req.use_forced_mix_outs);
@@ -1321,7 +1320,7 @@ bool blockchain_storage::update_spent_tx_flags_for_input(uint64_t amount, uint64
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   auto it = m_outputs.find(amount);
   CHECK_AND_ASSERT_MES(it != m_outputs.end(), false, "Amount " << amount << " have not found during update_spent_tx_flags_for_input()");
-  CHECK_AND_ASSERT_MES(global_index < it->second.size(), false, "Gloabl index" << global_index << " for amount " << amount << " bigger value than amount's vector size()=" << it->second.size());
+  CHECK_AND_ASSERT_MES(global_index < it->second.size(), false, "Global index" << global_index << " for amount " << amount << " bigger value than amount's vector size()=" << it->second.size());
 
 
   auto tx_it = m_transactions.find(it->second[global_index].first);
