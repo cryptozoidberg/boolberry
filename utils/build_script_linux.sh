@@ -1,7 +1,7 @@
 #!/bin/bash
 
-QT_PREFIX_PATH="/home/roky/Qt/5.3/gcc_64"
-QT_BINARIES_PATH="/home/roky/bbr_binaries"
+QT_PREFIX_PATH="$HOME/Qt/5.3/gcc_64"
+QT_BINARIES_PATH="$HOME/bbr_binaries"
 
 
 cd boolberry
@@ -16,6 +16,10 @@ fi
 echo "---------------- BUILDING PROJECT ----------------"
 echo "--------------------------------------------------"
 
+echo "Backupping wallet files(on the off-chance)"
+cp -v build/release/src/*.bin build/release/src/*.bin.keys build/release/src/*.bbr build/release/src/*.bbr.keys build/release/src/*.bbr.address.txt build/release/src/*.bin.address.txt ..
+
+echo "Building...." 
 rm -rf build; mkdir -p build/release; cd build/release; 
 cmake -D STATIC=true -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH" -D CMAKE_BUILD_TYPE=Release ../..
 if [ $? -ne 0 ]; then
