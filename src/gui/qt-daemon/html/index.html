@@ -13,10 +13,17 @@
     <script src="files/js/jquery-ui-1.10.4.custom.js"></script>
     <script src="files/ui_helper.js" type="text/javascript" charset="utf-8"></script>
     <script src="files/date_format.js"></script>
+
     <script type="text/javascript" src="files/js/jquery.jqplot.min.js"></script>
     <script type="text/javascript" src="files/js/plugins/jqplot.dateAxisRenderer.min.js"></script>
     <script type="text/javascript" src="files/js/plugins/jqplot.ohlcRenderer.min.js"></script>
     <script type="text/javascript" src="files/js/plugins/jqplot.highlighter.min.js"></script>
+    <!--
+    <script type="text/javascript" src="files/js/jquery.jqplot.js"></script>
+    <script type="text/javascript" src="files/js/plugins/jqplot.dateAxisRenderer.js"></script>
+    <script type="text/javascript" src="files/js/plugins/jqplot.ohlcRenderer.js"></script>
+    <script type="text/javascript" src="files/js/plugins/jqplot.highlighter.js"></script>
+    -->
 </head>
 
 <body>
@@ -28,7 +35,7 @@
             <div class="menu_bar_tabs">
                 <div id="daemon_state_view_menu" class="inline_menu_bar_item"  view_name="daemon_state_view">Connectivity</div>
                 <div id="wallet_view_menu"  class="inline_menu_bar_item" view_name="wallet_view">Wallet</div>
-                <div id="exchange_view_menu"  class="inline_menu_bar_item" view_name="exchange_view">Exchange</div>
+                <div id="exchange_view_menu"  class="inline_menu_bar_item" view_name="exchange_view" callback="on_exchange_tab_switch">Exchange</div>
             </div>
         </div>
     </div>
@@ -148,8 +155,11 @@
     </div>
     <div id="exchange_view" class="view_hidden menu_view_inner_area" >
         <div class="active_panel" style="text-align: center;">
-            <span>The information below loaded via public API from <img height="12px" src="files/poloniex.png"><br></span>
-            <div id="plot_area" style="margin-left: 40px; height:300px;width:600px;" >
+            <div>
+                <div id="plot_area" style="margin-left: 40px;" />
+            </div>
+            <br>
+            <span>The information above loaded via public API from <img height="12px" src="files/poloniex.png"><br></span>
         </div>
 
         </div>

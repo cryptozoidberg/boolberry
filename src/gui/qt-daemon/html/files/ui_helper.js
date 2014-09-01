@@ -18,6 +18,12 @@ function inline_menu_item_select(item)
         {
             $('#'+view_to_hide).addClass('view_hidden');
         }
+        var callback_to_hide = $(last_selected_item).attr('callback');
+        if(callback_to_hide && callback_to_hide !== undefined)
+        {
+            window[callback_to_hide](false);
+        }
+
     }
     //lets show new view
     var view_to_show = $(item).attr('view_name');
@@ -26,6 +32,15 @@ function inline_menu_item_select(item)
         console.log("internal error: item dont have view_name attr");
         return;
     }
+
+    var callback_to_show = $(item).attr('callback');
+    if(callback_to_show && callback_to_show !== undefined)
+    {
+        window[callback_to_show](true);
+    }
+
+
+
     $('#'+view_to_show).removeClass('view_hidden');
     $(item).addClass('inline_menu_bar_selected_item');
     $(item.parentNode).data("last_selected", item);
