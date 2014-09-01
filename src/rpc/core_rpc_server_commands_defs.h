@@ -9,6 +9,7 @@
 #include "crypto/hash.h"
 #include "p2p/p2p_protocol_defs.h"
 #include "rpc/mining_protocol_defs.h"
+#include "storages/portable_storage_base.h"
 
 namespace currency
 {
@@ -364,7 +365,7 @@ namespace currency
       uint64_t reserve_size;       //max 255 bytes
       std::string wallet_address;
       alias_rpc_details alias_details;
-      bool dev_bounties_vote;
+      epee::serialization::storage_entry dev_bounties_vote;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(reserve_size)

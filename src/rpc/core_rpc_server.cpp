@@ -417,11 +417,17 @@ namespace currency
       LOG_PRINT_L1("COMMAND_RPC_GETBLOCKTEMPLATE: Alias requested for " << ai.m_alias << " -->>" << req.alias_details.details.address);
     }
 
+    bool donations_vote = true;
+    if (req.dev_bounties_vote.type() == typeid(bool))
+    {
+      donations_vote = boost::get<bool>(req.dev_bounties_vote);
+    }
+
     block b = AUTO_VAL_INIT(b);
     currency::blobdata blob_reserve = PROJECT_VERSION_LONG;
     blob_reserve.resize(blob_reserve.size() + 1 + req.reserve_size, 0);
     wide_difficulty_type dt = 0;
-    if(!m_core.get_block_template(b, acc, dt, res.height, blob_reserve, req.dev_bounties_vote, ai))
+    if (!m_core.get_block_template(b, acc, dt, res.height, blob_reserve, donations_vote, ai))
     {
       error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
       error_resp.message = "Internal error: failed to create block template";
@@ -731,7 +737,7 @@ namespace currency
     COMMAND_RPC_GETBLOCKTEMPLATE::response bt_res = AUTO_VAL_INIT(bt_res);
 
     //bt_req.alias_details  - set alias here
-    bt_req.dev_bounties_vote = true; //set vote 
+    bt_req.dev_bounties_vote = epee::serialization::storage_entry(true); //set vote 
     bt_req.reserve_size = 0; //if you want to put some data into extra
     // !!!!!!!! SET YOUR WALLET ADDRESS HERE  !!!!!!!!
     bt_req.wallet_address = "1HNJjUsofq5LYLoXem119dd491yFAb5g4bCHkecV4sPqigmuxw57Ci9am71fEN4CRmA9jgnvo5PDNfaq8QnprWmS5uLqnbq";
