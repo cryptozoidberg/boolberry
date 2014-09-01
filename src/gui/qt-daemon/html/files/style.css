@@ -271,11 +271,23 @@ span.daemon_view_general_status_value_success_text
     /*color: rgb(95, 95, 95);*/
 }
 
-.balance_text
+.wallet_secondary_text
 {
     margin-top: 20px;
     color: rgb(95, 95, 95);
-    font: 14px;
+    font-size: 80%;
+    font-weight: bold;
+}
+
+.wallet_balance
+{
+    padding-right: 10px;
+}
+.balance_text
+{
+    margin-top: 20px;
+    padding-right: 10px;
+    color: rgb(95, 95, 95);
     font-weight: bold;
 }
 

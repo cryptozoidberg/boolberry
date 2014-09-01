@@ -402,7 +402,7 @@ QString Html5ApplicationViewer::request_uri(const QString& url_str, const QStrin
 
   
   QByteArray res = reply->readAll();
-   return res;
+  return res;
   
 }
 
