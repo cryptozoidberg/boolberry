@@ -105,15 +105,16 @@ namespace currency
     };
   };
 
-
   struct CORE_SYNC_DATA
   {
     uint64_t current_height;
     crypto::hash  top_id;
+    uint64_t last_checkpoint_height;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(current_height)
       KV_SERIALIZE_VAL_POD_AS_BLOB(top_id)
+      KV_SERIALIZE(last_checkpoint_height)
     END_KV_SERIALIZE_MAP()
   };
 

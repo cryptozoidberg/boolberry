@@ -63,6 +63,7 @@ namespace currency
     bool deinit();
 
     void set_checkpoints(checkpoints&& chk_pts) { m_checkpoints = chk_pts; }
+    checkpoints& get_checkpoints() { return m_checkpoints; }
 
     //bool push_new_block();
     bool get_blocks(uint64_t start_offset, size_t count, std::list<block>& blocks, std::list<transaction>& txs);

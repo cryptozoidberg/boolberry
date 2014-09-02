@@ -43,6 +43,13 @@ namespace currency
       return false;
   }
   //---------------------------------------------------------------------------
+  uint64_t checkpoints::get_top_checkpoint_height() const 
+  {
+    if (!m_points.size())
+      return 0;
+    return (--m_points.end())->first;
+  }
+  //---------------------------------------------------------------------------
   bool checkpoints::check_block(uint64_t height, const crypto::hash& h) const
   {
     auto it = m_points.find(height);

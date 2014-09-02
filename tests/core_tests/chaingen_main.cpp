@@ -73,6 +73,8 @@ int main(int argc, char* argv[])
   }
   else //if (command_line::get_arg(vm, arg_generate_and_play_test_data))
   {    
+    
+    GENERATE_AND_PLAY(prun_ring_signatures);
     GENERATE_AND_PLAY(get_random_outs_test);
     GENERATE_AND_PLAY(mix_attr_tests);
     GENERATE_AND_PLAY(gen_simple_chain_001);

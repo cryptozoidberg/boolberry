@@ -1880,8 +1880,14 @@ bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::ha
       return false;
     }
 
-    CHECK_AND_ASSERT_MES(sig_index < tx.signatures.size(), false, "wrong transaction: not signature entry for input with index= " << sig_index);
-    if(!check_tx_input(in_to_key, tx_prefix_hash, tx.signatures[sig_index], pmax_used_block_height))
+    std::vector<crypto::signature> sig_stub;
+    const std::vector<crypto::signature>* psig = &sig_stub;
+    if (!m_is_in_checkpoint_zone)
+    {
+      CHECK_AND_ASSERT_MES(sig_index < tx.signatures.size(), false, "wrong transaction: not signature entry for input with index= " << sig_index);
+      psig = &tx.signatures[sig_index];
+    }    
+    if (!check_tx_input(in_to_key, tx_prefix_hash, *psig, pmax_used_block_height))
     {
       LOG_PRINT_L0("Failed to check ring signature for tx " << get_transaction_hash(tx));
       return false;
@@ -1889,7 +1895,10 @@ bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::ha
 
     sig_index++;
   }
-  CHECK_AND_ASSERT_MES(tx.signatures.size() == sig_index, false, "tx signatures count differs from inputs");
+  if (!m_is_in_checkpoint_zone)
+  {
+    CHECK_AND_ASSERT_MES(tx.signatures.size() == sig_index, false, "tx signatures count differs from inputs");
+  }
 
   return true;
 }
@@ -1959,9 +1968,10 @@ bool blockchain_storage::check_tx_input(const txin_to_key& txin, const crypto::h
     LOG_PRINT_L0("Output keys for tx with amount = " << txin.amount << " and count indexes " << txin.key_offsets.size() << " returned wrong keys count " << output_keys.size());
     return false;
   }
-  CHECK_AND_ASSERT_MES(sig.size() == output_keys.size(), false, "internal error: tx signatures count=" << sig.size() << " mismatch with outputs keys count for inputs=" << output_keys.size());
   if(m_is_in_checkpoint_zone)
     return true;
+
+  CHECK_AND_ASSERT_MES(sig.size() == output_keys.size(), false, "internal error: tx signatures count=" << sig.size() << " mismatch with outputs keys count for inputs=" << output_keys.size());
   return crypto::check_ring_signature(tx_prefix_hash, txin.k_image, output_keys, sig.data());
 }
 //------------------------------------------------------------------
@@ -2071,13 +2081,16 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
 
   if(m_checkpoints.is_in_checkpoint_zone(get_current_blockchain_height()))
   {
+    m_is_in_checkpoint_zone = true;
     if(!m_checkpoints.check_block(get_current_blockchain_height(), id))
     {
       LOG_ERROR("CHECKPOINT VALIDATION FAILED");
       bvc.m_verifivation_failed = true;
       return false;
     }
-  }
+  }else
+    m_is_in_checkpoint_zone = false;
+
   TIME_MEASURE_FINISH(longhash_calculating_time);
 
   if(!prevalidate_miner_transaction(bl, m_blocks.size()))
