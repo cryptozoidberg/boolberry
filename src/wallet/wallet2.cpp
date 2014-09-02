@@ -19,7 +19,7 @@ using namespace epee;
 #include "profile_tools.h"
 #include "crypto/crypto.h"
 #include "serialization/binary_utils.h"
-
+#include "currency_core/alias_helper.h"
 using namespace currency;
 
 namespace tools
@@ -635,6 +635,11 @@ void wallet2::get_recent_transfers_history(std::vector<wallet_rpc::wallet_transf
   auto stop = m_transfer_history.size() - offset >= count ? start + count : m_transfer_history.rend();
 
   trs.insert(trs.end(), start, stop);
+}
+//----------------------------------------------------------------------------------------------------
+bool wallet2::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
+{
+  return tools::get_transfer_address(adr_str, addr, m_http_client, m_daemon_address);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& u, wallet_rpc::wallet_transfer_info& wti)

@@ -92,7 +92,7 @@ namespace tools
     for (auto it = req.destinations.begin(); it != req.destinations.end(); it++) 
     {
       currency::tx_destination_entry de;
-      if(!get_account_address_from_str(de.addr, it->address))
+      if(!m_wallet.get_transfer_address(it->address, de.addr))
       {
         er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
         er.message = std::string("WALLET_RPC_ERROR_CODE_WRONG_ADDRESS: ") + it->address;

@@ -4,7 +4,7 @@
 
 
 #include "daemon_backend.h"
-
+#include "currency_core/alias_helper.h"
 
 
 daemon_backend::daemon_backend():m_pview(&m_view_stub),
@@ -495,39 +495,6 @@ bool daemon_backend::get_aliases(view::alias_set& al_set)
   return false;
 }
 
-bool daemon_backend::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
-{  
-  if (!adr_str.size())
-    return false;
-
-  std::string addr_str_local = adr_str;
-
-  if (adr_str[0] == '@')
-  {
-    //referred by alias name
-    if (adr_str.size() < 2)
-      return false;
-    std::string pure_alias_name = adr_str.substr(1);
-    CHECK_AND_ASSERT_MES(currency::validate_alias_name(pure_alias_name), false, "wrong name set in transfer command");
-
-    //currency::alias_info_base ai = AUTO_VAL_INIT(ai);
-    currency::COMMAND_RPC_GET_ALIAS_DETAILS::response alias_info = AUTO_VAL_INIT(alias_info);
-
-    if (!m_rpc_proxy.get_alias_info(pure_alias_name, alias_info))
-      return false;
-
-    if (alias_info.status != CORE_RPC_STATUS_OK)
-      return false;
-    
-    addr_str_local = alias_info.alias_details.address;   
-  }
-
-  if (!get_account_address_from_str(addr, addr_str_local))
-  {
-    return false;
-  }
-  return true;
-}
 
 bool daemon_backend::transfer(const view::transfer_params& tp, currency::transaction& res_tx)
 {
@@ -547,7 +514,7 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
   for(auto& d: tp.destinations)
   {
     dsts.push_back(currency::tx_destination_entry());
-    if (!get_transfer_address(d.address, dsts.back().addr))
+    if (!tools::get_transfer_address(d.address, dsts.back().addr, m_rpc_proxy))
     {
       m_pview->show_msg_box("Failed to send transaction: invalid address");
       return false;

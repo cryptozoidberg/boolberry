@@ -343,7 +343,7 @@ namespace currency
       dust_handler(dust);
     }
   }
-  //---------------------------------------------------------------
+
   blobdata block_to_blob(const block& b);
   bool block_to_blob(const block& b, blobdata& b_blob);
   blobdata tx_to_blob(const transaction& b);
