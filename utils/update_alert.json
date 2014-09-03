@@ -2,8 +2,12 @@
    "maj":0,
    "min":2,
    "rev":0,
-   "build":28,
+   "build":34,
    "cs":[
+      {
+         "build":34,
+         "mode":2
+      },
       {
          "build":28,
          "mode":3

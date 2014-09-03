@@ -174,7 +174,7 @@ void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height
   fill_transfer_details(tx, td, wti.td);
   wti.timestamp = timestamp;
   wti.tx_blob_size = static_cast<uint32_t>(currency::get_object_blobsize(wti.tx));
-  wti.tx_hash = string_tools::pod_to_hex(currency::get_object_hash(tx));
+  wti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td)
