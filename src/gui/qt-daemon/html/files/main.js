@@ -172,9 +172,14 @@ function print_money(amount)
 
 
 
-function get_details_block(td, div_id_str, transaction_id, blob_size)
+function get_details_block(td, div_id_str, transaction_id, blob_size, payment_id)
 {
-    var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='balance_text'>Transaction ID:</span> " +  transaction_id + ", <b>size</b>: " + blob_size.toString()  + " bytes<br>";
+    var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='tx_details_text'>Transaction id:</span> " +  transaction_id + ", <b>size</b>: " + blob_size.toString()  + " bytes<br>";
+    if(payment_id !== '' && payment_id !== undefined)
+    {
+        res += "<span class='tx_details_text'>Payment id:</span> " +  payment_id + "<br>";
+    }
+
     if(td.rcv !== undefined)
     {
         for(var i=0; i < td.rcv.length; i++)
@@ -261,7 +266,7 @@ function get_transfer_html_entry(tr, is_recent)
         dt.format("yyyy-mm-dd HH:MM"),
         print_money(tr.amount),
         tr.tx_hash,
-        get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash, tr.tx_blob_size),
+        get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash, tr.tx_blob_size, tr.payment_id),
         action_text,
         tr.recipient,
         short_string);
@@ -504,6 +509,7 @@ $(function()
         ti:{
             height: 10,
             tx_hash: "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c212fe",
+            payment_id: "17967407c304e12b659ce5ab696ad9f64005c809d3e214bc6834c5e1c1e9a9b5",
             amount: 10111100000000,
             tx_blob_size: 1222,
             is_income: true,
@@ -528,6 +534,7 @@ $(function()
     tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
     tttt.ti.timestamp = 1402171355;
+    tttt.ti.payment_id = "";
     tttt.ti.amount =  10123000000000;
     tttt.ti.recipient = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
     tttt.ti.recipient_alias = "zoidberg";
@@ -537,6 +544,7 @@ $(function()
 
     tttt.ti.tx_hash = "u19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
+    tttt.ti.payment_id = undefined;
     tttt.ti.recipient = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
     tttt.ti.recipient_alias = "tifozi";
 

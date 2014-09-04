@@ -410,9 +410,6 @@ QString Html5ApplicationViewer::request_uri(const QString& url_str, const QStrin
     connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
     eventLoop.exec();
     QByteArray res = reply->readAll();
-    //@#@ remove me!
-    //::Sleep(45000);
-    //@#@
     m_d->handle_internal_callback(res, callbackname);
     --m_request_uri_threads_count;
   }).detach();

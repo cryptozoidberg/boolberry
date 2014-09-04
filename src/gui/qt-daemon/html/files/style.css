@@ -290,6 +290,13 @@ span.daemon_view_general_status_value_success_text
     font-weight: bold;
 }
 
+.tx_details_text
+{
+    margin-top: 20px;
+    padding-right: 10px;
+    font-weight: bold;
+}
+
 #wallet_transfer_panel
 {
     background: rgb(230, 233, 242);
