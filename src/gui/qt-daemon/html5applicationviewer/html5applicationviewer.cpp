@@ -49,7 +49,7 @@ signals:
     void hide_wallet();
     void switch_view(const QString str);
     void set_recent_transfers(const QString str);
-
+    void handle_internal_callback(const QString str, const QString callback_name);
 
 
 
@@ -160,6 +160,10 @@ bool Html5ApplicationViewer::store_config()
 
 Html5ApplicationViewer::~Html5ApplicationViewer()
 {
+  while (m_request_uri_threads_count)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
   store_config();
   delete m_d;
 }
@@ -384,25 +388,37 @@ bool is_uri_allowed(const QString& uri)
   return true;
 }
 
-QString Html5ApplicationViewer::request_uri(const QString& url_str, const QString& params)
+QString Html5ApplicationViewer::request_uri(const QString& url_str, const QString& params, const QString& callbackname)
 {
-  view::request_uri_params prms;
-  if (!epee::serialization::load_t_from_json(prms, params.toStdString()))
-  {
-    show_msg_box("Internal error: failed to load request_uri params");
-    return "";
-  }
-  QNetworkAccessManager NAManager;
-  QUrl url(url_str);
-  QNetworkRequest request(url);
-  QNetworkReply *reply = NAManager.get(request);
-  QEventLoop eventLoop;
-  connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-  eventLoop.exec();
-
   
-  QByteArray res = reply->readAll();
-  return res;
+  ++m_request_uri_threads_count;
+  std::thread([url_str, params, callbackname, this](){
+  
+    view::request_uri_params prms;
+    if (!epee::serialization::load_t_from_json(prms, params.toStdString()))
+    {
+      show_msg_box("Internal error: failed to load request_uri params");
+      m_d->handle_internal_callback("", callbackname);
+      --m_request_uri_threads_count;
+      return;
+    }
+    QNetworkAccessManager NAManager;
+    QUrl url(url_str);
+    QNetworkRequest request(url);
+    QNetworkReply *reply = NAManager.get(request);
+    QEventLoop eventLoop;
+    connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+    eventLoop.exec();
+    QByteArray res = reply->readAll();
+    //@#@ remove me!
+    //::Sleep(45000);
+    //@#@
+    m_d->handle_internal_callback(res, callbackname);
+    --m_request_uri_threads_count;
+  }).detach();
+  
+
+  return "";
   
 }
 

@@ -49,7 +49,7 @@ public slots:
     QString get_version();
     QString transfer(const QString& json_transfer_object);
     void message_box(const QString& msg);
-    QString request_uri(const QString& uri, const QString& params);
+    QString request_uri(const QString& url_str, const QString& params, const QString& callbackname);    
     QString request_aliases();
     bool init_config();
 
@@ -81,6 +81,8 @@ private:
     std::atomic<bool> m_quit_requested;
     std::atomic<bool> m_deinitialize_done;
     gui_config m_config;
+
+    std::atomic<size_t> m_request_uri_threads_count;
 };
 
 #endif // HTML5APPLICATIONVIEWER_H
