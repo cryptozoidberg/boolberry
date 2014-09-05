@@ -41,7 +41,7 @@ echo $version_str
 mkdir -p boolberry;
 
 cp -Rv ../../src/gui/qt-daemon/html ./boolberry
-cp -Rv $QT_BINARIES_PATH/qt-boolb.sh ./boolberry
+cp -Rv ../../utils/qt-boolb.sh ./boolberry
 cp -Rv $QT_BINARIES_PATH/libs ./boolberry
 cp -Rv $QT_BINARIES_PATH/libs ./boolberry
 cp -Rv src/boolbd src/qt-boolb src/simplewallet src/simpleminer src/connectivity_tool ./boolberry
