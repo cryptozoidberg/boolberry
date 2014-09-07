@@ -62,7 +62,7 @@ namespace currency
     bool init(const std::string& config_folder);
     bool deinit();
 
-    void set_checkpoints(checkpoints&& chk_pts) { m_checkpoints = chk_pts; }
+    void set_checkpoints(checkpoints&& chk_pts);
     checkpoints& get_checkpoints() { return m_checkpoints; }
 
     //bool push_new_block();
@@ -204,6 +204,7 @@ namespace currency
     aliases_container m_aliases;
     address_to_aliases_container m_addr_to_alias;
     std::vector<crypto::hash> m_scratchpad;
+    uint64_t m_current_pruned_rs_height;
 
     std::string m_config_folder;
     checkpoints m_checkpoints;
@@ -253,6 +254,8 @@ namespace currency
     bool get_required_donations_value_for_next_block(uint64_t& don_am); //applicable only for each CURRENCY_DONATIONS_INTERVAL-th block
     void fill_addr_to_alias_dict();
     bool resync_spent_tx_flags();
+    bool prune_ring_signatures_if_need();
+    bool prune_ring_signatures(uint64_t height);
   };
 
 
@@ -260,7 +263,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          25
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          26
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 
@@ -319,6 +322,14 @@ namespace currency
         throw std::runtime_error("resync_spent_tx_flags() failed.");
       }
     }
+
+    if(version < 26)
+      ar & m_current_pruned_rs_height;
+    else 
+      m_current_pruned_rs_height = 0;
+
+
+
 
     LOG_PRINT_L2("Blockchain storage:" << ENDL << 
         "m_blocks: " << m_blocks.size() << ENDL  << 

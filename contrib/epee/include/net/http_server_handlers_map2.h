@@ -227,6 +227,7 @@ namespace epee
       epee::serialization::store_t_to_json(static_cast<epee::json_rpc::error_response&>(rsp), response_info.m_body); \
       return true; \
     } \
+    LOG_PRINT_L1("json_rpc: ") \
     if(false) return true; //just a stub to have "else if"
 
 

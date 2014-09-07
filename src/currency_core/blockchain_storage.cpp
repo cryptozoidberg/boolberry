@@ -36,7 +36,8 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool):m_tx_pool(tx_poo
                                                                 m_is_in_checkpoint_zone(false), 
                                                                 m_donations_account(AUTO_VAL_INIT(m_donations_account)), 
                                                                 m_royalty_account(AUTO_VAL_INIT(m_royalty_account)),
-                                                                m_is_blockchain_storing(false)
+                                                                m_is_blockchain_storing(false), 
+                                                                m_current_pruned_rs_height(0)
 {
   bool r = get_donation_accounts(m_donations_account, m_royalty_account);
   CHECK_AND_ASSERT_THROW_MES(r, "failed to load donation accounts");
@@ -173,6 +174,42 @@ bool blockchain_storage::pop_block_from_blockchain()
   return true;
 }
 //------------------------------------------------------------------
+void blockchain_storage::set_checkpoints(checkpoints&& chk_pts) 
+{
+  m_checkpoints = chk_pts;
+  prune_ring_signatures_if_need();
+}
+//------------------------------------------------------------------
+bool blockchain_storage::prune_ring_signatures(uint64_t height)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  CHECK_AND_ASSERT_MES(height < m_blocks.size(), false, "prune_ring_signatures called with wrong parametr " << height << ", m_blocks.size() " << m_blocks.size());
+  for(const auto& h: m_blocks[height].bl.tx_hashes)
+  {
+    auto it = m_transactions.find(h);
+    CHECK_AND_ASSERT_MES(it != m_transactions.end(), false, "failed to find transaction " << h << " in blockchain index, in block on height = " << height);    
+    CHECK_AND_ASSERT_MES(it->second.m_keeper_block_height == height, false, 
+      "failed to validate extra check, it->second.m_keeper_block_height = " << it->second.m_keeper_block_height  << 
+      "is mot equal to height = " << height << " in blockchain index, for block on height = " << height);
+    
+    it->second.tx.signatures.clear();
+  }
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::prune_ring_signatures_if_need()
+{
+  if(m_current_pruned_rs_height && m_checkpoints.get_top_checkpoint_height() && m_checkpoints.get_top_checkpoint_height() > m_current_pruned_rs_height)
+  {    
+    for(uint64_t height = m_current_pruned_rs_height+1; height < m_blocks.size() && height <= m_checkpoints.get_top_checkpoint_height(); height++)
+    {
+      bool res = prune_ring_signatures(height);
+      CHECK_AND_ASSERT(res, false, "filed to prune_ring_signatures for height = " << height);
+    }
+  }
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::reset_and_set_genesis_block(const block& b)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -305,10 +342,6 @@ bool blockchain_storage::purge_block_data_from_blockchain(const block& bl, size_
   }
 
   res = purge_transaction_from_blockchain(get_transaction_hash(bl.miner_tx)) && res;
-
-  //purge scratchpad
-
-
   return res;
 }
 //------------------------------------------------------------------
