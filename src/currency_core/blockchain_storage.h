@@ -255,7 +255,7 @@ namespace currency
     void fill_addr_to_alias_dict();
     bool resync_spent_tx_flags();
     bool prune_ring_signatures_if_need();
-    bool prune_ring_signatures(uint64_t height);
+    bool prune_ring_signatures(uint64_t height, uint64_t& transactions_pruned, uint64_t& signatures_pruned);
   };
 
 
@@ -324,10 +324,14 @@ namespace currency
     }
 
     if(version < 26)
-      ar & m_current_pruned_rs_height;
-    else 
       m_current_pruned_rs_height = 0;
-
+    else 
+      ar & m_current_pruned_rs_height;
+    
+    if(archive_t::is_loading::value)
+    {
+      prune_ring_signatures_if_need();
+    }
 
 
 

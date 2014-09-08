@@ -19,6 +19,7 @@ namespace currency {
     ADD_CHECKPOINT(2000,  "66e8cd560748e41a3aeb4d0dc9a071c5d5145929aa6dc0df98baac5b43e584a6");
     ADD_CHECKPOINT(3000,  "0a24811b48634fdd205a7fc9cc594b8fc485ec886be84d546bbbe0a2ff6662e3");
     ADD_CHECKPOINT(5000,  "01a1a9fc533196000143b918ee5a47a5c49d2a19cad812d04e3a16fdcee97fbb");
+    ADD_CHECKPOINT(70000,  "e7e9fd61e132d7d4d3aefdbf1759bdde2e728b9c84d245deefb2c574b3cb1b53");
 #endif
     return true;
   }
