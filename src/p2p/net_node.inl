@@ -22,12 +22,13 @@ namespace nodetool
 {
   namespace
   {
-    const command_line::arg_descriptor<std::string> arg_p2p_bind_ip        = {"p2p-bind-ip", "Interface for p2p network protocol", "0.0.0.0"};
-    const command_line::arg_descriptor<std::string> arg_p2p_bind_port      = {"p2p-bind-port", "Port for p2p network protocol", boost::to_string(P2P_DEFAULT_PORT)};
-    const command_line::arg_descriptor<uint32_t>    arg_p2p_external_port  = {"p2p-external-port", "External port for p2p network protocol (if port forwarding used with NAT)", 0};
-    const command_line::arg_descriptor<bool>        arg_p2p_allow_local_ip = {"allow-local-ip", "Allow local ip add to peer list, mostly in debug purposes"};
+    const command_line::arg_descriptor<std::string>               arg_p2p_bind_ip        = {"p2p-bind-ip", "Interface for p2p network protocol", "0.0.0.0"};
+    const command_line::arg_descriptor<std::string>               arg_p2p_bind_port      = {"p2p-bind-port", "Port for p2p network protocol", boost::to_string(P2P_DEFAULT_PORT)};
+    const command_line::arg_descriptor<uint32_t>                  arg_p2p_external_port  = {"p2p-external-port", "External port for p2p network protocol (if port forwarding used with NAT)", 0};
+    const command_line::arg_descriptor<bool>                      arg_p2p_allow_local_ip = {"allow-local-ip", "Allow local ip add to peer list, mostly in debug purposes"};
     const command_line::arg_descriptor<std::vector<std::string> > arg_p2p_add_peer   = {"add-peer", "Manually add peer to local peerlist"};
     const command_line::arg_descriptor<std::vector<std::string> > arg_p2p_add_priority_node   = {"add-priority-node", "Specify list of peers to connect to and attempt to keep the connection open"};
+    const command_line::arg_descriptor<bool>                      arg_p2p_use_only_priority_nodes   = {"use-only-priority-nodes", "Try to connect only to priority nodes"};
     const command_line::arg_descriptor<std::vector<std::string> > arg_p2p_seed_node   = {"seed-node", "Connect to a node to retrieve peer addresses, and disconnect"};
     const command_line::arg_descriptor<bool> arg_p2p_hide_my_port   =    {"hide-my-port", "Do not announce yourself as peerlist candidate", false, true};  }
 
@@ -70,6 +71,7 @@ namespace nodetool
     m_config.m_net_config.send_peerlist_sz = P2P_DEFAULT_PEERS_IN_HANDSHAKE;
 
     m_first_connection_maker_call = true;
+    m_use_only_priority_peers = false;
     CATCH_ENTRY_L0("node_server::init_config", false);
     return true;
   }
@@ -160,6 +162,12 @@ namespace nodetool
         m_priority_peers.push_back(na);
       }
     }
+    if(command_line::has_arg(vm, arg_p2p_use_only_priority_nodes))
+    {
+      m_use_only_priority_peers = true;
+    }
+
+
     if (command_line::has_arg(vm, arg_p2p_seed_node))
     {
       std::vector<std::string> seed_perrs = command_line::get_arg(vm, arg_p2p_seed_node);
@@ -689,7 +697,7 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::connections_maker()
   {
-    if(!m_peerlist.get_white_peers_count() && m_seed_nodes.size())
+    if(!m_peerlist.get_white_peers_count() && m_seed_nodes.size() && !m_priority_peers.size())
     {
       size_t try_count = 0;
       size_t current_index = crypto::rand<size_t>()%m_seed_nodes.size();
@@ -719,6 +727,8 @@ namespace nodetool
         continue;
       try_to_connect_and_handshake_with_new_peer(na);
     }
+    if(m_use_only_priority_peers)
+      return true;
 
     size_t expected_white_connections = (m_config.m_net_config.connections_count*P2P_DEFAULT_WHITELIST_CONNECTIONS_PERCENT)/100;
 

@@ -236,6 +236,7 @@ namespace nodetool
     int64_t m_last_stat_request_time;
 #endif
     std::list<net_address>   m_priority_peers;
+    bool m_use_only_priority_peers;
     std::vector<net_address> m_seed_nodes;
     std::list<nodetool::peerlist_entry> m_command_line_peers;
     int64_t m_peer_livetime;
