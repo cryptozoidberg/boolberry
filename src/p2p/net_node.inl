@@ -43,7 +43,9 @@ namespace nodetool
     command_line::add_arg(desc, arg_p2p_add_peer);
     command_line::add_arg(desc, arg_p2p_add_priority_node);
     command_line::add_arg(desc, arg_p2p_seed_node);    
-    command_line::add_arg(desc, arg_p2p_hide_my_port);   }
+    command_line::add_arg(desc, arg_p2p_hide_my_port);   
+    command_line::add_arg(desc, arg_p2p_use_only_priority_nodes);       
+  }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::init_config()
@@ -71,7 +73,6 @@ namespace nodetool
     m_config.m_net_config.send_peerlist_sz = P2P_DEFAULT_PEERS_IN_HANDSHAKE;
 
     m_first_connection_maker_call = true;
-    m_use_only_priority_peers = false;
     CATCH_ENTRY_L0("node_server::init_config", false);
     return true;
   }
@@ -163,9 +164,9 @@ namespace nodetool
       }
     }
     if(command_line::has_arg(vm, arg_p2p_use_only_priority_nodes))
-    {
       m_use_only_priority_peers = true;
-    }
+    else
+      m_use_only_priority_peers = false;
 
 
     if (command_line::has_arg(vm, arg_p2p_seed_node))

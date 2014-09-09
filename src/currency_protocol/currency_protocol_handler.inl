@@ -130,15 +130,10 @@ namespace currency
       return false;
     }else if (m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() < hshd.last_checkpoint_height)
     {
-      LOG_PRINT_CCONTEXT_MAGENTA("Remote node have longer checkpoints zone( " << hshd.last_checkpoint_height <<  ") "
-        "that local (" << m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() << ")"
-        "That means that current software is outdated, please updated it." LOG_LEVEL_0);
-
+      LOG_PRINT_CCONTEXT_MAGENTA("Remote node have longer checkpoints zone( " << hshd.last_checkpoint_height <<  ") " <<
+        "that local (" << m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() << ")" << 
+        "That means that current software is outdated, please updated it.", LOG_LEVEL_0);
     }
-
-
-
-
 
     context.m_state = currency_connection_context::state_synchronizing;
     context.m_remote_blockchain_height = hshd.current_height;
