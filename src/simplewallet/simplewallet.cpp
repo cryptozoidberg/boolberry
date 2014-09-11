@@ -170,6 +170,7 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("refresh", boost::bind(&simple_wallet::refresh, this, _1), "Resynchronize transactions and balance");
   m_cmd_binder.set_handler("balance", boost::bind(&simple_wallet::show_balance, this, _1), "Show current wallet balance");
   m_cmd_binder.set_handler("incoming_transfers", boost::bind(&simple_wallet::show_incoming_transfers, this, _1), "incoming_transfers [available|unavailable] - Show incoming transfers - all of them or filter them by availability");
+  m_cmd_binder.set_handler("list_recent_transfers", boost::bind(&simple_wallet::list_recent_transfers, this, _1), "list_recent_transfers - Show recent maximum 1000 transfers");
   m_cmd_binder.set_handler("payments", boost::bind(&simple_wallet::show_payments, this, _1), "payments <payment_id_1> [<payment_id_2> ... <payment_id_N>] - Show payments <payment_id_1>, ... <payment_id_N>");
   m_cmd_binder.set_handler("bc_height", boost::bind(&simple_wallet::show_blockchain_height, this, _1), "Show blockchain height");
   m_cmd_binder.set_handler("transfer", boost::bind(&simple_wallet::transfer, this, _1), "transfer <mixin_count> <addr_1> <amount_1> [<addr_2> <amount_2> ... <addr_N> <amount_N>] [payment_id] - Transfer <amount_1>,... <amount_N> to <address_1>,... <address_N>, respectively. <mixin_count> is the number of transactions yours is indistinguishable from (from 0 to maximum available)");
@@ -522,6 +523,51 @@ bool simple_wallet::refresh(const std::vector<std::string>& args)
 bool simple_wallet::show_balance(const std::vector<std::string>& args/* = std::vector<std::string>()*/)
 {
   success_msg_writer() << "balance: " << print_money(m_wallet->balance()) << ", unlocked balance: " << print_money(m_wallet->unlocked_balance());
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool print_wti(const tools::wallet_rpc::wallet_transfer_info& wti)
+{
+  epee::log_space::console_colors cl;
+  if (wti.is_income)
+    cl = epee::log_space::console_color_green;
+  else
+    cl = epee::log_space::console_color_magenta;
+
+  std::string payment_id_placeholder;
+  if (wti.payment_id.size())
+    payment_id_placeholder = std::string("(payment_id:") + wti.payment_id + ")";
+
+  message_writer(cl) << epee::misc_utils::get_time_str_v2(wti.timestamp) << " "
+    << (wti.is_income ? "Received " : "Sent    ")
+    << print_money(wti.amount) << "(fee:" << print_money(wti.fee) << ")  "
+    << (wti.recipient_alias.size() ? wti.recipient_alias : wti.recipient)
+    << " " << wti.tx_hash << payment_id_placeholder;
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::list_recent_transfers(const std::vector<std::string>& args)
+{
+  std::vector<tools::wallet_rpc::wallet_transfer_info> unconfirmed;
+  std::vector<tools::wallet_rpc::wallet_transfer_info> recent;
+  m_wallet->get_recent_transfers_history(recent, 0, 1000);
+  m_wallet->get_unconfirmed_transfers(unconfirmed);
+  //workaround for missed fee
+  
+  success_msg_writer() << "Unconfirmed transfers: ";
+  for (auto & wti : unconfirmed)
+  {
+    if (!wti.fee)
+      wti.fee = currency::get_tx_fee(wti.tx);
+    print_wti(wti);
+  }
+  success_msg_writer() << "Recent transfers: ";
+  for (auto & wti : recent)
+  {
+    if (!wti.fee)
+      wti.fee = currency::get_tx_fee(wti.tx);
+    print_wti(wti);
+  }
   return true;
 }
 //----------------------------------------------------------------------------------------------------
