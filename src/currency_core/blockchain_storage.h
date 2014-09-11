@@ -126,6 +126,7 @@ namespace currency
     wide_difficulty_type block_difficulty(size_t i);
     bool copy_scratchpad(std::vector<crypto::hash>& dst);//TODO: not the best way, add later update method instead of full copy
     bool copy_scratchpad(std::string& dst);
+    bool prune_aged_alt_blocks();
 
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
     bool get_blocks(const t_ids_container& block_ids, t_blocks_container& blocks, t_missed_container& missed_bs)
@@ -263,7 +264,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          26
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          27
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 
@@ -278,7 +279,11 @@ namespace currency
     ar & m_blocks_index;
     ar & m_transactions;
     ar & m_spent_keys;
-    ar & m_alternative_chains;
+
+    //do not keep alternative blocks
+    if(version < 27)
+      ar & m_alternative_chains;
+
     ar & m_outputs;
     ar & m_invalid_blocks;
     ar & m_current_block_cumul_sz_limit;

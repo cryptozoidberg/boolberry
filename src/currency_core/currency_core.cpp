@@ -532,7 +532,8 @@ namespace currency
       m_starter_message_showed = true;
     }
 
-    m_store_blockchain_interval.do_call(boost::bind(&blockchain_storage::store_blockchain, &m_blockchain_storage));
+    m_store_blockchain_interval.do_call([this](){return m_blockchain_storage.store_blockchain();});
+    m_prune_alt_blocks_interval.do_call([this](){return m_blockchain_storage.prune_aged_alt_blocks();});
     m_miner.on_idle();
     m_mempool.on_idle();
     return true;
