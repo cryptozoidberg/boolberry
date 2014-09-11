@@ -423,17 +423,13 @@ function on_set_recent_transfers(o)
 }
 
 
-function secure_request_url_result_handler(res)
+function secure_request_url_result_handler(info_obj)
 {
     //debug case
-    if(res === undefined)
+    if(info_obj === undefined)
         return;
 
-    console.log("https://blockchain.info/ticker response:" + res);
-
-    var info_obj = $.parseJSON(res);
-    if(info_obj.last === undefined )
-        return;
+    console.log("https://blockchain.info/ticker response:" + JSON.stringify(info_obj));
 
     current_btc_to_usd_exchange_rate = parseFloat(info_obj.last);
     console.log("Exchange rate BTC: " + current_btc_to_usd_exchange_rate.toFixed(8) + " USD");
@@ -442,6 +438,7 @@ function secure_request_url_result_handler(res)
 
 function on_handle_internal_callback(obj_str, callback_name)
 {
+    //console.log("on_handle_internal_callback: " + callback_name + ":" + obj_str);
     var obj = undefined;
     if(obj_str !== undefined && obj_str !== "")
     {
