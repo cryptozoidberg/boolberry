@@ -428,6 +428,13 @@ bool daemon_backend::load_recent_transfers()
   view::transfers_array tr_hist;
   m_wallet->get_recent_transfers_history(tr_hist.history, 0, 1000);
   m_wallet->get_unconfirmed_transfers(tr_hist.unconfirmed);
+  //workaround for missed fee
+  for (auto & he : tr_hist.history)
+    if (!he.fee) he.fee = currency::get_tx_fee(he.tx);
+
+  for (auto & he : tr_hist.unconfirmed)
+    if (!he.fee) he.fee = currency::get_tx_fee(he.tx);
+
   return m_pview->set_recent_transfers(tr_hist);
 }
 

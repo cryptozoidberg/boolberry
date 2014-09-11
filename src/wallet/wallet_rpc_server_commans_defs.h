@@ -38,6 +38,7 @@ namespace wallet_rpc
     std::string   recipient; //optional
     std::string   recipient_alias; //optional
     bool          is_income;
+    uint64_t      fee;
     wallet_transfer_info_details td;
     
     //not included in serialization map
@@ -54,6 +55,7 @@ namespace wallet_rpc
       KV_SERIALIZE(is_income)
       KV_SERIALIZE(timestamp)
       KV_SERIALIZE(td)
+      KV_SERIALIZE(fee)
     END_KV_SERIALIZE_MAP()
   };
 

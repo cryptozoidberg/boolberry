@@ -212,7 +212,7 @@ namespace tools
 
 BOOST_CLASS_VERSION(tools::wallet2, 8)
 BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 3)
-BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 2)
+BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 3)
 
 
 namespace boost
@@ -263,6 +263,8 @@ namespace boost
     template <class Archive>
     inline void serialize(Archive& a, tools::wallet_rpc::wallet_transfer_info& x, const boost::serialization::version_type ver)
     {      
+      x.fee = 0;
+
       a & x.amount;
       a & x.timestamp;
       a & x.tx_hash;
@@ -276,8 +278,10 @@ namespace boost
       if (ver < 2)
         return;
       a & x.recipient_alias;
+      if (ver < 3)
+        return;
+      a & x.fee;
     }
-
   }
 }
 
