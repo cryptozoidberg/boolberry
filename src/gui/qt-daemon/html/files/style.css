@@ -430,6 +430,13 @@ span.daemon_view_general_status_value_success_text
     display: none;
 }
 
+.transfer_extra_options_hint
+{
+    font-size: 70%;
+    font-weight: normal;
+}
+
+
 #wallet_recent_transfers_panel
 {
     /*background: rgb(241, 241, 241);*/
