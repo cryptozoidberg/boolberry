@@ -360,6 +360,88 @@ function on_close_wallet()
 
 
 var last_timerId;
+
+function test_parse_and_get_locktime_function()
+{
+    $('#lock_time').val("1d 2h");
+    if(parse_and_get_locktime() !== 780)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+    $('#lock_time').val("1d 2h 22");
+    if(parse_and_get_locktime() !== 802)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+    $('#lock_time').val("22");
+    if(parse_and_get_locktime() !== 22)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+    $('#lock_time').val("d222");
+    if(parse_and_get_locktime() !== undefined)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+    $('#lock_time').val("sfdd");
+    if(parse_and_get_locktime() !== undefined)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+    $('#lock_time').val("3d 2h 34j");
+    if(parse_and_get_locktime() !== undefined)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+}
+
+
+function parse_and_get_locktime()
+{
+    var lock_time = $('#lock_time').val();
+    if(lock_time === "")
+        return 0;
+    var items = lock_time.split(" ");
+    if(!items.length )
+        return 0;
+
+    var blocks_count = 0;
+    for(var i = 0; i!=items.length; i++)
+    {
+        var multiplier = 1;
+        if(items[i][items[i].length-1] === "d")
+        {
+            items[i] = items[i].substr(0, items[i].length-1);
+            multiplier = 720;
+        }else if(items[i][items[i].length-1] === "h")
+        {
+            items[i] = items[i].substr(0, items[i].length-1);
+            multiplier = 30;
+        }
+        var value = parseInt(items[i]);
+        if( !(value > 0) )
+        {
+            //Qt_parent.message_box("Wrong transaction lock time specified.");
+            return undefined;
+        }
+        blocks_count += value * multiplier;
+    }
+    return blocks_count;
+}
+
+
 function on_transfer()
 {
     var transfer_obj = {
@@ -504,6 +586,9 @@ $(function()
     /****************************************************************************/
     //some testing stuff
     //to make it available in browser mode
+
+    test_parse_and_get_locktime_function();
+
     show_wallet();
     on_update_wallet_status({wallet_state: 2});
     var tttt = {
