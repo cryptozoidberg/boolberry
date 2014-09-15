@@ -172,11 +172,12 @@ function print_money(amount)
 
 
 
-function get_details_block(td, div_id_str, transaction_id, blob_size, payment_id, fee)
+function get_details_block(td, div_id_str, transaction_id, blob_size, payment_id, fee, unlock_time)
 {
     var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='tx_details_text'>Transaction id:</span> " +  transaction_id
         + "<br><b>size</b>: " + blob_size.toString()  + " bytes"
         +  "<br><b>fee</b>: " + print_money(fee)
+        + "<br><b>unlock_time</b>: " + unlock_time
         +  "<br><b>split transfers</b>: <br>";
 
     if(payment_id !== '' && payment_id !== undefined)
@@ -270,7 +271,7 @@ function get_transfer_html_entry(tr, is_recent)
         dt.format("yyyy-mm-dd HH:MM"),
         print_money(tr.amount),
         tr.tx_hash,
-        get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash, tr.tx_blob_size, tr.payment_id, tr.fee),
+        get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash, tr.tx_blob_size, tr.payment_id, tr.fee, tr.unlock_time ? tr.unlock_time - tr.height: 0),
         action_text,
         tr.recipient,
         short_string);
@@ -433,7 +434,6 @@ function parse_and_get_locktime()
         var value = parseInt(items[i]);
         if( !(value > 0) )
         {
-            //Qt_parent.message_box("Wrong transaction lock time specified.");
             return undefined;
         }
         blocks_count += value * multiplier;
@@ -452,11 +452,17 @@ function on_transfer()
             }
         ],
         mixin_count: 0,
+        lock_time: 0,
         payment_id: $('#payment_id').val()
     };
 
-    //if(transfer_obj.destinations[0].address )
-
+    var lock_time = parse_and_get_locktime();
+    if(lock_time === undefined)
+    {
+        Qt_parent.message_box("Wrong transaction lock time specified.");
+        return;
+    }
+    transfer_obj.lock_time = lock_time;
     transfer_obj.mixin_count = parseInt($('#mixin_count_id').val());
     transfer_obj.fee = $('#tx_fee').val();
 
@@ -587,7 +593,7 @@ $(function()
     //some testing stuff
     //to make it available in browser mode
 
-    test_parse_and_get_locktime_function();
+    //test_parse_and_get_locktime_function();
 
     show_wallet();
     on_update_wallet_status({wallet_state: 2});
@@ -599,6 +605,7 @@ $(function()
             amount: 10111100000000,
             tx_blob_size: 1222,
             is_income: true,
+            unlock_time: 27,
             fee: 2000000000,
             timestamp: 1402878665,
             td: {

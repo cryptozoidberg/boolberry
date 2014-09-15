@@ -281,6 +281,11 @@ namespace boost
       if (ver < 3)
         return;
       a & x.fee;
+
+      //do not store unlock_time
+      if (archive_t::is_loading::value)
+        x.unlock_time = x.tx.unlock_time;
+
     }
   }
 }

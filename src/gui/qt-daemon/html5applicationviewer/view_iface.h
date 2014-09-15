@@ -39,12 +39,14 @@ namespace view
   {
     std::list<transfer_destination> destinations;
     uint64_t mixin_count;
+    uint64_t lock_time;
     std::string payment_id;
     std::string fee;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(destinations)
       KV_SERIALIZE(mixin_count)
+      KV_SERIALIZE(lock_time)
       KV_SERIALIZE(payment_id)
       KV_SERIALIZE(fee)
     END_KV_SERIALIZE_MAP()
