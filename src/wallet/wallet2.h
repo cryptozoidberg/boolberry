@@ -283,7 +283,7 @@ namespace boost
       a & x.fee;
 
       //do not store unlock_time
-      if (archive_t::is_loading::value)
+      if (Archive::is_loading::value)
         x.unlock_time = x.tx.unlock_time;
 
     }
