@@ -290,11 +290,18 @@ namespace currency
     ar & m_aliases;
     ar & m_scratchpad;
     
-    /*serialization bug workaround*/
+
+    /*---- serialization bug workaround ----*/    
     
-    uint64_t total_check_count = m_blocks.size() + m_blocks_index.size() + m_transactions.size() + m_spent_keys.size() + m_alternative_chains.size() + m_outputs.size() + m_invalid_blocks.size() + m_current_block_cumul_sz_limit;
+    /*serialization m_alternative_chains excluding*/
+    uint64_t total_check_count = 0;
+    if (archive_t::is_loading::value && version < 27)
+      total_check_count = m_blocks.size() + m_blocks_index.size() + m_transactions.size() + m_spent_keys.size() + m_alternative_chains.size() + m_outputs.size() + m_invalid_blocks.size() + m_current_block_cumul_sz_limit;
+    else
+      total_check_count = m_blocks.size() + m_blocks_index.size() + m_transactions.size() + m_spent_keys.size() + m_outputs.size() + m_invalid_blocks.size() + m_current_block_cumul_sz_limit;
+
     if(archive_t::is_saving::value)
-    {        
+    {
       ar & total_check_count;
     }else
     {
