@@ -129,7 +129,8 @@ Html5ApplicationViewer::Html5ApplicationViewer(QWidget *parent)
     : QWidget(parent)
     , m_d(new Html5ApplicationViewerPrivate(this)),
       m_quit_requested(false),
-      m_deinitialize_done(false)
+      m_deinitialize_done(false), 
+      m_backend_stopped(false)
 {
     //connect(m_d, SIGNAL(quitRequested()), SLOT(close()));
 
@@ -249,7 +250,13 @@ QGraphicsWebView *Html5ApplicationViewer::webView() const
 bool Html5ApplicationViewer::on_request_quit()
 {
   m_quit_requested = true;
-  m_backend.send_stop_signal();
+  if (m_backend_stopped)
+  {
+    bool r = QMetaObject::invokeMethod(this,
+      "do_close",
+      Qt::QueuedConnection);
+  }else
+    m_backend.send_stop_signal();
   return true;
 }
 
@@ -261,9 +268,10 @@ bool Html5ApplicationViewer::do_close()
 
 bool Html5ApplicationViewer::on_backend_stopped()
 {
+  m_backend_stopped = true;
+  m_deinitialize_done = true;
   if(m_quit_requested)
   {
-    m_deinitialize_done = true;
     bool r = QMetaObject::invokeMethod(this,
                                  "do_close",
                                  Qt::QueuedConnection);

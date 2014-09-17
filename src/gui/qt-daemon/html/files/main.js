@@ -102,7 +102,25 @@ function on_update_daemon_state(info_obj)
         inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
         disable_tab(document.getElementById('wallet_view_menu'), true);
         //show OK
+    }else if(info_obj.daemon_network_state == 4)//deinit
+    {
+        $("#synchronization_progressbar_block").hide();
+        $("#synchronization_progressbar" ).progressbar({value: false });
+        $("#daemon_synchronization_text").text("");
+
+        $("#daemon_status_text").removeClass("daemon_view_general_status_value_success_text");
+        $("#daemon_status_text").addClass("daemon_view_general_status_value_fail_text");
+
+        $("#open_wallet_button").button("disable");
+        $("#generate_wallet_button").button("disable");
+        //$("#domining_button").button("disable");
+
+        hide_wallet();
+        inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
+        disable_tab(document.getElementById('wallet_view_menu'), true);
+        //show OK
     }
+
     else
     {
         //set unknown status

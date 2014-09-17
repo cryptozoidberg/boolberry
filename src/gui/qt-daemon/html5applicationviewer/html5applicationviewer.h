@@ -80,6 +80,7 @@ private:
     daemon_backend m_backend;
     std::atomic<bool> m_quit_requested;
     std::atomic<bool> m_deinitialize_done;
+    std::atomic<bool> m_backend_stopped;
     gui_config m_config;
 
     std::atomic<size_t> m_request_uri_threads_count;
