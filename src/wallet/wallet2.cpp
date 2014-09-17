@@ -346,6 +346,19 @@ void wallet2::update_current_tx_limit()
   m_upper_transaction_size_limit = res.current_blocks_median - CURRENCY_COINBASE_BLOB_RESERVED_SIZE;
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::scan_tx_pool()
+{
+  //get transaction pool content 
+  currency::COMMAND_RPC_GET_TX_POOL::request req = AUTO_VAL_INIT(req);
+  currency::COMMAND_RPC_GET_TX_POOL::response res = AUTO_VAL_INIT(res);
+  bool r = net_utils::invoke_http_bin_remote_command2(m_daemon_address + "/get_tx_pool.bin", req, res, m_http_client, WALLET_RCP_CONNECTION_TIMEOUT);
+  CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "get_tx_pool");
+  CHECK_AND_THROW_WALLET_EX(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_tx_pool");
+  CHECK_AND_THROW_WALLET_EX(res.status != CORE_RPC_STATUS_OK, error::get_blocks_error, res.status);
+
+  //TODO: read transactions
+}
+//----------------------------------------------------------------------------------------------------
 void wallet2::refresh(size_t & blocks_fetched, bool& received_money)
 {
   received_money = false;

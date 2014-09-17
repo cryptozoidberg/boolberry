@@ -192,6 +192,24 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_tx_pool(const COMMAND_RPC_GET_TX_POOL::request& req, COMMAND_RPC_GET_TX_POOL::response& res, connection_context& cntx)
+  {
+    CHECK_CORE_READY();
+    std::list<transaction> txs;
+    if (!m_core.get_pool_transactions(txs))
+    {
+      res.status = "Failed to call get_pool_transactions()";
+      return true;
+    }
+
+    for(auto& tx: txs)
+    {
+      res.txs.push_back(t_serializable_object_to_blob(tx));
+    }
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_transactions(const COMMAND_RPC_GET_TRANSACTIONS::request& req, COMMAND_RPC_GET_TRANSACTIONS::response& res, connection_context& cntx)
   {
     CHECK_CORE_READY();

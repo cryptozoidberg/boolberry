@@ -125,6 +125,7 @@ namespace tools
     i_wallet2_callback* callback() const { return m_callback; }
     void callback(i_wallet2_callback* callback) { m_callback = callback; }
 
+    void scan_tx_pool();
     void refresh();
     void refresh(size_t & blocks_fetched);
     void refresh(size_t & blocks_fetched, bool& received_money);

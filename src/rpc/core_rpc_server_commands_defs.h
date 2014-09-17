@@ -118,7 +118,26 @@ namespace currency
       END_KV_SERIALIZE_MAP()
     };
   };
+  //-----------------------------------------------
+  struct COMMAND_RPC_GET_TX_POOL
+  {
+    struct request
+    {
+      BEGIN_KV_SERIALIZE_MAP()
+      END_KV_SERIALIZE_MAP()
+    };
 
+    struct response
+    {
+      std::list<blobdata> txs;  //transactions blobs
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(txs)
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
   //-----------------------------------------------
   struct COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES
   {

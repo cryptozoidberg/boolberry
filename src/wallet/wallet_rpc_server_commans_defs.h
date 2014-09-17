@@ -32,11 +32,11 @@ namespace wallet_rpc
     uint64_t      amount;
     uint64_t      timestamp;
     std::string   tx_hash;
-    uint64_t      height;
+    uint64_t      height;          //if height == 0 than tx is unconfirmed
     uint64_t      unlock_time;
     uint32_t      tx_blob_size;
     std::string   payment_id;
-    std::string   recipient; //optional
+    std::string   recipient;       //optional
     std::string   recipient_alias; //optional
     bool          is_income;
     uint64_t      fee;
