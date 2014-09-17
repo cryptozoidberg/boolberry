@@ -367,6 +367,7 @@ bool daemon_backend::update_wallets()
       try
       {
         m_wallet->refresh();
+        m_wallet->scan_tx_pool();
       }
       
       catch (const tools::error::daemon_busy& /*e*/)

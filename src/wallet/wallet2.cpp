@@ -121,7 +121,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       
       mtd.spent_indices.push_back(i);
 
-      if (0 != m_callback)
+      if (m_callback)
         m_callback->on_money_spent(height, td.m_tx, td.m_internal_output_index, tx);
     }
     i++;
@@ -356,7 +356,46 @@ void wallet2::scan_tx_pool()
   CHECK_AND_THROW_WALLET_EX(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_tx_pool");
   CHECK_AND_THROW_WALLET_EX(res.status != CORE_RPC_STATUS_OK, error::get_blocks_error, res.status);
 
-  //TODO: read transactions
+  for (const auto &tx_blob : res.txs)
+  {
+    currency::transaction tx;
+    bool r = parse_and_validate_tx_from_blob(tx_blob, tx);
+    CHECK_AND_THROW_WALLET_EX(!r, error::tx_parse_error, tx_blob);
+    
+    // read extra
+    std::vector<size_t> outs;
+    uint64_t tx_money_got_in_outs = 0;
+    crypto::public_key tx_pub_key = null_pkey;
+    bool r = parse_and_validate_tx_extra(tx, tx_pub_key);
+    CHECK_AND_THROW_WALLET_EX(!r, error::tx_extra_parse_error, tx);
+    //check if we have money
+    r = lookup_acc_outs(m_account.get_keys(), tx, tx_pub_key, outs, tx_money_got_in_outs);
+    CHECK_AND_THROW_WALLET_EX(!r, error::acc_outs_lookup_error, tx, tx_pub_key, m_account.get_keys());
+    //check if we have spendings
+    uint64_t tx_money_spent_in_ins = 0;
+    // check all outputs for spending (compare key images)
+    size_t i = 0;
+    for(auto& in: tx.vin)
+    {
+      if (in.type() != typeid(currency::txin_to_key))
+        continue;
+      if(m_key_images.count(boost::get<currency::txin_to_key>(in).k_image))
+        tx_money_spent_in_ins += boost::get<currency::txin_to_key>(in).amount;
+    }
+
+    if (!tx_money_spent_in_ins && tx_money_got_in_outs)
+    {
+      //prepare notification about pending transaction
+      wallet_rpc::wallet_transfer_info wti = AUTO_VAL_INIT(wti);
+      wti.is_income = true;
+
+      prepare_wti(wti, 0, 0, tx, tx_money_got_in_outs, money_transfer2_details());
+      if (m_callback)
+        m_callback->on_transfer2(wti);
+    }
+
+  }
+
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::refresh(size_t & blocks_fetched, bool& received_money)
