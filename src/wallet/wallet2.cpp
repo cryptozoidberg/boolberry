@@ -366,7 +366,7 @@ void wallet2::scan_tx_pool()
     std::vector<size_t> outs;
     uint64_t tx_money_got_in_outs = 0;
     crypto::public_key tx_pub_key = null_pkey;
-    bool r = parse_and_validate_tx_extra(tx, tx_pub_key);
+    r = parse_and_validate_tx_extra(tx, tx_pub_key);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_extra_parse_error, tx);
     //check if we have money
     r = lookup_acc_outs(m_account.get_keys(), tx, tx_pub_key, outs, tx_money_got_in_outs);
