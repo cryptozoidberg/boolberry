@@ -173,7 +173,7 @@ void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height
     wti.payment_id = string_tools::pod_to_hex(pid);
   fill_transfer_details(tx, td, wti.td);
   wti.timestamp = timestamp;
-  wti.fee = currency::get_tx_fee(tx);
+  wti.fee = currency::is_coinbase(tx) ? 0:currency::get_tx_fee(tx);
   wti.unlock_time = tx.unlock_time;
   wti.tx_blob_size = static_cast<uint32_t>(currency::get_object_blobsize(wti.tx));
   wti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
@@ -355,13 +355,22 @@ void wallet2::scan_tx_pool()
   CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "get_tx_pool");
   CHECK_AND_THROW_WALLET_EX(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_tx_pool");
   CHECK_AND_THROW_WALLET_EX(res.status != CORE_RPC_STATUS_OK, error::get_blocks_error, res.status);
+  
+  std::unordered_map<crypto::hash, currency::transaction> unconfirmed_in_transfers_local(std::move(m_unconfirmed_in_transfers));
 
   for (const auto &tx_blob : res.txs)
   {
     currency::transaction tx;
     bool r = parse_and_validate_tx_from_blob(tx_blob, tx);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_parse_error, tx_blob);
-    
+    crypto::hash tx_hash = currency::get_transaction_hash(tx);
+    auto it = unconfirmed_in_transfers_local.find(tx_hash);
+    if (it != unconfirmed_in_transfers_local.end())
+    {
+      m_unconfirmed_in_transfers.insert(*it);
+      continue;
+    }
+
     // read extra
     std::vector<size_t> outs;
     uint64_t tx_money_got_in_outs = 0;
@@ -387,15 +396,14 @@ void wallet2::scan_tx_pool()
     {
       //prepare notification about pending transaction
       wallet_rpc::wallet_transfer_info wti = AUTO_VAL_INIT(wti);
+      wti.timestamp = time(NULL);
       wti.is_income = true;
-
+      m_unconfirmed_in_transfers[tx_hash] = tx;
       prepare_wti(wti, 0, 0, tx, tx_money_got_in_outs, money_transfer2_details());
       if (m_callback)
         m_callback->on_transfer2(wti);
     }
-
   }
-
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::refresh(size_t & blocks_fetched, bool& received_money)
@@ -853,7 +861,7 @@ uint64_t wallet2::select_transfers(uint64_t needed_money, size_t fake_outputs_co
   */
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient)
+void wallet2::add_sent_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient)
 {
   unconfirmed_transfer_details& utd = m_unconfirmed_txs[currency::get_transaction_hash(tx)];
   utd.m_change = change_amount;
@@ -865,10 +873,10 @@ void wallet2::add_unconfirmed_tx(const currency::transaction& tx, uint64_t chang
   if (m_callback)
   {
     wallet_rpc::wallet_transfer_info wti = AUTO_VAL_INIT(wti);
+    wti.is_income = false;
     wallet_transfer_info_from_unconfirmed_transfer_details(utd, wti);
-    m_callback->on_money_sent(wti);
+    m_callback->on_transfer2(wti);
   }
-    
 }
 //----------------------------------------------------------------------------------------------------
 std::string wallet2::get_alias_for_address(const std::string& addr)

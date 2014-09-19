@@ -44,7 +44,6 @@ signals:
     void update_wallet_status(const QString str);
     void update_wallet_info(const QString str);
     void money_transfer(const QString str);
-    void money_sent_unconfirmed(const QString str);
     void show_wallet();
     void hide_wallet();
     void switch_view(const QString str);
@@ -337,13 +336,6 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
   return true;
 }
 
-bool Html5ApplicationViewer::money_sent_unconfirmed(const view::transfer_event_info& wsi)
-{
-  std::string json_str;
-  epee::serialization::store_t_to_json(wsi, json_str);
-  m_d->money_transfer(json_str.c_str());
-  return true;
-}
 
 bool Html5ApplicationViewer::hide_wallet()
 {

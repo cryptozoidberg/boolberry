@@ -367,7 +367,6 @@ bool daemon_backend::update_wallets()
       try
       {
         m_wallet->refresh();
-        m_wallet->scan_tx_pool();
       }
       
       catch (const tools::error::daemon_busy& /*e*/)
@@ -392,6 +391,30 @@ bool daemon_backend::update_wallets()
       wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
       m_pview->update_wallet_status(wsi);
       update_wallet_info();
+    }
+
+    // scan for unconfirmed trasactions
+    try
+    {
+      m_wallet->scan_tx_pool();
+    }
+
+    catch (const tools::error::daemon_busy& /*e*/)
+    {
+      LOG_PRINT_L0("Daemon busy while wallet refresh");
+      return true;
+    }
+
+    catch (const std::exception& e)
+    {
+      LOG_PRINT_L0("Failed to refresh wallet: " << e.what());
+      return false;
+    }
+
+    catch (...)
+    {
+      LOG_PRINT_L0("Failed to refresh wallet, unknownk exception");
+      return false;
     }
   }
   return true;
@@ -444,10 +467,12 @@ bool daemon_backend::load_recent_transfers()
   m_wallet->get_unconfirmed_transfers(tr_hist.unconfirmed);
   //workaround for missed fee
   for (auto & he : tr_hist.history)
-    if (!he.fee) he.fee = currency::get_tx_fee(he.tx);
+    if (!he.fee && !currency::is_coinbase(he.tx)) 
+       he.fee = currency::get_tx_fee(he.tx);
 
   for (auto & he : tr_hist.unconfirmed)
-    if (!he.fee) he.fee = currency::get_tx_fee(he.tx);
+    if (!he.fee && !currency::is_coinbase(he.tx)) 
+       he.fee = currency::get_tx_fee(he.tx);
 
   return m_pview->set_recent_transfers(tr_hist);
 }
@@ -609,14 +634,6 @@ void daemon_backend::on_new_block(uint64_t /*height*/, const currency::block& /*
 }
 
 void daemon_backend::on_transfer2(const tools::wallet_rpc::wallet_transfer_info& wti)
-{
-  view::transfer_event_info tei = AUTO_VAL_INIT(tei);
-  tei.ti = wti;
-  tei.balance = m_wallet->balance();
-  tei.unlocked_balance = m_wallet->unlocked_balance();
-  m_pview->money_transfer(tei);
-}
-void daemon_backend::on_money_sent(const tools::wallet_rpc::wallet_transfer_info& wti)
 {
   view::transfer_event_info tei = AUTO_VAL_INIT(tei);
   tei.ti = wti;

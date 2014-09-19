@@ -314,13 +314,6 @@ function on_update_wallet_info(wal_status)
 
 }
 
-function on_money_sent_unconfirmed(tei)
-{
-    $("#unconfirmed_transfers_container_id").prepend( get_transfer_html_entry(tei.ti, false));
-    $("#wallet_balance").text(print_money(tei.balance));
-    $("#wallet_unlocked_balance").text(print_money(tei.unlocked_balance));
-}
-
 function on_money_transfer(tei)
 {
     var id = "#" + "transfer_entry_line_" + tei.ti.tx_hash +"_id";
@@ -688,7 +681,6 @@ $(function()
     Qt.update_wallet_status.connect(str_to_obj.bind({cb: on_update_wallet_status}));
     Qt.update_wallet_info.connect(str_to_obj.bind({cb: on_update_wallet_info}));
     Qt.money_transfer.connect(str_to_obj.bind({cb: on_money_transfer}));
-    Qt.money_sent_unconfirmed.connect(str_to_obj.bind({cb: on_money_sent_unconfirmed}));
 
     Qt.show_wallet.connect(show_wallet);
     Qt.hide_wallet.connect(hide_wallet);
@@ -701,6 +693,7 @@ $(function()
     on_update_wallet_status({wallet_state: 1});
     // put it here to disable wallet tab only in qt-mode
     disable_tab(document.getElementById('wallet_view_menu'), true);
+    $("#version_text").text(Qt_parent.get_version());
     $("#version_text").text(Qt_parent.get_version());
 });
 
