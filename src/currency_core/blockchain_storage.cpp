@@ -2097,6 +2097,15 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
 {
   TIME_MEASURE_START(block_processing_time);
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  //@#@
+  if(m_blocks.size() == 15422)
+  {
+    m_blocks[1];
+  }
+  //!@#@
+
+
+
   if(bl.prev_id != get_top_block_id())
   {
     LOG_PRINT_L0("Block with id: " << id << ENDL

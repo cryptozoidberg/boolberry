@@ -59,8 +59,16 @@ bool generate_blockchain_with_pruned_rs(std::vector<test_event_entry>& events)
     }
     bool operator()(currency::transaction& t)const
     {
-      std::cout << "pringing sigs: " << t.signatures.size() << ENDL;
+      size_t real_bloc_size = t_serializable_object_to_blob(t).size();
+
+      std::cout << "prunging sigs: " << t.signatures.size() << ENDL;
       t.signatures.clear();
+      
+      //check tx pruning correctnes
+      if(real_bloc_size != get_object_blobsize(t)) 
+      {
+        ASSERT_MES_AND_THROW("real_bloc_size != get_object_blobsize(t)");
+      }
       return true;
     }
     bool operator()(currency::account_base& a)const { return false; }

@@ -28,9 +28,9 @@ namespace currency
 
   }
   //---------------------------------------------------------------------------------
-  bool tx_memory_pool::add_tx(const transaction &tx, /*const crypto::hash& tx_prefix_hash,*/ const crypto::hash &id, size_t blob_size, tx_verification_context& tvc, bool kept_by_block)
-  {
-    
+  bool tx_memory_pool::add_tx(const transaction &tx, const crypto::hash &id, tx_verification_context& tvc, bool kept_by_block)
+  {    
+    size_t blob_size = get_object_blobsize(tx);
     //#9Protection from big transaction flood
     if(!kept_by_block && blob_size > CURRENCY_MAX_TRANSACTION_BLOB_SIZE)
     {
@@ -147,9 +147,8 @@ namespace currency
   bool tx_memory_pool::add_tx(const transaction &tx, tx_verification_context& tvc, bool keeped_by_block)
   {
     crypto::hash h = null_hash;
-    size_t blob_size = get_object_blobsize(tx);
     get_transaction_hash(tx, h);
-    return add_tx(tx, h, blob_size, tvc, keeped_by_block);
+    return add_tx(tx, h, tvc, keeped_by_block);
   }
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::remove_transaction_keyimages(const transaction& tx)

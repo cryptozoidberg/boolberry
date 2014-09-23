@@ -189,7 +189,7 @@ namespace currency
       return false;
     }
 
-    bool r = add_new_tx(tx, tx_hash, tx_prefixt_hash, tx_blob.size(), tvc, keeped_by_block);
+    bool r = add_new_tx(tx, tx_hash, tx_prefixt_hash, tvc, keeped_by_block);
     if(tvc.m_verifivation_failed)
     {LOG_PRINT_RED_L0("Transaction verification failed: " << tx_hash);}
     else if(tvc.m_verifivation_impossible)
@@ -296,7 +296,7 @@ namespace currency
     crypto::hash tx_prefix_hash = get_transaction_prefix_hash(tx);
     blobdata bl;
     t_serializable_object_to_blob(tx, bl);
-    return add_new_tx(tx, tx_hash, tx_prefix_hash, bl.size(), tvc, keeped_by_block);
+    return add_new_tx(tx, tx_hash, tx_prefix_hash, tvc, keeped_by_block);
   }
   //-----------------------------------------------------------------------------------------------
   size_t core::get_blockchain_total_transactions()
@@ -309,7 +309,7 @@ namespace currency
     return m_blockchain_storage.get_outs(amount, pkeys);
   }
   //-----------------------------------------------------------------------------------------------
-  bool core::add_new_tx(const transaction& tx, const crypto::hash& tx_hash, const crypto::hash& tx_prefix_hash, size_t blob_size, tx_verification_context& tvc, bool keeped_by_block)
+  bool core::add_new_tx(const transaction& tx, const crypto::hash& tx_hash, const crypto::hash& tx_prefix_hash, tx_verification_context& tvc, bool keeped_by_block)
   {
     if(m_mempool.have_tx(tx_hash))
     {
@@ -323,7 +323,7 @@ namespace currency
       return true;
     }
 
-    return m_mempool.add_tx(tx, tx_hash, blob_size, tvc, keeped_by_block);
+    return m_mempool.add_tx(tx, tx_hash, tvc, keeped_by_block);
   }
   //-----------------------------------------------------------------------------------------------
   bool core::get_block_template(block& b, const account_public_address& adr, wide_difficulty_type& diffic, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai)
