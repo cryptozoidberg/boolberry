@@ -2076,10 +2076,28 @@ bool blockchain_storage::get_block_for_scratchpad_alt(uint64_t connection_height
   return true;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::prune_aged_alt_blocks()
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
+  uint64_t current_height = get_current_blockchain_height();
+
+  for(auto it = m_alternative_chains.begin(); it != m_alternative_chains.end();)
+  {
+    if( current_height > it->second.height && current_height - it->second.height > CURRENCY_ALT_BLOCK_LIVETIME_COUNT)
+      m_alternative_chains.erase(it++);
+    else
+      ++it;
+  }
+
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypto::hash& id, block_verification_context& bvc)
 {
   TIME_MEASURE_START(block_processing_time);
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
   if(bl.prev_id != get_top_block_id())
   {
     LOG_PRINT_L0("Block with id: " << id << ENDL

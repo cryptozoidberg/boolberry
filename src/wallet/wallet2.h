@@ -125,6 +125,7 @@ namespace tools
     i_wallet2_callback* callback() const { return m_callback; }
     void callback(i_wallet2_callback* callback) { m_callback = callback; }
 
+    void scan_tx_pool();
     void refresh();
     void refresh(size_t & blocks_fetched);
     void refresh(size_t & blocks_fetched, bool& received_money);
@@ -178,7 +179,7 @@ namespace tools
     uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
     bool prepare_file_names(const std::string& file_path);
     void process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias);
-    void add_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient);
+    void add_sent_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient);
     void update_current_tx_limit();
     void prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height, uint64_t timestamp, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
     void handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
@@ -204,6 +205,7 @@ namespace tools
 
     std::atomic<bool> m_run;
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
+    std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
 
     i_wallet2_callback* m_callback;
   };
@@ -212,7 +214,7 @@ namespace tools
 
 BOOST_CLASS_VERSION(tools::wallet2, 8)
 BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 3)
-BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 2)
+BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 3)
 
 
 namespace boost
@@ -263,6 +265,8 @@ namespace boost
     template <class Archive>
     inline void serialize(Archive& a, tools::wallet_rpc::wallet_transfer_info& x, const boost::serialization::version_type ver)
     {      
+      x.fee = 0;
+
       a & x.amount;
       a & x.timestamp;
       a & x.tx_hash;
@@ -276,8 +280,15 @@ namespace boost
       if (ver < 2)
         return;
       a & x.recipient_alias;
-    }
+      if (ver < 3)
+        return;
+      a & x.fee;
 
+      //do not store unlock_time
+      if (Archive::is_loading::value)
+        x.unlock_time = x.tx.unlock_time;
+
+    }
   }
 }
 
@@ -498,7 +509,7 @@ namespace tools
         recipient += ", ";
       recipient += get_account_address_as_str(d.addr);
     }
-    add_unconfirmed_tx(tx, change_dts.amount, recipient);
+    add_sent_unconfirmed_tx(tx, change_dts.amount, recipient);
 
     LOG_PRINT_L2("transaction " << get_transaction_hash(tx) << " generated ok and sent to daemon, key_images: [" << key_images << "]");
 

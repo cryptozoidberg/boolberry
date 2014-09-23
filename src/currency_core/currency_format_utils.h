@@ -239,8 +239,7 @@ namespace currency
     get_block_longhash(b, p, height, cb);
     return p;
   }
-  //---------------------------------------------------------------
-  
+  //---------------------------------------------------------------  
   template<class t_object>
   bool t_serializable_object_to_blob(const t_object& to, blobdata& b_blob)
   {
@@ -274,6 +273,7 @@ namespace currency
     return h;
   }
   //---------------------------------------------------------------
+
   template<class t_object>
   size_t get_object_blobsize(const t_object& o)
   {

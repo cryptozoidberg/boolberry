@@ -168,6 +168,12 @@ span.daemon_view_general_status_value_success_text
     font-weight:bold;
 }
 
+span.daemon_view_general_status_value_fail_text
+{
+    color: #a91308;
+    font-weight:bold;
+}
+
 
 .daemon_view_general_status_block
 {
@@ -429,6 +435,13 @@ span.daemon_view_general_status_value_success_text
     color: #8f8f8f;
     display: none;
 }
+
+.transfer_extra_options_hint
+{
+    font-size: 70%;
+    font-weight: normal;
+}
+
 
 #wallet_recent_transfers_panel
 {

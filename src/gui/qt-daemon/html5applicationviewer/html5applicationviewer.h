@@ -67,7 +67,6 @@ private:
     virtual bool update_wallet_status(const view::wallet_status_info& wsi);
     virtual bool update_wallet_info(const view::wallet_info& wsi);
     virtual bool money_transfer(const view::transfer_event_info& tei);
-    virtual bool money_sent_unconfirmed(const view::transfer_event_info& wsi);
     virtual bool show_wallet();
     virtual bool hide_wallet();
     virtual bool switch_view(int view_no);
@@ -80,6 +79,7 @@ private:
     daemon_backend m_backend;
     std::atomic<bool> m_quit_requested;
     std::atomic<bool> m_deinitialize_done;
+    std::atomic<bool> m_backend_stopped;
     gui_config m_config;
 
     std::atomic<size_t> m_request_uri_threads_count;

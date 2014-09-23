@@ -63,7 +63,6 @@ private:
   //----- tools::i_wallet2_callback ------
   virtual void on_new_block(uint64_t height, const currency::block& block);
   virtual void on_transfer2(const tools::wallet_rpc::wallet_transfer_info& wti);
-  virtual void on_money_sent(const tools::wallet_rpc::wallet_transfer_info& wti);
 
   std::thread m_main_worker_thread;
   std::atomic<bool> m_stop_singal_sent;

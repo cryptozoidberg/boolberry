@@ -173,6 +173,18 @@ std::string daemon_backend::get_config_folder()
 
 void daemon_backend::main_worker(const po::variables_map& vm)
 {
+
+#define CHECK_AND_ASSERT_AND_SET_GUI(cond, res, mess) \
+  if (!cond) \
+  { \
+    LOG_ERROR(mess); \
+    dsi.daemon_network_state = 4; \
+    dsi.text_state = mess; \
+    m_pview->update_daemon_status(dsi); \
+    m_pview->on_backend_stopped(); \
+    return res; \
+  }
+
   view::daemon_status_info dsi = AUTO_VAL_INIT(dsi);
   dsi.difficulty = "---";
   m_pview->update_daemon_status(dsi);
@@ -182,7 +194,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   dsi.text_state = "Initializing p2p server";
   m_pview->update_daemon_status(dsi);
   bool res = m_p2psrv.init(vm);
-  CHECK_AND_ASSERT_MES(res, void(), "Failed to initialize p2p server.");
+  CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize p2p server.");
   LOG_PRINT_L0("P2p server initialized OK on port: " << m_p2psrv.get_this_peer_port());
 
   //LOG_PRINT_L0("Starting UPnP");
@@ -192,14 +204,14 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   dsi.text_state = "Initializing currency protocol";
   m_pview->update_daemon_status(dsi);
   res = m_cprotocol.init(vm);
-  CHECK_AND_ASSERT_MES(res, void(), "Failed to initialize currency protocol.");
+  CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize currency protocol.");
   LOG_PRINT_L0("Currency protocol initialized OK");
 
   LOG_PRINT_L0("Initializing core rpc server...");
   dsi.text_state = "Initializing core rpc server";
   m_pview->update_daemon_status(dsi);
   res = m_rpc_server.init(vm);
-  CHECK_AND_ASSERT_MES(res, void(), "Failed to initialize core rpc server.");
+  CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize core rpc server.");
   LOG_PRINT_GREEN("Core rpc server initialized OK on port: " << m_rpc_server.get_binded_port(), LOG_LEVEL_0);
 
   //initialize core here
@@ -207,20 +219,21 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   dsi.text_state = "Initializing core";
   m_pview->update_daemon_status(dsi);
   res = m_ccore.init(vm);
-  CHECK_AND_ASSERT_MES(res, void(), "Failed to initialize core");
+  CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize core");
   LOG_PRINT_L0("Core initialized OK");
 
   LOG_PRINT_L0("Starting core rpc server...");
   dsi.text_state = "Starting core rpc server";
   m_pview->update_daemon_status(dsi);
   res = m_rpc_server.run(2, false);
-  CHECK_AND_ASSERT_MES(res, void(), "Failed to initialize core rpc server.");
+  CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize core rpc server.");
   LOG_PRINT_L0("Core rpc server started ok");
 
   LOG_PRINT_L0("Starting p2p net loop...");
   dsi.text_state = "Starting network loop";
   m_pview->update_daemon_status(dsi);
-  m_p2psrv.run(false);
+  res = m_p2psrv.run(false);
+  CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to run p2p loop.");
   LOG_PRINT_L0("p2p net loop stopped");
 
   //go to monitoring view loop
@@ -379,6 +392,30 @@ bool daemon_backend::update_wallets()
       m_pview->update_wallet_status(wsi);
       update_wallet_info();
     }
+
+    // scan for unconfirmed trasactions
+    try
+    {
+      m_wallet->scan_tx_pool();
+    }
+
+    catch (const tools::error::daemon_busy& /*e*/)
+    {
+      LOG_PRINT_L0("Daemon busy while wallet refresh");
+      return true;
+    }
+
+    catch (const std::exception& e)
+    {
+      LOG_PRINT_L0("Failed to refresh wallet: " << e.what());
+      return false;
+    }
+
+    catch (...)
+    {
+      LOG_PRINT_L0("Failed to refresh wallet, unknownk exception");
+      return false;
+    }
   }
   return true;
 }
@@ -428,6 +465,15 @@ bool daemon_backend::load_recent_transfers()
   view::transfers_array tr_hist;
   m_wallet->get_recent_transfers_history(tr_hist.history, 0, 1000);
   m_wallet->get_unconfirmed_transfers(tr_hist.unconfirmed);
+  //workaround for missed fee
+  for (auto & he : tr_hist.history)
+    if (!he.fee && !currency::is_coinbase(he.tx)) 
+       he.fee = currency::get_tx_fee(he.tx);
+
+  for (auto & he : tr_hist.unconfirmed)
+    if (!he.fee && !currency::is_coinbase(he.tx)) 
+       he.fee = currency::get_tx_fee(he.tx);
+
   return m_pview->set_recent_transfers(tr_hist);
 }
 
@@ -544,8 +590,13 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
   }
 
   try
-  {
-    m_wallet->transfer(dsts, tp.mixin_count, 0, fee, extra, res_tx);
+  { 
+    //set transaction unlock time if it was specified by user 
+    uint64_t unlock_time = 0;
+    if (tp.lock_time)
+      unlock_time = m_wallet->get_blockchain_current_height() + tp.lock_time;
+
+    m_wallet->transfer(dsts, tp.mixin_count, unlock_time+1, fee, extra, res_tx);
     update_wallet_info();
   }
   catch (const std::exception& e)
@@ -583,14 +634,6 @@ void daemon_backend::on_new_block(uint64_t /*height*/, const currency::block& /*
 }
 
 void daemon_backend::on_transfer2(const tools::wallet_rpc::wallet_transfer_info& wti)
-{
-  view::transfer_event_info tei = AUTO_VAL_INIT(tei);
-  tei.ti = wti;
-  tei.balance = m_wallet->balance();
-  tei.unlocked_balance = m_wallet->unlocked_balance();
-  m_pview->money_transfer(tei);
-}
-void daemon_backend::on_money_sent(const tools::wallet_rpc::wallet_transfer_info& wti)
 {
   view::transfer_event_info tei = AUTO_VAL_INIT(tei);
   tei.ti = wti;

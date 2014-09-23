@@ -44,7 +44,6 @@ signals:
     void update_wallet_status(const QString str);
     void update_wallet_info(const QString str);
     void money_transfer(const QString str);
-    void money_sent_unconfirmed(const QString str);
     void show_wallet();
     void hide_wallet();
     void switch_view(const QString str);
@@ -129,7 +128,8 @@ Html5ApplicationViewer::Html5ApplicationViewer(QWidget *parent)
     : QWidget(parent)
     , m_d(new Html5ApplicationViewerPrivate(this)),
       m_quit_requested(false),
-      m_deinitialize_done(false)
+      m_deinitialize_done(false), 
+      m_backend_stopped(false)
 {
     //connect(m_d, SIGNAL(quitRequested()), SLOT(close()));
 
@@ -249,7 +249,13 @@ QGraphicsWebView *Html5ApplicationViewer::webView() const
 bool Html5ApplicationViewer::on_request_quit()
 {
   m_quit_requested = true;
-  m_backend.send_stop_signal();
+  if (m_backend_stopped)
+  {
+    bool r = QMetaObject::invokeMethod(this,
+      "do_close",
+      Qt::QueuedConnection);
+  }else
+    m_backend.send_stop_signal();
   return true;
 }
 
@@ -261,9 +267,10 @@ bool Html5ApplicationViewer::do_close()
 
 bool Html5ApplicationViewer::on_backend_stopped()
 {
+  m_backend_stopped = true;
+  m_deinitialize_done = true;
   if(m_quit_requested)
   {
-    m_deinitialize_done = true;
     bool r = QMetaObject::invokeMethod(this,
                                  "do_close",
                                  Qt::QueuedConnection);
@@ -329,13 +336,6 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
   return true;
 }
 
-bool Html5ApplicationViewer::money_sent_unconfirmed(const view::transfer_event_info& wsi)
-{
-  std::string json_str;
-  epee::serialization::store_t_to_json(wsi, json_str);
-  m_d->money_transfer(json_str.c_str());
-  return true;
-}
 
 bool Html5ApplicationViewer::hide_wallet()
 {

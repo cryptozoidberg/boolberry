@@ -102,7 +102,25 @@ function on_update_daemon_state(info_obj)
         inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
         disable_tab(document.getElementById('wallet_view_menu'), true);
         //show OK
+    }else if(info_obj.daemon_network_state == 4)//deinit
+    {
+        $("#synchronization_progressbar_block").hide();
+        $("#synchronization_progressbar" ).progressbar({value: false });
+        $("#daemon_synchronization_text").text("");
+
+        $("#daemon_status_text").removeClass("daemon_view_general_status_value_success_text");
+        $("#daemon_status_text").addClass("daemon_view_general_status_value_fail_text");
+
+        $("#open_wallet_button").button("disable");
+        $("#generate_wallet_button").button("disable");
+        //$("#domining_button").button("disable");
+
+        hide_wallet();
+        inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
+        disable_tab(document.getElementById('wallet_view_menu'), true);
+        //show OK
     }
+
     else
     {
         //set unknown status
@@ -172,9 +190,14 @@ function print_money(amount)
 
 
 
-function get_details_block(td, div_id_str, transaction_id, blob_size, payment_id)
+function get_details_block(td, div_id_str, transaction_id, blob_size, payment_id, fee, unlock_time)
 {
-    var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='tx_details_text'>Transaction id:</span> " +  transaction_id + ", <b>size</b>: " + blob_size.toString()  + " bytes<br>";
+    var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='tx_details_text'>Transaction id:</span> " +  transaction_id
+        + "<br><b>size</b>: " + blob_size.toString()  + " bytes"
+        +  "<br><b>fee</b>: " + print_money(fee)
+        + "<br><b>unlock_time</b>: " + unlock_time
+        +  "<br><b>split transfers</b>: <br>";
+
     if(payment_id !== '' && payment_id !== undefined)
     {
         res += "<span class='tx_details_text'>Payment id:</span> " +  payment_id + "<br>";
@@ -266,7 +289,7 @@ function get_transfer_html_entry(tr, is_recent)
         dt.format("yyyy-mm-dd HH:MM"),
         print_money(tr.amount),
         tr.tx_hash,
-        get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash, tr.tx_blob_size, tr.payment_id),
+        get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash, tr.tx_blob_size, tr.payment_id, tr.fee, tr.unlock_time ? tr.unlock_time - tr.height: 0),
         action_text,
         tr.recipient,
         short_string);
@@ -289,13 +312,6 @@ function on_update_wallet_info(wal_status)
         }
     }
 
-}
-
-function on_money_sent_unconfirmed(tei)
-{
-    $("#unconfirmed_transfers_container_id").prepend( get_transfer_html_entry(tei.ti, false));
-    $("#wallet_balance").text(print_money(tei.balance));
-    $("#wallet_unlocked_balance").text(print_money(tei.unlocked_balance));
 }
 
 function on_money_transfer(tei)
@@ -356,6 +372,87 @@ function on_close_wallet()
 
 
 var last_timerId;
+
+function test_parse_and_get_locktime_function()
+{
+    $('#lock_time').val("1d 2h");
+    if(parse_and_get_locktime() !== 780)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+    $('#lock_time').val("1d 2h 22");
+    if(parse_and_get_locktime() !== 802)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+    $('#lock_time').val("22");
+    if(parse_and_get_locktime() !== 22)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+    $('#lock_time').val("d222");
+    if(parse_and_get_locktime() !== undefined)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+    $('#lock_time').val("sfdd");
+    if(parse_and_get_locktime() !== undefined)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+    $('#lock_time').val("3d 2h 34j");
+    if(parse_and_get_locktime() !== undefined)
+    {
+        alert("[parse_and_get_locktime]Test Failed");
+        return;
+    }
+
+}
+
+
+function parse_and_get_locktime()
+{
+    var lock_time = $('#lock_time').val();
+    if(lock_time === "")
+        return 0;
+    var items = lock_time.split(" ");
+    if(!items.length )
+        return 0;
+
+    var blocks_count = 0;
+    for(var i = 0; i!=items.length; i++)
+    {
+        var multiplier = 1;
+        if(items[i][items[i].length-1] === "d")
+        {
+            items[i] = items[i].substr(0, items[i].length-1);
+            multiplier = 720;
+        }else if(items[i][items[i].length-1] === "h")
+        {
+            items[i] = items[i].substr(0, items[i].length-1);
+            multiplier = 30;
+        }
+        var value = parseInt(items[i]);
+        if( !(value > 0) )
+        {
+            return undefined;
+        }
+        blocks_count += value * multiplier;
+    }
+    return blocks_count;
+}
+
+
 function on_transfer()
 {
     var transfer_obj = {
@@ -366,11 +463,17 @@ function on_transfer()
             }
         ],
         mixin_count: 0,
+        lock_time: 0,
         payment_id: $('#payment_id').val()
     };
 
-    //if(transfer_obj.destinations[0].address )
-
+    var lock_time = parse_and_get_locktime();
+    if(lock_time === undefined)
+    {
+        Qt_parent.message_box("Wrong transaction lock time specified.");
+        return;
+    }
+    transfer_obj.lock_time = lock_time;
     transfer_obj.mixin_count = parseInt($('#mixin_count_id').val());
     transfer_obj.fee = $('#tx_fee').val();
 
@@ -423,17 +526,13 @@ function on_set_recent_transfers(o)
 }
 
 
-function secure_request_url_result_handler(res)
+function secure_request_url_result_handler(info_obj)
 {
     //debug case
-    if(res === undefined)
+    if(info_obj === undefined)
         return;
 
-    console.log("https://blockchain.info/ticker response:" + res);
-
-    var info_obj = $.parseJSON(res);
-    if(info_obj.last === undefined )
-        return;
+    console.log("https://blockchain.info/ticker response:" + JSON.stringify(info_obj));
 
     current_btc_to_usd_exchange_rate = parseFloat(info_obj.last);
     console.log("Exchange rate BTC: " + current_btc_to_usd_exchange_rate.toFixed(8) + " USD");
@@ -442,6 +541,7 @@ function secure_request_url_result_handler(res)
 
 function on_handle_internal_callback(obj_str, callback_name)
 {
+    //console.log("on_handle_internal_callback: " + callback_name + ":" + obj_str);
     var obj = undefined;
     if(obj_str !== undefined && obj_str !== "")
     {
@@ -503,6 +603,9 @@ $(function()
     /****************************************************************************/
     //some testing stuff
     //to make it available in browser mode
+
+    //test_parse_and_get_locktime_function();
+
     show_wallet();
     on_update_wallet_status({wallet_state: 2});
     var tttt = {
@@ -513,6 +616,8 @@ $(function()
             amount: 10111100000000,
             tx_blob_size: 1222,
             is_income: true,
+            unlock_time: 27,
+            fee: 2000000000,
             timestamp: 1402878665,
             td: {
                 rcv: [1000, 1000, 1000, 1000],//rcv: ["0.0000001000", "0.0000001000", "0.0000001000", "0.0000001000"],
@@ -534,6 +639,7 @@ $(function()
     tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
     tttt.ti.timestamp = 1402171355;
+    tttt.ti.fee = 1000000000;
     tttt.ti.payment_id = "";
     tttt.ti.amount =  10123000000000;
     tttt.ti.recipient = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
@@ -575,7 +681,6 @@ $(function()
     Qt.update_wallet_status.connect(str_to_obj.bind({cb: on_update_wallet_status}));
     Qt.update_wallet_info.connect(str_to_obj.bind({cb: on_update_wallet_info}));
     Qt.money_transfer.connect(str_to_obj.bind({cb: on_money_transfer}));
-    Qt.money_sent_unconfirmed.connect(str_to_obj.bind({cb: on_money_sent_unconfirmed}));
 
     Qt.show_wallet.connect(show_wallet);
     Qt.hide_wallet.connect(hide_wallet);
@@ -588,6 +693,7 @@ $(function()
     on_update_wallet_status({wallet_state: 1});
     // put it here to disable wallet tab only in qt-mode
     disable_tab(document.getElementById('wallet_view_menu'), true);
+    $("#version_text").text(Qt_parent.get_version());
     $("#version_text").text(Qt_parent.get_version());
 });
 
