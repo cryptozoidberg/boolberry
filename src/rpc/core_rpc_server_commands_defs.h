@@ -44,7 +44,6 @@ namespace currency
     END_KV_SERIALIZE_MAP()
   };
 
-
   struct COMMAND_RPC_GET_HEIGHT
   {
     struct request
