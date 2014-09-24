@@ -265,7 +265,14 @@ function get_transfer_html_entry(tr, is_recent)
         }
     }else
     {
-        img_ref = "files/sandwatch.png";
+        if(tr.is_income)
+        {
+            img_ref = "files/unconfirmed_received.png"
+        }
+        else
+        {
+            img_ref = "files/unconfirmed_sent.png";
+        }
         action_text = "Unconfirmed";
     }
 
