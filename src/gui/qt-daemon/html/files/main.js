@@ -672,13 +672,14 @@ $(function()
     tttt.ti.height = 0;
     on_money_transfer(tttt);
     //
+    tttt.ti.tx_hash = "8196q0a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
+    tttt.ti.is_income = true;
+    tttt.ti.height = 0;
+    on_money_transfer(tttt);
+
     tttt.ti.tx_hash = "b19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c2152";
     $("#unconfirmed_transfers_container_id").prepend( get_transfer_html_entry(tttt.ti, false));
-
-
     /****************************************************************************/
-
-
 
     inline_menu_item_select(document.getElementById('daemon_state_view_menu'));
 

@@ -596,7 +596,7 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
     if (tp.lock_time)
       unlock_time = m_wallet->get_blockchain_current_height() + tp.lock_time;
 
-    m_wallet->transfer(dsts, tp.mixin_count, unlock_time+1, fee, extra, res_tx);
+    m_wallet->transfer(dsts, tp.mixin_count, unlock_time ? unlock_time + 1:0, fee, extra, res_tx);
     update_wallet_info();
   }
   catch (const std::exception& e)
