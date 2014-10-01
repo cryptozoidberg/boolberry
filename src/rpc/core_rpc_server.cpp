@@ -97,6 +97,7 @@ namespace currency
     res.current_network_hashrate_350 = m_core.get_blockchain_storage().get_current_hashrate(350);
     res.scratchpad_size = m_core.get_blockchain_storage().get_scratchpad_size();
     res.alias_count = m_core.get_blockchain_storage().get_aliases_count();
+    m_core.get_blockchain_storage().get_transactions_daily_stat(res.transactions_cnt_per_day, res.transactions_volume_per_day);
 
     if (!res.outgoing_connections_count)
       res.daemon_network_state = COMMAND_RPC_GET_INFO::daemon_network_state_connecting;

@@ -303,6 +303,8 @@ namespace currency
       uint64_t daemon_network_state;
       uint64_t synchronization_start_height;
       uint64_t max_net_seen_height;
+      uint64_t transactions_cnt_per_day;
+      uint64_t transactions_volume_per_day;
       nodetool::maintainers_info_external mi;
 
       BEGIN_KV_SERIALIZE_MAP()
@@ -324,6 +326,8 @@ namespace currency
         KV_SERIALIZE(daemon_network_state)
         KV_SERIALIZE(synchronization_start_height)
         KV_SERIALIZE(max_net_seen_height)
+        KV_SERIALIZE(transactions_cnt_per_day)
+        KV_SERIALIZE(transactions_volume_per_day)
         KV_SERIALIZE(mi)
       END_KV_SERIALIZE_MAP()
     };

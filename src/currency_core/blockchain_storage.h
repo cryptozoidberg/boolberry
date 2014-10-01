@@ -127,6 +127,7 @@ namespace currency
     bool copy_scratchpad(std::vector<crypto::hash>& dst);//TODO: not the best way, add later update method instead of full copy
     bool copy_scratchpad(std::string& dst);
     bool prune_aged_alt_blocks();
+    bool get_transactions_daily_stat(uint64_t& daily_cnt, uint64_t& daily_volume);
 
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
     bool get_blocks(const t_ids_container& block_ids, t_blocks_container& blocks, t_missed_container& missed_bs)
