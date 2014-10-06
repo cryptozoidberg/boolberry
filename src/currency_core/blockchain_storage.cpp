@@ -1188,6 +1188,26 @@ bool blockchain_storage::handle_get_objects(NOTIFY_REQUEST_GET_OBJECTS::request&
   return true;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::get_transactions_daily_stat(uint64_t& daily_cnt, uint64_t& daily_volume)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  daily_cnt = daily_volume = 0;
+  for(size_t i =  (m_blocks.size() > CURRENCY_BLOCK_PER_DAY ? m_blocks.size() - CURRENCY_BLOCK_PER_DAY:0 ); i!=m_blocks.size(); i++)
+  {
+    for(auto& h: m_blocks[i].bl.tx_hashes)
+    {
+      ++daily_cnt;
+      auto tx_it = m_transactions.find(h);
+      CHECK_AND_ASSERT_MES(tx_it != m_transactions.end(), false, "Wrong transaction hash "<<  h <<" in block on height " << i );
+      uint64_t am = 0;
+      bool r = get_inputs_money_amount(tx_it->second.tx, am);
+      CHECK_AND_ASSERT_MES(r, false, "failed to get_inputs_money_amount");
+      daily_volume += am;
+    }
+  }
+  return true;
+}
+//------------------------------------------------------------------
 uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);

@@ -52,6 +52,7 @@
 #define DIFFICULTY_CUT                                  60  // timestamps to cut after sorting
 #define DIFFICULTY_BLOCKS_COUNT                         (DIFFICULTY_WINDOW + DIFFICULTY_LAG)
 
+#define CURRENCY_BLOCK_PER_DAY                          ((60*60*24)/(DIFFICULTY_TARGET))
 
 #define CURRENCY_LOCKED_TX_ALLOWED_DELTA_SECONDS        (DIFFICULTY_TARGET * CURRENCY_LOCKED_TX_ALLOWED_DELTA_BLOCKS)
 #define CURRENCY_LOCKED_TX_ALLOWED_DELTA_BLOCKS         1
