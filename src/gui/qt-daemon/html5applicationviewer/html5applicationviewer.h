@@ -7,6 +7,8 @@
 
 #include <QWidget>
 #include <QUrl>
+#include <QSystemTrayIcon>
+#include <QMenu>
 #include "view_iface.h"
 #ifndef Q_MOC_RUN
 #include "daemon_backend.h"
@@ -52,12 +54,14 @@ public slots:
     QString request_uri(const QString& url_str, const QString& params, const QString& callbackname);    
     QString request_aliases();
     bool init_config();
+	void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
     void loadFile(const QString &fileName);
     void loadUrl(const QUrl &url);
     void closeEvent(QCloseEvent *event);
-    
+	void changeEvent(QEvent *e);
+
     bool store_config();
 
     //------- i_view ---------
@@ -75,6 +79,8 @@ private:
     //----------------------------------------------
     bool is_uri_allowed(const QString& uri);
 
+	void initTrayIcon(const std::string& htmlPath);
+
     class Html5ApplicationViewerPrivate *m_d;
     daemon_backend m_backend;
     std::atomic<bool> m_quit_requested;
@@ -83,6 +89,11 @@ private:
     gui_config m_config;
 
     std::atomic<size_t> m_request_uri_threads_count;
+
+	std::unique_ptr<QSystemTrayIcon> m_trayIcon;
+	std::unique_ptr<QMenu> m_trayIconMenu;
+	std::unique_ptr<QAction> m_restoreAction;
+	std::unique_ptr<QAction> m_quitAction;
 };
 
 #endif // HTML5APPLICATIONVIEWER_H

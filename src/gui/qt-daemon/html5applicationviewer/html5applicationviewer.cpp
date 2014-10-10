@@ -19,6 +19,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QTimer>
 #include "warnings.h"
 #include "net/http_client.h"
 
@@ -179,6 +180,70 @@ void Html5ApplicationViewer::closeEvent(QCloseEvent *event)
   }
 }
 
+void Html5ApplicationViewer::changeEvent(QEvent *e)
+{
+	switch (e->type())
+	{
+	case QEvent::WindowStateChange:
+	{
+		if (this->windowState() & Qt::WindowMinimized)
+		{
+			if (m_trayIcon)
+			{
+				QTimer::singleShot(250, this, SLOT(hide()));
+				m_trayIcon->showMessage("Boolberry app is minimized to tray",
+					"You can restore it with double-click or context menu");
+			}
+		}
+
+		break;
+	}
+	default:
+		break;
+	}
+
+	QWidget::changeEvent(e);
+}
+
+void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
+{
+	if (!QSystemTrayIcon::isSystemTrayAvailable())
+		return;
+
+	m_restoreAction = std::unique_ptr<QAction>(new QAction(tr("&Restore"), this));
+	connect(m_restoreAction.get(), SIGNAL(triggered()), this, SLOT(showNormal()));
+
+	m_quitAction = std::unique_ptr<QAction>(new QAction(tr("&Quit"), this));
+	connect(m_quitAction.get(), SIGNAL(triggered()), this, SLOT(on_request_quit()));
+
+	m_trayIconMenu = std::unique_ptr<QMenu>(new QMenu(this));
+	m_trayIconMenu->addAction(m_restoreAction.get());
+	m_trayIconMenu->addSeparator();
+	m_trayIconMenu->addAction(m_quitAction.get());
+
+	m_trayIcon = std::unique_ptr<QSystemTrayIcon>(new QSystemTrayIcon(this));
+	m_trayIcon->setContextMenu(m_trayIconMenu.get());
+#ifdef WIN32
+	std::string iconPath(htmlPath + "/files/app16.png"); // windows tray icon size is 16x16
+#else
+	std::string iconPath(htmlPath + "/files/app22.png"); // X11 tray icon size is 22x22
+#endif
+	m_trayIcon->setIcon(QIcon(iconPath.c_str()));
+	m_trayIcon->setToolTip("Boolberry");
+	connect(m_trayIcon.get(), SIGNAL(activated(QSystemTrayIcon::ActivationReason)), 
+		this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
+	m_trayIcon->show();
+}
+
+void Html5ApplicationViewer::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+	if (reason == QSystemTrayIcon::ActivationReason::DoubleClick)
+	{
+		showNormal();
+		activateWindow();
+	}
+}
+
 void Html5ApplicationViewer::loadFile(const QString &fileName)
 {
     m_d->m_webView->setUrl(QUrl::fromLocalFile(Html5ApplicationViewerPrivate::adjustPath(fileName)));
@@ -333,6 +398,21 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
   std::string json_str;
   epee::serialization::store_t_to_json(tei, json_str);
   m_d->money_transfer(json_str.c_str());
+  if (!m_trayIcon)
+	  return true;
+  if (!tei.ti.is_income)
+	  return true;
+  double amount = double(tei.ti.amount) * (1e-12);
+  if (tei.ti.height == 0) // unconfirmed trx
+  {
+	  QString msg = QString("BBR%1 is received").arg(amount);
+	  m_trayIcon->showMessage("Income transfer (unconfirmed)", msg);
+  }
+  else // confirmed trx
+  {
+	  QString msg = QString("BBR%1 is confirmed").arg(amount);
+	  m_trayIcon->showMessage("Income transfer confirmed", msg);
+  }
   return true;
 }
 
@@ -372,7 +452,8 @@ bool Html5ApplicationViewer::set_recent_transfers(const view::transfers_array& t
 }
 
 bool Html5ApplicationViewer::set_html_path(const std::string& path)
-{  
+{ 
+  initTrayIcon(path);
   loadFile(QLatin1String((path + "/index.html").c_str()));
   return true;
 }
