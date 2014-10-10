@@ -398,6 +398,21 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
   std::string json_str;
   epee::serialization::store_t_to_json(tei, json_str);
   m_d->money_transfer(json_str.c_str());
+  if (!m_trayIcon)
+	  return true;
+  if (!tei.ti.is_income)
+	  return true;
+  double amount = double(tei.ti.amount) * (1e-12);
+  if (tei.ti.height == 0) // unconfirmed trx
+  {
+	  QString msg = QString("BBR%1 is received").arg(amount);
+	  m_trayIcon->showMessage("Income transfer (unconfirmed)", msg);
+  }
+  else // confirmed trx
+  {
+	  QString msg = QString("BBR%1 is confirmed").arg(amount);
+	  m_trayIcon->showMessage("Income transfer confirmed", msg);
+  }
   return true;
 }
 
