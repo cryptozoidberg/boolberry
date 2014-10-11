@@ -20,80 +20,80 @@ class QGraphicsWebView;
 
 class Html5ApplicationViewer : public QWidget, public view::i_view
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    enum ScreenOrientation {
-        ScreenOrientationLockPortrait,
-        ScreenOrientationLockLandscape,
-        ScreenOrientationAuto
-    };
+  enum ScreenOrientation {
+    ScreenOrientationLockPortrait,
+    ScreenOrientationLockLandscape,
+    ScreenOrientationAuto
+  };
 
-    explicit Html5ApplicationViewer(QWidget *parent = 0);
-    virtual ~Html5ApplicationViewer();
+  explicit Html5ApplicationViewer(QWidget *parent = 0);
+  virtual ~Html5ApplicationViewer();
 
-    // Note that this will only have an effect on Fremantle.
-    void setOrientation(ScreenOrientation orientation);
+  // Note that this will only have an effect on Fremantle.
+  void setOrientation(ScreenOrientation orientation);
 
-    void showExpanded();
+  void showExpanded();
 
-    QGraphicsWebView *webView() const;
-    bool start_backend(int argc, char* argv[]);
+  QGraphicsWebView *webView() const;
+  bool start_backend(int argc, char* argv[]);
 protected:
 
-private slots:
+  private slots :
     bool do_close();
-    bool on_request_quit();
-public slots:
-    void open_wallet();
-    void generate_wallet();
-    void close_wallet();
-    QString get_version();
-    QString transfer(const QString& json_transfer_object);
-    void message_box(const QString& msg);
-    QString request_uri(const QString& url_str, const QString& params, const QString& callbackname);    
-    QString request_aliases();
-    bool init_config();
-	void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
+  bool on_request_quit();
+  public slots:
+  void open_wallet();
+  void generate_wallet();
+  void close_wallet();
+  QString get_version();
+  QString transfer(const QString& json_transfer_object);
+  void message_box(const QString& msg);
+  QString request_uri(const QString& url_str, const QString& params, const QString& callbackname);
+  QString request_aliases();
+  bool init_config();
+  void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
-    void loadFile(const QString &fileName);
-    void loadUrl(const QUrl &url);
-    void closeEvent(QCloseEvent *event);
-	void changeEvent(QEvent *e);
+  void loadFile(const QString &fileName);
+  void loadUrl(const QUrl &url);
+  void closeEvent(QCloseEvent *event);
+  void changeEvent(QEvent *e);
 
-    bool store_config();
+  bool store_config();
 
-    //------- i_view ---------
-    virtual bool update_daemon_status(const view::daemon_status_info& info);
-    virtual bool on_backend_stopped();
-    virtual bool show_msg_box(const std::string& message);
-    virtual bool update_wallet_status(const view::wallet_status_info& wsi);
-    virtual bool update_wallet_info(const view::wallet_info& wsi);
-    virtual bool money_transfer(const view::transfer_event_info& tei);
-    virtual bool show_wallet();
-    virtual bool hide_wallet();
-    virtual bool switch_view(int view_no);
-    virtual bool set_recent_transfers(const view::transfers_array& ta);
-    virtual bool set_html_path(const std::string& path);
-    //----------------------------------------------
-    bool is_uri_allowed(const QString& uri);
+  //------- i_view ---------
+  virtual bool update_daemon_status(const view::daemon_status_info& info);
+  virtual bool on_backend_stopped();
+  virtual bool show_msg_box(const std::string& message);
+  virtual bool update_wallet_status(const view::wallet_status_info& wsi);
+  virtual bool update_wallet_info(const view::wallet_info& wsi);
+  virtual bool money_transfer(const view::transfer_event_info& tei);
+  virtual bool show_wallet();
+  virtual bool hide_wallet();
+  virtual bool switch_view(int view_no);
+  virtual bool set_recent_transfers(const view::transfers_array& ta);
+  virtual bool set_html_path(const std::string& path);
+  //----------------------------------------------
+  bool is_uri_allowed(const QString& uri);
 
-	void initTrayIcon(const std::string& htmlPath);
+  void initTrayIcon(const std::string& htmlPath);
 
-    class Html5ApplicationViewerPrivate *m_d;
-    daemon_backend m_backend;
-    std::atomic<bool> m_quit_requested;
-    std::atomic<bool> m_deinitialize_done;
-    std::atomic<bool> m_backend_stopped;
-    gui_config m_config;
+  class Html5ApplicationViewerPrivate *m_d;
+  daemon_backend m_backend;
+  std::atomic<bool> m_quit_requested;
+  std::atomic<bool> m_deinitialize_done;
+  std::atomic<bool> m_backend_stopped;
+  gui_config m_config;
 
-    std::atomic<size_t> m_request_uri_threads_count;
+  std::atomic<size_t> m_request_uri_threads_count;
 
-	std::unique_ptr<QSystemTrayIcon> m_trayIcon;
-	std::unique_ptr<QMenu> m_trayIconMenu;
-	std::unique_ptr<QAction> m_restoreAction;
-	std::unique_ptr<QAction> m_quitAction;
+  std::unique_ptr<QSystemTrayIcon> m_trayIcon;
+  std::unique_ptr<QMenu> m_trayIconMenu;
+  std::unique_ptr<QAction> m_restoreAction;
+  std::unique_ptr<QAction> m_quitAction;
 };
 
 #endif // HTML5APPLICATIONVIEWER_H
