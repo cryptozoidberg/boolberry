@@ -1,0 +1,34 @@
+// Copyright (c) 2012-2013 The Cryptonote developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+
+#pragma once
+#include "include_base_utils.h"
+#include "net/http_client.h"
+#include "core_rpc_proxy.h"
+
+#define WALLET_RCP_CONNECTION_TIMEOUT                          200000
+
+
+namespace tools
+{
+  class default_http_core_proxy: public i_core_proxy
+  {
+    bool set_connection_addr(const std::string& url);
+    bool call_COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES(currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::request& rqt, currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::response& rsp);
+    bool call_COMMAND_RPC_GET_BLOCKS_FAST(currency::COMMAND_RPC_GET_BLOCKS_FAST::request& rqt, currency::COMMAND_RPC_GET_BLOCKS_FAST::response& rsp);
+    bool call_COMMAND_RPC_GET_INFO(currency::COMMAND_RPC_GET_INFO::request& rqt, currency::COMMAND_RPC_GET_INFO::response& rsp);
+    bool call_COMMAND_RPC_GET_TX_POOL(currency::COMMAND_RPC_GET_TX_POOL::request& rqt, currency::COMMAND_RPC_GET_TX_POOL::response& rsp);
+    bool call_COMMAND_RPC_GET_ALIASES_BY_ADDRESS(currency::COMMAND_RPC_GET_ALIASES_BY_ADDRESS::request& rqt, currency::COMMAND_RPC_GET_ALIASES_BY_ADDRESS::response& rsp);
+    bool call_COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS(currency::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::request& rqt, currency::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::response& rsp);
+    bool call_COMMAND_RPC_SEND_RAW_TX(currency::COMMAND_RPC_SEND_RAW_TX::request& rqt, currency::COMMAND_RPC_SEND_RAW_TX::response& rsp);    
+    bool check_connection();
+    bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
+    
+    epee::net_utils::http::http_simple_client m_http_client;
+    std::string m_daemon_address;
+
+  };
+}
+
