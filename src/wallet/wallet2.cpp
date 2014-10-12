@@ -604,7 +604,7 @@ bool wallet2::prepare_file_names(const std::string& file_path)
 //----------------------------------------------------------------------------------------------------
 bool wallet2::check_connection()
 {
-  return m_core_proxy->check_connecton();
+  return m_core_proxy->check_connection();
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::load(const std::string& wallet_, const std::string& password)
