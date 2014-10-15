@@ -36,6 +36,7 @@ namespace currency
      bool handle_incoming_tx(const blobdata& tx_blob, tx_verification_context& tvc, bool keeped_by_block);
      bool handle_incoming_block(const blobdata& block_blob, block_verification_context& bvc, bool update_miner_blocktemplate = true);
      i_currency_protocol* get_protocol(){return m_pprotocol;}
+     tx_memory_pool& get_tx_pool(){ return m_mempool; };
 
      //-------------------- i_miner_handler -----------------------
      virtual bool handle_block_found( block& b);

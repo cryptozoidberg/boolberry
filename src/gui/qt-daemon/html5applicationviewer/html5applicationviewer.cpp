@@ -407,12 +407,12 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
   double amount = double(tei.ti.amount) * (1e-12);
   if (tei.ti.height == 0) // unconfirmed trx
   {
-    QString msg = QString("BBR%1 is received").arg(amount);
+    QString msg = QString("%1 BBR is received").arg(amount);
     m_trayIcon->showMessage("Income transfer (unconfirmed)", msg);
   }
   else // confirmed trx
   {
-    QString msg = QString("BBR%1 is confirmed").arg(amount);
+    QString msg = QString("%1 BBR is confirmed").arg(amount);
     m_trayIcon->showMessage("Income transfer confirmed", msg);
   }
   return true;

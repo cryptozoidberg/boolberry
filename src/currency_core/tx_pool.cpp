@@ -287,6 +287,13 @@ namespace currency
     m_transactions_lock.unlock();
   }
   //---------------------------------------------------------------------------------
+  void tx_memory_pool::purge_transactions()
+  {
+    CRITICAL_REGION_LOCAL(m_transactions_lock);
+    m_transactions.clear();
+    m_spent_key_images.clear();
+  }
+  //---------------------------------------------------------------------------------
   bool tx_memory_pool::is_transaction_ready_to_go(tx_details& txd)
   {
     //not the best implementation at this time, sorry :(

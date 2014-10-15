@@ -947,5 +947,10 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
-
+  bool core_rpc_server::on_reset_transaction_pool(const COMMAND_RPC_RESET_TX_POOL::request& req, COMMAND_RPC_RESET_TX_POOL::response& res, connection_context& cntx)
+  {
+    m_core.get_tx_pool().purge_transactions();
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
 }
