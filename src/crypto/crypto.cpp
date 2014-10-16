@@ -73,7 +73,7 @@ namespace crypto {
     sc_reduce32(&res);
   }
 
-  void crypto_ops::generate_keys(public_key &pub, secret_key &sec) {
+  vector<unsigned char> crypto_ops::generate_keys(public_key &pub, secret_key &sec) {
     lock_guard<mutex> lock(random_lock);
     ge_p3 point;
     random_scalar(sec);

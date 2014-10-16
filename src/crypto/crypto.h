@@ -66,8 +66,10 @@ namespace crypto {
     void operator=(const crypto_ops &);
     ~crypto_ops();
 
-    static void generate_keys(public_key &, secret_key &);
-    friend void generate_keys(public_key &, secret_key &);
+    static vector<unsigned char> generate_keys(public_key &, secret_key &);
+    friend vector<unsigned char> generate_keys(public_key &, secret_key &);
+    static void restore_keys(public_key &, secret_key &, const vector<unsigned char> &);
+    friend void restore_keys(public_key &, secret_key &, const vector<unsigned char> &);
     static bool check_key(const public_key &);
     friend bool check_key(const public_key &);
     static bool secret_key_to_public_key(const secret_key &, public_key &);

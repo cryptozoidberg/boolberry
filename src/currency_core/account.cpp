@@ -29,13 +29,23 @@ DISABLE_VS_WARNINGS(4244 4345)
     m_keys = account_keys();
   }
   //-----------------------------------------------------------------
-  void account_base::generate()
+  vector<unsigned char> account_base::generate()
   {
-    generate_keys(m_keys.m_account_address.m_spend_public_key, m_keys.m_spend_secret_key);
-    generate_keys(m_keys.m_account_address.m_view_public_key, m_keys.m_view_secret_key);
+    vector<unsigned char> seed = generate_keys(m_keys.m_account_address.m_spend_public_key, m_keys.m_spend_secret_key);
+    vector<unsigned char> seed2 = generate_keys(m_keys.m_account_address.m_view_public_key, m_keys.m_view_secret_key);
+    m_creation_timestamp = time(NULL);
+    seed.append(seed2.begin(), seed2.end());
+    return seed;
+  }
+   //-----------------------------------------------------------------
+  void account_base::restore(const vector<unsigned char>& restore_seed)
+  {
+    assert(restore_seed.size() == 64);
+    restore_keys(m_keys.m_account_address.m_spend_public_key, m_keys.m_spend_secret_key, vector<unsigned char>(restore_seed.begin(), restore_seed.begin() + 32));
+    restore_keys(m_keys.m_account_address.m_view_public_key, m_keys.m_view_secret_key, vector<unsigned char>(restore_seed.begin() + 32, restore_seed.end()));
     m_creation_timestamp = time(NULL);
   }
-  //-----------------------------------------------------------------
+   //-----------------------------------------------------------------
   const account_keys& account_base::get_keys() const
   {
     return m_keys;
