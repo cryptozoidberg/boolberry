@@ -190,6 +190,88 @@ namespace wallet_rpc
     };
   };
 
+
+  struct telepod
+  {
+    std::string transaction_template_hex;
+    std::string account_keys_hex;
+    std::string basement_tx_id_hex;
+    std::list<uint64_t> tx_outs_offsets;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(transaction_template_hex)
+      KV_SERIALIZE(account_keys_hex)
+      KV_SERIALIZE(basement_tx_id_hex)
+      KV_SERIALIZE(tx_outs_offsets)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct COMMAND_RPC_MAKETELEPOD
+  {
+    struct request
+    {
+      uint64_t amount;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(amount)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+      telepod tpd;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(tpd)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+
+  struct COMMAND_RPC_TELEPODSTATUS
+  {
+    struct request
+    {
+      telepod tpd;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tpd)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;  //"OK", "UNCONFIRMED", "BAD", "SPENT"
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+     END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_CLONETELEPOD
+  {
+    struct request
+    {
+      telepod tpd;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tpd)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+      telepod tpd;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(tpd)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+
+
 }
 }
 
