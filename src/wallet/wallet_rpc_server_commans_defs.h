@@ -193,16 +193,12 @@ namespace wallet_rpc
 
   struct telepod
   {
-    std::string transaction_template_hex;
     std::string account_keys_hex;
     std::string basement_tx_id_hex;
-    std::list<uint64_t> tx_outs_offsets;
 
     BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(transaction_template_hex)
       KV_SERIALIZE(account_keys_hex)
       KV_SERIALIZE(basement_tx_id_hex)
-      KV_SERIALIZE(tx_outs_offsets)
     END_KV_SERIALIZE_MAP()
   };
 
