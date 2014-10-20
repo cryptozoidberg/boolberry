@@ -266,6 +266,24 @@ namespace wallet_rpc
     };
   };
 
+  struct COMMAND_RPC_WITHDRAWTELEPOD
+  {
+    struct request
+    {
+      telepod tpd;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tpd)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;  ////"OK", "UNCONFIRMED", "BAD", "SPENT"
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
 
 
 }

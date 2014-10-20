@@ -44,6 +44,8 @@ namespace tools
         MAP_JON_RPC_WE("maketelepod",   on_maketelepod,   wallet_rpc::COMMAND_RPC_MAKETELEPOD)
         MAP_JON_RPC_WE("clonetelepod",  on_clonetelepod, wallet_rpc::COMMAND_RPC_CLONETELEPOD)
         MAP_JON_RPC_WE("telepodstatus", on_telepodstatus, wallet_rpc::COMMAND_RPC_TELEPODSTATUS)
+        MAP_JON_RPC_WE("withdrawtelepod", on_withdrawtelepod, wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD)
+
       END_JSON_RPC_MAP()
     END_URI_MAP2()
 
@@ -56,6 +58,7 @@ namespace tools
       bool on_maketelepod(const wallet_rpc::COMMAND_RPC_MAKETELEPOD::request& req, wallet_rpc::COMMAND_RPC_MAKETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx);
       bool on_clonetelepod(const wallet_rpc::COMMAND_RPC_CLONETELEPOD::request& req, wallet_rpc::COMMAND_RPC_CLONETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx);
       bool on_telepodstatus(const wallet_rpc::COMMAND_RPC_TELEPODSTATUS::request& req, wallet_rpc::COMMAND_RPC_TELEPODSTATUS::response& res, epee::json_rpc::error& er, connection_context& cntx);
+      bool on_withdrawtelepod(const wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD::request& req, wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx);
 
       bool handle_command_line(const boost::program_options::variables_map& vm);
 
