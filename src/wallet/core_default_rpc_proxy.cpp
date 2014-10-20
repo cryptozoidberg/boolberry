@@ -52,6 +52,16 @@ namespace tools
     return epee::net_utils::invoke_http_json_remote_command2(m_daemon_address + "/sendrawtransaction", req, res, m_http_client, WALLET_RCP_CONNECTION_TIMEOUT);
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool default_http_core_proxy::call_COMMAND_RPC_GET_TRANSACTIONS(const currency::COMMAND_RPC_GET_TRANSACTIONS::request& req, currency::COMMAND_RPC_GET_TRANSACTIONS::response& rsp)
+  {
+    return epee::net_utils::invoke_http_json_remote_command2(m_daemon_address + "/gettransactions", req, rsp, m_http_client, WALLET_RCP_CONNECTION_TIMEOUT);
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool default_http_core_proxy::call_COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES(const currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::request& req, currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::response& rsp)
+  {
+    return epee::net_utils::invoke_http_bin_remote_command2(m_daemon_address + "/get_o_indexes.bin", req, rsp, m_http_client, WALLET_RCP_CONNECTION_TIMEOUT);
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
   bool default_http_core_proxy::check_connection()
   {
     if (m_http_client.is_connected())

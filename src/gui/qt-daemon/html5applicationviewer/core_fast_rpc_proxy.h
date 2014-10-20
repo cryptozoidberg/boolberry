@@ -69,39 +69,20 @@ namespace tools
       return m_rpc.on_get_alias_details(req, res, m_err_stub, m_cntxt_stub);
     }
     //------------------------------------------------------------------------------------------------------------------------------
+    bool call_COMMAND_RPC_GET_TRANSACTIONS(const currency::COMMAND_RPC_GET_TRANSACTIONS::request& req, currency::COMMAND_RPC_GET_TRANSACTIONS::response& rsp)
+    {
+      return m_rpc.on_get_transactions(req, rsp, m_cntxt_stub);
+    }
+    //------------------------------------------------------------------------------------------------------------------------------
+    bool call_COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES(const currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::request& req, currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::response& rsp)
+    {
+      return m_rpc.on_get_indexes(req, rsp, m_http_client, m_cntxt_stub);
+    }
+    //------------------------------------------------------------------------------------------------------------------------------
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
     {
       return tools::get_transfer_address(adr_str, addr, this);
     }
-
-
-/*    bool get_info(const currency::COMMAND_RPC_GET_INFO::response& info)
-    {
-      currency::core_rpc_server::connection_context stub_cntxt = AUTO_VAL_INIT(stub_cntxt);
-      currency::COMMAND_RPC_GET_INFO::request res = AUTO_VAL_INIT(res);
-
-      return m_rpc.on_get_info(res, info, stub_cntxt);
-    }
-
-    bool get_aliases(const currency::COMMAND_RPC_GET_ALL_ALIASES::response& aliases)
-    {
-      currency::core_rpc_server::connection_context stub_cntxt = AUTO_VAL_INIT(stub_cntxt);
-      currency::COMMAND_RPC_GET_ALL_ALIASES::request res = AUTO_VAL_INIT(res);
-      epee::json_rpc::error error_resp;
-
-      return m_rpc.on_get_all_aliases(res, aliases, error_resp, stub_cntxt);
-    }
-
-    bool get_alias_info(const std::string& alias, currency::COMMAND_RPC_GET_ALIAS_DETAILS::response& alias_info)
-    {
-      currency::core_rpc_server::connection_context stub_cntxt = AUTO_VAL_INIT(stub_cntxt);
-      currency::COMMAND_RPC_GET_ALIAS_DETAILS::request req = AUTO_VAL_INIT(req);
-      req.alias = alias;
-      epee::json_rpc::error error_resp;
-
-      return m_rpc.on_get_alias_details(req, alias_info, error_resp, stub_cntxt);
-    }
-    */
 
   private:
     currency::core_rpc_server& m_rpc;

@@ -237,7 +237,7 @@ namespace wallet_rpc
 
     struct response
     {
-      std::string status;  //"OK", "UNCONFIRMED", "BAD", "SPENT"
+      std::string status;  //"OK", "UNCONFIRMED", "BAD", "SPENT", "INTERNAL_ERROR"
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -257,7 +257,7 @@ namespace wallet_rpc
 
     struct response
     {
-      std::string status;
+      std::string status;//"OK", "UNCONFIRMED", "BAD", "SPENT", "INTERNAL_ERROR:"
       telepod tpd;
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -278,7 +278,7 @@ namespace wallet_rpc
 
     struct response
     {
-      std::string status;  ////"OK", "UNCONFIRMED", "BAD", "SPENT"
+      std::string status;  //"OK", "UNCONFIRMED", "BAD", "SPENT", "INTERNAL_ERROR"
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
       END_KV_SERIALIZE_MAP()

@@ -226,6 +226,140 @@ namespace tools
   //------------------------------------------------------------------------------------------------------------------------------
   bool wallet_rpc_server::on_clonetelepod(const wallet_rpc::COMMAND_RPC_CLONETELEPOD::request& req, wallet_rpc::COMMAND_RPC_CLONETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
+    //check if base transaction confirmed
+    currency::COMMAND_RPC_GET_TRANSACTIONS::request get_tx_req = AUTO_VAL_INIT(get_tx_req);
+    currency::COMMAND_RPC_GET_TRANSACTIONS::response get_tx_rsp = AUTO_VAL_INIT(get_tx_rsp);
+    get_tx_req.txs_hashes.push_back(req.tpd.basement_tx_id_hex);
+    if (!m_wallet.get_core_proxy()->call_COMMAND_RPC_GET_TRANSACTIONS(get_tx_req, get_tx_rsp)
+      || get_tx_rsp.status != CORE_RPC_STATUS_OK
+      || !get_tx_rsp.txs_as_hex.size())
+    {
+      res.status = "UNCONFIRMED";
+      return true;
+    }
+    
+    //extract account keys
+    std::string acc_buff;
+    currency::account_base acc = AUTO_VAL_INIT(acc);
+    if (!string_tools::parse_hexstr_to_binbuff(req.tpd.account_keys_hex, acc_buff))
+    {
+      LOG_ERROR("Failed to parse_hexstr_to_binbuff(req.tpd.account_keys_hex, acc_buff)");
+      res.status = "BAD";
+      return true;
+    }
+    if (!epee::serialization::load_t_from_binary(acc, acc_buff))
+    {
+      LOG_ERROR("Failed to load_t_from_binary(acc, acc_buff)");
+      res.status = "BAD";
+      return true;
+    }
+
+    //extract transaction
+    currency::transaction tx = AUTO_VAL_INIT(tx);
+    std::string buff;
+    if (!string_tools::parse_hexstr_to_binbuff(get_tx_rsp.txs_as_hex.back(), buff))
+    {
+      LOG_ERROR("Failed to parse_hexstr_to_binbuff(get_tx_rsp.txs_as_hex.back(), buff)");
+      res.status = "INTERNAL_ERROR";
+      return true;
+    }
+    if (!currency::parse_and_validate_tx_from_blob(buff, tx))
+    {
+      LOG_ERROR("Failed to currency::parse_and_validate_tx_from_blob(buff, tx)");
+      res.status = "INTERNAL_ERROR";
+      return true;
+    }
+
+    crypto::public_key tx_pub_key = currency::get_tx_pub_key_from_extra(tx);
+    if (tx_pub_key == currency::null_pkey)
+    {
+      LOG_ERROR("Failed to currency::get_tx_pub_key_from_extra(tx)");
+      res.status = "BAD";
+      return true;
+
+    }
+    
+    //get transaction global output indices 
+    currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::request get_ind_req = AUTO_VAL_INIT(get_ind_req);
+    currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::response get_ind_rsp = AUTO_VAL_INIT(get_ind_rsp);
+    get_ind_req.txid = currency::get_transaction_hash(tx);
+    if (!m_wallet.get_core_proxy()->call_COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES(get_ind_req, get_ind_rsp)
+      || get_ind_rsp.status != CORE_RPC_STATUS_OK
+      || get_ind_rsp.o_indexes.size() != tx.vout.size())
+    {
+      LOG_ERROR("Problem with call_COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES(....) ");
+      res.status = "INTERNAL_ERROR";
+      return true;
+    }
+
+    //prepare inputs
+    std::vector<currency::tx_source_entry> sources;
+    size_t i = 0;
+    uint64_t amount = 0;
+    for (auto& o : get_ind_rsp.o_indexes)
+    {
+      //check if input is for telepod's address
+      if (currency::is_out_to_acc(acc.get_keys(), boost::get<currency::txout_to_key>(tx.vout[i].target), tx_pub_key, i))
+      {
+        //income output 
+        amount += tx.vout[i].amount;
+        sources.resize(sources.size() + 1);
+        currency::tx_source_entry& tse = sources.back();
+        tse.amount = tx.vout[i].amount;
+        tse.outputs.push_back(currency::tx_source_entry::output_entry(o, boost::get<currency::txout_to_key>(tx.vout[i].target).key));
+        tse.real_out_tx_key = tx_pub_key;
+        tse.real_output = 0;
+        tse.real_output_in_tx_index = i;
+      }
+      ++i;
+    }
+    
+    //new destination account 
+    currency::account_base acc2 = AUTO_VAL_INIT(acc2);
+    acc2.generate();
+
+    //prepare outputs
+    std::vector<currency::tx_destination_entry> dsts(1);
+    currency::tx_destination_entry& dst = dsts.back();
+    dst.addr = acc2.get_keys().m_account_address;
+    dst.amount = amount - DEFAULT_FEE;
+    
+    //generate transaction
+    const std::vector<uint8_t> extra;
+    currency::transaction tx2 = AUTO_VAL_INIT(tx2);
+    bool r = currency::construct_tx(acc.get_keys(), sources, dsts, extra, tx2, 0);
+    if (!r)
+    {
+      LOG_ERROR("Problem with construct_tx(....) ");
+      res.status = "INTERNAL_ERROR";
+      return true;
+    }
+    if (CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx))
+    {
+      LOG_ERROR("Problem with construct_tx(....), blobl size os too big: " << get_object_blobsize(tx));
+      res.status = "INTERNAL_ERROR";
+      return true;
+    }
+
+    //send transaction to daemon
+    currency::COMMAND_RPC_SEND_RAW_TX::request req_send_raw;
+    req_send_raw.tx_as_hex = epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(tx2));
+    currency::COMMAND_RPC_SEND_RAW_TX::response rsp_send_raw;
+    r = m_wallet.get_core_proxy()->call_COMMAND_RPC_SEND_RAW_TX(req_send_raw, rsp_send_raw);
+    if (!r || rsp_send_raw.status != CORE_RPC_STATUS_OK)
+    {
+      LOG_ERROR("Problem with construct_tx(....), blobl size os too big: " << get_object_blobsize(tx));
+      res.status = "INTERNAL_ERROR";
+      return true;
+    }
+
+    res.tpd.basement_tx_id_hex = string_tools::pod_to_hex(currency::get_transaction_hash(tx2));
+    std::string acc2_buff = epee::serialization::store_t_to_binary(acc2);
+    res.tpd.account_keys_hex = string_tools::buff_to_hex_nodelimer(acc2_buff);
+
+    res.status = "OK";
+    LOG_PRINT_GREEN("TELEPOD ISSUED [" << currency::print_money(dst.amount) << "BBR, base_tx_id: ]" << currency::get_transaction_hash(tx2), LOG_LEVEL_0);
+
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------

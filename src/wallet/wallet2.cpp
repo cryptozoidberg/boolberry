@@ -53,6 +53,11 @@ bool wallet2::set_core_proxy(std::shared_ptr<i_core_proxy>& proxy)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+std::shared_ptr<i_core_proxy> wallet2::get_core_proxy()
+{
+  return m_core_proxy;
+}
+//----------------------------------------------------------------------------------------------------
 void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b)
 {
   std::string recipient, recipient_alias;
