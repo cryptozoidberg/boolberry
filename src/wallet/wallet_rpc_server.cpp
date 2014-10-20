@@ -189,6 +189,38 @@ namespace tools
   //------------------------------------------------------------------------------------------------------------------------------
   bool wallet_rpc_server::on_maketelepod(const wallet_rpc::COMMAND_RPC_MAKETELEPOD::request& req, wallet_rpc::COMMAND_RPC_MAKETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
+    //check available balance
+    if (m_wallet.unlocked_balance() <= req.amount)
+    { 
+      res.status = "INSUFFICIENT_COINS";
+      return true;
+    }
+
+    currency::account_base acc;
+    acc.generate();
+    std::vector<currency::tx_destination_entry> dsts(1);
+    dsts.back().amount = req.amount;
+    dsts.back().addr = acc.get_keys().m_account_address;
+    currency::transaction tx = AUTO_VAL_INIT(tx);
+    try
+    {
+      std::vector<uint8_t> extra;
+      m_wallet.transfer(dsts, 0, 0, DEFAULT_FEE, extra, tx);
+    }
+    catch (const std::runtime_error& er)
+    {
+      LOG_ERROR("Failed to send transaction: " << er.what());
+      res.status = "INTERNAL_ERROR";
+      return true;
+    }
+
+    res.tpd.basement_tx_id_hex = string_tools::pod_to_hex(currency::get_transaction_hash(tx));    
+    std::string buff = epee::serialization::store_t_to_binary(acc);    
+    res.tpd.account_keys_hex = string_tools::buff_to_hex_nodelimer(buff);
+
+    res.status = "OK";
+    LOG_PRINT_GREEN("TELEPOD ISSUED [" << currency::print_money(req.amount) << "BBR, base_tx_id: ]" << currency::get_transaction_hash(tx), LOG_LEVEL_0);
+
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------

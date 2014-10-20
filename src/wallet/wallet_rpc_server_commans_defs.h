@@ -214,7 +214,7 @@ namespace wallet_rpc
 
     struct response
     {
-      std::string status;
+      std::string status; //"OK", "INSUFFICIENT_COINS", "INTERNAL_ERROR"
       telepod tpd;
 
       BEGIN_KV_SERIALIZE_MAP()

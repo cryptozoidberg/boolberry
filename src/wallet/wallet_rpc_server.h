@@ -45,7 +45,6 @@ namespace tools
         MAP_JON_RPC_WE("clonetelepod",  on_clonetelepod, wallet_rpc::COMMAND_RPC_CLONETELEPOD)
         MAP_JON_RPC_WE("telepodstatus", on_telepodstatus, wallet_rpc::COMMAND_RPC_TELEPODSTATUS)
         MAP_JON_RPC_WE("withdrawtelepod", on_withdrawtelepod, wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD)
-
       END_JSON_RPC_MAP()
     END_URI_MAP2()
 
