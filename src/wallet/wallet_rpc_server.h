@@ -60,7 +60,7 @@ namespace tools
       bool on_withdrawtelepod(const wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD::request& req, wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx);
 
       bool handle_command_line(const boost::program_options::variables_map& vm);
-      bool build_transaction_from_telepod(const wallet_rpc::telepod& tlp, const currency::account_base& acc2, currency::transaction& tx2, std::string& status );
+      bool build_transaction_from_telepod(const wallet_rpc::telepod& tlp, const currency::account_public_address& acc2, currency::transaction& tx2, std::string& status);
 
       wallet2& m_wallet;
       std::string m_port;

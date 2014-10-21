@@ -271,14 +271,16 @@ namespace wallet_rpc
     struct request
     {
       telepod tpd;
+      std::string addr;
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tpd)
+        KV_SERIALIZE(addr)
       END_KV_SERIALIZE_MAP()
     };
 
     struct response
     {
-      std::string status;  //"OK", "UNCONFIRMED", "BAD", "SPENT", "INTERNAL_ERROR"
+      std::string status;  //"OK", "UNCONFIRMED", "BAD", "SPENT", "INTERNAL_ERROR", "BAD_ADDRESS"
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
       END_KV_SERIALIZE_MAP()

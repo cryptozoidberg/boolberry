@@ -224,7 +224,7 @@ namespace tools
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  bool wallet_rpc_server::build_transaction_from_telepod(const wallet_rpc::telepod& tlp, const currency::account_base& acc2, currency::transaction& tx2, std::string& status)
+  bool wallet_rpc_server::build_transaction_from_telepod(const wallet_rpc::telepod& tlp, const currency::account_public_address& acc2, currency::transaction& tx2, std::string& status)
   {
     //check if base transaction confirmed
     currency::COMMAND_RPC_GET_TRANSACTIONS::request get_tx_req = AUTO_VAL_INIT(get_tx_req);
@@ -318,7 +318,7 @@ namespace tools
     //prepare outputs
     std::vector<currency::tx_destination_entry> dsts(1);
     currency::tx_destination_entry& dst = dsts.back();
-    dst.addr = acc2.get_keys().m_account_address;
+    dst.addr = acc2;
     dst.amount = amount - DEFAULT_FEE;
 
     //generate transaction
@@ -330,9 +330,9 @@ namespace tools
       status = "INTERNAL_ERROR";
       return false;
     }
-    if (CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx))
+    if (CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx2))
     {
-      LOG_ERROR("Problem with construct_tx(....), blobl size os too big: " << get_object_blobsize(tx));
+      LOG_ERROR("Problem with construct_tx(....), blobl size os too big: " << get_object_blobsize(tx2));
       status = "INTERNAL_ERROR";
       return false;
     }
@@ -347,7 +347,7 @@ namespace tools
     currency::account_base acc2 = AUTO_VAL_INIT(acc2);
     acc2.generate();
 
-    if (!build_transaction_from_telepod(req.tpd, acc2, tx2, res.status))
+    if (!build_transaction_from_telepod(req.tpd, acc2.get_keys().m_account_address, tx2, res.status))
     {
       LOG_ERROR("Failed to build_transaction_from_telepod(...)");
       return true;
@@ -382,7 +382,7 @@ namespace tools
     currency::account_base acc2 = AUTO_VAL_INIT(acc2);
     acc2.generate();
 
-    if (!build_transaction_from_telepod(req.tpd, acc2, tx2, res.status))
+    if (!build_transaction_from_telepod(req.tpd, acc2.get_keys().m_account_address, tx2, res.status))
     {
       return true;
     }
@@ -416,6 +416,38 @@ namespace tools
   //------------------------------------------------------------------------------------------------------------------------------
   bool wallet_rpc_server::on_withdrawtelepod(const wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD::request& req, wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
+    currency::transaction tx2 = AUTO_VAL_INIT(tx2);
+    //parse destination add 
+    currency::account_public_address acc_addr = AUTO_VAL_INIT(acc_addr);
+    if (!currency::get_account_address_from_str(acc_addr, req.addr))
+    {
+      LOG_ERROR("Failed to build_transaction_from_telepod(...)");
+      res.status = "BAD_ADDRESS";
+      return true;
+    }
+
+
+    if (!build_transaction_from_telepod(req.tpd, acc_addr, tx2, res.status))
+    {
+      LOG_ERROR("Failed to build_transaction_from_telepod(...)");
+      return true;
+    }
+
+    //send transaction to daemon
+    currency::COMMAND_RPC_SEND_RAW_TX::request req_send_raw;
+    req_send_raw.tx_as_hex = epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(tx2));
+    currency::COMMAND_RPC_SEND_RAW_TX::response rsp_send_raw;
+    bool r = m_wallet.get_core_proxy()->call_COMMAND_RPC_SEND_RAW_TX(req_send_raw, rsp_send_raw);
+    if (!r || rsp_send_raw.status != CORE_RPC_STATUS_OK)
+    {
+      LOG_ERROR("Problem with construct_tx(....), blobl size os too big: " << get_object_blobsize(tx2));
+      res.status = "INTERNAL_ERROR";
+      return true;
+    }
+
+    res.status = "OK";
+    LOG_PRINT_GREEN("TELEPOD WITHDRAWN [" << currency::print_money(currency::get_outs_money_amount(tx2)) << "BBR, tx_id: ]" << currency::get_transaction_hash(tx2), LOG_LEVEL_0);
+
     return true;
   }
 
