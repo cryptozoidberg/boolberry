@@ -138,6 +138,28 @@ namespace currency
     };
   };
   //-----------------------------------------------
+  struct COMMAND_RPC_CHECK_KEYIMAGES
+  {
+    struct request
+    {
+      std::list<crypto::key_image> images;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE_CONTAINER_POD_AS_BLOB(images)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::list<bool> images_stat;  //true - unspent, false - spent
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(images_stat)
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+  //-----------------------------------------------
   struct COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES
   {
     struct request

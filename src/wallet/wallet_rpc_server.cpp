@@ -224,34 +224,34 @@ namespace tools
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  bool wallet_rpc_server::on_clonetelepod(const wallet_rpc::COMMAND_RPC_CLONETELEPOD::request& req, wallet_rpc::COMMAND_RPC_CLONETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx)
+  bool wallet_rpc_server::build_transaction_from_telepod(const wallet_rpc::telepod& tlp, const currency::account_base& acc2, currency::transaction& tx2, std::string& status)
   {
     //check if base transaction confirmed
     currency::COMMAND_RPC_GET_TRANSACTIONS::request get_tx_req = AUTO_VAL_INIT(get_tx_req);
     currency::COMMAND_RPC_GET_TRANSACTIONS::response get_tx_rsp = AUTO_VAL_INIT(get_tx_rsp);
-    get_tx_req.txs_hashes.push_back(req.tpd.basement_tx_id_hex);
+    get_tx_req.txs_hashes.push_back(tlp.basement_tx_id_hex);
     if (!m_wallet.get_core_proxy()->call_COMMAND_RPC_GET_TRANSACTIONS(get_tx_req, get_tx_rsp)
       || get_tx_rsp.status != CORE_RPC_STATUS_OK
       || !get_tx_rsp.txs_as_hex.size())
     {
-      res.status = "UNCONFIRMED";
-      return true;
+      status = "UNCONFIRMED";
+      return false;
     }
-    
+
     //extract account keys
     std::string acc_buff;
     currency::account_base acc = AUTO_VAL_INIT(acc);
-    if (!string_tools::parse_hexstr_to_binbuff(req.tpd.account_keys_hex, acc_buff))
+    if (!string_tools::parse_hexstr_to_binbuff(tlp.account_keys_hex, acc_buff))
     {
-      LOG_ERROR("Failed to parse_hexstr_to_binbuff(req.tpd.account_keys_hex, acc_buff)");
-      res.status = "BAD";
-      return true;
+      LOG_ERROR("Failed to parse_hexstr_to_binbuff(tlp.account_keys_hex, acc_buff)");
+      status = "BAD";
+      return false;
     }
     if (!epee::serialization::load_t_from_binary(acc, acc_buff))
     {
       LOG_ERROR("Failed to load_t_from_binary(acc, acc_buff)");
-      res.status = "BAD";
-      return true;
+      status = "BAD";
+      return false;
     }
 
     //extract transaction
@@ -260,25 +260,25 @@ namespace tools
     if (!string_tools::parse_hexstr_to_binbuff(get_tx_rsp.txs_as_hex.back(), buff))
     {
       LOG_ERROR("Failed to parse_hexstr_to_binbuff(get_tx_rsp.txs_as_hex.back(), buff)");
-      res.status = "INTERNAL_ERROR";
-      return true;
+      status = "INTERNAL_ERROR";
+      return false;
     }
     if (!currency::parse_and_validate_tx_from_blob(buff, tx))
     {
       LOG_ERROR("Failed to currency::parse_and_validate_tx_from_blob(buff, tx)");
-      res.status = "INTERNAL_ERROR";
-      return true;
+      status = "INTERNAL_ERROR";
+      return false;
     }
 
     crypto::public_key tx_pub_key = currency::get_tx_pub_key_from_extra(tx);
     if (tx_pub_key == currency::null_pkey)
     {
       LOG_ERROR("Failed to currency::get_tx_pub_key_from_extra(tx)");
-      res.status = "BAD";
-      return true;
+      status = "BAD";
+      return false;
 
     }
-    
+
     //get transaction global output indices 
     currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::request get_ind_req = AUTO_VAL_INIT(get_ind_req);
     currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::response get_ind_rsp = AUTO_VAL_INIT(get_ind_rsp);
@@ -288,8 +288,8 @@ namespace tools
       || get_ind_rsp.o_indexes.size() != tx.vout.size())
     {
       LOG_ERROR("Problem with call_COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES(....) ");
-      res.status = "INTERNAL_ERROR";
-      return true;
+      status = "INTERNAL_ERROR";
+      return false;
     }
 
     //prepare inputs
@@ -313,31 +313,43 @@ namespace tools
       }
       ++i;
     }
-    
-    //new destination account 
-    currency::account_base acc2 = AUTO_VAL_INIT(acc2);
-    acc2.generate();
+
 
     //prepare outputs
     std::vector<currency::tx_destination_entry> dsts(1);
     currency::tx_destination_entry& dst = dsts.back();
     dst.addr = acc2.get_keys().m_account_address;
     dst.amount = amount - DEFAULT_FEE;
-    
+
     //generate transaction
     const std::vector<uint8_t> extra;
-    currency::transaction tx2 = AUTO_VAL_INIT(tx2);
     bool r = currency::construct_tx(acc.get_keys(), sources, dsts, extra, tx2, 0);
     if (!r)
     {
       LOG_ERROR("Problem with construct_tx(....) ");
-      res.status = "INTERNAL_ERROR";
-      return true;
+      status = "INTERNAL_ERROR";
+      return false;
     }
     if (CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx))
     {
       LOG_ERROR("Problem with construct_tx(....), blobl size os too big: " << get_object_blobsize(tx));
-      res.status = "INTERNAL_ERROR";
+      status = "INTERNAL_ERROR";
+      return false;
+    }
+
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_clonetelepod(const wallet_rpc::COMMAND_RPC_CLONETELEPOD::request& req, wallet_rpc::COMMAND_RPC_CLONETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx)
+  {
+    currency::transaction tx2 = AUTO_VAL_INIT(tx2);
+    //new destination account 
+    currency::account_base acc2 = AUTO_VAL_INIT(acc2);
+    acc2.generate();
+
+    if (!build_transaction_from_telepod(req.tpd, acc2, tx2, res.status))
+    {
+      LOG_ERROR("Failed to build_transaction_from_telepod(...)");
       return true;
     }
 
@@ -345,10 +357,10 @@ namespace tools
     currency::COMMAND_RPC_SEND_RAW_TX::request req_send_raw;
     req_send_raw.tx_as_hex = epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(tx2));
     currency::COMMAND_RPC_SEND_RAW_TX::response rsp_send_raw;
-    r = m_wallet.get_core_proxy()->call_COMMAND_RPC_SEND_RAW_TX(req_send_raw, rsp_send_raw);
+    bool r = m_wallet.get_core_proxy()->call_COMMAND_RPC_SEND_RAW_TX(req_send_raw, rsp_send_raw);
     if (!r || rsp_send_raw.status != CORE_RPC_STATUS_OK)
     {
-      LOG_ERROR("Problem with construct_tx(....), blobl size os too big: " << get_object_blobsize(tx));
+      LOG_ERROR("Problem with construct_tx(....), blobl size os too big: " << get_object_blobsize(tx2));
       res.status = "INTERNAL_ERROR";
       return true;
     }
@@ -358,13 +370,47 @@ namespace tools
     res.tpd.account_keys_hex = string_tools::buff_to_hex_nodelimer(acc2_buff);
 
     res.status = "OK";
-    LOG_PRINT_GREEN("TELEPOD ISSUED [" << currency::print_money(dst.amount) << "BBR, base_tx_id: ]" << currency::get_transaction_hash(tx2), LOG_LEVEL_0);
+    LOG_PRINT_GREEN("TELEPOD ISSUED [" << currency::print_money(currency::get_outs_money_amount(tx2)) << "BBR, base_tx_id: ]" << currency::get_transaction_hash(tx2), LOG_LEVEL_0);
 
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
   bool wallet_rpc_server::on_telepodstatus(const wallet_rpc::COMMAND_RPC_TELEPODSTATUS::request& req, wallet_rpc::COMMAND_RPC_TELEPODSTATUS::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
+    currency::transaction tx2 = AUTO_VAL_INIT(tx2);
+    //new destination account 
+    currency::account_base acc2 = AUTO_VAL_INIT(acc2);
+    acc2.generate();
+
+    if (!build_transaction_from_telepod(req.tpd, acc2, tx2, res.status))
+    {
+      return true;
+    }
+    //check if transaction is spent
+    currency::COMMAND_RPC_CHECK_KEYIMAGES::request req_ki = AUTO_VAL_INIT(req_ki);
+    currency::COMMAND_RPC_CHECK_KEYIMAGES::response rsp_ki = AUTO_VAL_INIT(rsp_ki);
+    for (auto& i : tx2.vin)
+      req_ki.images.push_back(boost::get<currency::txin_to_key>(i).k_image);
+
+    if (!m_wallet.get_core_proxy()->call_COMMAND_RPC_COMMAND_RPC_CHECK_KEYIMAGES(req_ki, rsp_ki) 
+      || rsp_ki.status != CORE_RPC_STATUS_OK
+      || rsp_ki.images_stat.size() != req_ki.images.size())
+    {
+      LOG_ERROR("Problem with call_COMMAND_RPC_COMMAND_RPC_CHECK_KEYIMAGES(....)");
+      res.status = "INTERNAL_ERROR";
+      return true;
+    }
+
+    for (auto s : rsp_ki.images_stat)
+    {
+      if (!s)
+      {
+        res.status = "SPENT";
+        return true;
+      }
+    }
+
+    res.status = "OK";
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------

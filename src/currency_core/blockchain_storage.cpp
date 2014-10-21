@@ -1208,6 +1208,17 @@ bool blockchain_storage::get_transactions_daily_stat(uint64_t& daily_cnt, uint64
   return true;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::check_keyimages(const std::list<crypto::key_image>& images, std::list<bool>& images_stat)
+{
+  //true - unspent, false - spent
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  for (auto& ki : images)
+  {
+    images_stat.push_back(m_spent_keys.count(ki)?false:true);
+  }
+  return true;
+}
+//------------------------------------------------------------------
 uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);

@@ -190,7 +190,7 @@ namespace wallet_rpc
     };
   };
 
-
+  /*stay-alone instance*/
   struct telepod
   {
     std::string account_keys_hex;

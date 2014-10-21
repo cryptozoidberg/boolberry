@@ -74,11 +74,12 @@ namespace tools
       return m_rpc.on_get_transactions(req, rsp, m_cntxt_stub);
     }
     //------------------------------------------------------------------------------------------------------------------------------
-    bool call_COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES(const currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::request& req, currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::response& rsp)
+    bool call_COMMAND_RPC_COMMAND_RPC_CHECK_KEYIMAGES(const currency::COMMAND_RPC_CHECK_KEYIMAGES::request& req, currency::COMMAND_RPC_CHECK_KEYIMAGES::response& rsp)
     {
-      return m_rpc.on_get_indexes(req, rsp, m_http_client, m_cntxt_stub);
+      return m_rpc.on_check_keyimages(req, rsp, m_cntxt_stub);
     }
     //------------------------------------------------------------------------------------------------------------------------------
+
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
     {
       return tools::get_transfer_address(adr_str, addr, this);
