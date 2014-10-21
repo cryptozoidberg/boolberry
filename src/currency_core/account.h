@@ -32,8 +32,8 @@ namespace currency
   public:
     account_base();
     // return restore seed
-    vector<unsigned char> generate();
-    void restore(const vector<unsigned char>& restore_seed);
+    std::vector<unsigned char> generate();
+    void restore(const std::vector<unsigned char>& restore_seed);
     const account_keys& get_keys() const;
     std::string get_public_address_str();
 
