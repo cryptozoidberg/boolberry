@@ -301,37 +301,50 @@ namespace currency
     if(txd.max_used_block_id == null_hash)
     {//not checked, lets try to check
 
-      if(txd.last_failed_id != null_hash && m_blockchain.get_current_blockchain_height() > txd.last_failed_height && txd.last_failed_id == m_blockchain.get_block_id_by_height(txd.last_failed_height))
+      if (txd.last_failed_id != null_hash && m_blockchain.get_current_blockchain_height() > txd.last_failed_height && txd.last_failed_id == m_blockchain.get_block_id_by_height(txd.last_failed_height))
+      {
+        txd.decline_reason = "tx is broken for this height";
         return false;//we already sure that this tx is broken for this height
+      }
 
       if(!m_blockchain.check_tx_inputs(txd.tx, txd.max_used_block_height, txd.max_used_block_id))
       {
         txd.last_failed_height = m_blockchain.get_current_blockchain_height()-1;
         txd.last_failed_id = m_blockchain.get_block_id_by_height(txd.last_failed_height);
+        txd.decline_reason = "check_tx_inputs() validation failed";
         return false;
       }
     }else
     {
-      if(txd.max_used_block_height >= m_blockchain.get_current_blockchain_height())
+      if (txd.max_used_block_height >= m_blockchain.get_current_blockchain_height())
+      {
+        txd.decline_reason = "max_used_block_height > current_height";
         return false;
+      }
       if(m_blockchain.get_block_id_by_height(txd.max_used_block_height) != txd.max_used_block_id)
       {
         //if we already failed on this height and id, skip actual ring signature check
-        if(txd.last_failed_id == m_blockchain.get_block_id_by_height(txd.last_failed_height))
+        if (txd.last_failed_id == m_blockchain.get_block_id_by_height(txd.last_failed_height))
+        {
+          txd.decline_reason = "last_failed_id is still actual";
           return false;
+        }
         //check ring signature again, it is possible (with very small chance) that this transaction become again valid
         if(!m_blockchain.check_tx_inputs(txd.tx, txd.max_used_block_height, txd.max_used_block_id))
         {
           txd.last_failed_height = m_blockchain.get_current_blockchain_height()-1;
           txd.last_failed_id = m_blockchain.get_block_id_by_height(txd.last_failed_height);
+          txd.decline_reason = "check_tx_inputs() failed(2)";
           return false;
         }
       }
     }
     //if we here, transaction seems valid, but, anyway, check for key_images collisions with blockchain, just to be sure
-    if(m_blockchain.have_tx_keyimges_as_spent(txd.tx))
+    if (m_blockchain.have_tx_keyimges_as_spent(txd.tx))
+    {
+      txd.decline_reason = "have_tx_keyimges_as_spent";
       return false;
-
+    }
     //transaction is ok.
     return true;
   }
@@ -375,7 +388,8 @@ namespace currency
           << "max_used_block_id: " << txd.max_used_block_id << ENDL
           << "last_failed_height: " << txd.last_failed_height << ENDL
           << "last_failed_id: " << txd.last_failed_id << ENDL
-          << "live_time: " << epee::misc_utils::get_time_interval_string(time(nullptr) - txd.receive_time) << ENDL;
+          << "live_time: " << epee::misc_utils::get_time_interval_string(time(nullptr) - txd.receive_time) << ENDL
+          << "decline_reason: " << txd.decline_reason << ENDL;
       }else
       {
         tx_details& txd = txe.second;
@@ -388,7 +402,8 @@ namespace currency
           << "max_used_block_id: " << txd.max_used_block_id << ENDL
           << "last_failed_height: " << txd.last_failed_height << ENDL
           << "last_failed_id: " << txd.last_failed_id << ENDL
-          << "live_time: " << epee::misc_utils::get_time_interval_string(time(nullptr) - txd.receive_time) << ENDL;
+          << "live_time: " << epee::misc_utils::get_time_interval_string(time(nullptr) - txd.receive_time) << ENDL
+          << "decline_reason: " << txd.decline_reason << ENDL;
       }
 
     }

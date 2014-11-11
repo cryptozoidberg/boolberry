@@ -93,6 +93,7 @@ namespace currency
       uint64_t last_failed_height;
       crypto::hash last_failed_id;
       time_t receive_time;
+      std::string decline_reason;
     };
 
   private:
