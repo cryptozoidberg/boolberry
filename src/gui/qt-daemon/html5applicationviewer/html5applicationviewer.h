@@ -45,7 +45,7 @@ private slots:
     bool do_close();
     bool on_request_quit();
 public slots:
-	QString browse_wallet();
+	QString browse_wallet(bool existing);
     void open_wallet(const QString& path, const QString& pwd);
     void generate_wallet();
     void close_wallet();

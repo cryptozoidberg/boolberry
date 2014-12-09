@@ -560,10 +560,18 @@ void Html5ApplicationViewer::generate_wallet()
   m_backend.generate_wallet(path.toStdString(), pass.toStdString());
 }
 
-QString Html5ApplicationViewer::browse_wallet()
+QString Html5ApplicationViewer::browse_wallet(bool existing)
 {
-	return QFileDialog::getOpenFileName(this, tr("Open wallet File"),
-		m_config.wallets_last_used_dir.c_str(),
+	if (existing)
+	{
+		return QFileDialog::getOpenFileName(this, tr("Open wallet File"),
+			m_config.wallets_last_used_dir.c_str(),
+			tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
+	}
+	QFileDialog dialogFile(this);
+	std::string default_file = (tools::get_current_username() + "_wallet.bbr").c_str();
+	return dialogFile.getSaveFileName(this, tr("Wallet file to store"),
+		(m_config.wallets_last_used_dir + "/" + default_file).c_str(),
 		tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
 }
 
