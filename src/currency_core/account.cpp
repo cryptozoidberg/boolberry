@@ -10,6 +10,9 @@
 #include "account.h"
 #include "warnings.h"
 #include "crypto/crypto.h"
+extern "C" {
+#include "crypto/keccak.h"
+}
 #include "currency_core/currency_basic_impl.h"
 #include "currency_core/currency_format_utils.h"
 using namespace std;
@@ -32,17 +35,20 @@ DISABLE_VS_WARNINGS(4244 4345)
   vector<unsigned char> account_base::generate()
   {
     vector<unsigned char> seed = generate_keys(m_keys.m_account_address.m_spend_public_key, m_keys.m_spend_secret_key);
-    vector<unsigned char> seed2 = generate_keys(m_keys.m_account_address.m_view_public_key, m_keys.m_view_secret_key);
+	vector<unsigned char> seed2(32, 0);
+	keccak(&seed[0], seed.size(), &seed2[0], seed2.size());
+    restore_keys(m_keys.m_account_address.m_view_public_key, m_keys.m_view_secret_key, seed2);
     m_creation_timestamp = time(NULL);
-    seed.insert(seed.end(), seed2.begin(), seed2.end());
     return seed;
   }
    //-----------------------------------------------------------------
   void account_base::restore(const vector<unsigned char>& restore_seed)
   {
-    assert(restore_seed.size() == 64);
-    restore_keys(m_keys.m_account_address.m_spend_public_key, m_keys.m_spend_secret_key, vector<unsigned char>(restore_seed.begin(), restore_seed.begin() + 32));
-    restore_keys(m_keys.m_account_address.m_view_public_key, m_keys.m_view_secret_key, vector<unsigned char>(restore_seed.begin() + 32, restore_seed.end()));
+    assert(restore_seed.size() == 32);
+	vector<unsigned char> seed2(32, 0);
+	keccak(&restore_seed[0], restore_seed.size(), &seed2[0], seed2.size());
+	restore_keys(m_keys.m_account_address.m_spend_public_key, m_keys.m_spend_secret_key, restore_seed);
+    restore_keys(m_keys.m_account_address.m_view_public_key, m_keys.m_view_secret_key, seed2);
     m_creation_timestamp = time(NULL);
   }
    //-----------------------------------------------------------------

@@ -109,7 +109,8 @@ namespace tools
       END_SERIALIZE()
     };
 
-    void generate(const std::string& wallet, const std::string& password);
+    std::vector<unsigned char> generate(const std::string& wallet, const std::string& password);
+	void restore(const std::string& wallet, const std::vector<unsigned char>& restore_seed, const std::string& password);
     void load(const std::string& wallet, const std::string& password);    
     void store();
     std::string get_wallet_path(){ return m_keys_file; }

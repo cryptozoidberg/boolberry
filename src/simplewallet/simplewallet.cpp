@@ -16,6 +16,7 @@
 #include "storages/http_abstract_invoke.h"
 #include "rpc/core_rpc_server_commands_defs.h"
 #include "wallet/wallet_rpc_server.h"
+#include "crypto/mnemonic-encoding.h"
 #include "version.h"
 
 #if defined(WIN32)
@@ -35,10 +36,12 @@ namespace
 {
   const command_line::arg_descriptor<std::string> arg_wallet_file = {"wallet-file", "Use wallet <arg>", ""};
   const command_line::arg_descriptor<std::string> arg_generate_new_wallet = {"generate-new-wallet", "Generate new wallet and save it to <arg> or <address>.wallet by default", ""};
-  const command_line::arg_descriptor<std::string> arg_daemon_address = {"daemon-address", "Use daemon instance at <host>:<port>", ""};
+  const command_line::arg_descriptor<std::string> arg_restore_wallet = { "restore-wallet", "Restore wallet from restore seed and save it to <arg> or <address>.wallet by default", "" };
+  const command_line::arg_descriptor<std::string> arg_daemon_address = { "daemon-address", "Use daemon instance at <host>:<port>", "" };
   const command_line::arg_descriptor<std::string> arg_daemon_host = {"daemon-host", "Use daemon instance at host <arg> instead of localhost", ""};
   const command_line::arg_descriptor<std::string> arg_password = {"password", "Wallet password", "", true};
-  const command_line::arg_descriptor<int> arg_daemon_port = {"daemon-port", "Use daemon instance at port <arg> instead of default", 0};
+  const command_line::arg_descriptor<std::string> arg_restore_seed = { "restore-seed", "Restore wallet from the 24-word seed", "", true };
+  const command_line::arg_descriptor<int> arg_daemon_port = { "daemon-port", "Use daemon instance at port <arg> instead of default", 0 };
   const command_line::arg_descriptor<uint32_t> arg_log_level = {"set_log", "", 0, true};
 
   const command_line::arg_descriptor< std::vector<std::string> > arg_command = {"command", ""};
@@ -216,9 +219,10 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
   size_t c = 0; 
   if(!m_generate_new.empty()) ++c;
   if(!m_wallet_file.empty()) ++c;
+  if (!m_restore_wallet.empty()) ++c;
   if (1 != c)
   {
-    fail_msg_writer() << "you must specify --wallet-file or --generate-new-wallet params";
+    fail_msg_writer() << "you must specify --wallet-file or --generate-new-wallet or --restore-wallet params";
     return false;
   }
 
@@ -249,6 +253,16 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
     bool r = new_wallet(m_generate_new, pwd_container.password());
     CHECK_AND_ASSERT_MES(r, false, "account creation failed");
   }
+  else if (!m_restore_wallet.empty())
+  {
+	  if (m_restore_seed.empty())
+	  {
+		  fail_msg_writer() << "you must specify 24-word restore seed to restore wallet";
+		  return false;
+	  }
+	  bool r = restore_wallet(m_restore_wallet, m_restore_seed, pwd_container.password());
+	  CHECK_AND_ASSERT_MES(r, false, "account restore failed");
+  }
   else
   {
     bool r = open_wallet(m_wallet_file, pwd_container.password());
@@ -273,6 +287,8 @@ void simple_wallet::handle_command_line(const boost::program_options::variables_
   m_daemon_address = command_line::get_arg(vm, arg_daemon_address);
   m_daemon_host    = command_line::get_arg(vm, arg_daemon_host);
   m_daemon_port    = command_line::get_arg(vm, arg_daemon_port);
+  m_restore_wallet = command_line::get_arg(vm, arg_restore_wallet);
+  m_restore_seed   = command_line::get_arg(vm, arg_restore_seed);
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::try_connect_to_daemon()
@@ -293,9 +309,10 @@ bool simple_wallet::new_wallet(const string &wallet_file, const std::string& pas
 
   m_wallet.reset(new tools::wallet2());
   m_wallet->callback(this);
+  std::vector<unsigned char> restore_seed;
   try
   {
-    m_wallet->generate(wallet_file, password);
+    restore_seed = m_wallet->generate(wallet_file, password);
     message_writer(epee::log_space::console_color_white, true) << "Generated new wallet: " << m_wallet->get_account().get_public_address_str() << std::endl << "view key: " << string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
   }
   catch (const std::exception& e)
@@ -307,16 +324,54 @@ bool simple_wallet::new_wallet(const string &wallet_file, const std::string& pas
   m_wallet->init(m_daemon_address);
 
   success_msg_writer() <<
-    "**********************************************************************\n" <<
-    "Your wallet has been generated.\n" <<
-    "To start synchronizing with the daemon use \"refresh\" command.\n" <<
-    "Use \"help\" command to see the list of available commands.\n" <<
-    "Always use \"exit\" command when closing simplewallet to save\n" <<
-    "current session's state. Otherwise, you will possibly need to synchronize \n" <<
-    "your wallet again. Your wallet key is NOT under risk anyway.\n" <<
-    "**********************************************************************";
+	  "**********************************************************************\n" <<
+	  "Your wallet has been generated.\n" <<
+	  "To start synchronizing with the daemon use \"refresh\" command.\n" <<
+	  "Use \"help\" command to see the list of available commands.\n" <<
+	  "Always use \"exit\" command when closing simplewallet to save\n" <<
+	  "current session's state. Otherwise, you will possibly need to synchronize \n" <<
+	  "your wallet again. Your wallet key is NOT under risk anyway.\n"; 
+  success_msg_writer(true) << 
+	  "\nPLEASE NOTE: the following 24 words can be used to recover access to your wallet. Please write them down and store them somewhere safe and secure. Please do not store them in your email or on file storage services outside of your immediate control.\n";
+  success_msg_writer() << crypto::mnemonic_encoding::binary2text(restore_seed) << "\n";
+  success_msg_writer() << 
+	  "**********************************************************************";
   return true;
 }
+
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::restore_wallet(const std::string &wallet_file, const std::string &restore_seed, const std::string& password)
+{
+	m_wallet_file = wallet_file;
+
+	m_wallet.reset(new tools::wallet2());
+	m_wallet->callback(this);
+	try
+	{
+		std::vector<unsigned char> seed = crypto::mnemonic_encoding::text2binary(restore_seed);
+		m_wallet->restore(wallet_file, seed, password);
+		message_writer(epee::log_space::console_color_white, true) << "Wallet restored: " << m_wallet->get_account().get_public_address_str() << std::endl << "view key: " << string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
+	}
+	catch (const std::exception& e)
+	{
+		fail_msg_writer() << "failed to restore wallet: " << e.what();
+		return false;
+	}
+
+	m_wallet->init(m_daemon_address);
+
+	success_msg_writer() <<
+		"**********************************************************************\n" <<
+		"Your wallet has been restored.\n" <<
+		"To start synchronizing with the daemon use \"refresh\" command.\n" <<
+		"Use \"help\" command to see the list of available commands.\n" <<
+		"Always use \"exit\" command when closing simplewallet to save\n" <<
+		"current session's state. Otherwise, you will possibly need to synchronize \n" <<
+		"your wallet again. Your wallet key is NOT under risk anyway.\n" <<
+		"**********************************************************************";
+	return true;
+}
+
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::open_wallet(const string &wallet_file, const std::string& password)
 {
@@ -893,6 +948,8 @@ int main(int argc, char* argv[])
   po::options_description desc_params("Wallet options");
   command_line::add_arg(desc_params, arg_wallet_file);
   command_line::add_arg(desc_params, arg_generate_new_wallet);
+  command_line::add_arg(desc_params, arg_restore_wallet);
+  command_line::add_arg(desc_params, arg_restore_seed);
   command_line::add_arg(desc_params, arg_password);
   command_line::add_arg(desc_params, arg_daemon_address);
   command_line::add_arg(desc_params, arg_daemon_host);
@@ -914,7 +971,7 @@ int main(int argc, char* argv[])
 
     if (command_line::get_arg(vm, command_line::arg_help))
     {
-      success_msg_writer() << "Usage: simplewallet [--wallet-file=<file>|--generate-new-wallet=<file>] [--daemon-address=<host>:<port>] [<COMMAND>]";
+      success_msg_writer() << "Usage: simplewallet [--wallet-file=<file>|--generate-new-wallet=<file>|--restore-wallet=<file> --restore-seed=<24-word seed>] [--daemon-address=<host>:<port>] [<COMMAND>]";
       success_msg_writer() << desc_all << '\n' << w.get_commands_str();
       return false;
     }
