@@ -5,6 +5,7 @@
 
 #include "daemon_backend.h"
 #include "currency_core/alias_helper.h"
+#include "crypto/mnemonic-encoding.h"
 
 
 daemon_backend::daemon_backend():m_pview(&m_view_stub),
@@ -477,7 +478,8 @@ bool daemon_backend::load_recent_transfers()
   return m_pview->set_recent_transfers(tr_hist);
 }
 
-bool daemon_backend::generate_wallet(const std::string& path, const std::string& password)
+bool daemon_backend::generate_wallet(const std::string& path, 
+	const std::string& password, std::string& restore_seed)
 {
   CRITICAL_REGION_LOCAL(m_wallet_lock);
   try
@@ -489,7 +491,7 @@ bool daemon_backend::generate_wallet(const std::string& path, const std::string&
       m_wallet->callback(this);
     }
 
-    m_wallet->generate(path, password);
+	restore_seed = crypto::mnemonic_encoding::binary2text(m_wallet->generate(path, password));
   }
   catch (const std::exception& e)
   {

@@ -47,7 +47,8 @@ private slots:
 public slots:
 	QString browse_wallet(bool existing);
     void open_wallet(const QString& path, const QString& pwd);
-    void generate_wallet();
+    QString generate_wallet(const QString& name, const QString& pwd, 
+		const QString& path);
     void close_wallet();
     QString get_version();
     QString transfer(const QString& json_transfer_object);

@@ -535,29 +535,17 @@ void Html5ApplicationViewer::message_box(const QString& msg)
   show_msg_box(msg.toStdString());
 }
 
-void Html5ApplicationViewer::generate_wallet()
+QString Html5ApplicationViewer::generate_wallet(const QString& name, const QString& pwd,
+	const QString& path)
 {
-  QFileDialog dialogFile(this);  
-  std::string default_file = (tools::get_current_username() + "_wallet.bbr").c_str();
-  QString path = dialogFile.getSaveFileName(this, tr("Wallet file to store"),
-    (m_config.wallets_last_used_dir + "/" + default_file).c_str(),
-    tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
-  
   if (!path.length())
-    return;
+    throw std::runtime_error("Empty wallet path");
 
   m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
 
-  //read password
-  bool ok;
-  QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
-    tr("Password:"), QLineEdit::Password,
-    QString(), &ok);
-  
-  if (!ok)
-    return;
-
-  m_backend.generate_wallet(path.toStdString(), pass.toStdString());
+  std::string restore_seed;
+  m_backend.generate_wallet(path.toStdString(), pwd.toStdString(), restore_seed);
+  return restore_seed.c_str();
 }
 
 QString Html5ApplicationViewer::browse_wallet(bool existing)
