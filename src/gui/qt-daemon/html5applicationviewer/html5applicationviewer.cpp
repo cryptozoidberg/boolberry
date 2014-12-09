@@ -560,26 +560,20 @@ void Html5ApplicationViewer::generate_wallet()
   m_backend.generate_wallet(path.toStdString(), pass.toStdString());
 }
 
-void Html5ApplicationViewer::open_wallet()
+QString Html5ApplicationViewer::browse_wallet()
 {
-  QString path = QFileDialog::getOpenFileName(this, tr("Open wallet File"),
-                                                   m_config.wallets_last_used_dir.c_str(),
-                                                   tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
+	return QFileDialog::getOpenFileName(this, tr("Open wallet File"),
+		m_config.wallets_last_used_dir.c_str(),
+		tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
+}
+
+void Html5ApplicationViewer::open_wallet(const QString& path, const QString& pwd)
+{
   if(!path.length())
     return;
 
   m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
-
-
-  //read password
-  bool ok;
-  QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
-                                            tr("Password:"), QLineEdit::Password,
-                                            QString(), &ok);
-  if(!ok)
-    return;
-
-  m_backend.open_wallet(path.toStdString(), pass.toStdString());
+  m_backend.open_wallet(path.toStdString(), pwd.toStdString());
 }
 
 #include "html5applicationviewer.moc"
