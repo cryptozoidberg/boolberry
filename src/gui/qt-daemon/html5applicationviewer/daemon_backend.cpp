@@ -509,6 +509,38 @@ bool daemon_backend::generate_wallet(const std::string& path,
 
 }
 
+bool daemon_backend::restore_wallet(const std::string& path, 
+	const std::string& restore_text, const std::string& password)
+{
+	CRITICAL_REGION_LOCAL(m_wallet_lock);
+	try
+	{
+		if (m_wallet->get_wallet_path().size())
+		{
+			m_wallet->store();
+			m_wallet.reset(new tools::wallet2());
+			m_wallet->callback(this);
+		}
+
+		std::vector<unsigned char> restore_seed = 
+			crypto::mnemonic_encoding::text2binary(restore_text);
+		m_wallet->restore(path, restore_seed, password);
+	}
+	catch (const std::exception& e)
+	{
+		m_pview->show_msg_box(std::string("Failed to generate wallet: ") + e.what());
+		m_wallet.reset(new tools::wallet2());
+		m_wallet->callback(this);
+		return false;
+	}
+
+	m_wallet->init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
+	update_wallet_info();
+	m_last_wallet_synch_height = 0;
+	m_pview->show_wallet();
+	return true;
+}
+
 bool daemon_backend::close_wallet()
 {
   CRITICAL_REGION_LOCAL(m_wallet_lock);

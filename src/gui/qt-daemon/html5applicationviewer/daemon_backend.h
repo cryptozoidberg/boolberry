@@ -48,6 +48,8 @@ public:
   bool open_wallet(const std::string& path, const std::string& password);
   bool generate_wallet(const std::string& path, const std::string& password, 
 	  std::string& restore_seed);
+  bool restore_wallet(const std::string& path, const std::string& restore_text, 
+	  const std::string& password);
   bool close_wallet();
   bool transfer(const view::transfer_params& tp, currency::transaction& res_tx);
   bool get_aliases(view::alias_set& al_set);

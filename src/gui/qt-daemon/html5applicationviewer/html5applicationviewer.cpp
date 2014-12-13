@@ -5,6 +5,7 @@
 #include "html5applicationviewer.h"
 
 #include <QCoreApplication>
+#include <QApplication>
 #include <QDir>
 #include <QFileInfo>
 #include <QVBoxLayout>
@@ -20,6 +21,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QTimer>
+#include <QClipboard>
 #include "warnings.h"
 #include "net/http_client.h"
 
@@ -300,7 +302,7 @@ void Html5ApplicationViewer::showExpanded()
 #endif
     this->setMouseTracking(true);
     this->setMinimumWidth(1000);
-    this->setMinimumHeight(600);
+    this->setMinimumHeight(650);
     //this->setFixedSize(800, 600);
     m_d->m_webView->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
     m_d->m_webView->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
@@ -433,6 +435,21 @@ void Html5ApplicationViewer::close_wallet()
   m_backend.close_wallet();
 }
 
+void Html5ApplicationViewer::add_address(const QString& name, const QString& address,
+	const QString& alias)
+{
+	gui_config::addressbook_entry row({ name.toStdString(), 
+		address.toStdString(), alias.toStdString() });
+	m_config.address_book.entries.push_back(row);
+}
+
+QString Html5ApplicationViewer::get_addressbook()
+{
+	std::string json_str;
+	epee::serialization::store_t_to_json(m_config.address_book, json_str);
+	return json_str.c_str();
+}
+
 bool Html5ApplicationViewer::switch_view(int view_no)
 {
   view::switch_view_info swi = AUTO_VAL_INIT(swi);
@@ -546,6 +563,24 @@ QString Html5ApplicationViewer::generate_wallet(const QString& name, const QStri
   std::string restore_seed;
   m_backend.generate_wallet(path.toStdString(), pwd.toStdString(), restore_seed);
   return restore_seed.c_str();
+}
+
+void Html5ApplicationViewer::restore_wallet(const QString& restore_text, 
+	const QString& password, const QString& path)
+{
+	if (!path.length())
+		throw std::runtime_error("Empty wallet path");
+
+	m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
+
+	m_backend.restore_wallet(path.toStdString(), restore_text.toStdString(), 
+		password.toStdString());
+}
+
+void Html5ApplicationViewer::place_to_clipboard(const QString& data)
+{
+	QClipboard *clipboard = QApplication::clipboard();
+	clipboard->setText(data);
 }
 
 QString Html5ApplicationViewer::browse_wallet(bool existing)
