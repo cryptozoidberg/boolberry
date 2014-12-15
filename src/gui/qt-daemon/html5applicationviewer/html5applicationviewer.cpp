@@ -226,9 +226,9 @@ void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
 	m_trayIcon = std::unique_ptr<QSystemTrayIcon>(new QSystemTrayIcon(this));
 	m_trayIcon->setContextMenu(m_trayIconMenu.get());
 #ifdef WIN32
-	std::string iconPath(htmlPath + "/files/app16.png"); // windows tray icon size is 16x16
+	std::string iconPath(htmlPath + "/app16.png"); // windows tray icon size is 16x16
 #else
-	std::string iconPath(htmlPath + "/files/app22.png"); // X11 tray icon size is 22x22
+	std::string iconPath(htmlPath + "/app22.png"); // X11 tray icon size is 22x22
 #endif
 	m_trayIcon->setIcon(QIcon(iconPath.c_str()));
 	m_trayIcon->setToolTip("Boolberry");
