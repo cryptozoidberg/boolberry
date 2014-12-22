@@ -70,7 +70,9 @@ namespace crypto {
     friend std::vector<unsigned char> generate_keys(public_key &, secret_key &);
     static void restore_keys(public_key &, secret_key &, const std::vector<unsigned char> &);
     friend void restore_keys(public_key &, secret_key &, const std::vector<unsigned char> &);
-    static bool check_key(const public_key &);
+	static void dependent_key(const secret_key &, secret_key &);
+	friend void dependent_key(const secret_key &, secret_key &);
+	static bool check_key(const public_key &);
     friend bool check_key(const public_key &);
     static bool secret_key_to_public_key(const secret_key &, public_key &);
     friend bool secret_key_to_public_key(const secret_key &, public_key &);
@@ -111,6 +113,12 @@ namespace crypto {
   inline std::vector<unsigned char> generate_keys(public_key &pub, secret_key &sec) {
     return crypto_ops::generate_keys(pub, sec);
   }
+
+  inline void dependent_key(const secret_key& first, secret_key& second)
+  {
+	  return crypto_ops::dependent_key(first, second);
+  }
+
 
   /* Restore key pair from the seed.
   */

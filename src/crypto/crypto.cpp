@@ -84,6 +84,13 @@ namespace crypto {
 		return vector<unsigned char>(&sec.data[0], &sec.data[32]);
 	}
 
+	void crypto_ops::dependent_key(const secret_key& first, secret_key& second)
+	{
+		hash_to_scalar(first.data, 32, second);
+		if (sc_check((unsigned char*)second.data) != 0)
+			throw std::runtime_error("Failed to derive key");
+	}
+
 	void crypto_ops::restore_keys(public_key &pub, secret_key &sec, const std::vector<unsigned char> &seed){
 		if (seed.size() != 32)
 			throw std::runtime_error("Invalid restore seed size");
