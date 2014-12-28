@@ -1,6 +1,6 @@
 ﻿/*
  sample result:
-                    <tr>
+                    <tr data-trxid="trx_id">
                         <td class="iconcell" data-type="unconfirmed">&nbsp;</td>
                         <td>
                             <div class="infocellheader">AMOUNT</div>
@@ -95,13 +95,38 @@ function get_trx_sender_receiver_cell(data, confirmed) {
 
 function get_trx_details_cell(data, confirmed) {
     console.log("get_trx_details_cell");
-    var res = '<td class="infocellmoreicon"><div class="infocellheader">MORE</div><div class="infocell">DETAILS...</div></td>';
+    var res =
+        '<td>' +
+        '<div class="infocellmoreicon">' +
+            '<div class="infocellheader">MORE</div>' +
+            '<div class="infocell">DETAILS...</div>' +
+        '</div>' +
+        '<div class="trxdetails">' +
+            'Amount: ' + print_money(data.amount) + '<br/>' +
+            'Fee: ' + print_money(data.fee) + '<br/>' +
+            'Height: ' + data.height + '<br/>';
+    if (data.is_income)
+        res += 'Type: in<br/>';
+    else
+        res += 'Type: out<br/>';
+    res +=
+            'Payment id: ' + data.payment_id + '<br/>' +
+            'Recipient: ' + data.recipient + '<br/>' +
+            'Recipient alias: ' + data.recipient_alias + '<br/>' +
+            'Details: ' + JSON.stringify(data.td) + '<br/>' +
+            'Timestamp: ' + data.timestamp + '<br/>' +
+            'Size: ' + data.tx_blob_size + '<br/>' +
+            'Hash: ' + data.tx_hash + '<br/>' +
+            'Unlock time: ' + data.unlock_time +
+        '</div>' +
+        '</td>';
+    console.log(res);
     return res;
 }
 
 function get_trx_table_entry(data, confirmed) {
     console.log("get_trx_table_entry(" + JSON.stringify(data) + ", " + confirmed + ")");
-    return "<tr>" + get_trx_icon_cell(data, confirmed) + 
+    return "<tr data-trxid='" + data.tx_hash + "'>" + get_trx_icon_cell(data, confirmed) +
         get_trx_amount_cell(data, confirmed) + 
         get_trx_status_cell(data, confirmed) + 
         get_trx_date_cell(data, confirmed) + 

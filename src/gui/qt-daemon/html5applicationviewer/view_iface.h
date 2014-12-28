@@ -146,6 +146,7 @@ public:
   {
     uint64_t unlocked_balance;
     uint64_t balance;
+	int64_t unconfirmed_balance;
     std::string address;
     std::string tracking_hey;
     std::string path;
@@ -153,6 +154,7 @@ public:
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(unlocked_balance)
       KV_SERIALIZE(balance)
+	  KV_SERIALIZE(unconfirmed_balance)
       KV_SERIALIZE(address)
       KV_SERIALIZE(tracking_hey)
       KV_SERIALIZE(path)

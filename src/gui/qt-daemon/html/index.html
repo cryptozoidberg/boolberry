@@ -133,8 +133,10 @@
             </div>
             <div class="screen" id="transactions">
                 <h1>Transactions</h1>
-                <table id="transactionstrxlist" class="trxlist">
-                </table>
+                <div class="trxlistwrapper">
+                    <table id="transactionstrxlist" class="trxlist">
+                    </table>
+                </div>
             </div>
             <div class="screen" id="wallet">
                 <div id="walletrestoreseed"></div>
@@ -206,9 +208,12 @@
                     </ul>
                 </div>
                 <input type="button" class="sendbutton" value="SEND" id="walletsendbtn"/>
+                <div id="walletsendresult"></div>
                 <h1>Recent Transactions</h1>
-                <table id="wallettrxlist" class="trxlist">
-                </table>
+                <div class="wtrxlistwrapper">
+                    <table id="wallettrxlist" class="trxlist">
+                    </table>
+                </div>
             </div>
             <div class="screen" id="addressbook">
                 <h1>Create New Address</h1>

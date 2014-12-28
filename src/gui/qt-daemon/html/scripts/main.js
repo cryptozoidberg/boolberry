@@ -49,6 +49,7 @@ function initialize() {
     $('#addressbookaddbtn').on('click', on_addrbook_add);
     $('#addressbooklist .copybtn').on('click', on_address_copy_btn);
 
+    $('.infocellmoreicon').on('click', on_trx_more_details);
 
     fill_addressbook();
 }
@@ -58,24 +59,28 @@ function onWalletItemClick() {
     $('.menuitem, .walletmenuitem, .screen').removeAttr('data-state');
     $('#walletitem, #wallet').attr('data-state', 'active');
     $('#walletmenu').attr('data-state', 'active');
+    $("#walletsendresult").html('');
 }
 
 function onOpenWalletItemClick() {
     console.log("onOpenWalletItemClick()");
     $('.menuitem, .walletmenuitem, .screen, #walletmenu').removeAttr('data-state');
     $('#openwalletitem, #openwallet').attr('data-state', 'active');
+    $("#walletsendresult").html('');
 }
 
 function onCreateWalletItemClick() {
     console.log("onCreateWalletItemClick()");
     $('.menuitem, .walletmenuitem, .screen, #walletmenu').removeAttr('data-state');
     $('#createwalletitem, #createwallet').attr('data-state', 'active');
+    $("#walletsendresult").html('');
 }
 
 function onRestoreWalletItemClick() {
     console.log("onRestoreWalletItemClick()");
     $('.menuitem, .walletmenuitem, .screen, #walletmenu').removeAttr('data-state');
     $('#restorewalletitem, #restorewallet').attr('data-state', 'active');
+    $("#walletsendresult").html('');
 }
 
 function onTransactionsItemClick() {
@@ -84,16 +89,18 @@ function onTransactionsItemClick() {
     $('#walletitem').attr('data-state', 'active');
     $('#walletmenu').attr('data-state', 'active');
     $('#transactionsitem, #transactions').attr('data-state', 'active');
+    $("#walletsendresult").html('');
 }
 
 function onAddressBookItemClick() {
     console.log("onAddressBookItemClick()");
     $('.menuitem, .walletmenuitem, .screen, #walletmenu').removeAttr('data-state');
     $('#addressbookitem, #addressbook').attr('data-state', 'active');
+    $("#walletsendresult").html('');
 }
 
 function str_to_obj(str) {
-    console.log("str_to_obj(" + str + ")");
+ //   console.log("str_to_obj(" + str + ")");
     var info_obj = jQuery.parseJSON(str);
     this.cb(info_obj);
 }
@@ -109,11 +116,17 @@ function build_prefix(count) {
 
 function print_money(amount) {
     console.log("print_money(" + amount + ")");
-    var am_str = amount.toString();
+    var sign = (amount >= 0);
+    var val = amount;
+    if (!sign)
+        val = -amount;
+    var am_str = val.toString();
     if (am_str.length <= 12) {
         am_str = build_prefix(13 - am_str.length) + am_str;
     }
     am_str = am_str.slice(0, am_str.length - 12) + "." + am_str.slice(am_str.length - 12);
+    if (!sign)
+        am_str = "-" + am_str;
     return am_str;
 }
 
@@ -172,9 +185,12 @@ function on_wallet_send() {
         mixin_count: $('walletsendmixin').val(),
         lock_time: 0,
         fee:0,
-        payment_id: $('#walletsendpaymentid').val()
+        payment_id: ''
     };
 
+    if ($('#walletsendpaymentid').val() == 'PAYMENT ID...')
+        $('#walletsendpaymentid').val('');
+    transfer_obj.payment_id = $('#walletsendpaymentid').val();
     var lock_time = parse_and_get_locktime();
     if (lock_time === undefined) {
         Qt_parent.message_box("Wrong transaction lock time specified.");
@@ -188,19 +204,11 @@ function on_wallet_send() {
 
     console.log(JSON.stringify(transfer_res_obj));
     if (transfer_res_obj.success) {
-
-/*
-        $('#transfer_address_id').val("");
-        $('#transfer_amount_id').val("");
-        $('#payment_id').val("");
-        $('#mixin_count_id').val(0);
-        $("#transfer_result_span").html("<span style='color: #1b9700'> Money successfully sent, transaction " + transfer_res_obj.tx_hash + ", " + transfer_res_obj.tx_blob_size + " bytes</span><br>");
-        if (last_timerId !== undefined)
-            clearTimeout(last_timerId);
-
-        $("#transfer_result_zone").show("fast");
-        last_timerId = setTimeout(function () { $("#transfer_result_zone").hide("fast"); }, 15000);
-        */
+        $('#walletsendaddress').val("ADDRESS...");
+        $('#walletsendamount').val("AMOUNT...");
+        $('#walletsendpaymentid').val("PAYMENT ID...");
+        $('#walletsendmixin').val(1);
+        $("#walletsendresult").html("<span style='color: #1b9700'> Money successfully sent, transaction " + transfer_res_obj.tx_hash + ", " + transfer_res_obj.tx_blob_size + " bytes</span><br>");
     }
     else
         return;
@@ -223,7 +231,7 @@ function on_set_recent_transfers(o) {
         for (var i = 0; i < o.unconfirmed.length; i++) {
             str += get_trx_table_entry(o.unconfirmed[i], false);
             counter++;
-            if (counter == 3)
+            if (counter <= 3)
                 shortStr = str;
         }
     }
@@ -233,7 +241,7 @@ function on_set_recent_transfers(o) {
         for (var i = 0; i < o.history.length; i++) {
             str += get_trx_table_entry(o.history[i], true);
             counter++;
-            if (counter == 3)
+            if (counter <= 3)
                 shortStr = str;
         }
     }
@@ -243,6 +251,8 @@ function on_set_recent_transfers(o) {
     console.log(shortStr);
     $("#wallettrxlist").html(shortStr);
     $("#transactionstrxlist").html(str);
+
+    $('.infocellmoreicon').on('click', on_trx_more_details);
 
     console.log("end");
 }
@@ -263,6 +273,7 @@ function on_update_wallet_info(wal_status) {
     console.log("on_update_wallet_info(" + JSON.stringify(wal_status) + ")");
     $("#balanceview .informervalue").text(print_money(wal_status.balance));
     $("#unlockedview .informervalue").text(print_money(wal_status.unlocked_balance));
+    $("#unconfirmedview .informervalue").text(print_money(wal_status.unconfirmed_balance));
     $("#walletaddress").attr("value", wal_status.address);
     $("#walletbalance").text("BALANCE:" + print_money(wal_status.balance));
 /*    $("#wallet_address").text(wal_status.address);
@@ -278,11 +289,27 @@ function on_update_wallet_info(wal_status) {
 
 function on_money_transfer(tei) {
     console.log("on_money_transfer(" + JSON.stringify(tei) + ")");
-    var id = "#" + "transfer_entry_line_" + tei.ti.tx_hash + "_id";
-    $(id).remove();
-    $("#recent_transfers_container_id").prepend(get_transfer_html_entry(tei.ti, false));
+    var tr_html = get_trx_table_entry(tei.ti, (tei.ti.height > 0));
+    console.log('new row: ' + tr_html);
+    // remove old row for this transaction
+    console.log('remove old trx entries');
+    var id = "tr[data-trxid='" + tei.ti.tx_hash + "']";
+    console.log('id=' + id);
+    console.log('Found: ' + $(id).length);
+    if($(id).length > 0)
+        $(id).remove();
+    console.log('removed');
+    // add row with new info for this transaction
+    console.log('prepend rows');
+    $("#transactionstrxlist").prepend(tr_html);
+    $('#wallettrxlist').prepend(tr_html);
+    console.log('set wallet balance');
     $("#wallet_balance").text(print_money(tei.balance));
     $("#wallet_unlocked_balance").text(print_money(tei.unlocked_balance));
+
+    $('.infocellmoreicon').on('click', on_trx_more_details);
+
+    console.log('finished');
 }
 
 function on_open_wallet() {
@@ -302,10 +329,9 @@ function on_create_wallet() {
     var restore_seed = Qt_parent.generate_wallet($('#createwalletname').val(),
         $('#createwalletpwd').val(), $('#createwalletpath').val());
     $('#walletrestoreseed').html("Use this words to restore this wallet in future:<br>" + restore_seed);
-    $('#createwalletname').attr('value', '');
-    $('#createwalletpwd').attr('value', '');
-    $('#createwalletpwd2').attr('value', '');
-
+    $('#createwalletname').val('');
+    $('#createwalletpwd').val('');
+    $('#createwalletpwd2').val('');
 }
 
 function on_restore_wallet() {
@@ -317,9 +343,9 @@ function on_restore_wallet() {
     Qt_parent.restore_wallet($('#restorewalletseed').val(),
         $('#restorewalletpwd1').val(), $('#restorewalletpath').val());
     $('#walletrestoreseed').text('');
-    $('#restorewalletpwd1').attr('value', '');
-    $('#restorewalletpwd2').attr('value', '');
-    $('#restorewalletseed').attr('value', '');
+    $('#restorewalletpwd1').val('');
+    $('#restorewalletpwd2').val('');
+    $('#restorewalletseed').val('');
 }
 
 function on_browse_wallet_for_open() {
@@ -346,8 +372,10 @@ function on_update_wallet_status(wal_status) {
     if (wal_status.wallet_state == 1) {
         //syncmode
     } else if (wal_status.wallet_state == 2) {
-        onWalletItemClick();
-        $('#walletitem').removeClass('is-disabled');
+        if ($('#walletitem').hasClass('is-disabled')) {
+            onWalletItemClick();
+            $('#walletitem').removeClass('is-disabled');
+        }
     }
     else {
         alert("wrong state");
@@ -355,7 +383,7 @@ function on_update_wallet_status(wal_status) {
 }
 
 function on_update_daemon_state(info_obj) {
-    console.log("on_update_daemon_state(" + JSON.stringify(info_obj) + ")");
+//    console.log("on_update_daemon_state(" + JSON.stringify(info_obj) + ")");
     if (info_obj.daemon_network_state == 0)//daemon_network_state_connecting
     {
         $("#connectionstatusimage").attr("src", "images/statedisconnected.png");
@@ -372,8 +400,9 @@ function on_update_daemon_state(info_obj) {
     {
        if( ($('#wait').attr('data-state') == 'active') ||
             ($('#openwalletitem').hasClass('is-disabled') && $('#walletitem').hasClass('is-disabled'))) {
-  //      if ($('#wait').attr('data-state') == 'active') {
             $('#openwalletitem, #createwalletitem, #restorewalletitem').removeClass('is-disabled');
+            $("#blockchainprogress").attr("value", 100);
+            $("#progresstext").text("");
             $('#wait').removeAttr('data-state');
             onOpenWalletItemClick();
         }
@@ -511,4 +540,17 @@ function on_wallet_send_addresslist_click() {
     console.log('on_wallet_send_addresslist_click()');
     $('#walletsendaddress').attr('value', $(this).attr('data-address'));
     $('#walletsendaddresslist').hide();
+}
+
+function on_trx_more_details() {
+    console.log('on_trx_more_details');
+    var info_block =  $(this).next('.trxdetails');
+    if (info_block.is(':visible')) {
+        info_block.hide();
+        $(this).children('.infocellheader').text('MORE');
+    }
+    else {
+        info_block.show();
+        $(this).children('.infocellheader').text('LESS');
+    }
 }

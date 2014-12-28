@@ -657,6 +657,7 @@ bool daemon_backend::update_wallet_info()
   wi.tracking_hey = string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
   wi.balance = m_wallet->balance();
   wi.unlocked_balance = m_wallet->unlocked_balance();
+  wi.unconfirmed_balance = m_wallet->unconfirmed_balance();
   wi.path = m_wallet->get_wallet_path();
   m_pview->update_wallet_info(wi);
   return true;

@@ -134,6 +134,7 @@ namespace tools
 
     uint64_t balance();
     uint64_t unlocked_balance();
+	int64_t unconfirmed_balance();
     template<typename T>
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy);
     template<typename T>

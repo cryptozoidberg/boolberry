@@ -686,6 +686,25 @@ uint64_t wallet2::unlocked_balance()
   return amount;
 }
 //----------------------------------------------------------------------------------------------------
+int64_t wallet2::unconfirmed_balance()
+{
+	int64_t amount = 0;
+	std::vector<wallet_rpc::wallet_transfer_info> trs;
+	get_unconfirmed_transfers(trs);
+	for (auto& u : trs)
+	{
+		if (u.is_income)
+			amount -= int64_t(u.amount);
+		else
+			amount += int64_t(u.amount);
+	}
+	BOOST_FOREACH(transfer_details& td, m_transfers)
+		if (!td.m_spent && (td.m_block_height == 0))
+			amount += int64_t(td.amount());
+
+	return amount;
+}
+//----------------------------------------------------------------------------------------------------
 uint64_t wallet2::balance()
 {
   uint64_t amount = 0;

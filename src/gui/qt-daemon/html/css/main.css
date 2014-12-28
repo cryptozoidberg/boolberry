@@ -589,3 +589,26 @@ div[role="main"] {
     #walletsendaddresslist li:hover {
         text-decoration:underline;
     }
+
+.trxdetails {
+    display: none;
+    padding: 5px;
+}
+
+.wtrxlistwrapper {
+    max-width: 75%;
+    overflow-y:scroll;
+    overflow-x:visible;
+    height: 200px;
+    position: absolute;
+    bottom: 10px;
+}
+
+.trxlistwrapper {
+    max-width: 75%;
+    overflow-y:scroll;
+    overflow-x:visible;
+    position: absolute;
+    top: 120px;
+    bottom: 10px;
+}
