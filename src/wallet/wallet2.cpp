@@ -357,7 +357,7 @@ void wallet2::scan_tx_pool()
   CHECK_AND_THROW_WALLET_EX(res.status != CORE_RPC_STATUS_OK, error::get_blocks_error, res.status);
   
   std::unordered_map<crypto::hash, currency::transaction> unconfirmed_in_transfers_local(std::move(m_unconfirmed_in_transfers));
-
+  m_unconfirmed_balance = 0;
   for (const auto &tx_blob : res.txs)
   {
     currency::transaction tx;
@@ -400,6 +400,7 @@ void wallet2::scan_tx_pool()
       wti.is_income = true;
       m_unconfirmed_in_transfers[tx_hash] = tx;
       prepare_wti(wti, 0, 0, tx, tx_money_got_in_outs, money_transfer2_details());
+	  m_unconfirmed_balance += wti.amount;
       if (m_callback)
         m_callback->on_transfer2(wti);
     }
@@ -688,21 +689,9 @@ uint64_t wallet2::unlocked_balance()
 //----------------------------------------------------------------------------------------------------
 int64_t wallet2::unconfirmed_balance()
 {
-	int64_t amount = 0;
-	std::vector<wallet_rpc::wallet_transfer_info> trs;
-	get_unconfirmed_transfers(trs);
-	for (auto& u : trs)
-	{
-		if (u.is_income)
-			amount -= int64_t(u.amount);
-		else
-			amount += int64_t(u.amount);
-	}
-	BOOST_FOREACH(transfer_details& td, m_transfers)
-		if (!td.m_spent && (td.m_block_height == 0))
-			amount += int64_t(td.amount());
-
-	return amount;
+	if (m_unconfirmed_in_transfers.size() > 0)
+		return m_unconfirmed_balance;
+	return 0;
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::balance()

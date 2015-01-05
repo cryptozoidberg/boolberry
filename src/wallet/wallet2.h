@@ -208,6 +208,7 @@ namespace tools
     std::atomic<bool> m_run;
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
     std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
+	uint64_t m_unconfirmed_balance;
 
     i_wallet2_callback* m_callback;
   };

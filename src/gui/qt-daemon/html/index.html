@@ -59,17 +59,39 @@
         <div class="content">
             <div class="screen" id="wait" data-state="active">
                 <h1>Wait, please...</h1>
+                <table class="actionparams">
+                    <tr>
+                        <td><div class="tablelabel">Connections</div></td>
+                        <td><input type="text" id="waitconnections" readonly="readonly" /></td>
+                    </tr>
+                    <tr>
+                        <td><div class="tablelabel">Height</div></td>
+                        <td><input type="text" id="waitheight" readonly="readonly" /></td>
+                    </tr>
+                    <tr>
+                        <td><div class="tablelabel">Current difficulty</div></td>
+                        <td><input type="text" id="waitdifficulty" readonly="readonly" /></td>
+                    </tr>
+                    <tr>
+                        <td><div class="tablelabel">Current network hashrate</div></td>
+                        <td><input type="text" id="waithashrate" readonly="readonly" /></td>
+                    </tr>
+                    <tr>
+                        <td><div class="tablelabel">Software version</div></td>
+                        <td><input type="text" id="waitversion" readonly="readonly" /></td>
+                    </tr>
+                </table>
             </div>
             <div class="screen" id="openwallet">
                 <h1>Open Wallet</h1>
                 <table class="actionparams">
                     <tr>
-                        <td><div class="tablelabel">Destination</div></td>
+                        <td><div class="tablelabel">Location</div></td>
                         <td><input id="openwalletpath" type="text" value=""/></td>
                     </tr>
                     <tr>
                         <td colspan="2">
-                        <input class="openfile" type="button" value="Open..." id="browsewalletbtn"/>
+                        <input class="openfile" type="button" value="Browse..." id="browsewalletbtn"/>
                         </td>
                     </tr>
                     <tr>
@@ -97,11 +119,11 @@
                         <td><input type="password" value="" id="createwalletpwd2"/></td>
                     </tr>
                     <tr>
-                        <td><div class="tablelabel">Destination</div></td>
+                        <td><div class="tablelabel">Location</div></td>
                         <td><input type="text" value="" id="createwalletpath"/></td>
                     </tr>
                 </table>
-                <input class="openfile" type="button" value="Open..." id="createwalletbrowsebtn"/>
+                <input class="openfile" type="button" value="Browse..." id="createwalletbrowsebtn"/>
                 <p>
                 <input type="button" class="executeaction" value="CREATE NEW WALLET" id="createwalletcreatebtn"/>
                 </p>
@@ -122,11 +144,11 @@
                         <td><input type="password" value="" id="restorewalletpwd2"/></td>
                     </tr>
                     <tr>
-                        <td><div class="tablelabel">Destination</div></td>
+                        <td><div class="tablelabel">Location</div></td>
                         <td><input type="text" value="" id="restorewalletpath"/></td>
                     </tr>
                 </table>
-                <input class="openfile" type="button" id="restorewalletbrowsebtn" value="Open..."/>
+                <input class="openfile" type="button" id="restorewalletbrowsebtn" value="Browse..."/>
                 <p>
                 <input type="button" class="executeaction" id="restorewalletcreatebtn" value="RESTORE WALLET" />
                 </p>
@@ -140,7 +162,7 @@
             </div>
             <div class="screen" id="wallet">
                 <div id="walletrestoreseed"></div>
-                <h1>Wallet</h1>
+                <h1 id="wallet_header">Wallet</h1>
                 <table class="actionparams">
                     <tr>
                         <td><div class="tablelabel">Address</div></td>

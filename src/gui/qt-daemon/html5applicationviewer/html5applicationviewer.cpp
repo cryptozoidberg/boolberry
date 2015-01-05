@@ -555,8 +555,11 @@ void Html5ApplicationViewer::message_box(const QString& msg)
 QString Html5ApplicationViewer::generate_wallet(const QString& name, const QString& pwd,
 	const QString& path)
 {
-  if (!path.length())
-    throw std::runtime_error("Empty wallet path");
+	if (!path.length())
+	{
+		show_msg_box("Empty wallet path");
+		return "";
+	}
 
   m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
 

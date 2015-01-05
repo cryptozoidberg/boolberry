@@ -166,12 +166,14 @@ public:
     tools::wallet_rpc::wallet_transfer_info ti;
     uint64_t unlocked_balance;
     uint64_t balance;
+	int64_t unconfirmed_balance;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(ti)
       KV_SERIALIZE(unlocked_balance)
       KV_SERIALIZE(balance)
-    END_KV_SERIALIZE_MAP()
+	  KV_SERIALIZE(unconfirmed_balance)
+	END_KV_SERIALIZE_MAP()
   };
 
   struct transfers_array

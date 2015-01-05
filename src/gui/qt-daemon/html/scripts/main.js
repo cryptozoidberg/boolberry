@@ -304,8 +304,10 @@ function on_money_transfer(tei) {
     $("#transactionstrxlist").prepend(tr_html);
     $('#wallettrxlist').prepend(tr_html);
     console.log('set wallet balance');
-    $("#wallet_balance").text(print_money(tei.balance));
-    $("#wallet_unlocked_balance").text(print_money(tei.unlocked_balance));
+    $("#balanceview .informervalue").text(print_money(tei.balance));
+    $("#unlockedview .informervalue").text(print_money(tei.unlocked_balance));
+    $("#unconfirmedview .informervalue").text(print_money(tei.unconfirmed_balance));
+    $("#walletbalance").text("BALANCE:" + print_money(tei.balance));
 
     $('.infocellmoreicon').on('click', on_trx_more_details);
 
@@ -318,6 +320,7 @@ function on_open_wallet() {
         $('#openwalletpwd').val());
     $('#walletrestoreseed').text('');
     $('#openwalletpwd').attr('value', '');
+    $('#openwalletpwd').val('');
 }
 
 function on_create_wallet() {
@@ -371,11 +374,16 @@ function on_update_wallet_status(wal_status) {
     console.log("on_update_wallet_status(" + JSON.stringify(wal_status) + ")");
     if (wal_status.wallet_state == 1) {
         //syncmode
-    } else if (wal_status.wallet_state == 2) {
         if ($('#walletitem').hasClass('is-disabled')) {
             onWalletItemClick();
             $('#walletitem').removeClass('is-disabled');
+            $('#wallet').children.addClass('is-disabled');
+            $('#wallet_header').text('Wallet (Synchronizing...)');
         }
+    } else if (wal_status.wallet_state == 2) {
+        // synced
+        $('#wallet').children.removeClass('is-disabled');
+        $('#wallet_header').text('Wallet');
     }
     else {
         alert("wrong state");
@@ -383,7 +391,7 @@ function on_update_wallet_status(wal_status) {
 }
 
 function on_update_daemon_state(info_obj) {
-//    console.log("on_update_daemon_state(" + JSON.stringify(info_obj) + ")");
+    console.log("on_update_daemon_state(" + JSON.stringify(info_obj) + ")");
     if (info_obj.daemon_network_state == 0)//daemon_network_state_connecting
     {
         $("#connectionstatusimage").attr("src", "images/statedisconnected.png");
@@ -409,11 +417,23 @@ function on_update_daemon_state(info_obj) {
         $("#connectionstatusimage").attr("src", "images/stateconnected.png");
         $("#blockchainprogress").attr("value", percents);
         $("#progresstext").text("Synchronized");
+    } else if (info_obj.daemon_network_state == 3)//daemon_network_state_stop
+    {
+        $('.screen').removeAttr('data-state');
+        $('#wait').attr('data-state', 'active');
+        $('#wait table').hide();
+        $('.menuitem, .walletmenuitem').removeAttr('data-state').addClass('is-disabled');
     } else {
         $("#connectionstatusimage").attr("src", "images/statedisconnected.png");
     }
 
     $("#connectstatedescr").text(info_obj.text_state);
+
+    $('#waitconnections').val(info_obj.out_connections_count);
+    $('#waitheight').val(info_obj.height);
+    $('#waitdifficulty').val(info_obj.difficulty);
+    $('#waithashrate').val(info_obj.hashrate);
+    $('#waitversion').val(info_obj.last_build_available);
 
 /*    $("#daemon_out_connections_text").text(info_obj.out_connections_count.toString());
     if (info_obj.out_connections_count >= 8) {

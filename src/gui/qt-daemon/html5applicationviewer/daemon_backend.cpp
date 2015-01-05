@@ -651,7 +651,7 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
 
 bool daemon_backend::update_wallet_info()
 {
-  CRITICAL_REGION_LOCAL(m_wallet_lock);
+	CRITICAL_REGION_LOCAL(m_wallet_lock);
   view::wallet_info wi = AUTO_VAL_INIT(wi);
   wi.address = m_wallet->get_account().get_public_address_str();
   wi.tracking_hey = string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
@@ -674,6 +674,7 @@ void daemon_backend::on_transfer2(const tools::wallet_rpc::wallet_transfer_info&
   tei.ti = wti;
   tei.balance = m_wallet->balance();
   tei.unlocked_balance = m_wallet->unlocked_balance();
+  tei.unconfirmed_balance = m_wallet->unconfirmed_balance();
   m_pview->money_transfer(tei);
 }
 

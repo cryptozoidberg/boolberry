@@ -56,7 +56,7 @@ function get_trx_status_cell(data, confirmed) {
         if (data.is_income)
             res += 'RECEIVED';
         else
-            res += 'SENDED';
+            res += 'SENT';
     } else {
         res += 'UNCONFIRMED';
     }
