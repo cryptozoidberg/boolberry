@@ -41,10 +41,10 @@ public:
     bool start_backend(int argc, char* argv[]);
 protected:
 
-private slots:
+  private slots :
     bool do_close();
     bool on_request_quit();
-public slots:
+  public slots:
 	QString browse_wallet(bool existing);
     void open_wallet(const QString& path, const QString& pwd);
     QString generate_wallet(const QString& name, const QString& pwd, 
@@ -59,7 +59,7 @@ public slots:
     QString get_version();
     QString transfer(const QString& json_transfer_object);
     void message_box(const QString& msg);
-    QString request_uri(const QString& url_str, const QString& params, const QString& callbackname);    
+  QString request_uri(const QString& url_str, const QString& params, const QString& callbackname);
     QString request_aliases();
     bool init_config();
 	void trayIconActivated(QSystemTrayIcon::ActivationReason reason);

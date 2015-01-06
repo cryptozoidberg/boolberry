@@ -7,7 +7,7 @@
 #include <string>
 #include "currency_core/currency_basic.h"
 #include "rpc/core_rpc_server_commands_defs.h"
-
+#include "wallet/core_rpc_proxy.h"
 //---------------------------------------------------------------
 namespace tools
 {
@@ -47,16 +47,17 @@ namespace tools
     }
     return true;
   }
-
-  template<typename proxy_type_t>
-  bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, proxy_type_t& proxy)
+  inline 
+  bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, i_core_proxy* proxy)
   {
-    return get_transfer_address_cb(adr_str, addr, [&proxy](const currency::COMMAND_RPC_GET_ALIAS_DETAILS::request& req_alias_info,
+    return get_transfer_address_cb(adr_str, addr, [&proxy](currency::COMMAND_RPC_GET_ALIAS_DETAILS::request& req_alias_info,
                                                                         currency::COMMAND_RPC_GET_ALIAS_DETAILS::response& alias_info)
     {
-      return proxy.get_alias_info(req_alias_info.alias, alias_info);
+      return proxy->call_COMMAND_RPC_GET_ALIAS_DETAILS(req_alias_info, alias_info);
     });
   }
+
+  /*
   inline
   bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, epee::net_utils::http::http_simple_client& http_client, const std::string& daemon_address)
   {
@@ -66,6 +67,7 @@ namespace tools
       return epee::net_utils::invoke_http_json_rpc(daemon_address + "/json_rpc", "get_alias_details", req_alias_info, alias_info, http_client);
     });
   }
+  */
 }
 
 

@@ -190,6 +190,104 @@ namespace wallet_rpc
     };
   };
 
+  /*stay-alone instance*/
+  struct telepod
+  {
+    std::string account_keys_hex;
+    std::string basement_tx_id_hex;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(account_keys_hex)
+      KV_SERIALIZE(basement_tx_id_hex)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct COMMAND_RPC_MAKETELEPOD
+  {
+    struct request
+    {
+      uint64_t amount;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(amount)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status; //"OK", "INSUFFICIENT_COINS", "INTERNAL_ERROR"
+      telepod tpd;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(tpd)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+
+  struct COMMAND_RPC_TELEPODSTATUS
+  {
+    struct request
+    {
+      telepod tpd;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tpd)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;  //"OK", "UNCONFIRMED", "BAD", "SPENT", "INTERNAL_ERROR"
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+     END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_CLONETELEPOD
+  {
+    struct request
+    {
+      telepod tpd;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tpd)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;//"OK", "UNCONFIRMED", "BAD", "SPENT", "INTERNAL_ERROR:"
+      telepod tpd;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(tpd)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_WITHDRAWTELEPOD
+  {
+    struct request
+    {
+      telepod tpd;
+      std::string addr;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tpd)
+        KV_SERIALIZE(addr)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;  //"OK", "UNCONFIRMED", "BAD", "SPENT", "INTERNAL_ERROR", "BAD_ADDRESS"
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+
 }
 }
 

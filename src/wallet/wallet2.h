@@ -10,22 +10,20 @@
 #include <atomic>
 
 #include "include_base_utils.h"
-#include "currency_core/account.h"
+
 #include "currency_core/account_boost_serialization.h"
 #include "currency_core/currency_basic_impl.h"
-#include "net/http_client.h"
-#include "storages/http_abstract_invoke.h"
-#include "rpc/core_rpc_server_commands_defs.h"
 #include "wallet_rpc_server_commans_defs.h"
 #include "currency_core/currency_format_utils.h"
 #include "common/unordered_containers_boost_serialization.h"
+#include "storages/portable_storage_template_helper.h"
 #include "crypto/chacha8.h"
 #include "crypto/hash.h"
-
+#include "core_rpc_proxy.h"
+#include "core_default_rpc_proxy.h"
 #include "wallet_errors.h"
 
 #define DEFAULT_TX_SPENDABLE_AGE                               10
-#define WALLET_RCP_CONNECTION_TIMEOUT                          200000
 
 namespace tools
 {
@@ -46,6 +44,8 @@ namespace tools
     virtual void on_money_sent(const wallet_rpc::wallet_transfer_info& wti) {}
   };
 
+    
+
   struct tx_dust_policy
   {
     uint64_t dust_threshold;
@@ -64,7 +64,8 @@ namespace tools
   {
     wallet2(const wallet2&) : m_run(true), m_callback(0) {};
   public:
-    wallet2() : m_run(true), m_callback(0) {};
+    wallet2() : m_run(true), m_callback(0), m_core_proxy(new default_http_core_proxy())
+    {};
     struct transfer_details
     {
       uint64_t m_block_height;
@@ -131,7 +132,9 @@ namespace tools
     void refresh(size_t & blocks_fetched);
     void refresh(size_t & blocks_fetched, bool& received_money);
     bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok);
-
+    
+    bool set_core_proxy(std::shared_ptr<i_core_proxy>& proxy);
+    std::shared_ptr<i_core_proxy> get_core_proxy();
     uint64_t balance();
     uint64_t unlocked_balance();
 	int64_t unconfirmed_balance();
@@ -191,10 +194,8 @@ namespace tools
     
 
     currency::account_base m_account;
-    std::string m_daemon_address;
     std::string m_wallet_file;
     std::string m_keys_file;
-    epee::net_utils::http::http_simple_client m_http_client;
     std::vector<crypto::hash> m_blockchain;
     std::atomic<uint64_t> m_local_bc_height; //temporary workaround 
     std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;
@@ -208,9 +209,8 @@ namespace tools
     std::atomic<bool> m_run;
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
     std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
-	uint64_t m_unconfirmed_balance;
-
-    i_wallet2_callback* m_callback;
+    uint64_t m_unconfirmed_balance;
+    std::shared_ptr<i_core_proxy> m_core_proxy;    i_wallet2_callback* m_callback;
   };
 }
 
@@ -404,7 +404,7 @@ namespace tools
         req.amounts.push_back(it->amount());
       }
 
-      bool r = epee::net_utils::invoke_http_bin_remote_command2(m_daemon_address + "/getrandom_outs.bin", req, daemon_resp, m_http_client, 200000);
+      bool r = m_core_proxy->call_COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS(req, daemon_resp);
       CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "getrandom_outs.bin");
       CHECK_AND_THROW_WALLET_EX(daemon_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "getrandom_outs.bin");
       CHECK_AND_THROW_WALLET_EX(daemon_resp.status != CORE_RPC_STATUS_OK, error::get_random_outs_error, daemon_resp.status);
@@ -500,7 +500,7 @@ namespace tools
     COMMAND_RPC_SEND_RAW_TX::request req;
     req.tx_as_hex = epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(tx));
     COMMAND_RPC_SEND_RAW_TX::response daemon_send_resp;
-    r = epee::net_utils::invoke_http_json_remote_command2(m_daemon_address + "/sendrawtransaction", req, daemon_send_resp, m_http_client, 200000);
+    r = m_core_proxy->call_COMMAND_RPC_SEND_RAW_TX(req, daemon_send_resp);  
     CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "sendrawtransaction");
     CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
     CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status != CORE_RPC_STATUS_OK, error::tx_rejected, tx, daemon_send_resp.status);

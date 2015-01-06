@@ -49,6 +49,7 @@ namespace currency
 
     void lock();
     void unlock();
+    void purge_transactions();
 
     // load/store operations
     bool init(const std::string& config_folder);
@@ -92,6 +93,7 @@ namespace currency
       uint64_t last_failed_height;
       crypto::hash last_failed_id;
       time_t receive_time;
+      std::string decline_reason;
     };
 
   private:

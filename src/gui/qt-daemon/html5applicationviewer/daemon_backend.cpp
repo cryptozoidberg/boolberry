@@ -14,10 +14,9 @@ daemon_backend::daemon_backend():m_pview(&m_view_stub),
                                  m_cprotocol(m_ccore, &m_p2psrv),
                                  m_p2psrv(m_cprotocol),
                                  m_rpc_server(m_ccore, m_p2psrv),
-                                 m_rpc_proxy(m_rpc_server),
+                                 m_rpc_proxy(new tools::core_fast_rpc_proxy(m_rpc_server)),
                                  m_last_daemon_height(0),
                                  m_last_wallet_synch_height(0)
-
 {
   m_wallet.reset(new tools::wallet2());
   m_wallet->callback(this);
@@ -306,8 +305,9 @@ bool daemon_backend::update_state_info()
 {
   view::daemon_status_info dsi = AUTO_VAL_INIT(dsi);
   dsi.difficulty = "---";
+  currency::COMMAND_RPC_GET_INFO::request req = AUTO_VAL_INIT(req);
   currency::COMMAND_RPC_GET_INFO::response inf = AUTO_VAL_INIT(inf);
-  if(!m_rpc_proxy.get_info(inf))
+  if (!m_rpc_proxy->call_COMMAND_RPC_GET_INFO(req, inf))
   {
     dsi.text_state = "get_info failed";
     m_pview->update_daemon_status(dsi);
@@ -566,7 +566,7 @@ bool daemon_backend::close_wallet()
 bool daemon_backend::get_aliases(view::alias_set& al_set)
 {
   currency::COMMAND_RPC_GET_ALL_ALIASES::response aliases = AUTO_VAL_INIT(aliases);
-  if (m_rpc_proxy.get_aliases(aliases) && aliases.status == CORE_RPC_STATUS_OK)
+  if (m_rpc_proxy->call_COMMAND_RPC_GET_ALL_ALIASES(aliases) && aliases.status == CORE_RPC_STATUS_OK)
   {
     al_set.aliases = aliases.aliases;
     return true;
@@ -594,7 +594,7 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
   for(auto& d: tp.destinations)
   {
     dsts.push_back(currency::tx_destination_entry());
-    if (!tools::get_transfer_address(d.address, dsts.back().addr, m_rpc_proxy))
+    if (!tools::get_transfer_address(d.address, dsts.back().addr, m_rpc_proxy.get()))
     {
       m_pview->show_msg_box("Failed to send transaction: invalid address");
       return false;

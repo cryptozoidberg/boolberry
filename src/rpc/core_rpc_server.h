@@ -40,6 +40,8 @@ namespace currency
     bool on_get_info(const COMMAND_RPC_GET_INFO::request& req, COMMAND_RPC_GET_INFO::response& res, connection_context& cntx);
     bool on_set_maintainers_info(const COMMAND_RPC_SET_MAINTAINERS_INFO::request& req, COMMAND_RPC_SET_MAINTAINERS_INFO::response& res, connection_context& cntx);
     bool on_get_tx_pool(const COMMAND_RPC_GET_TX_POOL::request& req, COMMAND_RPC_GET_TX_POOL::response& res, connection_context& cntx);
+    bool on_check_keyimages(const COMMAND_RPC_CHECK_KEYIMAGES::request& req, COMMAND_RPC_CHECK_KEYIMAGES::response& res, connection_context& cntx);
+    
 
     //json_rpc
     bool on_getblockcount(const COMMAND_RPC_GETBLOCKCOUNT::request& req, COMMAND_RPC_GETBLOCKCOUNT::response& res, connection_context& cntx);
@@ -53,7 +55,8 @@ namespace currency
     bool on_get_all_aliases(const COMMAND_RPC_GET_ALL_ALIASES::request& req, COMMAND_RPC_GET_ALL_ALIASES::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
     bool on_alias_by_address(const COMMAND_RPC_GET_ALIASES_BY_ADDRESS::request& req, COMMAND_RPC_GET_ALIASES_BY_ADDRESS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
     bool on_get_addendums(const COMMAND_RPC_GET_ADDENDUMS::request& req, COMMAND_RPC_GET_ADDENDUMS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
-    
+    bool on_reset_transaction_pool(const COMMAND_RPC_RESET_TX_POOL::request& req, COMMAND_RPC_RESET_TX_POOL::response& res, connection_context& cntx);
+
     
     //mining rpc
     bool on_login(const mining::COMMAND_RPC_LOGIN::request& req, mining::COMMAND_RPC_LOGIN::response& res, connection_context& cntx);
@@ -76,6 +79,7 @@ namespace currency
       MAP_URI_AUTO_BIN2("/getrandom_outs.bin", on_get_random_outs, COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS)
       MAP_URI_AUTO_BIN2("/set_maintainers_info.bin", on_set_maintainers_info, COMMAND_RPC_SET_MAINTAINERS_INFO)
       MAP_URI_AUTO_BIN2("/get_tx_pool.bin", on_get_tx_pool, COMMAND_RPC_GET_TX_POOL)
+      MAP_URI_AUTO_BIN2("/check_keyimages.bin", on_check_keyimages, COMMAND_RPC_CHECK_KEYIMAGES)
       MAP_URI_AUTO_JON2("/gettransactions", on_get_transactions, COMMAND_RPC_GET_TRANSACTIONS)
       MAP_URI_AUTO_JON2("/sendrawtransaction", on_send_raw_tx, COMMAND_RPC_SEND_RAW_TX)
       MAP_URI_AUTO_JON2("/start_mining", on_start_mining, COMMAND_RPC_START_MINING)
@@ -94,6 +98,7 @@ namespace currency
         MAP_JON_RPC_WE("get_all_alias_details",  on_get_all_aliases,            COMMAND_RPC_GET_ALL_ALIASES)
         MAP_JON_RPC_WE("get_alias_by_address",   on_alias_by_address,           COMMAND_RPC_GET_ALIASES_BY_ADDRESS)
         MAP_JON_RPC_WE("get_addendums",          on_get_addendums,              COMMAND_RPC_GET_ADDENDUMS)
+        MAP_JON_RPC("reset_transaction_pool",    on_reset_transaction_pool,     COMMAND_RPC_RESET_TX_POOL)
         //remote miner rpc
         MAP_JON_RPC_N(on_login,            mining::COMMAND_RPC_LOGIN)
         MAP_JON_RPC_N(on_getjob,           mining::COMMAND_RPC_GETJOB)

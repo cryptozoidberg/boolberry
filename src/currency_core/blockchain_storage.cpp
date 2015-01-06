@@ -934,7 +934,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
 {
   if(m_checkpoints.is_height_passed_zone(get_block_height(b), get_current_blockchain_height()-1))
   {
-    LOG_PRINT_RED_L0("Block with id: " << id << ENDL << " for alternative chain, is under checkpoint zone, declined");
+    LOG_PRINT_RED_L0("Block with id: " << id << "[" << get_block_height(b)  << "]" << ENDL << " for alternative chain, is under checkpoint zone, declined");
     bvc.m_verifivation_failed = true;
     return false;
 
@@ -1204,6 +1204,17 @@ bool blockchain_storage::get_transactions_daily_stat(uint64_t& daily_cnt, uint64
       CHECK_AND_ASSERT_MES(r, false, "failed to get_inputs_money_amount");
       daily_volume += am;
     }
+  }
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::check_keyimages(const std::list<crypto::key_image>& images, std::list<bool>& images_stat)
+{
+  //true - unspent, false - spent
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  for (auto& ki : images)
+  {
+    images_stat.push_back(m_spent_keys.count(ki)?false:true);
   }
   return true;
 }

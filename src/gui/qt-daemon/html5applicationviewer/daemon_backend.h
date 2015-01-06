@@ -23,7 +23,7 @@ using namespace epee;
 #include "daemon/daemon_commands_handler.h"
 //#include "common/miniupnp_helper.h"
 #include "view_iface.h"
-#include "daemon_rpc_proxy.h"
+#include "core_fast_rpc_proxy.h"
 #include "wallet/wallet2.h"
 
 POP_WARNINGS
@@ -71,7 +71,7 @@ private:
   std::atomic<bool> m_stop_singal_sent;
   view::view_stub m_view_stub;
   view::i_view* m_pview;
-  tools::daemon_rpc_proxy_fast m_rpc_proxy;
+  std::shared_ptr<tools::i_core_proxy> m_rpc_proxy;
   critical_section m_wallet_lock;
   std::unique_ptr<tools::wallet2> m_wallet;
   std::atomic<uint64_t> m_last_daemon_height;
@@ -84,8 +84,3 @@ private:
   nodetool::node_server<currency::t_currency_protocol_handler<currency::core> > m_p2psrv;
   currency::core_rpc_server m_rpc_server;
 };
-
-
-
-
-
