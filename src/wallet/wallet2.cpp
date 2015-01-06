@@ -367,7 +367,7 @@ void wallet2::scan_tx_pool()
   CHECK_AND_THROW_WALLET_EX(res.status != CORE_RPC_STATUS_OK, error::get_blocks_error, res.status);
   
   std::unordered_map<crypto::hash, currency::transaction> unconfirmed_in_transfers_local(std::move(m_unconfirmed_in_transfers));
-
+  m_unconfirmed_balance = 0;
   for (const auto &tx_blob : res.txs)
   {
     currency::transaction tx;
@@ -410,6 +410,7 @@ void wallet2::scan_tx_pool()
       wti.is_income = true;
       m_unconfirmed_in_transfers[tx_hash] = tx;
       prepare_wti(wti, 0, 0, tx, tx_money_got_in_outs, money_transfer2_details());
+	  m_unconfirmed_balance += wti.amount;
       if (m_callback)
         m_callback->on_transfer2(wti);
     }
@@ -571,7 +572,7 @@ void wallet2::load_keys(const std::string& keys_file_name, const std::string& pa
   CHECK_AND_THROW_WALLET_EX(!r, error::invalid_password);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::generate(const std::string& wallet_, const std::string& password)
+std::vector<unsigned char> wallet2::generate(const std::string& wallet_, const std::string& password)
 {
   clear();
   prepare_file_names(wallet_);
@@ -580,7 +581,7 @@ void wallet2::generate(const std::string& wallet_, const std::string& password)
   CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
   CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_keys_file,   ignored_ec), error::file_exists, m_keys_file);
 
-  m_account.generate();
+  std::vector<unsigned char> restore_seed = m_account.generate();
   m_account_public_address = m_account.get_keys().m_account_address;
 
   bool r = store_keys(m_keys_file, password);
@@ -590,7 +591,32 @@ void wallet2::generate(const std::string& wallet_, const std::string& password)
   if(!r) LOG_PRINT_RED_L0("String with address text not saved");
 
   store();
+
+  return restore_seed;
 }
+
+//----------------------------------------------------------------------------------------------------
+void wallet2::restore(const std::string& wallet_, const std::vector<unsigned char>& restore_seed, const std::string& password)
+{
+	clear();
+	prepare_file_names(wallet_);
+
+	boost::system::error_code ignored_ec;
+	CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
+	CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_keys_file, ignored_ec), error::file_exists, m_keys_file);
+
+	m_account.restore(restore_seed);
+	m_account_public_address = m_account.get_keys().m_account_address;
+
+	bool r = store_keys(m_keys_file, password);
+	CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_keys_file);
+
+	r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str());
+	if (!r) LOG_PRINT_RED_L0("String with address text not saved");
+
+	store();
+}
+
 //----------------------------------------------------------------------------------------------------
 bool wallet2::prepare_file_names(const std::string& file_path)
 {
@@ -662,6 +688,13 @@ uint64_t wallet2::unlocked_balance()
       amount += td.amount();
 
   return amount;
+}
+//----------------------------------------------------------------------------------------------------
+int64_t wallet2::unconfirmed_balance()
+{
+	if (m_unconfirmed_in_transfers.size() > 0)
+		return m_unconfirmed_balance;
+	return 0;
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::balance()
