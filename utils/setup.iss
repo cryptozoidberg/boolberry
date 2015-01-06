@@ -101,8 +101,7 @@ Source: "{#BinariesPath}\simplewallet.exe"; DestDir: "{app}"; Flags: ignoreversi
 Source: "{#BinariesPath}\platforms\qminimal.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qoffscreen.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qwindows.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\index.html"; DestDir: "{app}\html"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\*"; DestDir: "{app}\html\files"; Flags: ignoreversion recursesubdirs
+Source: "..\src\gui\qt-daemon\html\*"; DestDir: "{app}\html"; Flags: ignoreversion recursesubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
