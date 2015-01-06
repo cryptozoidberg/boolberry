@@ -2,11 +2,11 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Boolberry"
-#define MyAppVersion "new_gui_beta"
+;#define MyAppVersion "0.2.0.31"
 #define MyAppPublisher "Boolberry Team"
 #define MyAppURL "http://boolberry.com"
 #define MyAppExeName "qt-boolb.exe"
-#define BinariesPath "C:\myprojects\bender\src\myfork\generated\src\Release"
+;#define BinariesPath "C:\jenkins\workdir\builds\bbr-win-x64-v0.2.0.31(5d85ebf)"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -52,9 +52,9 @@ Root: HKCR; Subkey: "BoolberryWalletDataKyesFile\DefaultIcon"; ValueType: string
 Source: "{#BinariesPath}\boolbd.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\d3dcompiler_47.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\Enginio.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BinariesPath}\icudt53.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BinariesPath}\icuin53.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BinariesPath}\icuuc53.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\icudt52.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\icuin52.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\icuuc52.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\libEGL.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\msvcp120.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -88,7 +88,6 @@ Source: "{#BinariesPath}\Qt5SerialPort.dll"; DestDir: "{app}"; Flags: ignorevers
 Source: "{#BinariesPath}\Qt5Sql.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\Qt5Svg.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\Qt5Test.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BinariesPath}\Qt5WebChannel.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\Qt5WebKit.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\Qt5WebKitWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\Qt5WebSockets.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -102,7 +101,8 @@ Source: "{#BinariesPath}\simplewallet.exe"; DestDir: "{app}"; Flags: ignoreversi
 Source: "{#BinariesPath}\platforms\qminimal.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qoffscreen.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qwindows.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\*"; DestDir: "{app}\html\"; Flags: ignoreversion recursesubdirs
+Source: "..\src\gui\qt-daemon\html\index.html"; DestDir: "{app}\html"; Flags: ignoreversion
+Source: "..\src\gui\qt-daemon\html\files\*"; DestDir: "{app}\html\files"; Flags: ignoreversion recursesubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
