@@ -110,7 +110,8 @@ namespace tools
       END_SERIALIZE()
     };
 
-    void generate(const std::string& wallet, const std::string& password);
+    std::vector<unsigned char> generate(const std::string& wallet, const std::string& password);
+	void restore(const std::string& wallet, const std::vector<unsigned char>& restore_seed, const std::string& password);
     void load(const std::string& wallet, const std::string& password);    
     void store();
     std::string get_wallet_path(){ return m_keys_file; }
@@ -136,6 +137,7 @@ namespace tools
     std::shared_ptr<i_core_proxy> get_core_proxy();
     uint64_t balance();
     uint64_t unlocked_balance();
+	int64_t unconfirmed_balance();
     template<typename T>
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy);
     template<typename T>
@@ -207,8 +209,8 @@ namespace tools
     std::atomic<bool> m_run;
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
     std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
-    std::shared_ptr<i_core_proxy> m_core_proxy;
-    i_wallet2_callback* m_callback;
+    uint64_t m_unconfirmed_balance;
+    std::shared_ptr<i_core_proxy> m_core_proxy;    i_wallet2_callback* m_callback;
   };
 }
 

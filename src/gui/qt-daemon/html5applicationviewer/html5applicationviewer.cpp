@@ -5,6 +5,7 @@
 #include "html5applicationviewer.h"
 
 #include <QCoreApplication>
+#include <QApplication>
 #include <QDir>
 #include <QFileInfo>
 #include <QVBoxLayout>
@@ -20,6 +21,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QTimer>
+#include <QClipboard>
 #include "warnings.h"
 #include "net/http_client.h"
 
@@ -225,9 +227,9 @@ void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
   m_trayIcon = std::unique_ptr<QSystemTrayIcon>(new QSystemTrayIcon(this));
   m_trayIcon->setContextMenu(m_trayIconMenu.get());
 #ifdef WIN32
-  std::string iconPath(htmlPath + "/files/app16.png"); // windows tray icon size is 16x16
+	std::string iconPath(htmlPath + "/app16.png"); // windows tray icon size is 16x16
 #else
-  std::string iconPath(htmlPath + "/files/app22.png"); // X11 tray icon size is 22x22
+	std::string iconPath(htmlPath + "/app22.png"); // X11 tray icon size is 22x22
 #endif
   m_trayIcon->setIcon(QIcon(iconPath.c_str()));
   m_trayIcon->setToolTip("Boolberry");
@@ -299,12 +301,12 @@ void Html5ApplicationViewer::showExpanded()
 #else
   show();
 #endif
-  this->setMouseTracking(true);
-  this->setMinimumWidth(800);
-  this->setMinimumHeight(600);
-  //this->setFixedSize(800, 600);
-  m_d->m_webView->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
-  m_d->m_webView->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+    this->setMouseTracking(true);
+    this->setMinimumWidth(1000);
+    this->setMinimumHeight(650);
+    //this->setFixedSize(800, 600);
+    m_d->m_webView->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
+    m_d->m_webView->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 }
 
 QGraphicsWebView *Html5ApplicationViewer::webView() const
@@ -435,6 +437,21 @@ void Html5ApplicationViewer::close_wallet()
   m_backend.close_wallet();
 }
 
+void Html5ApplicationViewer::add_address(const QString& name, const QString& address,
+	const QString& alias)
+{
+	gui_config::addressbook_entry row({ name.toStdString(), 
+		address.toStdString(), alias.toStdString() });
+	m_config.address_book.entries.push_back(row);
+}
+
+QString Html5ApplicationViewer::get_addressbook()
+{
+	std::string json_str;
+	epee::serialization::store_t_to_json(m_config.address_book, json_str);
+	return json_str.c_str();
+}
+
 bool Html5ApplicationViewer::switch_view(int view_no)
 {
   view::switch_view_info swi = AUTO_VAL_INIT(swi);
@@ -537,51 +554,68 @@ void Html5ApplicationViewer::message_box(const QString& msg)
   show_msg_box(msg.toStdString());
 }
 
-void Html5ApplicationViewer::generate_wallet()
+QString Html5ApplicationViewer::generate_wallet(const QString& name, const QString& pwd,
+	const QString& path)
 {
-  QFileDialog dialogFile(this);
-  std::string default_file = (tools::get_current_username() + "_wallet.bbr").c_str();
-  QString path = dialogFile.getSaveFileName(this, tr("Wallet file to store"),
-    (m_config.wallets_last_used_dir + "/" + default_file).c_str(),
-    tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
-
-  if (!path.length())
-    return;
+	if (!path.length())
+	{
+		show_msg_box("Empty wallet path");
+		return "";
+	}
 
   m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
 
-  //read password
-  bool ok;
-  QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
-    tr("Password:"), QLineEdit::Password,
-    QString(), &ok);
-
-  if (!ok)
-    return;
-
-  m_backend.generate_wallet(path.toStdString(), pass.toStdString());
+  std::string restore_seed;
+  m_backend.generate_wallet(path.toStdString(), pwd.toStdString(), restore_seed);
+  return restore_seed.c_str();
 }
 
-void Html5ApplicationViewer::open_wallet()
+void Html5ApplicationViewer::restore_wallet(const QString& restore_text, 
+	const QString& password, const QString& path)
 {
-  QString path = QFileDialog::getOpenFileName(this, tr("Open wallet File"),
-    m_config.wallets_last_used_dir.c_str(),
-    tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
-  if (!path.length())
-    return;
+	if (!path.length())
+	{
+		show_msg_box("Empty wallet path");
+		return "";
+	}
+
+	m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
+
+	m_backend.restore_wallet(path.toStdString(), restore_text.toStdString(), 
+		password.toStdString());
+}
+
+void Html5ApplicationViewer::place_to_clipboard(const QString& data)
+{
+	QClipboard *clipboard = QApplication::clipboard();
+	clipboard->setText(data);
+}
+
+QString Html5ApplicationViewer::browse_wallet(bool existing)
+{
+	if (existing)
+	{
+		return QFileDialog::getOpenFileName(this, tr("Open wallet File"),
+			m_config.wallets_last_used_dir.c_str(),
+			tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
+	}
+	QFileDialog dialogFile(this);
+	std::string default_file = (tools::get_current_username() + "_wallet.bbr").c_str();
+	return dialogFile.getSaveFileName(this, tr("Wallet file to store"),
+		(m_config.wallets_last_used_dir + "/" + default_file).c_str(),
+		tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
+}
+
+void Html5ApplicationViewer::open_wallet(const QString& path, const QString& pwd)
+{
+	if (!path.length())
+	{
+		show_msg_box("Empty wallet path");
+		return "";
+	}
 
   m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
-
-
-  //read password
-  bool ok;
-  QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
-    tr("Password:"), QLineEdit::Password,
-    QString(), &ok);
-  if (!ok)
-    return;
-
-  m_backend.open_wallet(path.toStdString(), pass.toStdString());
+  m_backend.open_wallet(path.toStdString(), pwd.toStdString());
 }
 
 #include "html5applicationviewer.moc"

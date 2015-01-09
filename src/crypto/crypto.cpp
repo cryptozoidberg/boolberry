@@ -18,68 +18,88 @@
 
 namespace crypto {
 
-  struct random_init_singleton
-  {
-    random_init_singleton()
-    {
-      grant_random_initialize();
-    }
-  };
+	struct random_init_singleton
+	{
+		random_init_singleton()
+		{
+			grant_random_initialize();
+		}
+	};
 
-  random_init_singleton init_rand; //place initializer here to avoid grant_random_initialize first call after threads will be possible(local static variables init is not thread-safe)
+	random_init_singleton init_rand; //place initializer here to avoid grant_random_initialize first call after threads will be possible(local static variables init is not thread-safe)
 
-  using std::abort;
-  using std::int32_t;
-  using std::int64_t;
-  using std::lock_guard;
-  using std::mutex;
-  using std::size_t;
-  using std::uint32_t;
-  using std::uint64_t;
+	using std::abort;
+	using std::int32_t;
+	using std::int64_t;
+	using std::lock_guard;
+	using std::mutex;
+	using std::size_t;
+	using std::uint32_t;
+	using std::uint64_t;
 
-  extern "C" {
+	using std::vector;
+
+	extern "C" {
 #include "crypto-ops.h"
 #include "random.h"
-  }
-  
+	}
 
-  mutex random_lock;
 
-  static inline unsigned char *operator &(ec_point &point) {
-    return &reinterpret_cast<unsigned char &>(point);
-  }
+	mutex random_lock;
 
-  static inline const unsigned char *operator &(const ec_point &point) {
-    return &reinterpret_cast<const unsigned char &>(point);
-  }
+	static inline unsigned char *operator &(ec_point &point) {
+		return &reinterpret_cast<unsigned char &>(point);
+	}
 
-  static inline unsigned char *operator &(ec_scalar &scalar) {
-    return &reinterpret_cast<unsigned char &>(scalar);
-  }
+	static inline const unsigned char *operator &(const ec_point &point) {
+		return &reinterpret_cast<const unsigned char &>(point);
+	}
 
-  static inline const unsigned char *operator &(const ec_scalar &scalar) {
-    return &reinterpret_cast<const unsigned char &>(scalar);
-  }
+	static inline unsigned char *operator &(ec_scalar &scalar) {
+		return &reinterpret_cast<unsigned char &>(scalar);
+	}
 
-  static inline void random_scalar(ec_scalar &res) {
-    unsigned char tmp[64];
-    generate_random_bytes(64, tmp);
-    sc_reduce(tmp);
-    memcpy(&res, tmp, 32);
-  }
+	static inline const unsigned char *operator &(const ec_scalar &scalar) {
+		return &reinterpret_cast<const unsigned char &>(scalar);
+	}
 
-  static inline void hash_to_scalar(const void *data, size_t length, ec_scalar &res) {
-    cn_fast_hash(data, length, reinterpret_cast<hash &>(res));
-    sc_reduce32(&res);
-  }
+	static inline void random_scalar(ec_scalar &res) {
+		unsigned char tmp[64];
+		generate_random_bytes(64, tmp);
+		sc_reduce(tmp);
+		memcpy(&res, tmp, 32);
+	}
 
-  void crypto_ops::generate_keys(public_key &pub, secret_key &sec) {
-    lock_guard<mutex> lock(random_lock);
-    ge_p3 point;
-    random_scalar(sec);
-    ge_scalarmult_base(&point, &sec);
-    ge_p3_tobytes(&pub, &point);
-  }
+	static inline void hash_to_scalar(const void *data, size_t length, ec_scalar &res) {
+		cn_fast_hash(data, length, reinterpret_cast<hash &>(res));
+		sc_reduce32(&res);
+	}
+
+	vector<unsigned char> crypto_ops::generate_keys(public_key &pub, secret_key &sec) {
+		lock_guard<mutex> lock(random_lock);
+		ge_p3 point;
+		random_scalar(sec);
+		ge_scalarmult_base(&point, &sec);
+		ge_p3_tobytes(&pub, &point);
+		return vector<unsigned char>(&sec.data[0], &sec.data[32]);
+	}
+
+	void crypto_ops::dependent_key(const secret_key& first, secret_key& second)
+	{
+		hash_to_scalar(first.data, 32, second);
+		if (sc_check((unsigned char*)second.data) != 0)
+			throw std::runtime_error("Failed to derive key");
+	}
+
+	void crypto_ops::restore_keys(public_key &pub, secret_key &sec, const std::vector<unsigned char> &seed){
+		if (seed.size() != 32)
+			throw std::runtime_error("Invalid restore seed size");
+		lock_guard<mutex> lock(random_lock);
+		ge_p3 point;
+		std::copy(seed.begin(), seed.end(), &sec.data[0]);
+		ge_scalarmult_base(&point, &sec);
+		ge_p3_tobytes(&pub, &point);
+	}
 
   bool crypto_ops::check_key(const public_key &key) {
     ge_p3 point;

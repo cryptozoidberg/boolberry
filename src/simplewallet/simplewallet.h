@@ -41,7 +41,8 @@ namespace currency
 
     bool new_wallet(const std::string &wallet_file, const std::string& password);
     bool open_wallet(const std::string &wallet_file, const std::string& password);
-    bool close_wallet();
+	bool restore_wallet(const std::string &wallet_file, const std::string &restore_seed, const std::string& password);
+	bool close_wallet();
 
     bool help(const std::vector<std::string> &args = std::vector<std::string>());
     bool start_mining(const std::vector<std::string> &args);
@@ -125,6 +126,9 @@ namespace currency
     std::string m_wallet_file;
     std::string m_generate_new;
     std::string m_import_path;
+
+	std::string m_restore_wallet;
+	std::string m_restore_seed;
 
     std::string m_daemon_address;
     std::string m_daemon_host;
