@@ -62,9 +62,9 @@ namespace tools
 
   class wallet2
   {
-    wallet2(const wallet2&) : m_run(true), m_callback(0) {};
+    wallet2(const wallet2&) : m_run(true), m_callback(0), m_unconfirmed_balance(0) {};
   public:
-    wallet2() : m_run(true), m_callback(0), m_core_proxy(new default_http_core_proxy())
+    wallet2() : m_run(true), m_callback(0), m_core_proxy(new default_http_core_proxy()), m_unconfirmed_balance(0)
     {};
     struct transfer_details
     {
