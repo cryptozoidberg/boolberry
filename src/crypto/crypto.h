@@ -31,6 +31,7 @@ namespace crypto {
 
   POD_CLASS ec_scalar {
     char data[32];
+    friend class crypto_ops;
   };
 
   POD_CLASS public_key: ec_point {
