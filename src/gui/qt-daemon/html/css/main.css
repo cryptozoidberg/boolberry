@@ -403,6 +403,7 @@ div[role="main"] {
         border-color:#9399B0;
     }
 
+
 .addressfield {
     width:98%;
     background-color:#ffffff;
@@ -612,3 +613,8 @@ div[role="main"] {
     top: 120px;
     bottom: 10px;
 }
+
+#addressbooklist input[type=text] {
+    width: 200px;
+}
+
