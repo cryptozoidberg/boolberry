@@ -438,11 +438,23 @@ void Html5ApplicationViewer::close_wallet()
 }
 
 void Html5ApplicationViewer::add_address(const QString& name, const QString& address,
-	const QString& alias)
+	const QString& alias, const QString& paymentId)
 {
 	gui_config::addressbook_entry row({ name.toStdString(), 
-		address.toStdString(), alias.toStdString() });
+		address.toStdString(), alias.toStdString(), paymentId.toStdString() });
 	m_config.address_book.entries.push_back(row);
+}
+
+void Html5ApplicationViewer::delete_address(const QString& name, const QString& address,
+	const QString& alias, const QString& paymentId)
+{
+	gui_config::addressbook_entry row({ name.toStdString(),
+		address.toStdString(), alias.toStdString(), paymentId.toStdString() });
+	m_config.address_book.entries.erase(
+		std::remove(m_config.address_book.entries.begin(),
+		m_config.address_book.entries.end(), row), 
+		m_config.address_book.entries.end()
+		);
 }
 
 QString Html5ApplicationViewer::get_addressbook()
@@ -576,7 +588,7 @@ void Html5ApplicationViewer::restore_wallet(const QString& restore_text,
 	if (!path.length())
 	{
 		show_msg_box("Empty wallet path");
-		return "";
+		return;
 	}
 
 	m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
@@ -611,7 +623,7 @@ void Html5ApplicationViewer::open_wallet(const QString& path, const QString& pwd
 	if (!path.length())
 	{
 		show_msg_box("Empty wallet path");
-		return "";
+		return;
 	}
 
   m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();

@@ -53,7 +53,9 @@ protected:
 		const QString& path);
     void close_wallet();
 	void add_address(const QString& name, const QString& address,
-		const QString& alias);
+		const QString& alias, const QString& paymentId);
+	void delete_address(const QString& name, const QString& address,
+		const QString& alias, const QString& paymentId);
 	QString get_addressbook();
 	void place_to_clipboard(const QString& data);
     QString get_version();

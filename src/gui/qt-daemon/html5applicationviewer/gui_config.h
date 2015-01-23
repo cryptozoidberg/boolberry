@@ -16,11 +16,26 @@ struct gui_config
 	  std::string name;
 	  std::string address;
 	  std::string alias;
+	  std::string paymentId;
+
+	  bool operator==(const addressbook_entry& abe) const
+	  {
+		  return (
+			  (name == abe.name) && (address == abe.address) &&
+			  (alias == abe.alias) && (paymentId == abe.paymentId)
+			  );
+	  }
+
+	  bool operator!=(const addressbook_entry& abe) const
+	  {
+		  return !(operator==(abe));
+	  }
 
 	  BEGIN_KV_SERIALIZE_MAP()
 		  KV_SERIALIZE(name)
 		  KV_SERIALIZE(address)
 		  KV_SERIALIZE(alias)
+		  KV_SERIALIZE(paymentId)
 	  END_KV_SERIALIZE_MAP()
   };
 

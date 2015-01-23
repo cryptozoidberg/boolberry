@@ -478,16 +478,24 @@ function on_addrbook_add() {
         return;
     }
     Qt_parent.add_address($('#addressbookname').val(),
-        $('#addressbookaddress').val(), $('#addressbookalias').val());
+        $('#addressbookaddress').val(), $('#addressbookalias').val(), 
+        $('#addressbookpaymentid').val());
     $('#addressbookname').val('');
     $('#addressbookaddress').val('');
     $('#addressbookalias').val('');
+    $('#addressbookpaymentid').val('');
     fill_addressbook();
 }
 
 function on_address_copy_btn() {
-    alert($(this).attr('data-address'));
     Qt_parent.place_to_clipboard($(this).attr('data-address'));
+}
+
+function on_address_delete_btn() {
+    Qt_parent.delete_address($(this).attr('data-name'), 
+        $(this).attr('data-address'), $(this).attr('data-alias'), 
+        $(this).attr('data-paymentId'));
+    fill_addressbook();
 }
 
 function fill_addressbook() {
@@ -502,16 +510,21 @@ function fill_addressbook() {
             var entry = ab.entries[i];
             html += "<tr>";
             html += '<td><div class="tablelabel">' + entry.name + '&nbsp;</div></td>';
-            html += '<td><input type="text" value="' + entry.address + '"/></td>';
+            html += '<td><input type="text" readonly value="' + entry.address + '"/></td>';
+            html += '<td><input type="text" readonly value="' + entry.paymentId + '"/></td>';
             html += '<td><input class="copybtn" type="button" value="Copy" data-address="' + entry.address + '"/></td>';
+            html += '<td><div class="close" data-name="' + entry.name +
+                '" data-address="' + entry.address + '" data-alias="' +
+                entry.alias + '" data-paymentId="' + entry.paymentId + '">&nbsp;</div></td>';
             html += "</tr>";
-            list += '<li data-address="' + entry.address + '">' + entry.name + '</li>';
+            list += '<li data-address="' + entry.address + '" data-paymentId="' + entry.paymentId + '">' + entry.name + '</li>';
         }
     }
     $('#addressbooklist').html(html);
     $('#walletsendaddresslist ul').html(list);
 
     $('#addressbooklist .copybtn').on('click', on_address_copy_btn);
+    $('#addressbooklist .close').on('click', on_address_delete_btn);
     $('#walletsendaddresslist li').on('click', on_wallet_send_addresslist_click);
 }
 
@@ -559,6 +572,7 @@ function on_wallet_send_book_btn() {
 function on_wallet_send_addresslist_click() {
     console.log('on_wallet_send_addresslist_click()');
     $('#walletsendaddress').attr('value', $(this).attr('data-address'));
+    $('#walletsendpaymentid').attr('value', $(this).attr('data-paymentId'));
     $('#walletsendaddresslist').hide();
 }
 

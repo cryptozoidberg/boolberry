@@ -3275,7 +3275,8 @@ namespace crypto
 		{
 			int n = NUMWORDS;
 			vector<string> tokens;
-			boost::split(tokens, boost::trim_copy(text), 
+			string trimmed_copy(boost::trim_copy(text));
+			boost::split(tokens, trimmed_copy, 
 				boost::is_any_of(" "));
 			if(tokens.size() % 3 != 0)
 				throw runtime_error("Invalid word count in mnemonic text");
