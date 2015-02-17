@@ -1,0 +1,15 @@
+#!/bin/bash
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title scratchpad_size
+graph_vlabel scratchpad_size
+graph_category boolb
+scratchpad_size.label scratchpad_size
+EOM
+        exit 0;;
+esac
+
+printf "scratchpad_size.value "
+connectivity_tool --ip=127.0.0.1 --rpc_port=10102 --timeout=1000 --rpc_get_daemon_info | grep scratchpad_size | cut -d ' ' -f2

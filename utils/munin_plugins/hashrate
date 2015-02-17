@@ -1,0 +1,21 @@
+#!/bin/bash
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title hashrate
+graph_vlabel hashrate
+graph_category boolb
+hashrate_10.label hashrate_10
+hashrate_50.label hashrate_50
+hashrate_350.label hashrate_350
+EOM
+        exit 0;;
+esac
+
+printf "hashrate_10.value "
+connectivity_tool --ip=127.0.0.1 --rpc_port=10102 --timeout=1000 --rpc_get_daemon_info | grep current_network_hashrate_10 | cut -d ' ' -f2
+printf "hashrate_50.value "
+connectivity_tool --ip=127.0.0.1 --rpc_port=10102 --timeout=1000 --rpc_get_daemon_info | grep current_network_hashrate_50 | cut -d ' ' -f2
+printf "hashrate_350.value "
+connectivity_tool --ip=127.0.0.1 --rpc_port=10102 --timeout=1000 --rpc_get_daemon_info | grep current_network_hashrate_350 | cut -d ' ' -f2

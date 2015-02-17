@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;" />
+
+    <!--  <link rel="stylesheet" href="files/jquery-ui-1.10.2.custom.css" /> -->
+    <link rel="stylesheet" href="files/css/start/jquery-ui-1.10.4.custom.css"/>
+    <link rel="stylesheet" type="text/css" href="files/style.css" />
+
+    <!--  <script src="files/http_code.jquery.com_jquery-latest.js"></script> -->
+    <!--  <script src="files/http_code.jquery.com_ui_1.10.2_jquery-ui.js"></script> -->
+    <script src="files/js/jquery-1.10.2.js"></script>
+    <script src="files/js/jquery-ui-1.10.4.custom.js"></script>
+    <script src="files/ui_helper.js" type="text/javascript" charset="utf-8"></script>
+    <script src="files/date_format.js"></script>
+
+    <script type="text/javascript" src="files/js/jquery.jqplot.min.js"></script>
+    <script type="text/javascript" src="files/js/plugins/jqplot.dateAxisRenderer.min.js"></script>
+    <script type="text/javascript" src="files/js/plugins/jqplot.ohlcRenderer.min.js"></script>
+    <script type="text/javascript" src="files/js/plugins/jqplot.highlighter.min.js"></script>
+    <!--
+    <script type="text/javascript" src="files/js/jquery.jqplot.js"></script>
+    <script type="text/javascript" src="files/js/plugins/jqplot.dateAxisRenderer.js"></script>
+    <script type="text/javascript" src="files/js/plugins/jqplot.ohlcRenderer.js"></script>
+    <script type="text/javascript" src="files/js/plugins/jqplot.highlighter.js"></script>
+    -->
+</head>
+
+<body>
+
+<div id="container">
+    <div class="top_menu_bar">
+        <div class="menu_bar_logo"><img src="files/text_and_logo.png" height="80px" /></div>
+        <div class="inline_menu_bar">
+            <div class="menu_bar_tabs">
+                <div id="daemon_state_view_menu" class="inline_menu_bar_item"  view_name="daemon_state_view">Connectivity</div>
+                <div id="wallet_view_menu"  class="inline_menu_bar_item" view_name="wallet_view">Wallet</div>
+                <!-- <div id="exchange_view_menu"  class="inline_menu_bar_item" view_name="exchange_view" callback="on_exchange_tab_switch">Exchange</div> -->
+            </div>
+        </div>
+    </div>
+
+    <div id="daemon_state_view" class="view_hidden menu_view_inner_area" >
+        <div id="daemon_state_internal_panel" class="active_panel">
+            <div class="daemon_view_general_status_block"><span class="daemon_view_general_status_text">Status:</span> <span  id="daemon_status_text">Loading blockchain data...</span></div>
+            <div id="synchronization_progressbar_block">
+                <div style="width: 200px; height: 20px;float: left;" id="synchronization_progressbar"></div><span style="margin-left: 10px;" id="daemon_synchronization_text">--</span>
+            </div>
+            <div class="daemon_view_details_block">
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Connections: </span>
+                    <span class="daemon_view_param_value" id="daemon_out_connections_text">0</span>  <!-- (out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> -->
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Height: </span>
+                    <span class="daemon_view_param_value" id="daemon_height_text">0</span>  <!-- (out)/<span id="daemon_inc_connections_text">0</span>(inc)</span> -->
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Current PoW difficulty: </span>
+                    <span class="daemon_view_param_value" id="pow_difficulty_text">---</span>
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Current PoS difficulty: </span>
+                    <span class="daemon_view_param_value" id="pos_difficulty_text">---</span>
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Current network hashrate: </span>
+                    <span class="daemon_view_param_value" id="hashrate_text">---</span>
+                </div>
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Software version: </span>
+                    <span class="daemon_view_param_value"><span id="version_text">---</span><span class="daemon_view_param_value_last_ver_info" id="last_actual_version_text">(available version: 0.1.3.20)</span></span>
+
+                </div>
+
+                <div class="daemon_view_details_status_block">
+                    <span class="daemon_view_param_title">Exchange rate: </span>
+                    <span class="daemon_view_param_value" id="exchange_rate_text">---</span>
+
+                </div>
+
+                <div class="daemon_view_block_explorer_block">
+                    <span>Last blocks:</span>
+                    <div class="daemon_view_blocks_entry" id="block_explorer_entry_parent">
+                        <span>[2014-06-08 04:02]</span><span style="font-weight: bold"> 1</span> <span style="color: #0d8233; width: 200px">[PoS]</span> diff: 234234234<br>
+                        <span>[2014-06-08 04:02]</span><span style="font-weight: bold"> 2</span> <span style="color: #af4f3a; width: 200px">[PoW]</span>diff: 234234234233<br>
+                        <span>[2014-06-08 04:02]</span><span style="font-weight: bold"> 3</span> <span style="color: #0d8233; width: 200px">[PoS]</span> diff: 234234234<br>
+                        <span>[2014-06-08 04:02]</span><span style="font-weight: bold"> 4</span> <span style="color: #af4f3a; width: 200px">[PoW]</span>diff: 234234234234<br>
+                    </div>
+                </div>
+
+            </div>
+            <div class="buttons_group">
+                <!-- <div id="domining_button" class="common_button">Generate coins</div> -->
+            </div>
+        </div>
+    </div>
+    <div id="wallet_view" class="view_hidden menu_view_inner_area" >
+        <div id="wallet_welcome_screen_area">
+            <div id="open_wallet_button" class="common_button">Open wallet</div><br><br><span id="id_wallet_or_text">or</span> <br><br>
+            <div id="generate_wallet_button" class="common_button">Generate new wallet</div>
+        </div>
+        <div id="wallet_workspace_area">
+            <div class="active_panel">
+                <div class="wallet_left_panel_entry">
+                    <span class="balance_text">Balance:</span>
+                    <span class="wallet_balance" id="wallet_balance">0.0</span>
+                    <span class="balance_text">Unlocked:</span>
+                    <span class="wallet_balance" id="wallet_unlocked_balance">0.0</span>
+                    <span class="balance_text">Est. value:
+                    <span class="wallet_balance" id="est_value_btc_id"></span>BTC/<span class="wallet_balance" id="est_value_usd_id"></span>USD</span><span  style="font-size: 40%"><br><br></span>
+                    <span class="wallet_secondary_text" >Path:</span>
+                    <span class="my_addres_text" id="wallet_path">C:\home\projects\boolberry\build\src\Release\wallet.bin</span><br>
+                    <span class="wallet_secondary_text">Address:</span>
+                    <span class="my_addres_text" id="wallet_address">1HNJjUsofq5LYLoXem119dd491yFAb5g4bCHkecV4sPqigmuxw57Ci9am71fEN4CRmA9jgnvo5PDNfaq8QnprWmS5uLqnbq</span><br>
+                </div>
+                <div id="synchronizing_wallet_block">
+                    Synchronizing wallet...
+                    <div style="width: 150px; height: 20px;" id="wallet_progressbar"></div>
+                </div>
+                <div id="synchronized_wallet_block" style="display: none">
+                    Synchronized <div id="close_wallet_button_id" class="common_button">Close wallet</div>
+                    <br>
+                    <span id="mining_state_span">
+                        Mining state: ----
+                    </span>
+                    <span id="mining_is_running_span">
+                        idle
+                    </span>
+                    <div id="wallet_start_stop_mining" class="common_button">Start mining</div>
+                </div>
+
+            </div>
+            <div class="wallet_separator">Send payment</div>
+            <div class="active_panel">
+                <div>
+                    <table cellspacing="3px">
+                        <tr>
+                            <td width="90px">Address:</td>
+                            <td><input id="transfer_address_id"><br></td>
+                        </tr>
+                        <tr>
+                            <td>Amount:</td>
+                            <td><input pattern="[0-9]+(\.[0-9]{1,12})?" id="transfer_amount_id" value="0.0">  <a href="javascript:;" onclick="jQuery('.transfer_extra_options').toggle('fast');" class="options_link_text">More options...</a> </td>
+                        </tr>
+                        <tr>
+                            <td > <span class="transfer_extra_options">Payment id: </span> </td>
+                            <td > <span class="transfer_extra_options"><input style="width: 400px" id="payment_id"></span></td>
+                        </tr>
+                        <tr>
+                            <td > <span class="transfer_extra_options">Mixin: </span> </td>
+                            <td > <span class="transfer_extra_options"><input type="number" style="width: 40px" id="mixin_count_id" value="0"></span></td>
+                        </tr>
+                        <tr>
+                            <td > <span class="transfer_extra_options">Fee: </span> </td>
+                            <td > <span class="transfer_extra_options"><input style="width: 130px" id="tx_fee" value="0.001000000000"></span></td>
+                        </tr>
+                        <tr>
+                            <td > <span class="transfer_extra_options">Unlock time: </span> </td>
+                            <td > <span class="transfer_extra_options"><input style="width: 130px" id="lock_time" value=""></span><span class="transfer_extra_options transfer_extra_options_hint"> Use "1d" or "1h" or n, where n is the number of blocks within which the transaction must be blocked.</span></td>
+                        </tr>
+
+                        <tr>
+                            <td></td>
+                            <td align="right"><div id="transfer_button_id" class="common_button">Send</div></td>
+                        </tr>
+                    </table>
+                    <div id="transfer_result_zone" style="display: none">
+                    <span id="transfer_result_span">
+
+                    </span>
+                        <a href="javascript:;" onclick="jQuery('#transfer_result_zone').toggle('fast');" class="options_link_text">Hide</a>
+                    </div>
+
+                </div>
+            </div>
+            <div class="wallet_separator">Recent transfers</div>
+            <div class="wallet_panet_transparent">
+                <div class='transfer_entry_line' style='color: #373435; height: 20px; background: #f3f3f2; font-weight: bold;'>
+                    <span style='position: absolute; left: 51px;'>Date</span>
+                    <span style='position: absolute; left: 180px;'>Status</span>
+                    <span style='position: absolute; left: 250px;'>Transaction</span>
+                    <span style='position: absolute; left: 340px;'>Amount</span>
+                    <span style='position: absolute; left: 480px;'>Recipient</span>
+                </div>
+                <div id="unconfirmed_transfers_container_id"></div>
+                <div id="recent_transfers_container_id"></div>
+            </div>
+        </div>
+    </div>
+    <div id="exchange_view" class="view_hidden menu_view_inner_area" >
+        <div class="active_panel" style="text-align: center;">
+            <div>
+                <div id="plot_area" style="margin-left: 40px;" />
+            </div>
+            <br>
+            <span>The information above loaded via public API from <img height="12px" src="files/poloniex.png"><br></span>
+        </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="files/main.js" type="text/javascript" charset="utf-8"></script>
+
+</body>
+</html>
