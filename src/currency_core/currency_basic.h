@@ -131,6 +131,34 @@ namespace currency
     END_SERIALIZE()
   };
 
+
+  struct bid_details
+  {
+    uint8_t bid_type;
+    uint64_t amount_lui;       //amount of lui
+    uint64_t amount_etc;       //amount of other currency or goods
+    std::string target;        //[30 characters] currency / goods
+    std::string location;      //[50 characters] geo-location
+    std::string contacts;      //[140 characters] (Skype, mail, ICQ, etc., website)
+    std::string comment;       //[160 characters]
+    std::string payment_types; //[20 characters ]money accept type(bank transaction, internet money, cash, etc)
+    uint8_t expiration_time;   //n-days
+
+    BEGIN_SERIALIZE_OBJECT()
+      VALUE(bid_type)
+      VARINT_FIELD(amount_lui)
+      VARINT_FIELD(amount_etc)
+      VALUE(target)
+      VALUE(location)
+      VALUE(contacts)
+      VALUE(comment)
+      VALUE(payment_types)
+      VALUE(expiration_time)
+    END_SERIALIZE()
+
+  };
+
+
   class transaction_prefix
   {
 
@@ -157,10 +185,12 @@ namespace currency
     transaction_prefix(){}
   };
 
+
   class transaction: public transaction_prefix
   {
   public:
     std::vector<std::vector<crypto::signature> > signatures; //count signatures  always the same as inputs count
+    std::vector<bid_details> bid;
 
     transaction();
     virtual ~transaction();
@@ -169,6 +199,7 @@ namespace currency
     BEGIN_SERIALIZE_OBJECT()
       FIELDS(*static_cast<transaction_prefix *>(this))
       FIELD(signatures)
+      FIELD(bid)
     END_SERIALIZE()
 
 
@@ -213,6 +244,12 @@ namespace currency
 
     return boost::apply_visitor(txin_signature_size_visitor(), tx_in);
   }
+
+
+
+
+
+
 
 
 
