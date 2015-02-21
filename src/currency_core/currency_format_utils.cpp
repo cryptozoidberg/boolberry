@@ -496,16 +496,18 @@ namespace currency
                                                              const std::vector<tx_destination_entry>& destinations, 
                                                              transaction& tx, 
                                                              uint64_t unlock_time, 
-                                                             uint8_t tx_outs_attr)
+                                                             uint8_t tx_outs_attr, 
+                                                             const std::list<offer_details>& od)
   {
-    return construct_tx(sender_account_keys, sources, destinations, std::vector<uint8_t>(), tx, unlock_time, tx_outs_attr);
+    return construct_tx(sender_account_keys, sources, destinations, std::vector<uint8_t>(), tx, unlock_time, tx_outs_attr, od);
   }
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
                                                              const std::vector<uint8_t>& extra,
                                                              transaction& tx, 
                                                              uint64_t unlock_time,
-                                                             uint8_t tx_outs_attr)
+                                                             uint8_t tx_outs_attr, 
+                                                             const std::list<offer_details>& od)
   {
     tx.vin.clear();
     tx.vout.clear();
@@ -586,6 +588,13 @@ namespace currency
     {
       LOG_ERROR("Transaction inputs money ("<< summary_inputs_money << ") less than outputs money (" << summary_outs_money << ")");
       return false;
+    }
+
+    //include offers if need
+    //TODO: add crypto protocol here
+    for (const auto& of : od)
+    {
+      tx.offers.push_back(of);
     }
 
 

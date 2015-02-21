@@ -26,6 +26,8 @@ bool gen_pos_basic_tests::generate(std::vector<test_event_entry>& events) const
   std::list<currency::account_base> coin_stake_sources;
 
   GENERATE_ACCOUNT(miner_account);
+  GENERATE_ACCOUNT(some_account_1);
+
   coin_stake_sources.push_back(miner_account);
   MAKE_GENESIS_BLOCK(events, blk_0, miner_account, ts_start);
   MAKE_ACCOUNT(events, first_acc);
@@ -72,7 +74,26 @@ bool gen_pos_basic_tests::generate(std::vector<test_event_entry>& events) const
   DO_CALLBACK(events, "configure_check_height2");
   // start alternative chain
   MAKE_NEXT_BLOCK(events, blk_33b_a, blk_32_a, miner_account);
- 
+
+  std::list<offer_details> offers;
+  offers.resize(1);
+  offer_details& od = offers.back();
+
+  od.offer_type = OFFER_TYPE_LUI_TO_ETC;
+  od.amount_lui = 1000000000;
+  od.amount_etc = 22222222;
+  od.target = "USD";
+  od.location = "USA, New York City";
+  od.contacts = "skype: zina; icq: 12313212; email: zina@zina.com; mobile: +621234567834";
+  od.comment = "The best ever rate in NYC!!!";
+  od.payment_types = "BTC;BANK;CASH";
+  od.expiration_time = 10;
+
+  MAKE_TX_LIST_START(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a);
+  MAKE_TX_LIST_OFFER(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a, offers);
+
+
+
 
 
 

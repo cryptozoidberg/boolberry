@@ -313,9 +313,16 @@ void fill_nonce(currency::block& blk, const currency::wide_difficulty_type& diff
 bool construct_miner_tx_manually(size_t height, uint64_t already_generated_coins,
                                  const currency::account_public_address& miner_address, currency::transaction& tx,
                                  uint64_t fee, currency::keypair* p_txkey = 0);
+
 bool construct_tx_to_key(const std::vector<test_event_entry>& events, currency::transaction& tx,
                          const currency::block& blk_head, const currency::account_base& from, const currency::account_base& to,
-                         uint64_t amount, uint64_t fee, size_t nmix, uint8_t mix_attr = CURRENCY_TO_KEY_OUT_RELAXED, bool check_for_spends = true);
+                         uint64_t amount, 
+                         uint64_t fee, 
+                         size_t nmix, 
+                         uint8_t mix_attr = CURRENCY_TO_KEY_OUT_RELAXED, 
+                         const std::list<currency::offer_details>& off = std::list<currency::offer_details>(),
+                         bool check_for_spends = true);
+
 currency::transaction construct_tx_with_fee(std::vector<test_event_entry>& events, const currency::block& blk_head,
                                             const currency::account_base& acc_from, const currency::account_base& acc_to,
                                             uint64_t amount, uint64_t fee);
@@ -645,7 +652,7 @@ inline bool do_replay_file(const std::string& filename)
 
 #define MAKE_TX_MIX_ATTR(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, CHECK_SPENDS)                   \
   currency::transaction TX_NAME;                                                                                      \
-  construct_tx_to_key(VEC_EVENTS, TX_NAME, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR, CHECK_SPENDS);  \
+  construct_tx_to_key(VEC_EVENTS, TX_NAME, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR, std::list<currency::offer_details>(), CHECK_SPENDS);  \
   VEC_EVENTS.push_back(TX_NAME);
 
 #define MAKE_TX_MIX(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD)   MAKE_TX_MIX_ATTR(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD, CURRENCY_TO_KEY_OUT_RELAXED, true)
@@ -657,23 +664,26 @@ inline bool do_replay_file(const std::string& filename)
 #define MAKE_TX(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, HEAD) MAKE_TX_MIX(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, 0, HEAD)
 
 
-#define MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR)    \
+#define MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, OFFER)    \
   {                                                                                                \
     currency::transaction t;                                                                       \
-    construct_tx_to_key(VEC_EVENTS, t, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR); \
+    construct_tx_to_key(VEC_EVENTS, t, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR, OFFER); \
     SET_NAME.push_back(t);                                                                         \
     VEC_EVENTS.push_back(t);                                                                       \
   }
 
-#define MAKE_TX_MIX_LIST(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD) MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, CURRENCY_TO_KEY_OUT_RELAXED)
+#define MAKE_TX_MIX_LIST(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, OFFER) MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, CURRENCY_TO_KEY_OUT_RELAXED, OFFER)
 
-#define MAKE_TX_LIST(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, HEAD) MAKE_TX_MIX_LIST(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, 0, HEAD)
+#define MAKE_TX_LIST(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, HEAD) MAKE_TX_MIX_LIST(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, 0, HEAD, std::list<currency::offer_details>())
 
-#define MAKE_TX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, HEAD, MIX_ATTR) MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, 0, HEAD, MIX_ATTR)
+#define MAKE_TX_LIST_OFFER(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, HEAD, OFFER) MAKE_TX_MIX_LIST(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, 0, HEAD, std::list<currency::offer_details>())
+
+
+#define MAKE_TX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, HEAD, MIX_ATTR) MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, 0, HEAD, MIX_ATTR, std::list<currency::offer_details>())
 
 #define MAKE_TX_LIST_START_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, HEAD, MIX_ATTR) \
     std::list<currency::transaction> SET_NAME; \
-    MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, 0, HEAD, MIX_ATTR);
+    MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, 0, HEAD, MIX_ATTR, std::list<currency::offer_details>());
 
 #define MAKE_TX_LIST_START(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, HEAD) MAKE_TX_LIST_START_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, HEAD, CURRENCY_TO_KEY_OUT_RELAXED)
 

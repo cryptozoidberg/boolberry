@@ -329,8 +329,19 @@ bool blockchain_storage::purge_transaction_from_blockchain(const crypto::hash& t
 
   bool res = pop_transaction_from_global_index(tx, tx_id);
   m_transactions.erase(tx_index_it);
+
+  //remove offers if need
+  m_offers.resize(m_offers.size() - tx.offers.size());
+
   LOG_PRINT_L1("Removed transaction from blockchain history:" << tx_id << ENDL);
   return res;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::get_all_offers(std::list<offer_details>& offers)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  m_offers = offers;
+  return true;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::purge_block_data_from_blockchain(const block& bl, size_t processed_tx_count)
@@ -1897,6 +1908,15 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
   LOG_PRINT_L2("Added transaction to blockchain history:" << ENDL
     << "tx_id: " << tx_id << ENDL
     << "inputs: " << tx.vin.size() << ", outs: " << tx.vout.size() << ", spend money: " << print_money(get_outs_money_amount(tx)) << "(fee: " << (is_coinbase(tx) ? "0[coinbase]" : print_money(get_tx_fee(tx))) << ")");
+
+  //add offers if exists
+  for (const auto& off : tx.offers)
+  {
+    m_offers.push_back(off);
+  }
+
+
+
   return true;
 }
 //------------------------------------------------------------------

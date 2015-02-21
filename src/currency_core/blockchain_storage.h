@@ -144,6 +144,9 @@ namespace currency
     bool is_coin_age_okay(uint64_t source_tx_block_timestamp, uint64_t last_block_timestamp);
     void set_pos_config(const pos_config& pc);
 
+    //exchange access functions
+    //this function mostly made for debug purposes
+    bool get_all_offers(std::list<offer_details>& offers);
 
 
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
@@ -235,6 +238,9 @@ namespace currency
 
     //pos
     pos_config m_pos_config;
+    
+    //offers
+    std::list<offer_details> m_offers;
 
 
     bool switch_to_alternative_blockchain(std::list<blocks_ext_by_hash::iterator>& alt_chain);

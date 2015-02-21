@@ -131,10 +131,13 @@ namespace currency
     END_SERIALIZE()
   };
 
+#define OFFER_TYPE_LUI_TO_ETC   0
+#define OFFER_TYPE_ETC_TO_LUI   1
 
-  struct bid_details
+
+  struct offer_details
   {
-    uint8_t bid_type;
+    uint8_t offer_type;
     uint64_t amount_lui;       //amount of lui
     uint64_t amount_etc;       //amount of other currency or goods
     std::string target;        //[30 characters] currency / goods
@@ -145,7 +148,7 @@ namespace currency
     uint8_t expiration_time;   //n-days
 
     BEGIN_SERIALIZE_OBJECT()
-      VALUE(bid_type)
+      VALUE(offer_type)
       VARINT_FIELD(amount_lui)
       VARINT_FIELD(amount_etc)
       VALUE(target)
@@ -155,7 +158,6 @@ namespace currency
       VALUE(payment_types)
       VALUE(expiration_time)
     END_SERIALIZE()
-
   };
 
 
@@ -190,7 +192,7 @@ namespace currency
   {
   public:
     std::vector<std::vector<crypto::signature> > signatures; //count signatures  always the same as inputs count
-    std::vector<bid_details> bid;
+    std::vector<offer_details> offers;
 
     transaction();
     virtual ~transaction();
@@ -199,7 +201,7 @@ namespace currency
     BEGIN_SERIALIZE_OBJECT()
       FIELDS(*static_cast<transaction_prefix *>(this))
       FIELD(signatures)
-      FIELD(bid)
+      FIELD(offers)
     END_SERIALIZE()
 
 
