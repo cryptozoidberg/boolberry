@@ -2232,7 +2232,7 @@ wide_difficulty_type blockchain_storage::get_adjusted_cumulative_difficulty_for_
   }
 
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  for (uint64_t h = connection_height - 1; h != 0 && !(last_pos_diff && last_pow_diff); ++h)
+  for (uint64_t h = connection_height - 1; h != 0 && !(last_pos_diff && last_pow_diff); --h)
   {
     if (is_pos_block(m_blocks[h].bl))
     {
