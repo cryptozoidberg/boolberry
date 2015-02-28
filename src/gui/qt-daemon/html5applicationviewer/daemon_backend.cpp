@@ -136,7 +136,29 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   if (log_file_path.empty())
     log_file_path = log_space::log_singletone::get_default_log_file();
   std::string log_dir;
-  log_dir = log_file_path.has_parent_path() ? log_file_path.parent_path().string() : log_space::log_singletone::get_default_log_folder();
+
+  if (log_file_path.has_parent_path())
+  {
+    log_dir = log_file_path.parent_path().string();
+  }else
+  {
+#if defined(MACOSX)
+    //osx firewall issue
+    log_dir = string_tools::get_user_home_dir();
+    log_dir += "Library/"CURRENCY_NAME;
+    boost::system::error_code ec;
+    boost::filesystem::create_directories(log_dir, ec);
+    if (!boost::filesystem::is_directory(log_dir, ec))
+    {
+      log_dir = log_space::log_singletone::get_default_log_folder();
+    }
+#else
+    //load process name
+    log_dir = log_space::log_singletone::get_default_log_folder();
+#endif      
+  }
+
+
 
   log_space::log_singletone::add_logger(LOGGER_FILE, log_file_path.filename().string().c_str(), log_dir.c_str());
   LOG_PRINT_L0(CURRENCY_NAME << " v" << PROJECT_VERSION_LONG);

@@ -862,13 +862,14 @@ namespace log_space
 
     bool init_log_path_by_default()
     {
+      m_default_log_file =  m_process_name;
+      std::string::size_type a = m_default_log_file.rfind('.');
+      if (a != std::string::npos)
+        m_default_log_file.erase(a, m_default_log_file.size());
+
       //load process name
       m_default_log_folder = string_tools::get_current_module_folder();
 
-      m_default_log_file =  m_process_name;
-      std::string::size_type a = m_default_log_file.rfind('.');
-      if ( a != std::string::npos )
-        m_default_log_file.erase( a, m_default_log_file.size());
       m_default_log_file += ".log";
 
       return true;

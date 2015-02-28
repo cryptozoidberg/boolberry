@@ -86,6 +86,16 @@ namespace string_tools
 		}
 	}
 	//----------------------------------------------------------------------------
+  inline
+  std::string get_user_home_dir(std::string path)
+  {
+    const char* phomedir = getenv("HOME");
+    if (phomedir)
+      return phomedir;
+    else
+      return "~";
+  }
+  //----------------------------------------------------------------------------
 	inline bool get_guid_from_string(OUT boost::uuids::uuid& inetifer, const std::string& str_id)
 	{
 		std::string local_str_id = str_id;
