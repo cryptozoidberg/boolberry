@@ -161,7 +161,7 @@ bool Html5ApplicationViewer::toggle_mining()
 }
 QString Html5ApplicationViewer::get_exchange_last_top(const QString& params)
 {
-
+  return QString();
 }
 bool Html5ApplicationViewer::store_config()
 {

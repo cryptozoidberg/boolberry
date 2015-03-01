@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     Html5ApplicationViewer viewer;
     viewer.setOrientation(Html5ApplicationViewer::ScreenOrientationAuto);
     viewer.showExpanded();
-    viewer.setWindowTitle("Boolberry");
+    viewer.setWindowTitle("Luidor");
         
     if(!viewer.start_backend(argc, argv))
       return false;
