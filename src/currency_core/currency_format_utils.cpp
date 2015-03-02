@@ -4,10 +4,11 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "include_base_utils.h"
+#include <boost/foreach.hpp>
 using namespace epee;
 
 #include "currency_format_utils.h"
-#include <boost/foreach.hpp>
+#include "serialization/vector.h"
 #include "currency_config.h"
 #include "miner.h"
 #include "crypto/crypto.h"
@@ -387,6 +388,7 @@ namespace currency
     extra.m_tx_pub_key = null_pkey;
     bool padding_started = false; //let the padding goes only at the end
     bool tx_extra_tag_pubkey_found = false;
+    bool tx_extra_tag_offers_hash_found = false;
     bool tx_extra_user_data_found = false;
     bool tx_alias_found = false;
     for(size_t i = 0; i != tx.extra.size();)
@@ -403,7 +405,16 @@ namespace currency
         i += 1 + sizeof(crypto::public_key);
         tx_extra_tag_pubkey_found = true;
         continue;
-      }else if(tx.extra[i] == TX_EXTRA_TAG_USER_DATA)
+      }
+      else if (tx.extra[i] == TX_EXTRA_TAG_OFFERS_HASH)
+      {
+        CHECK_AND_ASSERT_MES(sizeof(crypto::hash) <= tx.extra.size() - 1 - i, false, "Failed to parse transaction extra (TX_EXTRA_TAG_OFFERS_HASH have not enough bytes) in tx " << get_transaction_hash(tx));
+        CHECK_AND_ASSERT_MES(!tx_extra_tag_offers_hash_found, false, "Failed to parse transaction extra (duplicate TX_EXTRA_TAG_OFFERS_HASH entry) in tx " << get_transaction_hash(tx));
+        extra.m_offers_hash = *reinterpret_cast<const crypto::hash*>(&tx.extra[i + 1]);
+        i += 1 + sizeof(crypto::hash);
+        tx_extra_tag_offers_hash_found = true;
+        continue;
+      }else if (tx.extra[i] == TX_EXTRA_TAG_USER_DATA)
       {
         //CHECK_AND_ASSERT_MES(is_coinbase(tx), false, "Failed to parse transaction extra (TX_EXTRA_NONCE can be only in coinbase) in tx " << get_transaction_hash(tx));
         CHECK_AND_ASSERT_MES(!tx_extra_user_data_found, false, "Failed to parse transaction extra (duplicate TX_EXTRA_NONCE entry) in tx " << get_transaction_hash(tx));
@@ -456,6 +467,15 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
+  bool add_offers_hash_to_extra(transaction& tx, const crypto::hash& offers_hash)
+  {
+    tx.extra.resize(tx.extra.size() + 1 + sizeof(crypto::hash));
+    tx.extra[tx.extra.size() - 1 - sizeof(crypto::hash)] = TX_EXTRA_TAG_OFFERS_HASH;
+    *reinterpret_cast<crypto::hash*>(&tx.extra[tx.extra.size() - sizeof(crypto::hash)]) = offers_hash;
+    return true;
+  }
+  
+  //---------------------------------------------------------------
   bool add_tx_extra_nonce(transaction& tx, const blobdata& extra_nonce)
   {
     CHECK_AND_ASSERT_MES(extra_nonce.size() <=255, false, "extra nonce could be 255 bytes max");
@@ -490,6 +510,18 @@ namespace currency
     out.target = tk;
     tx.vout.push_back(out);
     return true;
+  }
+  //---------------------------------------------------------------
+  crypto::hash get_offers_hash(const transaction& tx)
+  {
+    if (!tx.offers.size())
+      return null_hash;
+
+    //put hash into extra
+    std::stringstream ss;
+    binary_archive<true> oar(ss);
+    bool r = ::do_serialize(oar, const_cast<std::vector<offer_details>&>(tx.offers));
+    return get_blob_hash(ss.str());
   }
   //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
@@ -591,12 +623,12 @@ namespace currency
     }
 
     //include offers if need
-    //TODO: add crypto protocol here
-    for (const auto& of : od)
+    tx.offers.insert(tx.offers.begin(), od.begin(), od.end());
+    
+    if (tx.offers.size())
     {
-      tx.offers.push_back(of);
+      add_offers_hash_to_extra(tx, get_offers_hash(tx));
     }
-
 
     //generate ring signatures
     crypto::hash tx_prefix_hash;

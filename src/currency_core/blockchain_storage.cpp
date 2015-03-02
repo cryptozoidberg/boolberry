@@ -319,6 +319,9 @@ bool blockchain_storage::purge_transaction_from_blockchain(const crypto::hash& t
   
   bool r = unprocess_blockchain_tx_extra(tx);
   CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_extra");
+  r = unprocess_blockchain_tx_offers(tx);
+  CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_offers");
+
 
   if(!is_coinbase(tx))
   {
@@ -330,9 +333,6 @@ bool blockchain_storage::purge_transaction_from_blockchain(const crypto::hash& t
   bool res = pop_transaction_from_global_index(tx, tx_id);
   m_transactions.erase(tx_index_it);
 
-  //remove offers if need
-  m_offers.resize(m_offers.size() - tx.offers.size());
-
   LOG_PRINT_L1("Removed transaction from blockchain history:" << tx_id << ENDL);
   return res;
 }
@@ -340,7 +340,7 @@ bool blockchain_storage::purge_transaction_from_blockchain(const crypto::hash& t
 bool blockchain_storage::get_all_offers(std::list<offer_details>& offers)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  m_offers = offers;
+  offers = m_offers;
   return true;
 }
 //------------------------------------------------------------------
@@ -1829,12 +1829,33 @@ bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
   return true;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::process_blockchain_tx_offers(const transaction& tx)
+{
+  //check transaction extra
+  for (const auto& of : tx.offers)
+    m_offers.push_back(of);
+
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::unprocess_blockchain_tx_offers(const transaction& tx)
+{
+  CHECK_AND_ASSERT_MES(m_offers.size() >= tx.offers.size(), false, "wrong m_offers size("
+    << m_offers.size() << ") in unprocess_blockchain_tx_offers with tx offers.size=" << tx.offers.size());
+  m_offers.resize(m_offers.size() - tx.offers.size());
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::add_transaction_from_block(const transaction& tx, const crypto::hash& tx_id, const crypto::hash& bl_id, uint64_t bl_height)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
 
   bool r = process_blockchain_tx_extra(tx);
   CHECK_AND_ASSERT_MES(r, false, "failed to process_blockchain_tx_extra");
+
+  r = process_blockchain_tx_offers(tx);
+  CHECK_AND_ASSERT_MES(r, false, "failed to process_blockchain_tx_offers");
+
 
   struct add_transaction_input_visitor: public boost::static_visitor<bool>
   {
@@ -1887,6 +1908,8 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
       purge_transaction_keyimages_from_blockchain(tx, false);
       bool r = unprocess_blockchain_tx_extra(tx);
       CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_extra");
+      r = unprocess_blockchain_tx_offers(tx);
+      CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_offers");
       return false;
     }
   }
@@ -1901,6 +1924,9 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
     purge_transaction_keyimages_from_blockchain(tx, true);
     bool r = unprocess_blockchain_tx_extra(tx);
     CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_extra");
+    r = unprocess_blockchain_tx_offers(tx);
+    CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_offers");
+
     return false;
   }
   r = push_transaction_to_global_outs_index(tx, tx_id, i_r.first->second.m_global_output_indexes);
@@ -1908,13 +1934,6 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
   LOG_PRINT_L2("Added transaction to blockchain history:" << ENDL
     << "tx_id: " << tx_id << ENDL
     << "inputs: " << tx.vin.size() << ", outs: " << tx.vout.size() << ", spend money: " << print_money(get_outs_money_amount(tx)) << "(fee: " << (is_coinbase(tx) ? "0[coinbase]" : print_money(get_tx_fee(tx))) << ")");
-
-  //add offers if exists
-  for (const auto& off : tx.offers)
-  {
-    m_offers.push_back(off);
-  }
-
 
 
   return true;
@@ -1999,8 +2018,15 @@ bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::ha
   if (!m_is_in_checkpoint_zone)
   {
     CHECK_AND_ASSERT_MES(tx.signatures.size() == sig_index, false, "tx signatures count differs from inputs");
+    
+    // check offers hash
+    //TODO: remove second time extra parse
+    tx_extra_info ei = AUTO_VAL_INIT(ei); 
+    bool r = parse_and_validate_tx_extra(tx, ei);
+    CHECK_AND_ASSERT_MES(r, false, "failed to parse_and_validate_tx_extra");
+    CHECK_AND_ASSERT_MES(get_offers_hash(tx) == ei.m_offers_hash, false, "offers hash in tx: " << get_offers_hash(tx)
+      << " missmatch with offers hash specified in extra: " << ei.m_offers_hash);
   }
-
   return true;
 }
 //------------------------------------------------------------------

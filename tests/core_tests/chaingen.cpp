@@ -835,6 +835,10 @@ bool fill_tx_sources(std::vector<tx_source_entry>& sources, const std::vector<te
             if (oi.spent)
                 continue;
 
+            if (oi.p_tx->unlock_time > blockchain.size())
+              continue;
+
+
             currency::tx_source_entry ts;
             ts.amount = oi.amount;
             ts.real_output_in_tx_index = oi.out_no;

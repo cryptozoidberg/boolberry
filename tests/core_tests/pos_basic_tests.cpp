@@ -16,6 +16,7 @@ gen_pos_basic_tests::gen_pos_basic_tests()
   REGISTER_CALLBACK_METHOD(gen_pos_basic_tests, configure_core);
   REGISTER_CALLBACK_METHOD(gen_pos_basic_tests, configure_check_height1);
   REGISTER_CALLBACK_METHOD(gen_pos_basic_tests, configure_check_height2);
+  REGISTER_CALLBACK_METHOD(gen_pos_basic_tests, check_exchange_1);
 }
 #define FIRST_ALIAS_NAME "first"
 #define SECOND_ALIAS_NAME "second"
@@ -73,7 +74,7 @@ bool gen_pos_basic_tests::generate(std::vector<test_event_entry>& events) const
 
   DO_CALLBACK(events, "configure_check_height2");
   // start alternative chain
-  MAKE_NEXT_BLOCK(events, blk_33b_a, blk_32_a, miner_account);
+  MAKE_NEXT_BLOCK(events, blk_34, blk_33_a, miner_account);
 
   std::list<offer_details> offers;
   offers.resize(1);
@@ -89,14 +90,12 @@ bool gen_pos_basic_tests::generate(std::vector<test_event_entry>& events) const
   od.payment_types = "BTC;BANK;CASH";
   od.expiration_time = 10;
 
-  MAKE_TX_LIST_START(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a);
-  MAKE_TX_LIST_OFFER(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a, offers);
+  MAKE_TX_LIST_START_WITH_OFFERS(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a, offers);
+  //MAKE_TX_LIST_OFFER(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a, offers);
 
-
-
-
-
-
+  MAKE_NEXT_BLOCK_TX_LIST(events, blk_35, blk_34, miner_account, txs_blk);
+  MAKE_NEXT_BLOCK(events, blk_36, blk_35, miner_account);
+  DO_CALLBACK(events, "check_exchange_1");
 
   return true;
 }
@@ -121,5 +120,14 @@ bool gen_pos_basic_tests::configure_check_height2(currency::core& c, size_t ev_i
 {
   uint64_t h = c.get_current_blockchain_height();
   CHECK_EQ(h, 34);
+  return true;
+}
+
+bool gen_pos_basic_tests::check_exchange_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+{
+  std::list<offer_details> offers;
+  c.get_blockchain_storage().get_all_offers(offers);
+
+  CHECK_EQ(offers.size(), 1);
   return true;
 }

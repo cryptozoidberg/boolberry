@@ -273,6 +273,8 @@ namespace currency
     bool get_block_for_scratchpad_alt(uint64_t connection_height, uint64_t block_index, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain, block & b);
     bool process_blockchain_tx_extra(const transaction& tx);
     bool unprocess_blockchain_tx_extra(const transaction& tx);
+    bool process_blockchain_tx_offers(const transaction& tx);
+    bool unprocess_blockchain_tx_offers(const transaction& tx);
     bool pop_alias_info(const alias_info& ai);
     bool put_alias_info(const alias_info& ai);
     void fill_addr_to_alias_dict();
