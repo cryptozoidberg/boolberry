@@ -134,10 +134,14 @@ Html5ApplicationViewer::Html5ApplicationViewer(QWidget *parent)
 m_quit_requested(false),
 m_deinitialize_done(false),
 m_backend_stopped(false), 
-m_request_uri_threads_count(0)
+m_request_uri_threads_count(0), 
+m_request_id_counter(0), 
+m_is_stop(false)
 {
   //connect(m_d, SIGNAL(quitRequested()), SLOT(close()));
-
+  m_dispatcher = std::thread([](){
+    dispatcher();
+  });
   connect(m_d, SIGNAL(quitRequested()), this, SLOT(on_request_quit()));
 
   QVBoxLayout *layout = new QVBoxLayout;
@@ -145,7 +149,24 @@ m_request_uri_threads_count(0)
   layout->setMargin(0);
   setLayout(layout);
 }
-
+void Html5ApplicationViewer::dispatcher()
+{
+  while (!m_is_stop)
+  {
+    dispatch_entry de;
+    {
+      CRITICAL_REGION_LOCAL(m_dispatch_que_lock);
+      if (!m_dispatch_que.size())
+      {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        continue;
+      }
+      de = m_dispatch_que.front();
+      m_dispatch_que.pop_front();
+    }
+    de.cb->do_call(de.dp);
+  }
+}
 bool Html5ApplicationViewer::init_config()
 {
   epee::serialization::load_t_from_json_file(m_config, m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME);
@@ -334,7 +355,10 @@ bool Html5ApplicationViewer::on_request_quit()
       Qt::QueuedConnection);
   }
   else
+  {
+    m_is_stop = true;
     m_backend.send_stop_signal();
+  }
   return true;
 }
 
@@ -523,32 +547,42 @@ QString Html5ApplicationViewer::request_uri(const QString& url_str, const QStrin
 
 QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
 {
-  view::transfer_params tp = AUTO_VAL_INIT(tp);
-  view::transfer_response tr = AUTO_VAL_INIT(tr);
-  tr.success = false;
-  if (!epee::serialization::load_t_from_json(tp, json_transfer_object.toStdString()))
-  {
-    show_msg_box("Internal error: failed to load transfer params");
+  size_t request_id = m_request_id_counter++;
+  que_call([request_id](std::string&& param){
+  
+    view::transfer_params tp = AUTO_VAL_INIT(tp);
+    view::transfer_response tr = AUTO_VAL_INIT(tr);
+    tr.success = false;
+    if (!epee::serialization::load_t_from_json(tp, param))
+    {
+      show_msg_box("Internal error: failed to load transfer params");
+      return epee::serialization::store_t_to_json(tr).c_str();
+    }
+
+    if (!tp.destinations.size())
+    {
+      show_msg_box("Internal error: empty destinations");
+      return epee::serialization::store_t_to_json(tr).c_str();
+    }
+
+    currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
+
+    if (!m_backend.transfer(tp, res_tx))
+    {
+      return epee::serialization::store_t_to_json(tr).c_str();
+    }
+    tr.success = true;
+    tr.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(res_tx));
+    tr.tx_blob_size = currency::get_object_blobsize(res_tx);
+
     return epee::serialization::store_t_to_json(tr).c_str();
-  }
 
-  if (!tp.destinations.size())
-  {
-    show_msg_box("Internal error: empty destinations");
-    return epee::serialization::store_t_to_json(tr).c_str();
-  }
+  }, json_transfer_object.toStdString());
 
-  currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
-
-  if (!m_backend.transfer(tp, res_tx))
-  {
-    return epee::serialization::store_t_to_json(tr).c_str();
-  }
-  tr.success = true;
-  tr.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(res_tx));
-  tr.tx_blob_size = currency::get_object_blobsize(res_tx);
-
-  return epee::serialization::store_t_to_json(tr).c_str();
+  view::api_immediate_response air;
+  air.request_id = std::to_string(request_id);
+  air.error_code = "OK";
+  return epee::serialization::store_t_to_json(air).c_str();
 }
 
 void Html5ApplicationViewer::message_box(const QString& msg)

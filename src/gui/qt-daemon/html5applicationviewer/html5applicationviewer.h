@@ -83,6 +83,7 @@ private:
   bool is_uri_allowed(const QString& uri);
 
   void initTrayIcon(const std::string& htmlPath);
+  void dispatcher();
 
   class Html5ApplicationViewerPrivate *m_d;
   daemon_backend m_backend;
@@ -98,18 +99,37 @@ private:
   std::unique_ptr<QAction> m_restoreAction;
   std::unique_ptr<QAction> m_quitAction;
   
-  
+  struct dispatch_param
+  {
+    size_t request_id;
+    std::string param;
+  };
+
   struct dispatch_entry
   {
     std::string param;
-    std:::shared_ptr<epee::misc_utils::call_basic<param>> cb;
-  }
+    std::shared_ptr<typename epee::misc_utils::call_basic<std::string> > cb;
+  };
   
   
   std::list<dispatch_entry> m_dispatch_que;
+  std::atomic<size_t> m_request_id_counter;
+  std::atomic<bool> m_is_stop;
   critical_section m_dispatch_que_lock;
-  
-    
+  std::thread m_dispatcher;
+
+  template<typename callback_t>
+  bool que_call(callback_t cb, const QString param)
+  {
+    CRITICAL_REGION_LOCAL(m_dispatch_que_lock);
+    m_dispatch_que.push_back(dispatch_entry());
+    dispatch_entry& de = m_dispatch_que.back();
+    de.param = param.toStdString();
+    de.cb = build_abstract_callback<std::string>(cb)
+  }
+
+
+
 };
 
 #endif // HTML5APPLICATIONVIEWER_H

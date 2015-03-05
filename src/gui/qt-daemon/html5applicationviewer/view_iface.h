@@ -241,7 +241,17 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct api_immediate_response
+  {
+    std::string request_id;
+    std::string error_code;
 
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(request_id)
+      KV_SERIALIZE(error_code)
+    END_KV_SERIALIZE_MAP()
+
+  };
 
 
   struct i_view

@@ -183,7 +183,7 @@ namespace misc_utils
   template<typename t_param>
   struct call_basic
   {
-    virtual bool do(t_param& p)=0;
+    virtual bool do_call(t_param& p){};
   };
   
   
@@ -192,7 +192,7 @@ namespace misc_utils
   {
     call_specific(t_callback cb):m_cb(cb)
     {}
-    virtual bool do(t_param& p)
+    virtual bool do_call(t_param& p)
     {
       return m_cb(p);
     }
@@ -201,9 +201,9 @@ namespace misc_utils
   };
   
   template<typename t_param, typename t_callback>
-  auto build_abstract_callback(t_callback cb)
+  auto build_abstract_callback(t_callback cb) -> std::shared_ptr<call_basic<t_param> >
   {
-    return std::shared_ptr<call_basic>(new call_specific<t_param, t_callback>(cb)));
+    return std::shared_ptr<call_basic<t_param> >(new call_specific<t_param, t_callback>(cb));
   }
 
 
