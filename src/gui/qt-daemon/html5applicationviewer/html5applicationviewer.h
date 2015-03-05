@@ -97,6 +97,19 @@ private:
   std::unique_ptr<QMenu> m_trayIconMenu;
   std::unique_ptr<QAction> m_restoreAction;
   std::unique_ptr<QAction> m_quitAction;
+  
+  
+  struct dispatch_entry
+  {
+    std::string param;
+    std:::shared_ptr<epee::misc_utils::call_basic<param>> cb;
+  }
+  
+  
+  std::list<dispatch_entry> m_dispatch_que;
+  critical_section m_dispatch_que_lock;
+  
+    
 };
 
 #endif // HTML5APPLICATIONVIEWER_H
