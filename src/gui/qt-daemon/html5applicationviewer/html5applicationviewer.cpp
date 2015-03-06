@@ -139,7 +139,7 @@ m_request_id_counter(0),
 m_is_stop(false)
 {
   //connect(m_d, SIGNAL(quitRequested()), SLOT(close()));
-  m_dispatcher = std::thread([](){
+  m_dispatcher = std::thread([this](){
     dispatcher();
   });
   connect(m_d, SIGNAL(quitRequested()), this, SLOT(on_request_quit()));
@@ -164,7 +164,7 @@ void Html5ApplicationViewer::dispatcher()
       de = m_dispatch_que.front();
       m_dispatch_que.pop_front();
     }
-    de.cb->do_call(de.dp);
+    de.cb->do_call();
   }
 }
 bool Html5ApplicationViewer::init_config()
@@ -225,7 +225,7 @@ void Html5ApplicationViewer::changeEvent(QEvent *e)
                                     if (m_trayIcon)
                                     {
                                       QTimer::singleShot(250, this, SLOT(hide()));
-                                      m_trayIcon->showMessage("Boolberry app is minimized to tray",
+                                      m_trayIcon->showMessage("Lui app is minimized to tray",
                                         "You can restore it with double-click or context menu");
                                     }
                                   }
@@ -263,7 +263,7 @@ void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
   std::string iconPath(htmlPath + "/files/app22.png"); // X11 tray icon size is 22x22
 #endif
   m_trayIcon->setIcon(QIcon(iconPath.c_str()));
-  m_trayIcon->setToolTip("Boolberry");
+  m_trayIcon->setToolTip("Lui");
   connect(m_trayIcon.get(), SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
     this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
   m_trayIcon->show();
@@ -548,41 +548,48 @@ QString Html5ApplicationViewer::request_uri(const QString& url_str, const QStrin
 QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
 {
   size_t request_id = m_request_id_counter++;
-  que_call([request_id](std::string&& param){
-  
+  std::shared_ptr<std::string> param(new std::string(json_transfer_object.toStdString()));
+
+  return que_call(request_id, [request_id, param, this](void){
+
+    view::api_response ar;
+    ar.request_id = std::to_string(request_id);
+
     view::transfer_params tp = AUTO_VAL_INIT(tp);
     view::transfer_response tr = AUTO_VAL_INIT(tr);
     tr.success = false;
-    if (!epee::serialization::load_t_from_json(tp, param))
+    if (!epee::serialization::load_t_from_json(tp, *param))
     {
-      show_msg_box("Internal error: failed to load transfer params");
-      return epee::serialization::store_t_to_json(tr).c_str();
+      view::api_void av;
+      ar.error_code = API_RETURN_CODE_BAD_ARG;
+      dispatch(ar, av);
+      return;
     }
 
     if (!tp.destinations.size())
     {
-      show_msg_box("Internal error: empty destinations");
-      return epee::serialization::store_t_to_json(tr).c_str();
+      view::api_void av;
+      ar.error_code = API_RETURN_CODE_BAD_ARG;
+      dispatch(ar, av);
+      return;
     }
 
     currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
-
-    if (!m_backend.transfer(tp, res_tx))
+    std::string status = m_backend.transfer(tp, res_tx);
+    if (status != API_RETURN_CODE_OK)
     {
-      return epee::serialization::store_t_to_json(tr).c_str();
+      view::api_void av;
+      ar.error_code = status;
+      dispatch(ar, av);
+      return;
     }
     tr.success = true;
     tr.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(res_tx));
     tr.tx_blob_size = currency::get_object_blobsize(res_tx);
+    dispatch(ar, tr);
+    return;
 
-    return epee::serialization::store_t_to_json(tr).c_str();
-
-  }, json_transfer_object.toStdString());
-
-  view::api_immediate_response air;
-  air.request_id = std::to_string(request_id);
-  air.error_code = "OK";
-  return epee::serialization::store_t_to_json(air).c_str();
+  });
 }
 
 void Html5ApplicationViewer::message_box(const QString& msg)

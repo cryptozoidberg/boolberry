@@ -646,33 +646,26 @@ bool daemon_backend::get_aliases(view::alias_set& al_set)
 }
 
 
-bool daemon_backend::transfer(const view::transfer_params& tp, currency::transaction& res_tx)
+std::string daemon_backend::transfer(const view::transfer_params& tp, currency::transaction& res_tx)
 {
   std::vector<currency::tx_destination_entry> dsts;
   if(!tp.destinations.size())
-  {
-    m_pview->show_msg_box("Internal error: empty destinations");
-    return false;
-  }
+    return API_RETURN_CODE_BAD_ARG_EMPTY_DESTINATIONS;
+
   uint64_t fee = 0;
   if (!currency::parse_amount(fee, tp.fee))
-  {
-    m_pview->show_msg_box("Failed to send transaction: wrong fee amount");
-    return false;
-  }
+    return API_RETURN_CODE_BAD_ARG_WRONG_FEE;
 
   for(auto& d: tp.destinations)
   {
     dsts.push_back(currency::tx_destination_entry());
     if (!tools::get_transfer_address(d.address, dsts.back().addr, m_rpc_proxy.get()))
     {
-      m_pview->show_msg_box("Failed to send transaction: invalid address");
-      return false;
+      return API_RETURN_CODE_BAD_ARG_INVALID_ADDRESS;
     }
     if(!currency::parse_amount(dsts.back().amount, d.amount))
     {
-      m_pview->show_msg_box("Failed to send transaction: wrong amount");
-      return false;
+      return API_RETURN_CODE_BAD_ARG_WRONG_AMOUNT;
     }
   }
   //payment_id
@@ -682,14 +675,12 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
 
     crypto::hash payment_id;
     if(!currency::parse_payment_id_from_hex_str(tp.payment_id, payment_id))
-    {
-      m_pview->show_msg_box("Failed to send transaction: wrong payment_id");
-      return false;
+    {      
+      return API_RETURN_CODE_BAD_ARG_WRONG_PAYMENT_ID;
     }
     if(!currency::set_payment_id_to_tx_extra(extra, payment_id))
     {
-      m_pview->show_msg_box("Failed to send transaction: internal error, failed to set payment id");
-      return false;
+      return API_RETURN_CODE_INTERNAL_ERROR;
     }
   }
 
@@ -706,17 +697,17 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
   catch (const std::exception& e)
   {
     LOG_ERROR("Transfer error: " << e.what());
-    m_pview->show_msg_box(std::string("Failed to send transaction: ") + e.what());
-    return false;
+    std::string err_code = API_RETURN_CODE_INTERNAL_ERROR;
+    err_code += std::string(":") + e.what();
+    return err_code;
   }
   catch (...)
   {
     LOG_ERROR("Transfer error: unknown error");
-    m_pview->show_msg_box("Failed to send transaction: unknown error");
-    return false;
+    return API_RETURN_CODE_INTERNAL_ERROR;
   }
 
-  return true;
+  return API_RETURN_CODE_OK;
 }
 
 bool daemon_backend::update_wallet_info()

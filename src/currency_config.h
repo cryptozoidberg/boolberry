@@ -111,6 +111,7 @@
 
 
 #define GUI_BLOCKS_DISPLAY_COUNT                        40
+#define GUI_DISPATCH_QUE_MAXSIZE                        100
 
 #define ALLOW_DEBUG_COMMANDS
 

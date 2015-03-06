@@ -241,7 +241,7 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
-  struct api_immediate_response
+  struct api_response
   {
     std::string request_id;
     std::string error_code;
@@ -252,6 +252,22 @@ public:
     END_KV_SERIALIZE_MAP()
 
   };
+
+  struct api_void
+  {
+    BEGIN_KV_SERIALIZE_MAP()
+    END_KV_SERIALIZE_MAP()
+  };
+
+#define API_RETURN_CODE_OK                                      "OK"
+#define API_RETURN_CODE_INTERNAL_ERROR                          "INTERNAL_ERROR"
+#define API_RETURN_CODE_INTERNAL_ERROR_QUE_FULL                 "INTERNAL_ERROR_QUE_FULL"
+#define API_RETURN_CODE_BAD_ARG                                 "BAD_ARG"
+#define API_RETURN_CODE_BAD_ARG_EMPTY_DESTINATIONS              "BAD_ARG_EMPTY_DESTINATIONS"
+#define API_RETURN_CODE_BAD_ARG_WRONG_FEE                       "BAD_ARG_WRONG_FEE"
+#define API_RETURN_CODE_BAD_ARG_INVALID_ADDRESS                 "BAD_ARG_INVALID_ADDRESS"
+#define API_RETURN_CODE_BAD_ARG_WRONG_AMOUNT                    "BAD_ARG_WRONG_AMOUNT"
+#define API_RETURN_CODE_BAD_ARG_WRONG_PAYMENT_ID                "BAD_ARG_WRONG_PAYMENT_ID"
 
 
   struct i_view

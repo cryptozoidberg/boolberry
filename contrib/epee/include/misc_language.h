@@ -180,30 +180,29 @@ namespace misc_utils
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
-  template<typename t_param>
   struct call_basic
   {
-    virtual bool do_call(t_param& p){};
+    virtual void do_call(){};
   };
   
   
-  template<typename t_param, typename t_callback>
-  struct call_specific: public call_basic<t_param>
+  template<typename t_callback>
+  struct call_specific: public call_basic
   {
     call_specific(t_callback cb):m_cb(cb)
     {}
-    virtual bool do_call(t_param& p)
+    virtual void do_call()
     {
-      return m_cb(p);
+      m_cb();
     }
   private:
     t_callback m_cb;
   };
   
-  template<typename t_param, typename t_callback>
-  auto build_abstract_callback(t_callback cb) -> std::shared_ptr<call_basic<t_param> >
+  template<typename t_callback>
+  auto build_abstract_callback(t_callback cb) -> std::shared_ptr<call_basic>
   {
-    return std::shared_ptr<call_basic<t_param> >(new call_specific<t_param, t_callback>(cb));
+    return std::shared_ptr<call_basic>(new call_specific<t_callback>(cb));
   }
 
 

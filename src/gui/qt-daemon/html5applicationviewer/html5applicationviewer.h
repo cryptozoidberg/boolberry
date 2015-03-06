@@ -99,16 +99,10 @@ private:
   std::unique_ptr<QAction> m_restoreAction;
   std::unique_ptr<QAction> m_quitAction;
   
-  struct dispatch_param
-  {
-    size_t request_id;
-    std::string param;
-  };
 
   struct dispatch_entry
   {
-    std::string param;
-    std::shared_ptr<typename epee::misc_utils::call_basic<std::string> > cb;
+    std::shared_ptr<typename epee::misc_utils::call_basic> cb;
   };
   
   
@@ -119,15 +113,33 @@ private:
   std::thread m_dispatcher;
 
   template<typename callback_t>
-  bool que_call(callback_t cb, const QString param)
+  QString que_call(size_t request_id, callback_t cb)
   {
     CRITICAL_REGION_LOCAL(m_dispatch_que_lock);
+    if (m_dispatch_que.size() > GUI_DISPATCH_QUE_MAXSIZE)
+    {
+      view::api_response air;
+      air.request_id = std::to_string(request_id);
+      air.error_code = API_RETURN_CODE_INTERNAL_ERROR_QUE_FULL;
+      return epee::serialization::store_t_to_json(air).c_str();
+    }
     m_dispatch_que.push_back(dispatch_entry());
     dispatch_entry& de = m_dispatch_que.back();
-    de.param = param.toStdString();
-    de.cb = build_abstract_callback<std::string>(cb)
+    de.cb = epee::misc_utils::build_abstract_callback(cb);
+
+    view::api_response air;
+    air.request_id = std::to_string(request_id);
+    air.error_code = API_RETURN_CODE_OK;
+    return epee::serialization::store_t_to_json(air).c_str();
   }
 
+  template<typename t_response>
+  void dispatch(const view::api_response& status, const t_response& rsp)
+  {
+    QString status_obj_str = epee::serialization::store_t_to_json(status).c_str();
+    QString rsp_obj_str = epee::serialization::store_t_to_json(rsp).c_str();
+    m_d->dispatch(status_obj_str, rsp_obj_str);
+  }
 
 
 };
