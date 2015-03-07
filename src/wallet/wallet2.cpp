@@ -41,8 +41,7 @@ void fill_transfer_details(const currency::transaction& tx, const tools::money_t
 //----------------------------------------------------------------------------------------------------
 void wallet2::init(const std::string& daemon_address)
 {
-  m_upper_transaction_size_limit = 0;
-  m_core_proxy->set_connection_addr(daemon_address);
+  //m_core_proxy->set_connection_addr(daemon_address);
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::set_core_proxy(const std::shared_ptr<i_core_proxy>& proxy)

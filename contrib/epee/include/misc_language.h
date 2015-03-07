@@ -205,7 +205,6 @@ namespace misc_utils
     return std::shared_ptr<call_basic>(new call_specific<t_callback>(cb));
   }
 
-
   
   
   

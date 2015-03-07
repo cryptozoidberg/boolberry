@@ -25,7 +25,7 @@ using namespace epee;
 #include "view_iface.h"
 #include "core_fast_rpc_proxy.h"
 #include "wallet/wallet2.h"
-
+#include "wallet_id_adapter.h"
 POP_WARNINGS
 
 namespace po = boost::program_options;
@@ -38,7 +38,7 @@ namespace po = boost::program_options;
 BOOST_CLASS_VERSION(nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >, CURRENT_P2P_STORAGE_ARCHIVE_VER);
 
 
-class daemon_backend: public tools::i_wallet2_callback
+class daemon_backend : public i_backend_wallet_callback
 {
 public:
   daemon_backend();
@@ -46,8 +46,11 @@ public:
   bool start(int argc, char* argv[], view::i_view* pview_handler);
   bool stop();
   bool send_stop_signal();
-  bool open_wallet(const std::string& path, const std::string& password);
-  bool generate_wallet(const std::string& path, const std::string& password);
+  std::string open_wallet(const std::string& path, const std::string& password, size_t& wallet_id);
+  std::string generate_wallet(const std::string& path, const std::string& password, size_t& wallet_id);
+  std::string get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist);
+  std::string get_wallet_info(size_t wallet_id, view::wallet_info& wi);
+
   bool close_wallet();
   void toggle_pos_mining();
   std::string transfer(const view::transfer_params& tp, currency::transaction& res_tx);
@@ -58,15 +61,14 @@ private:
   bool update_state_info();
   bool update_wallets();
   void loop();
-  bool update_wallet_info();
-  bool load_recent_transfers();
+  std::string get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist);
   bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
   bool get_last_blocks(view::daemon_status_info& dsi);
 
 
-  //----- tools::i_wallet2_callback ------
+  //----- i_backend_wallet_callback ------
   virtual void on_new_block(uint64_t height, const currency::block& block);
-  virtual void on_transfer2(const tools::wallet_rpc::wallet_transfer_info& wti);
+  virtual void on_transfer2(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti);
   virtual void on_pos_block_found(const currency::block& /*block*/);
 
 
@@ -75,13 +77,14 @@ private:
   view::view_stub m_view_stub;
   view::i_view* m_pview;
   std::shared_ptr<tools::i_core_proxy> m_rpc_proxy;
-  critical_section m_wallet_lock;
-  std::unique_ptr<tools::wallet2> m_wallet;
+  critical_section m_wallets_lock;
+  std::map<size_t, std::shared_ptr<tools::wallet2>> m_wallets;
   std::atomic<uint64_t> m_last_daemon_height;
   std::atomic<uint64_t> m_last_wallet_synch_height;
   std::atomic<uint64_t> m_last_wallet_mint_time;
   std::atomic<bool> m_do_mint;
   std::atomic<bool> m_mint_is_running;
+  std::atomic<size_t> m_wallet_id_counter;
 
   std::string m_data_dir;
 

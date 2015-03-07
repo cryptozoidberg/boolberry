@@ -42,7 +42,6 @@ namespace tools
     virtual void on_transfer2(const wallet_rpc::wallet_transfer_info& wti) {}
     virtual void on_money_sent(const wallet_rpc::wallet_transfer_info& wti) {}
     virtual void on_pos_block_found(const currency::block& /*block*/) {}
-
   };
 
     
@@ -67,7 +66,7 @@ namespace tools
   {
     wallet2(const wallet2&) : m_run(true), m_callback(0) {};
   public:
-    wallet2() : m_run(true), m_callback(0), m_core_proxy(new default_http_core_proxy())
+    wallet2() : m_run(true), m_callback(0), m_core_proxy(new default_http_core_proxy()), m_upper_transaction_size_limit(0)
     {};
     struct transfer_details
     {
@@ -129,6 +128,7 @@ namespace tools
 
     i_wallet2_callback* callback() const { return m_callback; }
     void callback(i_wallet2_callback* callback) { m_callback = callback; }
+    void callback(std::shared_ptr<i_wallet2_callback> callback){ m_callback_holder = callback; m_callback = m_callback_holder.get();}
 
     void scan_tx_pool();
     void refresh();
@@ -231,6 +231,7 @@ namespace tools
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
     std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
     std::shared_ptr<i_core_proxy> m_core_proxy;
+    std::shared_ptr<i_wallet2_callback> m_callback_holder;
     i_wallet2_callback* m_callback;
   };
 }

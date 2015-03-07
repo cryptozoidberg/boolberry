@@ -260,6 +260,7 @@ public:
   };
 
 #define API_RETURN_CODE_OK                                      "OK"
+#define API_RETURN_CODE_FAIL                                    "FAIL"
 #define API_RETURN_CODE_INTERNAL_ERROR                          "INTERNAL_ERROR"
 #define API_RETURN_CODE_INTERNAL_ERROR_QUE_FULL                 "INTERNAL_ERROR_QUE_FULL"
 #define API_RETURN_CODE_BAD_ARG                                 "BAD_ARG"
@@ -268,6 +269,10 @@ public:
 #define API_RETURN_CODE_BAD_ARG_INVALID_ADDRESS                 "BAD_ARG_INVALID_ADDRESS"
 #define API_RETURN_CODE_BAD_ARG_WRONG_AMOUNT                    "BAD_ARG_WRONG_AMOUNT"
 #define API_RETURN_CODE_BAD_ARG_WRONG_PAYMENT_ID                "BAD_ARG_WRONG_PAYMENT_ID"
+#define API_RETURN_CODE_WALLET_WRONG_PASSWORD                   "WALLET_WRONG_PASSWORD"
+#define API_RETURN_CODE_WALLET_WRONG_ID                         "WALLET_WRONG_ID"
+#define API_RETURN_CODE_FILE_NOT_FOUND                          "FILE_NOT_FOUND"
+#define API_RETURN_CODE_FILE_ALREADY_EXISTS                     "FILE_ALREADY_EXISTS"
 
 
   struct i_view

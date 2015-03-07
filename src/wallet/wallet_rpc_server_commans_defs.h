@@ -41,6 +41,7 @@ namespace wallet_rpc
     bool          is_income;
     uint64_t      fee;
     wallet_transfer_info_details td;
+    uint64_t      wallet_id;
     
     //not included in serialization map
     currency::transaction tx;
