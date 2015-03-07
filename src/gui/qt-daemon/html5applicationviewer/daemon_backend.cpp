@@ -19,11 +19,7 @@ daemon_backend::daemon_backend():m_pview(&m_view_stub),
                                  m_do_mint(true), 
                                  m_mint_is_running(false), 
                                  m_wallet_id_counter(0)
-{
-  //m_wallet.reset(new tools::wallet2());
-  //m_wallet->set_core_proxy(std::shared_ptr<tools::i_core_proxy>(new tools::core_fast_rpc_proxy(m_rpc_server)));
-  //m_wallet->callback(this);
-}
+{}
 
 const command_line::arg_descriptor<bool> arg_alloc_win_console = {"alloc-win-console", "Allocates debug console with GUI", false};
 const command_line::arg_descriptor<std::string> arg_html_folder = {"html-path", "Manually set GUI html folder path", "",  true};
@@ -273,12 +269,12 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   dsi.daemon_network_state = 3;
 
   CRITICAL_REGION_BEGIN(m_wallets_lock);
-  if(m_wallet->get_wallet_path().size())
+  for (auto& w : m_wallets)
   {
     LOG_PRINT_L0("Storing wallet data...");
-    dsi.text_state = "Storing wallet data...";
+    dsi.text_state = "Storing wallets data...";
     m_pview->update_daemon_status(dsi);
-    m_wallet->store();
+    w.second->store();
   }
   CRITICAL_REGION_END();
 
@@ -387,6 +383,17 @@ bool daemon_backend::update_state_info()
   return true;
 }
 
+void daemon_backend::update_wallets_info()
+{
+  CRITICAL_REGION_LOCAL(m_wallets_lock);
+  for (auto& w : m_wallets)
+  {
+    wallet_info wi;
+    get_wallet_info(*w, wi);
+
+  }
+}
+
 bool daemon_backend::get_last_blocks(view::daemon_status_info& dsi)
 {
   //dsi.last_blocks
@@ -417,18 +424,18 @@ bool daemon_backend::get_last_blocks(view::daemon_status_info& dsi)
 bool daemon_backend::update_wallets()
 {
   CRITICAL_REGION_LOCAL(m_wallets_lock);
-  if(m_wallet->get_wallet_path().size())
-  {//wallet is opened
-    if(m_last_daemon_height != m_last_wallet_synch_height)
+  for (auto& w : m_wallets)
+  {
+    if (m_last_daemon_height != m_last_wallet_synch_height)
     {
       view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
       wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
       m_pview->update_wallet_status(wsi);
       try
       {
-        m_wallet->refresh();
+        w.second->refresh();
       }
-      
+
       catch (const tools::error::daemon_busy& /*e*/)
       {
         LOG_PRINT_L0("Daemon busy while wallet refresh");
@@ -450,8 +457,12 @@ bool daemon_backend::update_wallets()
       m_last_wallet_synch_height = m_ccore.get_current_blockchain_height();
       wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
       m_pview->update_wallet_status(wsi);
-      update_wallet_info();
-    }
+      update_wallets_info();
+
+
+
+  }
+
 
     // scan for unconfirmed trasactions
     try
@@ -719,7 +730,11 @@ std::string daemon_backend::get_wallet_info(size_t wallet_id, view::wallet_info&
   auto w = m_wallets[wallet_id];
   if (w.get() == nullptr)
     return API_RETURN_CODE_WALLET_WRONG_ID;
+  return get_wallet_info(*w, wi);
+}
 
+std::string daemon_backend::get_wallet_info(tools::wallet2& w, view::wallet_info& wi)
+{
   wi = AUTO_VAL_INIT(wi);
   wi.address = w->get_account().get_public_address_str();
   wi.tracking_hey = string_tools::pod_to_hex(w->get_account().get_keys().m_view_secret_key);
@@ -728,7 +743,7 @@ std::string daemon_backend::get_wallet_info(size_t wallet_id, view::wallet_info&
   wi.path = w->get_wallet_path();
   wi.do_mint = m_do_mint;
   wi.mint_is_in_progress = m_mint_is_running;
-  return API_RETURN_CODE_WALLET_WRONG_ID;
+  return API_RETURN_CODE_OK;
 }
 
 void daemon_backend::on_new_block(uint64_t /*height*/, const currency::block& /*block*/)

@@ -423,7 +423,7 @@ bool Html5ApplicationViewer::update_wallet_status(const view::wallet_status_info
   return true;
 }
 
-bool Html5ApplicationViewer::update_wallet_info(const view::wallet_info& wsi)
+bool Html5ApplicationViewer::update_wallets_info(const view::wallet_info& wsi)
 {
   std::string json_str;
   epee::serialization::store_t_to_json(wsi, json_str);

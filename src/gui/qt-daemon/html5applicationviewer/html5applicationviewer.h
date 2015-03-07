@@ -71,7 +71,7 @@ private:
   virtual bool on_backend_stopped();
   virtual bool show_msg_box(const std::string& message);
   virtual bool update_wallet_status(const view::wallet_status_info& wsi);
-  virtual bool update_wallet_info(const view::wallet_info& wsi);
+  virtual bool update_wallets_info(const view::wallet_info& wsi);
   virtual bool money_transfer(const view::transfer_event_info& tei);
   virtual bool show_wallet();
   virtual bool hide_wallet();

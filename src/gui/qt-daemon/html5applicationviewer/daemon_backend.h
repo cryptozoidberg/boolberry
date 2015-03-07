@@ -50,6 +50,8 @@ public:
   std::string generate_wallet(const std::string& path, const std::string& password, size_t& wallet_id);
   std::string get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist);
   std::string get_wallet_info(size_t wallet_id, view::wallet_info& wi);
+  std::string get_wallet_info(tools::wallet2& w, view::wallet_info& wi);
+
 
   bool close_wallet();
   void toggle_pos_mining();
@@ -64,6 +66,7 @@ private:
   std::string get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist);
   bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
   bool get_last_blocks(view::daemon_status_info& dsi);
+  void update_wallets_info();
 
 
   //----- i_backend_wallet_callback ------

@@ -281,7 +281,7 @@ public:
     virtual bool on_backend_stopped()=0;
     virtual bool show_msg_box(const std::string& message)=0;
     virtual bool update_wallet_status(const wallet_status_info& wsi)=0;
-    virtual bool update_wallet_info(const wallet_info& wsi)=0;
+    virtual bool update_wallets_info(const wallet_info& wsi)=0;
     virtual bool money_transfer(const transfer_event_info& wsi) = 0;
     virtual bool show_wallet()=0;
     virtual bool hide_wallet()= 0;
@@ -297,7 +297,7 @@ public:
     virtual bool on_backend_stopped(){return true;}
     virtual bool show_msg_box(const std::string& /*message*/){return true;}
     virtual bool update_wallet_status(const wallet_status_info& /*wsi*/){return true;}
-    virtual bool update_wallet_info(const wallet_info& /*wsi*/){return true;}
+    virtual bool update_wallets_info(const wallet_info& /*wsi*/){return true;}
     virtual bool money_transfer(const transfer_event_info& /*wsi*/){ return true; }
     virtual bool show_wallet(){return true;}
     virtual bool hide_wallet(){ return true; }
