@@ -12,8 +12,8 @@ public:
   virtual void on_new_block(size_t wallet_id, uint64_t /*height*/, const currency::block& /*block*/) {}
   virtual void on_money_received(size_t wallet_id, uint64_t /*height*/, const currency::transaction& /*tx*/, size_t /*out_index*/) {}
   virtual void on_money_spent(size_t wallet_id, uint64_t /*height*/, const currency::transaction& /*in_tx*/, size_t /*out_index*/, const currency::transaction& /*spend_tx*/) {}
-  virtual void on_transfer2(size_t wallet_id, const wallet_rpc::wallet_transfer_info& wti) {}
-  virtual void on_money_sent(size_t wallet_id, const wallet_rpc::wallet_transfer_info& wti) {}
+  virtual void on_transfer2(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti) {}
+  virtual void on_money_sent(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti) {}
   virtual void on_pos_block_found(size_t wallet_id, const currency::block& /*block*/) {}
 };
 

@@ -51,11 +51,11 @@ public:
   std::string get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist);
   std::string get_wallet_info(size_t wallet_id, view::wallet_info& wi);
   std::string get_wallet_info(tools::wallet2& w, view::wallet_info& wi);
+  std::string close_wallet(size_t wallet_id);
 
 
-  bool close_wallet();
   void toggle_pos_mining();
-  std::string transfer(const view::transfer_params& tp, currency::transaction& res_tx);
+  std::string transfer(size_t wallet_id, const view::transfer_params& tp, currency::transaction& res_tx);
   bool get_aliases(view::alias_set& al_set);
   std::string get_config_folder();
 private:
@@ -63,7 +63,6 @@ private:
   bool update_state_info();
   bool update_wallets();
   void loop();
-  std::string get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist);
   bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
   bool get_last_blocks(view::daemon_status_info& dsi);
   void update_wallets_info();

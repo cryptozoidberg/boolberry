@@ -47,7 +47,7 @@ protected:
   public slots:
   void open_wallet();
   void generate_wallet();
-  void close_wallet();
+  void close_wallet(const QString& wallet_id);
   QString get_version();
   QString transfer(const QString& json_transfer_object);
   void message_box(const QString& msg);
@@ -71,7 +71,7 @@ private:
   virtual bool on_backend_stopped();
   virtual bool show_msg_box(const std::string& message);
   virtual bool update_wallet_status(const view::wallet_status_info& wsi);
-  virtual bool update_wallets_info(const view::wallet_info& wsi);
+  virtual bool update_wallets_info(const view::wallets_summary_info& wsi);
   virtual bool money_transfer(const view::transfer_event_info& tei);
   virtual bool show_wallet();
   virtual bool hide_wallet();

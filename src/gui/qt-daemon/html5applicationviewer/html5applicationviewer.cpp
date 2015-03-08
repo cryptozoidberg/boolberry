@@ -423,7 +423,7 @@ bool Html5ApplicationViewer::update_wallet_status(const view::wallet_status_info
   return true;
 }
 
-bool Html5ApplicationViewer::update_wallets_info(const view::wallet_info& wsi)
+bool Html5ApplicationViewer::update_wallets_info(const view::wallets_summary_info& wsi)
 {
   std::string json_str;
   epee::serialization::store_t_to_json(wsi, json_str);
@@ -466,9 +466,10 @@ bool Html5ApplicationViewer::show_wallet()
   return true;
 }
 
-void Html5ApplicationViewer::close_wallet()
+void Html5ApplicationViewer::close_wallet(const QString& wallet_id)
 {
-  m_backend.close_wallet();
+  //TODO: make async call
+  //m_backend.close_wallet();
 }
 
 bool Html5ApplicationViewer::switch_view(int view_no)
@@ -575,7 +576,7 @@ QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
     }
 
     currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
-    std::string status = m_backend.transfer(tp, res_tx);
+    std::string status = m_backend.transfer(tp.wallet_id, tp, res_tx);
     if (status != API_RETURN_CODE_OK)
     {
       view::api_void av;
@@ -618,8 +619,8 @@ void Html5ApplicationViewer::generate_wallet()
 
   if (!ok)
     return;
-
-  m_backend.generate_wallet(path.toStdString(), pass.toStdString());
+  size_t wallet_id = 0;
+  m_backend.generate_wallet(path.toStdString(), pass.toStdString(), wallet_id);
 }
 
 void Html5ApplicationViewer::open_wallet()
@@ -640,8 +641,8 @@ void Html5ApplicationViewer::open_wallet()
     QString(), &ok);
   if (!ok)
     return;
-
-  m_backend.open_wallet(path.toStdString(), pass.toStdString());
+  size_t wallet_id = 0;
+  m_backend.open_wallet(path.toStdString(), pass.toStdString(), wallet_id);
 }
 
 #include "html5applicationviewer.moc"

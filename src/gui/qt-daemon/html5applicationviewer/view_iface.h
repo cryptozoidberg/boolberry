@@ -37,6 +37,7 @@ namespace view
 
   struct transfer_params
   {
+    uint64_t wallet_id;
     std::list<transfer_destination> destinations;
     uint64_t mixin_count;
     uint64_t lock_time;
@@ -44,6 +45,7 @@ namespace view
     std::string fee;
 
     BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
       KV_SERIALIZE(destinations)
       KV_SERIALIZE(mixin_count)
       KV_SERIALIZE(lock_time)
@@ -184,6 +186,19 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct wallet_entry_info
+  {
+    wallet_info wi;
+    uint64_t    wallet_id;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wi)
+      KV_SERIALIZE(wallet_id)
+    END_KV_SERIALIZE_MAP()
+
+  };
+
+
   struct transfer_event_info
   {
     tools::wallet_rpc::wallet_transfer_info ti;
@@ -208,6 +223,15 @@ public:
     END_KV_SERIALIZE_MAP()
 
   };
+
+  struct wallets_summary_info
+  {
+    std::list<wallet_entry_info> wallets;
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallets)
+    END_KV_SERIALIZE_MAP()
+  };
+
 
   struct header_entry
   {
@@ -281,7 +305,7 @@ public:
     virtual bool on_backend_stopped()=0;
     virtual bool show_msg_box(const std::string& message)=0;
     virtual bool update_wallet_status(const wallet_status_info& wsi)=0;
-    virtual bool update_wallets_info(const wallet_info& wsi)=0;
+    virtual bool update_wallets_info(const wallets_summary_info& wsi) = 0;
     virtual bool money_transfer(const transfer_event_info& wsi) = 0;
     virtual bool show_wallet()=0;
     virtual bool hide_wallet()= 0;
@@ -297,7 +321,7 @@ public:
     virtual bool on_backend_stopped(){return true;}
     virtual bool show_msg_box(const std::string& /*message*/){return true;}
     virtual bool update_wallet_status(const wallet_status_info& /*wsi*/){return true;}
-    virtual bool update_wallets_info(const wallet_info& /*wsi*/){return true;}
+    virtual bool update_wallets_info(const wallets_summary_info& /*lwi*/){ return true; }
     virtual bool money_transfer(const transfer_event_info& /*wsi*/){ return true; }
     virtual bool show_wallet(){return true;}
     virtual bool hide_wallet(){ return true; }
