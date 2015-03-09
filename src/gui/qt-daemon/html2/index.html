@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Guilder</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="assets/css/dashboard.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="assets/font/guilder/styles.css" rel="stylesheet">
+    <link href="assets/css/bootstrap-tour.css" rel="stylesheet">
+    <link href="assets/css/bootstrap-slider.css" rel="stylesheet">
+    <link href="assets/js/owl.carousel.2.0.0-beta.2.4/assets/owl.carousel.css" rel="stylesheet">
+    <link href="assets/css/bootstrap-select.css" rel="stylesheet">
+
+    <link href="assets/css/app.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="assets/js/html5shiv.min.js"></script>
+      <script src="assets/js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+
+            <a class="navbar-brand" href="#"><span >
+                <img style="max-width:100%;" src="assets/img/bitcoin11.svg">
+                </span>Guilder app</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="navbar-text" style="max-width:270px; line-height:13px">
+
+                    <small>Архитектура сети обеспечивает полную безопасность и анонимность</small>
+                </li>
+
+                <li><a href="market.html" style="color:#5cb85c">
+                    <i class="fa fa-2x fa-check-circle-o"></i>
+
+                    <span class="ifOnlineText online">Онлайн</span>
+                    <span class="ifOnlineText offline">Оффлайн</span>
+                    <span class="ifOnlineText loading">Загружается...</span></a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row row-sidebar-collapse">
+        <div class="col-xs-3 col-sm-3 col-md-2 sidebar">
+
+            <div class="sidebar-bar sidebar-header"><a data-target=".menulabel" data-toggle="collapse" type="button" class="btn btn-lg btn-default" href="#" aria-expanded="true"><i class="fa fa-lg fa-bars"></i></a></div>
+            <ul class="nav nav-sidebar">
+                <li><a href="index.html"><i class="gu gu-3x gu-th"></i><span class="collapse in menulabel"> <em>Дашборд</em></span></a></li>
+                <li><a href="safes.html"><i class="gu gu-3x gu-safe"></i><span class="collapse in menulabel"> <em>Сейфы</em></span></a></li>
+                <li><a href="market.html"><i class="gu gu-3x gu-market"></i><span class="collapse in menulabel"> <em>Рынок</em></span></a></li>
+                <li><a href="contacts.html"><i class="gu gu-3x gu-adressbook"></i><span class="collapse in menulabel"> <em>Контакты</em></span></a></li>
+                <li><a href="history.html"><i class="gu gu-3x gu-money"></i><span class="collapse in menulabel"> <em>История платежей</em></span></a></li>
+                <li><a href="deposits.html"  id="maininglink"><i class="gu gu-3x gu-increasing"></i><span class="collapse in menulabel"> <em>Добыча</em></span></a></li>
+            </ul>
+
+            <ul class="nav nav-sidebar">
+                <li><a href="settings.html"><i class="fa fa-2x fa-gears"></i><span class="collapse in menulabel"> <em>Настройки</em></span></a></li>
+                <li><a href="#" type="button" class="data-toggle" data-toggle="modal" data-target="#helptour"><i class="fa fa-2x fa-question-circle"></i>
+                    <span class="collapse in menulabel"> <em>Помощь</em></span>
+                </a></li>
+
+
+            </ul>
+            <div class="sidebar-bar sidebar-footer"><a data-target="#pincode" data-toggle="modal" type="button" class="btn btn-lg btn-default" href="#"><i class="fa fa-lg fa-lock"></i></a></div>
+
+        </div>
+
+        <div class="col-xs-9 col-sm-9 col-xs-offset-3 col-sm-offset-3 col-md-10 col-md-offset-2 main ajaxContainer">
+            <noscript><div class="nojsError">Невозможно загрузить интерфейс, потому что отключен JavaScript :(</div></noscript>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal modal-preloaded" id="addSafe" tabindex="-1" role="dialog" aria-labelledby="addSafeLabel" aria-hidden="true"  style="display:block">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btn btn-primary btn-block">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title text-center">Создание нового сейфа</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div id="owl-panels" class="owl-carousel">
+                        <div class="item"  data-hash="screen1">
+                            <div class="form-group">
+                                <label class="requred">
+                                    Имя для обозначения сейфа в приложении<!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
+                                </label>
+                                <div class="help-block">Вы сможете создать сколько угодно сейфов.  Имя для сейфа &ndash; это любое слово или словосочетание для
+                                    обозначения этого сейфа в списке</div>
+                                <input type="text" class="input-lg form-control" placeholder="любое слово или словосочетание">
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
+                                <div class="col-xs-6 col-sm-6"><a class="btn btn-primary btn-block btn-lg" type="button" href="#screen2">Продолжить</a></div></div>
+
+                        </div>
+                        <div class="item" data-hash="screen2">
+                            <div class="form-group clearfix">
+                                <label class="requred">Пароль для сейфа
+                                </label>
+                                <div class="help-block">Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы. Для надежности используйте автоматический генератор с
+                                    установкой сложности пароля</div>
+                                <input type="password" placeholder="" class="input-lg form-control">
+
+                            </div>
+                            <div class="form-group clearfix">
+                                <label class="col-xs-6 col-sm-6">Надежность: <span class="label label-success">высокая</span></label>
+                                <div class="col-xs-6 col-sm-6 text-right"><button data-target="#generator" data-toggle="modal" class="btn btn-success" type="button">Генератор паролей</button> </div>
+
+                            </div>
+                            <a href="#screen1" type="button" class="btn btn-link text-muted"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
+                            <div class="form-group">
+                                <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
+                                <div class="col-xs-6 col-sm-6"> <a class="btn btn-primary btn-block btn-lg" type="button" href="#screen3">Продолжить</a></div>
+                            </div>
+
+
+
+
+
+
+                        </div>
+                        <div class="item" data-hash="screen3">
+                            <div class="alert alert-warning">
+                                <h4 class="text-danger" style="margin:0">Важно</h4>
+                                <p>Восстановить пароль невозможно. При утере пароля от сейфа, сейф придется отключить из приложения. Восстановить сейф можно только из цифровой копии ( brainwallet) или физической копии файла с другим паролем, который вы помните. </p>
+                            </div>
+                            <h4>Проверьте точно ли вы запомнили пароль? </h4>
+                            <div class="form-group">
+                                <label  class="requred">Введите пароль повторно</label>
+                                <input class="form-control" type="password">
+                            </div>
+
+
+                            <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savefile" id="savefilebtn">Сохранить файл сейфа <i class="fa fa-lg fa-check" id="savestate" style="display:none"></i></a>
+
+
+                            <hr>
+                            <h5>Чтобы не потерять и надежно защитить файл сейфа, вам необходимо создать  бекапы файла сейфа и smartsafe на следующем шаге</h5>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary btn-block btn-lg" disabled="" id="gotoBackups">Продолжить</button>
+                                <a href="#screen4" class="btn btn-primary btn-block btn-lg" id="gotoBackupslink" style="display:none">Продолжить</a>
+                            </div>
+                        </div>
+
+                        <div class="item" data-hash="screen4">
+
+                            <div class="form-group">
+                                <div class="help-block">Файл сейфа является хранищем ваших средств. История платежей и Контакты также хранится в этом файле. Чтобы файл сейфа оставался подключенным в приложение, не перемещайте его из той директории, куда вы его сохранили.</div>
+                            </div>
+                            <h4>Физический бекап файла сейфа</h4>
+                            <div class="form-group">
+                                <div class="help-block">Скопируйте созданный файл сейфа в другое надежное место, не храните бекап на том же компьютере.</div>
+                            </div>
+                            <div class="form-group">
+                                <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savecopyfile">Сохранить копию файла на компьютере
+                                    <i class="fa fa-lg fa-check savefilesuccess" id="" style="display:none"></i>
+                                </a>
+                            </div>
+                            <h4>Цифровой бекап файла сейфа</h4>
+                            <div class="form-group">
+                                <div class="help-block"><strong><span class="text-primary">Smartsafe</span> – это фраза в которой зашифрован сейф.</strong> Эту фразу Вам нужно запомнить или распечатать и хранить в надежном месте. Smartsafe позволит Вам восстановить сейф в приложении даже если Вы потеряете файл сейфа или если Вы забудете пароль от сейфа.</div>
+                            </div>
+                            <div class="form-group">
+                                <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#smartsafe">Создать цифровую копию (Smartsafe)
+                                    <i class="fa fa-lg fa-check smartsafesuccess" style="display:none"></i>
+                                </a>
+                            </div>
+
+                            <hr>
+
+                            <div class="form-group">
+                                <button type="button" disabled="" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn" data-dismiss="modal">Начать использовать сейф</button>
+                            </div>
+
+                </form>
+
+
+            </div>
+
+        </div>
+        </form>
+    </div>
+</div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+</div>
+<div class="modal modal-preloaded" id="openSafe" tabindex="-1" role="dialog" aria-labelledby="openSafeLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btn btn-primary btn-block">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title text-center">Восстановление сейфа из файла</h4>
+            </div>
+            <div class="modal-body">
+                <div id="owl-panels0" class="owl-carousel">
+                    <div class="screen01">
+                        <em>системный диалог - Открыть файл  </em>
+                        <p>
+
+                            <a class="btn btn-default" href="#screen02">Далее</a></p>
+                    </div>
+                    <div class="item" data-hash="screen02">
+                        <div class="form-group">
+                            <label class="requred">
+                                Имя для обозначения сейфа в приложении<!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
+                            </label>
+                            <div class="help-block">Вы сможете создать сколько угодно сейфов.  Имя для сейфа &ndash; это любое слово или словосочетание для
+                                обозначения этого сейфа в списке</div>
+                            <input type="text" class="input-lg form-control" placeholder="любое слово или словосочетание">
+                        </div>
+                        <div class="row"><div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div><div class="col-xs-6 col-sm-6">
+
+                            <a class="btn btn-primary btn-block btn-lg" type="button" href="#screen03">Продолжить</a></div></div>
+
+                    </div>
+                    <div class="item" data-hash="screen03">
+                        <div class="form-group clearfix">
+                            <label class="requred">Заданный при создании файла сейфа пароль
+                            </label>
+                            <input type="password" placeholder="" class="input-lg form-control">
+                        </div>
+                        <p>Восстановить пароль невозможно. При утере пароля от сейфа, используйте другой способ восстановления – из цифровой копии ( brainwallet) или физической копии файла этого же сейфа с другим паролем, который вы помните. </p>
+
+                        <a href="#screen02" class="btn btn-link"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
+                        <div class="row">
+                            <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
+                            <div class="col-xs-6 col-sm-6"><button type="button" class="btn btn-primary btn-block btn-lg" type="button" data-dismiss="modal">Открыть сейф</a></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-preloaded" id="onensmartSafe" tabindex="-1" role="dialog" aria-labelledby="onensmartSafeLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btn btn-primary btn-block">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title text-center">Восстановление сейфа smartsafe</h4>
+            </div>
+            <div class="modal-body">
+                <div id="owl-panels1" class="owl-carousel">
+                    <div class="item" data-hash="screen11">
+                        <div class="form-group">
+                            <label class="requred">
+                                Имя для обозначения сейфа в приложении<!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
+                            </label>
+                            <div class="help-block">Вы сможете создать сколько угодно сейфов.  Имя для сейфа &ndash; это любое слово или словосочетание для
+                                обозначения этого сейфа в списке</div>
+                            <input type="password" class="input-lg form-control" placeholder="любое слово или словосочетание">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xs-6 col-sm-6"><a data-dismiss="modal" href="#" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a></div>
+                            <div class="col-xs-6 col-sm-6">
+                                <a class="btn btn-primary btn-block btn-lg" type="button" href="#screen12">Продолжить</a>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="item" data-hash="screen12">
+                        <div class="form-group clearfix">
+                            <label class="requred">Фраза, шифрующая сейф</label>
+                            <div class="help-block">Случайный набор букв, сгенерированный компьютером, при создании smartsafe бекапа сейфа.</div>
+                        </div>
+                        <div class="form-group clearfix">
+                            <div class="col-xs-3 col-sm-3">
+                                <input type="text" value="" class="form-control">
+                            </div>
+                            <div class="col-xs-3 col-sm-3">
+                                <input type="text" value="" class="form-control">
+                            </div>
+                            <div class="col-xs-3 col-sm-3">
+                                <input type="text" value="" class="form-control">
+                            </div>
+                            <div class="col-xs-3 col-sm-3">
+                                <input type="text" value="" class="form-control">
+                            </div>
+
+                        </div>
+                        <div class="form-group clearfix">
+                            <div class="col-xs-3 col-sm-3">
+                                <input type="text" value="" class="form-control">
+                            </div>
+                            <div class="col-xs-3 col-sm-3">
+                                <input type="text" value="" class="form-control">
+                            </div>
+                            <div class="col-xs-3 col-sm-3">
+                                <input type="text" value="" class="form-control">
+                            </div>
+                            <div class="col-xs-3 col-sm-3">
+                                <input type="text" value="" class="form-control">
+                            </div>
+
+                        </div>
+
+                        <a class="btn btn-link text-muted" type="button" href="#screen11"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
+
+                        <div class="form-group">
+                            <div class="col-xs-6 col-sm-6"><a data-dismiss="modal" href="#" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a></div>
+                            <div class="col-xs-6 col-sm-6">
+                                <a class="btn btn-primary btn-block btn-lg" type="button" href="#screen13">Продолжить</a>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="item" data-hash="screen13">
+
+
+
+                        <div class="form-group clearfix">
+                            <label class="requred">Новый пароль для сейфа</label>
+                            <div class="help-block">Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы. Для надежности используйте автоматический генератор с
+                                установкой сложности пароля</div>
+                            <input type="password" placeholder="" class="input-lg form-control">
+
+                        </div>
+                        <div class="form-group clearfix">
+                            <label class="col-xs-6 col-sm-6">Надежность: <span class="label label-success">высокая</span></label>
+                            <div class="col-xs-6 col-sm-6 text-right"><button data-target="#generator" data-toggle="modal" class="btn btn-success" type="button">Генератор паролей</button> </div>
+
+                        </div>
+                        <a class="btn btn-link text-muted" type="button" href="#screen12"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
+                        <div class="form-group">
+                            <div class="col-xs-6 col-sm-6"><a data-dismiss="modal" href="#" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a></div>
+                            <div class="col-xs-6 col-sm-6">
+                                <a class="btn btn-primary btn-block btn-lg" type="button" href="#screen14">Продолжить</a>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="item" data-hash="screen14">
+                        <div class="alert alert-warning">
+                            <h4 class="text-danger" style="margin:0">Важно</h4>
+                            <p>Восстановить пароль невозможно. При утере пароля от сейфа, сейф придется отключить из приложения. Восстановить сейф можно только из цифровой копии ( brainwallet) или   физической копии файла с другим паролем, который вы помните. </p>
+                        </div>
+                        <h4>Проверьте точно ли вы запомнили пароль? </h4>
+                        <div class="form-group">
+                            <label  class="requred">Введите пароль повторно</label>
+                            <input class="form-control" type="password">
+                        </div>
+
+
+                        <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savefile0" id="savefilebtn0">Сохранить файл сейфа <i class="fa fa-lg fa-check"  id="savestatesuccess0" style="display:none"></i></a>
+
+
+                        <!--
+                 <div class="alert alert-success" id="savestate0" style="display:none">
+                            <strong><em>Файл сейфа сохранен.</em></strong>
+                        </div>
+                -->
+                        <hr>
+                        <h5>Чтобы не потерять и надежно защитить файл сейфа, вам необходимо создать  бекап файла сейфа на следующем шаге</h5>
+
+
+                        <button type="button" class="btn btn-primary btn-block btn-lg" disabled="" id="gotoBackups0">Продолжить</button>
+                        <a href="#screen15" class="btn btn-primary btn-block btn-lg" id="gotoBackupslink0" style="display:none">Продолжить</a>
+
+                    </div>
+                    <div class="item" data-hash="screen15">
+
+                        <div class="form-group">
+                            <div class="help-block">Файл сейфа является хранищем ваших средств. История платежей и Контакты также хранится в этом файле. Чтобы файл сейфа оставался подключенным в приложение, не перемещайте его из той директории, куда вы его сохранили.</div>
+                        </div>
+                        <h4>Физический бекап файла сейфа</h4>
+                        <div class="form-group">
+                            <div class="help-block">Скопируйте созданный файл сейфа в другое надежное место, не храните бекап на том же компьютере.</div>
+                        </div>
+                        <div class="form-group">
+                            <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savecopyfile0" >Сохранить копию файла на компьютере
+                                <i class="fa fa-lg fa-check savefilesuccess0" style="display:none"></i></a>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" disabled="" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn0" data-dismiss="modal">Восстановить сейф</a>
+
+                        </div>
+                        </form>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div><!-- /.modal-content -->
+</div>
+
+
+<div class="modal fade second-layer" id="generator" tabindex="-1" role="dialog" aria-labelledby="generatorLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header btn btn-block btn-info">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="generatorLabel">Генератор паролей</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group"  style="margin-bottom:20px; height: 32px;">
+                        <select class="selectpicker form-control" data-style="btn-info">
+                            <option>
+                                Запоминающийся
+                            </option>
+                            <option>
+                                Буквы и цифры
+                            </option>
+                            <option>
+                                Только цифры
+                            </option>
+                            <option>
+                                FIPL181 метод
+                            </option>
+                            <option>
+                                Случайный
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="">Вариант пароля</label>
+                        <div class="input-group">
+                            <input type="text" placeholder="" class="form-control">
+                            <span class="input-group-btn"><button class="btn btn-info" type="button"><i class="fa fa-lg fa-refresh"></i></button></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Длина</label>
+                        <div class="fslider btn-info-slider">
+                            <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="12"  data-slider-step="1" data-slider-value="11" data-slider-tooltip="show" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Сложность</label>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                                <span class="sr-only">40% Complete (success)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Метки для запоминания</label>
+                        <textarea class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" data-dismiss="modal" class="btn btn-lg btn-block btn-info">Применить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="savefile" tabindex="-1" role="dialog" aria-labelledby="savefileLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-group">
+                    <em>системный диалог "сохранить файл"</em>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-default" type="button" data-dismiss="modal">Закрыть</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal fade" id="savecopyfile" tabindex="-1" role="dialog" aria-labelledby="savecopyfilefileLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-group">
+                    <em>системный диалог "сохранить файл"</em>
+                    <p class="small text-muted">---сделать недоступным пересохранение оригинальной копии файла-- </p>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-default" type="button" data-dismiss="modal">Закрыть</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="savefile0" tabindex="-1" role="dialog" aria-labelledby="savefile0Label" aria-hidden="true">
+
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-group">
+                    <em>системный диалог "сохранить файл"</em>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-default" type="button" data-dismiss="modal">Закрыть</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal fade" id="savecopyfile0" tabindex="-1" role="dialog" aria-labelledby="savecopyfilefile0Label" aria-hidden="true">
+
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-group">
+                    <em>системный диалог "сохранить файл"</em>
+                    <p class="small text-muted">---сделать недоступным пересохранение оригинальной копии файла-- </p>
+                </div>
+                <div class="form-group">
+                    <a class="btn btn-default" type="button" data-dismiss="modal">Закрыть</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="modal fade second-layer" id="smartsafe" tabindex="-1" role="dialog" aria-labelledby="smartsafeLabel" aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btn btn-block btn-info">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="generatorLabel">Создание цифровой копии сейфа (Smartsafe)</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <label class="requred">Фраза для шифрования сейфа</label>
+                    <div class="help-block">
+                        Случайный набор букв, сгенерированный компьютером, в которой зашифрован сейф. Распечатайте и храните это в бумажном виде. С помощью этой фразы можно будет восстановить сейф, даже если Вы потеряете файл сейфа или если вы забудете пароль от сейфа.
+                    </div>
+                    <div class="form-group clearfix">
+                        <div class="col-xs-3 col-sm-3">
+                            <input type="text" value="KFDK" class="form-control">
+                        </div>
+                        <div class="col-xs-3 col-sm-3">
+                            <input type="text" value="TLIU" class="form-control">
+                        </div>
+                        <div class="col-xs-3 col-sm-3">
+                            <input type="text" value="WSED" class="form-control">
+                        </div>
+                        <div class="col-xs-3 col-sm-3">
+                            <input type="text" value="REBY" class="form-control">
+                        </div>
+
+                    </div>
+                    <div class="form-group clearfix">
+                        <div class="col-xs-3 col-sm-3">
+                            <input type="text" value="IOKM" class="form-control">
+                        </div>
+                        <div class="col-xs-3 col-sm-3">
+                            <input type="text" value="TGHJ" class="form-control">
+                        </div>
+                        <div class="col-xs-3 col-sm-3">
+                            <input type="text" value="KLGO" class="form-control">
+                        </div>
+                        <div class="col-xs-3 col-sm-3">
+                            <input type="text" value="RDDV" class="form-control">
+                        </div>
+
+                    </div>
+                    <div class="btn-toolbar">
+                        <div class="btn-group pull-right"><button type="button" class="btn btn-primary"><i class="fa fa-lg fa-print"></i> Печать</button></div><div class="btn-group  pull-right"><button type="button" class="btn btn-default"><i class="fa fa-lg fa-qrcode"></i> QR-код</button></div>
+                    </div>
+                    <div class="checkbox"><label><input type="checkbox" onchange="onblockBtn()"> Я распечатал фразу и сохранил в надежном месте</label></div>
+                    <div class="form-group">
+                        <button class="btn btn-lg btn-block btn-info" data-dismiss="modal" type="button" disabled="" id="printbtncheck">Продолжить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="alert alert-warning" style="position:fixed; right:20px; top:20px;box-shadow: 0 2px 8px;z-index:1090">
+    <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+        <span class="sr-only">Close</span>
+    </button>
+    <p><strong>Вышло обновление программы до версии 0.4567</strong></p>
+    <p>Для безопасной работы вы должны загрузить его и установить</p>
+    <p><a href="" class="btn btn-sm btn-block btn-warning">Обновить</a></p>
+</div>
+
+<div class="modal fade cover-layer" id="helptour" tabindex="-1" role="dialog" aria-labelledby="helptourLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <button style="color: rgb(255, 255, 255); opacity: 0.7; font-weight: 100; font-size: 60px;" data-dismiss="modal" class="close" type="button"><span aria-hidden="true">×</span><span style="font-size:22px; display:inline-block; vertical-align:middle">Закрыть<span class="sr-only">Close</span></span></button>
+        <div class="tip" style="top:400px; left:10%">
+            <p class="tip-arrow-left"><img src="assets/img/ar-top-left.svg"></p>
+            <p class="tip-text">Доступ к основным разделам приложения</p>
+
+        </div>
+        <div class="tip" style="top:110px; left:20%">
+            <p class="tip-arrow-left"><img src="assets/img/ar-top-right.svg"></p>
+            <p class="tip-text">Переход к отправке гульденов</p>
+
+        </div>
+        <div class="tip" style="top:110px; left:40%">
+            <p class="tip-arrow-left"><img src="assets/img/ar-top-right.svg"></p>
+            <p class="tip-text">Переход к созданию заявки на покупку гульденов</p>
+
+        </div>
+        <div class="tip" style="top:110px; left:60%">
+            <p class="tip-arrow-left"><img src="assets/img/ar-top-right.svg"></p>
+            <p class="tip-text">Переход к созданию заявки на продажу гульденов</p>
+
+        </div>
+        <div class="tip" style="top:110px; left:80%">
+            <p class="tip-arrow-left"><img src="assets/img/ar-top-right.svg"></p>
+            <p class="tip-text">Переход к созданию заявок на продажу и покупку товаров за гульдены</p>
+
+        </div>
+        <div style="top:280px; left:20%" class="tip">
+            <p class="tip-arrow-left"><img src="assets/img/ar-top-right.svg"></p>
+            <p class="tip-text">Все ваши сейфы можно найти в этом списке, вначале расположены те, где были платежи.</p>
+
+        </div>
+        <div class="tip" style="top:575px; right:40px">
+            <p class="tip-arrow-right"><img src="assets/img/ar-top-right.svg"></p>
+            <p class="tip-text"> Листайте по горизонтали список сейфов этими стрелками двигом пальца или мышки на самих сейфах</p>
+
+        </div>
+        <div style="top:375px; left:40%" class="tip">
+            <p class="tip-arrow-right"><img src="assets/img/ar-top-right.svg"></p>
+            <p class="tip-text"> В выпадающем списке расположены ссылки на действия с этим сейфом</p>
+
+        </div>
+
+        <div style="top:430px; left:70%" class="tip">
+            <p class="tip-arrow-left"><img src="assets/img/ar-top-left.svg"></p>
+            <p class="tip-text"> Индикатор процесса прохождения платежа </p>
+
+        </div>
+
+        <div style="top:280px; left:80%" class="tip">
+            <p class="tip-arrow-right"><img src="assets/img/ar-top-right.svg"></p>
+            <p class="tip-text"> Переход к созданию нового сейфа или восстановления из файла сейфа</p>
+
+        </div>
+
+        <div style="top:675px; left:40%" class="tip">
+            <p class="tip-arrow-right"><img src="assets/img/ar-top-right.svg"></p>
+            <p class="tip-text"> Виджеты - блоки с обновлениями из разных разделов</p>
+
+        </div>
+        <div style="top:635px; left:56%" class="tip">
+            <p class="tip-arrow-left"><img src="assets/img/ar-top-left.svg"></p>
+            <p class="tip-text">Вы сможете настроить, что показать в каждом блоке, выбором в выпадающем списке</p>
+
+        </div>
+
+        <div style="top:80px; left:35px" class="tip">
+            <p class="tip-arrow-left"><img src="assets/img/ar-top-left.svg"></p>
+            <p class="tip-text">Меню можно свернуть, нажав на эту кнопку</p>
+        </div>
+    </div>
+</div>
+
+<div id="pincode" class="modal" tabindex="-1" role="dialog" aria-labelledby="pincodeLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btn btn-primary btn-block">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title text-center">Введите пинкод для входа в приложение</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="text-center">
+                        <div class="row">
+                            <div class="col-xs-4 col-sm-4 col-sm-offset-4">
+                                <input type="password" placeholder="_ _ _ _" class="input-lg form-control text-center pin-input">
+                            </div>
+                            <div class="col-xs-4 col-sm-4 text-left"><a class="label label-default show-pin" href="">Показать пин</a></div>
+                        </div>
+                        <div class="tablo">
+                            <div class="row">
+                                <div class="col-xs-4 col-sm-4">
+                                    <span class="btn btn-default">1</span>
+                                </div>
+                                <div class="col-xs-4 col-sm-4">
+                                    <span class="btn btn-default">2</span>
+                                </div>
+                                <div class="col-xs-4 col-sm-4">
+                                    <span class="btn btn-default">3</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-4 col-sm-4">
+                                    <span class="btn btn-default">4</span>
+                                </div>
+                                <div class="col-xs-4 col-sm-4">
+                                    <span class="btn btn-default">5</span>
+                                </div>
+                                <div class="col-xs-4 col-sm-4">
+                                    <span class="btn btn-default">6</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-4 col-sm-4">
+                                    <span class="btn btn-default">7</span>
+                                </div>
+                                <div class="col-xs-4 col-sm-4">
+                                    <span class="btn btn-default">8</span>
+                                </div>
+                                <div class="col-xs-4 col-sm-4">
+                                    <span class="btn btn-default">9</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-4 col-sm-4">
+                                    &nbsp;
+                                </div>
+                                <div class="col-xs-4 col-sm-4">
+                                    <span class="btn btn-default">0</span>
+                                </div>
+                                <div class="col-xs-4 col-sm-4">
+                                    &nbsp;
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-xs-4 col-sm-4 col-sm-offset-8 text-left"><a class="label label-danger show-pin" href="#" type="button" data-toggle="modal" data-target="#resetpin" data-dismiss="modal">Сброс пин-кода</a></div>
+                        </div>
+                        <hr>
+                        <a class="btn btn-primary btn-lg btn-block " type="button" href="create-safe.html" data-dismiss="modal">Войти</a>
+                    </div>
+
+                </form>
+            </div>
+
+
+        </div><!-- /.modal-content -->
+    </div>
+</div>
+
+
+<div id="resetpin" class="modal second-layer modal-preloaded" tabindex="-1" role="dialog" aria-labelledby="resetpinLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="owl-panels22" class="owl-carousel">
+                <div class="item" data-hash="screen21">
+                    <div class="modal-header btn btn-primary btn-block">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title text-center">Сброс пинкода</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <h5>Чтобы восстановить доступ к приложению, введите пароль от выбранного случайно сейфа, после этого вы сможете задать новый пинкод</h5>
+                        <div class="form-group">
+                            <label class="form-group">
+                                Пароль от сейфа <strong>Safelabel2</strong>
+                            </label>
+                            <input type="password" value="" placeholder="" class="form-control">
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-lg btn-block" type="button" data-dismiss="modal" id="cancelbtn">Отмена</a></div>
+                            <div class="col-xs-6 col-sm-6"><a class="btn btn-primary btn-lg btn-block" type="button" href="#screen22">Продолжить</a></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item" data-hash="screen22">
+                    <div class="modal-header btn btn-primary btn-block">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title text-center">Новый пинкод</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="text-center">
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-sm-offset-4">
+                                        <input type="password" placeholder="_ _ _ _" class="input-lg form-control text-center pin-input">
+                                    </div>
+                                    <div class="col-xs-4 col-sm-4 text-left"><a class="label label-default show-pin" href="">Показать пин</a></div>
+                                </div>
+                                <div class="tablo">
+                                    <div class="row">
+                                        <div class="col-xs-4 col-sm-4">
+                                            <span class="btn btn-default">1</span>
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4">
+                                            <span class="btn btn-default">2</span>
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4">
+                                            <span class="btn btn-default">3</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-4 col-sm-4">
+                                            <span class="btn btn-default">4</span>
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4">
+                                            <span class="btn btn-default">5</span>
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4">
+                                            <span class="btn btn-default">6</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-4 col-sm-4">
+                                            <span class="btn btn-default">7</span>
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4">
+                                            <span class="btn btn-default">8</span>
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4">
+                                            <span class="btn btn-default">9</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-4 col-sm-4">
+                                            &nbsp;
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4">
+                                            <span class="btn btn-default">0</span>
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4">
+                                            &nbsp;
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <a class="btn btn-primary btn-lg btn-block " type="button" href="create-safe.html" data-dismiss="modal"  id="pinAddBtn22">Задать пинкод</a>
+                            </div>
+
+                        </form>
+                    </div>
+                     </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div>
+</div>
+
+
+
+
+<!-- Bootstrap core JavaScript
+    ================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/docs.min.js"></script>
+
+<script src="assets/js/owl.carousel.2.0.0-beta.2.4/owl.carousel.min.js"></script>
+<script src="assets/js/bootstrap-slider.js"></script>
+<script src="assets/js/sidebar-collapse.js"></script>
+<script src="assets/js/bootstrap-tour.js"></script>
+<script src="assets/js/jquery.smoothscroll.js"></script>
+<script src="assets/js/jquery.browser.js"></script>
+<script src="assets/js/jquery.ba-hashchange.js"></script>
+<script src="assets/js/bootstrap-tour.app.js"></script>
+<script src="assets/js/spin.js"></script>
+
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="assets/js/ie10-viewport-bug-workaround.js"></script>
+
+<!-- Flot -->
+<script src="assets/js/flot/jquery.flot.js"></script>
+<script src="assets/js/flot/jquery.flot.time.js"></script>
+<script src="assets/js/flot/jquery.flot.selection.js"></script>
+<script src="assets/js/flot/jquery.flot.tooltip.min.js"></script>
+<script src="assets/js/flot/jquery.flot.resize.js"></script>
+<script src="assets/js/flot/jquery.flot.pie.js"></script>
+
+<script src="assets/js/bootstrap-select/bootstrap-select.js"></script>
+<script src="assets/js/bootstrap-select/i18n/defaults-ru_RU.min.js"></script>
+<script src="assets/js/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+<script src="assets/js/bootstrap-datepicker/locales/bootstrap-datepicker.ru.js"></script>
+<script src="assets/js/jquery.easing.min.js"></script>
+<script src="assets/js/jquery.easypiechart.js"></script>
+<script src="assets/js/ajax-mining-diagrams.js"></script>
+
+<!-- Dependencies -->
+<script src="GuilderApplication.js"></script>
+<script src="GuilderBackend.js"></script>
+<script src="GuilderEmulator.js"></script>
+<script src="GuilderRouter.js"></script>
+
+<!-- Bootstrap -->
+<script src="app.js"></script>
+
+
+
+</body>
+</html>

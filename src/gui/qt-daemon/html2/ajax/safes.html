@@ -1,0 +1,741 @@
+    <nav class="navbar btns" role="navigation">
+        <ul class="nav nav-pills nav-justified">
+            <li>
+                <a href="sendG.html" class="btn btn-default"> Отправить гульдены</a>
+
+            </li>
+            <li>
+                <a class="btn btn-default" href="buyG.html">Купить гульдены</a>
+
+            </li>
+            <li>
+                <a href="sellG.html" class="btn btn-default">Продать гульдены</a>
+
+            </li>
+
+            <li>
+
+                <a aria-expanded="false" class="btn btn-default dropdown" data-toggle="dropdown">Купить/Продать товар
+
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="buyProduct.html">Купить товар за гульдены</a></li>
+                    <li><a href="sellProduct.html">Продать товар за гульдены</a></li>
+                </ul>
+
+
+
+
+            </li>
+        </ul>
+    </nav>
+    <h1>Сейфы</h1>
+    <h5>Здесь Вы можете просмотреть список всех сейфов, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
+    <div class="tabs">
+        <div class="navbar">
+
+
+            <div class="row">
+
+
+                <div class="col-xs-5 col-sm-5">
+                    <div class="btn-group"><button class="btn btn-primary" type="button" data-toggle="modal" data-target="#addSafe">Создать сейф</button></div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Восстановить сейф <span class="caret"></span>
+                        </button>
+                        <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                            <li><a data-target="#openSafe" data-toggle="modal" type="button">Открыть файл-сейф</a></li>
+                            <li><a data-target="#onensmartSafe" data-toggle="modal" type="button">Восстановить из smartsafe</a></li>
+
+                        </ul>
+                    </div>
+
+
+                </div>
+
+
+                <div class="col-xs-7 col-sm-7">
+
+                    <div class="btn-toolbar pull-right">
+
+                        <ul class="nav nav-tabs btn-group-tabs">
+                            <li class="active"><button data-target=".list-view" data-toggle="tab" class="btn btn-default" type="button">
+                                <i class="fa fa-list"></i> Списком</button>
+
+                            </li>
+                            <li>
+                                <button class="btn btn-default" data-target=".tiles-view" data-toggle="tab" type="button">
+                                    <i class="fa fa-th"></i> Блоками
+                                </button>
+                            </li>
+                        </ul>
+
+                    </div>
+                    <div class="pull-right col-xs-5 col-sm-5"><form><input type="text" class="form-control" placeholder="найти"></form></div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <div class="tab-content nopadding">
+            <div class="tab-pane list-view active">
+                <div class="table-responsive panel">
+                    <table class="table table-condensed table-hover data-table safes-table">
+                        <thead>
+                        <tr>
+                            <th><span class="nowrap">Сейф <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                            <th><span class="nowrap">Счет сейфа <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                            <th><span class="nowrap">Состояние <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                            <th><span class="nowrap">Баланс <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                            <th></th>
+                        </tr>
+
+                        </thead>
+                        <tbody>
+                        <tr>
+
+                            <td>
+                                <a class="btn btn-link" href="safe.html"><big>Safelabel1</big></a><button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован"><i class="fa fa-1x fa-lock text-primary"></i></button><span class="label label-info">@safealias</span> <span class="label label-info">@safealias</span></td>
+
+
+                            <td><div class="dropdown">
+                                <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted"> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+
+
+                                            <li><div class="contractor">
+                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div></li>
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
+                            </div></td>
+                            <td><ul class="list-unstyled">
+                                <li class="text-info">
+                                    Ожидается:  <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">
+                                </li>
+
+
+                            </ul></td>
+                            <td><strong><big>4,40 G<big></big></big></strong></td>
+                            <td>
+                                <div class="btn-group navbar-btn">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        <i class="fa fa-gear"></i> <span class="caret"></span>
+                                    </button>
+                                    <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                                        <li><a href="market.html">Отправить гульдены</a></li>
+
+                                        <li><a href="market.html">Продать гульдены</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Начать добычу</a></li>
+
+                                        <li class="divider"></li>
+                                        <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                                        <li><a href="market.html">Сделать бекап</a></li>
+                                    </ul>
+                                </div></td>
+                        </tr>
+                        <tr>
+
+                            <td>
+
+                                <a class="btn btn-link" href="safe.html"><big>Safelabel1</big></a><button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован"><i class="fa fa-1x fa-lock text-primary"></i></button><a href="safe.html#information"  class="label label-warning">Присвоить алиас</a></td>
+
+                            <td><div class="dropdown">
+                                <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted"> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+
+
+                                            <li><div class="contractor">
+                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div></li>
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
+                            </div></td>
+                            <td><ul class="list-unstyled">
+
+                                <li class="text-warning">
+                                    Отправляется:  <em>4,00 G</em> <span class="chart send-timer" data-percent="86">
+                                </li>
+
+
+                            </ul></td>
+                            <td><strong><big>34,40 G<big></big></big></strong></td>
+                            <td>
+                                <div class="btn-group navbar-btn">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        <i class="fa fa-gear"></i> <span class="caret"></span>
+                                    </button>
+                                    <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                                        <li><a href="market.html">Отправить гульдены</a></li>
+
+                                        <li><a href="market.html">Продать гульдены</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Начать добычу</a></li>
+
+                                        <li class="divider"></li>
+                                        <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                                        <li><a href="market.html">Сделать бекап</a></li>
+                                    </ul>
+                                </div></td>
+                        </tr>
+                        <tr>
+                            <td> <a class="btn btn-link" href="safe.html"><big>Safelabel1</big></a><button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф не зашифрован"><i class="fa fa-1x fa-unlock text-primary"></i></button><span class="label label-info">@safealias</span> <span class="label label-info">@safealias</span></td>
+
+                            <td><div class="dropdown">
+                                <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted"> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+
+
+                                            <li><div class="contractor">
+                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div></li>
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
+                            </div></td>
+                            <td><ul class="list-unstyled">
+
+
+                            </ul></td>
+                            <td><strong><big>0,56 G<big></big></big></strong></td>
+                            <td>
+                                <div class="btn-group navbar-btn">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        <i class="fa fa-gear"></i> <span class="caret"></span>
+                                    </button>
+                                    <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                                        <li><a href="market.html">Отправить гульдены</a></li>
+
+                                        <li><a href="market.html">Продать гульдены</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Начать добычу</a></li>
+
+                                        <li class="divider"></li>
+                                        <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                                        <li><a href="market.html">Сделать бекап</a></li>
+                                    </ul>
+                                </div></td>
+                        </tr>
+                        <tr>
+
+                            <td> <a class="btn btn-link" href="safe.html"><big>Safelabel1</big></a><button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован"><i class="fa fa-1x fa-lock text-primary"></i></button><span class="label label-info">@safealias</span> <span class="label label-info">@safealias</span>
+
+                            </td>
+
+                            <td><div class="dropdown">
+                                <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted"> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+
+
+                                            <li><div class="contractor">
+                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div></li>
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
+                            </div></td>
+                            <td><ul class="list-unstyled">
+                                <li class="label-icon">
+                                    <em>Добыча</em> <span class="label label-success"><i class="gu gu-2x gu-pick"></i></span>
+                                </li>
+                            </ul></td>
+                            <td><strong><big>345,40 G<big></big></big></strong></td>
+                            <td>
+                                <div class="btn-group navbar-btn">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        <i class="fa fa-gear"></i> <span class="caret"></span>
+                                    </button>
+                                    <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                                        <li><a href="market.html">Отправить гульдены</a></li>
+
+                                        <li><a href="market.html">Продать гульдены</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Остановить добычу</a></li>
+
+                                        <li class="divider"></li>
+                                        <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                                        <li><a href="market.html">Сделать бекап</a></li>
+                                    </ul>
+                                </div></td>
+                        </tr>
+                        <tr>
+
+                            <td> <a class="btn btn-link" href="safe.html"><big>Safelabel1</big></a><button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован"><i class="fa fa-1x fa-lock text-primary"></i></button><span class="label label-info">@safealias</span> <span class="label label-info">@safealias</span>
+
+                            </td>
+
+                            <td><div class="dropdown">
+                                <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted"> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+
+
+                                            <li><div class="contractor">
+                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div></li>
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
+                            </div></td><td><ul class="list-unstyled">
+                            <li class="label-icon">
+                                <em>Добыча</em> <span class="label label-success"><i class="gu gu-2x gu-pick"></i></span>
+                            </li>
+
+                        </ul></td>
+
+                            <td><strong><big>878,40 G<big></big></big></strong></td>
+                            <td>
+                                <div class="btn-group navbar-btn">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        <i class="fa fa-gear"></i> <span class="caret"></span>
+                                    </button>
+                                    <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                                        <li><a href="market.html">Отправить гульдены</a></li>
+
+                                        <li><a href="market.html">Продать гульдены</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Остановить добычу</a></li>
+
+                                        <li class="divider"></li>
+                                        <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                                        <li><a href="market.html">Сделать бекап</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane tiles-view">
+                <div class="row">
+                    <div class="col-xs-6 col-xs-6 col-sm-6 safebox">
+                        <div class="panel">
+                            <div class="panel-heading">
+
+                                <div class="btn-group navbar-btn pull-right">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        Операции <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a href="market.html">Отправить гульдены</a></li>
+
+                                        <li><a href="market.html">Продать гульдены</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Начать добычу</a></li>
+
+                                        <li class="divider"></li>
+                                        <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                                        <li><a href="market.html">Сделать бекап</a></li>
+                                    </ul>
+                                </div>
+
+                                <a href="safe.html" class="btn btn-link"><big>Safelabel1</big></a><button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован"><i class="fa fa-1x fa-lock text-primary"></i></button><div class="dropdown">
+                                <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted"> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+
+
+                                            <li><div class="contractor">
+                                                <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div></li>
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
+                            </div><div><span class="label label-info">@safealias</span> <span class="label label-info">@safealias</span></div>
+
+
+
+                            </div>
+                            <div class="panel-body">
+
+
+                                <div class="row">
+                                    <div class="col-xs-9 col-sm-9">
+                                        <ul class="list-unstyled">
+
+                                            <li class="text-info">
+                                                Ожидается:  <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">
+                                            </li>
+                                        </ul>
+                                        <div class="balance">Баланс: 4,4G </div>
+                                    </div>
+                                    <div class="col-xs-3 col-sm-3">
+                                        <div class="coins">
+                                            <img class="img-responsive" src="assets/img/coins24.svg">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-xs-6 col-sm-6 safebox">
+                        <div class="panel">
+                            <div class="panel-heading">
+
+                                <div class="btn-group navbar-btn pull-right">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        Операции <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a href="market.html">Отправить гульдены</a></li>
+
+                                        <li><a href="market.html">Продать гульдены</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Начать добычу</a></li>
+
+                                        <li class="divider"></li>
+                                        <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                                        <li><a href="market.html">Сделать бекап</a></li>
+                                    </ul>
+                                </div>
+
+                                <a href="safe.html" class="btn btn-link"><big>Safelabel1</big></a><button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован"><i class="fa fa-1x fa-lock text-primary"></i></button><div class="dropdown">
+                                <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted"> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+
+
+                                            <li><div class="contractor">
+                                                <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div></li>
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
+                            </div><div><a href="safe.html#information"  class="label label-warning">Присвоить алиас</a></div>
+
+
+
+                            </div>
+                            <div class="panel-body">
+
+
+                                <div class="row">
+                                    <div class="col-xs-9 col-sm-9">
+                                        <ul class="list-unstyled">
+
+                                            <li class="text-warning">
+                                                Отправляется:  <em>4,00 G</em> <span class="chart send-timer" data-percent="86">
+                                            </li>
+
+
+                                        </ul>
+                                        <div class="balance">Баланс: 34,40G </div>
+                                    </div>
+                                    <div class="col-xs-3 col-sm-3">
+                                        <div class="coins">
+                                            <img class="img-responsive" src="assets/img/coins24.svg">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6 col-xs-6 col-sm-6 safebox">
+                        <div class="panel">
+                            <div class="panel-heading">
+
+                                <div class="btn-group navbar-btn pull-right">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        Операции <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a href="market.html">Отправить гульдены</a></li>
+
+                                        <li><a href="market.html">Продать гульдены</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Начать добычу</a></li>
+
+                                        <li class="divider"></li>
+                                        <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                                        <li><a href="market.html">Сделать бекап</a></li>
+                                    </ul>
+                                </div>
+
+                                <a href="safe.html" class="btn btn-link"><big>Safelabel1</big></a><button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф не зашифрован"><i class="fa fa-1x fa-unlock text-primary"></i></button><div class="dropdown">
+                                <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted"> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+
+
+                                            <li><div class="contractor">
+                                                <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div></li>
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
+                            </div><div><span class="label label-info">@safealias</span> <span class="label label-info">@safealias</span></div>
+
+
+
+                            </div>
+                            <div class="panel-body">
+
+
+                                <div class="row">
+                                    <div class="col-xs-9 col-sm-9">
+                                        <ul class="list-unstyled">
+
+
+                                        </ul>
+                                        <div class="balance">Баланс: 0,56G </div>
+                                    </div>
+                                    <div class="col-xs-3 col-sm-3">
+                                        <div class="coins">
+                                            <img src="assets/img/coins24.svg" class="img-responsive">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-xs-6 col-sm-6 safebox">
+                        <div class="panel">
+                            <div class="panel-heading">
+
+                                <div class="btn-group navbar-btn pull-right">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        Операции <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a href="market.html">Отправить гульдены</a></li>
+
+                                        <li><a href="market.html">Продать гульдены</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Остановить добычу</a></li>
+
+                                        <li class="divider"></li>
+                                        <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                                        <li><a href="market.html">Сделать бекап</a></li>
+                                    </ul>
+                                </div>
+
+                                <a href="safe.html" class="btn btn-link"><big>Safelabel1</big></a><button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован"><i class="fa fa-1x fa-lock text-primary"></i></button><div class="dropdown">
+                                <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted"> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+
+
+                                            <li><div class="contractor">
+                                                <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div></li>
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
+                            </div><div><span class="label label-info">@safealias</span> <span class="label label-info">@safealias</span></div>
+
+
+
+                            </div>
+                            <div class="panel-body">
+
+
+                                <div class="row">
+                                    <div class="col-xs-9 col-sm-9">
+                                        <ul class="list-unstyled">
+                                            <li class="label-icon">
+                                                <em>Добыча</em> <span class="label label-success"><i class="gu gu-2x gu-pick"></i></span>
+                                            </li>
+
+                                        </ul>
+                                        <div class="balance">Баланс: 345,40G </div>
+                                    </div>
+                                    <div class="col-xs-3 col-sm-3">
+                                        <div class="coins">
+                                            <img src="assets/img/coins24.svg" class="img-responsive">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6 col-xs-6 col-sm-6 safebox">
+                        <div class="panel">
+
+                            <div class="panel-heading">
+
+                                <div class="btn-group navbar-btn pull-right">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        Операции <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a href="market.html">Отправить гульдены</a></li>
+
+                                        <li><a href="market.html">Продать гульдены</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Остановить добычу</a></li>
+
+                                        <li class="divider"></li>
+                                        <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                                        <li><a href="market.html">Сделать бекап</a></li>
+                                    </ul>
+                                </div>
+
+                                <a href="safe.html" class="btn btn-link"><big>Safelabel1</big></a><button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован"><i class="fa fa-1x fa-lock text-primary"></i></button><div class="dropdown">
+                                <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted"> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+
+
+                                            <li><div class="contractor">
+                                                <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div></li>
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
+                            </div><div><span class="label label-info">@safealias</span> <span class="label label-info">@safealias</span></div>
+
+
+
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-xs-9 col-sm-9">
+                                        <ul class="list-unstyled">
+                                            <li class="label-icon">
+                                                <em>Добыча</em> <span class="label label-success"><i class="gu gu-2x gu-pick"></i></span>
+                                            </li>
+
+                                        </ul>
+                                        <div class="balance">Баланс: 878,40 G </div>
+                                    </div>
+                                    <div class="col-xs-3 col-sm-3">
+                                        <div class="coins">
+                                            <img src="assets/img/coins24.svg" class="img-responsive">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="navbar"></div>
+
+
+
+    </div>
+    <hr>
+    <div class="footer">
+
+
+    </div>

@@ -1,0 +1,701 @@
+    <nav class="navbar btns" role="navigation">
+        <ul class="nav nav-pills nav-justified">
+            <li>
+                <a href="sendG.html" class="btn btn-default"> Отправить гульдены</a>
+
+            </li>
+            <li>
+                <a class="btn btn-default" href="buyG.html">Купить гульдены</a>
+
+            </li>
+            <li>
+                <a href="sellG.html" class="btn btn-default">Продать гульдены</a>
+
+            </li>
+
+            <li>
+
+                <a class="btn btn-default dropdown" data-toggle="dropdown">Купить/Продать товар
+
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="buyProduct.html">Купить товар за гульдены</a></li>
+                    <li><a href="sellProduct.html">Продать товар за гульдены</a></li>
+                </ul>
+
+
+
+
+            </li>
+        </ul>
+    </nav>
+    <a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт истории платежей в файл</span></a>
+    <h1>История платежей</h1>
+    <h5>Здесь Вы можете просмотреть историю платежей по всем сейфам, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
+    <div class="tabs">
+        <div class="navbar" id="navbar-tabs">
+
+            <form class="form-horizontal">
+                <div class="collapse  text-right filter1 in close-filter">
+                    <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter1" class="btn btn-primary active"><i class="fa fa-chevron-up"></i> Фильтр</button>
+                    </div>
+                </div>
+                <div class="collapse in filter1">
+                    <div class="row" style="margin-top:20px; margin-bottom:20px;">
+                        <div class="col-xs-5 col-sm-5">
+                            <div class="form-group clearfix">
+                                <label class="control-label requred col-xs-4 col-sm-4">Период</label>
+                                <select class="selectpicker col-xs-8 col-sm-8" style="width:100%">
+                                    <option class="dateperiod" selected="">выбрать</option>
+                                    <option class="dateperiod">день</option>
+                                    <option class="dateperiod">неделя</option>
+                                    <option class="dateperiod">месяц</option>
+                                    <option class="dateperiod">два месяца</option>
+                                    <option class="dateperiod">весь период</option>
+                                    <option class="datetoggle">другой период</option>
+                                </select>
+                            </div>
+                            <div class="form-group collapse in date-collapse">
+                                <label class="control-label col-xs-4 col-sm-4 requred">Дата</label>
+                                <div class="col-xs-8 col-sm-8">
+
+
+                                    <div class="hdatapicker">
+                                        <div class="input-daterange input-group" id="datepicker">
+                                            <span class="input-group-addon">от</span>
+                                            <input type="text" class="input-sm form-control" name="start" />
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <span class="input-group-addon">до</span>
+                                            <input type="text" class="input-sm form-control" name="end" />
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-7 col-sm-7">
+                            <div class="form-group clearfix">
+
+                                <label class="control-label requred col-xs-2 col-sm-2">Сейф</label>
+                                <select class="col-xs-8 col-sm-8 selectpicker nopadding">
+                                    <option>все сейфы</option>
+                                    <option selected="">Safelabel (@@safealias) 4.20 G</option>
+                                    <option>1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak 30.40 G</option>
+                                    <option>Safelabel2 (@safealias2) 0.56 G</option>
+                                    <option>Safelabel-997398r (@safealias5) 0.56 G</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-xs-2 col-sm-2 control-label requred">Состояние</label>
+                                <select class="col-xs-4 col-sm-4 selectpicker nopadding">
+                                    <option selected="">любое</option>
+                                    <option>анонимно</option>
+                                    <option>неанонимно</option>
+                                </select>
+
+                                <div class="col-xs-4 col-sm-4 col-sm-offset-2">
+                                    <label class="checkbox"><input type="checkbox" value=""> <strong>Скрыть доход от добычи</strong></label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-xs-2 col-sm-2 control-label requred">Микшер</label>
+                                <select class="col-xs-4 col-sm-4 selectpicker nopadding">
+                                    <option selected="">не важно</option>
+                                    <option>микшировано</option>
+                                    <option>не микшировано</option>
+                                </select>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+                <div class="row">
+
+                    <div class="col-xs-4 col-sm-4">
+
+
+                        <div data-toggle="buttons" class="btn-group btn-group-justified">
+                            <label class="btn btn-primary active">
+                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Все
+                            </label>
+                            <label class="btn btn-primary">
+                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Входящие
+                            </label>
+                            <label class="btn btn-primary ">
+                                <input type="radio" autocomplete="off" id="option2" name="options"> Исходящие
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 col-sm-4">
+                        <input type="text" class="form-control" placeholder="найти текст">
+                    </div>
+                    <div class="col-xs-4 col-sm-4">
+                        <div class="collapse in filter1">
+                            <div class="row">
+
+                                <div style="padding-right:5px" class="col-xs-6 col-sm-6">
+                                    <button type="button" class="btn btn-block btn-primary">Применить</button></div>
+                                <div style="padding-left:5px" class="col-xs-6 col-sm-6"><button type="button" class="btn btn-block btn-default">Очистить фильтр</button></div>
+                            </div>
+                        </div>
+                        <div class="collapse filter1">
+                            <div class="btn-group pull-right"><button type="button" data-toggle="collapse" data-target=".filter1" class="btn btn-default"><i class="fa fa-chevron-down"></i> Фильтр</button></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+
+        </div>
+        <div class="table-responsive panel">
+            <table class="table table-condensed  data-table history-table">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                        <span class="nowrap">Дата операции <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                    </th>
+                    <th>
+                        <span class="nowrap">Состояние <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                    </th>
+                    <th>
+                        <span class="nowrap">Сумма, G <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                    </th>
+                    <th>
+                        <span class="nowrap">Комиссия, G</span>
+                    </th>
+                    <th>
+                        <span class="nowrap">Отправитель <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                    </th>
+                    <th>
+                        <span class="nowrap">Получатель <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                    </th>
+                    <th>
+                        <span class="nowrap">Комментарий</span>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+	<span class="mix-label mix-label-up">
+	 <img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
+		<em><i style="color:#ddd" class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
+	</span>
+                    </td>
+                    <td>
+
+                        <small class="text-muted nowrap">12.12.14 22:56</small>
+                        <span class="chart send-timer" data-percent="86"></span>
+
+                    </td>
+                    <td>
+                        <small class="text-warning"><em>Отправление</em></small>
+                    </td>
+                    <td>
+                        &ndash;23,00
+                    </td>
+                    <td>
+                        &ndash;1,67
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Сейф: <a href="">Safelabel1</a></li>
+
+                                        <li><div class="contractor">
+                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div></li>
+                                        <li><a href="">@onesafekaccout</a></li>
+                                        <li><a href="">@twosafeaccout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">B4QqkxudA7hJjwhPYFSc1HUWFZP3giGepi2foJocRhav7mSQ2RnYYTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li><div class="contractor">
+                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="text-muted">текст комментария</span></td>
+                </tr>
+                <tr>
+                    <td><span class="mix-label mix-label-down">
+	 <img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
+		<em><i style="color:#ddd" class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
+	</span>
+                    </td>
+                    <td>
+
+                        <small class="text-muted nowrap">12.12.14 22:56</small><span class="chart receive-timer" data-percent="60"></span>
+
+                    </td>
+                    <td>
+                        <small class="text-info"><em>Получение</em></small>
+                    </td>
+                    <td>
+                        +3,00
+                    </td>
+                    <td>
+                        0
+                    </td>
+                    <td>
+                        <small style="color:#999"><em>неизвестно</em></small>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Сейф: <a href="">Safelabel1</a></li>
+
+                                        <li><div class="contractor">
+                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div></li>
+                                        <li><a href="">@onesafekaccout</a></li>
+                                        <li><a href="">@twosafeaccout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="text-muted">текст комментария</span></td>
+                </tr>
+                <tr>
+                    <td>
+	<span class="mix-label mix-label-up">
+	 <img src="assets/font/svg/sound8.svg" style="opacity: 0.75;">
+		<em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
+	</span>
+                    </td>
+                    <td>
+
+                        <small class="text-muted nowrap">12.12.14 22:56</small>
+
+
+                    </td>
+                    <td>
+                        <small class="text-muted">Отправлено</small>
+                    </td>
+                    <td>
+                        &ndash;6,00
+                    </td>
+                    <td>
+                        &ndash;1,67
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button aria-expanded="true" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Сейф: <a href="">Safelabel1</a></li>
+
+                                        <li><div class="contractor">
+                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div></li>
+                                        <li><a href="">@onesafekaccout</a></li>
+                                        <li><a href="">@twosafeaccout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">@fjjhtyjlmnbg<span class="caret"></span></span>
+
+			</span></button>
+                            <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li><div class="contractor">
+                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div>
+                                        </li>
+                                        <li><a href="">@fjjhtyjlmnbg</a>
+                                        </li></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="text-muted">текст комментария</span></td>
+
+                </tr>
+                <tr class="success">
+                    <td>
+		<span class="mix-label mix-label-up">
+	<img style="width:22px;" src="assets/img/pick5.svg">
+	<em><i class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
+		</span>
+                    </td>
+                    <td>
+                        <small class="text-muted nowrap">12.12.14 22:56</small>
+                    </td>
+                    <td><small class="text-muted">Добыча</small>
+                    </td>
+                    <td>
+                        +5,00
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Сейф: <a href="">Safelabel1</a></li>
+
+                                        <li><div class="contractor">
+                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div></li>
+                                        <li><a href="">@onesafekaccout</a></li>
+                                        <li><a href="">@twosafeaccout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td><span class="text-muted">текст комментария</span></td>
+
+                </tr>
+                <tr>
+                    <td>
+	<span class="mix-label mix-label-up">
+	<img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
+		<em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
+	</span>
+                    </td>
+                    <td>
+                        <small class="text-muted nowrap">12.12.14 22:56</small>
+                    </td>
+                    <td>
+                        <small class="text-muted">Отправлено</small>
+
+                    </td>
+                    <td>
+                        &ndash;23,00
+                    </td>
+                    <td>
+                        &ndash;1,67
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999"><span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			</span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Сейф: <a href="">Safelabel1</a></li>
+
+                                        <li><div class="contractor">
+                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div></li>
+                                        <li><a href="">@onesafekaccout</a></li>
+                                        <li><a href="">@twosafeaccout</a></li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Человек @onechelovekaccout <span class="caret"></span></span>
+
+			</span></button>
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Имя: <a href="">Человек</a></li>
+                                        <li>Email: <a href="">chelovek@domain.com</a></li>
+                                        <li><div class="contractor">
+                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div></li>
+                                        <li><a href="">@onechelovekaccout</a></li>
+                                        <li><a href="">@twochelovekaccout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="text-muted">текст комментария</span></td>
+                </tr>
+                <tr>
+                    <td>
+	<span class="mix-label mix-label-up">
+	<img style="opacity: 0.05;" src="assets/font/svg/sound8.svg">
+	<em><i class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
+	</span>
+                    </td>
+                    <td>
+                        <small class="text-muted nowrap">12.12.14 22:56</small>
+                    </td>
+                    <td>
+                        <small class="text-muted">Получено</small>
+                    </td>
+                    <td>
+                        &ndash;23,00
+                    </td>
+                    <td>
+                        0
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>
+                                            <div class="contractor">
+                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Сейф: <a href="">Safelabel1</a></li>
+
+                                        <li><div class="contractor">
+                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div></li>
+                                        <li><a href="">@onesafekaccout</a></li>
+                                        <li><a href="">@twosafeaccout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="text-muted">текст комментария</span></td>
+
+                </tr>
+                <tr>
+                    <td>
+	<span class="mix-label mix-label-up">
+	<img style="opacity: 0.05;" src="assets/font/svg/sound8.svg">
+		<em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
+	</span>
+
+                    </td>
+                    <td>
+                        <small class="text-muted nowrap">12.12.14 22:56</small>
+                    </td>
+                    <td>
+                        <small class="text-muted">Отправлено</small>
+                        <small class="label label-default"></small>
+                    </td>
+                    <td>
+                        &ndash;23,00
+                    </td>
+                    <td>
+                        &ndash;1,67
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Сейф: <a href="">Safelabel1</a></li>
+
+                                        <li><div class="contractor">
+                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div></li>
+                                        <li><a href="">@onesafekaccout</a></li>
+                                        <li><a href="">@twosafeaccout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div><small><em class="text-danger"></em></small>
+                    </td>
+                    <td>
+
+                        <div class="dropdown">
+                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Вася @vasyaccount <span class="caret"></span></span>
+
+			</span></button>
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Имя: <a href="">Вася</a></li>
+                                        <li>Email: <a href="">vasya@domain.com</a></li>
+                                        <li>skype: <a href="">vasya</a></li>
+                                        <div class="contractor">
+                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div>
+
+                                        <li><a href="">@vasyaccount</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </td>
+                    <td><span class="text-muted">текст комментария</span></td>
+
+                </tr>
+                <tr>
+                    <td>
+	<span class="mix-label mix-label-up">
+	<img style="opacity: 0.05;" src="assets/font/svg/sound8.svg">
+		<em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
+	</span>
+                    </td>
+                    <td>
+                        <small class="text-muted nowrap">12.12.14 22:56</small>
+                    </td>
+                    <td>
+                        <small class="text-muted">Отправлено</small>
+                        <small class="label label-default"><em>неанонимно</em></small>
+                    </td>
+                    <td>
+                        &ndash;23,00
+                    </td>
+                    <td>
+                        &ndash;1,67
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div class="dropdown-menu dropdown-menu-left" role="menu">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Сейф: <a href="">Safelabel1</a></li>
+
+                                        <li><div class="contractor">
+                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div></li>
+                                        <li><a href="">@onesafekaccout</a></li>
+                                        <li><a href="">@twosafeaccout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+
+                        <div class="dropdown">
+                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Вася @vasyaccount <span class="caret"></span></span>
+			<span class="moredots">...</span>
+			</span></button>
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Имя: <a href="">Вася</a></li>
+                                        <li>Email: <a href="">vasya@domain.com</a></li>
+                                        <li>skype: <a href="">vasya</a></li>
+                                        <div class="contractor">
+                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                        </div>
+
+                                        <li><a href="">@vasyaccount</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <small></small>
+                    </td>
+                    <td><span class="text-muted">текст комментария</span></td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="navbar">
+            <button class="btn btn-block btn-default navbar-btn">Загрузить еще N</button>
+
+            <div class="text-right"> <button class="btn btn-link text-muted"><span class="text-muted underlined">Показать все платежи</span></button></div>
+        </div>
+    </div>
+    <hr>
+    <div class="footer">
+
+
+    </div>

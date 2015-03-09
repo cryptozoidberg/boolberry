@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 15.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="Capa_1"
+   x="0px"
+   y="0px"
+   width="216px"
+   height="146px"
+   viewBox="0 0 216 146"
+   enable-background="new 0 0 216 146"
+   xml:space="preserve"
+   inkscape:version="0.48.2 r9819"
+   sodipodi:docname="block.svg"><metadata
+   id="metadata19"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+   id="defs17" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="640"
+   inkscape:window-height="480"
+   id="namedview15"
+   showgrid="false"
+   inkscape:zoom="1.6164384"
+   inkscape:cx="108"
+   inkscape:cy="73"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="Capa_1" />
+<g
+   id="g3">
+	<path
+   d="M166.102,11.5H49.9c-1.877,0-3.402,1.522-3.402,3.402v116.202c0,1.877,1.524,3.4,3.402,3.4h116.202   c1.879,0,3.4-1.523,3.4-3.4V14.902C169.502,13.022,167.98,11.5,166.102,11.5z M159.025,124.027H56.974V21.974h102.051V124.027z"
+   id="path5" />
+	<rect
+   x="112.764"
+   y="77.766"
+   width="36.74"
+   height="36.737"
+   id="rect7" />
+	<rect
+   x="66.5"
+   y="31.499"
+   width="36.738"
+   height="36.742"
+   id="rect9" />
+	<rect
+   x="112.764"
+   y="31.499"
+   width="36.74"
+   height="36.742"
+   id="rect11" />
+	<rect
+   x="66.5"
+   y="77.766"
+   width="36.738"
+   height="36.737"
+   id="rect13" />
+</g>
+</svg>

@@ -1,0 +1,164 @@
+    <nav class="navbar btns" role="navigation">
+        <ul class="nav nav-pills nav-justified">
+            <li>
+                <a href="sendG.html" class="btn btn-default"> Отправить гульдены</a>
+
+            </li>
+            <li>
+                <a class="btn btn-default" href="buyG.html">Купить гульдены</a>
+
+            </li>
+            <li>
+                <a href="sellG.html" class="btn btn-default">Продать гульдены</a>
+
+            </li>
+
+            <li>
+
+                <a class="btn btn-default dropdown" data-toggle="dropdown">Купить/Продать товар
+
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="buyProduct.html">Купить товар за гульдены</a></li>
+                    <li><a href="sellProduct.html">Продать товар за гульдены</a></li>
+                </ul>
+
+
+
+
+            </li>
+        </ul>
+    </nav>
+
+
+    <div class="tabs">
+
+        <h1>Добыча</h1>
+        <h5>Здесь Вы можете просмотреть добычу по всем сейфам, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
+        <div class="panel">
+            <div class="panel-body">
+                <h4><a data-target="" data-toggle="collapse" type="button" href="#"><span> Калькулятор доходности</span></a></h4>
+
+                <div class="row">
+                    <div class="col-xs-3 col-sm-3">
+
+                        <label class="control-label requred" style="margin:10px 0">
+                            Период отсутствия движения по счету:
+                        </label>
+                        <div class="form-group clearfix">
+                            <div class="input-group">
+                                <input type="text" class="form-control" value=""/>	<span class="input-group-addon">дней</span>
+                            </div>
+
+                        </div>
+
+
+                        <label class="control-label requred" style="margin:10px 0">
+                            Сумма на счете:
+                        </label>
+                        <div class="form-group clearfix">
+                            <div class="input-group">
+                                <input type="text" class="form-control" value=""/>	<span class="input-group-addon">G</span>
+                            </div>
+                        </div>
+                        <div class="form-group clearfix">
+                            <button class="btn btn-block btn-primary">Рассчитать</button>
+
+                        </div>
+                    </div>
+
+                    <div class="col-xs-9 col-sm-9">
+                        <div class="flot-chart">
+                            <div class="flot-chart-content" id="calculator"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-body">
+                <h4><a data-target="" data-toggle="collapse" type="button" href="#"><span>Статистика дохода</span></a></h4>
+                <div class="pull-right">Срок добычи: 72 дня</div>
+                <div class="dropdown">
+                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted"><big class="text-primary">Safelabel1</big> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                    <div class="dropdown-menu dropdown-menu-left" role="menu">
+                        <div style="padding:10px">
+                            <ul class="list-unstyled">
+                                <li>Сейф: <a href="">Safelabel1</a></li>
+
+                                <li><div class="contractor">
+                                    <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                </div></li>
+                                <li><a href="">@onesafekaccout</a></li>
+                                <li><a href="">@twosafeaccout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <ul class="nav nav-tabs" style="margin:10px 0">
+                    <li class="active"><a href=".diagram1" data-toggle="tab">Диаграмма</a></li>
+                    <li><a href=".history1" data-toggle="tab">Таблица дохода</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane diagram1 active">
+                        <div class="flot-chart">
+                            <div class="flot-chart-content" id="profit1"></div>
+                        </div>
+                    </div>
+                    <div class="tab-pane history1">
+                        <div class="table-responsive panel">
+                            <table class="table table-condensed  data-table history-table">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>
+                                        <span class="nowrap">Дата операции <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                                    </th>
+                                    <th>
+                                        <span class="nowrap">Сумма, G <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                                    </th>
+                                    <th>
+                                        <span class="nowrap">Баланс счета, G</span>
+                                    </th>
+
+
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr class="success">
+                                    <td>
+                        		<span class="mix-label mix-label-up">
+
+                        	<em><i class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
+                        		</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted nowrap">12.12.14 22:56</small>
+                                    </td>
+
+                                    <td>
+                                        +5,00
+                                    </td>
+                                    <td>
+                                        878,40 G
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="footer">
+
+
+    </div>

@@ -1,0 +1,340 @@
+    <nav class="navbar btns" role="navigation">
+        <ul class="nav nav-pills nav-justified">
+            <li>
+                <a href="sendG.html" class="btn btn-default"> Отправить гульдены</a>
+
+            </li>
+            <li>
+                <a class="btn btn-default" href="buyG.html">Купить гульдены</a>
+
+            </li>
+            <li>
+                <a href="sellG.html" class="btn btn-default">Продать гульдены</a>
+
+            </li>
+
+            <li>
+
+                <a class="btn btn-default dropdown" data-toggle="dropdown">Купить/Продать товар
+
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="buyProduct.html">Купить товар за гульдены</a></li>
+                    <li><a href="sellProduct.html">Продать товар за гульдены</a></li>
+                </ul>
+
+
+
+
+            </li>
+        </ul>
+    </nav>
+    <h1>Настройки</h1>
+    <ul class="nav nav-tabs toptabs">
+
+        <li class="active" role="presentation"><a href="#safety" data-toggle="tab">Безопасность</a></li>
+        <li role="presentation"><a href="#maining" data-toggle="tab">Добыча</a></li>
+        <li role="presentation"><a href="#interface" data-toggle="tab">Интерфейс</a></li>
+        <li role="presentation"><a href="#common" data-toggle="tab">Система</a></li>
+
+    </ul>
+    <form>
+        <div class="tab-content tabs tabs-left settings">
+            <div class="tab-pane active" id="safety">
+                <div class="panel">
+                    <div class="panel-body">
+                        <h4><a data-target=".collapse-off3-1" data-toggle="collapse-off" type="button" href="#"><span>Пин-код</span></a></h4>
+
+                        <div class="collapse-off in collapse-off3-1">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default active"><input type="radio" name="options3_1_1" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                        <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options3_1_1" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Использовать пинкод для входа в приложение</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right foursteps">
+                                        <div class="fslider">
+                                            <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="4"  data-slider-step="1" data-slider-value="2"/>
+                                        </div>
+                                        <div class="scale"><span>5 мин</span><span>10 мин</span><span>15 мин</span><span>>30 мин</span></div>
+                                    </div>
+                                    Блокировать интерфейс приложения при отсутствии действий в течении <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-body">
+                        <h4><a data-target=".collapse-off3-2" data-toggle="collapse-off" type="button" href="#"><span>Безопасность сейфов</span></a></h4>
+
+                        <div class="collapse-off in collapse-off3-2">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default active"><input type="radio" name="options3_2_1" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                        <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options3_2_1" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Напоминать о создании бекапов сейфа</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right foursteps">
+                                        <div class="fslider">
+                                            <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="4"  data-slider-step="1" data-slider-value="2"/>
+                                        </div>
+                                        <div class="scale"><span>день</span><span>3 дня</span><span>неделю</span><span>месяц</span></div>
+                                    </div>
+                                    <em>Напоминать о создании бекапа сейфа каждый</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-body">
+                        <h4><a data-target=".collapse-off3_3" data-toggle="collapse-off" type="button" href="#"><span>Безопасность платежей</span></a></h4>
+                        <div class="collapse-off in collapse-off3-3">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default active"><input type="radio" name="options3_3_1" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i> </label>
+                                        <label class="btn btn-danger"><i class="fa fa-lg fa-times"></i><input type="radio" name="options3_3_1" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Скрывать номер счета по умолчанию при отправке
+                                    </em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default active"><input type="radio" name="options3_3_2" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i> </label>
+                                        <label class="btn btn-danger"><i class="fa fa-lg fa-times"></i><input type="radio" name="options3_3_2" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Микшировать ваши платежи с другими платежами в сети
+                                    </em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right foursteps">
+                                        <div class="fslider">
+                                            <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="4"  data-slider-step="1" data-slider-value="2"/>
+                                        </div>
+                                        <div class="scale"><span>легкий</span><span>стандартный</span><span>средний</span><span>высокий</span></div>
+                                    </div>
+                                    <em>Уровень микширования</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content='Уровень микширования - это количество транзакций, с которыми проиходит "смешивание" при отправке платежа. Чем выше уровень, тем медленнее происходит обработка транзакции, но отследить такой кому приндлежит платеж практичесеки невозможно'><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                                <li class="list-group-item">
+
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default active"><input type="radio" name="options3_3_3" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                        <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options3_3_3" id="option2" autocomplete="off"></label>
+
+                                    </div>
+                                    Требовать ввод пароля к сейфу при отправке платежа  <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="maining">
+
+                <div class="panel">
+                    <div class="panel-body">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <div class="btn-group pull-right" data-toggle="buttons">
+                                    <label class="btn btn-default active"><input type="radio" name="options5_1" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                    <label class="btn btn-danger"><i class="fa fa-lg fa-times"></i><input type="radio" name="options5_1" id="option2" autocomplete="off"></label>
+                                </div>
+                                <em>Блокировать возможность транзакций со счета с добычей</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Платеж со счета с добычей возможен, но приведет к потере прогнозируемой прибыли"><i class="fa fa-lg fa-question-circle"></i></button>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="btn-group pull-right" data-toggle="buttons">
+                                    <label class="btn btn-default active"><input type="radio" name="options5_2" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                    <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options5_2" id="option2" autocomplete="off"></label>
+                                </div>
+                                <em>Требовать подтверждения при попытке совершения транзакции со счета с добычей</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="btn-group pull-right" data-toggle="buttons">
+                                    <label class="btn btn-default active"><input type="radio" name="options5_3" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                    <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options5_3" id="option2" autocomplete="off"></label>
+                                </div>
+                                <em>Разрешить начало добычи в сейфах автоматически при отсутствии платежей</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content=" Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="btn-group pull-right foursteps">
+                                    <div class="fslider">
+                                        <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="4"  data-slider-step="1" data-slider-value="2"/>
+                                    </div>
+                                    <div class="scale"><span>3 дня</span><span>неделю</span><span>2 недели</span><span>месяц</span></div>
+                                </div>
+                                <em>Заупукать добычу в сейфе автоматически через</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content=" Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="interface">
+
+                <div class="panel">
+                    <div class="panel-body">
+                        <h4><a data-target=".collapse-off3-1" data-toggle="collapse-off" type="button" href="#"><span>Общее</span></a></h4>
+
+                        <div class="collapse-off in collapse-off3-1">
+                            <ul class="list-group">
+                                <li class="list-group-item clearfix">
+                                    <div class="pull-right selesct-holder">
+                                        <select class="selectpicker">
+                                            <option>Английский</option>
+                                            <option>Немецкий</option>
+                                            <option>Французский</option>
+                                            <option>Испанский</option>
+                                            <option>Русский</option>
+                                        </select>
+                                    </div>
+                                    <em>Язык интерфейса</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"></i></button>
+                                </li>
+                                <li class="list-group-item clearfix">
+                                    <div class="btn-group pull-right foursteps">
+                                        <div class="fslider">
+                                            <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="4"  data-slider-step="1" data-slider-value="2"/>
+                                        </div>
+                                        <div class="scale"><span>мелкий</span><span>стандартный</span><span>крупный</span><span>огромный</span></div>
+                                    </div>
+                                    <em>Размер шрифта</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"></i></button></li>
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default active"><input type="radio" name="options2_1" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                        <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options2_1" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Наличие подсказок при наведении на кнопки</em>
+                                    <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-body">
+                        <h4><a data-target=".collapse-off3-1" data-toggle="collapse-off" type="button" href="#"><span>Экран «Отправить гульдены»</span></a></h4>
+
+                        <div class="collapse-off in collapse-off3-1">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default active"><input type="radio" name="options4_1" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                        <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options4_1" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Показывать историю транзакций по получателю при оформлении платежа</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-body">
+                        <h4><a data-target=".collapse-off3-1" data-toggle="collapse-off" type="button" href="#"><span>Экраны «Купить/продать гульдены»</span></a></h4>
+
+                        <div class="collapse-off in collapse-off3-1">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default active"><input type="radio" name="options4_2" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                        <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options4_2" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Показывать в форме заявки курсы спроса и предложения в системе</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default active"><input type="radio" name="options4_3" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                        <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options4_3" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Показывать в форме заявки последние сделки на биржах </em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content=" Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="tab-pane" id="common">
+                <div class="panel">
+                    <div class="panel-body">
+                        <h4><a data-target=".collapse-off1-1" data-toggle="collapse-off" type="button" href="#"><span>Приложение</span></a></h4>
+                        <div class="collapse-off in collapse-off31-1">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default"><input type="radio" name="options1_1_1" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                        <label class="btn btn-default active"><i class="fa fa-lg fa-times"></i><input type="radio" name="options1_1_1" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Автоматически запускать приложение при включении компьютера</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content=" Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default active"><input type="radio" name="options1_1_2" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                        <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options1_1_2" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Напоминать о необходимости дождаться завершения процессов перед выключением компьютера</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right foursteps">
+                                        <div class="fslider">
+                                            <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="4"  data-slider-step="1" data-slider-value="2"/>
+                                        </div>
+                                        <div class="scale"><span>5 мин</span><span>15 мин</span><span>30 мин</span><span>час</span></div>
+                                    </div>
+                                    <em>Сохранять данные приложения автоматически через</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-body">
+                        <h4><a data-target=".collapse-off1-1" data-toggle="collapse-off" type="button" href="#"><span>Платежная система</span></a></h4>
+                        <div class="collapse-off in collapse-off31-1">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right" data-toggle="buttons">
+                                        <label class="btn btn-default"><input type="radio" name="options1_1" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
+                                        <label class="btn btn-default active"><i class="fa fa-lg fa-times"></i><input type="radio" name="options1_1" id="option2" autocomplete="off"></label>
+                                    </div>
+                                    <em>Включить пожертвования на развитие системы</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Подсказка"><i class="fa fa-lg fa-question-circle"></i></button>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="btn-group pull-right foursteps">
+                                        <div class="collapse-off in donat">
+                                            <div class="fslider">
+                                                <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-step="0.1" data-slider-max="5"  data-slider-value="3"/>
+                                            </div>
+                                            <div class="scale"><span>0,1%</span><span>0,5%</span><span>1%</span><span>5%</span></div>
+                                        </div>
+                                        <div class="collapse-off donat">
+                                            <select class="selectpicker shortselect"><option>1%</option><option>2%</option><option>5%</option><option>10%</option><option>50%</option><option>100%</option></select>
+                                            <div class="btn-group"> или </div>
+                                            <div class="btn-group"><div class="input-group" style="width:130px;"><input type="text" placeholder="число" class="form-control"><span class="input-group-addon">%</span></div></div>
+                                        </div>
+                                    </div>
+                                    <em>Какой процент от суммы добычи отчислять на развитие системы</em> <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content=" Подсказка"><i class="fa fa-lg fa-question-circle"></i></button> <a href="#" type="button" class="label label-info" data-toggle="collapse-off"  data-target=".donat">другое значение</a>
+
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
