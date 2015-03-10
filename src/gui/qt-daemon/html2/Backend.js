@@ -24,10 +24,7 @@ Backend = function(emulator) {
         var returnObject = JSON.parse(returnValue);
 
         if (returnObject.error_code != "OK") {
-            // TODO: get rid of native alert window
-            // TODO: do we really need any kind of alert here? console.log maybe?
-            // TODO: no need alert for sure
-            alert("API Error: " + returnObject.error_code);
+            console.log("API Error: " + returnObject.error_code);
         } else {
             // Everything is OK
             callbacks[returnObject.request_id] = callback;
@@ -44,8 +41,6 @@ Backend = function(emulator) {
             var callback = callbacks[requestId];
             callback(status, param);
         } else {
-            // TODO: backend taking the initiative of talking to interface, like on_update_wallet_info
-            // TODO: if not the case, log an error? that's what we do, for now, we'll dump the error into the console
             console.log("API Error: no such request_id: ["+requestId+"]");
         }
     };
