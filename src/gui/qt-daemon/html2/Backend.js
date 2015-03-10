@@ -26,6 +26,7 @@ Backend = function(emulator) {
         if (returnObject.error_code != "OK") {
             // TODO: get rid of native alert window
             // TODO: do we really need any kind of alert here? console.log maybe?
+            // TODO: no need alert for sure
             alert("API Error: " + returnObject.error_code);
         } else {
             // Everything is OK
