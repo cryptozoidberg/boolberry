@@ -1,5 +1,5 @@
 // Ajax router
-GuilderRouter = function(ajaxContainer) {
+Router = function(ajaxContainer) {
 
     this.settings = {
         'animation': {
@@ -159,4 +159,4 @@ GuilderRouter = function(ajaxContainer) {
         this.appCallback = callback;
     }
 
-}; // -- end of GuilderRouter definition
+}; // -- end of Router definition

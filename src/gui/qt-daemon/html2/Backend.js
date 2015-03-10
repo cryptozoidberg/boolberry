@@ -1,5 +1,5 @@
 // Talks to C++ backend
-GuilderBackend = function(emulator) {
+Backend = function(emulator) {
 
     this.settings = {
         useEmulator: true,
@@ -58,14 +58,24 @@ GuilderBackend = function(emulator) {
 
     /******************** Specific backend API calls being reflected in UI *********************/
 
+    // Register callbacks for automatic events from backend side
+    this.registerEventCallbacks = function() {
+        // TODO
+    };
+
+    // UI initialization
     this.onAppInit = function() {
+        this.registerEventCallbacks();
+
+        // -- // -- // -- // -- //
+
         setInterval(function() {
             $backend.checkIfOnline();
         }, this.settings.intervalCheckIfOnline);
 
         $backend.checkIfOnline();
 
-        setInterval(this.updateCurrentScreen, this.settings.intervalUpdateCurrentScreen)
+        setInterval(this.updateCurrentScreen, this.settings.intervalUpdateCurrentScreen);
     };
 
     this.updateCurrentScreen = function() {
@@ -105,4 +115,4 @@ GuilderBackend = function(emulator) {
         });
     };
 
-}; // -- end of GuilderBackend definition
+}; // -- end of Backend definition

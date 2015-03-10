@@ -1,7 +1,7 @@
 $(function () {
     var $ = window.jQuery;
-    var router = new GuilderRouter($('.ajaxContainer'));
-    var emulator = new GuilderEmulator();
-    var backend = new GuilderBackend(emulator);
-    var app = new GuilderApplication(router, backend);
+    var router   = new Router($('.ajaxContainer'));
+    var emulator = new Emulator();
+    var backend  = new Backend(emulator);
+    var app      = new Application(router, backend);
 });

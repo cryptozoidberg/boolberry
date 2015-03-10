@@ -1,7 +1,7 @@
 // Backend emulation
-GuilderEmulator = function() {
+Emulator = function() {
 
-    this.backend = null; // set in GuilderBackend
+    this.backend = null; // set in Backend
     this.settings = {
         asyncEmulationTimeout: 500
     };
@@ -75,4 +75,4 @@ GuilderEmulator = function() {
         }
     };
 
-}; // -- end of GuilderEmulator
+}; // -- end of Emulator

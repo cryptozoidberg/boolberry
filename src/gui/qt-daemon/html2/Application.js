@@ -1,5 +1,5 @@
-// Main Guilder object
-GuilderApplication = function(router, backend) {
+// Main object
+Application = function(router, backend) {
 
     this.router = router;
     this.backend = backend;
@@ -154,4 +154,4 @@ GuilderApplication = function(router, backend) {
 
     this.init();
 
-}; // -- end of GuilderApplication definition
+}; // -- end of Application definition
