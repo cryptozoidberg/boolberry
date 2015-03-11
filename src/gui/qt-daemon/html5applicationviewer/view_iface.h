@@ -198,6 +198,60 @@ public:
 
   };
 
+  struct open_wallet_request
+  {
+    std::string pass;
+    std::string path;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(pass)
+      KV_SERIALIZE(path)
+    END_KV_SERIALIZE_MAP()
+  };
+
+
+  struct open_wallet_response
+  {
+    uint64_t wallet_id;
+    
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct close_wallet_request
+  {
+    uint64_t wallet_id;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
+    END_KV_SERIALIZE_MAP()
+  };
+
+
+
+  struct system_filedialog_request
+  {
+    std::string caption;
+    std::string filemask;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(caption)
+      KV_SERIALIZE(filemask)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct system_filedialog_response
+  {
+    std::string error_code;
+    std::string path;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(error_code)
+      KV_SERIALIZE(path)
+    END_KV_SERIALIZE_MAP()
+  };
+
 
   struct transfer_event_info
   {
@@ -297,6 +351,8 @@ public:
 #define API_RETURN_CODE_WALLET_WRONG_ID                         "WALLET_WRONG_ID"
 #define API_RETURN_CODE_FILE_NOT_FOUND                          "FILE_NOT_FOUND"
 #define API_RETURN_CODE_FILE_ALREADY_EXISTS                     "FILE_ALREADY_EXISTS"
+#define API_RETURN_CODE_CANCELED                                "CANCELED"
+
 
 
   struct i_view

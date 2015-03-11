@@ -466,12 +466,6 @@ bool Html5ApplicationViewer::show_wallet()
   return true;
 }
 
-void Html5ApplicationViewer::close_wallet(const QString& wallet_id)
-{
-  //TODO: make async call
-  //m_backend.close_wallet();
-}
-
 bool Html5ApplicationViewer::switch_view(int view_no)
 {
   view::switch_view_info swi = AUTO_VAL_INIT(swi);
@@ -591,6 +585,10 @@ QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
     return;
 
   });
+  view::api_response ar;
+  ar.error_code = API_RETURN_CODE_OK;
+  ar.request_id = request_id;
+  return epee::serialization::store_t_to_json(ar).c_str();
 }
 
 void Html5ApplicationViewer::message_box(const QString& msg)
@@ -598,51 +596,153 @@ void Html5ApplicationViewer::message_box(const QString& msg)
   show_msg_box(msg.toStdString());
 }
 
-void Html5ApplicationViewer::generate_wallet()
+QString Html5ApplicationViewer::show_openfile_dialog(const QString& param)
 {
-  QFileDialog dialogFile(this);
-  std::string default_file = (tools::get_current_username() + "_wallet.bbr").c_str();
-  QString path = dialogFile.getSaveFileName(this, tr("Wallet file to store"),
-    (m_config.wallets_last_used_dir + "/" + default_file).c_str(),
-    tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
+  view::system_filedialog_request ofdr = AUTO_VAL_INIT(ofdr);
+  view::system_filedialog_response ofdres = AUTO_VAL_INIT(ofdres);
+  if (!epee::serialization::load_t_from_json(ofdr, param.toStdString()))
+  {
+    ofdres.error_code = API_RETURN_CODE_BAD_ARG;
+    return epee::serialization::store_t_to_json(ofdres).c_str();
+  }
+
+  QString path = QFileDialog::getOpenFileName(this, ofdr.caption.c_str(),
+    m_config.wallets_last_used_dir.c_str(),
+    ofdr.filemask.c_str());
 
   if (!path.length())
-    return;
+  {
+    ofdres.error_code = API_RETURN_CODE_CANCELED;
+    return epee::serialization::store_t_to_json(ofdres).c_str();
+  }
 
-  m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
-
-  //read password
-  bool ok;
-  QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
-    tr("Password:"), QLineEdit::Password,
-    QString(), &ok);
-
-  if (!ok)
-    return;
-  size_t wallet_id = 0;
-  m_backend.generate_wallet(path.toStdString(), pass.toStdString(), wallet_id);
+  ofdres.error_code = API_RETURN_CODE_OK;
+  ofdres.path = path.toStdString();
+  return epee::serialization::store_t_to_json(ofdres).c_str();
 }
 
-void Html5ApplicationViewer::open_wallet()
+QString Html5ApplicationViewer::show_savefile_dialog(const QString& param)
 {
-  QString path = QFileDialog::getOpenFileName(this, tr("Open wallet File"),
+
+  view::system_filedialog_request ofdr = AUTO_VAL_INIT(ofdr);
+  view::system_filedialog_response ofdres = AUTO_VAL_INIT(ofdres);
+  if (!epee::serialization::load_t_from_json(ofdr, param.toStdString()))
+  {
+    ofdres.error_code = API_RETURN_CODE_BAD_ARG;
+    return epee::serialization::store_t_to_json(ofdres).c_str();
+  }
+
+  QString path = QFileDialog::getSaveFileName(this, ofdr.caption.c_str(),
     m_config.wallets_last_used_dir.c_str(),
-    tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
+    ofdr.filemask.c_str());
+
   if (!path.length())
+  {
+    ofdres.error_code = API_RETURN_CODE_CANCELED;
+    return epee::serialization::store_t_to_json(ofdres).c_str();
+  }
+
+  ofdres.error_code = API_RETURN_CODE_OK;
+  ofdres.path = path.toStdString();
+  return epee::serialization::store_t_to_json(ofdres).c_str();
+}
+
+QString Html5ApplicationViewer::close_wallet(const QString& param)
+{
+  size_t request_id = m_request_id_counter++;
+  std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
+
+  return que_call(request_id, [request_id, param_ptr, this](void){
+
+    view::api_response ar;
+    ar.request_id = std::to_string(request_id);
+
+    view::close_wallet_request cwr = AUTO_VAL_INIT(cwr);
+    if (!epee::serialization::load_t_from_json(cwr, *param_ptr))
+    {
+      view::api_void av;
+      ar.error_code = API_RETURN_CODE_BAD_ARG;
+      dispatch(ar, av);
+      return;
+    }
+
+    ar.error_code = m_backend.close_wallet(cwr.wallet_id);
+    dispatch(ar, cwr);
+    return;
+  });
+
+  view::api_response ar;
+  ar.error_code = API_RETURN_CODE_OK;
+  ar.request_id = request_id;
+  return epee::serialization::store_t_to_json(ar).c_str();
+}
+
+
+QString Html5ApplicationViewer::generate_wallet(const QString& param)
+{
+  size_t request_id = m_request_id_counter++;
+  std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
+
+  return que_call(request_id, [request_id, param_ptr, this](void){
+
+    view::api_response ar;
+    ar.request_id = std::to_string(request_id);
+
+    view::open_wallet_request owd = AUTO_VAL_INIT(owd);
+    if (!epee::serialization::load_t_from_json(owd, *param_ptr))
+    {
+      view::api_void av;
+      ar.error_code = API_RETURN_CODE_BAD_ARG;
+      dispatch(ar, av);
+      return;
+    }
+
+    m_config.wallets_last_used_dir = boost::filesystem::path(owd.path).parent_path().string();
+
+    view::open_wallet_response owr = AUTO_VAL_INIT(owr);
+    ar.error_code = m_backend.generate_wallet(owd.path, owd.pass, owr.wallet_id);
+    dispatch(ar, owr);
+    return;
+  });
+
+  view::api_response ar;
+  ar.error_code = API_RETURN_CODE_OK;
+  ar.request_id = request_id;
+  return epee::serialization::store_t_to_json(ar).c_str();
+
+}
+
+QString Html5ApplicationViewer::open_wallet(const QString& param)
+{
+  size_t request_id = m_request_id_counter++;
+  std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
+
+  return que_call(request_id, [request_id, param_ptr, this](void){
+
+    view::api_response ar;
+    ar.request_id = std::to_string(request_id);
+
+    view::open_wallet_request owd = AUTO_VAL_INIT(owd);
+    if (!epee::serialization::load_t_from_json(owd, *param_ptr))
+    {
+      view::api_void av;
+      ar.error_code = API_RETURN_CODE_BAD_ARG;
+      dispatch(ar, av);
+      return;
+    }
+
+    m_config.wallets_last_used_dir = boost::filesystem::path(owd.path).parent_path().string();
+
+    view::open_wallet_response owr = AUTO_VAL_INIT(owr);
+    ar.error_code = m_backend.open_wallet(owd.path, owd.pass, owr.wallet_id);
+    dispatch(ar, owr);
     return;
 
-  m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
-
-
-  //read password
-  bool ok;
-  QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
-    tr("Password:"), QLineEdit::Password,
-    QString(), &ok);
-  if (!ok)
-    return;
-  size_t wallet_id = 0;
-  m_backend.open_wallet(path.toStdString(), pass.toStdString(), wallet_id);
+  });
+  view::api_response ar;
+  ar.error_code = API_RETURN_CODE_OK;
+  ar.request_id = request_id;
+  return epee::serialization::store_t_to_json(ar).c_str();
 }
 
 #include "html5applicationviewer.moc"

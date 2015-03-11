@@ -45,9 +45,13 @@ protected:
   bool do_close();
   bool on_request_quit();
   public slots:
-  void open_wallet();
-  void generate_wallet();
-  void close_wallet(const QString& wallet_id);
+
+  QString show_openfile_dialog(const QString& param);
+  QString show_savefile_dialog(const QString& param);
+
+  QString open_wallet(const QString& param);
+  QString generate_wallet(const QString& param);
+  QString close_wallet(const QString& wallet_id);
   QString get_version();
   QString transfer(const QString& json_transfer_object);
   void message_box(const QString& msg);
