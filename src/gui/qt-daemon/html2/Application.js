@@ -119,6 +119,28 @@ Application = function(router, backend) {
         $(".bs-ui-slider").slider({});
         $('a[data-toggle="collapse"]').attr('onclick', 'return false;'); // Make section headers unclickable
 
+        // Buttons & actions
+        $(document).on("click", ".open-safe-button", function() {
+            var fileName = $app.backend.showOpenFileDialog("Выберите файл сейфа", function(status, param) { // todo: translate
+                if (status.error_code == "OK" && param.path) {
+                    $("#openSafe input[name='open-safe_file-name-input']").val( param.path );
+                    $("#openSafe").modal('open');
+                } else {
+                    console.log("OpenFileDialog API Error: "+status.error_code);
+                }
+            });
+        });
+        $(document).on("click", ".index_close-safe-button", function() {
+            var safe_id = $(this).parents('.safebox').data('safe-id');
+            $app.backend.backendRequest('close_wallet', {wallet_id: safe_id}, function(status, data) {
+                if (status.error_code != "OK") {
+                    alert("Error: "+status.error_code); // todo: replace alert
+                }
+            });
+            $('.safebox').click();
+            return false;
+        });
+
         // Premium/standard placement radiobox
         $(document).on("click", "[id$=_premiumPlacement_checkbox]", function() {
             var opposite_id = $(this).attr('id').replace('premium', 'standard');
@@ -133,6 +155,7 @@ Application = function(router, backend) {
         setInterval(function() {
             $('.alert-warning').slideUp();
         }, 3000);
+
     };
 
     this.onScreenInit = function(screen) {
@@ -148,10 +171,11 @@ Application = function(router, backend) {
 
     this.getRandomInt = function(min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min);
-    }
+    };
 
     //////////////////////////////////////////////////////////////
 
     this.init();
 
 }; // -- end of Application definition
+
