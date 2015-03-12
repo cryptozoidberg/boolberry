@@ -44,6 +44,9 @@ params =  {
 }
 */
 
+
+
+
 function on_update_wallet_info(param){}
 /*
 param = {wallets: [
@@ -245,6 +248,40 @@ function get_version(){}
 response = "1.2.3 ";
 
 */
+
+
+
+function show_openfile_dialog(params){}
+
+/*
+ params = {
+ "caption": "Open wallet",
+ "filemask":"*.lui"
+ }
+
+response = {
+    "error_code": "OK",
+    "path": "/home/lui.lui"
+}
+
+*/
+
+
+function show_savefile_dialog(params){}
+
+/*
+ params = {
+ "caption": "Open wallet",
+ "filemask":"*.lui"
+ }
+
+ response = {
+ "error_code": "OK",
+ "path": "/home/lui.lui"
+ }
+
+ */
+
 
 
 /* EXCHANGE API */
