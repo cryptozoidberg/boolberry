@@ -517,7 +517,7 @@ bool wallet2::clear()
   return true;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::store_keys(const std::string& keys_file_name, const std::string& password)
+bool wallet2::store_keys(const std::string& buff, const std::string& password)
 {
   std::string account_data;
   bool r = epee::serialization::store_t_to_binary(m_account, account_data);
@@ -532,10 +532,7 @@ bool wallet2::store_keys(const std::string& keys_file_name, const std::string& p
   crypto::chacha8(account_data.data(), account_data.size(), key, keys_file_data.iv, &cipher[0]);
   keys_file_data.account_data = cipher;
 
-  std::string buf;
-  r = ::serialization::dump_binary(keys_file_data, buf);
-  r = r && epee::file_io_utils::save_string_to_file(keys_file_name, buf); //and never touch wallet_keys_file again, only read
-  CHECK_AND_ASSERT_MES(r, false, "failed to generate wallet keys file " << keys_file_name);
+  r = ::serialization::dump_binary(keys_file_data, buff);
 
   return true;
 }
@@ -582,11 +579,10 @@ void wallet2::assign_account(const currency::account_base& acc)
 void wallet2::generate(const std::string& wallet_, const std::string& password)
 {
   clear();
-  prepare_file_names(wallet_);
+  m_wallet_file = wallet_;
 
   boost::system::error_code ignored_ec;
   CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
-  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_keys_file,   ignored_ec), error::file_exists, m_keys_file);
 
   m_account.generate();
   m_account_public_address = m_account.get_keys().m_account_address;
@@ -599,21 +595,7 @@ void wallet2::generate(const std::string& wallet_, const std::string& password)
 
   store();
 }
-//----------------------------------------------------------------------------------------------------
-bool wallet2::prepare_file_names(const std::string& file_path)
-{
-  m_keys_file = file_path;
-  m_wallet_file = file_path;
-  boost::system::error_code e;
-  if(string_tools::get_extension(m_keys_file) == "keys")
-  {//provided keys file name
-    m_wallet_file = string_tools::cut_off_extension(m_wallet_file);
-  }else
-  {//provided wallet file name
-    m_keys_file += ".keys";
-  }
-  return true;
-}
+
 //----------------------------------------------------------------------------------------------------
 bool wallet2::check_connection()
 {

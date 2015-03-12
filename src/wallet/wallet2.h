@@ -215,7 +215,6 @@ namespace tools
 
     currency::account_base m_account;
     std::string m_wallet_file;
-    std::string m_keys_file;
     std::vector<crypto::hash> m_blockchain;
     std::atomic<uint64_t> m_local_bc_height; //temporary workaround 
     std::atomic<uint64_t> m_last_bc_timestamp; 
