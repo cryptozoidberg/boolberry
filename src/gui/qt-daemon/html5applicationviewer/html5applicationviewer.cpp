@@ -587,7 +587,7 @@ QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
   });
   view::api_response ar;
   ar.error_code = API_RETURN_CODE_OK;
-  ar.request_id = request_id;
+  ar.request_id = std::to_string(request_id);
   return epee::serialization::store_t_to_json(ar).c_str();
 }
 
@@ -673,7 +673,7 @@ QString Html5ApplicationViewer::close_wallet(const QString& param)
 
   view::api_response ar;
   ar.error_code = API_RETURN_CODE_OK;
-  ar.request_id = request_id;
+  ar.request_id = std::to_string(request_id);
   return epee::serialization::store_t_to_json(ar).c_str();
 }
 
@@ -707,7 +707,7 @@ QString Html5ApplicationViewer::generate_wallet(const QString& param)
 
   view::api_response ar;
   ar.error_code = API_RETURN_CODE_OK;
-  ar.request_id = request_id;
+  ar.request_id = std::to_string(request_id);
   return epee::serialization::store_t_to_json(ar).c_str();
 
 }
@@ -741,7 +741,7 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
   });
   view::api_response ar;
   ar.error_code = API_RETURN_CODE_OK;
-  ar.request_id = request_id;
+  ar.request_id = std::to_string(request_id);
   return epee::serialization::store_t_to_json(ar).c_str();
 }
 
