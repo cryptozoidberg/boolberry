@@ -152,7 +152,24 @@ function generate_wallet(){}
  If you need the way to show Save File Dialog just le me know
 */
 
+get_wallet_info()
+/*
 
+params = {
+  "wallet_id" = 1234;
+}
+
+response =
+{
+ "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ",
+ "balance": 20605413534000000,
+ "do_mint": 1,
+ "mint_is_in_progress": 0,
+ "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_2.lui",
+ "tracking_hey": "d4327fb64d896c013682bbad36a193e5f6667c2291c8f361595ef1e9c3368d0f",
+ "unlocked_balance": 20553902633000000
+}
+*/
 
 function get_recent_transfers(params){}
 /*
