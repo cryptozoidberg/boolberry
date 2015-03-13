@@ -210,7 +210,7 @@ public:
   };
 
 
-  struct open_wallet_response
+  struct wallet_id_obj
   {
     uint64_t wallet_id;
     
@@ -218,16 +218,6 @@ public:
       KV_SERIALIZE(wallet_id)
     END_KV_SERIALIZE_MAP()
   };
-
-  struct close_wallet_request
-  {
-    uint64_t wallet_id;
-
-    BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(wallet_id)
-    END_KV_SERIALIZE_MAP()
-  };
-
 
 
   struct system_filedialog_request
