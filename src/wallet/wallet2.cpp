@@ -517,7 +517,7 @@ bool wallet2::clear()
   return true;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::store_keys(const std::string& buff, const std::string& password)
+bool wallet2::store_keys(std::string& buff, const std::string& password)
 {
   std::string account_data;
   bool r = epee::serialization::store_t_to_binary(m_account, account_data);
@@ -587,10 +587,7 @@ void wallet2::generate(const std::string& wallet_, const std::string& password)
   m_account.generate();
   m_account_public_address = m_account.get_keys().m_account_address;
 
-  bool r = store_keys(m_keys_file, password);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_keys_file);
-
-  r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str() );
+  bool r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str() );
   if(!r) LOG_PRINT_RED_L0("String with address text not saved");
 
   store();
@@ -605,11 +602,15 @@ bool wallet2::check_connection()
 void wallet2::load(const std::string& wallet_, const std::string& password)
 {
   clear();
-  prepare_file_names(wallet_);
+  m_wallet_file = wallet_;
+  m_password = password;
 
   boost::system::error_code e;
-  bool exists = boost::filesystem::exists(m_keys_file, e);
-  CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, m_keys_file);
+  bool exists = boost::filesystem::exists(m_wallet_file, e);
+  CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, m_wallet_file);
+
+
+
 
   load_keys(m_keys_file, password);
   LOG_PRINT_L0("Loaded wallet keys file, with public address: " << m_account.get_public_address_str());
@@ -640,6 +641,14 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
 //----------------------------------------------------------------------------------------------------
 void wallet2::store()
 {
+  std::stringstream ss;
+
+  std::string keys_buff;
+  bool r = store_keys(keys_buff, m_password);
+  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_wallet_file);
+
+
+
   bool r = tools::serialize_obj_to_file(*this, m_wallet_file);
   CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_wallet_file);
 }
