@@ -47,11 +47,9 @@
                     <small>Архитектура сети обеспечивает полную безопасность и анонимность</small>
                 </li>
 
-                <li><a href="market.html" style="color:#5cb85c">
-                    <i class="fa fa-2x fa-check-circle-o"></i>
-
-                    <span class="ifOnlineText online">Онлайн</span>
-                    <span class="ifOnlineText offline">Оффлайн</span>
+                <li><a href="market.html">
+                    <span class="ifOnlineText online" style="color:#5cb85c"><i class="fa fa-2x fa-check-circle-o"></i> Онлайн</span>
+                    <span class="ifOnlineText offline" style="color:#b85c5c"><i class="fa fa-2x fa-pause"></i> Оффлайн</span>
                     <span class="ifOnlineText loading">Загружается...</span></a>
                 </li>
 
@@ -110,7 +108,7 @@
                                 </label>
                                 <div class="help-block">Вы сможете создать сколько угодно сейфов.  Имя для сейфа &ndash; это любое слово или словосочетание для
                                     обозначения этого сейфа в списке</div>
-                                <input type="text" class="input-lg form-control" placeholder="любое слово или словосочетание">
+                                <input id="create-safe_safe-name-input" type="text" class="input-lg form-control" placeholder="любое слово или словосочетание">
                             </div>
                             <div class="row">
                                 <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
@@ -123,7 +121,7 @@
                                 </label>
                                 <div class="help-block">Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы. Для надежности используйте автоматический генератор с
                                     установкой сложности пароля</div>
-                                <input type="password" placeholder="" class="input-lg form-control">
+                                <input id="create-safe_safe-password-input-1" type="password" placeholder="" class="input-lg form-control">
 
                             </div>
                             <div class="form-group clearfix">
@@ -151,7 +149,7 @@
                             <h4>Проверьте точно ли вы запомнили пароль? </h4>
                             <div class="form-group">
                                 <label  class="requred">Введите пароль повторно</label>
-                                <input class="form-control" type="password">
+                                <input id="create-safe_safe-password-input-2" class="form-control" type="password">
                             </div>
 
 
@@ -208,33 +206,49 @@
 </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
 </div>
-<div class="modal modal-preloaded" id="openSafe" tabindex="-1" role="dialog" aria-labelledby="openSafeLabel" aria-hidden="true">
+
+<div class="modal modal-preloaded" id="openSafe" tabindex="-1" role="dialog" aria-labelledby="openSafeLabel"
+     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header btn btn-primary btn-block">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                        class="sr-only">Close</span></button>
                 <h4 class="modal-title text-center">Восстановление сейфа из файла</h4>
             </div>
-            <div class="modal-body">
-                <div id="owl-panels0" class="owl-carousel">
-                    <div class="screen01">
-                        <em>системный диалог - Открыть файл  </em>
-                        <p>
 
-                            <a class="btn btn-default" href="#screen02">Далее</a></p>
+            <div class="modal-body">
+
+                <div id="owl-panels0" class="owl-carousel">
+                    <div class="modal-opensafe-screen01">
+                        <em>системный диалог - Открыть файл </em>
+                        <p>
+                        <a class="btn btn-default" href="#screen02">Далее</a></p>
+                        <input type="hidden" name="open-safe_file-name-input" id="open-safe_file-name-input" val=""/>
                     </div>
+
                     <div class="item" data-hash="screen02">
                         <div class="form-group">
                             <label class="requred">
-                                Имя для обозначения сейфа в приложении<!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
+                                Имя для обозначения сейфа в приложении
+                                <!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
                             </label>
-                            <div class="help-block">Вы сможете создать сколько угодно сейфов.  Имя для сейфа &ndash; это любое слово или словосочетание для
-                                обозначения этого сейфа в списке</div>
-                            <input type="text" class="input-lg form-control" placeholder="любое слово или словосочетание">
-                        </div>
-                        <div class="row"><div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div><div class="col-xs-6 col-sm-6">
 
-                            <a class="btn btn-primary btn-block btn-lg" type="button" href="#screen03">Продолжить</a></div></div>
+                            <div class="help-block">Вы сможете создать сколько угодно сейфов. Имя для сейфа &ndash; это
+                                любое слово или словосочетание для
+                                обозначения этого сейфа в списке
+                            </div>
+                            <input type="text" class="input-lg form-control"
+                                   placeholder="любое слово или словосочетание">
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button"
+                                                              href="#" data-dismiss="modal"> Отменить</a></div>
+                            <div class="col-xs-6 col-sm-6">
+
+                                <a class="btn btn-primary btn-block btn-lg" type="button"
+                                   href="#screen03">Продолжить</a></div>
+                        </div>
 
                     </div>
                     <div class="item" data-hash="screen03">
@@ -243,12 +257,21 @@
                             </label>
                             <input type="password" placeholder="" class="input-lg form-control">
                         </div>
-                        <p>Восстановить пароль невозможно. При утере пароля от сейфа, используйте другой способ восстановления – из цифровой копии ( brainwallet) или физической копии файла этого же сейфа с другим паролем, который вы помните. </p>
+                        <p>Восстановить пароль невозможно. При утере пароля от сейфа, используйте другой способ
+                            восстановления – из цифровой копии ( brainwallet) или физической копии файла этого же сейфа
+                            с другим паролем, который вы помните. </p>
 
-                        <a href="#screen02" class="btn btn-link"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
+                        <a href="#screen02" class="btn btn-link"><i
+                                class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span
+                                class="text-muted">Назад</span></a>
+
                         <div class="row">
-                            <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
-                            <div class="col-xs-6 col-sm-6"><button type="button" class="btn btn-primary btn-block btn-lg" type="button" data-dismiss="modal">Открыть сейф</a></div>
+                            <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button"
+                                                              href="#" data-dismiss="modal"> Отменить</a></div>
+                            <div class="col-xs-6 col-sm-6">
+                                <button type="button" class="btn btn-primary btn-block btn-lg" type="button"
+                                        data-dismiss="modal">Открыть сейф</a>
+                            </div>
                         </div>
                     </div>
                 </div>

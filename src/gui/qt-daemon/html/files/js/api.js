@@ -49,7 +49,10 @@ params =  {
 
 function on_update_wallet_info(param){}
 /*
-param = {
+param = {wallets: [
+
+{
+    "wallet_id": "12345",
     "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ",
         "balance": 20605413534000000,
         "do_mint": 1,
@@ -57,6 +60,10 @@ param = {
         "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_2.lui",
         "tracking_hey": "d4327fb64d896c013682bbad36a193e5f6667c2291c8f361595ef1e9c3368d0f",
         "unlocked_balance": 20553902633000000
+}
+
+]    // (array of safes)
+
 }
 */
 function on_money_transfered(param){}
@@ -133,7 +140,6 @@ If you need the way to show Open File Dialog just le me know
 
 response = {
     wallet_id: "1234",
-
 }
 
 
