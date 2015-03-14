@@ -63,7 +63,7 @@
                         Восстановить сейф <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                        <li><a type="button" class="open-safe-button">Открыть файл-сейф</a></li>
+                        <li><a type="button" class="index_open-safe-button">Открыть файл-сейф</a></li>
                         <li><a type="button" data-toggle="modal" data-target="#onensmartSafe">Восстановить из
                             smartsafe</a></li>
                     </ul>
@@ -2128,89 +2128,91 @@
     </p>
 </div>
 
-<!-- Safe template -->
-<div style="display: none;" class="safebox_template">
+<!-- Safe templates -->
+<div style="display: none;" class="safebox_empty_template">
     <div class="safebox" data-safe-id="{{ safe_id }}">
-        <div class="panel">
-            <div class="panel-heading">
-                <div class="btn-group navbar-btn pull-right">
-                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle"
-                            type="button">
-                        Операции <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                        <li><a href="market.html">Отправить гульдены</a></li>
+    </div>
+</div>
+<div style="display: none;" class="safebox_template">
+    <div class="panel">
+        <div class="panel-heading">
+            <div class="btn-group navbar-btn pull-right">
+                <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle"
+                        type="button">
+                    Операции <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                    <li><a href="market.html">Отправить гульдены</a></li>
 
-                        <li><a href="market.html">Продать гульдены</a></li>
-                        <li><a href="market.html">Купить гульдены</a></li>
-                        <li><a href="#">Начать добычу</a></li>
+                    <li><a href="market.html">Продать гульдены</a></li>
+                    <li><a href="market.html">Купить гульдены</a></li>
+                    <li><a href="#">Начать добычу</a></li>
 
-                        <li class="divider"></li>
-                        <li><a href="safe.html#information">Присвоить алиас</a></li>
-                        <li><a class="index_close-safe-button" href="#">Отключить сейф</a></li>
-                        <li><a href="market.html">Сделать бекап</a></li>
-                    </ul>
-                </div>
-
-                <a href="safe.html" class="btn btn-link"><big>{{ label }}</big></a>
-                <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"
-                        data-content="Сейф зашифрован"><i class="fa fa-1x fa-lock text-primary"></i></button>
-                <div class="dropdown">
-                    <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown"
-                            aria-expanded="false"><span class="account-text"><span class="text-muted"> <span
-                            style="color:#999">{{ address }}</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                    <div class="dropdown-menu dropdown-menu-left" role="menu">
-                        <div style="padding:10px">
-                            <ul class="list-unstyled">
-
-
-                                <li>
-                                    <div class="contractor">
-                                        <button class="btn btn-sm btn-default pull-right"
-                                                style="position:absolute; bottom:0; right:0">скопировать
-                                        </button>
-							<pre style="height:60px" class="safe-number">{{ address }}
-							</pre>
-                                    </div>
-                                </li>
-
-                            </ul>
-                        </div>
-
-                    </div>
-
-
-                </div>
-                <div><span class="label label-info">@safealias</span> <span
-                        class="label label-info">@safealias</span></div>
-
-
+                    <li class="divider"></li>
+                    <li><a href="safe.html#information">Присвоить алиас</a></li>
+                    <li><a class="index_close-safe-button" href="#">Отключить сейф</a></li>
+                    <li><a href="market.html">Сделать бекап</a></li>
+                </ul>
             </div>
-            <div class="panel-body">
 
-
-                <div class="row">
-                    <div class="col-xs-9 col-sm-9">
+            <a href="safe.html" class="btn btn-link"><big>{{ label }}</big></a>
+            <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"
+                    data-content="Сейф зашифрован"><i class="fa fa-1x fa-lock text-primary"></i></button>
+            <div class="dropdown">
+                <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown"
+                        aria-expanded="false"><span class="account-text"><span class="text-muted"> <span
+                        style="color:#999">{{ address }}</span></span>
+        <span class="moredots">...<span class="caret"></span></span>
+        </span></button>
+                <div class="dropdown-menu dropdown-menu-left" role="menu">
+                    <div style="padding:10px">
                         <ul class="list-unstyled">
 
-                            <li class="text-info" style="display: none;">
-                                Ожидается: <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">
+
+                            <li>
+                                <div class="contractor">
+                                    <button class="btn btn-sm btn-default pull-right"
+                                            style="position:absolute; bottom:0; right:0">скопировать
+                                    </button>
+                        <pre style="height:60px" class="safe-number">{{ address }}
+                        </pre>
+                                </div>
                             </li>
+
                         </ul>
-                        <div class="balance">Баланс: {{ balance }}G</div>
-                    </div>
-                    <div class="col-xs-3 col-sm-3">
-                        <div class="coins">
-                            <img class="img-responsive" src="assets/img/coins24.svg">
-                        </div>
                     </div>
 
                 </div>
 
 
             </div>
+            <div><span class="label label-info">@safealias</span> <span
+                    class="label label-info">@safealias</span></div>
+
+
+        </div>
+        <div class="panel-body">
+
+
+            <div class="row">
+                <div class="col-xs-9 col-sm-9">
+                    <ul class="list-unstyled">
+
+                        <li class="text-info" style="display: none;">
+                            Ожидается: <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">
+                        </li>
+                    </ul>
+                    <div class="balance">Баланс: {{ balance }}G</div>
+                </div>
+                <div class="col-xs-3 col-sm-3">
+                    <div class="coins">
+                        <img class="img-responsive" src="assets/img/coins24.svg">
+                    </div>
+                </div>
+
+            </div>
+
+
         </div>
     </div>
 </div>
@@ -2288,22 +2290,25 @@
     });
 
 
-    var owl5 = $("#owl-panels0");
-    owl5.owlCarousel({
-        items: 1,
-        autoHeight: true,
-        nav: false,
-        dots: false,
-        margin: 16,
-        //callbacks: sliderInit();
-        mouseDrag: false,
-        touchDrag: false,
-        callbacks: true,
-        smartSpeed: 100,
-        URLhashListener: true,
-        autoplayHoverPause: true,
-        startPosition: 'URLHash',
-        onInitialized: hideModalOpen
+//    var owl5 = $("#owl-panels0");
+//    owl5.owlCarousel({
+//        items: 1,
+//        autoHeight: true,
+//        nav: false,
+//        dots: false,
+//        margin: 16,
+//        //callbacks: sliderInit();
+//        mouseDrag: false,
+//        touchDrag: false,
+//        callbacks: true,
+//        smartSpeed: 100,
+//        URLhashListener: true,
+//        autoplayHoverPause: true,
+//        startPosition: 'URLHash',
+//        onInitialized: hideModalOpen
+//    });
+    $(function() {
+        hideModalOpen();
     });
     var owl5 = $("#owl-panels1");
     owl5.owlCarousel({

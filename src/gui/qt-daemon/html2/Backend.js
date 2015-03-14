@@ -6,6 +6,7 @@ Backend = function(emulator) {
         intervalUpdateCurrentScreen: 5000
 //      intervalCheckIfOnline: 5000
     };
+    this.application = null;
     this.emulator = emulator;
     this.emulator.backend = this;
     var callbacks = [];
@@ -13,12 +14,14 @@ Backend = function(emulator) {
     var $backend = this;
 
     this.safes = {};
-    this.safesChangeCallbacks = [];
+    this.backendEventSubscribers = [];
 
     /******************** 'Talking to backend' stuff **********************/
 
     // Requests a function
     this.backendRequest = function(command, parameters, callback) {
+        console.log("Requesting API command '"+command+"' with parameters: "+JSON.stringify(parameters));
+
         // Emulated call versus real one through the magic Qt object
         var commandFunction = (this.settings.useEmulator) ? this.emulator.backendRequestCall(command) : Qt[command];
 
@@ -27,20 +30,21 @@ Backend = function(emulator) {
         var returnObject = JSON.parse(returnValue);
 
         if (returnObject.error_code != "OK") {
-            console.log("API Error: " + returnObject.error_code);
+            console.log("API Error for command '"+command+"': " + returnObject.error_code);
         } else {
             // Everything is OK
+            console.log("Requesting API command '"+command+"': completed, status=OK, request_id="+returnObject.request_id);
             callbacks[returnObject.request_id] = callback;
         }
     };
 
     // Callback from backend
     this.backendCallback = function(status, param) {
-        // Everything is OK
-
         // Do we have a callback for this?
         var requestId = status.request_id;
         if (callbacks[requestId]) {
+            console.log("Request with id "+requestId+" successfully returned with status="+status.error_code+" and response:");
+            console.log(param);
             var callback = callbacks[requestId];
             callback(status, param);
         } else {
@@ -53,6 +57,29 @@ Backend = function(emulator) {
         status = (status) ? JSON.parse(status) : null;
         param  = (param)  ? JSON.parse(param)  : null;
         return $backend.backendCallback(status, param);
+    };
+
+    this.subscribe = function(command, callback) {
+        backendEvents = ['on_update_safe_count', 'on_update_balance'];
+
+        if (backendEvents.indexOf(command) >= 0) {
+            // This object fires the event
+            this.backendEventSubscribers[command] = callback;
+        } else {
+            // Backend layer fires the event
+
+            if (this.settings.useEmulator) {
+                this.emulator.eventCallbacks[command] = callback;
+            } else {
+                Qt[command].connect(callback);
+            }
+        }
+    };
+
+    this.fireEvent = function(event) {
+        if (this.backendEventSubscribers[event]) {
+            this.backendEventSubscribers[event]();
+        }
     };
 
     /******************** Specific backend API calls being reflected in UI *********************/
@@ -109,8 +136,7 @@ Backend = function(emulator) {
          *
          */
         this.subscribe('on_update_daemon_state', function(data) {
-            $('.ifOnlineText').hide();
-            $('.ifOnlineText.'+data.text_state.toLowerCase()).show();
+            $backend.application.showOnlineState(data.text_state);
         });
 
         /**
@@ -133,60 +159,72 @@ Backend = function(emulator) {
          */
         this.subscribe('on_update_wallet_info', function(data) {
             // Save this array of safes if anything changed
-            if (JSON.stringify($backend.safes) != JSON.stringify(data.wallets)) {
-
-                $backend.safes = data.wallets;
-
-                // Safe counter on index screen
-                $('.index_safeCount').text($backend.safes.length);
-
-                // If safes changed, show them on index screen
-
-                // Destroy if first
-                owlSafes.trigger('destroy.owl.carousel');
-                owlSafes.html('');
-
-                // Now add the items
-                for (var i = 0; i < $backend.safes.length; i++) {
-                    var safe = $backend.safes[i];
-                    var safe_html = $('.safebox_template').html();
-                    safe_html = safe_html.replace('{{ address }}', safe.address);
-                    safe_html = safe_html.replace('{{ address }}', safe.address); // not a mistake
-                    safe_html = safe_html.replace('{{ balance }}', safe.balance);
-                    safe_html = safe_html.replace('{{ label }}', safe.wallet_id);
-                    safe_html = safe_html.replace('{{ safe_id }}', safe.wallet_id);
-
-                    owlSafes.append(safe_html);
+            var id = data.wallet_id;
+            var safe = $backend.safes[id];
+            if (safe) {
+                for(var key in data) {
+                    if (data[key] != safe[key]) {
+                        safe[key] = data[key];
+                    }
                 }
+                $backend.application.reRenderSafe(id);
+                $backend.fireEvent('on_update_balance');
+            } else {
+                // Got a new one? Just add it then
+                $backend.safes[id] = data;
 
-                // Calculate total balance
-                var total_balance = 0;
-                for (var i in $backend.safes) {
-                    total_balance += $backend.safes[i].balance;
-                }
-                $('.index_totalBalance').text(total_balance);
-
-                // And rebuild the carousel
-                owlSafes.owlCarousel({
-                    items: 2,
-                    navText: '',
-                    margin: 10
-                });
+                // and notify the subscribers
+                $backend.fireEvent('on_update_safe_count');
+                $backend.fireEvent('on_update_balance');
             }
         });
 
     };
 
-    this.subscribe = function(command, callback) {
-        if (this.settings.useEmulator) {
-            this.emulator.eventCallbacks[command] = callback;
-        } else {
-            Qt[command].connect(callback);
-        }
+    this.showOpenFileDialog = function(caption, callback) {
+        this.backendRequest('show_openfile_dialog', {caption: caption, filemask: '*.lui'}, callback);
     };
 
-    this.showOpenFileDialog = function(caption, callback) {
-        this.backendRequest('show_openfile_dialog', {caption: caption}, callback);
+    this.closeWallet = function(wallet_id, callback) {
+        // Prepare
+        var callbackAwareOfWalletID = function(wallet_id) {
+            return function(status, data) {
+                // Remove this safe from internal storage
+                if (status.error_code == 'OK') {
+                    delete $backend.safes[ wallet_id ];
+
+                    // Notify the subscribers
+                    $backend.fireEvent('on_update_safe_count');
+                    $backend.fireEvent('on_update_balance')
+                }
+
+                // Call the passed callback to reflect changes in UI
+                callback(status, data);
+            }
+        };
+
+        // Call API
+        $backend.backendRequest('close_wallet', {wallet_id: wallet_id}, callbackAwareOfWalletID(wallet_id));
+    };
+
+    this.openWallet = function(file, name, pass, callback) {
+        var param = {
+            path: file,
+            pass: pass
+        };
+        $backend.backendRequest('open_wallet', param, callback);
+    };
+
+    this.loadWalletToClientSide = function(wallet_id, callback) {
+        $backend.backendRequest('get_wallet_info', {wallet_id: wallet_id}, function(status, data) {
+            if (status.error_code == 'OK') {
+                $backend.safes[wallet_id] = data;
+                $backend.fireEvent('on_update_safe_count');
+                $backend.fireEvent('on_update_balance');
+            }
+
+            callback(status, data);
+        })
     };
 
     this.updateCurrentScreen = function() {

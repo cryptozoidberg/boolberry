@@ -219,16 +219,10 @@
 
             <div class="modal-body">
 
-                <div id="owl-panels0" class="owl-carousel">
-                    <div class="modal-opensafe-screen01">
-                        <em>системный диалог - Открыть файл </em>
-                        <p>
-                        <a class="btn btn-default" href="#screen02">Далее</a></p>
-                        <input type="hidden" name="open-safe_file-name-input" id="open-safe_file-name-input" val=""/>
-                    </div>
-
-                    <div class="item" data-hash="screen02">
+                <div id="owl-panels0">
+                    <div class="item open-safe_screen-1 open-safe_screen">
                         <div class="form-group">
+                            <input type="hidden" name="open-safe_file-name-input" value=""/>
                             <label class="requred">
                                 Имя для обозначения сейфа в приложении
                                 <!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
@@ -238,7 +232,7 @@
                                 любое слово или словосочетание для
                                 обозначения этого сейфа в списке
                             </div>
-                            <input type="text" class="input-lg form-control"
+                            <input type="text" name="open-safe_safe-name-input" class="input-lg form-control open-safe_safe-name-input"
                                    placeholder="любое слово или словосочетание">
                         </div>
                         <div class="row">
@@ -246,22 +240,21 @@
                                                               href="#" data-dismiss="modal"> Отменить</a></div>
                             <div class="col-xs-6 col-sm-6">
 
-                                <a class="btn btn-primary btn-block btn-lg" type="button"
-                                   href="#screen03">Продолжить</a></div>
+                                <a type="button" class="btn btn-primary btn-block btn-lg open-safe_step-2-button" href="#">Продолжить</a></div>
                         </div>
-
                     </div>
-                    <div class="item" data-hash="screen03">
+
+                    <div class="item open-safe_screen-2 open-safe_screen">
                         <div class="form-group clearfix">
                             <label class="requred">Заданный при создании файла сейфа пароль
                             </label>
-                            <input type="password" placeholder="" class="input-lg form-control">
+                            <input type="password" placeholder="" name="open-safe_safe-password-input" class="input-lg form-control open-safe_safe-password-input">
                         </div>
                         <p>Восстановить пароль невозможно. При утере пароля от сейфа, используйте другой способ
                             восстановления – из цифровой копии ( brainwallet) или физической копии файла этого же сейфа
                             с другим паролем, который вы помните. </p>
 
-                        <a href="#screen02" class="btn btn-link"><i
+                        <a href="#" class="btn btn-link open-safe_step-1-button"><i
                                 class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span
                                 class="text-muted">Назад</span></a>
 
@@ -269,7 +262,7 @@
                             <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button"
                                                               href="#" data-dismiss="modal"> Отменить</a></div>
                             <div class="col-xs-6 col-sm-6">
-                                <button type="button" class="btn btn-primary btn-block btn-lg" type="button"
+                                <button type="button" class="btn btn-primary btn-block btn-lg open-safe_open-safe-button" type="button"
                                         data-dismiss="modal">Открыть сейф</a>
                             </div>
                         </div>
