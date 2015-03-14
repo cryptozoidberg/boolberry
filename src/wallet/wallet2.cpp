@@ -547,14 +547,14 @@ namespace
   }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::load_keys(const std::string& keys_file_name, const std::string& password)
+void wallet2::load_keys(const std::string& buff, const std::string& password)
 {
   wallet2::keys_file_data keys_file_data;
-  std::string buf;
-  bool r = epee::file_io_utils::load_file_to_string(keys_file_name, buf);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_read_error, keys_file_name);
-  r = ::serialization::parse_binary(buf, keys_file_data);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, "internal error: failed to deserialize \"" + keys_file_name + '\"');
+//  std::string buf;
+//  bool r = epee::file_io_utils::load_file_to_string(keys_file_name, buf);
+//  CHECK_AND_THROW_WALLET_EX(!r, error::file_read_error, keys_file_name);
+  bool r = ::serialization::parse_binary(buff, keys_file_data);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, "internal error: failed to deserialize");
 
   crypto::chacha8_key key;
   crypto::generate_chacha8_key(password, key);
@@ -592,7 +592,6 @@ void wallet2::generate(const std::string& wallet_, const std::string& password)
 
   store();
 }
-
 //----------------------------------------------------------------------------------------------------
 bool wallet2::check_connection()
 {
@@ -605,30 +604,44 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
   m_wallet_file = wallet_;
   m_password = password;
 
+  std::string keys_buff;
+  std::string body_buff;
+
+
   boost::system::error_code e;
   bool exists = boost::filesystem::exists(m_wallet_file, e);
   CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, m_wallet_file);
 
+  std::ifstream data_file;
+  data_file.open(m_wallet_file, std::ios_base::binary | std::ios_base::in);
+  CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_not_found, m_wallet_file);
+
+  wallet_file_binary_header wbh = AUTO_VAL_INIT(wbh);
+  //wbh//WALLET_FILE_SIGNATURE;
 
 
+  data_file.read((char*)&wbh, sizeof(wbh));
+  CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_not_found, m_wallet_file);
 
-  load_keys(m_keys_file, password);
+  CHECK_AND_THROW_WALLET_EX(wbh.m_signature != WALLET_FILE_SIGNATURE, error::file_not_found, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(wbh.m_cb_body > WALLET_FILE_MAX_BODY_SIZE || 
+    wbh.m_cb_keys > WALLET_FILE_MAX_BODY_SIZE, error::file_not_found, m_wallet_file);
+
+
+  keys_buff.resize(wbh.m_cb_keys);
+  data_file.read((char*)keys_buff.data(), wbh.m_cb_keys);
+
+  load_keys(keys_buff, password);
   LOG_PRINT_L0("Loaded wallet keys file, with public address: " << m_account.get_public_address_str());
 
-  //keys loaded ok!
-  //try to load wallet file. but even if we failed, it is not big problem
-  if(!boost::filesystem::exists(m_wallet_file, e) || e)
-  {
-    LOG_PRINT_L0("file not found: " << m_wallet_file << ", starting with empty blockchain");
-    m_account_public_address = m_account.get_keys().m_account_address;
-    return;
-  }
-  bool r = tools::unserialize_obj_from_file(*this, m_wallet_file);
+
+
+  bool r = tools::portable_unserialize_obj_from_stream(*this, data_file);
   CHECK_AND_THROW_WALLET_EX(!r, error::file_read_error, m_wallet_file);
-  CHECK_AND_THROW_WALLET_EX(
-    m_account_public_address.m_spend_public_key != m_account.get_keys().m_account_address.m_spend_public_key ||
-    m_account_public_address.m_view_public_key  != m_account.get_keys().m_account_address.m_view_public_key,
-    error::wallet_files_doesnt_correspond, m_keys_file, m_wallet_file);
+//   CHECK_AND_THROW_WALLET_EX(
+//     m_account_public_address.m_spend_public_key != m_account.get_keys().m_account_address.m_spend_public_key ||
+//     m_account_public_address.m_view_public_key  != m_account.get_keys().m_account_address.m_view_public_key,
+//     error::wallet_files_doesnt_correspond, m_wallet_file);
 
   if(m_blockchain.empty())
   {
@@ -641,16 +654,33 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
 //----------------------------------------------------------------------------------------------------
 void wallet2::store()
 {
-  std::stringstream ss;
-
+  //prepare data
   std::string keys_buff;
   bool r = store_keys(keys_buff, m_password);
   CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_wallet_file);
 
+  wallet_file_binary_header wbh = AUTO_VAL_INIT(wbh);
 
-
-  bool r = tools::serialize_obj_to_file(*this, m_wallet_file);
+  std::stringstream ss;
+  r = tools::portble_serialize_obj_to_stream(*this, ss);
   CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_wallet_file);
+  std::string body_buff = ss.str();
+
+  //store data
+
+  wbh.m_signature = WALLET_FILE_SIGNATURE;
+  wbh.m_cb_keys = keys_buff.size();
+  wbh.m_cb_body = body_buff.size();
+
+  std::string header_buff((const char*)&wbh, sizeof(wbh));
+
+
+  std::ofstream data_file;
+  data_file.open(m_wallet_file, std::ios_base::binary | std::ios_base::out | std::ios::trunc);
+  CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_save_error, m_wallet_file);
+  data_file << header_buff << keys_buff << body_buff;
+  data_file.flush();
+  data_file.close();
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::unlocked_balance()

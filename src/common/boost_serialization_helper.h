@@ -37,7 +37,7 @@ namespace tools
     eos::portable_oarchive a(stream);
     a << obj;
 
-    return !data_file.fail();
+    return !stream.fail();
     CATCH_ENTRY_L0("serialize_obj_to_file", false);
   }
 
@@ -65,7 +65,7 @@ namespace tools
     eos::portable_iarchive a(stream);
 
     a >> obj;
-    return !data_file.fail();
+    return !stream.fail();
     CATCH_ENTRY_L0("unserialize_obj_from_file", false);
   }
 }
