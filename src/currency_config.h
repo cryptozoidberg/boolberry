@@ -109,6 +109,8 @@
 #define POS_MODFIFIER_INTERVAL                          10
 #define POS_WALLET_MINING_SCAN_INTERVAL                 20  //seconds
 
+#define WALLET_FILE_SIGNATURE                           0x
+
 
 #define GUI_BLOCKS_DISPLAY_COUNT                        40
 #define GUI_DISPATCH_QUE_MAXSIZE                        100
