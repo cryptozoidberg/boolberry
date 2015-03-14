@@ -4,9 +4,10 @@ Emulator = function() {
     this.backend = null; // set in Backend
     this.settings = {
         asyncEmulationTimeout: 500,
-        eventsInterval: 1000
+        eventsInterval: 5000
     };
     this.eventCallbacks = [];
+    this.application = null;
     this.wallets = null;
     var lastRequestId = 0;
     var $emulator = this;
@@ -44,64 +45,83 @@ Emulator = function() {
                 "synchronization_start_height": 9725,
                 "text_state": "Offline"
             };
-            $emulator.eventCallbacks['on_update_daemon_state'](data);
+
+            if ($emulator.eventCallbacks['on_update_daemon_state']) {
+                $emulator.eventCallbacks['on_update_daemon_state'](data);
+            }
 
         }, $emulator.settings.eventsInterval);
 
-        // on_update_wallet_info
-        setInterval(function() {
-            var data;
+        // Init wallets with random data
+        $emulator.wallets = {
+            "12345": {
+                "wallet_id": "12345",
+                "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ",
+                "balance": 84555,
+                "do_mint": 1,
+                "mint_is_in_progress": 0,
+                "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_2.lui",
+                "tracking_hey": "d4327fb64d896c013682bbad36a193e5f6667c2291c8f361595ef1e9c3368d0f",
+                "unlocked_balance": 84555
+            },
 
-            // on_update_daemon_state
-            if ($emulator.wallets == null) {
-                $emulator.wallets = [
-                        {
-                            "wallet_id": "12345",
-                            "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ",
-                            "balance": 84555,
-                            "do_mint": 1,
-                            "mint_is_in_progress": 0,
-                            "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_2.lui",
-                            "tracking_hey": "d4327fb64d896c013682bbad36a193e5f6667c2291c8f361595ef1e9c3368d0f",
-                            "unlocked_balance": 84555
-                        },
+            "12346": {
+                "wallet_id": "12346",
+                "address": "BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJHcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4",
+                "balance": 55,
+                "do_mint": 1,
+                "mint_is_in_progress": 0,
+                "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_4.lui",
+                "tracking_hey": "6a193e5f6667c2291c8f361595ef1e9c3368d0fd4327fb64d896c013682bbad3",
+                "unlocked_balance": 52
+            },
 
-                        {
-                            "wallet_id": "12346",
-                            "address": "BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJHcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4",
-                            "balance": 55,
-                            "do_mint": 1,
-                            "mint_is_in_progress": 0,
-                            "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_4.lui",
-                            "tracking_hey": "6a193e5f6667c2291c8f361595ef1e9c3368d0fd4327fb64d896c013682bbad3",
-                            "unlocked_balance": 52
-                        },
+            "12347": {
+                "wallet_id": "12347",
+                "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ",
+                "balance": 4358746,
+                "do_mint": 1,
+                "mint_is_in_progress": 0,
+                "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_2.lui",
+                "tracking_hey": "d4327fb64d896c013682bbad36a193e5f6667c2291c8f361595ef1e9c3368d0f",
+                "unlocked_balance": 34234
+            },
 
-                        {
-                            "wallet_id": "12347",
-                            "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ",
-                            "balance": 4358746,
-                            "do_mint": 1,
-                            "mint_is_in_progress": 0,
-                            "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_2.lui",
-                            "tracking_hey": "d4327fb64d896c013682bbad36a193e5f6667c2291c8f361595ef1e9c3368d0f",
-                            "unlocked_balance": 34234
-                        },
-
-                        {
-                            "wallet_id": "12348",
-                            "address": "BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJHcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4",
-                            "balance": 44,
-                            "do_mint": 1,
-                            "mint_is_in_progress": 0,
-                            "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_4.lui",
-                            "tracking_hey": "6a193e5f6667c2291c8f361595ef1e9c3368d0fd4327fb64d896c013682bbad3",
-                            "unlocked_balance": 33
-                        }
-                ];
+            "12348": {
+                "wallet_id": "12348",
+                "address": "BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJHcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4",
+                "balance": 44,
+                "do_mint": 1,
+                "mint_is_in_progress": 0,
+                "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_4.lui",
+                "tracking_hey": "6a193e5f6667c2291c8f361595ef1e9c3368d0fd4327fb64d896c013682bbad3",
+                "unlocked_balance": 33
             }
-            $emulator.eventCallbacks['on_update_wallet_info']( {wallets: JSON.parse(JSON.stringify($emulator.wallets)) } );
+        };
 
+        // show all the wallets in UI
+        setTimeout(function() {
+            for(var i in $emulator.wallets) {
+                if ($emulator.eventCallbacks['on_update_wallet_info']) {
+                    var wallet = $emulator.wallets[i];
+                    $emulator.eventCallbacks['on_update_wallet_info']( JSON.parse(JSON.stringify(wallet)) );
+                }
+            }
+        }, $emulator.settings.eventsInterval);
+
+        // random on_update_wallet_info
+        setInterval(function() {
+            if (Object.size($emulator.wallets) > 0) {
+                var rand_wallet = $emulator.application.getRandomObjectProperty($emulator.wallets);
+                var rand_balance_shift = $emulator.application.getRandomInt(-30, 30);
+                rand_wallet.balance += rand_balance_shift;
+                if (rand_wallet.balance < 0) rand_wallet.balance = 1000;
+
+                // Notify all the subscribers
+                if ($emulator.eventCallbacks['on_update_wallet_info']) {
+                    $emulator.eventCallbacks['on_update_wallet_info']( JSON.parse(JSON.stringify(rand_wallet)) );
+                }
+            }
         }, $emulator.settings.eventsInterval);
 
         //create-safe_safe-name-input
@@ -142,7 +162,6 @@ Emulator = function() {
         } else {
             // There's no such command
             return function(/*arguments*/) {
-                console.log("Emulator error: WRONG_API_COMMAND: "+command);
                 return JSON.stringify({
                     error_code: "WRONG_API_COMMAND"
                 });
@@ -156,18 +175,43 @@ Emulator = function() {
 
     this.functions = {
         'show_openfile_dialog': function(param) {
-            var name = prompt('Имя файла для открытия: '+param.caption);
+            var name = prompt('Тут будет диалог выбора файла: '+param.caption);
             return {error_code: "OK", data: {path: '/a/b/c/'+name}};
         },
         'close_wallet': function(param) {
             var id = param.wallet_id;
-            for(var i in $emulator.wallets) {
-                if ($emulator.wallets[i].wallet_id == id) {
-                    $emulator.wallets.splice(i, 1);
-                    return {error_code: "OK", data: {}};
-                }
+            if ($emulator.wallets[id]) {
+                delete $emulator.wallets[id];
+                return {error_code: "OK", data: {}};
+            } else {
+                return {error_code: "WRONG_WALLET_ID"};
             }
-            return {error_code: "WRONG_WALLET_ID"};
+        },
+        'open_wallet': function(param) {
+            if (param.pass == '123') {
+                var wallet_id = $emulator.application.getRandomInt(2000, 5000);
+                $emulator.wallets[wallet_id] = {
+                    "wallet_id": wallet_id,
+                    "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ".shuffle(),
+                    "balance": $emulator.application.getRandomInt(1000, 4000),
+                    "do_mint": 1,
+                    "mint_is_in_progress": 0,
+                    "path": param.path,
+                    "tracking_hey": "d4327fb64d896c013682bbad36a193e5f6667c2291c8f361595ef1e9c3368d0f".shuffle(),
+                    "unlocked_balance": $emulator.application.getRandomInt(0, 1000)
+                };
+                return {error_code: "OK", data: {wallet_id: wallet_id}};
+            } else {
+                return {error_code: "INVALID_PASSWORD"};
+            }
+        },
+        'get_wallet_info': function(param) {
+            var id = param.wallet_id;
+            if ($emulator.wallets[id]) {
+                return {error_code: "OK", data: $emulator.wallets[id]};
+            } else {
+                return {error_code: "WRONG_WALLET_ID"};
+            }
         }
     };
 
