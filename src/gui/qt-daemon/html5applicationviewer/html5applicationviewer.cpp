@@ -657,7 +657,7 @@ QString Html5ApplicationViewer::close_wallet(const QString& param)
     view::api_response ar;
     ar.request_id = std::to_string(request_id);
 
-    view::close_wallet_request cwr = AUTO_VAL_INIT(cwr);
+    view::wallet_id_obj cwr = AUTO_VAL_INIT(cwr);
     if (!epee::serialization::load_t_from_json(cwr, *param_ptr))
     {
       view::api_void av;
@@ -699,7 +699,7 @@ QString Html5ApplicationViewer::generate_wallet(const QString& param)
 
     m_config.wallets_last_used_dir = boost::filesystem::path(owd.path).parent_path().string();
 
-    view::open_wallet_response owr = AUTO_VAL_INIT(owr);
+    view::wallet_id_obj owr = AUTO_VAL_INIT(owr);
     ar.error_code = m_backend.generate_wallet(owd.path, owd.pass, owr.wallet_id);
     dispatch(ar, owr);
     return;
@@ -733,7 +733,7 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
 
     m_config.wallets_last_used_dir = boost::filesystem::path(owd.path).parent_path().string();
 
-    view::open_wallet_response owr = AUTO_VAL_INIT(owr);
+    view::wallet_id_obj owr = AUTO_VAL_INIT(owr);
     ar.error_code = m_backend.open_wallet(owd.path, owd.pass, owr.wallet_id);
     dispatch(ar, owr);
     return;
@@ -744,5 +744,39 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
   ar.request_id = std::to_string(request_id);
   return epee::serialization::store_t_to_json(ar).c_str();
 }
+
+QString Html5ApplicationViewer::get_wallet_info(const QString& param)
+{
+
+  size_t request_id = m_request_id_counter++;
+  std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
+
+  return que_call(request_id, [request_id, param_ptr, this](void){
+
+    view::api_response ar;
+    ar.request_id = std::to_string(request_id);
+
+    view::wallet_id_obj wio = AUTO_VAL_INIT(wio);
+    if (!epee::serialization::load_t_from_json(wio, *param_ptr))
+    {
+      view::api_void av;
+      ar.error_code = API_RETURN_CODE_BAD_ARG;
+      dispatch(ar, av);
+      return;
+    }
+
+    view::wallet_info wi = AUTO_VAL_INIT(wi);
+    ar.error_code = m_backend.get_wallet_info(wio.wallet_id, wi);
+    dispatch(ar, wi);
+    return;
+
+  });
+  view::api_response ar;
+  ar.error_code = API_RETURN_CODE_OK;
+  ar.request_id = std::to_string(request_id);
+  return epee::serialization::store_t_to_json(ar).c_str();
+}
+
+
 
 #include "html5applicationviewer.moc"

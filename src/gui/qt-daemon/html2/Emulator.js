@@ -3,10 +3,131 @@ Emulator = function() {
 
     this.backend = null; // set in Backend
     this.settings = {
-        asyncEmulationTimeout: 500
+        asyncEmulationTimeout: 500,
+        eventsInterval: 5000
     };
+    this.eventCallbacks = [];
+    this.application = null;
+    this.wallets = null;
     var lastRequestId = 0;
     var $emulator = this;
+
+    // Event callbacks (from backend)
+    this.startEventCallbacksTimers = function() {
+        setInterval(function() {
+            var data;
+
+            // on_update_daemon_state
+            data = {
+                "daemon_network_state": 2,
+                "hashrate": 0,
+                "height": 9729,
+                "inc_connections_count": 0,
+                "last_blocks": [
+                    {
+                        "date": 1425441268,
+                        "diff": "107458354441446",
+                        "h": 9728,
+                        "type": "PoS"
+                    }, {
+                        "date": 1425441256,
+                        "diff": "2778612",
+                        "h": 9727,
+                        "type": "PoW"
+                    }
+                ],
+                "last_build_available": "0.0.0.0",
+                "last_build_displaymode": 0,
+                "max_net_seen_height": 9726,
+                "out_connections_count": 2,
+                "pos_difficulty": "107285151137540",
+                "pow_difficulty": "2759454",
+                "synchronization_start_height": 9725,
+                "text_state": "Offline"
+            };
+
+            if ($emulator.eventCallbacks['on_update_daemon_state']) {
+                $emulator.eventCallbacks['on_update_daemon_state'](data);
+            }
+
+        }, $emulator.settings.eventsInterval);
+
+        // Init wallets with random data
+        $emulator.wallets = {
+            "12345": {
+                "wallet_id": "12345",
+                "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ",
+                "balance": 84555,
+                "do_mint": 1,
+                "mint_is_in_progress": 0,
+                "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_2.lui",
+                "tracking_hey": "d4327fb64d896c013682bbad36a193e5f6667c2291c8f361595ef1e9c3368d0f",
+                "unlocked_balance": 84555
+            },
+
+            "12346": {
+                "wallet_id": "12346",
+                "address": "BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJHcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4",
+                "balance": 55,
+                "do_mint": 1,
+                "mint_is_in_progress": 0,
+                "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_4.lui",
+                "tracking_hey": "6a193e5f6667c2291c8f361595ef1e9c3368d0fd4327fb64d896c013682bbad3",
+                "unlocked_balance": 52
+            },
+
+            "12347": {
+                "wallet_id": "12347",
+                "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ",
+                "balance": 4358746,
+                "do_mint": 1,
+                "mint_is_in_progress": 0,
+                "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_2.lui",
+                "tracking_hey": "d4327fb64d896c013682bbad36a193e5f6667c2291c8f361595ef1e9c3368d0f",
+                "unlocked_balance": 34234
+            },
+
+            "12348": {
+                "wallet_id": "12348",
+                "address": "BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJHcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4",
+                "balance": 44,
+                "do_mint": 1,
+                "mint_is_in_progress": 0,
+                "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_4.lui",
+                "tracking_hey": "6a193e5f6667c2291c8f361595ef1e9c3368d0fd4327fb64d896c013682bbad3",
+                "unlocked_balance": 33
+            }
+        };
+
+        // show all the wallets in UI
+        setTimeout(function() {
+            for(var i in $emulator.wallets) {
+                if ($emulator.eventCallbacks['on_update_wallet_info']) {
+                    var wallet = $emulator.wallets[i];
+                    $emulator.eventCallbacks['on_update_wallet_info']( JSON.parse(JSON.stringify(wallet)) );
+                }
+            }
+        }, $emulator.settings.eventsInterval);
+
+        // random on_update_wallet_info
+        setInterval(function() {
+            if (Object.size($emulator.wallets) > 0) {
+                var rand_wallet = $emulator.application.getRandomObjectProperty($emulator.wallets);
+                var rand_balance_shift = $emulator.application.getRandomInt(-30, 30);
+                rand_wallet.balance += rand_balance_shift;
+                if (rand_wallet.balance < 0) rand_wallet.balance = 1000;
+
+                // Notify all the subscribers
+                if ($emulator.eventCallbacks['on_update_wallet_info']) {
+                    $emulator.eventCallbacks['on_update_wallet_info']( JSON.parse(JSON.stringify(rand_wallet)) );
+                }
+            }
+        }, $emulator.settings.eventsInterval);
+
+        //create-safe_safe-name-input
+        //create-safe_safe-password-input-1
+        //create-safe_safe-password-input-2
+    };
 
     // Should return a function to be called with the arguments later
     this.backendRequestCall = function(command) {
@@ -53,26 +174,46 @@ Emulator = function() {
     };
 
     this.functions = {
-        'onlineStatus': function() {
-            var status = (Math.random() >= 0.7) ? 'online' : 'offline'; // and 'loading'
-            return {error_code: "OK", data: {status: status}};
+        'show_openfile_dialog': function(param) {
+            var name = prompt('Тут будет диалог выбора файла: '+param.caption);
+            return {error_code: "OK", data: {path: '/a/b/c/'+name}};
         },
-        'safeCount': function() {
-            var count = (Math.random() >= 0.7) ? '5' : '6';
-            return {error_code: "OK", data: {count: count}};
+        'close_wallet': function(param) {
+            var id = param.wallet_id;
+            if ($emulator.wallets[id]) {
+                delete $emulator.wallets[id];
+                return {error_code: "OK", data: {}};
+            } else {
+                return {error_code: "WRONG_WALLET_ID"};
+            }
         },
-        'paymentCount': function() {
-            var count = (Math.random() >= 0.7) ? '35' : '40';
-            return {error_code: "OK", data: {count: count}};
+        'open_wallet': function(param) {
+            if (param.pass == '123') {
+                var wallet_id = $emulator.application.getRandomInt(2000, 5000);
+                $emulator.wallets[wallet_id] = {
+                    "wallet_id": wallet_id,
+                    "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ".shuffle(),
+                    "balance": $emulator.application.getRandomInt(1000, 4000),
+                    "do_mint": 1,
+                    "mint_is_in_progress": 0,
+                    "path": param.path,
+                    "tracking_hey": "d4327fb64d896c013682bbad36a193e5f6667c2291c8f361595ef1e9c3368d0f".shuffle(),
+                    "unlocked_balance": $emulator.application.getRandomInt(0, 1000)
+                };
+                return {error_code: "OK", data: {wallet_id: wallet_id}};
+            } else {
+                return {error_code: "INVALID_PASSWORD"};
+            }
         },
-        'orderCount': function() {
-            var count = (Math.random() >= 0.7) ? '4' : '3';
-            return {error_code: "OK", data: {count: count}};
-        },
-        'totalBalance': function() {
-            var balance = (Math.random() >= 0.7) ? '1240,16' : '1264,00';
-            return {error_code: "OK", data: {balance: balance}};
+        'get_wallet_info': function(param) {
+            var id = param.wallet_id;
+            if ($emulator.wallets[id]) {
+                return {error_code: "OK", data: $emulator.wallets[id]};
+            } else {
+                return {error_code: "WRONG_WALLET_ID"};
+            }
         }
     };
 
 }; // -- end of Emulator
+

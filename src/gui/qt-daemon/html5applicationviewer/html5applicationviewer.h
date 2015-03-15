@@ -51,6 +51,7 @@ protected:
 
   QString open_wallet(const QString& param);
   QString generate_wallet(const QString& param);
+  QString get_wallet_info(const QString& param);
   QString close_wallet(const QString& wallet_id);
   QString get_version();
   QString transfer(const QString& json_transfer_object);

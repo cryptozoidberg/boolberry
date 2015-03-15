@@ -21,11 +21,21 @@
 #include "core_rpc_proxy.h"
 #include "core_default_rpc_proxy.h"
 #include "wallet_errors.h"
+#include "eos/portable_archive.hpp"
 
 #define DEFAULT_TX_SPENDABLE_AGE                               10
 
 namespace tools
 {
+#pragma pack(push, 1)
+  struct wallet_file_binary_header
+  {
+    uint64_t m_signature;
+    uint16_t m_cb_keys;
+    uint16_t m_cb_body;
+  };
+#pragma pack (pop)
+
 
   struct money_transfer2_details
   {
@@ -116,7 +126,7 @@ namespace tools
     void generate(const std::string& wallet, const std::string& password);
     void load(const std::string& wallet, const std::string& password);    
     void store();
-    std::string get_wallet_path(){ return m_keys_file; }
+    std::string get_wallet_path(){ return m_wallet_file; }
     currency::account_base& get_account(){return m_account;}
 
     void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
@@ -189,7 +199,7 @@ namespace tools
     bool build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& req, const currency::COMMAND_RPC_SCAN_POS::response& rsp);
 
   private:
-    bool store_keys(const std::string& keys_file_name, const std::string& password);
+    bool store_keys(std::string& buff, const std::string& password);
     void load_keys(const std::string& keys_file_name, const std::string& password);
     void process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b);
     void detach_blockchain(uint64_t height);
@@ -215,7 +225,7 @@ namespace tools
 
     currency::account_base m_account;
     std::string m_wallet_file;
-    std::string m_keys_file;
+    std::string m_password;
     std::vector<crypto::hash> m_blockchain;
     std::atomic<uint64_t> m_local_bc_height; //temporary workaround 
     std::atomic<uint64_t> m_last_bc_timestamp; 

@@ -29,6 +29,18 @@ namespace tools
     CATCH_ENTRY_L0("serialize_obj_to_file", false);
   }
 
+  template<class t_object, class t_stream>
+  bool portble_serialize_obj_to_stream(t_object& obj, t_stream& stream)
+  {
+    TRY_ENTRY();
+
+    eos::portable_oarchive a(stream);
+    a << obj;
+
+    return !stream.fail();
+    CATCH_ENTRY_L0("serialize_obj_to_file", false);
+  }
+
   template<class t_object>
   bool unserialize_obj_from_file(t_object& obj, const std::string& file_path)
   {
@@ -42,6 +54,18 @@ namespace tools
 
     a >> obj;
     return !data_file.fail();
+    CATCH_ENTRY_L0("unserialize_obj_from_file", false);
+  }
+
+  template<class t_object, class t_stream>
+  bool portable_unserialize_obj_from_stream(t_object& obj, t_stream& stream)
+  {
+    TRY_ENTRY();
+
+    eos::portable_iarchive a(stream);
+
+    a >> obj;
+    return !stream.fail();
     CATCH_ENTRY_L0("unserialize_obj_from_file", false);
   }
 }
