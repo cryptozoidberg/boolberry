@@ -188,7 +188,9 @@ namespace eos {
 		// load_override functions so we chose to stay one level higher
 		, public boost::archive::basic_binary_iarchive<portable_iarchive>
 
-	#if BOOST_VERSION >= 103500
+  #if BOOST_VERSION >= 105600
+    // mix-in helper class for serializing shared_ptr does not exist anymore
+  #elif BOOST_VERSION >= 103500
 		// mix-in helper class for serializing shared_ptr
 		, public boost::archive::detail::shared_ptr_helper
 	#endif
