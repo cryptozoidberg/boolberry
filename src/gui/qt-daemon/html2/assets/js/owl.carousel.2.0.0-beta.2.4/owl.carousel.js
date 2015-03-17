@@ -621,7 +621,9 @@
 		window.clearTimeout(this.resizeTimer);
         var $this = this;
 		this.resizeTimer = window.setTimeout(function() {
-            if ($this==null || $this.e==null) {
+            if ($this == null) {
+                // nothing
+            } else if ($this.e == null) {
                 $this.onResize();
             } else {
                 $this.e._onResize();
