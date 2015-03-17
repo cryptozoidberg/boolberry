@@ -222,11 +222,11 @@ Application = function(router, backend) {
     };
 
     this.subscribeToBackendEvents = function() {
-        this.backend.subscribe("on_update_safe_count", function() {
+        this.backend.subscribe("update_safe_count", function() {
             $app.updateSafeCarousel();
             $app.updateSafeCounters();
         });
-        this.backend.subscribe("on_update_balance", function() {
+        this.backend.subscribe("update_balance", function() {
             $app.updateBalanceCounters();
         });
     };

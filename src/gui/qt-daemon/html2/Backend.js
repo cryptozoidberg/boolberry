@@ -60,7 +60,7 @@ Backend = function(emulator) {
     };
 
     this.subscribe = function(command, callback) {
-        backendEvents = ['on_update_safe_count', 'on_update_balance'];
+        var backendEvents = ['update_safe_count', 'update_balance'];
 
         if (backendEvents.indexOf(command) >= 0) {
             // This object fires the event
@@ -104,7 +104,7 @@ Backend = function(emulator) {
     // Register callbacks for automatic events from backend side
     this.registerEventCallbacks = function() {
         /**
-         * on_update_daemon_state
+         * update_daemon_state
          *
          * data =  {
          *      "daemon_network_state": 2,
@@ -130,12 +130,12 @@ Backend = function(emulator) {
          *          "out_connections_count": 2,
          *          "pos_difficulty": "107285151137540",
          *          "pow_difficulty": "2759454",
-         *          "synchronization_start_height": 9725,
+         *          "synchronizatistart_height": 9725,
          *          "text_state": "Online"/"Offline"/"Loading"
          *  }
          *
          */
-        this.subscribe('on_update_daemon_state', function(data) {
+        this.subscribe('update_daemon_state', function(data) {
             $backend.application.showOnlineState(data.text_state);
         });
 
@@ -157,7 +157,7 @@ Backend = function(emulator) {
          *        }
          *
          */
-        this.subscribe('on_update_wallet_info', function(data) {
+        this.subscribe('update_wallet_info', function(data) {
             // Save this array of safes if anything changed
             var id = data.wallet_id;
             var safe = $backend.safes[id];
@@ -168,14 +168,14 @@ Backend = function(emulator) {
                     }
                 }
                 $backend.application.reRenderSafe(id);
-                $backend.fireEvent('on_update_balance');
+                $backend.fireEvent('update_balance');
             } else {
                 // Got a new one? Just add it then
                 $backend.safes[id] = data;
 
                 // and notify the subscribers
-                $backend.fireEvent('on_update_safe_count');
-                $backend.fireEvent('on_update_balance');
+                $backend.fireEvent('update_safe_count');
+                $backend.fireEvent('update_balance');
             }
         });
 
@@ -194,8 +194,8 @@ Backend = function(emulator) {
                     delete $backend.safes[ wallet_id ];
 
                     // Notify the subscribers
-                    $backend.fireEvent('on_update_safe_count');
-                    $backend.fireEvent('on_update_balance')
+                    $backend.fireEvent('update_safe_count');
+                    $backend.fireEvent('update_balance')
                 }
 
                 // Call the passed callback to reflect changes in UI
@@ -219,8 +219,8 @@ Backend = function(emulator) {
         $backend.backendRequest('get_wallet_info', {wallet_id: wallet_id}, function(status, data) {
             if (status.error_code == 'OK') {
                 $backend.safes[wallet_id] = data;
-                $backend.fireEvent('on_update_safe_count');
-                $backend.fireEvent('on_update_balance');
+                $backend.fireEvent('update_safe_count');
+                $backend.fireEvent('update_balance');
             }
 
             callback(status, data);
