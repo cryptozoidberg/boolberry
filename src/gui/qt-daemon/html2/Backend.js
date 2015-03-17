@@ -261,7 +261,9 @@ Backend = function(emulator) {
     };
 
     this.shouldUseEmulator = function() {
-        return (typeof Qt == 'undefined');
+        var use_emulator = (typeof Qt == 'undefined');
+        console.log("UseEmulator: " + use_emulator);
+        return use_emulator;
     };
 
 }; // -- end of Backend definition
