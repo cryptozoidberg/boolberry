@@ -25,7 +25,7 @@ Application = function(router, backend) {
         // Start streaming updates from backend
         this.backend.application = this;
         this.backend.emulator.application = this;
-        this.subscribeToBackendEvents();
+        this.subscribeToNonBackendEvents();
         this.backend.onAppInit();
     };
 
@@ -221,7 +221,7 @@ Application = function(router, backend) {
         $('.safebox[data-safe-id="'+safe_id+'"]').html(safe_html);
     };
 
-    this.subscribeToBackendEvents = function() {
+    this.subscribeToNonBackendEvents = function() {
         this.backend.subscribe("update_safe_count", function() {
             $app.updateSafeCarousel();
             $app.updateSafeCounters();

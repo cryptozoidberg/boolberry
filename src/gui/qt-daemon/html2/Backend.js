@@ -60,9 +60,9 @@ Backend = function(emulator) {
     };
 
     this.subscribe = function(command, callback) {
-        var backendEvents = ['update_safe_count', 'update_balance'];
+        var nonBackendEvents = ['update_safe_count', 'update_balance'];
 
-        if (backendEvents.indexOf(command) >= 0) {
+        if (nonBackendEvents.indexOf(command) >= 0) {
             // This object fires the event
             this.backendEventSubscribers[command] = callback;
         } else {
