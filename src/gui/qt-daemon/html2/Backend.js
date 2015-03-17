@@ -9,6 +9,7 @@ Backend = function(emulator) {
     this.application = null;
     this.emulator = emulator;
     this.emulator.backend = this;
+    this.last_daemon_state = null;
     var callbacks = [];
     var currentScreen = null;
     var $backend = this;
@@ -130,13 +131,17 @@ Backend = function(emulator) {
          *          "out_connections_count": 2,
          *          "pos_difficulty": "107285151137540",
          *          "pow_difficulty": "2759454",
-         *          "synchronizatistart_height": 9725,
+         *          "synchronization_start_height": 9725,
          *          "text_state": "Online"/"Offline"/"Loading"
          *  }
          *
          */
         this.subscribe('update_daemon_state', function(data) {
             $backend.application.showOnlineState(data.text_state);
+
+            // info widget
+            $backend.last_daemon_state = data;
+            $backend.application.updateBackendInfoWidget();
         });
 
         /**

@@ -29,6 +29,49 @@ Application = function(router, backend) {
         this.backend.onAppInit();
     };
 
+    this.updateBackendInfoWidget = function() {
+        var state = this.backend.last_daemon_state;
+        if (state != null) {
+            $('.widget[data-widget=backendInfo]').each(function() {
+                var tbody = $(this).find('.backendInfoTable').find('tbody');
+                tbody.html('');
+
+                for(var key in state) {
+                    var value = state[key];
+
+                    // Make nested tables if this is an array
+                    if ($.isArray(value)) {
+                        var newValue = "<table class='table table-condensed table-bordered'>";
+                        for(var _key in value) {
+                            var _value = value[_key];
+                            newValue += "<tr><td>";
+
+                            // Oh my! Three nested tables!! That's just super crazy.
+                            newValue += "<table class='table table-condensed table-bordered'>";
+                            for(var __key in _value) {
+                                newValue += "<tr><td>"+__key+"</td><td>"+_value[__key]+"</td></tr>";
+                            }
+                            newValue += "</table>";
+
+                            newValue += "</tr></td>";
+                        }
+                        newValue += "</table>";
+                        value = newValue;
+                    }
+
+                    var row = "<tr>";
+                    row += "<td>" + key + "</td>";
+                    row += "<td>" + value + "</td>";
+                    row += "</tr>";
+
+                    tbody.append(row);
+                }
+            });
+        } else {
+            console.log('backendInfo widget: state is null');
+        }
+    };
+
     this.setUpWidgets = function() {
         // Cache widgets
 
@@ -59,7 +102,7 @@ Application = function(router, backend) {
 
     // Widget management
     this.addWidget = function(button) {
-        var widget_number = this.getRandomInt()
+        var widget_number = this.getRandomInt();
         var widgetHTML = this.widgetCache['emptyWidget'];
         widgetHTML = '<div style="display: none;" class="widget-wrapper widget-wrapper-'+widget_number+'">' + widgetHTML + '</div>';
         $(button).before(widgetHTML);
@@ -84,8 +127,12 @@ Application = function(router, backend) {
             .before(widgetHTML)  // adding that
             .remove();           // and removing this
 
+        // Patches
         if (widgetName == 'activeMining') {
             doPlot("right"); // draw charts
+        }
+        if (widgetName == 'backendInfo') {
+            this.updateBackendInfoWidget();
         }
     };
 
