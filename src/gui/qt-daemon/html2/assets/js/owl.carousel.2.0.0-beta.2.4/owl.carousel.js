@@ -619,7 +619,14 @@
 	 */
 	Owl.prototype.onThrottledResize = function() {
 		window.clearTimeout(this.resizeTimer);
-		this.resizeTimer = window.setTimeout(this.e._onResize, this.settings.responsiveRefreshRate);
+        var $this = this;
+		this.resizeTimer = window.setTimeout(function() {
+            if ($this==null || $this.e==null) {
+                $this.onResize();
+            } else {
+                $this.e._onResize();
+            }
+        }, this.settings.responsiveRefreshRate);
 	};
 
 	/**

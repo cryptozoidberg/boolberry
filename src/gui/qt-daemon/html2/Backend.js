@@ -2,7 +2,7 @@
 Backend = function(emulator) {
 
     this.settings = {
-        useEmulator: true,
+//      useEmulator: true,
         intervalUpdateCurrentScreen: 5000
 //      intervalCheckIfOnline: 5000
     };
@@ -23,7 +23,7 @@ Backend = function(emulator) {
         console.log("Requesting API command '"+command+"' with parameters: "+JSON.stringify(parameters));
 
         // Emulated call versus real one through the magic Qt object
-        var commandFunction = (this.settings.useEmulator) ? this.emulator.backendRequestCall(command) : Qt[command];
+        var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt[command];
 
         // Now call it
         var returnValue = commandFunction(parameters);
@@ -68,7 +68,7 @@ Backend = function(emulator) {
         } else {
             // Backend layer fires the event
 
-            if (this.settings.useEmulator) {
+            if (this.shouldUseEmulator()) {
                 this.emulator.eventCallbacks[command] = callback;
             } else {
                 Qt[command].connect(callback);
@@ -253,6 +253,10 @@ Backend = function(emulator) {
                 //});
                 break;
         }
+    };
+
+    this.shouldUseEmulator = function() {
+        return (typeof Qt == 'undefined');
     };
 
 }; // -- end of Backend definition
