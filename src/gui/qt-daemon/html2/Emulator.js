@@ -17,7 +17,7 @@ Emulator = function() {
         setInterval(function() {
             var data;
 
-            // on_update_daemon_state
+            // update_daemon_state
             data = {
                 "daemon_network_state": 2,
                 "hashrate": 0,
@@ -46,8 +46,8 @@ Emulator = function() {
                 "text_state": "Offline"
             };
 
-            if ($emulator.eventCallbacks['on_update_daemon_state']) {
-                $emulator.eventCallbacks['on_update_daemon_state'](data);
+            if ($emulator.eventCallbacks['update_daemon_state']) {
+                $emulator.eventCallbacks['update_daemon_state'](data);
             }
 
         }, $emulator.settings.eventsInterval);
@@ -102,14 +102,14 @@ Emulator = function() {
         // show all the wallets in UI
         setTimeout(function() {
             for(var i in $emulator.wallets) {
-                if ($emulator.eventCallbacks['on_update_wallet_info']) {
+                if ($emulator.eventCallbacks['update_wallet_info']) {
                     var wallet = $emulator.wallets[i];
-                    $emulator.eventCallbacks['on_update_wallet_info']( JSON.parse(JSON.stringify(wallet)) );
+                    $emulator.eventCallbacks['update_wallet_info']( JSON.parse(JSON.stringify(wallet)) );
                 }
             }
         }, $emulator.settings.eventsInterval);
 
-        // random on_update_wallet_info
+        // random update_wallet_info
         setInterval(function() {
             if (Object.size($emulator.wallets) > 0) {
                 var rand_wallet = $emulator.application.getRandomObjectProperty($emulator.wallets);
@@ -118,8 +118,8 @@ Emulator = function() {
                 if (rand_wallet.balance < 0) rand_wallet.balance = 1000;
 
                 // Notify all the subscribers
-                if ($emulator.eventCallbacks['on_update_wallet_info']) {
-                    $emulator.eventCallbacks['on_update_wallet_info']( JSON.parse(JSON.stringify(rand_wallet)) );
+                if ($emulator.eventCallbacks['update_wallet_info']) {
+                    $emulator.eventCallbacks['update_wallet_info']( JSON.parse(JSON.stringify(rand_wallet)) );
                 }
             }
         }, $emulator.settings.eventsInterval);

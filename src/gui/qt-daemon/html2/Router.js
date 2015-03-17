@@ -13,9 +13,8 @@ Router = function(ajaxContainer) {
             'index', 'safes', 'market', 'contacts', 'history', 'deposits', 'settings',
             'sendG', 'buyG', 'sellG', 'buyProduct', 'sellProduct', 'safe',
 
-            'index0', 'safes0', 'market0', 'contacts0', 'history0', 'deposits0', 'settings0',
-            'sendG0', 'buyG0', 'sellG0', 'buyProduct0', 'sellProduct0', 'contact0', 'safe0', 'safe1',
-            'safe2'
+            'index0', 'safes0', 'market0', 'contacts0', 'history0', 'deposits0',
+            'contact0', 'safe0', 'safe1'
         ],
         'emptyPages': [
             'screen2', 'screen3'

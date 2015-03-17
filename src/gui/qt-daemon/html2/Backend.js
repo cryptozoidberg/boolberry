@@ -2,13 +2,14 @@
 Backend = function(emulator) {
 
     this.settings = {
-        useEmulator: true,
+//      useEmulator: true,
         intervalUpdateCurrentScreen: 5000
 //      intervalCheckIfOnline: 5000
     };
     this.application = null;
     this.emulator = emulator;
     this.emulator.backend = this;
+    this.last_daemon_state = null;
     var callbacks = [];
     var currentScreen = null;
     var $backend = this;
@@ -23,7 +24,7 @@ Backend = function(emulator) {
         console.log("Requesting API command '"+command+"' with parameters: "+JSON.stringify(parameters));
 
         // Emulated call versus real one through the magic Qt object
-        var commandFunction = (this.settings.useEmulator) ? this.emulator.backendRequestCall(command) : Qt[command];
+        var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt[command];
 
         // Now call it
         var returnValue = commandFunction(parameters);
@@ -60,16 +61,15 @@ Backend = function(emulator) {
     };
 
     this.subscribe = function(command, callback) {
-        backendEvents = ['on_update_safe_count', 'on_update_balance'];
+        var nonBackendEvents = ['update_safe_count', 'update_balance'];
 
-        console.log("subscribe(" + command + ", "  + callback + ")");
-        if (backendEvents.indexOf(command) >= 0) {
+        if (nonBackendEvents.indexOf(command) >= 0) {
             // This object fires the event
             this.backendEventSubscribers[command] = callback;
         } else {
             // Backend layer fires the event
 
-            if (this.settings.useEmulator) {
+            if (this.shouldUseEmulator()) {
                 this.emulator.eventCallbacks[command] = callback;
             } else {
                 Qt[command].connect(callback);
@@ -105,7 +105,7 @@ Backend = function(emulator) {
     // Register callbacks for automatic events from backend side
     this.registerEventCallbacks = function() {
         /**
-         * on_update_daemon_state
+         * update_daemon_state
          *
          * data =  {
          *      "daemon_network_state": 2,
@@ -136,8 +136,12 @@ Backend = function(emulator) {
          *  }
          *
          */
-        this.subscribe('on_update_daemon_state', function(data) {
+        this.subscribe('update_daemon_state', function(data) {
             $backend.application.showOnlineState(data.text_state);
+
+            // info widget
+            $backend.last_daemon_state = data;
+            $backend.application.updateBackendInfoWidget();
         });
 
         /**
@@ -158,7 +162,7 @@ Backend = function(emulator) {
          *        }
          *
          */
-        this.subscribe('on_update_wallet_info', function(data) {
+        this.subscribe('update_wallet_info', function(data) {
             // Save this array of safes if anything changed
             var id = data.wallet_id;
             var safe = $backend.safes[id];
@@ -169,14 +173,14 @@ Backend = function(emulator) {
                     }
                 }
                 $backend.application.reRenderSafe(id);
-                $backend.fireEvent('on_update_balance');
+                $backend.fireEvent('update_balance');
             } else {
                 // Got a new one? Just add it then
                 $backend.safes[id] = data;
 
                 // and notify the subscribers
-                $backend.fireEvent('on_update_safe_count');
-                $backend.fireEvent('on_update_balance');
+                $backend.fireEvent('update_safe_count');
+                $backend.fireEvent('update_balance');
             }
         });
 
@@ -195,8 +199,8 @@ Backend = function(emulator) {
                     delete $backend.safes[ wallet_id ];
 
                     // Notify the subscribers
-                    $backend.fireEvent('on_update_safe_count');
-                    $backend.fireEvent('on_update_balance')
+                    $backend.fireEvent('update_safe_count');
+                    $backend.fireEvent('update_balance')
                 }
 
                 // Call the passed callback to reflect changes in UI
@@ -220,8 +224,8 @@ Backend = function(emulator) {
         $backend.backendRequest('get_wallet_info', {wallet_id: wallet_id}, function(status, data) {
             if (status.error_code == 'OK') {
                 $backend.safes[wallet_id] = data;
-                $backend.fireEvent('on_update_safe_count');
-                $backend.fireEvent('on_update_balance');
+                $backend.fireEvent('update_safe_count');
+                $backend.fireEvent('update_balance');
             }
 
             callback(status, data);
@@ -254,6 +258,12 @@ Backend = function(emulator) {
                 //});
                 break;
         }
+    };
+
+    this.shouldUseEmulator = function() {
+        var use_emulator = (typeof Qt == 'undefined');
+        console.log("UseEmulator: " + use_emulator);
+        return use_emulator;
     };
 
 }; // -- end of Backend definition

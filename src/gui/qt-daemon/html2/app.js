@@ -10,7 +10,7 @@ String.prototype.shuffle = function () {
         a[j] = tmp;
     }
     return a.join("");
-}
+};
 
 // helper for pseudo-associative arrays in JS - work like .length but does it on objects
 Object.size = function(obj) {
