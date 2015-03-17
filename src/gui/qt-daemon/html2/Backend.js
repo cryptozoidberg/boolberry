@@ -62,6 +62,7 @@ Backend = function(emulator) {
     this.subscribe = function(command, callback) {
         backendEvents = ['on_update_safe_count', 'on_update_balance'];
 
+        console.log("subscribe(" + command + ", "  + callback + ")");
         if (backendEvents.indexOf(command) >= 0) {
             // This object fires the event
             this.backendEventSubscribers[command] = callback;

@@ -76,7 +76,9 @@ struct binary_archive<false> : public binary_archive_base<std::istream, false>
     }
     v = ret;
   }
-  void serialize_blob(void *buf, size_t len, const char *delimiter="") { stream_.read((char *)buf, len); }
+  void serialize_blob(void *buf, size_t len, const char *delimiter="") { 
+    stream_.read((char *)buf, len);
+  }
 
   template <class T>
   void serialize_varint(T &v)
