@@ -49,7 +49,13 @@ Application = function(router, backend) {
                             // Oh my! Three nested tables!! That's just super crazy.
                             newValue += "<table class='table table-condensed table-bordered'>";
                             for(var __key in _value) {
-                                newValue += "<tr><td>"+__key+"</td><td>"+_value[__key]+"</td></tr>";
+                                var __value = _value[__key];
+
+                                if (__key == 'date') {
+                                    __value = $app.getDateFromTimestamp(__value);
+                                }
+
+                                newValue += "<tr><td>"+__key+"</td><td>"+__value+"</td></tr>";
                             }
                             newValue += "</table>";
 
@@ -355,6 +361,36 @@ Application = function(router, backend) {
     this.getRandomObjectProperty = function(obj) {
         var keys = Object.keys(obj)
         return obj[keys[ keys.length * Math.random() << 0]];
+    };
+
+    // Unix timestamp to formatted date/time string
+    // - stolen from: http://stackoverflow.com/questions/847185/convert-a-unix-timestamp-to-time-in-javascript
+    //   & http://stackoverflow.com/questions/3552461/how-to-format-javascript-date
+    this.getDateFromTimestamp = function(unix_timestamp) {
+        // create a new javascript Date object based on the timestamp
+        // multiplied by 1000 so that the argument is in milliseconds, not seconds
+        var date = new Date(unix_timestamp*1000);
+
+        var m_names = new Array("January", "February", "March",
+            "April", "May", "June", "July", "August", "September",
+            "October", "November", "December");
+
+        var d = new Date();
+        var curr_date = d.getDate();
+        var curr_month = d.getMonth();
+        var curr_year = d.getFullYear();
+
+        // hours part from the timestamp
+        var hours = "0" + date.getHours();
+        // minutes part from the timestamp
+        var minutes = "0" + date.getMinutes();
+        // seconds part from the timestamp
+        var seconds = "0" + date.getSeconds();
+
+        // will display time in 10:30:23 format
+        var formattedTime = curr_date + "-" + m_names[curr_month] + "-" + curr_year + " " + hours.substr(hours.length-2) + ':' + minutes.substr(minutes.length-2) + ':' + seconds.substr(seconds.length-2);
+
+        return formattedTime;
     };
 
     //////////////////////////////////////////////////////////////
