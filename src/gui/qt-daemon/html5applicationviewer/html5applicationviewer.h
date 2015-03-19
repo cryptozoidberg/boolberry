@@ -68,6 +68,9 @@ private:
   void loadUrl(const QUrl &url);
   void closeEvent(QCloseEvent *event);
   void changeEvent(QEvent *e);
+  void dispatch(const QString& status, const QString& param);
+
+
 
   bool store_config();
 
@@ -143,7 +146,7 @@ private:
   {
     QString status_obj_str = epee::serialization::store_t_to_json(status).c_str();
     QString rsp_obj_str = epee::serialization::store_t_to_json(rsp).c_str();
-    m_d->dispatch(status_obj_str, rsp_obj_str);
+    dispatch(status_obj_str, rsp_obj_str);
   }
 
 

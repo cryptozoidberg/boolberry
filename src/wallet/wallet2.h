@@ -32,7 +32,7 @@ namespace tools
   {
     uint64_t m_signature;
     uint16_t m_cb_keys;
-    uint16_t m_cb_body;
+    uint64_t m_cb_body;
   };
 #pragma pack (pop)
 
@@ -192,7 +192,7 @@ namespace tools
       const std::vector<const crypto::public_key*>& keys_ptrs);
     void process_new_blockchain_entry(const currency::block& b, 
       currency::block_complete_entry& bche, 
-      crypto::hash& bl_id, 
+      const crypto::hash& bl_id,
       uint64_t height);
     bool get_pos_entries(currency::COMMAND_RPC_SCAN_POS::request& req);
     bool scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, currency::COMMAND_RPC_SCAN_POS::response& rsp, std::atomic<bool>& is_stop);

@@ -20,7 +20,6 @@ extern "C" {
 
 namespace tools
 {
-
   class miniupnp_helper
   {
     UPNPDev *m_devlist;

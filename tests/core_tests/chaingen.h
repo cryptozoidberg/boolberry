@@ -265,7 +265,7 @@ public:
   uint64_t get_already_generated_coins(const currency::block& blk) const;
   currency::wide_difficulty_type get_block_difficulty(const crypto::hash& blk_id) const;
 
-  bool test_generator::build_outputs_indext_for_chain(const std::vector<const block_info*>& blocks, outputs_index& index, tx_global_indexes& txs_outs);
+  bool build_outputs_indext_for_chain(const std::vector<const block_info*>& blocks, outputs_index& index, tx_global_indexes& txs_outs);
 
 
   void add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins, currency::wide_difficulty_type cum_diff, const std::list<currency::transaction>& tx_list);

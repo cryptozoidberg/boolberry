@@ -225,7 +225,7 @@ void wallet2::process_unconfirmed(const currency::transaction& tx, std::string& 
   }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::process_new_blockchain_entry(const currency::block& b, currency::block_complete_entry& bche, crypto::hash& bl_id, uint64_t height)
+void wallet2::process_new_blockchain_entry(const currency::block& b, currency::block_complete_entry& bche, const crypto::hash& bl_id, uint64_t height)
 {
   //handle transactions from new block
   CHECK_AND_THROW_WALLET_EX(height != m_blockchain.size(), error::wallet_internal_error,
@@ -625,7 +625,7 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
 
   CHECK_AND_THROW_WALLET_EX(wbh.m_signature != WALLET_FILE_SIGNATURE, error::file_not_found, m_wallet_file);
   CHECK_AND_THROW_WALLET_EX(wbh.m_cb_body > WALLET_FILE_MAX_BODY_SIZE || 
-    wbh.m_cb_keys > WALLET_FILE_MAX_BODY_SIZE, error::file_not_found, m_wallet_file);
+    wbh.m_cb_keys > WALLET_FILE_MAX_KEYS_SIZE, error::file_not_found, m_wallet_file);
 
 
   keys_buff.resize(wbh.m_cb_keys);

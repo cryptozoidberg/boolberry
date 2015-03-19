@@ -110,7 +110,8 @@
 #define POS_WALLET_MINING_SCAN_INTERVAL                 20  //seconds
 
 #define WALLET_FILE_SIGNATURE                           0x1111011101101011LL  //Bender's nightmare
-#define WALLET_FILE_MAX_BODY_SIZE                       0x88888888 //2GB
+#define WALLET_FILE_MAX_BODY_SIZE                       0x88888888L //2GB
+#define WALLET_FILE_MAX_KEYS_SIZE                       10000 //2GB
 
 
 

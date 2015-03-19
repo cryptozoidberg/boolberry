@@ -778,6 +778,10 @@ QString Html5ApplicationViewer::get_wallet_info(const QString& param)
   return epee::serialization::store_t_to_json(ar).c_str();
 }
 
+void Html5ApplicationViewer::dispatch(const QString& status, const QString& param)
+{
+  m_d->dispatch(status, param);
+}
 
 
 #include "html5applicationviewer.moc"
