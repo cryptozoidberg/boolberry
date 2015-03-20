@@ -1,10 +1,9 @@
 #!/bin/bash
 
 QT_PREFIX_PATH="$HOME/Qt/5.3/gcc_64"
-QT_BINARIES_PATH="$HOME/bbr_binaries"
+QT_BINARIES_PATH="$HOME/lui_binaries"
 
 
-cd boolberry
 prj_root=$(pwd)
 
 git pull
@@ -17,7 +16,7 @@ echo "---------------- BUILDING PROJECT ----------------"
 echo "--------------------------------------------------"
 
 echo "Backupping wallet files(on the off-chance)"
-cp -v build/release/src/*.bin build/release/src/*.bin.keys build/release/src/*.bbr build/release/src/*.bbr.keys build/release/src/*.bbr.address.txt build/release/src/*.bin.address.txt ..
+#cp -v build/release/src/*.bin build/release/src/*.bin.keys build/release/src/*.bbr build/release/src/*.bbr.keys build/release/src/*.bbr.address.txt build/release/src/*.bin.address.txt ..
 
 echo "Building...." 
 rm -rf build; mkdir -p build/release; cd build/release; 
@@ -27,27 +26,27 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-make daemon qt-boolb simplewallet simpleminer connectivity_tool;
+make daemon qt-lui simplewallet simpleminer connectivity_tool;
 if [ $? -ne 0 ]; then
     echo "Failed to make!"
     exit 1
 fi
 
  
-read version_str <<< $(./src/boolbd --version | awk '/^Boolberry / { print $2 }')
+read version_str <<< $(./src/luid --version | awk '/^Lui / { print $2 }')
 echo $version_str
 
 
-mkdir -p boolberry;
+mkdir -p lui;
 
-cp -Rv ../../src/gui/qt-daemon/html ./boolberry
-cp -Rv ../../utils/qt-boolb.sh ./boolberry
-cp -Rv $QT_BINARIES_PATH/libs ./boolberry
-cp -Rv $QT_BINARIES_PATH/libs ./boolberry
-cp -Rv src/boolbd src/qt-boolb src/simplewallet src/simpleminer src/connectivity_tool ./boolberry
+cp -Rv ../../src/gui/qt-daemon/html ./lui
+cp -Rv ../../utils/qt-lui.sh ./lui
+cp -Rv $QT_BINARIES_PATH/libs ./lui
+cp -Rv $QT_BINARIES_PATH/libs ./lui
+cp -Rv src/luid src/qt-lui src/simplewallet src/simpleminer src/connectivity_tool ./lui
 
 
-tar -cjvf bbr-linux-x64-$version_str.tar.bz2 boolberry
+tar -cjvf lui-linux-x64-$version_str.tar.bz2 lui
 if [ $? -ne 0 ]; then
     echo "Failed to pack"
     exit 1
