@@ -6,7 +6,7 @@ Application = function(router, backend) {
     this.alreadyInitializedScreens = [];
     this.screens = [];
     this.settings = {
-        maxWidgets: 20
+        maxWidgets: 12
     };
     var $app = this;
     
@@ -15,6 +15,7 @@ Application = function(router, backend) {
         this.setUpScreens();
 
         // Init routing
+        this.router.application = this;
         this.router.registerAppCallback(this.onScreenInit);
         this.router.loadPages(function() {
             // Some interface triggers, like selectpicker bootstrap plugin
@@ -160,11 +161,179 @@ Application = function(router, backend) {
                 $('a[data-toggle="collapse-off"]').attr('onclick', 'return false;');
             }
         };
-        this.screens['buyG'] = {
+        this.screens['contact'] = {
             init: function() {
-
+                $('.contact_add-messenger-button').click(function() {
+                    if ($('.contact_ims .im').length < 10) {
+                        $('.contact_ims').append($('.appScreen_contact .im')[0].outerHTML);
+                    }
+                });
+                $(document).on('click', '.contact_im-delete-button', function() {
+                    $(this).parents('.im').slideUp(function() {
+                        $(this).remove();
+                    });
+                });
             }
         };
+        this.screens['buyG'] = {
+            init: function() {
+                $('.buyG_amountG, .buyG_amountFiat, .buyG_rate').numeric();
+                $('.buyG_amountG').keyup(function() {
+                    var G = parseFloat($('.buyG_amountG').val());
+                    var fiat = parseFloat($('.buyG_amountFiat').val());
+                    var rate = parseFloat($('.buyG_rate').val());
+                    if (fiat != 0 && !isNaN(fiat)) {
+                        rate = fiat / G;
+                    } else if (rate != 0 && !isNaN(rate)) {
+                        fiat = G * rate;
+                    } else {
+                        fiat = 0;
+                        rate = 0;
+                    }
+                    $('.buyG_amountFiat').val(isNaN(fiat) ? 0 : fiat);
+                    $('.buyG_rate').val(isNaN(rate) ? 0 : rate);
+                });
+                $('.buyG_amountFiat').keyup(function() {
+                    var G = parseFloat($('.buyG_amountG').val());
+                    var fiat = parseFloat($('.buyG_amountFiat').val());
+                    var rate = parseFloat($('.buyG_rate').val());
+                    if (G != 0 && !isNaN(G)) {
+                        rate = fiat / G;
+                    } else if (rate != 0 && !isNaN(rate)) {
+                        G = fiat / rate;
+                    } else {
+                        G = 0;
+                        rate = 0;
+                    }
+                    $('.buyG_amountG').val(isNaN(G) ? 0 : G);
+                    $('.buyG_rate').val(isNaN(rate) ? 0 : rate);
+                });
+                $('.buyG_rate').keyup(function() {
+                    var G = parseFloat($('.buyG_amountG').val());
+                    var fiat = parseFloat($('.buyG_amountFiat').val());
+                    var rate = parseFloat($('.buyG_rate').val());
+                    if (G != 0 && !isNaN(G)) {
+                        fiat = G * rate;
+                    } else if (fiat != 0 && !isNaN(rate)) {
+                        G = fiat / rate;
+                    } else {
+                        fiat = 0;
+                        rate = 0;
+                    }
+                    $('.buyG_amountG').val(isNaN(G) ? 0 : G);
+                    $('.buyG_amountFiat').val(isNaN(fiat) ? 0 : fiat);
+                });
+            },
+            show: function() {
+                $('.buyG_sticker').sticky({topSpacing: 80});
+            },
+            hide: function() {
+                $('.buyG_sticker').unstick();
+            }
+        };
+        this.screens['sellG'] = {
+            init: function() {
+                $('.sellG_amountG, .sellG_amountFiat, .sellG_rate').numeric();
+                $('.sellG_amountG').keyup(function() {
+                    var G = parseFloat($('.sellG_amountG').val());
+                    var fiat = parseFloat($('.sellG_amountFiat').val());
+                    var rate = parseFloat($('.sellG_rate').val());
+                    if (fiat != 0 && !isNaN(fiat)) {
+                        rate = fiat / G;
+                    } else if (rate != 0 && !isNaN(rate)) {
+                        fiat = G * rate;
+                    } else {
+                        fiat = 0;
+                        rate = 0;
+                    }
+                    $('.sellG_amountFiat').val(isNaN(fiat) ? 0 : fiat);
+                    $('.sellG_rate').val(isNaN(rate) ? 0 : rate);
+                });
+                $('.sellG_amountFiat').keyup(function() {
+                    var G = parseFloat($('.sellG_amountG').val());
+                    var fiat = parseFloat($('.sellG_amountFiat').val());
+                    var rate = parseFloat($('.sellG_rate').val());
+                    if (G != 0 && !isNaN(G)) {
+                        rate = fiat / G;
+                    } else if (rate != 0 && !isNaN(rate)) {
+                        G = fiat / rate;
+                    } else {
+                        G = 0;
+                        rate = 0;
+                    }
+                    $('.sellG_amountG').val(isNaN(G) ? 0 : G);
+                    $('.sellG_rate').val(isNaN(rate) ? 0 : rate);
+                });
+                $('.sellG_rate').keyup(function() {
+                    var G = parseFloat($('.sellG_amountG').val());
+                    var fiat = parseFloat($('.sellG_amountFiat').val());
+                    var rate = parseFloat($('.sellG_rate').val());
+                    if (G != 0 && !isNaN(G)) {
+                        fiat = G * rate;
+                    } else if (fiat != 0 && !isNaN(rate)) {
+                        G = fiat / rate;
+                    } else {
+                        fiat = 0;
+                        rate = 0;
+                    }
+                    $('.sellG_amountG').val(isNaN(G) ? 0 : G);
+                    $('.sellG_amountFiat').val(isNaN(fiat) ? 0 : fiat);
+                });
+            },
+            show: function() {
+                $('.sellG_sticker').sticky({topSpacing: 80});
+            },
+            hide: function() {
+                $('.sellG_sticker').unstick();
+            }
+        };
+
+    };
+
+    // Show screen option (triggered by path in hash, like #screenName/option)
+    this.showScreenOption = function(screen, option, router) {
+        switch(screen) {
+            case 'history':
+                switch(option) {
+                    case 'ingoing':
+                        $('.history_filterIngoingButton').click(); break;
+                    case 'outgoing':
+                        $('.history_filterOutgoingButton').click(); break;
+                    case 'all':
+                        $('.history_filterIngoingOutgoingButton').click(); break;
+                }
+                break;
+            case 'market':
+                switch(option) {
+                    case 'currency/bid':
+                        $('.market_filterCurrencyButton').click();
+                        $('.market_filterCurrencyBidButton').click();
+                        break;
+                    case 'currency/ask':
+                        $('.market_filterCurrencyButton').click();
+                        $('.market_filterCurrencyAskButton').click();
+                        break;
+                    case 'barter/bid':
+                        $('.market_filterBarterButton').click();
+                        $('.market_filterBarterBidButton').click();
+                        break;
+                    case 'barter/ask':
+                        $('.market_filterBarterButton').click();
+                        $('.market_filterBarterAskButton').click();
+                        break;
+                    case 'favorites/currency':
+                        $('.market_filterMyFavoritesButton').click();
+                        $('.market_filterMyFavoritesCurrencyButton').click();
+                        $('.market_filterMyFavoritesAllButton').click();
+                        break;
+                    case 'favorites/barter':
+                        $('.market_filterMyFavoritesButton').click();
+                        $('.market_filterMyFavoritesBarterButton').click();
+                        $('.market_filterMyFavoritesAllButton').click();
+                        break;
+                }
+                break;
+        }
     };
 
     this.initInterface = function() {
@@ -185,6 +354,10 @@ Application = function(router, backend) {
                     console.log("OpenFileDialog API Error: "+status.error_code);
                 }
             });
+        });
+        $(document).on("click", ".buyG_submitButton", function() {
+            $app.showModal('#confirm_operation_modal');
+            return false;
         });
         $(document).on("click", ".open-safe_step-2-button", function() {
             $app.showModalScreen('open-safe', 'screen-2');
@@ -224,6 +397,25 @@ Application = function(router, backend) {
 
             return false;
         });
+        $(document).on("click", ".index_create-safe-button", function() {
+            $app.showModal('#addSafe', 'create-safe', 'screen-1', true); // clears all inputs beforehand
+        });
+        $(document).on("click", ".create-safe_step-1-button", function() {
+            $app.showModalScreen('create-safe', 'screen-1');
+            return false;
+        });
+        $(document).on("click", ".create-safe_step-2-button", function() {
+            $app.showModalScreen('create-safe', 'screen-2');
+            return false;
+        });
+        $(document).on("click", ".create-safe_step-3-button", function() {
+            $app.showModalScreen('create-safe', 'screen-3');
+            return false;
+        });
+        $(document).on("click", ".create-safe_step-4-button", function() {
+            $app.showModalScreen('create-safe', 'screen-4');
+            return false;
+        });
         $(document).on("click", ".index_close-safe-button", function() {
             loadingAnimationOn();
             var safe_id = $(this).parents('.safebox').data('safe-id');
@@ -248,19 +440,106 @@ Application = function(router, backend) {
             $('#'+opposite_id).trigger('click');
         });
 
+        // Radiobuttons
+        var selector = 'input[type=radio][name=marketMyOrdersRadio]';
+        $(document).on("change", selector, function() {
+            var val = $(selector + ':checked').val();
+            if (val == 'currency') {
+                $('#myCurrency').show();
+                $('#myBarter').hide();
+            } else {
+                $('#myBarter').show();
+                $('#myCurrency').hide();
+            }
+        });
+        $(function() { $(selector).change(); });
+        // Radiobuttons
+        var selector2 = 'input[type=radio][name=marketMyFavoritesRadio]';
+        $(document).on("change", selector2, function() {
+            var val = $(selector2 + ':checked').val();
+            if (val == 'currency') {
+                $('#favCurrency').show();
+                $('#favBarter').hide();
+            } else {
+                $('#favBarter').show();
+                $('#favCurrency').hide();
+            }
+        });
+        $(function() { $(selector2).change(); });
+
+        // Tooltips for help
+        $('input[name=options2_1]').change(function() {
+            if ($('input[name=options2_1]:checked').attr('id')=='option1') {
+                $('button.popover-name').css({'visibility': 'visible'});
+            } else {
+                $('button.popover-name').css({'visibility': 'hidden'});
+            }
+        });
+
         // Remove update notification after some time
         setInterval(function() {
             $('.alert-warning').slideUp();
         }, 3000);
 
-    };
+        // History and Market screen - collapse filters
+        setTimeout(function() {
+            //if ($('.appScreen_history .close-filter.filter1').attr('aria-expanded')==='true') {
+            //    $('.appScreen_history .close-filter.filter1 .btn[data-toggle=collapse]').click();
+            //}
+            //if ($('.appScreen_market .close-filter.filter11').attr('aria-expanded')==='true') {
+            //    $('.appScreen_market .close-filter.filter11 .btn[data-toggle=collapse]').click();
+            //}
+        }, 500);
+
+        // Datepickers
+        $('.appScreen_history .input-daterange').datepicker({
+            autoclose: true,
+            todayHighlight: true,
+            language: "ru"
+        });
+        $('.appScreen_market .input-date').datepicker({
+            autoclose: true,
+            todayHighlight: true,
+            language: "ru"
+        });
+        $('.market_currency_order-age-selector').change(function() {
+            if ($(this).val() == 'другой период') {
+                $('.market_currency_order-age-datapicker-row').show();
+            } else {
+                $('.market_currency_order-age-datapicker-row').hide();
+            }
+        });
+        $('.market_currency_order-age-selector').change();
+        $('.market_barter_order-age-selector').change(function() {
+            if ($(this).val() == 'другой период') {
+                $('.market_barter_order-age-datapicker-row').show();
+            } else {
+                $('.market_barter_order-age-datapicker-row').hide();
+            }
+        });
+        $('.market_barter_order-age-selector').change();
+        $('.history_period-selector').change(function() {
+            if ($(this).val() == 'другой период') {
+                $('.history_period-datapicker-row').show();
+            } else {
+                $('.history_period-datapicker-row').hide();
+            }
+        });
+        $('.history_period-selector').change();
+
+        // Password strength visualizer
+        $('#create-safe_safe-password-input-1').strengthMeter('progressBar', {
+            container: $('.create-safe_password-strength-bar')
+        });
+
+    }; // end of initInterface function
 
     this.showOnlineState = function(state) {
-        $('.ifOnlineText').hide();
+        $('.ifOnlineText').hide().removeClass('hide');
         $('.ifOnlineText.'+ state.toLowerCase()).show();
     };
 
-    // Renders the safe plate on the carousel on index screen
+    // Renders safes plate on the carousel on index screen
     this.reRenderSafe = function(safe_id) {
         var safe = $app.backend.safes[safe_id];
 
@@ -272,6 +551,31 @@ Application = function(router, backend) {
         safe_html = safe_html.replace('{{ safe_id }}', safe.wallet_id);
 
         $('.safebox[data-safe-id="'+safe_id+'"]').html(safe_html);
+
+        this.redrawSafeCharts();
+    };
+
+    this.redrawSafeCharts = function() {
+        $('.send-timer').easyPieChart({
+            easing: 'easeOutBounce',
+            size: 32,
+            lineWidth: 9,
+            lineCap: 'butt',
+            barColor: '#f0ad4e',
+            onStep: function (from, to, percent) {
+                $(this.el).find('.percent').text(Math.round(percent));
+            }
+        });
+        $('.receive-timer').easyPieChart({
+            easing: 'easeOutBounce',
+            size: 32,
+            lineWidth: 9,
+            lineCap: 'butt',
+            barColor: '#5bc0de',
+            onStep: function (from, to, percent) {
+                $(this.el).find('.percent').text(Math.round(percent));
+            }
+        });
     };
 
     this.subscribeToNonBackendEvents = function() {
@@ -331,12 +635,22 @@ Application = function(router, backend) {
     this.onScreenInit = function(screen) {
         if ($app.alreadyInitializedScreens.indexOf(screen) < 0) {
             $app.alreadyInitializedScreens.push(screen);
-            if ($app.screens[screen]) {
+            if ($app.screens[screen] && $app.screens[screen].init) {
                 $app.screens[screen].init();
             }
         }
 
         $app.backend.updateScreen(screen);
+    };
+    this.onScreenHide = function(screen) {
+        if ($app.screens[screen] && $app.screens[screen].hide) {
+            $app.screens[screen].hide();
+        }
+    };
+    this.onScreenShow = function(screen) {
+        if ($app.screens[screen] && $app.screens[screen].show) {
+            $app.screens[screen].show();
+        }
     };
 
     this.showModal = function(selector, name, screen, clearInputs) {
@@ -351,8 +665,10 @@ Application = function(router, backend) {
         $(selector).modal('hide');
     };
     this.showModalScreen = function(name, screen){
-        $('.'+name+'_screen').hide();
-        $('.'+name+'_'+screen).show()
+        if (name && screen) {
+            $('.'+name+'_screen').hide();
+            $('.'+name+'_'+screen).show()
+        }
     };
 
     this.getRandomInt = function(min, max) {
@@ -391,6 +707,22 @@ Application = function(router, backend) {
         var formattedTime = curr_date + "-" + m_names[curr_month] + "-" + curr_year + " " + hours.substr(hours.length-2) + ':' + minutes.substr(minutes.length-2) + ':' + seconds.substr(seconds.length-2);
 
         return formattedTime;
+    };
+
+    this.allowNumbersOnly = function(e) {
+        var key = e.charCode || e.keyCode || 0;
+        // allow backspace, tab, delete, enter, arrows, numbers and keypad numbers ONLY
+        // home, end, period, and numpad decimal
+        return (
+        key == 8 ||
+        key == 9 ||
+        key == 13 ||
+        key == 46 ||
+        key == 110 ||
+        key == 190 ||
+        (key >= 35 && key <= 40) ||
+        (key >= 48 && key <= 57) ||
+        (key >= 96 && key <= 105));
     };
 
     //////////////////////////////////////////////////////////////

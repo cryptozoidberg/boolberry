@@ -105,22 +105,28 @@
                         </div>
                         <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".facebook1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
                     </div>
+
+                    <div class="contact_ims"></div>
+
                     <div class="form-group">
                         <div class="col-xs-7 col-sm-7 col-sm-offset-4">
-                            <button type="button" data-toggle="collapse" data-target=".im1" class="btn btn-link text-muted"><i class="fa fa-lg fa-plus-circle"></i> Добавить мессенджер</button>
+                            <button type="button" class="btn btn-link text-muted contact_add-messenger-button"><i class="fa fa-lg fa-plus-circle"></i> Добавить мессенджер</button>
                         </div>
                     </div>
 
 
-                    <div class="form-group has-feedback group-hover inline-edit-field collapse im1">
-                        <div class="col-xs-4 col-sm-4"><input type="text" class="form-control flat-input text-right" placeholder="Название мессенджера"></div>
-                        <div class="col-xs-7 col-sm-7">
-                            <input type="text" value="" class="form-control flat-input" placeholder="профиль в мессенджере">
-                            <i class="fa fa-lg fa-pencil form-control-feedback"></i>
-                        </div>
-                        <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".im1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button>
+                    <div style="display: none;">
+                        <div class="form-group has-feedback group-hover inline-edit-field im">
+                            <div class="col-xs-4 col-sm-4"><input type="text" class="form-control flat-input text-right" placeholder="Название мессенджера"></div>
+                            <div class="col-xs-7 col-sm-7">
+                                <input type="text" value="" class="form-control flat-input" placeholder="профиль в мессенджере">
+                                <i class="fa fa-lg fa-pencil form-control-feedback"></i>
+                            </div>
+                            <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block contact_im-delete-button" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button>
+                            </div>
                         </div>
                     </div>
+
 
                     <div class="form-group has-feedback group-hover inline-edit-field collapse in location1">
                         <label class="col-xs-4 col-sm-4 control-label">Местожительства</label>

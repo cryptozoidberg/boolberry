@@ -6,12 +6,12 @@ Router = function(ajaxContainer) {
             'hideSpeed': 600,
             'showSpeed': 600
         },
-        'defaultUri': "index",
+        'defaultScreen': "index",
         'pages': [
             'routingError', 'empty', // should be the first ones
 
             'index', 'safes', 'market', 'contacts', 'history', 'deposits', 'settings',
-            'sendG', 'buyG', 'sellG', 'buyProduct', 'sellProduct', 'safe',
+            'sendG', 'buyG', 'sellG', 'buyProduct', 'sellProduct', 'safe', 'contact',
 
             'index0', 'safes0', 'market0', 'contacts0', 'history0', 'deposits0',
             'contact0', 'safe0', 'safe1'
@@ -23,10 +23,13 @@ Router = function(ajaxContainer) {
             'screen4': 'safes'
         }
     };
+    this.application = null;
     this.ajaxContainer = ajaxContainer;
-    this.lastHash = null;
     this.pagesToLoadCounter = 0; // how many pages are yet to load through loadPages() async. ajax
     this.appCallback = null;
+    this.currentScreen = null;
+    this.currentOption = null;
+    this.prevScreen = null;
     var $router = this;
 
     // Subscribes to hash changing events and link clicks
@@ -88,11 +91,25 @@ Router = function(ajaxContainer) {
         if ($router.pagesToLoadCounter != 0) return; // pages haven't been loaded yet
 
         // Parse hash
-        var hash = location.hash.substring(1);
-        if (hash == '' || hash == '/') hash = $router.settings.defaultUri;
+        var hash = location.hash.substring(1); // remove #
+        if (hash == '' || hash == '/') hash = $router.settings.defaultScreen;
+
+        // Path separated by slash
+        var option = null;
+        var slashPos = hash.indexOf('/');
+        if (slashPos >= 0) {
+            var option = hash.substr(slashPos+1);
+            hash = hash.substr(0, slashPos);
+        }
 
         // Did it change?
-        if (hash != $router.lastHash) {
+        var screenChanged = false;
+        if (hash != $router.currentScreen) {
+            // Update routing info
+            screenChanged = true;
+            $router.prevScreen = $router.currentScreen;
+            $router.currentScreen = hash;
+
             // Rewrite?
             if (hash in $router.settings.rewrite) {
                 location.hash = $router.settings.rewrite[hash];
@@ -123,8 +140,15 @@ Router = function(ajaxContainer) {
                 $('.appScreen').removeClass('active');
                 $('.appScreen.appScreen_' + hash).addClass('active');
 
+                // Do the updates
+                $router.application.onScreenHide($router.prevScreen);
+                $router.application.onScreenShow($router.currentScreen);
+
                 // Scroll to the top
                 window.scrollTo(0,0);
+
+                // Do we have screenname/option?
+                if (option) $router.application.showScreenOption($router.currentScreen, $router.currentOption);
 
                 // Animation 'show'
                 $router.showContainer();
@@ -135,7 +159,24 @@ Router = function(ajaxContainer) {
                 // Trigger resize event to execute some plugins relying on it
                 window.dispatchEvent(new Event('resize'));
             });
-        }
+        } // end of check if currentScreen is changed
+
+        if (option != $router.currentOption || screenChanged) {
+            // Update routing info
+            $router.currentOption = option;
+
+            // Scroll to the top
+            window.scrollTo(0,0);
+
+            // Do we have screenname/option?
+            $router.application.showScreenOption($router.currentScreen, $router.currentOption, $router);
+
+            // Animation 'show'
+            $router.showContainer();
+
+            // Trigger resize event to execute some plugins relying on it
+            window.dispatchEvent(new Event('resize'));
+        } // end of check if currentOption is changed
     };
 
     // Animations

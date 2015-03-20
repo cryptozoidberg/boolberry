@@ -35,7 +35,7 @@
                 <div class="panel-body">
                     <h4><a href="#" type="button" data-toggle="collapse" data-target=".collapse00">  <span>Детали <span class="collapse selltext">покупки</span><span class="collapse in selltext">продажи</span></span></a></h4>
 
-                    <div class="col-sm-4 there-are-more-deals-like-this-panel"><div class="panel-content">В данный момент на рынке есть<br><a href="#market"><strong>5</strong> заявок, соответствующих вашей</a></div></div>
+                    <div class="col-sm-4 there-are-more-deals-like-this-panel sellG_sticker"><div class="panel-content">В данный момент на рынке есть<br><a href="#market"><strong>5</strong> заявок, соответствующих вашей</a></div></div>
 
                     <div class="form-group">
                         <label class="col-xs-4 col-sm-4 control-label">
@@ -65,8 +65,7 @@
 
                                 <button  data-toggle="dropdown" class="btn btn-block  btn-default dropdown-toggle" type="button">
                                     <span class="caret"></span>
-                                    <span class="tab-pane active BTC" data-value="BTC">Биткоин (BTC)</span>
-                                    <span class="tab-pane AUD" data-value="AUD">Австралийский доллар (AUD)</span>
+                                    <span class="tab-pane active AUD" data-value="AUD">Австралийский доллар (AUD)</span>
                                     <span class="tab-pane AZN" data-value="AZN">Азербайджанский манат (AZN)</span>
                                     <span class="tab-pane ALL" data-value="ALL">Албанский лек (ALL)</span>
                                     <span class="tab-pane DZD" data-value="DZD">Алжирский динар (DZD)</span>
@@ -222,11 +221,11 @@
                                     <span class="tab-pane KRW" data-value="KRW">Южнокорейская вона (KRW)</span>
                                     <span class="tab-pane JMD" data-value="JMD">Ямайский доллар (JMD)</span>
                                     <span class="tab-pane JPY" data-value="JPY">Японская иена (JPY)</span>
+                                    <span class="tab-pane BTC" data-value="BTC">Биткоин (BTC)</span>
                                 </button>
                                 <div class="dropdown-menu">
                                     <ul class=" nav nav-pills nav-stacked" role="menu" id="droptabs">
-                                        <li class="active"><a href="#" type="button" data-target=".btc" data-toggle="tab" class="btc-btn">Биткоин (BTC)</a></li>
-                                        <li class=""><a href="#" type="button" data-target=".aud" data-toggle="tab" class="aud-btn">Австралийский доллар (AUD)</a></li>
+                                        <li class="active"><a href="#" type="button" data-target=".aud" data-toggle="tab" class="aud-btn">Австралийский доллар (AUD)</a></li>
                                         <li class=""><a href="#" type="button" data-target=".azn" data-toggle="tab" class="azn-btn">Азербайджанский манат (AZN)</a></li>
                                         <li class=""><a href="#" type="button" data-target=".all" data-toggle="tab" class="all-btn">Албанский лек (ALL)</a></li>
                                         <li class=""><a href="#" type="button" data-target=".dzd" data-toggle="tab" class="dzd-btn">Алжирский динар (DZD)</a></li>
@@ -382,6 +381,7 @@
                                         <li class=""><a href="#" type="button" data-target=".krw" data-toggle="tab" class="krw-btn">Южнокорейская вона (KRW)</a></li>
                                         <li class=""><a href="#" type="button" data-target=".jmd" data-toggle="tab" class="jmd-btn">Ямайский доллар (JMD)</a></li>
                                         <li class=""><a href="#" type="button" data-target=".jpy" data-toggle="tab" class="jpy-btn">Японская иена (JPY)</a></li>
+                                        <li class=""><a href="#" type="button" data-target=".btc" data-toggle="tab" class="btc-btn">Биткоин (BTC)</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -394,7 +394,7 @@
                                     </label>
                                     <div class="col-xs-4 col-sm-4">
                                         <div class="input-group">
-                                            <input type="text" placeholder="число" class="form-control">
+                                            <input type="text" placeholder="число" class="form-control sellG_amountG">
                                             <span class="input-group-addon">G</span>
                                         </div>
                                     </div>
@@ -418,7 +418,7 @@
                                     </label>
                                     <div class="col-xs-4 col-sm-4">
                                         <div class="input-group">
-                                            <input type="text" placeholder="число" class="form-control">
+                                            <input type="text" placeholder="число" class="form-control sellG_amountFiat">
                                             <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
                                         </div>
                                     </div>
@@ -428,7 +428,7 @@
                                     <label class="control-label col-xs-4 col-sm-4">Курс</label>
                                     <div class="col-xs-4 col-sm-4">
                                         <div class="input-group">
-                                            <input type="text" placeholder="цена 1 гульдена" class="form-control">
+                                            <input type="text" placeholder="цена 1 гульдена" class="form-control sellG_rate">
                                             <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
                                         </div>
                                     </div>
@@ -1042,10 +1042,13 @@
 
                         </div>
                         <div class="form-group">
-                            <label class="col-xs-4 col-sm-4 control-label requred">География видимости <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="
+                            <label class="col-xs-4 col-sm-4 control-label required">География видимости <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="
              Ваша заявка будет вверху списка в указанных странах, стран можно указать несколько"><i class="fa fa-lg fa-question-circle"></i></button></label>
-                            <div class="col-xs-6 col-sm-6">
-                                <input type="text" class="form-control" placeholder="страна/город">
+                            <div class="col-xs-3 col-sm-3 nopadding-right">
+                                <input type="text" class="form-control" placeholder="страна">
+                            </div>
+                            <div class="col-xs-3 col-sm-3 nopadding-right">
+                                <input type="text" class="form-control" placeholder="город">
                             </div>
                         </div>
                         <div class="form-group  unlock-block">

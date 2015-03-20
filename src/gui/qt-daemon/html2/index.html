@@ -20,6 +20,7 @@
     <link href="assets/css/bootstrap-slider.css" rel="stylesheet">
     <link href="assets/js/owl.carousel.2.0.0-beta.2.4/assets/owl.carousel.css" rel="stylesheet">
     <link href="assets/css/bootstrap-select.css" rel="stylesheet">
+    <link href="assets/css/datepicker3.css" rel="stylesheet">
 
     <link href="assets/css/app.css" rel="stylesheet">
 
@@ -48,9 +49,9 @@
                 </li>
 
                 <li><a href="market.html">
-                    <span class="ifOnlineText online" style="color:#5cb85c"><i class="fa fa-2x fa-check-circle-o"></i> Онлайн</span>
-                    <span class="ifOnlineText offline" style="color:#b85c5c"><i class="fa fa-2x fa-pause"></i> Оффлайн</span>
-                    <span class="ifOnlineText loading">Загружается...</span></a>
+                    <span class="ifOnlineText online hide" style="color:#5cb85c"><i class="fa fa-2x fa-check-circle-o"></i> Онлайн</span>
+                    <span class="ifOnlineText offline hide" style="color:#b85c5c"><i class="fa fa-2x fa-times-circle-o"></i> Оффлайн</span>
+                    <span class="ifOnlineText loading hide" style="color:#ec971f"><i class="fa fa-2x fa-circle-o-notch fa-spin"></i> Загружается...</span></a>
                 </li>
 
             </ul>
@@ -91,7 +92,7 @@
     </div>
 </div>
 
-<div class="modal modal-preloaded" id="addSafe" tabindex="-1" role="dialog" aria-labelledby="addSafeLabel" aria-hidden="true"  style="display:block">
+<div class="modal modal-preloaded" id="addSafe" tabindex="-1" role="dialog" aria-labelledby="addSafeLabel" aria-hidden="true" style="display:block">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header btn btn-primary btn-block">
@@ -100,8 +101,8 @@
             </div>
             <div class="modal-body">
                 <form>
-                    <div id="owl-panels" class="owl-carousel">
-                        <div class="item"  data-hash="screen1">
+                    <div id="owl-panels">
+                        <div class="item create-safe_screen-1 create-safe_screen" data-hash="screen1">
                             <div class="form-group">
                                 <label class="requred">
                                     Имя для обозначения сейфа в приложении<!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
@@ -112,36 +113,34 @@
                             </div>
                             <div class="row">
                                 <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
-                                <div class="col-xs-6 col-sm-6"><a class="btn btn-primary btn-block btn-lg" type="button" href="#screen2">Продолжить</a></div></div>
-
+                                <div class="col-xs-6 col-sm-6"><a class="create-safe_step-2-button btn btn-primary btn-block btn-lg" type="button" href="#screen2">Продолжить</a></div>
+                            </div>
                         </div>
-                        <div class="item" data-hash="screen2">
+                        <div class="item create-safe_screen-2 create-safe_screen" data-hash="screen2">
                             <div class="form-group clearfix">
                                 <label class="requred">Пароль для сейфа
                                 </label>
-                                <div class="help-block">Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы. Для надежности используйте автоматический генератор с
-                                    установкой сложности пароля</div>
+                                <div class="help-block">Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы.</div>
                                 <input id="create-safe_safe-password-input-1" type="password" placeholder="" class="input-lg form-control">
 
                             </div>
                             <div class="form-group clearfix">
-                                <label class="col-xs-6 col-sm-6">Надежность: <span class="label label-success">высокая</span></label>
-                                <div class="col-xs-6 col-sm-6 text-right"><button data-target="#generator" data-toggle="modal" class="btn btn-success" type="button">Генератор паролей</button> </div>
-
+                                <label>Надежность</label>
+                                <div class="create-safe_password-strength-bar"></div>
+                                <!--<div class="progress">-->
+                                    <!--<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">-->
+                                        <!--<span class="sr-only">40% (высокая)</span>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                                <!--div class="col-xs-6 col-sm-6 text-right"><button data-target="#generator" data-toggle="modal" class="btn btn-success" type="button">Генератор паролей</button> </div-->
                             </div>
-                            <a href="#screen1" type="button" class="btn btn-link text-muted"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
-                            <div class="form-group">
+                            <a href="#screen1" type="button" class="btn btn-link text-muted create-safe_step-1-button"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
+                            <div class="form-group clearfix">
                                 <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
-                                <div class="col-xs-6 col-sm-6"> <a class="btn btn-primary btn-block btn-lg" type="button" href="#screen3">Продолжить</a></div>
+                                <div class="col-xs-6 col-sm-6"> <a class="btn btn-primary btn-block btn-lg create-safe_step-3-button" type="button" href="#screen3">Продолжить</a></div>
                             </div>
-
-
-
-
-
-
                         </div>
-                        <div class="item" data-hash="screen3">
+                        <div class="item create-safe_screen-3 create-safe_screen" data-hash="screen3">
                             <div class="alert alert-warning">
                                 <h4 class="text-danger" style="margin:0">Важно</h4>
                                 <p>Восстановить пароль невозможно. При утере пароля от сейфа, сейф придется отключить из приложения. Восстановить сейф можно только из цифровой копии ( brainwallet) или физической копии файла с другим паролем, который вы помните. </p>
@@ -161,11 +160,10 @@
 
                             <div class="form-group">
                                 <button type="button" class="btn btn-primary btn-block btn-lg" disabled="" id="gotoBackups">Продолжить</button>
-                                <a href="#screen4" class="btn btn-primary btn-block btn-lg" id="gotoBackupslink" style="display:none">Продолжить</a>
+                                <a href="#screen4" class="btn btn-primary btn-block btn-lg create-safe_step-4-button" id="gotoBackupslink" style="display:none">Продолжить</a>
                             </div>
                         </div>
-
-                        <div class="item" data-hash="screen4">
+                        <div class="item create-safe_screen-4 create-safe_screen" data-hash="screen4">
 
                             <div class="form-group">
                                 <div class="help-block">Файл сейфа является хранищем ваших средств. История платежей и Контакты также хранится в этом файле. Чтобы файл сейфа оставался подключенным в приложение, не перемещайте его из той директории, куда вы его сохранили.</div>
@@ -360,8 +358,15 @@
 
                         </div>
                         <div class="form-group clearfix">
-                            <label class="col-xs-6 col-sm-6">Надежность: <span class="label label-success">высокая</span></label>
-                            <div class="col-xs-6 col-sm-6 text-right"><button data-target="#generator" data-toggle="modal" class="btn btn-success" type="button">Генератор паролей</button> </div>
+                            <div class="form-group">
+                                <label>Надежность</label>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                                        <span class="sr-only">40% (высокая)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--div class="col-xs-6 col-sm-6 text-right"><button data-target="#generator" data-toggle="modal" class="btn btn-success" type="button">Генератор паролей</button> </div-->
 
                         </div>
                         <a class="btn btn-link text-muted" type="button" href="#screen12"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
@@ -562,6 +567,56 @@
 
 </div>
 
+<div class="modal fade" id="confirm_operation_modal" tabindex="-1" role="dialog" aria-labelledby="confirm_operation_label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btn btn-block btn-info">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Закрыть</span></button>
+                <h4 class="modal-title" id="confirm_operation_label">Подтвердить операцию</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group clearfix first">
+                    <table class="table table-bordered table-striped">
+                        <tr>
+                            <td class="text-right text-strong">Тип операции</td>
+                            <td>Покупка гульденов</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-strong">Валюта расчета</td>
+                            <td>Австралийский доллар (AUD)</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-strong">Сумма покупки</td>
+                            <td>1000 G</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-strong">Курс</td>
+                            <td>5 USD</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-strong">Стоимость покупки</td>
+                            <td>5000 USD</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-strong">Счет, на который перечислят G</td>
+                            <td>Safelabel (@@safealias)</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="form-group clearfix">
+                    <div class="col-xs-6 col-sm-6"  style="padding-left:0">
+                        <button class="btn btn-lg btn-block" data-dismiss="modal">Отменить</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6" style="padding-left:0">
+                        <button class="btn btn-lg btn-block btn-success" data-dismiss="modal">Подтвердить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 
 <div class="modal fade second-layer" id="smartsafe" tabindex="-1" role="dialog" aria-labelledby="smartsafeLabel" aria-hidden="true">
 
@@ -624,12 +679,119 @@
 <div class="alert alert-warning" style="position:fixed; right:20px; top:20px;box-shadow: 0 2px 8px;z-index:1090">
     <button type="button" class="close" data-dismiss="alert">
         <span aria-hidden="true">&times;</span>
-        <span class="sr-only">Close</span>
+        <span class="sr-only">Закрыть</span>
     </button>
     <p><strong>Вышло обновление программы до версии 0.4567</strong></p>
     <p>Для безопасной работы вы должны загрузить его и установить</p>
     <p><a href="" class="btn btn-sm btn-block btn-warning">Обновить</a></p>
 </div>
+
+<div class="modal fade" id="alias" tabindex="-1" role="dialog" aria-labelledby="aliasLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btn btn-block btn-primary">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="aliasLabel">Создание нового алиаса для счета сейфа</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="">
+
+                    <div class="form-group has-success has-feedback">
+                        <label class="requred">Уникальное имя</label>
+                        <div style="color: rgb(115, 115, 115);" class="help-block">
+                            Алиас может состоять только из латинской букв, цифр, начинается всегда с символа "@".
+                        </div>
+                        <input type="text" class="form-control input-lg" value="@aliasname2343" placeholder="@alias">
+                        <span style="top:auto; bottom:25px" class="fa fa-lg fa-check form-control-feedback" aria-hidden="true"></span>
+                        <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                        <div class="help-block">
+                            <em>это имя свободно</em>
+                        </div>
+                    </div>
+
+                    <div class="form-group clearfix">
+                        <label class="requred col-xs-4 col-sm-4" style="padding-left:0; padding-top:5px">Цена создания алиса</label>
+
+                        <div class="col-xs-4 col-sm-4">
+
+                            <div class="input-group">
+
+                                <input type="text" value="1.76" placeholder="число" class="form-control">
+                                <span class="input-group-addon">G</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-group"><div style="margin-top:0" class="help-block">Каждое создание и передача алиаса &ndash; платная услуга, стоимость и создания и передачи одинаковая</div></div>
+                    <div class="form-group clearfix">
+                        <div class="col-xs-6 col-sm-6" style="padding-left:0"><button class="btn btn-lg btn-block" type="button"  data-dismiss="modal">Отменить</button></div>
+                        <div class="col-xs-6 col-sm-6" style="padding-right:0">
+                            <button class="btn btn-lg btn-block btn-primary" type="button">Создать</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="aliasTransfer" tabindex="-1" role="dialog" aria-labelledby="aliasTransferLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btn btn-block btn-primary">
+                <button data-dismiss="modal" class="close" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                <h4 id="aliasTransferLabel" class="modal-title">Передать алиас</h4>
+            </div>
+            <div class="modal-body">
+                <h4>@safealias</h4>
+                <form class="">
+
+                    <p class="text-muted">Алиас при создании прикрепляется к счету и не может быть удален, его можно передать на другой счет, принадлежащий любому пользователю сети, в том числе и ваш другой счет</p>
+                    <div class="form-group clearfix">
+
+
+                    </div>
+
+                    <div class="form-group clearfix">
+                        <label class="requred">Номер счета</label>
+
+                        <input type="text" class="form-control">
+
+                    </div>
+                    <div class="form-group clearfix">
+                        <label style="padding-left:0" class="requred col-xs-4 col-sm-4">Цена передачи алиса</label>
+
+
+
+                        <div class="col-xs-4 col-sm-4"><div class="input-group">
+                            <input type="text" value="1.76" placeholder="число" class="form-control">
+                            <span class="input-group-addon">G</span>
+                        </div>
+                        </div>
+
+
+                    </div>
+                    <div class="form-group clearfix">
+
+                        <div style="margin-top:0" class="help-block">Каждое создание и передача алиаса &ndash; платная услуга, стоимость и создания и передачи одинаковая</div>
+
+                    </div>
+                    <div class="form-group clearfix">
+                        <div class="col-xs-6 col-sm-6"  style="padding-left:0">
+                            <button class="btn btn-lg btn-block" data-dismiss="modal">Отменить</button>
+                        </div>
+                        <div class="col-xs-6 col-sm-6" style="padding-left:0">
+                            <button class="btn btn-lg btn-block btn-success" data-dismiss="modal">Передать алиас</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="modal fade cover-layer" id="helptour" tabindex="-1" role="dialog" aria-labelledby="helptourLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -784,6 +946,125 @@
 </div>
 
 
+<div class="modal fade" id="lists" tabindex="-1" role="dialog" aria-labelledby="addContactLabel" aria-hidden="true" >
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btn btn-primary btn-block">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title text-center">Группы контактов</h4>
+            </div>
+            <div class="modal-body form-horizontal">
+                <div id="delete" class="collapse">
+                    <div class="alert alert-warning">
+                        <p><strong>В списке "N" 3 контакта. Вы действительно хотите удалить список?</strong></p>
+                        <p><button type="button"  data-target="#delete" data-toggle="collapse" class="btn btn-danger">Удалить</button> <button type="button" class="btn btn-default" data-target="#delete" data-toggle="collapse">Отменить</button></p>
+                    </div>
+                </div>
+
+                <ul class="list-group list-edit-fields">
+
+                    <li class="list-group-item">
+                        <div class="dropdown pull-right edit1 collapse in">
+                            <button data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button">
+                                <i class="fa fa-lg fa-cog text-muted"></i> <span class="caret text-muted"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                <li><a data-target=".edit1" data-toggle="collapse" type="button" href="#">Переименовать</a></li>
+                                <li><a data-target="#delete" data-toggle="collapse" type="button" href="#">Удалить</a></li>
+
+                            </ul>
+                        </div>
+                        <a class="edit1 collapse in" href="#contacts" ><em>Проверенные</em></a>
+                        <div class="form-group has-feedback inline-edit-field edit1 collapse">
+                            <div class="col-xs-10 col-xs-1 col-sm-10">
+                                <input type="text" class="form-control flat-input" value="Проверенные">
+                                <i class="fa fa-lg fa-pencil form-control-feedback"></i>
+                            </div>
+                            <div class="col-xs-2 col-sm-2"><button class="btn btn-link btn-block" data-target=".edit1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-save text-muted"></i></button> </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="dropdown pull-right edit2 collapse in">
+                            <button data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button">
+                                <i class="fa fa-lg fa-cog text-muted"></i> <span class="caret text-muted"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                <li><a data-target=".edit2" data-toggle="collapse" type="button" href="#">Переименовать</a></li>
+                                <li><a data-target="#delete" data-toggle="collapse" type="button" href="#">Удалить</a></li>
+
+                            </ul>
+                        </div>
+                        <a class="edit2 collapse in" href="#contacts" ><em>Черный список</em></a>
+                        <div class="form-group has-feedback inline-edit-field edit2 collapse">
+                            <div class="col-xs-10 col-xs-1 col-sm-10">
+                                <input type="text" class="form-control flat-input" value="Черный список">
+                                <i class="fa fa-lg fa-pencil form-control-feedback"></i>
+                            </div>
+                            <div class="col-xs-2 col-sm-2"><button class="btn btn-link btn-block" data-target=".edit2" data-toggle="collapse" type="button"><i class="fa fa-lg fa-save text-muted"></i></button> </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="dropdown pull-right edit3 collapse in">
+                            <button data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button">
+                                <i class="fa fa-lg fa-cog text-muted"></i> <span class="caret text-muted"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                <li><a data-target=".edit3" data-toggle="collapse" type="button" href="#">Переименовать</a></li>
+                                <li><a data-target="#delete" data-toggle="collapse" type="button" href="#">Удалить</a></li>
+
+                            </ul>
+                        </div>
+                        <a class="edit3 collapse in" href="#contacts"><em>Магазины</em></a>
+                        <div class="form-group has-feedback inline-edit-field edit3 collapse">
+                            <div class="col-xs-10 col-xs-1 col-sm-10">
+                                <input type="text" class="form-control flat-input" value="Магазины">
+                                <i class="fa fa-lg fa-pencil form-control-feedback"></i>
+                            </div>
+                            <div class="col-xs-2 col-sm-2"><button class="btn btn-link btn-block" data-target=".edit3" data-toggle="collapse" type="button"><i class="fa fa-lg fa-save text-muted"></i></button> </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item collapse list4">
+                        <div class="dropdown pull-right edit4 collapse">
+                            <button data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button">
+                                <i class="fa fa-lg fa-cog text-muted"></i> <span class="caret text-muted"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                <li><a data-target=".edit1" data-toggle="collapse" type="button" href="#">Переименовать</a></li>
+                                <li><a data-target="#delete" data-toggle="collapse" type="button" href="#">Удалить</a></li>
+
+                            </ul>
+                        </div>
+                        <a class="edit4 collapse" href="contact-list.html" style="height:0"><em>Имя нового списка</em></a>
+                        <div class="form-group has-feedback inline-edit-field edit4 collapse in">
+                            <div class="col-xs-10 col-xs-1 col-sm-10">
+                                <input type="text" class="form-control flat-input" value="" placeholder="название листа">
+                                <i class="fa fa-lg fa-pencil form-control-feedback"></i>
+                            </div>
+                            <div class="col-xs-2 col-sm-2"><button class="btn btn-link btn-block" data-target=".edit4" data-toggle="collapse" type="button"><i class="fa fa-lg fa-save text-muted"></i></button> </div>
+                        </div>
+                    </li>
+
+                </ul>
+                <div><button type="button" data-toggle="collapse" data-target=".list4" class="btn btn-link text-muted"><i class="fa fa-lg fa-plus-circle"></i> Добавить группу</button></div>
+            </div>
+            <div class="modal-footer">
+                <div class="row">
+                    <div class="col-xs-6 col-sm-6">
+                        <a data-dismiss="modal" type="button" class="btn btn-default  btn-block">Отменить</a>
+                    </div>
+                    <div class="col-xs-6 col-sm-6">
+                        <a href="#screen2" type="button" class="btn btn-primary btn-block">Сохранить</a>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div>
+</div>
+
+
 <div id="resetpin" class="modal second-layer modal-preloaded" tabindex="-1" role="dialog" aria-labelledby="resetpinLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -899,8 +1180,11 @@
 <script src="assets/js/jquery.smoothscroll.js"></script>
 <script src="assets/js/jquery.browser.js"></script>
 <script src="assets/js/jquery.ba-hashchange.js"></script>
+<script src="assets/js/jquery.sticky.js"></script>
+<script src="assets/js/jquery.alphanum.js"></script>
 <script src="assets/js/bootstrap-tour.app.js"></script>
 <script src="assets/js/spin.js"></script>
+<script src="assets/js/bootstrap-datepicker.ru.js"></script>
 
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <script src="assets/js/ie10-viewport-bug-workaround.js"></script>
@@ -921,7 +1205,12 @@
 <script src="assets/js/jquery.easypiechart.js"></script>
 <script src="assets/js/ajax-mining-diagrams.js"></script>
 
-<!-- Dependencies -->
+<!-- Password strength -->
+<script src="assets/js/password-score.js"></script>
+<script src="assets/js/password-score-options.js"></script>
+<script src="assets/js/bootstrap-strength-meter.js"></script>
+
+<!-- Application Dependencies -->
 <script src="Application.js"></script>
 <script src="Backend.js"></script>
 <script src="Emulator.js"></script>

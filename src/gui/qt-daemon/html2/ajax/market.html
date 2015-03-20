@@ -1,3 +1,7 @@
+<!--
+    bid    somebody wants to buy something    покупает   спрос
+    ask    somebody wants to sell something   продает    предложение
+-->
     <nav class="navbar btns" role="navigation">
         <ul class="nav nav-pills nav-justified">
             <li>
@@ -34,42 +38,40 @@
     <h1 id="market">Рынок предложений валют и товаров</h1>
     <h5>Здесь Вы можете просмотреть рынок предложений, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
     <ul class="nav nav-tabs toptabs">
-        <li role="presentation" class="active"><a href="#currency" data-toggle="tab">Валюта</a></li>
-        <li role="presentation"><a href="#barter" data-toggle="tab">Товары</a></li>
-        <li class="dropdown" role="presentation">
-            <a aria-controls="myTabDrop1-contents" data-toggle="dropdown" class="dropdown-toggle" id="myTabDrop1" href="#">Мои заявки <span class="caret"></span></a>
-            <ul id="myTabDrop1-contents" aria-labelledby="myTabDrop1" role="menu" class="dropdown-menu">
-                <li><a aria-controls="dropdown1" data-toggle="tab" id="dropdown1-tab" role="tab" tabindex="-1" href="#myCurrency">Валюта</a></li>
-                <li><a aria-controls="dropdown2" data-toggle="tab" id="dropdown2-tab" role="tab" tabindex="-1" href="#myBarter">Товары</a></li>
-            </ul>
-        </li>
-        <li class="dropdown" role="presentation">
-            <a aria-controls="myTabDrop2-contents" data-toggle="dropdown" class="dropdown-toggle" id="myTabDrop2" href="#">Избранное<span class="caret"></span></a>
-            <ul id="myTabDrop2-contents" aria-labelledby="myTabDrop2" role="menu" class="dropdown-menu">
-                <li><a aria-controls="dropdown1" data-toggle="tab" id="dropdown1-tab" role="tab" tabindex="-1" href="#favCurrency">Валюта</a></li>
-                <li><a aria-controls="dropdown2" data-toggle="tab" id="dropdown2-tab" role="tab" tabindex="-1" href="#favBarter">Товары</a></li>
-            </ul>
-        </li>
+        <li role="presentation" class="active"><a class="market_filterCurrencyButton" href="#currency" data-toggle="tab">Валюта</a></li>
+        <li role="presentation"><a class="market_filterBarterButton" href="#barter" data-toggle="tab">Товары</a></li>
+        <li role="presentation"><a class="market_filterMyOrdersButton" href="#myOrders" data-toggle="tab">Мои заявки</a></li>
+        <li role="presentation"><a class="market_filterMyFavoritesButton" href="#myFavorites" data-toggle="tab">Избранное</a></li>
+        <!--<li class="dropdown" role="presentation">-->
+            <!--<a aria-controls="myTabDrop1-contents" data-toggle="dropdown" class="dropdown-toggle" id="myTabDrop1" href="#">Мои заявки <span class="caret"></span></a>-->
+            <!--<ul id="myTabDrop1-contents" aria-labelledby="myTabDrop1" role="menu" class="dropdown-menu">-->
+                <!--<li><a aria-controls="dropdown1" data-toggle="tab" id="dropdown1-tab" role="tab" tabindex="-1" href="#myCurrency">Валюта</a></li>-->
+                <!--<li><a aria-controls="dropdown2" data-toggle="tab" id="dropdown2-tab" role="tab" tabindex="-1" href="#myBarter">Товары</a></li>-->
+            <!--</ul>-->
+        <!--</li>-->
+        <!--<li class="dropdown" role="presentation">-->
+            <!--<a aria-controls="myTabDrop2-contents" data-toggle="dropdown" class="dropdown-toggle" id="myTabDrop2" href="#">Избранное<span class="caret"></span></a>-->
+            <!--<ul id="myTabDrop2-contents" aria-labelledby="myTabDrop2" role="menu" class="dropdown-menu">-->
+                <!--<li><a aria-controls="dropdown1" data-toggle="tab" id="dropdown1-tab" role="tab" tabindex="-1" href="#favCurrency">Валюта</a></li>-->
+                <!--<li><a aria-controls="dropdown2" data-toggle="tab" id="dropdown2-tab" role="tab" tabindex="-1" href="#favBarter">Товары</a></li>-->
+            <!--</ul>-->
+        <!--</li>-->
     </ul>
     <div class="tab-content tabs tabs-left">
-        <div class="tab-pane active" id="currency">
+        <div class="tab-pane active market_currencyTab" id="currency">
 
             <div class="navbar">
 
                 <form>
-                    <div class="collapse text-right filter1 close-filter">
-                        <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter1" class="btn btn-primary active"><i class="fa fa-chevron-up"></i> Фильтр</button>
-                        </div>
-                    </div>
-                    <div class="collapse filter1">
+                    <div class="collapse filter11">
                         <div class="row topmargin">
                             <div class="col-xs-5 col-sm-5">
                                 <div class="form-group clearfix">
-                                    <label class="col-xs-4 col-sm-4 control-label requred" style="">Валюта расчета</label>
+                                    <label class="col-xs-4 col-sm-4 control-label required" style="">Валюта расчета</label>
                                     <select class="selectpicker col-xs-3 col-sm-3 nopadding btn-sm" style=""><option selected="">USD</option><option>EURO</option><option>RUR</option></select>
                                 </div>
                                 <div class="form-group clearfix">
-                                    <label class="col-xs-4 col-sm-4 control-label requred" style="">
+                                    <label class="col-xs-4 col-sm-4 control-label required" style="">
                                         Сумма <span class="collapse in">покупки</span><span class="collapse">продажи</span>
                                     </label>
                                     <div class="col-xs-8 col-sm-8">
@@ -95,7 +97,7 @@
                                 </div>
 
                                 <div class="form-group clearfix">
-                                    <label class="col-xs-4 col-sm-4 control-label requred">
+                                    <label class="col-xs-4 col-sm-4 control-label required">
                                         Курс
                                     </label>
 
@@ -123,7 +125,7 @@
 
                                 <div class="form-group clearfix">
 
-                                    <label style="padding-left: 0" class="col-xs-4 col-sm-4 requred"></label>
+                                    <label style="padding-left: 0" class="col-xs-4 col-sm-4 required"></label>
                                     <div class="col-xs-8 col-sm-8 nopadding" style="margin-top: -4px; margin-bottom: 25px;">
                                         <label class="checkbox"><input type="checkbox" value=""> <strong>Бонус</strong></label>
                                     </div>
@@ -133,22 +135,29 @@
                             <div class="col-xs-7 col-sm-7">
                                 <div class="row">
                                     <div class="col-xs-6 col-sm-6">
-
                                         <div class="form-group clearfix">
-                                            <label class="col-xs-6 col-sm-6 requred text-right" style="padding-left: 0">
+                                            <label class="col-xs-6 col-sm-6 required text-right" style="padding-left: 0">
                                                 Возраст заявки</label>
-                                            <select class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding" style=""><option selected="">не важно</option><option>час</option><option>3 часа</option><option>день</option><option>два дня</option><option>три дня</option><option>неделя</option><option>больше недели</option></select>        </div>
-                                        <div class="form-group clearfix">
-                                            <label class="col-xs-6 col-sm-6 requred text-right" style="">Рейтинг</label>
-                                            <div class="fslider col-xs-6 col-sm-6 nopadding">
-                                                <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="5"  data-slider-step=".25" data-slider-value="[3,5]"/>
+                                            <select class="selectpicker market_currency_order-age-selector btn-sm col-xs-6 col-sm-6 nopadding" style="">
+                                                <option selected="">не важно</option><option>час</option><option>3 часа</option><option>день</option><option>два дня</option><option>три дня</option><option>неделя</option><option>больше недели</option><option>другой период</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group clearfix market_currency_order-age-datapicker-row">
+                                            <label class="col-xs-6 col-sm-6 required text-right"></label>
+                                            <div class="col-xs-6 col-sm-6 nopadding">
+                                                <div class="hdatapicker">
+                                                    <div class="input-daterange input-group" id="datepicker2">
+                                                        <span class="input-group-addon">от</span>
+                                                        <input type="text" class="input-sm form-control input-date" name="start" />
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
-                                    </div>
-                                    <div class="col-xs-6 col-sm-6">
                                         <div class="form-group clearfix">
-                                            <label style="padding-left: 0" class="col-xs-6 col-sm-6 requred nopadding">
+                                            <label style="padding-left: 0" class="col-xs-6 col-sm-6 required text-right">
                                                 Условия
                                             </label>
                                             <select class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding" style="">
@@ -164,12 +173,33 @@
                                             </select>
                                         </div>
 
+
+                                    </div>
+                                    <div class="col-xs-6 col-sm-6">
+                                        <div class="form-group clearfix" style="height: 32px;">
+                                            <label class="col-xs-6 col-sm-6 nopadding required" style="">Рейтинг</label>
+                                            <div class="fslider col-xs-6 col-sm-6 nopadding">
+                                                <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="5"  data-slider-step=".25" data-slider-value="[3,5]"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group clearfix market_currency_order-age-datapicker-row" style="position:relative; left: -20px;">
+                                            <div class="col-xs-6 col-sm-6 nopadding">
+                                                <div class="hdatapicker">
+                                                    <div class="input-daterange input-group" id="datepicker">
+                                                        <span class="input-group-addon">до</span>
+                                                        <input type="text" class="input-sm form-control input-date" name="end" />
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="form-group clearfix">
-                                            <label style="padding-left: 0" class=" col-xs-6 col-sm-6 requred nopadding">
+                                            <label style="padding-left: 0" class=" col-xs-6 col-sm-6 required nopadding">
                                                 Способ расчета
                                             </label>
-                                            <select class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding" style="">
-                                                <option selected="">выбрать</option>
+                                            <select class="selectpicker show-tick btn-sm col-xs-6 col-sm-6 nopadding market_currency_payMethodsSelector" multiple style="">
                                                 <option>Электронные платежные системы</option>
                                                 <option>Банковская карта</option>
                                                 <option>Банковский перевод</option>
@@ -181,28 +211,28 @@
                                     </div>
                                 </div>
 
-
                                 <div class="row">
-                                    <div class="form-group">
-
-
-
-
-                                        <label class="col-xs-3 col-sm-3 requred text-right" style="">География</label>
+                                    <div class="form-group clearfix">
+                                        <label class="col-xs-3 col-sm-3 required text-right" style="">География</label>
                                         <div class="col-xs-4 col-sm-4 nopadding">
-                                            <input type="text" class="form-control" placeholder="страны" value="">
+                                            <input type="text" class="form-control autocomplete-countries" placeholder="страны" value="">
                                         </div>
                                         <div class="col-xs-5 col-sm-5">
-                                            <input type="text" class="form-control" placeholder="города в странах" value="">
+                                            <input type="text" class="form-control autocomplete-cities" placeholder="города в странах" value="">
                                         </div>
-
-
-
-
                                     </div>
 
+                                    <div class="form-group text-right">
+                                        <div class="collapse filter11">
+                                            <div class="col-xs-6 col-sm-6"></div>
+                                            <div style="padding-right:5px" class="col-xs-3 col-sm-3">
+                                                <button type="button" class="btn btn-block btn-primary">Применить</button></div>
+                                            <div style="padding-left:5px" class="col-xs-3 col-sm-3"><button type="button" class="btn btn-block btn-default">Очистить фильтр</button></div>
+                                        </div>
+                                    </div>
 
                                 </div>
+
                             </div>
 
                         </div>
@@ -213,27 +243,29 @@
                         <div class="col-xs-4 col-sm-4">
 
                             <div class="btn-group btn-group-justified" data-toggle="buttons">
-                                <label class="btn btn-primary active">
-                                    <input type="radio" name="options" id="option1" autocomplete="off" checked=""> Предложение
+                                <label class="btn btn-primary market_filterCurrencyAllButton active">
+                                    <input type="radio" name="options" id="option0" autocomplete="off" checked=""> Все
                                 </label>
-                                <label class="btn btn-primary">
+                                <label class="btn btn-primary market_filterCurrencyAskButton">
+                                    <input type="radio" name="options" id="option1" autocomplete="off"> Предложение
+                                </label>
+                                <label class="btn btn-primary market_filterCurrencyBidButton">
                                     <input type="radio" name="options" id="option2" autocomplete="off"> Спрос
                                 </label>
                             </div>
                         </div>
                         <div class="col-xs-4 col-sm-4">
+                            <div class="collapse filter11 close-filter">
+                                <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter11" class="btn btn-primary active"><i class="fa fa-chevron-up"></i> Фильтр</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-4 col-sm-4 pull-right">
                             <input type="text" class="form-control" placeholder="найти текст">
                         </div>
                         <div class="col-xs-4 col-sm-4">
-                            <div class="collapse filter1">
-                                <div class="row">
-                                    <div style="padding-right:5px" class="col-xs-6 col-sm-6">
-                                        <button type="button" class="btn btn-block btn-primary">Применить</button></div>
-                                    <div style="padding-left:5px" class="col-xs-6 col-sm-6"><button type="button" class="btn btn-block btn-default">Очистить фильтр</button></div>
-                                </div>
-                            </div>
-                            <div class="collapse in filter1">
-                                <div class="btn-group pull-right"><button type="button" data-toggle="collapse" data-target=".filter1" class="btn btn-default"><i class="fa fa-chevron-down"></i> Фильтр</button></div>
+                            <div class="collapse in filter11">
+                                <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter11" class="btn btn-default"><i class="fa fa-chevron-down"></i> Фильтр</button></div>
                             </div>
                         </div>
                     </div>
@@ -736,48 +768,64 @@
 
             <div class="navbar">
                 <form>
-                    <div class="collapse text-right filter2 close-filter">
-                        <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter2" class="btn btn-primary active"><i class="fa fa-chevron-up"></i> Фильтр</button>
-                        </div>
-                    </div>
-                    <div class="collapse filter2">
+                    <div class="collapse filter22">
                         <div class="row">
 
                             <div class="col-xs-7 col-sm-7">
-                                <div class="form-group">
-                                    <label class="col-xs-2 col-sm-2 requred nopadding">География</label>
+                                <div class="form-group clearfix">
+                                    <label class="col-xs-2 col-sm-2 required nopadding">География</label>
                                     <div class="col-xs-5 col-sm-5 nopadding">
                                         <input type="text" value="" placeholder="страны" class="form-control">
                                     </div>
                                     <div class="col-xs-5 col-sm-5 nopadding" style="padding-left:5px">
                                         <input type="text" class="form-control" placeholder="города в странах" value="">
                                     </div>
+                                </div>
 
-
-
-
+                                <div class="form-group clearfix">
+                                    <label style="" class="col-xs-2 col-sm-2 required">Рейтинг</label>
+                                    <div class="fslider col-xs-10 col-sm-10 nopadding">
+                                        <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="5"  data-slider-step=".25" data-slider-value="[3,5]"/>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="col-xs-5 col-sm-5">
                                 <div class="row">
-                                    <div class="col-xs-10 col-xs-1 col-sm-10">
+                                    <div class="col-xs-12 col-xs-1 col-sm-12">
 
                                         <div class="form-group clearfix">
-                                            <label style="padding-left: 0" class="col-xs-6 col-sm-6 requred text-right">
+                                            <label style="padding-left: 0" class="col-xs-6 col-sm-6 required text-right">
                                                 Возраст заявки</label>
-                                            <select style="" class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding"><option selected="">не важно</option><option>час</option><option>3 часа</option><option>день</option><option>два дня</option><option>три дня</option><option>неделя</option><option>больше недели</option></select>        </div>
-                                        <div class="form-group clearfix">
-                                            <label style="" class="col-xs-6 col-sm-6 requred text-right">Рейтинг</label>
-                                            <div class="fslider col-xs-6 col-sm-6 nopadding">
-                                                <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="5"  data-slider-step=".25" data-slider-value="[3,5]"/>
+                                            <select style="" class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding market_barter_order-age-selector"><option selected="">не важно</option><option>час</option><option>3 часа</option><option>день</option><option>два дня</option><option>три дня</option><option>неделя</option><option>больше недели</option><option>другой период</option></select>
+                                        </div>
+
+                                        <div class="form-group clearfix market_barter_order-age-datapicker-row">
+                                            <label class="col-xs-3 col-sm-3 required text-right"></label>
+                                            <div class="col-xs-9 col-sm-9 nopadding">
+                                                <div class="hdatapicker">
+                                                    <div class="input-daterange input-group" id="datepicker3">
+                                                        <span class="input-group-addon">от</span>
+                                                        <input type="text" class="input-sm form-control input-date" name="start" />
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+
+                                                        <span class="input-group-addon">до</span>
+                                                        <input type="text" class="input-sm form-control input-date" name="end" />
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
-                                    </div>
-                                    <div class="col-xs-6 col-sm-6">
+                                        <div class="form-group clearfix" style="margin-top: 30px;">
+                                            <div class="collapse filter22">
+                                                    <div class="col-xs-2 col-sm-2 nopadding"></div>
+                                                    <div style="padding-right: 5px;" class="col-xs-5 col-sm-5">
+                                                        <button type="button" class="btn btn-block btn-primary">Применить</button></div>
+                                                    <div class="col-xs-5 col-sm-5 nopadding"><button type="button" class="btn btn-block btn-default">Очистить фильтр</button></div>
+                                            </div>
 
-
+                                        </div>
 
 
                                     </div>
@@ -786,6 +834,9 @@
                             </div>
 
                         </div>
+
+                        <div class="row" style="margin-top: 15px;"></div>
+
                     </div>
 
                     <div class="row">
@@ -793,27 +844,29 @@
                         <div class="col-xs-4 col-sm-4">
 
                             <div class="btn-group btn-group-justified" data-toggle="buttons">
-                                <label class="btn btn-primary active">
-                                    <input type="radio" name="options" id="option1" autocomplete="off" checked=""> Предложение
+                                <label class="btn btn-primary market_filterBarterAllButton active">
+                                    <input type="radio" name="options" id="option0" autocomplete="off" checked=""> Все
                                 </label>
-                                <label class="btn btn-primary">
+                                <label class="btn btn-primary market_filterBarterAskButton">
+                                    <input type="radio" name="options" id="option1" autocomplete="off"> Предложение
+                                </label>
+                                <label class="btn btn-primary market_filterBarterBidButton">
                                     <input type="radio" name="options" id="option2" autocomplete="off"> Спрос
                                 </label>
                             </div>
                         </div>
                         <div class="col-xs-4 col-sm-4">
+                            <div class="collapse filter22 close-filter">
+                                <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter22" class="btn btn-primary active"><i class="fa fa-chevron-up"></i> Фильтр</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-4 col-sm-4 pull-right">
                             <input type="text" class="form-control" placeholder="найти текст">
                         </div>
                         <div class="col-xs-4 col-sm-4">
-                            <div class="collapse filter2">
-                                <div class="row">
-                                    <div style="padding-right:5px" class="col-xs-6 col-sm-6">
-                                        <button type="button" class="btn btn-block btn-primary">Применить</button></div>
-                                    <div style="padding-left:5px" class="col-xs-6 col-sm-6"><button type="button" class="btn btn-block btn-default">Очистить фильтр</button></div>
-                                </div>
-                            </div>
-                            <div class="collapse in filter2">
-                                <div class="btn-group pull-right"><button type="button" data-toggle="collapse" data-target=".filter2" class="btn btn-default"><i class="fa fa-chevron-down"></i> Фильтр</button></div>
+                            <div class="collapse in filter22">
+                                <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter22" class="btn btn-default"><i class="fa fa-chevron-down"></i> Фильтр</button></div>
                             </div>
                         </div>
                     </div>
@@ -1294,13 +1347,33 @@
             </div>
         </div>
 
-        <div class="tab-pane" id="myCurrency">
+        <div class="tab-pane" id="myOrders">
 
             <div class="navbar">
+                <div class="row margin-bottom-small">
+                    <div class="col-xs-4 col-sm-4">
+                        <div data-toggle="buttons" class="btn-group btn-group-justified">
+                            <label class="btn btn-primary active">
+                                <input type="radio" name="marketMyOrdersRadio" checked="" autocomplete="off" value="currency"> Валюта
+                            </label>
+                            <label class="btn btn-primary">
+                                <input type="radio" name="marketMyOrdersRadio" autocomplete="off" value="barter"> Товары
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-4 col-sm-4"> <a data-toggle="modal" type="button" class="btn btn-link" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт моих заявок в файл</span></a></div>
+
+                    <div class="col-xs-4 col-sm-4 pull-right">
+                        <input type="text" placeholder="найти текст" class="form-control">
+                    </div>
+
+                </div>
+
+
                 <div class="row">
 
                     <div class="col-xs-4 col-sm-4">
-
                         <div data-toggle="buttons" class="btn-group btn-group-justified">
                             <label class="btn btn-primary active">
                                 <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Все
@@ -1313,14 +1386,11 @@
                             </label>
                         </div>
                     </div>
-                    <div class="col-xs-4 col-sm-4">
-                        <input type="text" placeholder="найти текст" class="form-control">
-                    </div>
-                    <div class="col-xs-4 col-sm-4"> <a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт моих заявок в файл</span></a></div>
+
                 </div>
             </div>
 
-            <div class="table-responsive panel market-table-responsive">
+            <div class="table-responsive panel market-table-responsive" id="myCurrency">
                 <table class="table table-condensed data-table table-hover">
                     <thead>
                     <tr>
@@ -1388,36 +1458,7 @@
                 </table>
             </div>
 
-        </div>
-
-        <div class="tab-pane" id="myBarter">
-
-            <div class="navbar">
-
-
-                <div class="row">
-
-                    <div class="col-xs-4 col-sm-4">
-
-                        <div data-toggle="buttons" class="btn-group btn-group-justified">
-                            <label class="btn btn-primary active">
-                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Все
-                            </label>
-                            <label class="btn btn-primary">
-                                <input type="radio" checked="" autocomplete="off" id="option2" name="options"> Предложение
-                            </label>
-                            <label class="btn btn-primary">
-                                <input type="radio" autocomplete="off" id="option3" name="options"> Спрос
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-xs-4 col-sm-4">
-                        <input type="text" placeholder="найти текст" class="form-control">
-                    </div>
-                    <div class="col-xs-4 col-sm-4"><a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт моих заявок в файл</span></a></div>
-                </div>
-            </div>
-            <div class="table-responsive panel market-table-responsive">
+            <div class="table-responsive panel market-table-responsive" id="myBarter">
 
                 <table class="table table-condensed data-table table-hover">
                     <thead>
@@ -1464,36 +1505,49 @@
             </div>
 
         </div>
-        <div class="tab-pane" id="favCurrency">
+
+        <div class="tab-pane" id="myFavorites">
 
             <div class="navbar">
 
-
+                <div class="row margin-bottom-small">
+                    <div class="col-xs-4 col-sm-4">
+                        <div data-toggle="buttons" class="btn-group btn-group-justified">
+                            <label class="btn btn-primary market_filterMyFavoritesCurrencyButton active">
+                                <input type="radio" name="marketMyFavoritesRadio" checked="" autocomplete="off" value="currency"> Валюта
+                            </label>
+                            <label class="btn btn-primary market_filterMyFavoritesBarterButton">
+                                <input type="radio" name="marketMyFavoritesRadio" autocomplete="off" value="barter"> Товары
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 col-sm-4 pull-right">
+                        <input type="text" placeholder="найти текст" class="form-control">
+                    </div>
+                    <div class="col-xs-4 col-sm-4 pull-right"></div>
+                </div>
 
                 <div class="row">
 
                     <div class="col-xs-4 col-sm-4">
 
                         <div data-toggle="buttons" class="btn-group btn-group-justified">
-                            <label class="btn btn-primary active">
+                            <label class="btn btn-primary market_filterMyFavoritesAllButton active">
                                 <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Все
                             </label>
-                            <label class="btn btn-primary">
+                            <label class="btn btn-primary market_filterMyFavoritesAskButton">
                                 <input type="radio" checked="" autocomplete="off" id="option2" name="options"> Предложение
                             </label>
-                            <label class="btn btn-primary">
+                            <label class="btn btn-primary market_filterMyFavoritesBidButton">
                                 <input type="radio" autocomplete="off" id="option3" name="options"> Спрос
                             </label>
                         </div>
-                    </div>
-                    <div class="col-xs-4 col-sm-4">
-                        <input type="text" placeholder="найти текст" class="form-control">
                     </div>
 
                 </div>
             </div>
 
-            <div class="table-responsive panel market-table-responsive">
+            <div class="table-responsive panel market-table-responsive" id="favCurrency">
                 <table class="table table-condensed data-table table-hover">
                     <thead>
                     <tr>
@@ -1559,37 +1613,7 @@
                 </table>
             </div>
 
-        </div>
-        <div class="tab-pane" id="favBarter">
-
-
-            <div class="navbar">
-
-
-                <div class="row">
-
-                    <div class="col-xs-4 col-sm-4">
-
-                        <div data-toggle="buttons" class="btn-group btn-group-justified">
-                            <label class="btn btn-primary active">
-                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Все
-                            </label>
-                            <label class="btn btn-primary">
-                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Предложение
-                            </label>
-                            <label class="btn btn-primary">
-                                <input type="radio" autocomplete="off" id="option2" name="options"> Спрос
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-xs-4 col-sm-4">
-                        <input type="text" placeholder="найти текст" class="form-control">
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="table-responsive panel market-table-responsive">
+            <div class="table-responsive panel market-table-responsive" id="favBarter">
 
                 <table class="table table-condensed data-table table-hover">
                     <thead>
@@ -1626,6 +1650,7 @@
                     </tbody>
                 </table>
             </div>
+
         </div>
 
     </div>
