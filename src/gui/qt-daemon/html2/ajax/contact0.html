@@ -43,6 +43,21 @@
                     <div class="clearfix">
 
                         <h4><a data-target=".collapse00" data-toggle="collapse" type="button" href="#"><span>Контактные данные</span></a></h4> </div>
+
+                    <div class="form-group inline-edit-field collapse in name1">
+                        <label class="col-xs-4 col-sm-4 control-label">Группа</label>
+
+
+                        <select class="selectpicker show-tick col-xs-4 col-sm-4" multiple="" title="Выберите группу" style="display: none;">
+
+                            <option>Проверенные</option>
+                            <option>Черный список</option>
+                            <option>Магазины</option>
+                        </select>
+
+
+                    </div>
+
                     <div class="form-group has-feedback group-hover inline-edit-field collapse in name1">
                         <label class="col-xs-4 col-sm-4 control-label">Контакт</label>
                         <div class="col-xs-7 col-sm-7">
@@ -93,9 +108,13 @@
 
                     <div class="form-group has-feedback group-hover inline-edit-field collapse in location1">
                         <label class="col-xs-4 col-sm-4 control-label">Местожительства</label>
-                        <div class="col-xs-7 col-sm-7">
-                            <input type="text" class="form-control flat-input" value="" placeholder="страна или город">
-                            <i class="fa fa-lg fa-pencil form-control-feedback"></i>
+                        <div class="col-xs-3 col-sm-3 nopadding-right">
+                            <input type="text" class="form-control autocomplete-country buyG_autocomplete-country" placeholder="страна">
+                        </div>
+                        <div class="col-xs-3 col-sm-3 nopadding-right">
+                            <input type="text" class="form-control" placeholder="город">
+                        </div>
+                        <div class="col-xs-1 col-sm-1">
                         </div>
                         <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".location1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
                     </div>

@@ -67,7 +67,7 @@
     var DEFAULT_SETTINGS_NUM = {
         allowPlus           : false, // Allow the + sign
         allowMinus          : true,  // Allow the - sign
-        allowThouSep        : false,  // Allow the thousands separator, default is the comma eg 12,000
+        allowThouSep        : true,  // Allow the thousands separator, default is the comma eg 12,000
         allowDecSep         : true,  // Allow the decimal separator, default is the fullstop eg 3.141
         allowLeadingSpaces  : false,
         maxDigits           : NaN,   // The max number of digits

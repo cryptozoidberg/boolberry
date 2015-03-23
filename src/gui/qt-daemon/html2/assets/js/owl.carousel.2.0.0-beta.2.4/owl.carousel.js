@@ -1479,8 +1479,10 @@
 		// test on zepto
 		if (!isElVisible(this.$element.get(0))) {
 			this.$element.addClass('owl-hidden');
-			window.clearInterval(this.e._checkVisibile);
-			this.e._checkVisibile = window.setInterval($.proxy(checkVisible, this), 500);
+            if (this.e != null) {
+                window.clearInterval(this.e._checkVisibile);
+                this.e._checkVisibile = window.setInterval($.proxy(checkVisible, this), 500);
+            }
 		}
 
 		function isElVisible(el) {
@@ -1491,7 +1493,9 @@
 			if (isElVisible(this.$element.get(0))) {
 				this.$element.removeClass('owl-hidden');
 				this.refresh();
-				window.clearInterval(this.e._checkVisibile);
+                if (this.e != null) {
+                    window.clearInterval(this.e._checkVisibile);
+                }
 			}
 		}
 	};

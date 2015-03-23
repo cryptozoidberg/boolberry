@@ -1590,3 +1590,7 @@ min-width: 96px;
 .appScreen_index .btn-toolbar {
     margin-bottom: -10px;
 }
+.panel.resume a {
+    color: #999;
+    text-decoration: none;
+}
