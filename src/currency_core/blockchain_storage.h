@@ -135,12 +135,24 @@ namespace currency
     bool check_keyimages(const std::list<crypto::key_image>& images, std::list<bool>& images_stat);//true - unspent, false - spent
     // --- PoS ---    
     bool build_kernel(const block& bl, stake_kernel& kernel, uint64_t& coindays_weight, const stake_modifier_type& stake_modifier);
-    bool build_kernel(uint64_t amount, uint64_t global_index, const crypto::key_image& ki, stake_kernel& kernel, uint64_t& coindays_weight, const stake_modifier_type& stake_modifier);
+    bool build_kernel(uint64_t amount, 
+                      uint64_t global_index, 
+                      const crypto::key_image& ki, 
+                      stake_kernel& kernel, 
+                      uint64_t& coindays_weight, 
+                      const stake_modifier_type& stake_modifier, 
+                      uint64_t timestamp);
     bool build_stake_modifier(crypto::hash& sm);
     bool scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMAND_RPC_SCAN_POS::response& rsp);
     bool validate_pos_block(const block& b, const crypto::hash& id, bool for_altchain);
     bool validate_pos_block(const block& b, wide_difficulty_type basic_diff, const crypto::hash& id, bool for_altchain);
-    bool validate_pos_block(const block& b, wide_difficulty_type basic_diff, uint64_t& coin_age, wide_difficulty_type& final_diff, crypto::hash& proof_hash, const crypto::hash& id, bool for_altchain);
+    bool validate_pos_block(const block& b, 
+                            wide_difficulty_type basic_diff, 
+                            uint64_t& coin_age, 
+                            wide_difficulty_type& final_diff, 
+                            crypto::hash& proof_hash, 
+                            const crypto::hash& id, 
+                            bool for_altchain);
     bool is_coin_age_okay(uint64_t source_tx_block_timestamp, uint64_t last_block_timestamp);
     void set_pos_config(const pos_config& pc);
 

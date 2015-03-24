@@ -140,11 +140,11 @@ namespace currency
     uint8_t offer_type;
     uint64_t amount_lui;       //amount of lui
     uint64_t amount_etc;       //amount of other currency or goods
-    std::string target;        //[30 characters] currency / goods
-    std::string location;      //[50 characters] geo-location
-    std::string contacts;      //[140 characters] (Skype, mail, ICQ, etc., website)
-    std::string comment;       //[160 characters]
-    std::string payment_types; //[20 characters ]money accept type(bank transaction, internet money, cash, etc)
+    std::string target;        //[max 30 characters] currency / goods
+    std::string location;      //[max 50 characters] geo-location
+    std::string contacts;      //[max 140 characters] (Skype, mail, ICQ, etc., website)
+    std::string comment;       //[max 160 characters]
+    std::string payment_types; //[max 20 characters ]money accept type(bank transaction, internet money, cash, etc)
     uint8_t expiration_time;   //n-days
 
     BEGIN_SERIALIZE_OBJECT()

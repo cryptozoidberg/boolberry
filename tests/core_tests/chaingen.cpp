@@ -146,8 +146,7 @@ bool test_generator::construct_block(currency::block& blk,
 
     //build wallets
     build_wallets(blocks, coin_stake_sources, txs_outs, wallets);
-
-    bool r = find_kernel(coin_stake_sources, blocks, oi, wallets, pe, won_walled_index);
+    bool r = find_kernel(coin_stake_sources, blocks, oi, wallets, pe, won_walled_index, blk.timestamp);
     CHECK_AND_ASSERT_THROW_MES(r, "failed to find_kernel ");
     blk.flags = CURRENCY_BLOCK_FLAG_POS_BLOCK;
   }
@@ -326,7 +325,8 @@ bool test_generator::find_kernel(const std::list<currency::account_base>& accs,
   const outputs_index& indexes,
   wallets_vector& wallets,
   currency::pos_entry& pe,
-  size_t& found_wallet_index)
+  size_t& found_wallet_index, 
+  uint64_t& found_timestamp)
 {
   uint64_t last_block_timestamp = 0;
   wide_difficulty_type basic_diff = 0;
@@ -343,7 +343,11 @@ bool test_generator::find_kernel(const std::list<currency::account_base>& accs,
 
     for (size_t i = 0; i != scan_pos_entries.pos_entries.size(); i++)
     {
-      for (uint64_t ts = last_block_timestamp - POS_SCAN_WINDOW; ts < last_block_timestamp + POS_SCAN_WINDOW; ts++)
+      //set timestamp starting from timestamp%POS_SCAN_STEP = 0
+      uint64_t starter_timestamp = last_block_timestamp - POS_SCAN_WINDOW;
+      starter_timestamp = POS_SCAN_STEP - (starter_timestamp%POS_SCAN_STEP) + starter_timestamp;
+
+      for (uint64_t ts = starter_timestamp; ts < last_block_timestamp + POS_SCAN_WINDOW; ts += POS_SCAN_STEP)
       {
         stake_kernel sk = AUTO_VAL_INIT(sk);
         uint64_t coindays_weight = 0;
@@ -353,7 +357,8 @@ bool test_generator::find_kernel(const std::list<currency::account_base>& accs,
           sk,
           coindays_weight,
           blck_chain,
-          indexes);
+          indexes, 
+          ts);
         crypto::hash kernel_hash = crypto::cn_fast_hash(&sk, sizeof(sk));
         wide_difficulty_type this_coin_diff = basic_diff / coindays_weight;
         if (!check_hash(kernel_hash, this_coin_diff))
@@ -441,7 +446,8 @@ bool test_generator::build_kernel(uint64_t amount,
                                   stake_kernel& kernel, 
                                   uint64_t& coindays_weight,
                                   const test_generator::blockchain_vector& blck_chain,
-                                  const test_generator::outputs_index& indexes)
+                                  const test_generator::outputs_index& indexes, 
+                                  uint64_t timestamp)
 {
   coindays_weight = 0;
   kernel = stake_kernel();
@@ -471,6 +477,7 @@ bool test_generator::build_kernel(uint64_t amount,
 
   uint64_t coin_age = blck_chain.back()->b.timestamp - blck_chain[h]->b.timestamp;
   kernel.tx_block_timestamp = blck_chain[h]->b.timestamp;
+  kernel.block_timestamp = timestamp;
 
   coindays_weight = get_coinday_weight(amount, coin_age);
   build_stake_modifier(kernel.stake_modifier, blck_chain);

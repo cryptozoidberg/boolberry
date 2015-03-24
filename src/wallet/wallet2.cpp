@@ -859,14 +859,18 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
 
   for (size_t i = 0; i != sp.pos_entries.size(); i++)
   {
-    for (uint64_t ts = timstamp_start; ts < timstamp_start + POS_SCAN_WINDOW; ts += POS_SCAN_STEP)
+    //set timestamp starting from timestamp%POS_SCAN_STEP = 0
+    uint64_t starter_timestamp = timstamp_start - POS_SCAN_WINDOW;
+    starter_timestamp = POS_SCAN_STEP - (starter_timestamp%POS_SCAN_STEP) + starter_timestamp;
+
+    for (uint64_t ts = starter_timestamp; ts < timstamp_start + POS_SCAN_WINDOW; ts += POS_SCAN_STEP)
     {
       PROFILE_FUNC("general_mining_iteration");
       if (!keep_mining)
         return false;
       stake_kernel sk = AUTO_VAL_INIT(sk);
       uint64_t coindays_weight = 0;
-      build_kernel(sp.pos_entries[i], pos_details_resp.sm, sk, coindays_weight);
+      build_kernel(sp.pos_entries[i], pos_details_resp.sm, sk, coindays_weight, ts);
       crypto::hash kernel_hash;
       {
         PROFILE_FUNC("calc_hash");

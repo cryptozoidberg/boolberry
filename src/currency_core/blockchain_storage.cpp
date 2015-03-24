@@ -2194,6 +2194,9 @@ bool blockchain_storage::validate_pos_block(const block& b, wide_difficulty_type
   bool is_pos = is_pos_block(b);
   CHECK_AND_ASSERT_MES(is_pos, false, "is_pos_block() returned false validate_pos_block()");
 
+  //check timestamp
+  CHECK_AND_ASSERT_MES(b.timestamp%POS_SCAN_STEP == 0, false, "wrong timestamp in PoS block(b.timestamp%POS_SCAN_STEP == 0), b.timestamp = " <<b.timestamp);
+
   //check keyimage
   CHECK_AND_ASSERT_MES(b.miner_tx.vin[1].type() == typeid(txin_to_key), false, "coinstake transaction in the block has the wrong type");
   const txin_to_key& in_to_key = boost::get<txin_to_key>(b.miner_tx.vin[1]);
@@ -2622,8 +2625,7 @@ bool blockchain_storage::build_kernel(const block& bl, stake_kernel& kernel, uin
 
   const txin_to_key& txin = boost::get<txin_to_key>(bl.miner_tx.vin[1]);
   CHECK_AND_ASSERT_MES(txin.key_offsets.size(), false, "wrong miner transaction");
-  kernel.tx_block_timestamp = bl.timestamp;
-  return build_kernel(txin.amount, txin.key_offsets[0], txin.k_image, kernel, coindays_weight, stake_modifier);
+  return build_kernel(txin.amount, txin.key_offsets[0], txin.k_image, kernel, coindays_weight, stake_modifier, bl.timestamp);
 }
 //------------------------------------------------------------------
 bool blockchain_storage::build_stake_modifier(crypto::hash& sm)
@@ -2647,7 +2649,7 @@ bool blockchain_storage::build_stake_modifier(crypto::hash& sm)
   return true;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::build_kernel(uint64_t amount, uint64_t global_index, const crypto::key_image& ki, stake_kernel& kernel, uint64_t& coindays_weight, const stake_modifier_type& stake_modifier)
+bool blockchain_storage::build_kernel(uint64_t amount, uint64_t global_index, const crypto::key_image& ki, stake_kernel& kernel, uint64_t& coindays_weight, const stake_modifier_type& stake_modifier, uint64_t timestamp)
 {
   coindays_weight = 0;
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -2655,6 +2657,7 @@ bool blockchain_storage::build_kernel(uint64_t amount, uint64_t global_index, co
   kernel.tx_out_global_index = global_index;
   kernel.kimage = ki;
   kernel.stake_modifier = stake_modifier;
+  kernel.block_timestamp = timestamp;
 
   //get block related with coinstake source transaction
   auto it = m_outputs.find(amount);
@@ -2691,7 +2694,7 @@ bool blockchain_storage::scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMA
     {
       stake_kernel sk = AUTO_VAL_INIT(sk);
       uint64_t coindays_weight = 0;
-      build_kernel(sp.pos_entries[i].amount, sp.pos_entries[i].index, sp.pos_entries[i].keyimage, sk, coindays_weight, sm);
+      build_kernel(sp.pos_entries[i].amount, sp.pos_entries[i].index, sp.pos_entries[i].keyimage, sk, coindays_weight, sm, ts);
       crypto::hash kernel_hash = crypto::cn_fast_hash(&sk, sizeof(sk));
       wide_difficulty_type this_coin_diff = basic_diff / coindays_weight;
       if (!check_hash(kernel_hash, this_coin_diff))

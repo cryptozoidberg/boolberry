@@ -229,14 +229,16 @@ public:
                     currency::stake_kernel& kernel,
                     uint64_t& coindays_weight,
                     const blockchain_vector& blck_chain,
-                    const outputs_index& indexes);
+                    const outputs_index& indexes, 
+                    uint64_t timestamp);
   
   bool find_kernel(const std::list<currency::account_base>& accs,
                    const blockchain_vector& blck_chain,
                    const outputs_index& indexes,
                    wallets_vector& wallets,
                    currency::pos_entry& pe,
-                   size_t& found_wallet_index);
+                   size_t& found_wallet_index,
+                   uint64_t& found_timestamp);
 
   bool build_wallets(const blockchain_vector& blocks,
                      const std::list<currency::account_base>& accs,

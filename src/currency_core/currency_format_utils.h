@@ -56,6 +56,7 @@ namespace currency
   {
     crypto::public_key m_tx_pub_key;
     crypto::hash m_offers_hash;
+    uint64_t m_offers_size;
     size_t tx_pub_key;
     alias_info m_alias;
     std::string m_user_data_blob;
