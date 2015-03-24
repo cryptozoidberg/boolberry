@@ -8,4 +8,4 @@ export QT_PLUGIN_PATH=$LD_LIBRARY_PATH
 echo $LD_LIBRARY_PATH
 echo $QT_PLUGIN_PATH
 
-./qt-boolb
+./qt-lui
