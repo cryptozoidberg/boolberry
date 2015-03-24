@@ -820,7 +820,7 @@ bool wallet2::prepare_and_sign_pos_block(currency::block& b,
   return true;
 }
 //------------------------------------------------------------------
-bool wallet2::build_kernel(const pos_entry& pe, const stake_modifier_type& stake_modifier, stake_kernel& kernel, uint64_t& coindays_weight)
+bool wallet2::build_kernel(const pos_entry& pe, const stake_modifier_type& stake_modifier, stake_kernel& kernel, uint64_t& coindays_weight, uint64_t timestamp)
 {
   PROFILE_FUNC("build_kernel");
   coindays_weight = 0;
@@ -828,6 +828,7 @@ bool wallet2::build_kernel(const pos_entry& pe, const stake_modifier_type& stake
   kernel.tx_out_global_index = pe.index;
   kernel.kimage = pe.keyimage;
   kernel.stake_modifier = stake_modifier;
+  kernel.block_timestamp = timestamp;
 
   uint64_t coin_age = m_last_bc_timestamp - pe.block_timestamp;
   kernel.tx_block_timestamp = pe.block_timestamp;
@@ -858,7 +859,7 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
 
   for (size_t i = 0; i != sp.pos_entries.size(); i++)
   {
-    for (uint64_t ts = timstamp_start; ts < timstamp_start + POS_SCAN_WINDOW; ts++)
+    for (uint64_t ts = timstamp_start; ts < timstamp_start + POS_SCAN_WINDOW; ts += POS_SCAN_STEP)
     {
       PROFILE_FUNC("general_mining_iteration");
       if (!keep_mining)
