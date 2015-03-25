@@ -335,7 +335,6 @@ namespace currency
   struct stake_kernel
   {
     stake_modifier_type stake_modifier;
-    uint64_t tx_block_timestamp;          // (?) source transaction block timestamp
     uint64_t block_timestamp;             //this block timestamp
     crypto::key_image kimage;
     uint64_t tx_out_global_index;         //global index of output in source transaction
