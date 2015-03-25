@@ -476,7 +476,6 @@ bool test_generator::build_kernel(uint64_t amount,
   CHECK_AND_ASSERT_THROW_MES(blck_chain[h]->b.timestamp <= blck_chain.back()->b.timestamp, "wrong coin age");
 
   uint64_t coin_age = blck_chain.back()->b.timestamp - blck_chain[h]->b.timestamp;
-  kernel.tx_block_timestamp = blck_chain[h]->b.timestamp;
   kernel.block_timestamp = timestamp;
 
   coindays_weight = get_coinday_weight(amount, coin_age);

@@ -2670,7 +2670,6 @@ bool blockchain_storage::build_kernel(uint64_t amount, uint64_t global_index, co
   CHECK_AND_ASSERT_MES(m_blocks[tx_it->second.m_keeper_block_height].bl.timestamp <= m_blocks.back().bl.timestamp, false, "wrong coin age");
 
   uint64_t coin_age = m_blocks.back().bl.timestamp - m_blocks[tx_it->second.m_keeper_block_height].bl.timestamp;
-  kernel.tx_block_timestamp = m_blocks[tx_it->second.m_keeper_block_height].bl.timestamp;
 
   coindays_weight = get_coinday_weight(amount, coin_age);
   return true;

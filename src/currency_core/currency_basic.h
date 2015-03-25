@@ -365,6 +365,8 @@ namespace currency
     uint64_t block_timestamp;             //this block timestamp
     crypto::key_image kimage;
     uint64_t tx_out_global_index;         //global index of output in source transaction
+    crypto::hash last_pow_id;
+    crypto::hash last_pos_kernel_hash;
   };
 #pragma pack(pop)
 
