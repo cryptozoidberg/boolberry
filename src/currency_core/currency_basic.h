@@ -337,7 +337,7 @@ namespace currency
   - The kernel structure now includes last_pow_hash and last_pos_hash: blockID of the last
   PoW block and kernel hash of the last PoS block respectively. By that we create the true 
   chain of blocks. In PPC you can use your winning output whenever you want (within timestamp 
-  boundaries), because kernel does not depend of the prevous block (unlike PoW mining,
+  boundaries), because kernel does not depend of the previous block (unlike PoW mining,
   where block header includes prev_id). Even use it twice (if a chain fork occurs). Our 
   protocol prevents it, making PoS mining more like PoW (but energy-efficient).
 

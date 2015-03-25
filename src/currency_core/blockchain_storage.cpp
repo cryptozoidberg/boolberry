@@ -2649,7 +2649,15 @@ bool blockchain_storage::build_stake_modifier(crypto::hash& sm)
   return true;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::build_kernel(uint64_t amount, uint64_t global_index, const crypto::key_image& ki, stake_kernel& kernel, uint64_t& coindays_weight, const stake_modifier_type& stake_modifier, uint64_t timestamp)
+bool blockchain_storage::build_kernel(uint64_t amount, 
+                                      uint64_t global_index, 
+                                      const crypto::key_image& ki, 
+                                      stake_kernel& kernel, 
+                                      uint64_t& coindays_weight, 
+                                      const stake_modifier_type& stake_modifier, 
+                                      uint64_t timestamp, 
+                                      const crypto::hash& last_pow_id, 
+                                      const crypto::hash& last_pos_id)
 {
   coindays_weight = 0;
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -2658,6 +2666,8 @@ bool blockchain_storage::build_kernel(uint64_t amount, uint64_t global_index, co
   kernel.kimage = ki;
   kernel.stake_modifier = stake_modifier;
   kernel.block_timestamp = timestamp;
+  kernel.last_pow_id = last_pow_id;
+  kernel.last_pos_kernel_hash = last_pos_id;
 
   //get block related with coinstake source transaction
   auto it = m_outputs.find(amount);
@@ -2689,11 +2699,13 @@ bool blockchain_storage::scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMA
 
   for (size_t i = 0; i != sp.pos_entries.size(); i++)
   {
+    stake_kernel sk = AUTO_VAL_INIT(sk);
+    uint64_t coindays_weight = 0;
+    build_kernel(sp.pos_entries[i].amount, sp.pos_entries[i].index, sp.pos_entries[i].keyimage, sk, coindays_weight, sm, ts);
+
     for (uint64_t ts = timstamp_start; ts < timstamp_start + POS_SCAN_WINDOW; ts++)
     {
-      stake_kernel sk = AUTO_VAL_INIT(sk);
-      uint64_t coindays_weight = 0;
-      build_kernel(sp.pos_entries[i].amount, sp.pos_entries[i].index, sp.pos_entries[i].keyimage, sk, coindays_weight, sm, ts);
+      sk.block_timestamp = ts;
       crypto::hash kernel_hash = crypto::cn_fast_hash(&sk, sizeof(sk));
       wide_difficulty_type this_coin_diff = basic_diff / coindays_weight;
       if (!check_hash(kernel_hash, this_coin_diff))

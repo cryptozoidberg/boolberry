@@ -55,6 +55,7 @@ namespace currency
       wide_difficulty_type difficulty;
       uint64_t already_generated_coins;
       uint64_t scratch_offset;
+      crypto::hash stake_hash;
     };
 
     blockchain_storage(tx_memory_pool& tx_pool);
@@ -141,7 +142,9 @@ namespace currency
                       stake_kernel& kernel, 
                       uint64_t& coindays_weight, 
                       const stake_modifier_type& stake_modifier, 
-                      uint64_t timestamp);
+                      uint64_t timestamp,
+                      const crypto::hash& last_pow_id,
+                      const crypto::hash& last_pos_id);
     bool build_stake_modifier(crypto::hash& sm);
     bool scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMAND_RPC_SCAN_POS::response& rsp);
     bool validate_pos_block(const block& b, const crypto::hash& id, bool for_altchain);
