@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8.6)
 PROJECT(lui)
 
 set(VERSION "0.1")
+cmake_policy(SET CMP0043 OLD)
 # $Format:Packaged from commit %H%nset(COMMIT %h)%nset(REFS "%d")$
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

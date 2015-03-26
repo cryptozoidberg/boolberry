@@ -56,8 +56,6 @@ namespace currency
   {
     crypto::public_key m_tx_pub_key;
     crypto::hash m_offers_hash;
-    uint64_t m_offers_size;
-    size_t tx_pub_key;
     alias_info m_alias;
     std::string m_user_data_blob;
     extra_attachment_info m_attachment_info;
@@ -89,7 +87,7 @@ namespace currency
   //---------------------------------------------------------------
   bool construct_tx_out(const account_public_address& destination_addr, const crypto::secret_key& tx_sec_key, size_t output_index, uint64_t amount, transaction& tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool validate_alias_name(const std::string& al);
-  crypto::hash get_offers_hash(const transaction& tx);
+  void get_attachment_details(const transaction& tx, extra_attachment_info& eai);
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, transaction& tx, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED, const std::list<offer_details>& od = std::list<offer_details>());
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, const std::vector<uint8_t>& extra, transaction& tx, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED, const std::list<offer_details>& od = std::list<offer_details>    ());
   bool sign_update_alias(alias_info& ai, const crypto::public_key& pkey, const crypto::secret_key& skey);

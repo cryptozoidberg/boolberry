@@ -1832,17 +1832,32 @@ bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
 bool blockchain_storage::process_blockchain_tx_offers(const transaction& tx)
 {
   //check transaction extra
-  for (const auto& of : tx.offers)
-    m_offers.push_back(of);
+  for (const auto& at : tx.attachment)
+  {
+    if (at.type() == typeid(offer_details))
+      m_offers.push_back(boost::get<offer_details>(at));
+  }
 
   return true;
 }
 //------------------------------------------------------------------
+size_t get_offers_count_in_attachments(const transaction& tx)
+{
+  size_t cnt = 0;
+  for (const auto& at : tx.attachment)
+  {
+    if (at.type() == typeid(offer_details))
+      ++cnt;
+  }
+  return cnt;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::unprocess_blockchain_tx_offers(const transaction& tx)
 {
-  CHECK_AND_ASSERT_MES(m_offers.size() >= tx.offers.size(), false, "wrong m_offers size("
-    << m_offers.size() << ") in unprocess_blockchain_tx_offers with tx offers.size=" << tx.offers.size());
-  m_offers.resize(m_offers.size() - tx.offers.size());
+  size_t cnt_offers = get_offers_count_in_attachments(tx);
+  CHECK_AND_ASSERT_MES(m_offers.size() >= cnt_offers, false, "wrong m_offers size("
+    << m_offers.size() << ") in unprocess_blockchain_tx_offers with tx offers cnt" << cnt_offers);
+  m_offers.resize(m_offers.size() - cnt_offers);
   return true;
 }
 //------------------------------------------------------------------
@@ -2024,8 +2039,12 @@ bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::ha
     tx_extra_info ei = AUTO_VAL_INIT(ei); 
     bool r = parse_and_validate_tx_extra(tx, ei);
     CHECK_AND_ASSERT_MES(r, false, "failed to parse_and_validate_tx_extra");
-    CHECK_AND_ASSERT_MES(get_offers_hash(tx) == ei.m_offers_hash, false, "offers hash in tx: " << get_offers_hash(tx)
-      << " missmatch with offers hash specified in extra: " << ei.m_offers_hash);
+    extra_attachment_info eai = AUTO_VAL_INIT(eai);
+    get_attachment_details(tx, eai);
+    CHECK_AND_ASSERT_MES(eai.hsh == ei.m_attachment_info.hsh && 
+      eai.sz == ei.m_attachment_info.sz, false, "attachment hash in tx: " << eai.hsh << ", and sz = " << eai.sz
+      << " missmatch with attachment hash specified in extra: "       
+      << ei.m_attachment_info.hsh << ", and len specified in extra: " << ei.m_attachment_info.sz);
   }
   return true;
 }
@@ -2655,9 +2674,7 @@ bool blockchain_storage::build_kernel(uint64_t amount,
                                       stake_kernel& kernel, 
                                       uint64_t& coindays_weight, 
                                       const stake_modifier_type& stake_modifier, 
-                                      uint64_t timestamp, 
-                                      const crypto::hash& last_pow_id, 
-                                      const crypto::hash& last_pos_id)
+                                      uint64_t timestamp)
 {
   coindays_weight = 0;
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -2666,8 +2683,6 @@ bool blockchain_storage::build_kernel(uint64_t amount,
   kernel.kimage = ki;
   kernel.stake_modifier = stake_modifier;
   kernel.block_timestamp = timestamp;
-  kernel.last_pow_id = last_pow_id;
-  kernel.last_pos_kernel_hash = last_pos_id;
 
   //get block related with coinstake source transaction
   auto it = m_outputs.find(amount);
@@ -2701,7 +2716,7 @@ bool blockchain_storage::scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMA
   {
     stake_kernel sk = AUTO_VAL_INIT(sk);
     uint64_t coindays_weight = 0;
-    build_kernel(sp.pos_entries[i].amount, sp.pos_entries[i].index, sp.pos_entries[i].keyimage, sk, coindays_weight, sm, ts);
+    build_kernel(sp.pos_entries[i].amount, sp.pos_entries[i].index, sp.pos_entries[i].keyimage, sk, coindays_weight, sm, 0);
 
     for (uint64_t ts = timstamp_start; ts < timstamp_start + POS_SCAN_WINDOW; ts++)
     {

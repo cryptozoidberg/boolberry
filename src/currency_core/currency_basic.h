@@ -33,6 +33,27 @@ namespace currency
   const static crypto::secret_key null_skey = AUTO_VAL_INIT(null_skey);
   const static crypto::signature null_sig = AUTO_VAL_INIT(null_sig);
 
+
+  /************************************************************************/
+  /*                                                                      */
+  /************************************************************************/
+  struct account_public_address
+  {
+    crypto::public_key m_spend_public_key;
+    crypto::public_key m_view_public_key;
+
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(m_spend_public_key)
+      FIELD(m_view_public_key)
+      END_SERIALIZE()
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(m_spend_public_key)
+        KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(m_view_public_key)
+      END_KV_SERIALIZE_MAP()
+  };
+
+
   typedef std::vector<crypto::signature> ring_signature;
 
   /* outputs */
@@ -134,7 +155,9 @@ namespace currency
 #define OFFER_TYPE_LUI_TO_ETC   0
 #define OFFER_TYPE_ETC_TO_LUI   1
 
-
+  /************************************************************************/
+  /* attachment structures                                                */
+  /************************************************************************/
   struct offer_details
   {
     uint8_t offer_type;
@@ -161,6 +184,30 @@ namespace currency
   };
 
 
+
+  struct tx_comment
+  {
+    std::string comment;
+
+    BEGIN_SERIALIZE()
+      FIELD(comment)
+      END_SERIALIZE()
+  };
+
+  struct tx_payer
+  {
+    account_public_address acc_addr;
+
+    BEGIN_SERIALIZE()
+      FIELD(comment)
+      END_SERIALIZE()
+  };
+
+  typedef boost::variant<offer_details, tx_comment, tx_payer, std::string> attachment_v;
+
+  /************************************************************************/
+  /* extra structures                                                     */
+  /************************************************************************/
   struct extra_attachment_info
   {
     uint64_t sz;
@@ -291,25 +338,6 @@ namespace currency
     return boost::apply_visitor(txin_signature_size_visitor(), tx_in);
   }
 
-  struct tx_comment
-  {
-    std::string comment;
-    
-    BEGIN_SERIALIZE()
-      FIELD(comment)
-    END_SERIALIZE()
-  };
-
-  struct tx_payer
-  {
-    account_public_address acc_addr;
-    
-    BEGIN_SERIALIZE()
-      FIELD(comment)
-    END_SERIALIZE()
-  };
-
-  typedef boost::variant<offer_details, tx_comment, tx_payer, std::string> attachment_v;
 
 
 
@@ -354,24 +382,7 @@ namespace currency
   };
 
 
-  /************************************************************************/
-  /*                                                                      */
-  /************************************************************************/
-  struct account_public_address
-  {
-    crypto::public_key m_spend_public_key;
-    crypto::public_key m_view_public_key;
 
-    BEGIN_SERIALIZE_OBJECT()
-      FIELD(m_spend_public_key)
-      FIELD(m_view_public_key)
-    END_SERIALIZE()
-
-    BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(m_spend_public_key)
-      KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(m_view_public_key)
-    END_KV_SERIALIZE_MAP()
-  };
 
   struct keypair
   {
@@ -448,7 +459,6 @@ namespace currency
 
 BLOB_SERIALIZER(currency::txout_to_key);
 BLOB_SERIALIZER(currency::txout_to_scripthash);
-BLOB_SERIALIZER(crypto::public_key);
 
 
 VARIANT_TAG(binary_archive, currency::txin_gen, 0xff);

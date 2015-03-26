@@ -142,9 +142,7 @@ namespace currency
                       stake_kernel& kernel, 
                       uint64_t& coindays_weight, 
                       const stake_modifier_type& stake_modifier, 
-                      uint64_t timestamp,
-                      const crypto::hash& last_pow_id,
-                      const crypto::hash& last_pos_id);
+                      uint64_t timestamp);
     bool build_stake_modifier(crypto::hash& sm);
     bool scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMAND_RPC_SCAN_POS::response& rsp);
     bool validate_pos_block(const block& b, const crypto::hash& id, bool for_altchain);

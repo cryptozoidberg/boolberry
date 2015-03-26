@@ -332,12 +332,14 @@ namespace currency
     std::string buff;
     bool r = make_tx_extra_alias_entry(buff, alinfo);
     if(!r) return false;
-    tx.extra.resize(tx.extra.size() + buff.size());
-    memcpy(&tx.extra[tx.extra.size() - buff.size()], buff.data(), buff.size());
+    extra_alias_entry eae = AUTO_VAL_INIT(eae);
+    eae.buff.resize(buff.size());
+    memcpy(&tx.extra[0], buff.data(), buff.size());
+    tx.extra.push_back(eae);
     return true;
   }
   //---------------------------------------------------------------
-  bool parse_tx_extra_alias_entry(const transaction& tx, size_t start, alias_info& alinfo, size_t& whole_entry_len)
+  bool parse_tx_extra_alias_entry(const std::vector<uint8_t>& alias_buff, const transaction& tx, size_t start, alias_info& alinfo, size_t& whole_entry_len)
   {
     whole_entry_len = 0;
     size_t i = start;
@@ -347,35 +349,35 @@ namespace currency
     |--flags--|c---alias name----|--------- account public address --------|[----account tracking key----]|[c--- text comment ---][----- signature(poof of alias owning) ------]
 
     ************************************************************************************************************************************************************/
-    CHECK_AND_ASSERT_MES(tx.extra.size()-1-i >= sizeof(crypto::public_key)*2+1, false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
+    CHECK_AND_ASSERT_MES(alias_buff.size()-1-i >= sizeof(crypto::public_key)*2+1, false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
     ++i;
-    uint8_t alias_flags = tx.extra[i];
+    uint8_t alias_flags = alias_buff[i];
     ++i;
-    uint8_t alias_name_len = tx.extra[i];
-    CHECK_AND_ASSERT_MES(tx.extra.size()-1-i >= tx.extra[i]+sizeof(crypto::public_key)*2, false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have wrong name bytes counter) in tx " << get_transaction_hash(tx));
+    uint8_t alias_name_len = alias_buff[i];
+    CHECK_AND_ASSERT_MES(alias_buff.size()-1-i >= alias_buff[i]+sizeof(crypto::public_key)*2, false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have wrong name bytes counter) in tx " << get_transaction_hash(tx));
     
-    alinfo.m_alias.assign((const char*)&tx.extra[i+1], static_cast<size_t>(alias_name_len));
-    i += tx.extra[i] + 1;
-    alinfo.m_address.m_spend_public_key = *reinterpret_cast<const crypto::public_key*>(&tx.extra[i]);
+    alinfo.m_alias.assign((const char*)&alias_buff[i+1], static_cast<size_t>(alias_name_len));
+    i += alias_buff[i] + 1;
+    alinfo.m_address.m_spend_public_key = *reinterpret_cast<const crypto::public_key*>(&alias_buff[i]);
     i += sizeof(const crypto::public_key);
-    alinfo.m_address.m_view_public_key = *reinterpret_cast<const crypto::public_key*>(&tx.extra[i]);
+    alinfo.m_address.m_view_public_key = *reinterpret_cast<const crypto::public_key*>(&alias_buff[i]);
     i += sizeof(const crypto::public_key);
     if(alias_flags&TX_EXTRA_TAG_ALIAS_FLAGS_ADDR_WITH_TRACK)
     {//address aliased with tracking key
-      CHECK_AND_ASSERT_MES(tx.extra.size()-i >= sizeof(crypto::secret_key), false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
-      alinfo.m_view_key = *reinterpret_cast<const crypto::secret_key*>(&tx.extra[i]);
+      CHECK_AND_ASSERT_MES(alias_buff.size()-i >= sizeof(crypto::secret_key), false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
+      alinfo.m_view_key = *reinterpret_cast<const crypto::secret_key*>(&alias_buff[i]);
       i += sizeof(const crypto::secret_key);
     }
-    uint8_t comment_len = tx.extra[i];
+    uint8_t comment_len = alias_buff[i];
     if(comment_len)
     {
-      CHECK_AND_ASSERT_MES(tx.extra.size() - i >=tx.extra[i], false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
-      alinfo.m_text_comment.assign((const char*)&tx.extra[i+1], static_cast<size_t>(tx.extra[i]));
-      i += tx.extra[i] + 1;
+      CHECK_AND_ASSERT_MES(alias_buff.size() - i >=alias_buff[i], false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
+      alinfo.m_text_comment.assign((const char*)&alias_buff[i+1], static_cast<size_t>(alias_buff[i]));
+      i += alias_buff[i] + 1;
     }
     if(alias_flags&TX_EXTRA_TAG_ALIAS_FLAGS_OP_UPDATE)
     {
-      CHECK_AND_ASSERT_MES(tx.extra.size()-i >= sizeof(crypto::secret_key), false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
+      CHECK_AND_ASSERT_MES(alias_buff.size()-i >= sizeof(crypto::secret_key), false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
       alinfo.m_sign = *reinterpret_cast<const crypto::signature*>(&tx.extra[i]);
       i += sizeof(const crypto::signature);
     }
@@ -397,8 +399,9 @@ namespace currency
       bool was_alias;
 
       tx_extra_info& rei;
+      const transaction& rtx;
       
-      tx_extra_handler(tx_extra_info& ei) :rei(ei)
+      tx_extra_handler(tx_extra_info& ei, const transaction& tx) :rei(ei), rtx(tx)
       {
         was_padding = was_pubkey = was_attachment = was_userdata = was_alias = false;
       }
@@ -409,7 +412,7 @@ namespace currency
       bool operator()(const crypto::public_key& k) const
       {
         ENSURE_ONETIME(was_pubkey, "public_key");
-        rei.tx_pub_key = k;
+        rei.m_tx_pub_key = k;
         return true;
       }
       bool operator()(const extra_attachment_info& ai) const
@@ -421,13 +424,16 @@ namespace currency
       bool operator()(const extra_alias_entry& ae) const
       {
         ENSURE_ONETIME(was_alias, "alias");
-        rei.m_alias = ae;
+        size_t len = 0;
+        bool r = parse_tx_extra_alias_entry(ae.buff, rtx, 0, rei.m_alias, len);
+        CHECK_AND_ASSERT_MES(r, false, "failed to parse_tx_extra_alias_entry");
+
         return true;
       }
       bool operator()(const extra_user_data& ud) const
       {
         ENSURE_ONETIME(was_userdata, "userdata");
-        rei.m_user_data_blob = ud;
+        rei.m_user_data_blob.assign((const char*)&ud.buff[0], ud.buff.size());
         return true;
       }
       bool operator()(const extra_padding& k) const
@@ -435,9 +441,9 @@ namespace currency
         ENSURE_ONETIME(was_userdata, "padding");
         return true;
       }
-    }
+    };
 
-    tx_extra_handler vtr(extra);
+    tx_extra_handler vtr(extra, tx);
 
     for (const auto& ex_v : tx.extra)
     {
@@ -446,7 +452,7 @@ namespace currency
     }
 
 
-
+    /*
 
 
     for(size_t i = 0; i != tx.extra.size();)
@@ -500,7 +506,7 @@ namespace currency
         continue;
       }
       ++i;
-    }
+    }*/
     return true;
   }
   //---------------------------------------------------------------
@@ -519,20 +525,17 @@ namespace currency
   //---------------------------------------------------------------
   bool add_tx_pub_key_to_extra(transaction& tx, const crypto::public_key& tx_pub_key)
   {
-    tx.extra.resize(tx.extra.size() + 1 + sizeof(crypto::public_key));
-    tx.extra[tx.extra.size() - 1 - sizeof(crypto::public_key)] = TX_EXTRA_TAG_PUBKEY;
-    *reinterpret_cast<crypto::public_key*>(&tx.extra[tx.extra.size() - sizeof(crypto::public_key)]) = tx_pub_key;
+    tx.extra.push_back(tx_pub_key);
     return true;
   }
   //---------------------------------------------------------------
-  bool add_offers_hash_to_extra(transaction& tx, const crypto::hash& offers_hash)
+  bool add_attachments_info_to_extra(transaction& tx)
   {
-    tx.extra.resize(tx.extra.size() + 1 + sizeof(crypto::hash));
-    tx.extra[tx.extra.size() - 1 - sizeof(crypto::hash)] = TX_EXTRA_TAG_OFFERS_HASH;
-    *reinterpret_cast<crypto::hash*>(&tx.extra[tx.extra.size() - sizeof(crypto::hash)]) = offers_hash;
+    extra_attachment_info eai = AUTO_VAL_INIT(eai);
+    get_attachment_details(tx, eai);
+    tx.extra.push_back(eai);
     return true;
-  }
-  
+  } 
   //---------------------------------------------------------------
   bool add_tx_extra_nonce(transaction& tx, const blobdata& extra_nonce)
   {
@@ -570,16 +573,19 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  crypto::hash get_offers_hash(const transaction& tx)
+  void get_attachment_details(const transaction& tx, extra_attachment_info& eai)
   {
-    if (!tx.offers.size())
-      return null_hash;
+    eai = extra_attachment_info();
+    if (!tx.attachment.size())
+      return;
 
     //put hash into extra
     std::stringstream ss;
     binary_archive<true> oar(ss);
-    bool r = ::do_serialize(oar, const_cast<std::vector<offer_details>&>(tx.offers));
-    return get_blob_hash(ss.str());
+    bool r = ::do_serialize(oar, const_cast<std::vector<attachment_v>&>(tx.attachment));
+    std::string buff = ss.str();
+    eai.sz = buff.size();
+    eai.hsh = get_blob_hash(buff);
   }
   //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
@@ -593,11 +599,11 @@ namespace currency
   }
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
-                                                             const std::vector<uint8_t>& extra,
+                                                             const std::vector<extra_v>& extra,
+                                                             const std::vector<attachment_v>& attachments,
                                                              transaction& tx, 
                                                              uint64_t unlock_time,
-                                                             uint8_t tx_outs_attr, 
-                                                             const std::list<offer_details>& od)
+                                                             uint8_t tx_outs_attr)
   {
     tx.vin.clear();
     tx.vout.clear();
@@ -681,12 +687,10 @@ namespace currency
     }
 
     //include offers if need
-    tx.offers.insert(tx.offers.begin(), od.begin(), od.end());
+    tx.attachment = attachments;
     
-    if (tx.offers.size())
-    {
-      add_offers_hash_to_extra(tx, get_offers_hash(tx));
-    }
+    if (tx.attachment.size())
+      add_attachments_info_to_extra(tx);
 
     //generate ring signatures
     crypto::hash tx_prefix_hash;
