@@ -19,7 +19,7 @@ Backend = function(emulator) {
 
     /******************** 'Talking to backend' stuff **********************/
 
-        // Requests a function
+    // Requests a function
     this.backendRequest = function(command, parameters, callback) {
         console.log("Requesting API command '"+command+"' with parameters: "+JSON.stringify(parameters));
 
@@ -90,7 +90,7 @@ Backend = function(emulator) {
 
     /******************** Specific backend API calls being reflected in UI *********************/
 
-        // UI initialization
+    // UI initialization
     this.onAppInit = function() {
         this.registerEventCallbacks();
 
@@ -142,9 +142,7 @@ Backend = function(emulator) {
          *
          */
         this.subscribe('update_daemon_state', function(data) {
-            console.log('update_daemon_state: ');
-            console.log(data);
-
+            // upper right corner indicator
             $backend.application.showOnlineState(data.text_state);
 
             // info widget
