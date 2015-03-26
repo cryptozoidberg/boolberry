@@ -19,7 +19,7 @@ Backend = function(emulator) {
 
     /******************** 'Talking to backend' stuff **********************/
 
-    // Requests a function
+        // Requests a function
     this.backendRequest = function(command, parameters, callback) {
         console.log("Requesting API command '"+command+"' with parameters: "+JSON.stringify(parameters));
 
@@ -72,7 +72,7 @@ Backend = function(emulator) {
             if (this.shouldUseEmulator()) {
                 this.emulator.eventCallbacks[command] = callback;
             } else {
-                Qt[command].connect(callback);
+                Qt[command].connect(this.callbackStrToObj.bind({callback: callback}));
             }
         }
     };
@@ -83,9 +83,14 @@ Backend = function(emulator) {
         }
     };
 
+    this.callbackStrToObj = function(str) {
+        var obj = $.parseJSON(str);
+        this.callback(obj);
+    };
+
     /******************** Specific backend API calls being reflected in UI *********************/
 
-    // UI initialization
+        // UI initialization
     this.onAppInit = function() {
         this.registerEventCallbacks();
 
@@ -137,6 +142,9 @@ Backend = function(emulator) {
          *
          */
         this.subscribe('update_daemon_state', function(data) {
+            console.log('update_daemon_state: ');
+            console.log(data);
+
             $backend.application.showOnlineState(data.text_state);
 
             // info widget
