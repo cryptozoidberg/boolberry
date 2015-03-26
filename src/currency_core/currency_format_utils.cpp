@@ -386,11 +386,69 @@ namespace currency
   bool parse_and_validate_tx_extra(const transaction& tx, tx_extra_info& extra)
   {
     extra.m_tx_pub_key = null_pkey;
-    bool padding_started = false; //let the padding goes only at the end
-    bool tx_extra_tag_pubkey_found = false;
-    bool tx_extra_tag_offers_hash_found = false;
-    bool tx_extra_user_data_found = false;
-    bool tx_alias_found = false;
+
+
+    struct tx_extra_handler: public boost::static_visitor<bool>
+    {
+      bool was_padding; //let the padding goes only at the end
+      bool was_pubkey;
+      bool was_attachment;
+      bool was_userdata;
+      bool was_alias;
+
+      tx_extra_info& rei;
+      
+      tx_extra_handler(tx_extra_info& ei) :rei(ei)
+      {
+        was_padding = was_pubkey = was_attachment = was_userdata = was_alias = false;
+      }
+
+#define ENSURE_ONETIME(varname, entry_name) CHECK_AND_ASSERT_MES(varname == false, false, "double entry in tx_extra: " entry_name);
+
+
+      bool operator()(const crypto::public_key& k) const
+      {
+        ENSURE_ONETIME(was_pubkey, "public_key");
+        rei.tx_pub_key = k;
+        return true;
+      }
+      bool operator()(const extra_attachment_info& ai) const
+      {
+        ENSURE_ONETIME(was_attachment, "attachment");
+        rei.m_attachment_info = ai;
+        return true;
+      }
+      bool operator()(const extra_alias_entry& ae) const
+      {
+        ENSURE_ONETIME(was_alias, "alias");
+        rei.m_alias = ae;
+        return true;
+      }
+      bool operator()(const extra_user_data& ud) const
+      {
+        ENSURE_ONETIME(was_userdata, "userdata");
+        rei.m_user_data_blob = ud;
+        return true;
+      }
+      bool operator()(const extra_padding& k) const
+      {
+        ENSURE_ONETIME(was_userdata, "padding");
+        return true;
+      }
+    }
+
+    tx_extra_handler vtr(extra);
+
+    for (const auto& ex_v : tx.extra)
+    {
+      if (!boost::apply_visitor(vtr, ex_v))
+        return false;
+    }
+
+
+
+
+
     for(size_t i = 0; i != tx.extra.size();)
     {
       if(padding_started)

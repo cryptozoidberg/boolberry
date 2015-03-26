@@ -165,21 +165,37 @@ namespace currency
   {
     uint64_t sz;
     crypto::hash hsh;
+
+    BEGIN_SERIALIZE()
+      VARINT_FIELD(sz)
+      FIELD(hsh)
+    END_SERIALIZE()
   };
 
   struct extra_user_data
   {
     std::vector<uint8_t> buff;
+    
+    BEGIN_SERIALIZE()
+      FIELD(buff)
+    END_SERIALIZE()
   };
 
   struct extra_alias_entry
   {
     std::vector<uint8_t> buff; //manual parse
+    BEGIN_SERIALIZE()
+      FIELD(buff)
+    END_SERIALIZE()
   };
 
   struct extra_padding
   {
     std::vector<uint8_t> buff; //stub
+    
+    BEGIN_SERIALIZE()
+      FIELD(buff)
+    END_SERIALIZE()
   };
 
   typedef boost::variant<crypto::public_key, extra_attachment_info, extra_alias_entry, extra_user_data, extra_padding> extra_v;
@@ -278,11 +294,19 @@ namespace currency
   struct tx_comment
   {
     std::string comment;
+    
+    BEGIN_SERIALIZE()
+      FIELD(comment)
+    END_SERIALIZE()
   };
 
   struct tx_payer
   {
     account_public_address acc_addr;
+    
+    BEGIN_SERIALIZE()
+      FIELD(comment)
+    END_SERIALIZE()
   };
 
   typedef boost::variant<offer_details, tx_comment, tx_payer, std::string> attachment_v;

@@ -39,7 +39,18 @@ namespace currency
     tx_destination_entry(uint64_t a, const account_public_address &ad) : amount(a), addr(ad) { }
   };
 
+  struct alias_info_base
+  {
+    account_public_address m_address;
+    crypto::secret_key m_view_key;
+    crypto::signature m_sign;     //is this field set no nonzero - that means update alias operation
+    std::string m_text_comment;
+  };
 
+  struct alias_info: public alias_info_base
+  {
+    std::string m_alias;
+  };
 
   struct tx_extra_info 
   {
@@ -49,6 +60,7 @@ namespace currency
     size_t tx_pub_key;
     alias_info m_alias;
     std::string m_user_data_blob;
+    extra_attachment_info m_attachment_info;
   };
 
   //---------------------------------------------------------------
