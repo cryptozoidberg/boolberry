@@ -161,6 +161,29 @@ namespace currency
   };
 
 
+  struct extra_attachment_info
+  {
+    uint64_t sz;
+    crypto::hash hsh;
+  };
+
+  struct extra_user_data
+  {
+    std::vector<uint8_t> buff;
+  };
+
+  struct extra_alias_entry
+  {
+    std::vector<uint8_t> buff; //manual parse
+  };
+
+  struct extra_padding
+  {
+    std::vector<uint8_t> buff; //stub
+  };
+
+  typedef boost::variant<crypto::public_key, extra_attachment_info, extra_alias_entry, extra_user_data, extra_padding> extra_v;
+
   class transaction_prefix
   {
 
@@ -172,7 +195,7 @@ namespace currency
     std::vector<txin_v> vin;
     std::vector<tx_out> vout;
     //extra
-    std::vector<uint8_t> extra;
+    std::vector<extra_v> extra;
 
     BEGIN_SERIALIZE()
       VARINT_FIELD(version)
@@ -192,30 +215,35 @@ namespace currency
   {
   public:
     std::vector<std::vector<crypto::signature> > signatures; //count signatures  always the same as inputs count
-    std::vector<offer_details> offers;
+    std::vector<attachment_v> attachment;
 
     transaction();
-    virtual ~transaction();
-    void set_null();
+    //virtual ~transaction();
+    //void set_null();
 
     BEGIN_SERIALIZE_OBJECT()
       FIELDS(*static_cast<transaction_prefix *>(this))
       FIELD(signatures)
-      FIELD(offers)
+      FIELD(attachment)
     END_SERIALIZE()
 
 
     static size_t get_signature_size(const txin_v& tx_in);
-    
   };
 
-
+  
   inline
   transaction::transaction()
   {
-    set_null();
+    version = 0;
+    unlock_time = 0;
+    vin.clear();
+    vout.clear();
+    extra.clear();
+    signatures.clear();
+    attachment.clear();
   }
-
+  /*
   inline
   transaction::~transaction()
   {
@@ -232,7 +260,7 @@ namespace currency
     extra.clear();
     signatures.clear();
   }
-
+  */
   inline
   size_t transaction::get_signature_size(const txin_v& tx_in)
   {
@@ -247,11 +275,17 @@ namespace currency
     return boost::apply_visitor(txin_signature_size_visitor(), tx_in);
   }
 
+  struct tx_comment
+  {
+    std::string comment;
+  };
 
+  struct tx_payer
+  {
+    account_public_address acc_addr;
+  };
 
-
-
-
+  typedef boost::variant<offer_details, tx_comment, tx_payer, std::string> attachment_v;
 
 
 
@@ -390,6 +424,8 @@ namespace currency
 
 BLOB_SERIALIZER(currency::txout_to_key);
 BLOB_SERIALIZER(currency::txout_to_scripthash);
+BLOB_SERIALIZER(crypto::public_key);
+
 
 VARIANT_TAG(binary_archive, currency::txin_gen, 0xff);
 VARIANT_TAG(binary_archive, currency::txin_to_script, 0x0);
@@ -401,6 +437,15 @@ VARIANT_TAG(binary_archive, currency::txout_to_key, 0x2);
 VARIANT_TAG(binary_archive, currency::transaction, 0xcc);
 VARIANT_TAG(binary_archive, currency::block, 0xbb);
 
+VARIANT_TAG(binary_archive, currency::offer_details, 0x0);
+VARIANT_TAG(binary_archive, currency::tx_comment, 0x1);
+VARIANT_TAG(binary_archive, currency::tx_payer, 0x2);
+VARIANT_TAG(binary_archive, std::string, 0x3);
+
+
+
+
+
 VARIANT_TAG(json_archive, currency::txin_gen, "gen");
 VARIANT_TAG(json_archive, currency::txin_to_script, "script");
 VARIANT_TAG(json_archive, currency::txin_to_scripthash, "scripthash");
@@ -411,6 +456,14 @@ VARIANT_TAG(json_archive, currency::txout_to_key, "key");
 VARIANT_TAG(json_archive, currency::transaction, "tx");
 VARIANT_TAG(json_archive, currency::block, "block");
 
+VARIANT_TAG(json_archive, currency::offer_details, "offer");
+VARIANT_TAG(json_archive, currency::tx_comment, "comment");
+VARIANT_TAG(json_archive, currency::tx_payer, "payer");
+VARIANT_TAG(json_archive, std::string, "string");
+
+
+
+
 VARIANT_TAG(debug_archive, currency::txin_gen, "gen");
 VARIANT_TAG(debug_archive, currency::txin_to_script, "script");
 VARIANT_TAG(debug_archive, currency::txin_to_scripthash, "scripthash");
@@ -420,3 +473,8 @@ VARIANT_TAG(debug_archive, currency::txout_to_scripthash, "scripthash");
 VARIANT_TAG(debug_archive, currency::txout_to_key, "key");
 VARIANT_TAG(debug_archive, currency::transaction, "tx");
 VARIANT_TAG(debug_archive, currency::block, "block");
+
+VARIANT_TAG(debug_archive, currency::offer_details, "offer");
+VARIANT_TAG(debug_archive, currency::tx_comment, "comment");
+VARIANT_TAG(debug_archive, currency::tx_payer, "payer");
+VARIANT_TAG(debug_archive, std::string, "string");

@@ -158,7 +158,7 @@ bool gen_block_invalid_nonce::generate(std::vector<test_event_entry>& events) co
   do
   {
     ++timestamp;
-    blk_3.miner_tx.set_null();
+    blk_3.miner_tx = AUTO_VAL_INIT(blk_3.miner_tx);
     if (!generator.construct_block_manually(blk_3, blk_last, miner_account,
       test_generator::bf_diffic | test_generator::bf_timestamp, 0, 0, timestamp, crypto::hash(), diffic))
       return false;
@@ -175,7 +175,7 @@ bool gen_block_no_miner_tx::generate(std::vector<test_event_entry>& events) cons
   BLOCK_VALIDATION_INIT_GENERATE();
 
   transaction miner_tx;
-  miner_tx.set_null();
+  miner_tx = AUTO_VAL_INIT(miner_tx);
 
   block blk_1;
   generator.construct_block_manually(blk_1, blk_0, miner_account, test_generator::bf_miner_tx, 0, 0, 0, crypto::hash(), 0, miner_tx);
