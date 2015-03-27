@@ -38,17 +38,13 @@
         <div class="navbar" id="navbar-tabs">
 
             <form class="form-horizontal">
-                <div class="collapse  text-right filter1 in close-filter">
-                    <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter1" class="btn btn-primary active"><i class="fa fa-chevron-up"></i> Фильтр</button>
-                    </div>
-                </div>
-                <div class="collapse in filter1">
+                <div class="collapse filter1" >
                     <div class="row" style="margin-top:20px; margin-bottom:20px;">
                         <div class="col-xs-5 col-sm-5">
                             <div class="form-group clearfix">
-                                <label class="control-label requred col-xs-4 col-sm-4">Период</label>
-                                <select class="selectpicker col-xs-8 col-sm-8" style="width:100%">
-                                    <option class="dateperiod" selected="">выбрать</option>
+                                <label class="control-label required col-xs-4 col-sm-4">Период</label>
+                                <select class="selectpicker col-xs-8 col-sm-8 history_period-selector" style="width:100%">
+                                    <option class="dateperiod" selected="">не важно</option>
                                     <option class="dateperiod">день</option>
                                     <option class="dateperiod">неделя</option>
                                     <option class="dateperiod">месяц</option>
@@ -57,8 +53,8 @@
                                     <option class="datetoggle">другой период</option>
                                 </select>
                             </div>
-                            <div class="form-group collapse in date-collapse">
-                                <label class="control-label col-xs-4 col-sm-4 requred">Дата</label>
+                            <div class="form-group collapse in date-collapse history_period-datapicker-row">
+                                <label class="control-label col-xs-4 col-sm-4 required">Дата</label>
                                 <div class="col-xs-8 col-sm-8">
 
 
@@ -79,7 +75,7 @@
                         <div class="col-xs-7 col-sm-7">
                             <div class="form-group clearfix">
 
-                                <label class="control-label requred col-xs-2 col-sm-2">Сейф</label>
+                                <label class="control-label required col-xs-2 col-sm-2">Сейф</label>
                                 <select class="col-xs-8 col-sm-8 selectpicker nopadding">
                                     <option>все сейфы</option>
                                     <option selected="">Safelabel (@@safealias) 4.20 G</option>
@@ -90,26 +86,37 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="col-xs-2 col-sm-2 control-label requred">Состояние</label>
+                                <label class="col-xs-2 col-sm-2 control-label required">Состояние</label>
                                 <select class="col-xs-4 col-sm-4 selectpicker nopadding">
                                     <option selected="">любое</option>
                                     <option>анонимно</option>
                                     <option>неанонимно</option>
                                 </select>
 
-                                <div class="col-xs-4 col-sm-4 col-sm-offset-2">
+                                <div class="col-xs-5 col-sm-5 col-sm-offset-1">
                                     <label class="checkbox"><input type="checkbox" value=""> <strong>Скрыть доход от добычи</strong></label>
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label class="col-xs-2 col-sm-2 control-label requred">Микшер</label>
+                                <label class="col-xs-2 col-sm-2 control-label required">Микшер</label>
                                 <select class="col-xs-4 col-sm-4 selectpicker nopadding">
                                     <option selected="">не важно</option>
                                     <option>микшировано</option>
                                     <option>не микшировано</option>
                                 </select>
 
+                            </div>
+
+                            <div class="form-group">
+                                <div class="collapse in filter1">
+                                    <div class="row">
+                                        <div class="col-xs-4 col-sm-4"></div>
+                                        <div style="padding-right:5px" class="col-xs-4 col-sm-4">
+                                            <button type="button" class="btn btn-block btn-primary">Применить</button></div>
+                                        <div style="padding-left:5px" class="col-xs-4 col-sm-4"><button type="button" class="btn btn-block btn-default">Очистить фильтр</button></div>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
@@ -125,10 +132,10 @@
 
 
                         <div data-toggle="buttons" class="btn-group btn-group-justified">
-                            <label class="btn btn-primary active">
+                            <label class="btn btn-primary history_filterIngoingOutgoingButton active">
                                 <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Все
                             </label>
-                            <label class="btn btn-primary">
+                            <label class="btn btn-primary history_filterIngoingButton">
                                 <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Входящие
                             </label>
                             <label class="btn btn-primary ">
@@ -137,20 +144,16 @@
                         </div>
                     </div>
                     <div class="col-xs-4 col-sm-4">
-                        <input type="text" class="form-control" placeholder="найти текст">
-                    </div>
-                    <div class="col-xs-4 col-sm-4">
-                        <div class="collapse in filter1">
-                            <div class="row">
-
-                                <div style="padding-right:5px" class="col-xs-6 col-sm-6">
-                                    <button type="button" class="btn btn-block btn-primary">Применить</button></div>
-                                <div style="padding-left:5px" class="col-xs-6 col-sm-6"><button type="button" class="btn btn-block btn-default">Очистить фильтр</button></div>
+                        <div class="collapse  filter1 close-filter">
+                            <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter1" class="btn btn-primary active"><i class="fa fa-chevron-up"></i> Фильтр</button>
                             </div>
                         </div>
-                        <div class="collapse filter1">
-                            <div class="btn-group pull-right"><button type="button" data-toggle="collapse" data-target=".filter1" class="btn btn-default"><i class="fa fa-chevron-down"></i> Фильтр</button></div>
+                        <div class="collapse filter1 in">
+                            <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter1" class="btn btn-default"><i class="fa fa-chevron-down"></i> Фильтр</button></div>
                         </div>
+                    </div>
+                    <div class="col-xs-4 col-sm-4 pull-right">
+                        <input type="text" class="form-control" placeholder="найти текст">
                     </div>
                 </div>
             </form>
@@ -216,15 +219,15 @@
                             <div role="menu" class="dropdown-menu dropdown-menu-left">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
 
                                         <li><div class="contractor">
                                             <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
 							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div></li>
-                                        <li><a href="">@onesafekaccout</a></li>
-                                        <li><a href="">@twosafeaccout</a></li>
+                                        <li><a href="#contact">@onesafekaccout</a></li>
+                                        <li><a href="#contact">@twosafeaccout</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -282,15 +285,15 @@
                             <div class="dropdown-menu dropdown-menu-left" role="menu">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
 
                                         <li><div class="contractor">
                                             <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
 							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div></li>
-                                        <li><a href="">@onesafekaccout</a></li>
-                                        <li><a href="">@twosafeaccout</a></li>
+                                        <li><a href="#contact">@onesafekaccout</a></li>
+                                        <li><a href="#contact">@twosafeaccout</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -328,15 +331,15 @@
                             <div class="dropdown-menu dropdown-menu-left" role="menu">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
 
                                         <li><div class="contractor">
                                             <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
 							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div></li>
-                                        <li><a href="">@onesafekaccout</a></li>
-                                        <li><a href="">@twosafeaccout</a></li>
+                                        <li><a href="#contact">@onesafekaccout</a></li>
+                                        <li><a href="#contact">@twosafeaccout</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -356,7 +359,7 @@
 							</pre>
                                         </div>
                                         </li>
-                                        <li><a href="">@fjjhtyjlmnbg</a>
+                                        <li><a href="#contact">@fjjhtyjlmnbg</a>
                                         </li></ul>
                                 </div>
                             </div>
@@ -392,15 +395,15 @@
                             <div role="menu" class="dropdown-menu dropdown-menu-left">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
 
                                         <li><div class="contractor">
                                             <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
 							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div></li>
-                                        <li><a href="">@onesafekaccout</a></li>
-                                        <li><a href="">@twosafeaccout</a></li>
+                                        <li><a href="#contact">@onesafekaccout</a></li>
+                                        <li><a href="#contact">@twosafeaccout</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -439,15 +442,15 @@
                             <div role="menu" class="dropdown-menu dropdown-menu-left">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
 
                                         <li><div class="contractor">
                                             <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
 							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div></li>
-                                        <li><a href="">@onesafekaccout</a></li>
-                                        <li><a href="">@twosafeaccout</a></li>
+                                        <li><a href="#contact">@onesafekaccout</a></li>
+                                        <li><a href="#contact">@twosafeaccout</a></li>
                                     </ul>
 
                                 </div>
@@ -462,15 +465,15 @@
                             <div role="menu" class="dropdown-menu dropdown-menu-left">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Имя: <a href="">Человек</a></li>
-                                        <li>Email: <a href="">chelovek@domain.com</a></li>
+                                        <li>Имя: <a href="#contact">Человек</a></li>
+                                        <li>Email: <a href="#contact">chelovek@domain.com</a></li>
                                         <li><div class="contractor">
                                             <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
 							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div></li>
-                                        <li><a href="">@onechelovekaccout</a></li>
-                                        <li><a href="">@twochelovekaccout</a></li>
+                                        <li><a href="#contact">@onechelovekaccout</a></li>
+                                        <li><a href="#contact">@twochelovekaccout</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -490,6 +493,9 @@
                     </td>
                     <td>
                         <small class="text-muted">Получено</small>
+                        <span style="color:red;font-size:25px;">
+                                !
+                        </span>
                     </td>
                     <td>
                         &ndash;23,00
@@ -526,15 +532,15 @@
                             <div class="dropdown-menu dropdown-menu-left" role="menu">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
 
                                         <li><div class="contractor">
                                             <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
 							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div></li>
-                                        <li><a href="">@onesafekaccout</a></li>
-                                        <li><a href="">@twosafeaccout</a></li>
+                                        <li><a href="#contact">@onesafekaccout</a></li>
+                                        <li><a href="#contact">@twosafeaccout</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -572,15 +578,15 @@
                             <div class="dropdown-menu dropdown-menu-left" role="menu">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
 
                                         <li><div class="contractor">
                                             <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
 							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div></li>
-                                        <li><a href="">@onesafekaccout</a></li>
-                                        <li><a href="">@twosafeaccout</a></li>
+                                        <li><a href="#contact">@onesafekaccout</a></li>
+                                        <li><a href="#contact">@twosafeaccout</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -595,16 +601,16 @@
                             <div role="menu" class="dropdown-menu dropdown-menu-left">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Имя: <a href="">Вася</a></li>
-                                        <li>Email: <a href="">vasya@domain.com</a></li>
-                                        <li>skype: <a href="">vasya</a></li>
+                                        <li>Имя: <a href="#contact">Вася</a></li>
+                                        <li>Email: <a href="#contact">vasya@domain.com</a></li>
+                                        <li>skype: <a href="#contact">vasya</a></li>
                                         <div class="contractor">
                                             <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
 							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div>
 
-                                        <li><a href="">@vasyaccount</a></li>
+                                        <li><a href="#contact">@vasyaccount</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -642,15 +648,15 @@
                             <div class="dropdown-menu dropdown-menu-left" role="menu">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
 
                                         <li><div class="contractor">
                                             <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
 							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div></li>
-                                        <li><a href="">@onesafekaccout</a></li>
-                                        <li><a href="">@twosafeaccout</a></li>
+                                        <li><a href="#contact">@onesafekaccout</a></li>
+                                        <li><a href="#contact">@twosafeaccout</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -665,16 +671,16 @@
                             <div role="menu" class="dropdown-menu dropdown-menu-left">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Имя: <a href="">Вася</a></li>
-                                        <li>Email: <a href="">vasya@domain.com</a></li>
-                                        <li>skype: <a href="">vasya</a></li>
+                                        <li>Имя: <a href="#contact">Вася</a></li>
+                                        <li>Email: <a href="#contact">vasya@domain.com</a></li>
+                                        <li>skype: <a href="#contact">vasya</a></li>
                                         <div class="contractor">
                                             <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
 							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
 							</pre>
                                         </div>
 
-                                        <li><a href="">@vasyaccount</a></li>
+                                        <li><a href="#contact">@vasyaccount</a></li>
                                     </ul>
                                 </div>
                             </div>

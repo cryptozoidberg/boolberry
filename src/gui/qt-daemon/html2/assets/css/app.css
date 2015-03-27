@@ -6,6 +6,7 @@ body {
 padding-top: 67px;
 background: none repeat scroll 0 0 #f8f8f8;
 font-size: 13px;
+padding-right: 0 !important;
 }
 .container-fluid {
 min-width: 960px!important;
@@ -567,7 +568,7 @@ label {
 font-weight: normal;
 line-height: 1.2em;
 }
-.requred {
+.required {
 font-weight: bold;
 color: #000;
 }
@@ -1504,23 +1505,6 @@ min-width: 96px;
     display: block;
 }
 
-.there-are-more-deals-like-this-panel {
-    position: absolute;
-    right: 20px;
-    text-align: right;
-    font-style: italic;
-}
-.there-are-more-deals-like-this-panel .panel-content {
-    position: relative;
-    top: -40px;
-}
-.there-are-more-deals-like-this-panel a {
-    text-decoration: underline;
-}
-.there-are-more-deals-like-this-panel a:hover {
-    text-decoration: none;
-}
-
 /* fix to align 'Состояние' label and dropdown content */
 .dropdown-menu.open {
     left: 0 !important;
@@ -1533,4 +1517,80 @@ min-width: 96px;
 .nojsError {
     font-size: 15px;
     color: #b94a48;
+}
+.footer .text-muted {
+    display: none;
+}
+.margin-bottom-small {
+    margin-bottom: 10px;
+}
+.owl-dots {
+    margin-left: 30px; margin-right: 30px;
+}
+.dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}
+.appScreen_market label {
+    margin-top: 7px;
+}
+.modal-backdrop.in {
+    width: 100%;
+}
+.modal.modal-preloaded {
+    overflow-y: hidden;
+}
+.nopadding-right {
+    padding-right: 0 !important;
+}
+.there-are-more-deals-like-this-panel {
+    right: 20px;
+    border: 1px solid #ccc;
+    padding: 8px;
+    background-color: #fff;
+    text-align: right;
+    font-style: italic;
+    z-index: 1000;
+    width: 300px;
+    float: right;
+}
+.there-are-more-deals-like-this-panel a {
+    text-decoration: underline;
+}
+.there-are-more-deals-like-this-panel a:hover {
+    text-decoration: none;
+}
+.is-sticky .there-are-more-deals-like-this-panel {
+    right: 30px;
+}
+.is-sticky .sellG_sticker {
+    margin-right: 20px;
+}
+.text-strong {
+    font-weight: bold;
+}
+#confirm_operation_modal {
+    min-width: 700px;
+}
+#confirm_operation_modal.first {
+    padding-top: 20px;
+}
+.market_currency_payMethodsSelector .dropdown-menu.open {
+    min-width: 250px !important;
+    /*position: relative !important;*/
+    left: -140px !important;
+    right: 0 !important;
+}
+.appScreen_sendG label.checkbox input[type=checkbox] {
+    margin-top: 1px;
+}
+.appScreen_sendG label.checkbox {
+    cursor: pointer;
+}
+.appScreen_index .btn-toolbar {
+    margin-bottom: -10px;
+}
+.panel.resume a {
+    color: #999;
+    text-decoration: none;
 }
