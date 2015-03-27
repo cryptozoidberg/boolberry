@@ -695,6 +695,25 @@ uint64_t blockchain_storage::get_current_comulative_blocksize_limit()
   return m_current_block_cumul_sz_limit;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::add_padding_to_tx(transaction& tx, size_t count)
+{
+  if (!count)
+    return true;
+
+  for (auto ex : tx.extra)
+  {
+    if (ex.type() == typeid(extra_padding))
+    {
+      boost::get<extra_padding>(ex).buff.insert(boost::get<extra_padding>(ex).buff.end(), count, 0);
+      return true;
+    }
+  }
+  extra_padding ex_padding;
+  ex_padding.buff.resize(count - 1);
+  tx.extra.push_back(ex_padding);
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::create_block_template(block& b, 
                                                const account_public_address& miner_address, 
                                                wide_difficulty_type& diffic, 
@@ -787,7 +806,7 @@ bool blockchain_storage::create_block_template(block& b,
 
     if (coinbase_blob_size < cumulative_size - txs_size) {
       size_t delta = cumulative_size - txs_size - coinbase_blob_size;
-      b.miner_tx.extra.insert(b.miner_tx.extra.end(), delta, 0);
+      add_padding_to_tx(b.miner_tx, delta);
       //here  could be 1 byte difference, because of extra field counter is varint, and it can become from 1-byte len to 2-bytes len.
       if (cumulative_size != txs_size + get_object_blobsize(b.miner_tx)) {
         CHECK_AND_ASSERT_MES(cumulative_size + 1 == txs_size + get_object_blobsize(b.miner_tx), false, "unexpected case: cumulative_size=" << cumulative_size << " + 1 is not equal txs_cumulative_size=" << txs_size << " + get_object_blobsize(b.miner_tx)=" << get_object_blobsize(b.miner_tx));

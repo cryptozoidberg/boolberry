@@ -199,8 +199,8 @@ namespace currency
     account_public_address acc_addr;
 
     BEGIN_SERIALIZE()
-      FIELD(comment)
-      END_SERIALIZE()
+      FIELD(acc_addr)
+    END_SERIALIZE()
   };
 
   typedef boost::variant<offer_details, tx_comment, tx_payer, std::string> attachment_v;
@@ -475,6 +475,14 @@ VARIANT_TAG(binary_archive, currency::offer_details, 0x0);
 VARIANT_TAG(binary_archive, currency::tx_comment, 0x1);
 VARIANT_TAG(binary_archive, currency::tx_payer, 0x2);
 VARIANT_TAG(binary_archive, std::string, 0x3);
+VARIANT_TAG(binary_archive, crypto::public_key, 0x4);
+
+
+VARIANT_TAG(binary_archive, currency::extra_attachment_info, 0x0);
+VARIANT_TAG(binary_archive, currency::extra_user_data, 0x0);
+VARIANT_TAG(binary_archive, currency::extra_alias_entry, 0x0);
+VARIANT_TAG(binary_archive, currency::extra_padding, 0x0);
+
 
 
 
@@ -494,6 +502,13 @@ VARIANT_TAG(json_archive, currency::offer_details, "offer");
 VARIANT_TAG(json_archive, currency::tx_comment, "comment");
 VARIANT_TAG(json_archive, currency::tx_payer, "payer");
 VARIANT_TAG(json_archive, std::string, "string");
+VARIANT_TAG(json_archive, crypto::public_key, "pub_key");
+
+
+VARIANT_TAG(json_archive, currency::extra_attachment_info, "attachment");
+VARIANT_TAG(json_archive, currency::extra_user_data, "user_data");
+VARIANT_TAG(json_archive, currency::extra_alias_entry, "alias");
+VARIANT_TAG(json_archive, currency::extra_padding, "padding");
 
 
 
@@ -512,3 +527,11 @@ VARIANT_TAG(debug_archive, currency::offer_details, "offer");
 VARIANT_TAG(debug_archive, currency::tx_comment, "comment");
 VARIANT_TAG(debug_archive, currency::tx_payer, "payer");
 VARIANT_TAG(debug_archive, std::string, "string");
+//VARIANT_TAG(debug_archive, crypto::public_key, "pub_key");
+
+
+VARIANT_TAG(debug_archive, currency::extra_attachment_info, "attachment");
+VARIANT_TAG(debug_archive, currency::extra_user_data, "user_data");
+VARIANT_TAG(debug_archive, currency::extra_alias_entry, "alias");
+VARIANT_TAG(debug_archive, currency::extra_padding, "padding");
+

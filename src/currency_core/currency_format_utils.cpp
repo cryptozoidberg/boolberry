@@ -112,7 +112,7 @@ namespace currency
     keypair txkey = keypair::generate();
     add_tx_pub_key_to_extra(tx, txkey.pub);
     if(extra_nonce.size())
-      if(!add_tx_extra_nonce(tx, extra_nonce))
+      if(!add_tx_extra_userdata(tx, extra_nonce))
         return false;
     if(alias.m_alias.size())
     {
@@ -537,19 +537,13 @@ namespace currency
     return true;
   } 
   //---------------------------------------------------------------
-  bool add_tx_extra_nonce(transaction& tx, const blobdata& extra_nonce)
+  bool add_tx_extra_userdata(transaction& tx, const blobdata& extra_nonce)
   {
     CHECK_AND_ASSERT_MES(extra_nonce.size() <=255, false, "extra nonce could be 255 bytes max");
-    size_t start_pos = tx.extra.size();
-    tx.extra.resize(tx.extra.size() + 2 + extra_nonce.size());
-    //write tag
-    tx.extra[start_pos] = TX_EXTRA_TAG_USER_DATA;
-    //write len
-    ++start_pos;
-    tx.extra[start_pos] = static_cast<uint8_t>(extra_nonce.size());
-    //write data
-    ++start_pos;
-    memcpy(&tx.extra[start_pos], extra_nonce.data(), extra_nonce.size());
+    extra_user_data eud = AUTO_VAL_INIT(eud);
+    eud.buff.resize(extra_nonce.size());
+    memcpy(&eud.buff[0], extra_nonce.data(), extra_nonce.size());
+    tx.extra.push_back(eud);
     return true;
   }
   //---------------------------------------------------------------

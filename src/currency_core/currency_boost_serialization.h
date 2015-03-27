@@ -23,6 +23,14 @@ namespace boost
   namespace serialization
   {
 
+    template <class Archive>
+    inline void serialize(Archive &a, currency::account_public_address &x, const boost::serialization::version_type ver)
+    {
+      a & x.m_spend_public_key;
+      a & x.m_view_public_key;
+    }
+    
+
   template <class Archive>
   inline void serialize(Archive &a, currency::txout_to_script &x, const boost::serialization::version_type ver)
   {
@@ -82,6 +90,57 @@ namespace boost
     a & x.target;
   }
 
+  template <class Archive>
+  inline void serialize(Archive &a, currency::offer_details &x, const boost::serialization::version_type ver)
+  {
+    a & x.offer_type;
+    a & x.amount_lui;    
+    a & x.amount_etc;    
+    a & x.target;        
+    a & x.location;      
+    a & x.contacts;      
+    a & x.comment;       
+    a & x.payment_types; 
+    a & x.expiration_time;
+  }
+
+
+  template <class Archive>
+  inline void serialize(Archive &a, currency::tx_comment &x, const boost::serialization::version_type ver)
+  {
+    a & x.comment;
+  }
+
+  template <class Archive>
+  inline void serialize(Archive &a, currency::tx_payer &x, const boost::serialization::version_type ver)
+  {
+    a & x.acc_addr;
+  }
+
+  template <class Archive>
+  inline void serialize(Archive &a, currency::extra_attachment_info &x, const boost::serialization::version_type ver)
+  {
+    a & x.hsh;
+    a & x.sz;
+  }
+
+  template <class Archive>
+  inline void serialize(Archive &a, currency::extra_user_data &x, const boost::serialization::version_type ver)
+  {
+    a & x.buff;
+  }
+
+  template <class Archive>
+  inline void serialize(Archive &a, currency::extra_alias_entry &x, const boost::serialization::version_type ver)
+  {
+    a & x.buff;
+  }
+
+  template <class Archive>
+  inline void serialize(Archive &a, currency::extra_padding &x, const boost::serialization::version_type ver)
+  {
+    a & x.buff;
+  }
 
   template <class Archive>
   inline void serialize(Archive &a, currency::transaction &x, const boost::serialization::version_type ver)

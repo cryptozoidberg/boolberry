@@ -10,8 +10,10 @@
 
 #include "include_base_utils.h"
 
-#include "currency_core/account_boost_serialization.h"
 #include "currency_core/currency_basic_impl.h"
+#include "currency_core/currency_boost_serialization.h"
+#include "currency_core/account_boost_serialization.h"
+
 #include "wallet_rpc_server_commans_defs.h"
 #include "currency_core/currency_format_utils.h"
 #include "common/unordered_containers_boost_serialization.h"

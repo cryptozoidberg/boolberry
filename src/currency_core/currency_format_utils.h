@@ -97,7 +97,7 @@ namespace currency
   bool parse_and_validate_tx_extra(const transaction& tx, crypto::public_key& tx_pub_key);
   crypto::public_key get_tx_pub_key_from_extra(const transaction& tx);
   bool add_tx_pub_key_to_extra(transaction& tx, const crypto::public_key& tx_pub_key);
-  bool add_tx_extra_nonce(transaction& tx, const blobdata& extra_nonce);
+  bool add_tx_extra_userdata(transaction& tx, const blobdata& extra_nonce);
   bool is_out_to_acc(const account_keys& acc, const txout_to_key& out_key, const crypto::public_key& tx_pub_key, size_t output_index);
   bool lookup_acc_outs(const account_keys& acc, const transaction& tx, const crypto::public_key& tx_pub_key, std::vector<size_t>& outs, uint64_t& money_transfered);
   bool lookup_acc_outs(const account_keys& acc, const transaction& tx, std::vector<size_t>& outs, uint64_t& money_transfered);
