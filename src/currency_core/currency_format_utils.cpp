@@ -334,7 +334,7 @@ namespace currency
     if(!r) return false;
     extra_alias_entry eae = AUTO_VAL_INIT(eae);
     eae.buff.resize(buff.size());
-    memcpy(&tx.extra[0], buff.data(), buff.size());
+    memcpy(&eae.buff[0], buff.data(), buff.size());
     tx.extra.push_back(eae);
     return true;
   }
@@ -378,7 +378,7 @@ namespace currency
     if(alias_flags&TX_EXTRA_TAG_ALIAS_FLAGS_OP_UPDATE)
     {
       CHECK_AND_ASSERT_MES(alias_buff.size()-i >= sizeof(crypto::secret_key), false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS have not enough bytes) in tx " << get_transaction_hash(tx));
-      alinfo.m_sign = *reinterpret_cast<const crypto::signature*>(&tx.extra[i]);
+      alinfo.m_sign = *reinterpret_cast<const crypto::signature*>(&alias_buff[i]);
       i += sizeof(const crypto::signature);
     }
     whole_entry_len = i - start;
@@ -450,63 +450,6 @@ namespace currency
       if (!boost::apply_visitor(vtr, ex_v))
         return false;
     }
-
-
-    /*
-
-
-    for(size_t i = 0; i != tx.extra.size();)
-    {
-      if(padding_started)
-      {
-        CHECK_AND_ASSERT_MES(!tx.extra[i], false, "Failed to parse transaction extra (not 0 after padding) in tx " << get_transaction_hash(tx));
-      }
-      else if(tx.extra[i] == TX_EXTRA_TAG_PUBKEY)
-      {
-        CHECK_AND_ASSERT_MES(sizeof(crypto::public_key) <= tx.extra.size()-1-i, false, "Failed to parse transaction extra (TX_EXTRA_TAG_PUBKEY have not enough bytes) in tx " << get_transaction_hash(tx));
-        CHECK_AND_ASSERT_MES(!tx_extra_tag_pubkey_found, false, "Failed to parse transaction extra (duplicate TX_EXTRA_TAG_PUBKEY entry) in tx " << get_transaction_hash(tx));
-        extra.m_tx_pub_key = *reinterpret_cast<const crypto::public_key*>(&tx.extra[i+1]);
-        i += 1 + sizeof(crypto::public_key);
-        tx_extra_tag_pubkey_found = true;
-        continue;
-      }
-      else if (tx.extra[i] == TX_EXTRA_TAG_OFFERS_HASH)
-      {
-        CHECK_AND_ASSERT_MES(sizeof(crypto::hash) <= tx.extra.size() - 1 - i, false, "Failed to parse transaction extra (TX_EXTRA_TAG_OFFERS_HASH have not enough bytes) in tx " << get_transaction_hash(tx));
-        CHECK_AND_ASSERT_MES(!tx_extra_tag_offers_hash_found, false, "Failed to parse transaction extra (duplicate TX_EXTRA_TAG_OFFERS_HASH entry) in tx " << get_transaction_hash(tx));
-        extra.m_offers_hash = *reinterpret_cast<const crypto::hash*>(&tx.extra[i + 1]);
-        i += 1 + sizeof(crypto::hash);
-        tx_extra_tag_offers_hash_found = true;
-        continue;
-      }else if (tx.extra[i] == TX_EXTRA_TAG_USER_DATA)
-      {
-        //CHECK_AND_ASSERT_MES(is_coinbase(tx), false, "Failed to parse transaction extra (TX_EXTRA_NONCE can be only in coinbase) in tx " << get_transaction_hash(tx));
-        CHECK_AND_ASSERT_MES(!tx_extra_user_data_found, false, "Failed to parse transaction extra (duplicate TX_EXTRA_NONCE entry) in tx " << get_transaction_hash(tx));
-        CHECK_AND_ASSERT_MES(tx.extra.size()-1-i >= 1, false, "Failed to parse transaction extra (TX_EXTRA_NONCE have not enough bytes) in tx " << get_transaction_hash(tx));
-        ++i;
-        CHECK_AND_ASSERT_MES(tx.extra.size()-1-i >= tx.extra[i], false, "Failed to parse transaction extra (TX_EXTRA_NONCE have wrong bytes counter) in tx " << get_transaction_hash(tx));
-        tx_extra_user_data_found = true;
-        if(tx.extra[i])
-          extra.m_user_data_blob.assign(reinterpret_cast<const char*>(&tx.extra[i+1]), static_cast<size_t>(tx.extra[i]));
-        i += tx.extra[i];//actually don't need to extract it now, just skip
-      }else if(tx.extra[i] == TX_EXTRA_TAG_ALIAS)
-      {
-        CHECK_AND_ASSERT_MES(is_coinbase(tx), false, "Failed to parse transaction extra (TX_EXTRA_TAG_ALIAS can be only in coinbase) in tx " << get_transaction_hash(tx));
-        CHECK_AND_ASSERT_MES(!tx_alias_found, false, "Failed to parse transaction extra (duplicate TX_EXTRA_TAG_ALIAS entry) in tx " << get_transaction_hash(tx));
-        size_t aliac_entry_len = 0;
-        if(!parse_tx_extra_alias_entry(tx, i, extra.m_alias, aliac_entry_len))
-          return false;
-
-        tx_alias_found = true;
-        i += aliac_entry_len-1;
-      }
-      else if(!tx.extra[i])
-      {
-        padding_started = true;
-        continue;
-      }
-      ++i;
-    }*/
     return true;
   }
   //---------------------------------------------------------------
@@ -1221,8 +1164,8 @@ namespace currency
   {
     //genesis block
     bl = boost::value_initialized<block>();
-    
-    /*account_public_address ac = boost::value_initialized<account_public_address>();
+    /*
+    account_public_address ac = boost::value_initialized<account_public_address>();
     std::vector<size_t> sz;
     //proof 
 #ifndef TESTNET
@@ -1238,10 +1181,14 @@ namespace currency
     construct_miner_tx(0, 0, 0, 0, 0, ac, bl.miner_tx, proof, 11, ai); // zero profit in genesis
     blobdata txb = tx_to_blob(bl.miner_tx);
     std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
+
+    blobdata tx_bl2;
+    string_tools::parse_hexstr_to_binbuff(hex_tx_represent, tx_bl2);
+    bool r2 = parse_and_validate_tx_from_blob(tx_bl2, bl.miner_tx);
     */
     //hard code coinbase tx in genesis block, because "true" generating tx use random, but genesis should be always the same
 #ifndef TESTNET
-    std::string genesis_coinbase_tx_hex = "010a01ff00088092f401029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807100808ece1c022a74a3c4c36d32e95633d44ba9a7b8188297b2ac91afecab826b86fabaa70916008084af5f0252d128bc9913d5ee8b702c37609917c2357b2f587e5de5622348a3acd718e5d60080f882ad1602b8ed916c56b3a99c9cdf22c7be7ec4e85587e5d40bc46bf6995313c288ad841e0080c8afa025021b452b4ac6c6419e06181f8c9f0734bd5bb132d8b75b44bbcd07dd8f553acba60080c0ee8ed20b02b10ba13e303cbe9abf7d5d44f1d417727abcc14903a74e071abd652ce1bf76dd0080e08d84ddcb010205e440069d10646f1bbfaeee88a2db218017941c5fa7280849126d2372fc64340080c0caf384a302029cad2882bba92fb7ecc8136475dae03169839eee05ff3ee3232d0136712f08b700bf0101458b473c03a485b56e66f42d9e71dd58d2b2b559f2c895c9f994a463bf307cbf02475468652054696d65732c204d617920313620323031343a205269636865737420313025206f776e20616c6d6f73742068616c6620746865206e6174696f6e2773207765616c74680300087a6f69646265726700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000094c6574277320676f2100";
+    std::string genesis_coinbase_tx_hex = "010a01ff00088092f401029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807100808ece1c022a74a3c4c36d32e95633d44ba9a7b8188297b2ac91afecab826b86fabaa70916008084af5f0252d128bc9913d5ee8b702c37609917c2357b2f587e5de5622348a3acd718e5d60080f882ad1602b8ed916c56b3a99c9cdf22c7be7ec4e85587e5d40bc46bf6995313c288ad841e0080c8afa025021b452b4ac6c6419e06181f8c9f0734bd5bb132d8b75b44bbcd07dd8f553acba60080c0ee8ed20b02b10ba13e303cbe9abf7d5d44f1d417727abcc14903a74e071abd652ce1bf76dd0080e08d84ddcb010205e440069d10646f1bbfaeee88a2db218017941c5fa7280849126d2372fc64340080c0caf384a302029cad2882bba92fb7ecc8136475dae03169839eee05ff3ee3232d0136712f08b7000304376283f82faacba1409b4c71d9b8963da6746de858fc9a7cd640d86df5bf4a9b01475468652054696d65732c204d617920313620323031343a205269636865737420313025206f776e20616c6d6f73742068616c6620746865206e6174696f6e2773207765616c746802550300087a6f69646265726700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000094c6574277320676f210000";
 #else 
     std::string genesis_coinbase_tx_hex = "";                                          
 #endif
@@ -1307,6 +1254,7 @@ namespace currency
     tx_extra_info tei = AUTO_VAL_INIT(tei);
     currency::parse_and_validate_tx_extra(t, tei);
     prefix_blob += tei.m_attachment_info.sz;
+    prefix_blob += tools::get_varint_packed_size(tei.m_attachment_info.sz);
 
     return prefix_blob;
   }

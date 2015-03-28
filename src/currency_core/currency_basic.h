@@ -475,13 +475,13 @@ VARIANT_TAG(binary_archive, currency::offer_details, 0x0);
 VARIANT_TAG(binary_archive, currency::tx_comment, 0x1);
 VARIANT_TAG(binary_archive, currency::tx_payer, 0x2);
 VARIANT_TAG(binary_archive, std::string, 0x3);
-VARIANT_TAG(binary_archive, crypto::public_key, 0x4);
 
 
 VARIANT_TAG(binary_archive, currency::extra_attachment_info, 0x0);
-VARIANT_TAG(binary_archive, currency::extra_user_data, 0x0);
-VARIANT_TAG(binary_archive, currency::extra_alias_entry, 0x0);
-VARIANT_TAG(binary_archive, currency::extra_padding, 0x0);
+VARIANT_TAG(binary_archive, currency::extra_user_data, 0x1);
+VARIANT_TAG(binary_archive, currency::extra_alias_entry, 0x2);
+VARIANT_TAG(binary_archive, currency::extra_padding, 0x3);
+VARIANT_TAG(binary_archive, crypto::public_key, 0x4);
 
 
 
