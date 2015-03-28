@@ -28,37 +28,17 @@ TEST(parse_and_validate_tx_extra, is_correct_extranonce_too_big)
   bool r = currency::construct_miner_tx(0, 0, 10000000000000, 1000, DEFAULT_FEE, acc.get_keys().m_account_address, tx, b, 1);
   ASSERT_FALSE(r);
 }
-TEST(parse_and_validate_tx_extra, is_correct_wrong_extra_couner_too_big)
-{
-  currency::transaction tx = AUTO_VAL_INIT(tx);
-  tx.extra.resize(20, 0);
-  tx.extra[0] = TX_EXTRA_TAG_USER_DATA;
-  tx.extra[1] = 255;
-  crypto::public_key tx_pub_key;
-  bool r = parse_and_validate_tx_extra(tx, tx_pub_key);
-  ASSERT_FALSE(r);
-}
+
+
 TEST(parse_and_validate_tx_extra, is_correct_wrong_extra_nonce_double_entry)
 {
   currency::transaction tx = AUTO_VAL_INIT(tx);
-  tx.extra.resize(20, 0);
   currency::blobdata v = "asasdasd";
-  currency::add_tx_extra_nonce(tx, v);
-  currency::add_tx_extra_nonce(tx, v);
+  currency::add_tx_extra_userdata(tx, v);
+  currency::add_tx_extra_userdata(tx, v);
   crypto::public_key tx_pub_key;
   bool r = parse_and_validate_tx_extra(tx, tx_pub_key);
   ASSERT_FALSE(r);
-}
-
-TEST(parse_and_validate_tx_extra, user_data_test)
-{
-  currency::transaction tx = AUTO_VAL_INIT(tx);
-  tx.extra.resize(20, 0);
-  tx.extra[0] = TX_EXTRA_TAG_USER_DATA;
-  tx.extra[1] = 18;
-  currency::tx_extra_info ei = AUTO_VAL_INIT(ei);
-  bool r = parse_and_validate_tx_extra(tx, ei);
-  ASSERT_TRUE(r);
 }
 
 
@@ -101,7 +81,7 @@ TEST(parse_and_validate_tx_extra, put_and_load_alias)
   alias.m_alias = "sdsdsd";
   alias.m_text_comment = "werwrwerw";
 
-  bool res = currency::construct_miner_tx(0, 0, 0, 0, 0, 1000, acc, acc, acc, miner_tx, currency::blobdata(), 10, 50, alias);
+  bool res = currency::construct_miner_tx(0, 0, 0, 0, 0, acc, miner_tx, currency::blobdata(), 10, alias);
   currency::tx_extra_info ei = AUTO_VAL_INIT(ei);
   bool r = parse_and_validate_tx_extra(miner_tx, ei);
   ASSERT_TRUE(r);
