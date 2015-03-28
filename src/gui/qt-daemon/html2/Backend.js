@@ -24,7 +24,7 @@ Backend = function(emulator) {
         console.log("Requesting API command '"+command+"' with parameters: "+JSON.stringify(parameters));
 
         // Emulated call versus real one through the magic Qt object
-        var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt[command];
+        var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt_parent[command];
 
         // Now call it
         var returnValue = commandFunction(parameters);
