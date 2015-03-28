@@ -10,12 +10,15 @@ Backend = function(emulator) {
     this.emulator = emulator;
     this.emulator.backend = this;
     this.last_daemon_state = null;
+    this.backendEventSubscribers = [];
+    this.applicationSettings = null;
+    this.contactGroups = ['Проверенные', 'Магазины', 'Черный список'];
     var callbacks = [];
     var currentScreen = null;
     var $backend = this;
 
     this.safes = {};
-    this.backendEventSubscribers = [];
+    this.contacts = null;
 
     /******************** 'Talking to backend' stuff **********************/
 
@@ -44,7 +47,7 @@ Backend = function(emulator) {
         // Do we have a callback for this?
         var requestId = status.request_id;
         if (callbacks[requestId]) {
-            console.log("Request with id "+requestId+" successfully returned with status="+status.error_code+" and response:");
+            console.log("Request with id "+requestId+" successfully executed with status="+status.error_code+" and response:");
             console.log(param);
             var callback = callbacks[requestId];
             callback(status, param);
@@ -61,12 +64,9 @@ Backend = function(emulator) {
     };
 
     this.subscribe = function(command, callback) {
-        var nonBackendEvents = ['update_safe_count', 'update_balance'];
+        var backendEvents = ['update_daemon_state', 'update_wallet_info'];
 
-        if (nonBackendEvents.indexOf(command) >= 0) {
-            // This object fires the event
-            this.backendEventSubscribers[command] = callback;
-        } else {
+        if (backendEvents.indexOf(command) >= 0) {
             // Backend layer fires the event
 
             if (this.shouldUseEmulator()) {
@@ -74,12 +74,15 @@ Backend = function(emulator) {
             } else {
                 Qt[command].connect(this.callbackStrToObj.bind({callback: callback}));
             }
+        } else {
+            // This object fires the event
+            this.backendEventSubscribers[command] = callback;
         }
     };
 
-    this.fireEvent = function(event) {
+    this.fireEvent = function(event, arguments) {
         if (this.backendEventSubscribers[event]) {
-            this.backendEventSubscribers[event]();
+            this.backendEventSubscribers[event](arguments);
         }
     };
 
@@ -88,26 +91,24 @@ Backend = function(emulator) {
         this.callback(obj);
     };
 
-    /******************** Specific backend API calls being reflected in UI *********************/
-
     // UI initialization
     this.onAppInit = function() {
+        // Load saved app settings
+        this.loadApplicationSettings();
+
+        // Register callbacks for automatic events from BACKEND side (like on_update_something_something)
         this.registerEventCallbacks();
 
-        // -- // -- // -- // -- //
+        // If no real backend, do emulated events
+        if (this.shouldUseEmulator()) this.emulator.startEventCallbacksTimers();
 
-        //setInterval(function() {
-        //    $backend.checkIfOnline();
-        //}, this.settings.intervalCheckIfOnline);
-        //
-        //$backend.checkIfOnline();
-        //
+        // Update necessary info on current screen regularly
         setInterval(this.updateCurrentScreen, this.settings.intervalUpdateCurrentScreen);
-
-        $backend.emulator.startEventCallbacksTimers();
     };
 
-    // Register callbacks for automatic events from backend side
+    /******************** Specific backend API calls being reflected in UI *********************/
+
+    // Register callbacks for automatic events from BACKEND side (like on_update_something_something)
     this.registerEventCallbacks = function() {
         /**
          * update_daemon_state
@@ -169,6 +170,9 @@ Backend = function(emulator) {
          *
          */
         this.subscribe('update_wallet_info', function(data) {
+            // Ignore if we get empty object
+            if (typeof data === 'object' && Object.size(data)==0) return;
+
             // Save this array of safes if anything changed
             var id = data.wallet_id;
             var safe = $backend.safes[id];
@@ -235,7 +239,7 @@ Backend = function(emulator) {
             }
 
             callback(status, data);
-        })
+        });
     };
 
     this.updateCurrentScreen = function() {
@@ -264,6 +268,27 @@ Backend = function(emulator) {
                 //});
                 break;
         }
+    };
+
+    this.loadApplicationSettings = function() {
+        $backend.backendRequest('load_settings', null, function(status, data) {
+            if (status.error_code == 'OK') {
+                $backend.applicationSettings = data;
+                $backend.fireEvent('app_settings_updated');
+            } else {
+                $backend.fireEvent('error_happened', status.error_code);
+            }
+        });
+    };
+
+    this.saveApplicationSettings = function() {
+        $backend.backendRequest('save_settings', this.applicationSettings, function(status, data) {
+            if (status.error_code == 'OK') {
+                $backend.fireEvent('app_settings_saved');
+            } else {
+                $backend.fireEvent('error_happened', status.error_code);
+            }
+        });
     };
 
     this.shouldUseEmulator = function() {

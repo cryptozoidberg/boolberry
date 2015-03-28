@@ -28,42 +28,33 @@
             <a data-toggle="modal" type="button" class="btn btn-link" data-target="#"><i class="fa fa-lg fa-times-circle text-muted"></i> <span class="underlined text-muted">Удалить контакт</span></a>
         </div>
 
-
         <h1>Человек</h1>
         <div class="col-xs-3 col-sm-3 nopadding"><a href="#sendG" class="btn btn-info"> <i class="fa fa-money"></i> Отправить гульдены контакту</a></div>
     </div>
 
-    <div class="form-horizontal">
+    <div class="ajax-error contact_errorArea">Извините, такого контакта не найдено :(</div>
+
+    <div class="form-horizontal contact_mainArea contact_insertion"></div>
+
+    <div class="contact_template hide" data-contact-id="{{ contact.id }}">
         <div class="tabs">
             <div class="panel">
                 <div class="panel-body">
-
-
-
-
-
-
-
                     <div class="clearfix">
                         <h4><a data-target=".collapse00" data-toggle="collapse" type="button" href="#"><span>Контактные данные</span></a></h4>
                     </div>
                     <div class="form-group inline-edit-field collapse in name1">
                         <label class="col-xs-4 col-sm-4 control-label">Группа</label>
 
-
-                        <select class="selectpicker show-tick col-xs-4 col-sm-4" multiple title='Выберите группу'>
-
-                            <option>Проверенные</option>
-                            <option selected>Черный список</option>
-                            <option>Магазины</option>
+                        <select class="{{ selectpicker_class }} show-tick col-xs-4 col-sm-4" multiple title='Выберите группу'>
+                            {{ group_options }}
                         </select>
-
 
                     </div>
                     <div class="form-group has-feedback group-hover inline-edit-field collapse in name1">
                         <label class="col-xs-4 col-sm-4 control-label">Имя</label>
                         <div class="col-xs-7 col-sm-7">
-                            <input type="text" class="form-control flat-input" value="Человек">
+                            <input type="text" class="form-control flat-input" value="{{ contact.name }}">
                             <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                         </div>
                         <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".name1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
@@ -84,7 +75,7 @@
                     <div class="form-group has-feedback group-hover inline-edit-field collapse in email1">
                         <label class="col-xs-4 col-sm-4 control-label">Email</label>
                         <div class="col-xs-7 col-sm-7">
-                            <input type="text" class="form-control flat-input" value="chelovek@domain.ru">
+                            <input type="text" class="form-control flat-input" value="{{ contact.contactFields.Email }}">
                             <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                         </div>
                         <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".email1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
@@ -92,7 +83,7 @@
                     <div class="form-group has-feedback group-hover inline-edit-field collapse in skype1">
                         <label class="col-xs-4 col-sm-4 control-label">Skype</label>
                         <div class="col-xs-7 col-sm-7">
-                            <input type="text" value="chelovek" class="form-control flat-input">
+                            <input type="text" value="{{ contact.contactFields.Skype }}" class="form-control flat-input">
                             <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                         </div>
                         <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".skype1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
@@ -102,7 +93,7 @@
                     <div class="form-group has-feedback group-hover inline-edit-field collapse in facebook1">
                         <label class="col-xs-4 col-sm-4 control-label">Facebook</label>
                         <div class="col-xs-7 col-sm-7">
-                            <input type="text" value="chelovek3042" class="form-control flat-input">
+                            <input type="text" value="{{ contact.contactFields.Facebook }}" class="form-control flat-input">
                             <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                         </div>
                         <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".facebook1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
@@ -133,7 +124,7 @@
                     <div class="form-group has-feedback group-hover inline-edit-field collapse in location1">
                         <label class="col-xs-4 col-sm-4 control-label">Местожительства</label>
                         <div class="col-xs-7 col-sm-7">
-                            <input type="text" class="form-control flat-input" value="Москва, Россия">
+                            <input type="text" class="form-control flat-input" value="{{ contact.location.city }}, {{ contact.location.country }}">
                             <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                         </div>
                         <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".location1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
@@ -156,7 +147,7 @@
                     <div class="form-group has-feedback group-hover inline-edit-field  collapse in note1">
                         <label class="col-xs-4 col-sm-4 control-label">Заметка</label>
                         <div class="col-xs-7 col-sm-7">
-                            <input type="text" value="сказал, нужны статьи" class="form-control flat-input">
+                            <input type="text" value="{{ contact.note }}" class="form-control flat-input">
                             <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                         </div>
 
@@ -189,7 +180,7 @@
                         <div class="form-group has-feedback group-hover inline-edit-field collapse in account1">
                             <label class="col-xs-4 col-sm-4 control-label">Счет</label>
                             <div class="col-xs-7 col-sm-7">
-                                <input type="text" value="1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y" class="form-control flat-input">
+                                <input type="text" value="{{ contact.account }}" class="form-control flat-input">
                                 <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                             </div>
                             <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".account1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
@@ -197,7 +188,7 @@
                         <div class="form-group has-feedback group-hover inline-edit-field collapse in alias1">
                             <label class="col-xs-4 col-sm-4 control-label">Алиас(1-й) счета</label>
                             <div class="col-xs-7 col-sm-7">
-                                <input type="text" value="@chelovek's_alias1" class="form-control flat-input">
+                                <input type="text" value="{{ contact.alias1 }}" class="form-control flat-input">
                                 <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                             </div>
                             <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".alias1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
@@ -206,7 +197,7 @@
                         <div class="form-group has-feedback group-hover inline-edit-field  collapse in alias2">
                             <label class="col-xs-4 col-sm-4 control-label">Алиас(2-й) счета</label>
                             <div class="col-xs-7 col-sm-7">
-                                <input type="text" value="@chelovek's_alias1" class="form-control flat-input">
+                                <input type="text" value="{{ contact.alias2 }}" class="form-control flat-input">
                                 <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                             </div>
                             <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".alias2" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>

@@ -51,6 +51,7 @@ Application = function(router, backend) {
                             newValue += "<tr><td>";
 
                             // Oh my! Three nested tables!! That's just super crazy.
+                            // Well, it's only for testing purposes, so...
                             newValue += "<table class='table table-condensed table-bordered'>";
                             for(var __key in _value) {
                                 var __value = _value[__key];
@@ -174,6 +175,11 @@ Application = function(router, backend) {
                         $('.market_export-my-orders').hide();
                     }
                 });
+            }
+        };
+        this.screens['contacts'] = {
+            init: function() {
+                $app.updateContactBook();
             }
         };
         this.screens['contact'] = {
@@ -357,6 +363,47 @@ Application = function(router, backend) {
                         $('.market_filterMyFavoritesAllButton').click();
                         break;
                 }
+                break;
+            case 'contact':
+                var contact_id = option;
+                // todo: what if contacts didn't yet load?
+                if ($app.backend.contacts && $app.backend.contacts[contact_id]) {
+                    var c = $app.backend.contacts[contact_id];
+                    $('.contact_mainArea').show();
+                    $('.contact_errorArea').hide();
+                } else {
+                    $('.contact_mainArea').hide();
+                    $('.contact_errorArea').show();
+                    return;
+                }
+
+                // Prepare to load
+                var group_options = '';
+                for(var g in $app.backend.contactGroups) {
+                    var group = $app.backend.contactGroups[g];
+                    var selected = (c.groups.indexOf(group) >= 0) ? 'selected' : '';
+                    group_options += '<option '+selected+'>' + $app.backend.contactGroups[g] + '</option>';
+                }
+
+                // Load contact
+                var html = $('.contact_template').html();
+                html = html.replace(/{{ contact.id }}/g, contact_id);
+                html = html.replace(/{{ contact.name }}/g, c.name);
+                html = html.replace(/{{ contact.contactFields.Email }}/g, c.contactFields.Email);
+                html = html.replace(/{{ contact.contactFields.Skype }}/g, c.contactFields.Skype);
+                html = html.replace(/{{ contact.contactFields.Facebook }}/g, c.contactFields.Facebook);
+                html = html.replace(/{{ contact.location.country }}/g, c.location.country);
+                html = html.replace(/{{ contact.location.city }}/g, c.location.city);
+                html = html.replace(/{{ contact.note }}/g, c.note);
+                html = html.replace(/{{ contact.account }}/g, c.account);
+                html = html.replace(/{{ contact.alias1 }}/g, c.aliases[0]);
+                html = html.replace(/{{ contact.alias2 }}/g, c.aliases[1]);
+                html = html.replace(/{{ group_options }}/g, group_options);
+                html = html.replace(/{{ selectpicker_class }}/g, 'selectpicker');
+                $('.contact_insertion').html(html);
+
+                $('.appScreen_contact .selectpicker').selectpicker();
+
                 break;
         }
     };
@@ -673,6 +720,44 @@ Application = function(router, backend) {
         this.backend.subscribe("update_balance", function() {
             $app.updateBalanceCounters();
         });
+        this.backend.subscribe("app_settings_updated", function() {
+            $app.backend.contacts = $app.backend.applicationSettings.contacts;
+        });
+    };
+
+    this.updateContactBook = function() {
+        // Wait for settings to load
+        if (!this.backend.contacts) {
+            setTimeout(function() {
+                $app.updateContactBook();
+            }, 500);
+            return;
+        }
+
+        // Initializing
+        var contacts = this.backend.contacts;
+        var insertion = $('.contacts_contact_insertion');
+        insertion.html(''); // remove all
+
+        for(var i in contacts) {
+            var c = contacts[i];
+            var html = $('.contacts_contact_template').html();
+
+            var aliases = '';
+            for(var j in c.aliases) aliases += '@' + c.aliases[j] + ' ';
+
+            html = html.replace(/{{ contact.id }}/g, i);
+            html = html.replace(/{{ contact.name }}/g, c.name);
+            html = html.replace(/{{ contact.city }}/g, c.location.city);
+            html = html.replace(/{{ contact.country }}/g, c.location.country);
+            html = html.replace(/{{ contact.account }}/g, c.account);
+            html = html.replace(/{{ contact.aliases }}/g, aliases);
+            html = html.replace(/{{ contact.contactField }}/g, (Object.size(c.contactFields)>0) ? c.contactFields[Object.keys(c.contactFields)[0]] : '');
+            html = html.replace(/{{ contact.note }}/g, c.note);
+            html = html.replace(/{{ contact.groups }}/g, c.groups.join(', '));
+
+            insertion.append(html);
+        }
     };
 
     // Updates counters on index screen
@@ -763,7 +848,7 @@ Application = function(router, backend) {
     };
     this.getRandomObjectProperty = function(obj) {
         var keys = Object.keys(obj)
-        return obj[keys[ keys.length * Math.random() << 0]];
+        return obj[keys[ keys.length * Math.random() << 0 ]];
     };
 
     // Unix timestamp to formatted date/time string

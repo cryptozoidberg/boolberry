@@ -12,6 +12,53 @@ Emulator = function() {
     var lastRequestId = 0;
     var $emulator = this;
 
+    // Emulation of saved app settings
+    this.applicationSettings = {
+        contacts: {
+            10: {
+                'name': 'Человек',
+                'location': {
+                    'city': 'Торонто',
+                    'country': 'Канада'
+                },
+                'account': '1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y',
+                'aliases': [
+                    'chelovek\'s_alias1',
+                    'chelovek\'s_alias2'
+                ],
+                'contactFields': {
+                    'Email': 'chelovek@domain.ru',
+                    'Skype': 'chelovek',
+                    'Facebook': 'chelovek3042'
+                },
+                'note': 'сказал, нужны статьи',
+                'groups': [
+                    'Проверенные'
+                ]
+            },
+            11: {
+                'name': 'Человек 2',
+                'location': {
+                    'city': 'Москва',
+                    'country': 'Россия'
+                },
+                'account': '1JRgYWzGYJuJhJYWzxSnsNSscrUe4xLwbnub4YGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y',
+                'aliases': [
+                    'chelovek2\'s_alias'
+                ],
+                'contactFields': {
+                    'Email': 'chelovek2@mail.ru',
+                    'Skype': 'chelovek2',
+                    'Facebook': 'chelovechek'
+                },
+                'note': 'еще один контакт',
+                'groups': [
+                    'Проверенные', 'Магазины'
+                ]
+            }
+        }
+    };
+
     // Event callbacks (from backend)
     this.startEventCallbacksTimers = function() {
         setInterval(function() {
@@ -212,6 +259,12 @@ Emulator = function() {
             } else {
                 return {error_code: "WRONG_WALLET_ID"};
             }
+        },
+        'load_settings': function(param) {
+            return {error_code: "OK", data: $emulator.applicationSettings};
+        },
+        'save_settings': function(param) {
+            return {error_code: "OK", data: {}};
         }
     };
 
