@@ -104,7 +104,7 @@ namespace tools
     }
     try
     {
-      std::vector<uint8_t> extra;
+      std::vector<currency::extra_v> extra;
       crypto::hash payment_id = AUTO_VAL_INIT(payment_id);
       if(currency::parse_payment_id_from_hex_str(req.payment_id_hex, payment_id))
       {
@@ -205,7 +205,7 @@ namespace tools
     currency::transaction tx = AUTO_VAL_INIT(tx);
     try
     {
-      std::vector<uint8_t> extra;
+      std::vector<currency::extra_v> extra;
       m_wallet.transfer(dsts, 0, 0, DEFAULT_FEE, extra, tx);
     }
     catch (const std::runtime_error& er)
@@ -323,8 +323,10 @@ namespace tools
     dst.amount = amount - DEFAULT_FEE;
 
     //generate transaction
-    const std::vector<uint8_t> extra;
-    bool r = currency::construct_tx(acc.get_keys(), sources, dsts, extra, tx2, 0);
+    const std::vector<currency::extra_v> extra;
+    const std::vector<currency::attachment_v> attachments;
+
+    bool r = currency::construct_tx(acc.get_keys(), sources, dsts, extra, attachments, tx2, 0);
     if (!r)
     {
       LOG_ERROR("Problem with construct_tx(....) ");

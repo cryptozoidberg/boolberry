@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0043 OLD)
+
 file(GLOB_RECURSE COMMON common/*)
 file(GLOB_RECURSE CRYPTO crypto/*)
 file(GLOB_RECURSE CURRENCY_CORE currency_core/*)

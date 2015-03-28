@@ -658,7 +658,7 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
     }
   }
   //payment_id
-  std::vector<uint8_t> extra;
+  std::vector<currency::extra_v> extra;
   if(tp.payment_id.size())
   {
 

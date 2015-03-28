@@ -88,8 +88,21 @@ namespace currency
   bool construct_tx_out(const account_public_address& destination_addr, const crypto::secret_key& tx_sec_key, size_t output_index, uint64_t amount, transaction& tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool validate_alias_name(const std::string& al);
   void get_attachment_details(const transaction& tx, extra_attachment_info& eai);
-  bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, transaction& tx, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED, const std::list<offer_details>& od = std::list<offer_details>());
-  bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, const std::vector<uint8_t>& extra, transaction& tx, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED, const std::list<offer_details>& od = std::list<offer_details>    ());
+  bool construct_tx(const account_keys& sender_account_keys, 
+    const std::vector<tx_source_entry>& sources, 
+    const std::vector<tx_destination_entry>& destinations, 
+    const std::vector<attachment_v>& attachments,
+    transaction& tx, 
+    uint64_t unlock_time, 
+    uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
+  bool construct_tx(const account_keys& sender_account_keys, 
+    const std::vector<tx_source_entry>& sources, 
+    const std::vector<tx_destination_entry>& destinations,
+    const std::vector<extra_v>& extra,
+    const std::vector<attachment_v>& attachments,
+    transaction& tx, 
+    uint64_t unlock_time, 
+    uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool sign_update_alias(alias_info& ai, const crypto::public_key& pkey, const crypto::secret_key& skey);
   bool make_tx_extra_alias_entry(std::string& buff, const alias_info& alinfo, bool make_buff_to_sign = false);
   bool add_tx_extra_alias(transaction& tx, const alias_info& alinfo);
@@ -144,7 +157,7 @@ namespace currency
   
   bool addendum_to_hexstr(const std::vector<crypto::hash>& add, std::string& hex_buff);
   bool hexstr_to_addendum(const std::string& hex_buff, std::vector<crypto::hash>& add);
-  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const std::string& payment_id);
+  bool set_payment_id_to_tx_extra(std::vector<extra_v>& extra, const std::string& payment_id);
   bool get_payment_id_from_tx_extra(const transaction& tx, std::string& payment_id);
   crypto::hash get_blob_longhash(const blobdata& bd, uint64_t height, const std::vector<crypto::hash>& scratchpad);
   crypto::hash get_blob_longhash_opt(const blobdata& bd, const std::vector<crypto::hash>& scratchpad);
@@ -159,8 +172,20 @@ namespace currency
   void print_currency_details();
     
   //---------------------------------------------------------------
+  template<class extra_t>
+  extra_t& get_or_add_field_to_extra(std::vector<extra_v>& extra)
+  {
+    for (auto& ev : extra)
+    {
+      if (ev.type() == typeid(extra_t))
+        return boost::get<extra_t&>(ev);
+    }
+    extra.push_back(extra_t());
+    return boost::get<extra_t&>(extra.back());
+  }
+  //---------------------------------------------------------------
   template<class payment_id_type>
-  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const payment_id_type& payment_id)
+  bool set_payment_id_to_tx_extra(std::vector<extra_v>& extra, const payment_id_type& payment_id)
   {
     std::string payment_id_blob;
     epee::string_tools::apped_pod_to_strbuff(payment_id_blob, payment_id);

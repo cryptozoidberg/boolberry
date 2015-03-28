@@ -722,7 +722,7 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   }
   local_args.erase(local_args.begin());
 
-  std::vector<uint8_t> extra;
+  std::vector<extra_v> extra;
   if (1 == local_args.size() % 2)
   {
     std::string payment_id_str = local_args.back();

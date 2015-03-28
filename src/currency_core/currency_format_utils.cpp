@@ -584,12 +584,12 @@ namespace currency
   //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
+                                                             const std::vector<attachment_v>& attachments,
                                                              transaction& tx, 
                                                              uint64_t unlock_time, 
-                                                             uint8_t tx_outs_attr, 
-                                                             const std::list<offer_details>& od)
+                                                             uint8_t tx_outs_attr)
   {
-    return construct_tx(sender_account_keys, sources, destinations, std::vector<uint8_t>(), tx, unlock_time, tx_outs_attr, od);
+    return construct_tx(sender_account_keys, sources, destinations, std::vector<extra_v>(), attachments, tx, unlock_time, tx_outs_attr);
   }
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
@@ -866,21 +866,21 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const std::string& payment_id)
+  bool set_payment_id_to_tx_extra(std::vector<extra_v>& extra, const std::string& payment_id)
   {
+
     if(!payment_id.size() || payment_id.size() >= TX_MAX_PAYMENT_ID_SIZE)
       return false;
 
-    if(std::find(extra.begin(), extra.end(), TX_EXTRA_TAG_USER_DATA) != extra.end())
-      return false;
-
-    extra.push_back(TX_EXTRA_TAG_USER_DATA);
-    extra.push_back(static_cast<uint8_t>(payment_id.size()+2));
-    extra.push_back(TX_USER_DATA_TAG_PAYMENT_ID);
-    extra.push_back(static_cast<uint8_t>(payment_id.size()));
+    extra_user_data& ud = get_or_add_field_to_extra<extra_user_data>(extra);
+    
+    ud.buff.push_back(TX_EXTRA_TAG_USER_DATA);
+    ud.buff.push_back(static_cast<uint8_t>(payment_id.size() + 2));
+    ud.buff.push_back(TX_USER_DATA_TAG_PAYMENT_ID);
+    ud.buff.push_back(static_cast<uint8_t>(payment_id.size()));
     
     const uint8_t* payment_id_ptr = reinterpret_cast<const uint8_t*>(payment_id.data());
-    std::copy(payment_id_ptr, payment_id_ptr + payment_id.size(), std::back_inserter(extra));
+    std::copy(payment_id_ptr, payment_id_ptr + payment_id.size(), std::back_inserter(ud.buff));
     return true;
   }
   //---------------------------------------------------------------

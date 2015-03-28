@@ -1165,13 +1165,13 @@ std::string wallet2::get_alias_for_address(const std::string& addr)
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-                       uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx)
+                       uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, currency::transaction& tx)
 {
   transfer(dsts, fake_outputs_count, unlock_time, fee, extra, detail::digit_split_strategy, tx_dust_policy(fee), tx);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-                       uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra)
+                       uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra)
 {
   currency::transaction tx;
   transfer(dsts, fake_outputs_count, unlock_time, fee, extra, tx);

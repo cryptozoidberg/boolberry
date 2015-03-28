@@ -153,11 +153,11 @@ namespace tools
     uint64_t balance();
     uint64_t unlocked_balance();
     template<typename T>
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy);
     template<typename T>
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra);
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, currency::transaction& tx);
     bool check_connection();
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
     void get_payments(const crypto::hash& payment_id, std::list<payment_details>& payments) const;
@@ -397,7 +397,7 @@ namespace tools
   //----------------------------------------------------------------------------------------------------
   template<typename T>
   void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-    uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy)
+    uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy)
   {
     currency::transaction tx;
     transfer(dsts, fake_outputs_count, unlock_time, fee, extra, destination_split_strategy, dust_policy, tx);
@@ -405,7 +405,7 @@ namespace tools
 
   template<typename T>
   void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-    uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr)
+    uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr)
   {
     if (!is_connected_to_net())
     {
@@ -524,7 +524,9 @@ namespace tools
       splitted_dsts.push_back(currency::tx_destination_entry(dust, dust_policy.addr_for_dust));
     }
 
-    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, tx, unlock_time);
+    const std::vector<currency::attachment_v> attachments;
+
+    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, attachments, tx, unlock_time);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
     //update_current_tx_limit();
     CHECK_AND_THROW_WALLET_EX(CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
