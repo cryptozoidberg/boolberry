@@ -695,25 +695,6 @@ uint64_t blockchain_storage::get_current_comulative_blocksize_limit()
   return m_current_block_cumul_sz_limit;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::add_padding_to_tx(transaction& tx, size_t count)
-{
-  if (!count)
-    return true;
-
-  for (auto ex : tx.extra)
-  {
-    if (ex.type() == typeid(extra_padding))
-    {
-      boost::get<extra_padding>(ex).buff.insert(boost::get<extra_padding>(ex).buff.end(), count, 0);
-      return true;
-    }
-  }
-  extra_padding ex_padding;
-  ex_padding.buff.resize(count - 1);
-  tx.extra.push_back(ex_padding);
-  return true;
-}
-//------------------------------------------------------------------
 bool blockchain_storage::create_block_template(block& b, 
                                                const account_public_address& miner_address, 
                                                wide_difficulty_type& diffic, 

@@ -134,7 +134,6 @@ namespace currency
     bool prune_aged_alt_blocks();
     bool get_transactions_daily_stat(uint64_t& daily_cnt, uint64_t& daily_volume);
     bool check_keyimages(const std::list<crypto::key_image>& images, std::list<bool>& images_stat);//true - unspent, false - spent
-    bool add_padding_to_tx(transaction& tx, size_t count);
     // --- PoS ---    
     bool build_kernel(const block& bl, stake_kernel& kernel, uint64_t& coindays_weight, const stake_modifier_type& stake_modifier);
     bool build_kernel(uint64_t amount, 

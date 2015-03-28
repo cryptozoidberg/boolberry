@@ -112,7 +112,8 @@ bool gen_double_spend_in_tx<txs_keeped_by_block>::generate(std::vector<test_even
   destinations.push_back(de);
 
   currency::transaction tx_1;
-  if (!construct_tx(bob_account.get_keys(), sources, destinations, tx_1, 0))
+  std::vector<currency::attachment_v> attachments;
+  if (!construct_tx(bob_account.get_keys(), sources, destinations, attachments, tx_1, 0))
     return false;
 
   SET_EVENT_VISITOR_SETT(events, event_visitor_settings::set_txs_keeped_by_block, txs_keeped_by_block);

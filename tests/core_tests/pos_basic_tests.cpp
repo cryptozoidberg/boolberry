@@ -76,9 +76,10 @@ bool gen_pos_basic_tests::generate(std::vector<test_event_entry>& events) const
   // start alternative chain
   MAKE_NEXT_BLOCK(events, blk_34, blk_33_a, miner_account);
 
-  std::list<offer_details> offers;
-  offers.resize(1);
-  offer_details& od = offers.back();
+  std::vector<currency::attachment_v> attachments;
+  attachments.push_back(currency::offer_details());
+
+  offer_details& od = boost::get<currency::offer_details&>(attachments.back());
 
   od.offer_type = OFFER_TYPE_LUI_TO_ETC;
   od.amount_lui = 1000000000;
@@ -90,7 +91,7 @@ bool gen_pos_basic_tests::generate(std::vector<test_event_entry>& events) const
   od.payment_types = "BTC;BANK;CASH";
   od.expiration_time = 10;
 
-  MAKE_TX_LIST_START_WITH_OFFERS(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a, offers);
+  MAKE_TX_LIST_START_WITH_ATTACHS(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a, attachments);
   //MAKE_TX_LIST_OFFER(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a, offers);
 
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_35, blk_34, miner_account, txs_blk);

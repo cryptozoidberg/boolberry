@@ -161,7 +161,7 @@ namespace currency
   bool get_payment_id_from_tx_extra(const transaction& tx, std::string& payment_id);
   crypto::hash get_blob_longhash(const blobdata& bd, uint64_t height, const std::vector<crypto::hash>& scratchpad);
   crypto::hash get_blob_longhash_opt(const blobdata& bd, const std::vector<crypto::hash>& scratchpad);
-  
+  bool add_padding_to_tx(transaction& tx, size_t count);
   
   //PoS
   bool is_pos_block(const block& b);

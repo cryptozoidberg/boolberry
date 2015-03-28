@@ -747,6 +747,25 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------
+  bool add_padding_to_tx(transaction& tx, size_t count)
+  {
+    if (!count)
+      return true;
+
+    for (auto ex : tx.extra)
+    {
+      if (ex.type() == typeid(extra_padding))
+      {
+        boost::get<extra_padding>(ex).buff.insert(boost::get<extra_padding>(ex).buff.end(), count, 0);
+        return true;
+      }
+    }
+    extra_padding ex_padding;
+    ex_padding.buff.resize(count - 1);
+    tx.extra.push_back(ex_padding);
+    return true;
+  }
+  //------------------------------------------------------------------
   bool is_tx_spendtime_unlocked(uint64_t unlock_time, uint64_t current_blockchain_height)
   {
     if (unlock_time < CURRENCY_MAX_BLOCK_NUMBER)
@@ -1284,6 +1303,11 @@ namespace currency
       prefix_blob += tools::get_varint_packed_size(sig_count);
     }
     prefix_blob += tools::get_varint_packed_size(t.vin.size());
+
+    tx_extra_info tei = AUTO_VAL_INIT(tei);
+    currency::parse_and_validate_tx_extra(t, tei);
+    prefix_blob += tei.m_attachment_info.sz;
+
     return prefix_blob;
   }
   //---------------------------------------------------------------

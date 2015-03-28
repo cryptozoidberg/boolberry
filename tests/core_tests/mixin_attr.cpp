@@ -39,7 +39,7 @@ bool mix_attr_tests::generate(std::vector<test_event_entry>& events) const
                                                  miner_account, 
                                                  MK_COINS(5), 
                                                  blk_3, 
-                                                 CURRENCY_TO_KEY_OUT_RELAXED, std::list<currency::offer_details>());                    //  6 + N
+                                                 CURRENCY_TO_KEY_OUT_RELAXED, std::vector<currency::attachment_v>());                    //  6 + N
 
   MAKE_TX_LIST_MIX_ATTR(events, txs_blk_4, miner_account, miner_account, MK_COINS(5), blk_3, 
                                                  CURRENCY_TO_KEY_OUT_RELAXED);                    //  7 + N
@@ -74,7 +74,7 @@ bool mix_attr_tests::generate(std::vector<test_event_entry>& events) const
                                                  MK_COINS(5),
                                                  blk_5, 
                                                  CURRENCY_TO_KEY_OUT_RELAXED,
-                                                 std::list<currency::offer_details>());
+                                                 std::vector<currency::attachment_v>());
   //MAKE_TX_LIST_MIX_ATTR(events, txs_blk_6, miner_account, miner_account, MK_COINS(5), blk_5, 4);
   MAKE_TX_LIST_MIX_ATTR(events, txs_blk_6, miner_account, bob_account2, MK_COINS(5), blk_5, 4);
   MAKE_TX_LIST_MIX_ATTR(events, txs_blk_6, miner_account, bob_account2, MK_COINS(5), blk_5, 4);
