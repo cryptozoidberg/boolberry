@@ -72,7 +72,7 @@ Backend = function(emulator) {
             if (this.shouldUseEmulator()) {
                 this.emulator.eventCallbacks[command] = callback;
             } else {
-                Qt[command].connect(callback);
+                Qt[command].connect(this.callbackStrToObj.bind({callback: callback}));
             }
         }
     };
@@ -81,6 +81,11 @@ Backend = function(emulator) {
         if (this.backendEventSubscribers[event]) {
             this.backendEventSubscribers[event]();
         }
+    };
+
+    this.callbackStrToObj = function(str) {
+        var obj = $.parseJSON(str);
+        this.callback(obj);
     };
 
     /******************** Specific backend API calls being reflected in UI *********************/
@@ -137,6 +142,7 @@ Backend = function(emulator) {
          *
          */
         this.subscribe('update_daemon_state', function(data) {
+            // upper right corner indicator
             $backend.application.showOnlineState(data.text_state);
 
             // info widget
