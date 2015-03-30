@@ -41,6 +41,7 @@ Backend = function(emulator) {
 
         if (returnObject.error_code != "OK") {
             console.log("API Error for command '"+command+"': " + returnObject.error_code);
+            return returnObject;
         } else {
             // Everything is OK
             console.log("Requesting API command '"+command+"': completed, status=OK");
@@ -178,7 +179,7 @@ Backend = function(emulator) {
 
             // info widget
             $backend.last_daemon_state = data;
-            $backend.application.updateBackendInfoWidget();
+            //$backend.application.updateBackendInfoWidget();
         });
 
         /**

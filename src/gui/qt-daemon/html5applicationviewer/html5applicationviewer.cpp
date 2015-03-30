@@ -728,7 +728,7 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
   size_t request_id = m_request_id_counter++;
   std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
 
-  que_call(request_id, [request_id, param_ptr, this](void){
+  return que_call(request_id, [request_id, param_ptr, this](void){
 
     view::api_response ar;
     ar.request_id = std::to_string(request_id);
@@ -750,10 +750,6 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
     return;
 
   });
-  view::api_response ar;
-  ar.error_code = API_RETURN_CODE_OK;
-  ar.request_id = std::to_string(request_id);
-  return epee::serialization::store_t_to_json(ar).c_str();
 }
 
 QString Html5ApplicationViewer::get_wallet_info(const QString& param)
@@ -782,10 +778,6 @@ QString Html5ApplicationViewer::get_wallet_info(const QString& param)
     return;
 
   });
-  view::api_response ar;
-  ar.error_code = API_RETURN_CODE_OK;
-  ar.request_id = std::to_string(request_id);
-  return epee::serialization::store_t_to_json(ar).c_str();
 }
 
 void Html5ApplicationViewer::dispatch(const QString& status, const QString& param)
