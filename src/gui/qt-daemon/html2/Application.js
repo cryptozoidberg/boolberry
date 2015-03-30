@@ -109,6 +109,10 @@ Application = function(router, backend) {
         $(document).on('click', '.widget-header', function() {
             return false; // make headers non-clickable
         });
+
+        // Show backend info widget
+        $('.buttonAddWidget:first').click();
+        $('.widget:first a[data-target-widget=backendInfo]').click();
     };
 
     // Widget management
