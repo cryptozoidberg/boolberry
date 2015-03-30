@@ -422,7 +422,7 @@ Application = function(router, backend) {
 
         // Buttons & actions
         $(document).on("click", ".safes_open-safe-button, .index_open-safe-button", function() {
-            var fileName = $app.backend.showOpenFileDialog("{}", function(status, param) { // todo: translate
+            var fileName = $app.backend.showOpenFileDialog("Выберите файл сейфа", function(status, param) { // todo: translate
                 if (status.error_code == "OK" && param.path && param.path != '') {
                     $app.showModal('#openSafe', 'open-safe', 'screen-1', true); // clears all inputs beforehand
                     $("input[name='open-safe_file-name-input']").val( param.path );

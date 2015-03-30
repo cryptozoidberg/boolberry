@@ -29,15 +29,14 @@ Backend = function(emulator) {
         // Emulated call versus real one through the magic Qt object
         var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt_parent[command];
 
-        if(commandFunction === undefined)
-        {
+        if (commandFunction === undefined) {
             console.log("API Error for command '"+command+"': command not found in Qt object");
             return;
         }
 
         // Now call it
         var returnValue = commandFunction(JSON.stringify(parameters));
-        var returnObject = JSON.parse(returnValue);
+        var returnObject = (returnValue === '') ? {} : JSON.parse(returnValue);
 
         if (returnObject.error_code != "OK") {
             console.log("API Error for command '"+command+"': " + returnObject.error_code);
@@ -277,7 +276,7 @@ Backend = function(emulator) {
     };
 
     this.loadApplicationSettings = function() {
-        $backend.backendRequest('load_settings', null, function(status, data) {
+        $backend.backendRequest('get_app_data', null, function(status, data) {
             if (status.error_code == 'OK') {
                 $backend.applicationSettings = data;
                 $backend.fireEvent('app_settings_updated');
@@ -288,7 +287,7 @@ Backend = function(emulator) {
     };
 
     this.saveApplicationSettings = function() {
-        $backend.backendRequest('save_settings', this.applicationSettings, function(status, data) {
+        $backend.backendRequest('store_app_data', this.applicationSettings, function(status, data) {
             if (status.error_code == 'OK') {
                 $backend.fireEvent('app_settings_saved');
             } else {

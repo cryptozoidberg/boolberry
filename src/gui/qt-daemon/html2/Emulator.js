@@ -260,10 +260,10 @@ Emulator = function() {
                 return {error_code: "WRONG_WALLET_ID"};
             }
         },
-        'load_settings': function(param) {
+        'get_app_data': function(param) {
             return {error_code: "OK", data: $emulator.applicationSettings};
         },
-        'save_settings': function(param) {
+        'store_app_data': function(param) {
             return {error_code: "OK", data: {}};
         }
     };
