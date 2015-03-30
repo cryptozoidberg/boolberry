@@ -422,14 +422,13 @@ Application = function(router, backend) {
 
         // Buttons & actions
         $(document).on("click", ".safes_open-safe-button, .index_open-safe-button", function() {
-            var fileName = $app.backend.showOpenFileDialog("Выберите файл сейфа", function(status, param) { // todo: translate
-                if (status.error_code == "OK" && param.path && param.path != '') {
-                    $app.showModal('#openSafe', 'open-safe', 'screen-1', true); // clears all inputs beforehand
-                    $("input[name='open-safe_file-name-input']").val( param.path );
-                } else {
-                    console.log("OpenFileDialog API Error: "+status.error_code);
-                }
-            });
+            var param = $app.backend.showOpenFileDialog("Выберите файл сейфа"); // todo: translate
+            if (param.error_code == "OK" && param.path && param.path != '') {
+                $app.showModal('#openSafe', 'open-safe', 'screen-1', true); // clears all inputs beforehand
+                $("input[name='open-safe_file-name-input']").val( param.path );
+            } else {
+                console.log("OpenFileDialog API Error: "+param.error_code);
+            }
         });
         $(document).on("click", ".buyG_submitButton", function() {
             $app.showModal('#confirm_operation_modal', 'confirm-modal', 'buyG');

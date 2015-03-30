@@ -4,7 +4,8 @@ Emulator = function() {
     this.backend = null; // set in Backend
     this.settings = {
         asyncEmulationTimeout: 500,
-        eventsInterval: 5000
+        eventsInterval: 5000,
+        synchronousFunctions: ['show_openfile_dialog']
     };
     this.eventCallbacks = [];
     this.application = null;
@@ -170,10 +171,6 @@ Emulator = function() {
                 }
             }
         }, $emulator.settings.eventsInterval);
-
-        //create-safe_safe-name-input
-        //create-safe_safe-password-input-1
-        //create-safe_safe-password-input-2
     };
 
     // Should return a function to be called with the arguments later
@@ -183,28 +180,32 @@ Emulator = function() {
                 // Make up request ID
                 var requestId = ++lastRequestId;
 
-                // Emulate async call using timeout
-                setTimeout(function(arg)
-                    {
-                        // Actually calling the command with arguments of parent function
-                        var returnObject = $emulator.functions[arg.command].apply(this, JSON.parse(arg.arguments));
+                if ($emulator.synchronousFunctions.indexOf(arg.command) >= 0) {
+                    // Actually calling the command with arguments of parent function
+                    return $emulator.functions[arg.command].apply(this, JSON.parse(arg.arguments));
+                } else {
+                    // Emulate async call using timeout
+                    setTimeout(function (arg) {
+                            // Actually calling the command with arguments of parent function
+                            var returnObject = $emulator.functions[arg.command].apply(this, JSON.parse(arg.arguments));
 
-                        // Passing the emulated result to our UI callback
-                        var status = {
-                            error_code: returnObject.error_code,
-                            request_id: arg.requestId
-                        };
-                        $emulator.sendAnswer(status, returnObject.data);
-                    },
-                    $emulator.settings.asyncEmulationTimeout,
-                    {command: command, requestId: requestId, arguments: arguments}
-                );
+                            // Passing the emulated result to our UI callback
+                            var status = {
+                                error_code: returnObject.error_code,
+                                request_id: arg.requestId
+                            };
+                            $emulator.sendAnswer(status, returnObject.data);
+                        },
+                        $emulator.settings.asyncEmulationTimeout,
+                        {command: command, requestId: requestId, arguments: arguments}
+                    );
 
-                // Successful API call
-                return JSON.stringify({
-                    error_code: "OK",
-                    request_id: requestId
-                });
+                    // Successful API call
+                    return JSON.stringify({
+                        error_code: "OK",
+                        request_id: requestId
+                    });
+                }
             }
         } else {
             // There's no such command

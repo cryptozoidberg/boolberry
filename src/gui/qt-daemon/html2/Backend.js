@@ -22,21 +22,9 @@ Backend = function(emulator) {
 
     /******************** 'Talking to backend' stuff **********************/
 
-    // Requests a function
+    // Requests a function from backend
     this.backendRequest = function(command, parameters, callback) {
-        console.log("Requesting API command '"+command+"' with parameters: "+JSON.stringify(parameters));
-
-        // Emulated call versus real one through the magic Qt object
-        var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt_parent[command];
-
-        if (commandFunction === undefined) {
-            console.log("API Error for command '"+command+"': command not found in Qt object");
-            return;
-        }
-
-        // Now call it
-        var returnValue = commandFunction(JSON.stringify(parameters));
-        var returnObject = (returnValue === '') ? {} : JSON.parse(returnValue);
+        var returnObject = this.doBackendRequest(command, parameters);
 
         if (returnObject.error_code != "OK") {
             console.log("API Error for command '"+command+"': " + returnObject.error_code);
@@ -45,6 +33,40 @@ Backend = function(emulator) {
             console.log("Requesting API command '"+command+"': completed, status=OK, request_id="+returnObject.request_id);
             callbacks[returnObject.request_id] = callback;
         }
+    };
+
+    // Requests a function from backend synchronously (like open file dialog)
+    this.backendSyncRequest = function(command, parameters) {
+        var returnObject = this.doBackendRequest(command, parameters);
+
+        if (returnObject.error_code != "OK") {
+            console.log("API Error for command '"+command+"': " + returnObject.error_code);
+        } else {
+            // Everything is OK
+            console.log("Requesting API command '"+command+"': completed, status=OK");
+            return returnObject;
+        }
+    };
+
+    this.doBackendRequest = function(command, parameters) {
+        console.log("Requesting API command '"+command+"' with parameters: "+JSON.stringify(parameters));
+
+        // Emulated call versus real one through the magic Qt object
+        var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt_parent[command];
+
+        // Does it exist?
+        if (commandFunction === undefined) {
+            console.log("API Error for command '"+command+"': command not found in Qt object");
+            return {
+                error_code: "COMMAND_NOT_FOUND"
+            };
+        }
+
+        // Now call it
+        var returnValue = commandFunction(JSON.stringify(parameters));
+        var returnObject = (returnValue === '') ? {} : JSON.parse(returnValue);
+
+        return returnObject;
     };
 
     // Callback from backend
@@ -201,8 +223,8 @@ Backend = function(emulator) {
 
     };
 
-    this.showOpenFileDialog = function(caption, callback) {
-        this.backendRequest('show_openfile_dialog', {caption: caption, filemask: '*.lui'}, callback);
+    this.showOpenFileDialog = function(caption) {
+        return this.backendSyncRequest('show_openfile_dialog', {caption: caption, filemask: '*.lui'});
     };
 
     this.closeWallet = function(wallet_id, callback) {
