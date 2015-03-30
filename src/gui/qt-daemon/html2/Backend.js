@@ -29,6 +29,12 @@ Backend = function(emulator) {
         // Emulated call versus real one through the magic Qt object
         var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt_parent[command];
 
+        if(commandFunction === undefined)
+        {
+            console.log("API Error for command '"+command+"': command not found in Qt object");
+            return;
+        }
+
         // Now call it
         var returnValue = commandFunction(JSON.stringify(parameters));
         var returnObject = JSON.parse(returnValue);
