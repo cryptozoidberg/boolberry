@@ -30,7 +30,7 @@ Backend = function(emulator) {
         var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt_parent[command];
 
         // Now call it
-        var returnValue = commandFunction(parameters);
+        var returnValue = commandFunction(JSON.stringify(parameters));
         var returnObject = JSON.parse(returnValue);
 
         if (returnObject.error_code != "OK") {

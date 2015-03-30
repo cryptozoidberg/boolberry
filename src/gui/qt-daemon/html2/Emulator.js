@@ -187,7 +187,7 @@ Emulator = function() {
                 setTimeout(function(arg)
                     {
                         // Actually calling the command with arguments of parent function
-                        var returnObject = $emulator.functions[arg.command].apply(this, arg.arguments);
+                        var returnObject = $emulator.functions[arg.command].apply(this, JSON.parse(arg.arguments));
 
                         // Passing the emulated result to our UI callback
                         var status = {
