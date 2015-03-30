@@ -155,14 +155,16 @@ void Html5ApplicationViewer::dispatcher()
   {
     dispatch_entry de;
     {
-      CRITICAL_REGION_LOCAL(m_dispatch_que_lock);
+      m_dispatch_que_lock.lock();
       if (!m_dispatch_que.size())
       {
+        m_dispatch_que_lock.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
         continue;
       }
       de = m_dispatch_que.front();
       m_dispatch_que.pop_front();
+      m_dispatch_que_lock.unlock();
     }
     de.cb->do_call();
   }
@@ -596,6 +598,14 @@ void Html5ApplicationViewer::message_box(const QString& msg)
 {
   show_msg_box(msg.toStdString());
 }
+QString Html5ApplicationViewer::get_app_data(const QString& param)
+{
+  return "";
+}
+QString Html5ApplicationViewer::store_app_data(const QString& param)
+{
+  return "";
+}
 
 QString Html5ApplicationViewer::show_openfile_dialog(const QString& param)
 {
@@ -718,7 +728,7 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
   size_t request_id = m_request_id_counter++;
   std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
 
-  return que_call(request_id, [request_id, param_ptr, this](void){
+  que_call(request_id, [request_id, param_ptr, this](void){
 
     view::api_response ar;
     ar.request_id = std::to_string(request_id);
