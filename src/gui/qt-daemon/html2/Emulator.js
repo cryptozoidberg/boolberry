@@ -218,7 +218,7 @@ Emulator = function() {
     };
 
     this.sendAnswer = function(status, data) {
-        dispatch(JSON.stringify(status), JSON.stringify(data));
+        this.backend.backendCallback(JSON.stringify(status), JSON.stringify(data));
     };
 
     this.functions = {

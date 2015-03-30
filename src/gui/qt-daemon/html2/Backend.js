@@ -71,6 +71,10 @@ Backend = function(emulator) {
 
     // Callback from backend
     this.backendCallback = function(status, param) {
+        // Deserialize JSON
+        status = (status) ? JSON.parse(status) : null;
+        param  = (param)  ? JSON.parse(param)  : null;
+
         // Do we have a callback for this?
         var requestId = status.request_id;
         if (callbacks[requestId]) {
@@ -83,13 +87,7 @@ Backend = function(emulator) {
         }
     };
 
-    // Set global function shortcut for backend
-    dispatch = function(status, param) {
-        status = (status) ? JSON.parse(status) : null;
-        param  = (param)  ? JSON.parse(param)  : null;
-        return $backend.backendCallback(status, param);
-    };
-
+    // Subscribers for backend events (initiated by backend)
     this.subscribe = function(command, callback) {
         var backendEvents = ['update_daemon_state', 'update_wallet_info'];
 
@@ -137,6 +135,11 @@ Backend = function(emulator) {
 
     // Register callbacks for automatic events from BACKEND side (like on_update_something_something)
     this.registerEventCallbacks = function() {
+        // Register dispatch function
+        if (!this.shouldUseEmulator()) {
+            Qt.dispatch.connect(this.backendCallback);
+        }
+
         /**
          * update_daemon_state
          *
