@@ -25,16 +25,16 @@
 <div class="panel panel-transparent resume">
     <div class="row">
         <div class="col-xs-3 col-sm-3">
-            <h4><span>Сейфов</span><em class="index_safeCount">0</em></h4>
+            <a href="#safes"><h4><span>Сейфов</span><em class="index_safeCount">0</em></h4></a>
         </div>
         <div class="col-xs-3 col-sm-3">
-            <h4><span>Платежей</span><em class="index_paymentsCount">0</em></h4>
+            <a href="#history"><h4><span>Платежей</span><em class="index_paymentsCount">0</em></h4></a>
         </div>
         <div class="col-xs-3 col-sm-3">
-            <h4><span>Весь баланс</span><em><em class="index_totalBalance">0,00</em> <strong>G</strong></em></h4>
+            <a href="#safes"><h4><span>Весь баланс</span><em><em class="index_totalBalance">0,00</em> <strong>G</strong></em></h4></a>
         </div>
         <div class="col-xs-3 col-sm-3">
-            <h4><span>Заявок</span><em class="index_orderCount">0</em></h4>
+            <a href="#market/my/currency"><h4><span>Заявок</span><em class="index_orderCount">0</em></h4></a>
         </div>
     </div>
 </div>
@@ -50,25 +50,23 @@
                 <a href="safes.html">Cейфы</a>
             </h3>
         </div>
-        <div class="navbar-collapse collapse" id="navbar-head">
-            <div class="btn-toolbar pull-right">
-                <div class="btn-group">
-                    <button class="btn btn-primary navbar-btn" type="button" data-toggle="modal" data-target="#addSafe">
-                        Создать сейф
-                    </button>
-                </div>
-                <div class="btn-group">
-                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-info navbar-btn dropdown-toggle"
-                            type="button">
-                        Восстановить сейф <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                        <li><a type="button" class="index_open-safe-button">Открыть файл-сейф</a></li>
-                        <li><a type="button" data-toggle="modal" data-target="#onensmartSafe">Восстановить из
-                            smartsafe</a></li>
-                    </ul>
-                </div>
-            </div>
+    </div>
+    <div class="btn-toolbar">
+        <div class="btn-group">
+            <button class="btn btn-primary navbar-btn index_create-safe-button" type="button">
+                Создать сейф
+            </button>
+        </div>
+        <div class="btn-group">
+            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-info navbar-btn dropdown-toggle"
+                    type="button">
+                Восстановить сейф <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                <li><a type="button" class="index_open-safe-button">Открыть файл-сейф</a></li>
+                <li><a type="button" data-toggle="modal" data-target="#onensmartSafe">Восстановить из
+                    smartsafe</a></li>
+            </ul>
         </div>
     </div>
     <div class="owl-carousel safes" id="owl-safes">
@@ -88,7 +86,7 @@
                             <!--<li><a href="#">Начать добычу</a></li>-->
 
                             <!--<li class="divider"></li>-->
-                            <!--<li><a href="safe.html#information">Присвоить алиас</a></li>-->
+                            <!--<li><a href="" data-toggle="modal" data-target="#alias">Присвоить алиас</a></li>-->
                             <!--<li><a href="">Отключить сейф</a></li>-->
                             <!--<li><a href="market.html">Сделать бекап</a></li>-->
                         <!--</ul>-->
@@ -209,7 +207,7 @@
 
 
                     <!--</div>-->
-                    <!--<div><a href="safe.html#information" class="label label-warning">Присвоить алиас</a></div>-->
+                    <!--<div><a href="" data-toggle="modal" data-target="#alias" class="label label-warning">Присвоить алиас</a></div>-->
 
 
                 <!--</div>-->
@@ -257,7 +255,7 @@
                             <!--<li><a href="#">Начать добычу</a></li>-->
 
                             <!--<li class="divider"></li>-->
-                            <!--<li><a href="safe.html#information">Присвоить алиас</a></li>-->
+                            <!--<li><a href="" data-toggle="modal" data-target="#alias">Присвоить алиас</a></li>-->
                             <!--<li><a href="">Отключить сейф</a></li>-->
                             <!--<li><a href="market.html">Сделать бекап</a></li>-->
                         <!--</ul>-->
@@ -339,7 +337,7 @@
                             <!--<li><a href="#">Остановить добычу</a></li>-->
 
                             <!--<li class="divider"></li>-->
-                            <!--<li><a href="safe.html#information">Присвоить алиас</a></li>-->
+                            <!--<li><a href="" data-toggle="modal" data-target="#alias">Присвоить алиас</a></li>-->
                             <!--<li><a href="">Отключить сейф</a></li>-->
                             <!--<li><a href="market.html">Сделать бекап</a></li>-->
                         <!--</ul>-->
@@ -425,7 +423,7 @@
                             <!--<li><a href="#">Остановить добычу</a></li>-->
 
                             <!--<li class="divider"></li>-->
-                            <!--<li><a href="safe.html#information">Присвоить алиас</a></li>-->
+                            <!--<li><a href="" data-toggle="modal" data-target="#alias">Присвоить алиас</a></li>-->
                             <!--<li><a href="">Отключить сейф</a></li>-->
                             <!--<li><a href="market.html">Сделать бекап</a></li>-->
                         <!--</ul>-->
@@ -537,7 +535,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -550,8 +548,10 @@
                         </ul>
                     </div>
 
-                    <h3 class="inline"><a class="" href="safes.html">Исходящие платежи <span class="badge">1</span></a>
+                    <h3 class="inline">
+                        <a href="history/outgoing.html" class="widget-header">Исходящие платежи <span class="badge">1</span></a>
                     </h3>
+
                 </div>
                 <div class="scroll">
                     <div class="scroll-inner">
@@ -767,7 +767,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -781,7 +781,9 @@
                     </div>
 
                     <h3 class="inline">
-                        <a href="#" class="widget-header">Входящие платежи <span class="badge">1</span></a></h3>
+                        <a href="history/ingoing.html" class="widget-header">Входящие платежи <span class="badge">1</span></a>
+                    </h3>
+
 
                 </div>
                 <div class="scroll">
@@ -926,7 +928,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -938,8 +940,11 @@
 
                         </ul>
                     </div>
-                    <h3 class="inline"><a href="#" class="widget-header">Избранное – Валюта <span class="badge">4</span></a>
+
+                    <h3 class="inline">
+                        <a href="market/favorites/currency.html" class="widget-header">Избранное – Валюта <span class="badge">4</span></a>
                     </h3>
+
                 </div>
 
                 <div class="scroll">
@@ -1058,7 +1063,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -1070,8 +1075,11 @@
 
                         </ul>
                     </div>
-                    <h3 class="inline"><a href="#" class="widget-header">Избранное – Товар <span class="badge">4</span></a>
+
+                    <h3 class="inline">
+                        <a href="market/favorites/barter.html" class="widget-header">Избранное – Товар <span class="badge">4</span></a>
                     </h3>
+
                 </div>
 
                 <div class="scroll">
@@ -1154,7 +1162,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -1166,8 +1174,11 @@
 
                         </ul>
                     </div>
-                    <h3 class="inline"><a href="#" class="widget-header">Спрос на товар<span class="badge">4</span></a>
+
+                    <h3 class="inline">
+                        <a href="market/barter/bid.html" class="widget-header">Спрос на товар <span class="badge">4</span></a>
                     </h3>
+
                 </div>
                 <div class="scroll">
                     <div class="scroll-inner">
@@ -1291,7 +1302,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -1303,8 +1314,11 @@
 
                         </ul>
                     </div>
-                    <h3 class="inline"><a href="#" class="widget-header">Предложения товаров<span class="badge">4</span></a>
+
+                    <h3 class="inline">
+                        <a href="market/barter/ask.html" class="widget-header">Предложения товаров <span class="badge">4</span></a>
                     </h3>
+
                 </div>
                 <div class="scroll">
                     <div class="scroll-inner">
@@ -1429,7 +1443,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -1441,8 +1455,11 @@
 
                         </ul>
                     </div>
-                    <h3 class="inline"><a href="#" class="widget-header">Информация по бэкенду</a>
+
+                    <h3 class="inline">
+                        <a href="settings.html" class="widget-header">Информация о сети</a>
                     </h3>
+
                 </div>
                 <div class="scroll">
                     <div class="scroll-inner">
@@ -1515,7 +1532,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -1527,8 +1544,11 @@
 
                         </ul>
                     </div>
-                    <h3 class="inline"><a href="#" class="widget-header">Активная добыча <span
-                            class="badge">2</span></a></h3>
+
+                    <h3 class="inline">
+                        <a href="deposits.html" class="widget-header">Активная добыча <span class="badge">2</span></a>
+                    </h3>
+
                 </div>
                 <div class="panel-body">
 
@@ -1664,7 +1684,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -1676,8 +1696,11 @@
 
                         </ul>
                     </div>
-                    <h3 class="inline"><a href="#" class="widget-header">Спрос на гульдены в системе <span
-                            class="badge">4</span></a></h3>
+
+                    <h3 class="inline">
+                        <a href="market/currency/bid.html" class="widget-header">Спрос на гульдены в системе <span class="badge">4</span></a>
+                    </h3>
+
                 </div>
 
                 <div class="scroll">
@@ -1800,7 +1823,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -1812,8 +1835,11 @@
 
                         </ul>
                     </div>
-                    <h3 class="inline"><a href="#" class="widget-header">Предложение гульденов в системе<span
-                            class="badge">2</span></a></h3>
+
+                    <h3 class="inline">
+                        <a href="market/currency/ask.html" class="widget-header">Предложение гульденов в системе <span class="badge">4</span></a>
+                    </h3>
+
                 </div>
 
                 <div class="scroll">
@@ -2082,7 +2108,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -2094,7 +2120,11 @@
 
                         </ul>
                     </div>
-                    <h3 class="inline"><a href="#" class="widget-header">Последние контакты</a></h3>
+
+                    <h3 class="inline">
+                        <a href="contacts.html" class="widget-header">Последние контакты</a>
+                    </h3>
+
                 </div>
                 <div class="scroll">
                     <div class="inner-scroll">
@@ -2200,7 +2230,7 @@
                                                        tabindex="-1">Избранное – Товар</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="backendInfo" role="menuitem"
-                                                       tabindex="-1">Информация по бэкенду</a></li>
+                                                       tabindex="-1">Информация о сети</a></li>
                             <li role="presentation"><a class="button" href="#changeThisWidget"
                                                        data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
                                 контакты</a></li>
@@ -2260,7 +2290,7 @@
                     <li><a href="#">Начать добычу</a></li>
 
                     <li class="divider"></li>
-                    <li><a href="safe.html#information">Присвоить алиас</a></li>
+                    <li><a href="" data-toggle="modal" data-target="#alias">Присвоить алиас</a></li>
                     <li><a class="index_close-safe-button" href="#">Отключить сейф</a></li>
                     <li><a href="market.html">Сделать бекап</a></li>
                 </ul>
@@ -2298,7 +2328,9 @@
 
             </div>
             <div><span class="label label-info">@safealias</span> <span
-                    class="label label-info">@safealias</span></div>
+                    class="label label-info">@safealias</span>
+                <a href="" data-toggle="modal" data-target="#alias"  class="label label-warning">Присвоить алиас</a>
+            </div>
 
 
         </div>
@@ -2308,9 +2340,14 @@
             <div class="row">
                 <div class="col-xs-9 col-sm-9">
                     <ul class="list-unstyled">
-
-                        <li class="text-info" style="display: none;">
-                            Ожидается: <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">
+                        <li class="text-info">
+                            Ожидается: <em>0,10 G</em> <span class="chart receive-timer" data-percent="86"></span>
+                            <span style="color:red;font-size:25px;">
+                                !
+                            </span>
+                        </li>
+                        <li class="text-info">
+                            Доступно для платежей: <em>0,10 G</em>
                         </li>
                     </ul>
                     <div class="balance">Баланс: {{ balance }}G</div>
@@ -2348,6 +2385,11 @@
             $('#onensmartSafe').addClass('modal-ready');
         })
     }
+    function hideModalConfirmOperation(event) {
+        $('#confirm_operation_modal').on('shown.bs.modal', function (e) {
+            $('#confirm_operation_modal').addClass('modal-ready');
+        })
+    }
     function hideModalPinreset(event) {
         $('#resetpin').on('shown.bs.modal', function (e) {
             $('#resetpin').addClass('modal-ready');
@@ -2382,23 +2424,23 @@
     owlSafes = owl3;
 
 
-    var owl4 = $("#owl-panels");
-    owl4.owlCarousel({
-        items: 1,
-        autoHeight: true,
-        nav: false,
-        dots: false,
-        margin: 16,
-        //callbacks: sliderInit();
-        mouseDrag: false,
-        touchDrag: false,
-        callbacks: true,
-        smartSpeed: 100,
-        URLhashListener: true,
-        autoplayHoverPause: true,
-        startPosition: 'URLHash',
-        onInitialized: hideModalAdd
-    });
+//    var owl4 = $("#owl-panels");
+//    owl4.owlCarousel({
+//        items: 1,
+//        autoHeight: true,
+//        nav: false,
+//        dots: false,
+//        margin: 16,
+//        //callbacks: sliderInit();
+//        mouseDrag: false,
+//        touchDrag: false,
+//        callbacks: true,
+//        smartSpeed: 100,
+//        URLhashListener: true,
+//        autoplayHoverPause: true,
+//        startPosition: 'URLHash',
+//        onInitialized: hideModalAdd
+//    });
 
 
 //    var owl5 = $("#owl-panels0");
@@ -2420,6 +2462,8 @@
 //    });
     $(function() {
         hideModalOpen();
+        hideModalAdd();
+        hideModalConfirmOperation();
     });
     var owl5 = $("#owl-panels1");
     owl5.owlCarousel({
@@ -2500,31 +2544,9 @@
 
     $(function () {
 
-        $('.send-timer').easyPieChart({
-            easing: 'easeOutBounce',
-            size: 32,
-            lineWidth: 9,
-            lineCap: 'butt',
-            barColor: '#f0ad4e',
-            onStep: function (from, to, percent) {
-                $(this.el).find('.percent').text(Math.round(percent));
-            }
-        });
-        var chart = window.chart = $('.chart').data('easyPieChart');
         $('.js_update').on('click', function () {
             chart.update(Math.random() * 200 - 100);
         });
-        $('.receive-timer').easyPieChart({
-            easing: 'easeOutBounce',
-            size: 32,
-            lineWidth: 9,
-            lineCap: 'butt',
-            barColor: '#5bc0de',
-            onStep: function (from, to, percent) {
-                $(this.el).find('.percent').text(Math.round(percent));
-            }
-        });
-        var chart = window.chart = $('.chart').data('easyPieChart');
         $('.js_update').on('click', function () {
             chart.update(Math.random() * 200 - 100);
         });
@@ -2596,10 +2618,12 @@
 //        $("button").click(function() {
 //            doPlot($(this).text());
 //        });
+
     });
-    $('.sdatepicker .input-group.date').datepicker({
-        autoclose: true,
-        todayHighlight: true
-    });
+
+//    $('.sdatepicker .input-group.date').datepicker({
+//        autoclose: true,
+//        todayHighlight: true
+//    });
 
 </script>

@@ -10,25 +10,21 @@ Backend = function(emulator) {
     this.emulator = emulator;
     this.emulator.backend = this;
     this.last_daemon_state = null;
+    this.backendEventSubscribers = [];
+    this.applicationSettings = null;
+    this.contactGroups = ['Проверенные', 'Магазины', 'Черный список'];
     var callbacks = [];
     var currentScreen = null;
     var $backend = this;
 
     this.safes = {};
-    this.backendEventSubscribers = [];
+    this.contacts = null;
 
     /******************** 'Talking to backend' stuff **********************/
 
-    // Requests a function
+    // Requests a function from backend
     this.backendRequest = function(command, parameters, callback) {
-        console.log("Requesting API command '"+command+"' with parameters: "+JSON.stringify(parameters));
-
-        // Emulated call versus real one through the magic Qt object
-        var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt[command];
-
-        // Now call it
-        var returnValue = commandFunction(parameters);
-        var returnObject = JSON.parse(returnValue);
+        var returnObject = this.doBackendRequest(command, parameters);
 
         if (returnObject.error_code != "OK") {
             console.log("API Error for command '"+command+"': " + returnObject.error_code);
@@ -39,12 +35,51 @@ Backend = function(emulator) {
         }
     };
 
+    // Requests a function from backend synchronously (like open file dialog)
+    this.backendSyncRequest = function(command, parameters) {
+        var returnObject = this.doBackendRequest(command, parameters);
+
+        if (returnObject.error_code != "OK") {
+            console.log("API Error for command '"+command+"': " + returnObject.error_code);
+            return returnObject;
+        } else {
+            // Everything is OK
+            console.log("Requesting API command '"+command+"': completed, status=OK");
+            return returnObject;
+        }
+    };
+
+    this.doBackendRequest = function(command, parameters) {
+        console.log("Requesting API command '"+command+"' with parameters: "+JSON.stringify(parameters));
+
+        // Emulated call versus real one through the magic Qt object
+        var commandFunction = (this.shouldUseEmulator()) ? this.emulator.backendRequestCall(command) : Qt_parent[command];
+
+        // Does it exist?
+        if (commandFunction === undefined) {
+            console.log("API Error for command '"+command+"': command not found in Qt object");
+            return {
+                error_code: "COMMAND_NOT_FOUND"
+            };
+        }
+
+        // Now call it
+        var returnValue = commandFunction(JSON.stringify(parameters));
+        var returnObject = (returnValue === '') ? {} : JSON.parse(returnValue);
+
+        return returnObject;
+    };
+
     // Callback from backend
     this.backendCallback = function(status, param) {
+        // Deserialize JSON
+        status = (status) ? JSON.parse(status) : null;
+        param  = (param)  ? JSON.parse(param)  : null;
+
         // Do we have a callback for this?
         var requestId = status.request_id;
         if (callbacks[requestId]) {
-            console.log("Request with id "+requestId+" successfully returned with status="+status.error_code+" and response:");
+            console.log("Request with id "+requestId+" successfully executed with status="+status.error_code+" and response:");
             console.log(param);
             var callback = callbacks[requestId];
             callback(status, param);
@@ -53,20 +88,11 @@ Backend = function(emulator) {
         }
     };
 
-    // Set global function shortcut for backend
-    dispatch = function(status, param) {
-        status = (status) ? JSON.parse(status) : null;
-        param  = (param)  ? JSON.parse(param)  : null;
-        return $backend.backendCallback(status, param);
-    };
-
+    // Subscribers for backend events (initiated by backend)
     this.subscribe = function(command, callback) {
-        var nonBackendEvents = ['update_safe_count', 'update_balance'];
+        var backendEvents = ['update_daemon_state', 'update_wallet_info'];
 
-        if (nonBackendEvents.indexOf(command) >= 0) {
-            // This object fires the event
-            this.backendEventSubscribers[command] = callback;
-        } else {
+        if (backendEvents.indexOf(command) >= 0) {
             // Backend layer fires the event
 
             if (this.shouldUseEmulator()) {
@@ -74,12 +100,15 @@ Backend = function(emulator) {
             } else {
                 Qt[command].connect(this.callbackStrToObj.bind({callback: callback}));
             }
+        } else {
+            // This object fires the event
+            this.backendEventSubscribers[command] = callback;
         }
     };
 
-    this.fireEvent = function(event) {
+    this.fireEvent = function(event, arguments) {
         if (this.backendEventSubscribers[event]) {
-            this.backendEventSubscribers[event]();
+            this.backendEventSubscribers[event](arguments);
         }
     };
 
@@ -88,27 +117,30 @@ Backend = function(emulator) {
         this.callback(obj);
     };
 
-    /******************** Specific backend API calls being reflected in UI *********************/
-
     // UI initialization
     this.onAppInit = function() {
+        // Load saved app settings
+        this.loadApplicationSettings();
+
+        // Register callbacks for automatic events from BACKEND side (like on_update_something_something)
         this.registerEventCallbacks();
 
-        // -- // -- // -- // -- //
+        // If no real backend, do emulated events
+        if (this.shouldUseEmulator()) this.emulator.startEventCallbacksTimers();
 
-        //setInterval(function() {
-        //    $backend.checkIfOnline();
-        //}, this.settings.intervalCheckIfOnline);
-        //
-        //$backend.checkIfOnline();
-        //
+        // Update necessary info on current screen regularly
         setInterval(this.updateCurrentScreen, this.settings.intervalUpdateCurrentScreen);
-
-        $backend.emulator.startEventCallbacksTimers();
     };
 
-    // Register callbacks for automatic events from backend side
+    /******************** Specific backend API calls being reflected in UI *********************/
+
+    // Register callbacks for automatic events from BACKEND side (like on_update_something_something)
     this.registerEventCallbacks = function() {
+        // Register dispatch function
+        if (!this.shouldUseEmulator()) {
+            Qt.dispatch.connect(this.backendCallback);
+        }
+
         /**
          * update_daemon_state
          *
@@ -147,7 +179,7 @@ Backend = function(emulator) {
 
             // info widget
             $backend.last_daemon_state = data;
-            $backend.application.updateBackendInfoWidget();
+            //$backend.application.updateBackendInfoWidget();
         });
 
         /**
@@ -169,6 +201,9 @@ Backend = function(emulator) {
          *
          */
         this.subscribe('update_wallet_info', function(data) {
+            // Ignore if we get empty object
+            if (typeof data === 'object' && Object.size(data)==0) return;
+
             // Save this array of safes if anything changed
             var id = data.wallet_id;
             var safe = $backend.safes[id];
@@ -192,8 +227,8 @@ Backend = function(emulator) {
 
     };
 
-    this.showOpenFileDialog = function(caption, callback) {
-        this.backendRequest('show_openfile_dialog', {caption: caption, filemask: '*.lui'}, callback);
+    this.showOpenFileDialog = function(caption) {
+        return this.backendSyncRequest('show_openfile_dialog', {caption: caption, filemask: '*.lui'});
     };
 
     this.closeWallet = function(wallet_id, callback) {
@@ -235,7 +270,7 @@ Backend = function(emulator) {
             }
 
             callback(status, data);
-        })
+        });
     };
 
     this.updateCurrentScreen = function() {
@@ -264,6 +299,27 @@ Backend = function(emulator) {
                 //});
                 break;
         }
+    };
+
+    this.loadApplicationSettings = function() {
+        $backend.backendRequest('get_app_data', null, function(status, data) {
+            if (status.error_code == 'OK') {
+                $backend.applicationSettings = data;
+                $backend.fireEvent('app_settings_updated');
+            } else {
+                $backend.fireEvent('error_happened', status.error_code);
+            }
+        });
+    };
+
+    this.saveApplicationSettings = function() {
+        $backend.backendRequest('store_app_data', this.applicationSettings, function(status, data) {
+            if (status.error_code == 'OK') {
+                $backend.fireEvent('app_settings_saved');
+            } else {
+                $backend.fireEvent('error_happened', status.error_code);
+            }
+        });
     };
 
     this.shouldUseEmulator = function() {

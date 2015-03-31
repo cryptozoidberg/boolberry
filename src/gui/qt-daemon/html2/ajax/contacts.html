@@ -32,6 +32,8 @@
         </ul>
     </nav>
 
+    <a data-target="#addContact" class="btn btn-link pull-right" type="button" data-toggle="modal"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт контактов в файл</span></a>
+
     <h1>Контакты</h1>
     <h5>Здесь Вы можете просмотреть список всех контактов, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
 
@@ -47,7 +49,6 @@
                     <div class="col-xs-8 col-sm-8">
                         <a href="contact0.html" class="btn btn-primary">Добавить контакт</a>
                         <a data-target="#lists" class="btn btn-link" type="button" data-toggle="modal"><i class="fa fa-lg fa-cog  text-muted"></i> <span class="underlined text-muted">Группы контактов</span></a>
-                        <a data-target="#addContact" class="btn btn-link" type="button" data-toggle="modal"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт контактов в файл</span></a>
                     </div>
 
                     <div class="col-xs-4 col-sm-4">
@@ -64,204 +65,60 @@
         <div class="table-responsive panel">
             <table class="table table-condensed  data-table contacts-table">
                 <thead>
-                <tr>
-
-                    <th><span class="nowrap">Контакт</span></th>
-                    <th><span class="nowrap">Счет</span></th>
-                    <th><span class="nowrap">Email/IM's <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                    <th><span class="nowrap">Группы<i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                    <th><span class="nowrap">Заметка <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                    <th></th>
-
-
-                </tr>
-
+                    <tr>
+                        <th><span class="nowrap">Контакт</span></th>
+                        <th><span class="nowrap">Счет</span></th>
+                        <th><span class="nowrap">Email/IM's <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Группы<i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Заметка <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th></th>
+                    </tr>
                 </thead>
 
-                <tbody>
-                <tr>
+                <tbody class="contacts_contact_insertion">
 
-                    <td>
-                        <a class="safename" href="contact.html">Человек</a>
-                        <div class="text-muted">
-                            <a class="text-muted" href="">Торонто</a>, <a class="text-muted" href="">Канада</a></div>
-                    </td>
-                    <td>
-                        <a class="blocklink" href="">
-
-
-
-                            <span class="account-text"><span class="text-muted">2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class="moredots">...</span></span>@onechelovekaccout @twochelovekaccout
-                        </a>
-                    </td>
-
-                    <td><ul class="list-unstyled"><li><a href="">chelovek@domain.com</a></li></ul></td>
-                    <td> <select class="selectpicker show-tick btn-group-sm" multiple title='Выберите группу'>
-
-                        <option selected="">Проверенные</option>
-                        <option>Черный список</option>
-                        <option>Магазины</option>
-                    </select></td>
-                    <td><span class="text-muted">текст о чем то<p></p></span></td>
-
-                    <td><div class="dropdown pull-right">
-                        <button type="button" class="btn btn-sm btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-lg fa-money text-muted"></i> <span class="caret text-muted"></span>
-                        </button>
-                        <ul role="menu" class="dropdown-menu dropdown-menu-right">
-                            <li><a href="">Отправить гульдены</a></li>
-                            <li><a href="">Связанные платежи</a></li>
-
-                        </ul>
-                    </div>
-
-                    </td>
-
-                </tr>
-                <tr>
-
-                    <td>
-                        <a class="safename" href="contact.html">Вася</a>
-                        <div class="text-muted"><a href="" class="text-muted">Канада</a></div>
-                    </td>
-                    <td>
-                        <a href="" class="blocklink"><span class="account-text"><span class="text-muted">2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class="moredots">...</span>
-                </span>@vasyaccount
-                        </a>
-                    </td>
-
-                    <td><ul class="list-unstyled"><li><a href="">vasya@domain.com</a></li><li><small class="text-muted">Skype:</small> <a href="">vasya</a></li></ul></td>
-                    <td> <select class="selectpicker show-tick btn-group-sm" multiple title='Выберите группу'>
-
-                        <option selected>Проверенные</option>
-                        <option>Черный список</option>
-                        <option selected>Магазины</option>
-                    </select></td>
-                    <td><span class="text-muted">текст о чем то<p></p></span></td>
-                    <td><div class="dropdown pull-right">
-                        <button aria-expanded="false" data-toggle="dropdown" class="btn btn-sm btn-link dropdown-toggle" type="button">
-                            <i class="fa fa-lg fa-money text-muted"></i> <span class="caret text-muted"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                            <li><a href="">Отправить гульдены</a></li>
-                            <li><a href="">Связанные платежи</a></li>
-
-                        </ul>
-                    </div>
-
-                    </td>
-
-                </tr>
-
-                <tr>
-
-                    <td>
-                        <a href="contact.html" class="safename">sdpweod</a>
-                        <div class="text-muted">
-                            <a href="" class="text-muted">Мексика</a></div>
-                    </td>
-                    <td>
-                        <a class="blocklink" href=""><span class="account-text"><span class="text-muted">2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class="moredots">...</span>
-                </span>@sdpweod
-                        </a>
-                    </td>
-
-                    <td><ul class="list-unstyled"><li></li><li><small class="text-muted">Skype:</small>  <a href="">sdpweod</a></li></ul></td>
-                    <td> <select class="selectpicker show-tick btn-group-sm" multiple title='Выберите группу'>
-
-                        <option>Проверенные</option>
-                        <option selected>Черный список</option>
-                        <option>Магазины</option>
-                    </select></td>
-                    <td><span class="text-muted">текст о чем то<p></p></span></td>
-                    <td><div class="dropdown pull-right">
-                        <button type="button" class="btn btn-sm btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-lg fa-money text-muted"></i> <span class="caret text-muted"></span>
-                        </button>
-                        <ul role="menu" class="dropdown-menu dropdown-menu-right">
-                            <li><a href="">Отправить гульдены</a></li>
-                            <li><a href="">Связанные платежи</a></li>
-
-                        </ul>
-                    </div>
-
-                    </td>
-
-                </tr>
-                <tr>
-
-                    <td>
-                        <a href="contact.html" class="safename">Uoiuy</a>
-                        <div class="text-muted"><a class="text-muted" href="">Австралия</a></div>
-                    </td>
-                    <td>
-                        <a class="blocklink" href=""><span class="account-text"><span class="text-muted">2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class="moredots">...</span>
-                </span>@uoiuyaccount  </a>
-                    </td>
-
-                    <td><ul class="list-unstyled"><li><a href="">uoiuy@domain.com</a></li><li><small class="text-muted">Skype:</small> <a href="">Uoiuy</a></li></ul></td>
-                    <td> <select class="selectpicker show-tick btn-group-sm" multiple title='Выберите группу'>
-
-                        <option>Проверенные</option>
-                        <option>Черный список</option>
-                        <option>Магазины</option>
-                    </select></td>
-                    <td></td>
-                    <td><div class="dropdown pull-right">
-                        <button type="button" class="btn btn-sm btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-lg fa-money text-muted"></i> <span class="caret text-muted"></span>
-                        </button>
-                        <ul role="menu" class="dropdown-menu dropdown-menu-right">
-                            <li><a href="">Отправить гульдены</a></li>
-                            <li><a href="">Связанные платежи</a></li>
-
-                        </ul>
-                    </div>
-
-                    </td>
-
-                </tr>
-                <tr>
-
-                    <td>
-                        <a class="safename" href="contact.html">Вася</a>
-                        <div class="text-muted"><a href="" class="text-muted">Канада</a></div>
-                    </td>
-                    <td>
-                        <a href="" class="blocklink"><span class="account-text"><span class="text-muted">2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class="moredots">...</span>
-                </span>@vasyaccount
-                        </a>
-                    </td>
-
-                    <td><ul class="list-unstyled"><li><a href="">vasya@domain.com</a></li><li><small class="text-muted">Skype:</small> <a href="">vasya</a></li></ul></td>
-                    <td> <select class="selectpicker show-tick btn-group-sm" multiple title='Выберите группу'>
-
-                        <option>Проверенные</option>
-                        <option>Черный список</option>
-                        <option>Магазины</option>
-                    </select></td>
-                    <td><span class="text-muted">текст о чем то<p></p></span></td>
-                    <td><div class="dropdown pull-right">
-                        <button aria-expanded="false" data-toggle="dropdown" class="btn btn-sm btn-link dropdown-toggle" type="button">
-                            <i class="fa fa-lg fa-money text-muted"></i> <span class="caret text-muted"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                            <li><a href="">Отправить гульдены</a></li>
-                            <li><a href="">Связанные платежи</a></li>
-
-                        </ul>
-                    </div>
-
-                    </td>
-
-                </tr>
                 </tbody>
-
-
             </table>
-
         </div>
 
+        <table class="hidden">
+            <tbody class="contacts_contact_template">
+                <tr>
+                    <td>
+                        <a class="safename" href="#contact/{{ contact.id }}">{{ contact.name }}</a>
+                        <div class="text-muted"><a class="text-muted" href="#contact/{{ contact.id }}">{{ contact.city }}</a>, <a class="text-muted" href="">{{ contact.country }}</a></div>
+                    </td>
+                    <td>
+                        <a class="blocklink" href="#contact/{{ contact.id }}">
+                            <span class="account-text">
+                                <span class="text-muted">{{ contact.account }}</span>
+                                <span class="moredots">...</span>
+                            </span>
+                            {{ contact.aliases }}
+                        </a>
+                    </td>
+                    <td>
+                        <ul class="list-unstyled">
+                            <li><a href="#contact/{{ contact.id }}">{{ contact.contactField }}</a></li>
+                        </ul>
+                    </td>
+                    <td>{{ contact.groups }}</td>
+                    <td><span class="text-muted">{{ contact.note }}<p></p></span></td>
+                    <td>
+                        <div class="dropdown pull-right">
+                            <button type="button" class="btn btn-sm btn-link dropdown-toggle" data-toggle="dropdown"
+                                    aria-expanded="false">
+                                <i class="fa fa-lg fa-money text-muted"></i> <span class="caret text-muted"></span>
+                            </button>
+                            <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                                <li><a href="#sendG/{{ contact.id }}">Отправить гульдены</a></li>
+                                <li><a href="#history/contact/{{ contact.id }}">Связанные платежи</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
 
     </div>

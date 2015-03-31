@@ -4,13 +4,61 @@ Emulator = function() {
     this.backend = null; // set in Backend
     this.settings = {
         asyncEmulationTimeout: 500,
-        eventsInterval: 5000
+        eventsInterval: 5000,
+        synchronousFunctions: ['show_openfile_dialog']
     };
     this.eventCallbacks = [];
     this.application = null;
     this.wallets = null;
     var lastRequestId = 0;
     var $emulator = this;
+
+    // Emulation of saved app settings
+    this.applicationSettings = {
+        contacts: {
+            10: {
+                'name': 'Человек',
+                'location': {
+                    'city': 'Торонто',
+                    'country': 'Канада'
+                },
+                'account': '1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y',
+                'aliases': [
+                    'chelovek\'s_alias1',
+                    'chelovek\'s_alias2'
+                ],
+                'contactFields': {
+                    'Email': 'chelovek@domain.ru',
+                    'Skype': 'chelovek',
+                    'Facebook': 'chelovek3042'
+                },
+                'note': 'сказал, нужны статьи',
+                'groups': [
+                    'Проверенные'
+                ]
+            },
+            11: {
+                'name': 'Человек 2',
+                'location': {
+                    'city': 'Москва',
+                    'country': 'Россия'
+                },
+                'account': '1JRgYWzGYJuJhJYWzxSnsNSscrUe4xLwbnub4YGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y',
+                'aliases': [
+                    'chelovek2\'s_alias'
+                ],
+                'contactFields': {
+                    'Email': 'chelovek2@mail.ru',
+                    'Skype': 'chelovek2',
+                    'Facebook': 'chelovechek'
+                },
+                'note': 'еще один контакт',
+                'groups': [
+                    'Проверенные', 'Магазины'
+                ]
+            }
+        }
+    };
 
     // Event callbacks (from backend)
     this.startEventCallbacksTimers = function() {
@@ -123,10 +171,6 @@ Emulator = function() {
                 }
             }
         }, $emulator.settings.eventsInterval);
-
-        //create-safe_safe-name-input
-        //create-safe_safe-password-input-1
-        //create-safe_safe-password-input-2
     };
 
     // Should return a function to be called with the arguments later
@@ -136,28 +180,32 @@ Emulator = function() {
                 // Make up request ID
                 var requestId = ++lastRequestId;
 
-                // Emulate async call using timeout
-                setTimeout(function(arg)
-                    {
-                        // Actually calling the command with arguments of parent function
-                        var returnObject = $emulator.functions[arg.command].apply(this, arg.arguments);
+                if ($emulator.synchronousFunctions.indexOf(arg.command) >= 0) {
+                    // Actually calling the command with arguments of parent function
+                    return $emulator.functions[arg.command].apply(this, JSON.parse(arg.arguments));
+                } else {
+                    // Emulate async call using timeout
+                    setTimeout(function (arg) {
+                            // Actually calling the command with arguments of parent function
+                            var returnObject = $emulator.functions[arg.command].apply(this, JSON.parse(arg.arguments));
 
-                        // Passing the emulated result to our UI callback
-                        var status = {
-                            error_code: returnObject.error_code,
-                            request_id: arg.requestId
-                        };
-                        $emulator.sendAnswer(status, returnObject.data);
-                    },
-                    $emulator.settings.asyncEmulationTimeout,
-                    {command: command, requestId: requestId, arguments: arguments}
-                );
+                            // Passing the emulated result to our UI callback
+                            var status = {
+                                error_code: returnObject.error_code,
+                                request_id: arg.requestId
+                            };
+                            $emulator.sendAnswer(status, returnObject.data);
+                        },
+                        $emulator.settings.asyncEmulationTimeout,
+                        {command: command, requestId: requestId, arguments: arguments}
+                    );
 
-                // Successful API call
-                return JSON.stringify({
-                    error_code: "OK",
-                    request_id: requestId
-                });
+                    // Successful API call
+                    return JSON.stringify({
+                        error_code: "OK",
+                        request_id: requestId
+                    });
+                }
             }
         } else {
             // There's no such command
@@ -170,7 +218,7 @@ Emulator = function() {
     };
 
     this.sendAnswer = function(status, data) {
-        dispatch(JSON.stringify(status), JSON.stringify(data));
+        this.backend.backendCallback(JSON.stringify(status), JSON.stringify(data));
     };
 
     this.functions = {
@@ -212,6 +260,12 @@ Emulator = function() {
             } else {
                 return {error_code: "WRONG_WALLET_ID"};
             }
+        },
+        'get_app_data': function(param) {
+            return {error_code: "OK", data: $emulator.applicationSettings};
+        },
+        'store_app_data': function(param) {
+            return {error_code: "OK", data: {}};
         }
     };
 
