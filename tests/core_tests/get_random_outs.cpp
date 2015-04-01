@@ -32,11 +32,11 @@ bool get_random_outs_test::generate(std::vector<test_event_entry>& events) const
   MAKE_NEXT_BLOCK(events, blk_2, blk_1, miner_account);                                                 //  4
   MAKE_NEXT_BLOCK(events, blk_3, blk_2, miner_account);                                                 //  5
   REWIND_BLOCKS(events, blk_3r, blk_3, miner_account);                                                  // <N blocks>
-  MAKE_TX_LIST_START(events, txs_blk_4, miner_account, miner_account, TEST_COIN_TRANSFER_UNIQUE_SIZE, blk_3);
+  MAKE_TX_LIST_START(events, txs_blk_4, miner_account, miner_account, TEST_COIN_TRANSFER_UNIQUE_SIZE, blk_3r);
 
-  MAKE_TX_LIST(events, txs_blk_4, miner_account, miner_account, TEST_COIN_TRANSFER_UNIQUE_SIZE, blk_3);                    //  7 + N
-  MAKE_TX_LIST(events, txs_blk_4, miner_account, miner_account, TEST_COIN_TRANSFER_UNIQUE_SIZE, blk_3);                    //  8 + N
-  MAKE_TX_LIST(events, txs_blk_4, miner_account, bob_account,   TEST_COIN_TRANSFER_UNIQUE_SIZE, blk_3);                    //  9 + N
+  MAKE_TX_LIST(events, txs_blk_4, miner_account, miner_account, TEST_COIN_TRANSFER_UNIQUE_SIZE, blk_3r);                    //  7 + N
+  MAKE_TX_LIST(events, txs_blk_4, miner_account, miner_account, TEST_COIN_TRANSFER_UNIQUE_SIZE, blk_3r);                    //  8 + N
+  MAKE_TX_LIST(events, txs_blk_4, miner_account, bob_account, TEST_COIN_TRANSFER_UNIQUE_SIZE, blk_3r);                    //  9 + N
 
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_4, blk_3r, miner_account, txs_blk_4);                             // 10 + N
 

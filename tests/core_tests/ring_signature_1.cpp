@@ -133,14 +133,14 @@ bool gen_ring_signature_2::generate(std::vector<test_event_entry>& events) const
   MAKE_NEXT_BLOCK(events, blk_2, blk_1, miner_account);                                                 //  4
   MAKE_NEXT_BLOCK(events, blk_3, blk_2, miner_account);                                                 //  5
   REWIND_BLOCKS(events, blk_3r, blk_3, miner_account);                                                  // <N blocks>
-  MAKE_TX_LIST_START(events, txs_blk_4, miner_account, bob_account, MK_COINS(61), blk_3);               //  6 + N
-  MAKE_TX_LIST(events, txs_blk_4, miner_account, bob_account, MK_COINS(61), blk_3);                     //  7 + N
-  MAKE_TX_LIST(events, txs_blk_4, miner_account, bob_account, MK_COINS(61), blk_3);                     //  8 + N
-  MAKE_TX_LIST(events, txs_blk_4, miner_account, bob_account, MK_COINS(61), blk_3);                     //  9 + N
+  MAKE_TX_LIST_START(events, txs_blk_4, miner_account, bob_account, MK_COINS(61), blk_3r);               //  6 + N
+  MAKE_TX_LIST(events, txs_blk_4, miner_account, bob_account, MK_COINS(61), blk_3r);                     //  7 + N
+  MAKE_TX_LIST(events, txs_blk_4, miner_account, bob_account, MK_COINS(61), blk_3r);                     //  8 + N
+  MAKE_TX_LIST(events, txs_blk_4, miner_account, bob_account, MK_COINS(61), blk_3r);                     //  9 + N
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_4, blk_3r, miner_account, txs_blk_4);                             // 10 + N
   DO_CALLBACK(events, "check_balances_1");                                                              // 11 + N
   REWIND_BLOCKS(events, blk_4r, blk_4, miner_account);                                                  // <N blocks>
-  MAKE_TX_MIX(events, tx_0, bob_account, alice_account, MK_COINS(244) - TESTS_DEFAULT_FEE, 3, blk_4);   // 12 + 2N
+  MAKE_TX_MIX(events, tx_0, bob_account, alice_account, MK_COINS(244) - TESTS_DEFAULT_FEE, 3, blk_4r);   // 12 + 2N
   MAKE_NEXT_BLOCK_TX1(events, blk_5, blk_4r, miner_account, tx_0);                                      // 13 + 2N
   DO_CALLBACK(events, "check_balances_2");                                                              // 14 + 2N
 

@@ -810,7 +810,7 @@ bool fill_output_entries(std::vector<output_index>& out_indices,
 }
 
 bool fill_tx_sources(std::vector<tx_source_entry>& sources, const std::vector<test_event_entry>& events,
-                     const block& blk_head, const currency::account_base& from, uint64_t amount, size_t nmix, bool check_for_spends = true)
+                     const block& blk_head, const currency::account_base& from, uint64_t amount, size_t nmix, bool check_for_spends = true, bool check_for_unloktime = true)
 {
     map_output_idx_t outs;
     map_output_t outs_mine;
@@ -840,9 +840,19 @@ bool fill_tx_sources(std::vector<tx_source_entry>& sources, const std::vector<te
             const output_index& oi = outs[o.first][sender_out];
             if (oi.spent)
                 continue;
-
-            if (oi.p_tx->unlock_time > blockchain.size())
-              continue;
+            if (check_for_unloktime)
+            {
+              if (oi.p_tx->unlock_time < CURRENCY_MAX_BLOCK_NUMBER)
+              {
+                //interpret as block index
+                if (oi.p_tx->unlock_time > blockchain.size())
+                  continue;
+              }
+              else
+              {
+                //interpret as time
+              }
+            }
 
 
             currency::tx_source_entry ts;
@@ -875,12 +885,13 @@ void fill_tx_sources_and_destinations(const std::vector<test_event_entry>& event
                                       const currency::account_base& from, const currency::account_base& to,
                                       uint64_t amount, uint64_t fee, size_t nmix, std::vector<tx_source_entry>& sources,
                                       std::vector<tx_destination_entry>& destinations,
-                                      bool check_for_spends)
+                                      bool check_for_spends,
+                                      bool check_for_unlocktime)
 {
   sources.clear();
   destinations.clear();
 
-  if (!fill_tx_sources(sources, events, blk_head, from, amount + fee, nmix, check_for_spends))
+  if (!fill_tx_sources(sources, events, blk_head, from, amount + fee, nmix, check_for_spends, check_for_unlocktime))
     throw std::runtime_error("couldn't fill transaction sources");
 
   tx_destination_entry de;

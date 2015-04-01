@@ -336,7 +336,8 @@ void fill_tx_sources_and_destinations(const std::vector<test_event_entry>& event
                                       uint64_t amount, uint64_t fee, size_t nmix,
                                       std::vector<currency::tx_source_entry>& sources,
                                       std::vector<currency::tx_destination_entry>& destinations, 
-                                      bool check_for_spends = true);
+                                      bool check_for_spends = true, 
+                                      bool check_for_unlocktime = true);
 uint64_t get_balance(const currency::account_base& addr, const std::vector<currency::block>& blockchain, const map_hash2tx_t& mtx);
 
 //--------------------------------------------------------------------------
@@ -436,6 +437,7 @@ public:
     m_c.handle_incoming_tx(t_serializable_object_to_blob(tx), tvc, m_txs_keeped_by_block);
     bool tx_added = pool_size + 1 == m_c.get_pool_transactions_count();
     bool r = check_tx_verification_context(tvc, tx_added, m_ev_index, tx, m_validator);
+    _ASSERTE(r);
     CHECK_AND_NO_ASSERT_MES(r, false, "tx verification context check failed");
     return true;
   }
@@ -748,6 +750,7 @@ inline bool do_replay_file(const std::string& filename)
     {                                                                                                      \
       std::cout << concolor::magenta << "#TEST# Failed " << #genclass << concolor::normal << '\n';         \
       failed_tests.push_back(#genclass);                                                                   \
+      _ASSERTE(false);                                                                                     \
     }                                                                                                      \
     std::cout << std::endl;                                                                                \
   }
@@ -757,6 +760,7 @@ inline bool do_replay_file(const std::string& filename)
     if(!function())                                                                                        \
     {                                                                                                      \
       std::cout << concolor::magenta << "#TEST# Failed " << test_name << concolor::normal << std::endl;    \
+      _ASSERTE(false);                                                                                     \
       return 1;                                                                                            \
     }                                                                                                      \
     else                                                                                                   \

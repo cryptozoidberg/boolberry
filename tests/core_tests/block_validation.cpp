@@ -331,7 +331,7 @@ bool gen_block_miner_tx_has_2_in::generate(std::vector<test_event_entry>& events
   MAKE_MINER_TX_MANUALLY(miner_tx, blk_0);
   miner_tx.vin.push_back(tmp_tx.vin[0]);
 
-  block blk_1;
+  block blk_1 = AUTO_VAL_INIT(blk_1);
   generator.construct_block_manually(blk_1, blk_0r, miner_account, test_generator::bf_miner_tx, 0, 0, 0, crypto::hash(), 0, miner_tx);
   events.push_back(blk_1);
 
@@ -550,7 +550,7 @@ bool gen_block_invalid_binary_format::generate(std::vector<test_event_entry>& ev
   while (diffic < 200);
 
   blk_last = boost::get<block>(events.back());
-  MAKE_TX(events, tx_0, miner_account, miner_account, MK_COINS(120), boost::get<block>(events[1]));
+  MAKE_TX(events, tx_0, miner_account, miner_account, MK_COINS(120), blk_last);
   DO_CALLBACK(events, "corrupt_blocks_boundary");
 
   block blk_test;

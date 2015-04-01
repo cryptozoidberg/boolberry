@@ -305,6 +305,7 @@ namespace currency
     extra.clear();
     signatures.clear();
     attachment.clear();
+    
   }
   /*
   inline
