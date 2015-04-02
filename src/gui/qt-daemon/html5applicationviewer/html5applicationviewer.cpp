@@ -353,7 +353,7 @@ bool Html5ApplicationViewer::on_request_quit()
   m_quit_requested = true;
   if (m_backend_stopped)
   {
-    bool r = QMetaObject::invokeMethod(this,
+    /*bool r = */QMetaObject::invokeMethod(this,
       "do_close",
       Qt::QueuedConnection);
   }
@@ -377,7 +377,7 @@ bool Html5ApplicationViewer::on_backend_stopped()
   m_deinitialize_done = true;
   if (m_quit_requested)
   {
-    bool r = QMetaObject::invokeMethod(this,
+    /*bool r = */QMetaObject::invokeMethod(this,
       "do_close",
       Qt::QueuedConnection);
   }
