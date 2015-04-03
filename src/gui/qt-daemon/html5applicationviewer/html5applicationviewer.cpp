@@ -196,10 +196,13 @@ bool Html5ApplicationViewer::store_config()
 
 Html5ApplicationViewer::~Html5ApplicationViewer()
 {
+  m_is_stop = true;
   while (m_request_uri_threads_count)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
+
+  m_dispatcher.join();
   store_config();
   delete m_d;
 }
@@ -389,6 +392,7 @@ bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info
   //m_d->update_daemon_state(info);
   std::string json_str;
   epee::serialization::store_t_to_json(info, json_str);
+  LOG_PRINT_L0("SENDING SIGNAL -> [update_daemon_state]");
   m_d->update_daemon_state(json_str.c_str());
   return true;
 }
@@ -422,6 +426,7 @@ bool Html5ApplicationViewer::update_wallet_status(const view::wallet_status_info
 {
   std::string json_str;
   epee::serialization::store_t_to_json(wsi, json_str);
+  LOG_PRINT_L0("SENDING SIGNAL -> [update_wallet_status]");
   m_d->update_wallet_status(json_str.c_str());
   return true;
 }
@@ -430,6 +435,7 @@ bool Html5ApplicationViewer::update_wallets_info(const view::wallets_summary_inf
 {
   std::string json_str;
   epee::serialization::store_t_to_json(wsi, json_str);
+  LOG_PRINT_L0("SENDING SIGNAL -> [update_wallets_info]");
   m_d->update_wallet_info(json_str.c_str());
   return true;
 }
@@ -438,15 +444,21 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
 {
   std::string json_str;
   epee::serialization::store_t_to_json(tei, json_str);
+
+  LOG_PRINT_L0("SENDING SIGNAL -> [money_transfer]");
   m_d->money_transfer(json_str.c_str());
   if (!m_trayIcon)
     return true;
   if (!tei.ti.is_income)
     return true;
   double amount = double(tei.ti.amount) * (1e-12);
+
+  /*
+  LOG_PRINT_L0("SHOWING MESSAGE -> [money_transfer]");
+
   if (tei.ti.height == 0) // unconfirmed trx
   {
-    QString msg = QString("%1 BBR is received").arg(amount);
+        QString msg = QString("%1 BBR is received").arg(amount);
     m_trayIcon->showMessage("Income transfer (unconfirmed)", msg);
   }
   else // confirmed trx
@@ -454,17 +466,20 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
     QString msg = QString("%1 BBR is confirmed").arg(amount);
     m_trayIcon->showMessage("Income transfer confirmed", msg);
   }
+  */
   return true;
 }
 
 
 bool Html5ApplicationViewer::hide_wallet()
 {
+  LOG_PRINT_L0("SENDING SIGNAL -> [hide_wallet]");
   m_d->hide_wallet();
   return true;
 }
 bool Html5ApplicationViewer::show_wallet()
 {
+  LOG_PRINT_L0("SENDING SIGNAL -> [show_wallet]");
   m_d->show_wallet();
   return true;
 }
@@ -475,6 +490,7 @@ bool Html5ApplicationViewer::switch_view(int view_no)
   swi.view = view_no;
   std::string json_str;
   epee::serialization::store_t_to_json(swi, json_str);
+  LOG_PRINT_L0("SENDING SIGNAL -> [switch_view]");
   m_d->switch_view(json_str.c_str());
   return true;
 }
@@ -483,6 +499,7 @@ bool Html5ApplicationViewer::set_recent_transfers(const view::transfers_array& t
 {
   std::string json_str;
   epee::serialization::store_t_to_json(ta, json_str);
+  LOG_PRINT_L0("SENDING SIGNAL -> [set_recent_transfers]");
   m_d->set_recent_transfers(json_str.c_str());
   return true;
 }
@@ -497,6 +514,7 @@ bool Html5ApplicationViewer::pos_block_found(const currency::block& block_found)
 { 
   std::stringstream ss;
   ss << "Found Block h = " << currency::get_block_height(block_found);
+  LOG_PRINT_L0("SENDING SIGNAL -> [update_pos_mining_text]");
   m_d->update_pos_mining_text(ss.str().c_str());
   return true;
 }
@@ -548,7 +566,7 @@ QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
   size_t request_id = m_request_id_counter++;
   std::shared_ptr<std::string> param(new std::string(json_transfer_object.toStdString()));
 
-  return que_call(request_id, [request_id, param, this](void){
+  return que_call("transfer", request_id, [request_id, param, this](void){
 
     view::api_response ar;
     ar.request_id = std::to_string(request_id);
@@ -663,7 +681,7 @@ QString Html5ApplicationViewer::close_wallet(const QString& param)
   size_t request_id = m_request_id_counter++;
   std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
 
-  return que_call(request_id, [request_id, param_ptr, this](void){
+  return que_call("close_wallet", request_id, [request_id, param_ptr, this](void){
 
     view::api_response ar;
     ar.request_id = std::to_string(request_id);
@@ -694,7 +712,7 @@ QString Html5ApplicationViewer::generate_wallet(const QString& param)
   size_t request_id = m_request_id_counter++;
   std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
 
-  return que_call(request_id, [request_id, param_ptr, this](void){
+  return que_call("generate_wallet", request_id, [request_id, param_ptr, this](void){
 
     view::api_response ar;
     ar.request_id = std::to_string(request_id);
@@ -728,7 +746,7 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
   size_t request_id = m_request_id_counter++;
   std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
 
-  return que_call(request_id, [request_id, param_ptr, this](void){
+  return que_call("open_wallet", request_id, [request_id, param_ptr, this](void){
 
     view::api_response ar;
     ar.request_id = std::to_string(request_id);
@@ -758,7 +776,7 @@ QString Html5ApplicationViewer::get_wallet_info(const QString& param)
   size_t request_id = m_request_id_counter++;
   std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
 
-  return que_call(request_id, [request_id, param_ptr, this](void){
+  return que_call("get_wallet_info", request_id, [request_id, param_ptr, this](void){
 
     view::api_response ar;
     ar.request_id = std::to_string(request_id);
