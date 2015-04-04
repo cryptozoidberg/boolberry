@@ -27,6 +27,9 @@
 #include "misc_language.h"
 #include "wallet/wallet2.h"
 
+#define MK_COINS(amount) (UINT64_C(amount) * COIN)
+#define TESTS_DEFAULT_FEE TX_POOL_MINIMUM_FEE//((uint64_t)1000000) // pow(10, 6)
+
 namespace concolor
 {
   inline std::basic_ostream<char, std::char_traits<char> >& bright_white(std::basic_ostream<char, std::char_traits<char> >& ostr)
@@ -578,6 +581,155 @@ inline bool do_replay_file(const std::string& filename)
   }
   return do_replay_events<t_test_class>(events);
 }
+
+
+template<class attachment_cb>
+bool construct_broken_tx(const currency::account_keys& sender_account_keys, const std::vector<currency::tx_source_entry>& sources,
+  const std::vector<currency::tx_destination_entry>& destinations,
+  const std::vector<currency::extra_v>& extra,
+  const std::vector<currency::attachment_v>& attachments,
+  currency::transaction& tx,
+  uint64_t unlock_time,
+  uint8_t tx_outs_attr, attachment_cb acb)
+{
+  tx.vin.clear();
+  tx.vout.clear();
+  tx.signatures.clear();
+  tx.extra = extra;
+
+  tx.version = CURRENT_TRANSACTION_VERSION;
+  tx.unlock_time = unlock_time;
+
+  currency::keypair txkey = currency::keypair::generate();
+  add_tx_pub_key_to_extra(tx, txkey.pub);
+
+  struct input_generation_context_data
+  {
+    keypair in_ephemeral;
+  };
+  std::vector<input_generation_context_data> in_contexts;
+
+
+  uint64_t summary_inputs_money = 0;
+  //fill inputs
+  BOOST_FOREACH(const currency::tx_source_entry& src_entr, sources)
+  {
+    if (src_entr.real_output >= src_entr.outputs.size())
+    {
+      LOG_ERROR("real_output index (" << src_entr.real_output << ")bigger than output_keys.size()=" << src_entr.outputs.size());
+      return false;
+    }
+    summary_inputs_money += src_entr.amount;
+
+    //key_derivation recv_derivation;
+    in_contexts.push_back(input_generation_context_data());
+    currency::keypair& in_ephemeral = in_contexts.back().in_ephemeral;
+    crypto::key_image img;
+    if (!currency::generate_key_image_helper(sender_account_keys, src_entr.real_out_tx_key, src_entr.real_output_in_tx_index, in_ephemeral, img))
+      return false;
+
+    //check that derivated key is equal with real output key
+    if (!(in_ephemeral.pub == src_entr.outputs[src_entr.real_output].second))
+    {
+      LOG_ERROR("derived public key missmatch with output public key! " << ENDL << "derived_key:"
+        << string_tools::pod_to_hex(in_ephemeral.pub) << ENDL << "real output_public_key:"
+        << string_tools::pod_to_hex(src_entr.outputs[src_entr.real_output].second));
+      return false;
+    }
+
+    //put key image into tx input
+    currency::txin_to_key input_to_key;
+    input_to_key.amount = src_entr.amount;
+    input_to_key.k_image = img;
+
+    //fill outputs array and use relative offsets
+    BOOST_FOREACH(const currency::tx_source_entry::output_entry& out_entry, src_entr.outputs)
+      input_to_key.key_offsets.push_back(out_entry.first);
+
+    input_to_key.key_offsets = absolute_output_offsets_to_relative(input_to_key.key_offsets);
+    tx.vin.push_back(input_to_key);
+  }
+
+  // "Shuffle" outs
+  std::vector<currency::tx_destination_entry> shuffled_dsts(destinations);
+  std::sort(shuffled_dsts.begin(), shuffled_dsts.end(), [](const currency::tx_destination_entry& de1, const currency::tx_destination_entry& de2) { return de1.amount < de2.amount; });
+
+  uint64_t summary_outs_money = 0;
+  //fill outputs
+  size_t output_index = 0;
+  BOOST_FOREACH(const currency::tx_destination_entry& dst_entr, shuffled_dsts)
+  {
+    CHECK_AND_ASSERT_MES(dst_entr.amount > 0, false, "Destination with wrong amount: " << dst_entr.amount);
+    bool r = construct_tx_out(dst_entr.addr, txkey.sec, output_index, dst_entr.amount, tx, tx_outs_attr);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to construc tx out");
+    output_index++;
+    summary_outs_money += dst_entr.amount;
+  }
+
+  //check money
+  if (summary_outs_money > summary_inputs_money)
+  {
+    LOG_ERROR("Transaction inputs money (" << summary_inputs_money << ") less than outputs money (" << summary_outs_money << ")");
+    return false;
+  }
+
+  //include offers if need
+  tx.attachment = attachments;
+
+  acb(tx);
+  //if (tx.attachment.size())
+  //  add_attachments_info_to_extra(tx);
+
+  //generate ring signatures
+  crypto::hash tx_prefix_hash;
+  get_transaction_prefix_hash(tx, tx_prefix_hash);
+
+  std::stringstream ss_ring_s;
+  size_t i = 0;
+  BOOST_FOREACH(const currency::tx_source_entry& src_entr, sources)
+  {
+    ss_ring_s << "pub_keys:" << ENDL;
+    std::vector<const crypto::public_key*> keys_ptrs;
+    BOOST_FOREACH(const currency::tx_source_entry::output_entry& o, src_entr.outputs)
+    {
+      keys_ptrs.push_back(&o.second);
+      ss_ring_s << o.second << ENDL;
+    }
+
+    tx.signatures.push_back(std::vector<crypto::signature>());
+    std::vector<crypto::signature>& sigs = tx.signatures.back();
+    sigs.resize(src_entr.outputs.size());
+    crypto::generate_ring_signature(tx_prefix_hash, boost::get<txin_to_key>(tx.vin[i]).k_image, keys_ptrs, in_contexts[i].in_ephemeral.sec, src_entr.real_output, sigs.data());
+    ss_ring_s << "signatures:" << ENDL;
+    std::for_each(sigs.begin(), sigs.end(), [&](const crypto::signature& s){ss_ring_s << s << ENDL; });
+    ss_ring_s << "prefix_hash:" << tx_prefix_hash << ENDL << "in_ephemeral_key: " << in_contexts[i].in_ephemeral.sec << ENDL << "real_output: " << src_entr.real_output;
+    i++;
+  }
+
+  LOG_PRINT2("construct_tx.log", "transaction_created: " << get_transaction_hash(tx) << ENDL << obj_to_json_str(tx) << ENDL << ss_ring_s.str(), LOG_LEVEL_3);
+
+  return true;
+}
+template<typename callback_t>
+bool construct_broken_tx(std::list<currency::transaction>& txs_set, 
+  std::vector<test_event_entry>& events,
+  const currency::account_base& sender_account_keys,
+  const currency::account_base& rcvr_account_keys,
+  const currency::block& blk_head, 
+  const std::vector<currency::attachment_v>& att, 
+  callback_t cb)
+{
+  currency::transaction t = AUTO_VAL_INIT(t);
+  std::vector<currency::tx_source_entry> sources;
+  std::vector<currency::tx_destination_entry> destinations;
+  fill_tx_sources_and_destinations(events, blk_head, sender_account_keys, rcvr_account_keys, MK_COINS(1), TESTS_DEFAULT_FEE, 0, sources, destinations, true);
+
+  bool r = construct_broken_tx(sender_account_keys.get_keys(), sources, destinations, std::vector<extra_v>(), att, t, 0, CURRENCY_TO_KEY_OUT_RELAXED, cb);
+  txs_set.push_back(t);
+  events.push_back(t);
+  return r;
+}
+
 //--------------------------------------------------------------------------
 #define GENERATE_ACCOUNT(account) \
     currency::account_base account; \
@@ -773,5 +925,3 @@ inline bool do_replay_file(const std::string& filename)
 #define CHECK_TEST_CONDITION(cond) CHECK_AND_ASSERT_MES(cond, false, "failed: \"" << QUOTEME(cond) << "\"")
 #define CHECK_EQ(v1, v2) CHECK_AND_ASSERT_MES(v1 == v2, false, "failed: \"" << QUOTEME(v1) << " == " << QUOTEME(v2) << "\", " << v1 << " != " << v2)
 #define CHECK_NOT_EQ(v1, v2) CHECK_AND_ASSERT_MES(!(v1 == v2), false, "failed: \"" << QUOTEME(v1) << " != " << QUOTEME(v2) << "\", " << v1 << " == " << v2)
-#define MK_COINS(amount) (UINT64_C(amount) * COIN)
-#define TESTS_DEFAULT_FEE TX_POOL_MINIMUM_FEE//((uint64_t)1000000) // pow(10, 6)

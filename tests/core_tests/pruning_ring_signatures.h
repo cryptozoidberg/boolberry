@@ -19,7 +19,5 @@ public:
   bool check_blockchain(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
   
 private:
-  currency::account_base m_bob_account;
-  currency::account_base m_alice_account;
 };
 

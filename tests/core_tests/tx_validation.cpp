@@ -749,3 +749,41 @@ bool gen_tx_signatures_are_invalid::generate(std::vector<test_event_entry>& even
 
   return true;
 }
+
+bool gen_broken_attachments::generate(std::vector<test_event_entry>& events) const
+{
+  uint64_t ts_start = 1338224400;
+  GENERATE_ACCOUNT(miner_account);
+  //
+  MAKE_GENESIS_BLOCK(events, blk_0, miner_account, ts_start);
+  MAKE_NEXT_BLOCK(events, blk_1, blk_0, miner_account);
+  MAKE_NEXT_BLOCK(events, blk_2, blk_1, miner_account);
+  MAKE_NEXT_BLOCK(events, blk_3, blk_2, miner_account);
+  MAKE_NEXT_BLOCK(events, blk_4, blk_3, miner_account);
+  REWIND_BLOCKS(events, blk_5, blk_4, miner_account);
+  REWIND_BLOCKS(events, blk_5r, blk_5, miner_account);
+
+  std::vector<currency::attachment_v> attachments;
+  attachments.push_back(currency::offer_details());
+
+  offer_details& od = boost::get<currency::offer_details&>(attachments.back());
+
+  od.offer_type = OFFER_TYPE_LUI_TO_ETC;
+  od.amount_lui = 1000000000;
+  od.amount_etc = 22222222;
+  od.target = "USD";
+  od.location = "USA, New York City";
+  od.contacts = "skype: zina; icq: 12313212; email: zina@zina.com; mobile: +621234567834";
+  od.comment = "The best ever rate in NYC!!!";
+  od.payment_types = "BTC;BANK;CASH";
+  od.expiration_time = 10;
+
+  std::list<currency::transaction> txs_set;
+  DO_CALLBACK(events, "mark_invalid_tx");
+  construct_broken_tx(txs_set, events, miner_account, miner_account, blk_5r, attachments, [](transaction& tx)
+  {
+    //don't put attachments info into 
+  });
+
+  return true;
+}
