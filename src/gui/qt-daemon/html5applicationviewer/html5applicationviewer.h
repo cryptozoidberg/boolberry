@@ -12,7 +12,6 @@
 #include "view_iface.h"
 #ifndef Q_MOC_RUN
 #include "daemon_backend.h"
-#include "gui_config.h"
 #endif
 
 class QGraphicsWebView;
@@ -57,6 +56,7 @@ protected:
   QString transfer(const QString& json_transfer_object);
   QString get_app_data(const QString& param);
   QString store_app_data(const QString& param);
+  QString get_default_user_dir(const QString& param);
 
   void message_box(const QString& msg);
   QString request_uri(const QString& url_str, const QString& params, const QString& callbackname);
@@ -101,7 +101,6 @@ private:
   std::atomic<bool> m_quit_requested;
   std::atomic<bool> m_deinitialize_done;
   std::atomic<bool> m_backend_stopped;
-  gui_config m_config;
 
   std::atomic<size_t> m_request_uri_threads_count;
 
