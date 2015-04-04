@@ -41,6 +41,9 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   pview_handler->update_daemon_status(dsi);
 
   log_space::get_set_log_detalisation_level(true, LOG_LEVEL_0);
+//#if !defined(NDEBUG)
+  log_space::log_singletone::add_logger(LOGGER_DEBUGGER, nullptr, nullptr);
+//#endif
   LOG_PRINT_L0("Initing...");
 
   TRY_ENTRY();

@@ -124,8 +124,9 @@ private:
   std::thread m_dispatcher;
 
   template<typename callback_t>
-  QString que_call(size_t request_id, callback_t cb)
+  QString que_call(const char* name, size_t request_id, callback_t cb)
   {
+    LOG_PRINT_L0("que_call: [" << name << "]" << request_id);
     CRITICAL_REGION_LOCAL(m_dispatch_que_lock);
     if (m_dispatch_que.size() > GUI_DISPATCH_QUE_MAXSIZE)
     {
@@ -149,6 +150,7 @@ private:
   {
     QString status_obj_str = epee::serialization::store_t_to_json(status).c_str();
     QString rsp_obj_str = epee::serialization::store_t_to_json(rsp).c_str();
+    LOG_PRINT_L0("dispatch_call: " << status.request_id);
     dispatch(status_obj_str, rsp_obj_str);
   }
 
