@@ -222,6 +222,7 @@ public:
 
   struct system_filedialog_request
   {
+    std::string default_dir;
     std::string caption;
     std::string filemask;
 

@@ -171,14 +171,15 @@ void Html5ApplicationViewer::dispatcher()
 }
 bool Html5ApplicationViewer::init_config()
 {
-  epee::serialization::load_t_from_json_file(m_config, m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME);
-  if (!m_config.wallets_last_used_dir.size())
-  {
-    m_config.wallets_last_used_dir = tools::get_default_user_dir();
-    tools::create_directories_if_necessary(m_config.wallets_last_used_dir);
-  }
   return true;
 }
+
+QString Html5ApplicationViewer::get_default_user_dir(const QString& param)
+{
+  return tools::get_default_user_dir().c_str();
+}
+
+
 bool Html5ApplicationViewer::toggle_mining()
 {
   m_backend.toggle_pos_mining();
@@ -190,7 +191,6 @@ QString Html5ApplicationViewer::get_exchange_last_top(const QString& params)
 }
 bool Html5ApplicationViewer::store_config()
 {
-  epee::serialization::store_t_to_json_file(m_config, m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME);
   return true;
 }
 
@@ -616,12 +616,18 @@ void Html5ApplicationViewer::message_box(const QString& msg)
 {
   show_msg_box(msg.toStdString());
 }
+
 QString Html5ApplicationViewer::get_app_data(const QString& param)
 {
-  return "";
+  std::string app_data_buff;
+  file_io_utils::load_file_to_string(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, app_data_buff);
+
+  return app_data_buff.c_str();
 }
+
 QString Html5ApplicationViewer::store_app_data(const QString& param)
 {
+  file_io_utils::save_string_to_file(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, param.toStdString());
   return "";
 }
 
@@ -636,7 +642,7 @@ QString Html5ApplicationViewer::show_openfile_dialog(const QString& param)
   }
 
   QString path = QFileDialog::getOpenFileName(this, ofdr.caption.c_str(),
-    m_config.wallets_last_used_dir.c_str(),
+    ofdr.default_dir.c_str(),
     ofdr.filemask.c_str());
 
   if (!path.length())
@@ -662,7 +668,7 @@ QString Html5ApplicationViewer::show_savefile_dialog(const QString& param)
   }
 
   QString path = QFileDialog::getSaveFileName(this, ofdr.caption.c_str(),
-    m_config.wallets_last_used_dir.c_str(),
+    ofdr.default_dir.c_str(),
     ofdr.filemask.c_str());
 
   if (!path.length())
@@ -726,8 +732,6 @@ QString Html5ApplicationViewer::generate_wallet(const QString& param)
       return;
     }
 
-    m_config.wallets_last_used_dir = boost::filesystem::path(owd.path).parent_path().string();
-
     view::wallet_id_obj owr = AUTO_VAL_INIT(owr);
     ar.error_code = m_backend.generate_wallet(owd.path, owd.pass, owr.wallet_id);
     dispatch(ar, owr);
@@ -759,8 +763,6 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
       dispatch(ar, av);
       return;
     }
-
-    m_config.wallets_last_used_dir = boost::filesystem::path(owd.path).parent_path().string();
 
     view::wallet_id_obj owr = AUTO_VAL_INIT(owr);
     ar.error_code = m_backend.open_wallet(owd.path, owd.pass, owr.wallet_id);
