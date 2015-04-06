@@ -55,7 +55,7 @@ namespace currency
       wide_difficulty_type difficulty;
       uint64_t already_generated_coins;
       uint64_t scratch_offset;
-      crypto::hash stake_hash;
+      crypto::hash stake_hash; //TODO: unused field for PoW blocks, subject for refactoring
     };
 
     blockchain_storage(tx_memory_pool& tx_pool);
@@ -143,7 +143,7 @@ namespace currency
                       uint64_t& coindays_weight, 
                       const stake_modifier_type& stake_modifier, 
                       uint64_t timestamp);
-    bool build_stake_modifier(crypto::hash& sm);
+    bool build_stake_modifier(stake_modifier_type& sm);
     bool scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMAND_RPC_SCAN_POS::response& rsp);
     bool validate_pos_block(const block& b, const crypto::hash& id, bool for_altchain);
     bool validate_pos_block(const block& b, wide_difficulty_type basic_diff, const crypto::hash& id, bool for_altchain);
@@ -301,6 +301,7 @@ namespace currency
     wide_difficulty_type get_last_alt_x_block_cumulative_precise_difficulty(alt_chain_list& alt_chain, uint64_t block_height, bool pos);
     size_t get_current_sequence_factor(bool pos);
     size_t get_current_sequence_factor_for_alt(alt_chain_list& alt_chain, bool pos);
+    uint64_t get_last_block_of_type(bool is_pos);
   };
 
 

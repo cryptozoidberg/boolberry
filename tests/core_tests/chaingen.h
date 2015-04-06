@@ -181,20 +181,22 @@ public:
                uint64_t an_already_generated_coins, 
                size_t a_block_size, 
                currency::wide_difficulty_type diff,
-               const std::list<currency::transaction>& tx_list)
+               const std::list<currency::transaction>& tx_list, 
+               const crypto::hash& k_hash)
       : b(b_)
       , already_generated_coins(an_already_generated_coins)
       , block_size(a_block_size)
       , cumul_difficulty(diff), 
-      m_transactions(tx_list.begin(), tx_list.end())
-    {
-    }
+      m_transactions(tx_list.begin(), tx_list.end()), 
+      ks_hash(k_hash)
+    {}
 
     currency::block b;
     uint64_t already_generated_coins;
     size_t block_size;
     currency::wide_difficulty_type cumul_difficulty;
     std::vector<currency::transaction> m_transactions;
+    crypto::hash ks_hash;
   };
 
   //               amount             vec_ind, tx_index, out index in tx
@@ -224,8 +226,8 @@ public:
   currency::wide_difficulty_type get_difficulty_for_next_block(const crypto::hash& head_id, bool pow = true);
   void get_block_chain(std::vector<const block_info*>& blockchain, const crypto::hash& head, size_t n) const;
   void get_last_n_block_sizes(std::vector<size_t>& block_sizes, const crypto::hash& head, size_t n) const;
-  //POS
-  bool build_stake_modifier(crypto::hash& sm, const test_generator::blockchain_vector& blck_chain);
+  //POS 
+  bool build_stake_modifier(currency::stake_modifier_type& sm, const test_generator::blockchain_vector& blck_chain);
   bool build_kernel(uint64_t amount, 
                     uint64_t global_index, 
                     const crypto::key_image& ki,
@@ -241,7 +243,8 @@ public:
                    wallets_vector& wallets,
                    currency::pos_entry& pe,
                    size_t& found_wallet_index,
-                   uint64_t& found_timestamp);
+                   uint64_t& found_timestamp,
+                   crypto::hash& found_kh);
 
   bool build_wallets(const blockchain_vector& blocks,
                      const std::list<currency::account_base>& accs,
@@ -273,7 +276,13 @@ public:
   bool build_outputs_indext_for_chain(const std::vector<const block_info*>& blocks, outputs_index& index, tx_global_indexes& txs_outs);
 
 
-  void add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, uint64_t already_generated_coins, currency::wide_difficulty_type cum_diff, const std::list<currency::transaction>& tx_list);
+  void add_block(const currency::block& blk, 
+    size_t tsx_size, 
+    std::vector<size_t>& block_sizes, 
+    uint64_t already_generated_coins, 
+    currency::wide_difficulty_type cum_diff, 
+    const std::list<currency::transaction>& tx_list,
+    const crypto::hash& ks_hash);
   bool construct_block(currency::block& blk, 
     uint64_t height, 
     const crypto::hash& prev_id,

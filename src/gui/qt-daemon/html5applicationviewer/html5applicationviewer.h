@@ -45,6 +45,7 @@ protected:
   bool on_request_quit();
   public slots:
 
+  // public API for javascript
   QString show_openfile_dialog(const QString& param);
   QString show_savefile_dialog(const QString& param);
 

@@ -106,7 +106,7 @@
 #define POS_SCAN_STEP                                   15    //seconds
 #define POS_MIN_COINAGE                                 (60*60) // 1 hour
 #define POS_MAX_COINAGE                                 (60*60*24*90) // 90 days
-#define POS_STARTER_MODFIFIER                           "bd82e18d42a7ad239588b24fd356d63cc82717e1fae8f6a492cd25d62fda263f"
+#define POS_STARTER_KERNEL_HASH                         "bd82e18d42a7ad239588b24fd356d63cc82717e1fae8f6a492cd25d62fda263f"
 #define POS_MODFIFIER_INTERVAL                          10
 #define POS_WALLET_MINING_SCAN_INTERVAL                 20  //seconds
 

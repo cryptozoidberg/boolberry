@@ -82,15 +82,19 @@ uint64_t test_generator::get_already_generated_coins(const currency::block& blk)
   return get_already_generated_coins(blk_hash);
 }
 
-void test_generator::add_block(const currency::block& blk, size_t tsx_size, std::vector<size_t>& block_sizes, 
+void test_generator::add_block(const currency::block& blk, 
+                               size_t tsx_size, 
+                               std::vector<size_t>& block_sizes, 
                                uint64_t already_generated_coins, 
                                wide_difficulty_type cum_diff, 
-                               const std::list<currency::transaction>& tx_list)
+                               const std::list<currency::transaction>& tx_list,
+                               const crypto::hash& ks_hash)
 {
   const size_t block_size = tsx_size + get_object_blobsize(blk.miner_tx);
   uint64_t block_reward;
   get_block_reward(misc_utils::median(block_sizes), block_size, already_generated_coins, block_reward);
-  m_blocks_info[get_block_hash(blk)] = block_info(blk, already_generated_coins + block_reward, block_size, cum_diff, tx_list);
+
+  m_blocks_info[get_block_hash(blk)] = block_info(blk, already_generated_coins + block_reward, block_size, cum_diff, tx_list, ks_hash);
 }
 
 bool test_generator::construct_block(currency::block& blk, 
@@ -109,6 +113,7 @@ bool test_generator::construct_block(currency::block& blk,
   blk.timestamp = timestamp;
   blk.prev_id = prev_id;
 
+  crypto::hash kernerl_hash = null_hash;
   blk.tx_hashes.reserve(tx_list.size());
   BOOST_FOREACH(const transaction &tx, tx_list)
   {
@@ -146,7 +151,7 @@ bool test_generator::construct_block(currency::block& blk,
 
     //build wallets
     build_wallets(blocks, coin_stake_sources, txs_outs, wallets);
-    bool r = find_kernel(coin_stake_sources, blocks, oi, wallets, pe, won_walled_index, blk.timestamp);
+    bool r = find_kernel(coin_stake_sources, blocks, oi, wallets, pe, won_walled_index, blk.timestamp, kernerl_hash);
     CHECK_AND_ASSERT_THROW_MES(r, "failed to find_kernel ");
     blk.flags = CURRENCY_BLOCK_FLAG_POS_BLOCK;
   }
@@ -230,7 +235,8 @@ bool test_generator::construct_block(currency::block& blk,
             block_sizes,
             already_generated_coins, 
             blocks.size() ? blocks.back()->cumul_difficulty + a_diffic: a_diffic, 
-            tx_list);
+            tx_list, 
+            kernerl_hash);
 
   return true;
 }
@@ -326,7 +332,8 @@ bool test_generator::find_kernel(const std::list<currency::account_base>& accs,
   wallets_vector& wallets,
   currency::pos_entry& pe,
   size_t& found_wallet_index, 
-  uint64_t& found_timestamp)
+  uint64_t& found_timestamp,
+  crypto::hash& found_kh)
 {
   uint64_t last_block_timestamp = 0;
   wide_difficulty_type basic_diff = 0;
@@ -371,6 +378,7 @@ bool test_generator::find_kernel(const std::list<currency::account_base>& accs,
             << ", key_image" << scan_pos_entries.pos_entries[i].keyimage, LOG_LEVEL_0);
           pe = scan_pos_entries.pos_entries[i];
           found_wallet_index = i;
+          found_kh = kernel_hash;
           return true;
         }
       }
@@ -482,22 +490,40 @@ bool test_generator::build_kernel(uint64_t amount,
   build_stake_modifier(kernel.stake_modifier, blck_chain);
   return true;
 }
-bool test_generator::build_stake_modifier(crypto::hash& sm, const test_generator::blockchain_vector& blck_chain)
+
+uint64_t get_last_block_of_type(bool looking_for_pos, const test_generator::blockchain_vector& blck_chain)
 {
-  //temporary implementation (to close to beginning atm)
-  uint64_t height_for_modifier = 0;
-  sm = null_hash;
-  if (blck_chain.size() < POS_MODFIFIER_INTERVAL)
+  uint64_t sz = blck_chain.size();
+  if (!sz)
+    return 0;
+  for (uint64_t i = sz - 1; i != 0; --i)
   {
-    bool r = string_tools::parse_tpod_from_hex_string(POS_STARTER_MODFIFIER, sm);
-    CHECK_AND_ASSERT_THROW_MES(r, "Failed to parse POS_STARTER_MODFIFIER");
-    return true;
+    bool is_pos_bl = is_pos_block(blck_chain[i]->b);
+    if ((looking_for_pos && !is_pos_bl) || (!looking_for_pos && is_pos_bl))
+      continue;
+    return i;
+  }
+  return 0;
+}
+
+bool test_generator::build_stake_modifier(stake_modifier_type& sm, const test_generator::blockchain_vector& blck_chain)
+{
+  uint64_t height_for_modifier = blck_chain.size();
+  sm = stake_modifier_type();
+
+  uint64_t last_pos_i = get_last_block_of_type(true, blck_chain);
+  uint64_t last_pow_i = get_last_block_of_type(false, blck_chain);
+
+  if (last_pos_i)
+    sm.last_pos_kernel_id = blck_chain[last_pos_i]->ks_hash;
+  else
+  {
+    bool r = string_tools::parse_tpod_from_hex_string(POS_STARTER_KERNEL_HASH, sm.last_pos_kernel_id);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to parse POS_STARTER_MODFIFIER");
   }
 
-  height_for_modifier = blck_chain.size() - (blck_chain.size() % POS_MODFIFIER_INTERVAL);
-  crypto::xor_pod(sm, get_block_hash(blck_chain[height_for_modifier - 4]->b));
-  crypto::xor_pod(sm, get_block_hash(blck_chain[height_for_modifier - 6]->b));
-  crypto::xor_pod(sm, get_block_hash(blck_chain[height_for_modifier - 8]->b));
+  sm.last_pow_id = get_block_hash(blck_chain[last_pow_i]->b);
+
 
   return true;
 }
@@ -630,7 +656,7 @@ bool test_generator::construct_block(currency::block& blk,
   find_nounce(blk, blocks, a_diffic, height);
 
   std::list<transaction> txs; // fake list here
-  add_block(blk, txs_sizes, block_sizes, already_generated_coins, blocks.size() ? blocks.back()->cumul_difficulty + a_diffic : a_diffic, txs);
+  add_block(blk, txs_sizes, block_sizes, already_generated_coins, blocks.size() ? blocks.back()->cumul_difficulty + a_diffic : a_diffic, txs, null_hash);
 
   return true;
 }

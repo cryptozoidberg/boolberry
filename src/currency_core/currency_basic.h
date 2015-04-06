@@ -404,39 +404,22 @@ namespace currency
   /*
   POS PROTOCOL, stake modifier
 
-  - The kernel structure now includes last_pow_hash and last_pos_hash: blockID of the last
-  PoW block and kernel hash of the last PoS block respectively. By that we create the true 
-  chain of blocks. In PPC you can use your winning output whenever you want (within timestamp 
-  boundaries), because kernel does not depend of the previous block (unlike PoW mining,
-  where block header includes prev_id). Even use it twice (if a chain fork occurs). Our 
-  protocol prevents it, making PoS mining more like PoW (but energy-efficient).
 
-  - StakeModifier (a part of the kernel) is recalculated on each PoW block as follows: 
-  StakeModifier on height h is equal to keccak(H20,H720), where H20 is the proof_hash of 
-  the block on height h-20 (20 blocks ago) and H720 is the proof_hash of the block on height 
-  h-720. proof_hash is blockID (for PoW) or kernel-hash (for PoS). Now StakeModifier is known 
-  in advance, 20 blocks ahead. But due to the first change an attacker can't predict his 
-  chances of creating consecutive chain of PoS blocks: he doesn't know pow_hash.
-
-  - Timestamp boundaries become more narrow. Timestamp must be greater than the median of 
-  the last 20 blocks (each block appears ~every 2 min, so the median is t minus 20 minutes).
-  And it shouldn't be greater than t+20 minutes, where t is the current local time of a node. 
-  The first rule is a mandatory one (we check it while verifying the blockchain), and the 
-  second is a default local node policy (we can not check it for blockchain in the past). 
-  This change is intended to decrease the power of PoS exhaustive search and make timestamps 
-  more consistent.
   */
 
-  typedef crypto::hash stake_modifier_type;
 #pragma pack(push, 1)
+  struct stake_modifier_type
+  {
+    crypto::hash last_pow_id;
+    crypto::hash last_pos_kernel_id;
+  };
+
   struct stake_kernel
   {
     stake_modifier_type stake_modifier;
     uint64_t block_timestamp;             //this block timestamp
     crypto::key_image kimage;
     uint64_t tx_out_global_index;         //global index of output in source transaction
-    crypto::hash last_pow_id;
-    crypto::hash last_pos_kernel_hash;
   };
 #pragma pack(pop)
 

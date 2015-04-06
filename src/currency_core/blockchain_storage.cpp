@@ -574,6 +574,23 @@ wide_difficulty_type blockchain_storage::get_next_diff_conditional(bool pos)
   return next_difficulty(timestamps, commulative_difficulties, pos ? DIFFICULTY_POS_TARGET : DIFFICULTY_POW_TARGET);
 }
 //------------------------------------------------------------------
+uint64_t blockchain_storage::get_last_block_of_type(bool looking_for_pos)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
+  uint64_t sz = m_blocks.size();
+  if (!sz)
+    return 0;
+  for (uint64_t i = sz - 1; i != 0; --i)
+  {
+    bool is_pos_bl = is_pos_block(m_blocks[i].bl);
+    if ((looking_for_pos && !is_pos_bl) || (!looking_for_pos && is_pos_bl))
+      continue;
+    return i;
+  }
+  return 0;
+}
+//------------------------------------------------------------------
 wide_difficulty_type blockchain_storage::get_next_difficulty_for_alternative_chain(const std::list<blocks_ext_by_hash::iterator>& alt_chain, block_extended_info& bei, bool pos)
 {
   std::vector<uint64_t> timestamps;
@@ -2230,8 +2247,10 @@ bool blockchain_storage::validate_pos_block(const block& b, wide_difficulty_type
   uint64_t coindays_weight = 0;
 
   stake_modifier_type sm = AUTO_VAL_INIT(sm);
-  build_stake_modifier(sm);
-  bool r = build_kernel(b, sk, coindays_weight, sm);
+  bool r = build_stake_modifier(sm);
+  CHECK_AND_ASSERT_MES(r, false, "failed to build_stake_modifier");
+
+  r = build_kernel(b, sk, coindays_weight, sm);
   CHECK_AND_ASSERT_MES(r, false, "failed to build kernel_stake");
   proof_hash = crypto::cn_fast_hash(&sk, sizeof(sk));
   final_diff = basic_diff / coindays_weight;
@@ -2515,6 +2534,8 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   bei.scratch_offset = m_scratchpad.size();
   bei.block_cumulative_size = cumulative_block_size;
   bei.difficulty = current_diffic;
+  if (is_pos_bl)
+    bei.stake_hash = proof_hash;
 
   //precise difficulty - difficulty used to calculate next difficulty
   uint64_t last_x_h = get_last_x_block_height(is_pos_bl);
@@ -2647,24 +2668,25 @@ bool blockchain_storage::build_kernel(const block& bl, stake_kernel& kernel, uin
   return build_kernel(txin.amount, txin.key_offsets[0], txin.k_image, kernel, coindays_weight, stake_modifier, bl.timestamp);
 }
 //------------------------------------------------------------------
-bool blockchain_storage::build_stake_modifier(crypto::hash& sm)
+bool blockchain_storage::build_stake_modifier(stake_modifier_type& sm)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   //temporary implementation (to close to beginning atm)
-  uint64_t height_for_modifier = 0;
-  sm = null_hash;
-  if (get_current_blockchain_height() < POS_MODFIFIER_INTERVAL)
+  uint64_t height_for_modifier = get_current_blockchain_height();
+  sm = stake_modifier_type();
+
+  uint64_t last_pos_i = get_last_block_of_type(true);
+  uint64_t last_pow_i = get_last_block_of_type(false);
+
+  if (last_pos_i)
+    sm.last_pos_kernel_id = m_blocks[last_pos_i].stake_hash;
+  else
   {
-    bool r = string_tools::parse_tpod_from_hex_string(POS_STARTER_MODFIFIER, sm);
+    bool r = string_tools::parse_tpod_from_hex_string(POS_STARTER_KERNEL_HASH, sm.last_pos_kernel_id);
     CHECK_AND_ASSERT_MES(r, false, "Failed to parse POS_STARTER_MODFIFIER");
-    return true;
   }
 
-  height_for_modifier = get_current_blockchain_height() - (get_current_blockchain_height() % POS_MODFIFIER_INTERVAL);
-  crypto::xor_pod(sm, get_block_hash(m_blocks[height_for_modifier - 4].bl));
-  crypto::xor_pod(sm, get_block_hash(m_blocks[height_for_modifier - 6].bl));
-  crypto::xor_pod(sm, get_block_hash(m_blocks[height_for_modifier - 8].bl));
-
+  sm.last_pow_id = get_block_hash(m_blocks[last_pow_i].bl);
   return true;
 }
 //------------------------------------------------------------------
@@ -2710,7 +2732,8 @@ bool blockchain_storage::scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMA
   CRITICAL_REGION_END();
 
   stake_modifier_type sm = AUTO_VAL_INIT(sm);
-  build_stake_modifier(sm);
+  bool r = build_stake_modifier(sm);
+  CHECK_AND_ASSERT_MES(r, false, "failed to build_stake_modifier");
 
   for (size_t i = 0; i != sp.pos_entries.size(); i++)
   {

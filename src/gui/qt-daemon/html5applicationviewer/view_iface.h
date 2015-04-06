@@ -163,9 +163,7 @@ public:
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_state)
     END_KV_SERIALIZE_MAP()
-  };
-
-  struct wallet_info
+  };  struct wallet_info
   {
     uint64_t unlocked_balance;
     uint64_t balance;
@@ -185,6 +183,8 @@ public:
       KV_SERIALIZE(mint_is_in_progress)
     END_KV_SERIALIZE_MAP()
   };
+
+
 
   struct wallet_entry_info
   {
