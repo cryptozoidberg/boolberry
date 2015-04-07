@@ -785,5 +785,21 @@ bool gen_broken_attachments::generate(std::vector<test_event_entry>& events) con
     //don't put attachments info into 
   });
 
+  DO_CALLBACK(events, "mark_invalid_tx");
+  construct_broken_tx(txs_set, events, miner_account, miner_account, blk_5r, std::vector<currency::attachment_v>(), [&](transaction& tx)
+  {
+    extra_attachment_info eai = extra_attachment_info();
+
+    //put hash into extra
+    std::stringstream ss;
+    binary_archive<true> oar(ss);
+    bool r = ::do_serialize(oar, const_cast<std::vector<attachment_v>&>(attachments));
+    std::string buff = ss.str();
+    eai.sz = buff.size();
+    eai.hsh = get_blob_hash(buff);
+    tx.extra.push_back(eai);
+  });
+
+
   return true;
 }
