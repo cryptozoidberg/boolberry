@@ -309,14 +309,14 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          31
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          32
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 
   template<class archive_t>
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
   {
-    if(version < 31)
+    if(version < 32)
       return;
     CHECK_PROJECT_NAME();
     CRITICAL_REGION_LOCAL(m_blockchain_lock);
