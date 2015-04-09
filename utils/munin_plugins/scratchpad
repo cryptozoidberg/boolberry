@@ -5,7 +5,7 @@ case $1 in
         cat <<'EOM'
 graph_title scratchpad_size
 graph_vlabel scratchpad_size
-graph_category boolb
+graph_category luid
 scratchpad_size.label scratchpad_size
 EOM
         exit 0;;

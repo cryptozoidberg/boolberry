@@ -5,7 +5,7 @@ case $1 in
         cat <<'EOM'
 graph_title tx_daily_volume
 graph_vlabel tx_daily_volume
-graph_category boolb
+graph_category luid
 tx_daily_volume.label tx_daily_volume
 EOM
         exit 0;;

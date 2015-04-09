@@ -5,7 +5,7 @@ case $1 in
         cat <<'EOM'
 graph_title Height
 graph_vlabel height
-graph_category boolb
+graph_category luid
 height.label height
 height.type COUNTER
 EOM

@@ -3,7 +3,10 @@ cmake_minimum_required(VERSION 2.8.6)
 PROJECT(lui)
 
 set(VERSION "0.3")
-cmake_policy(SET CMP0043 OLD)
+
+if(POLICY CMP0043)
+  cmake_policy(SET CMP0043 OLD)
+endif()
 
 # $Format:Packaged from commit %H%nset(COMMIT %h)%nset(REFS "%d")$
 
