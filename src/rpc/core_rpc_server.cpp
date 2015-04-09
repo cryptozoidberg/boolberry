@@ -110,6 +110,9 @@ namespace currency
     res.synchronization_start_height = m_p2p.get_payload_object().get_core_inital_height();
     res.max_net_seen_height = m_p2p.get_payload_object().get_max_seen_height();
     m_p2p.get_maintainers_info(res.mi);
+    res.pos_sequense_factor = m_core.get_blockchain_storage().get_current_sequence_factor(true);
+    res.pow_sequense_factor = m_core.get_blockchain_storage().get_current_sequence_factor(false);
+
     
     res.status = CORE_RPC_STATUS_OK;
     return true;

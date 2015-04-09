@@ -156,6 +156,8 @@ namespace currency
                             bool for_altchain);
     bool is_coin_age_okay(uint64_t source_tx_block_timestamp, uint64_t last_block_timestamp);
     void set_pos_config(const pos_config& pc);
+    size_t get_current_sequence_factor(bool pos);
+
 
     //exchange access functions
     //this function mostly made for debug purposes
@@ -299,7 +301,6 @@ namespace currency
     wide_difficulty_type get_adjusted_cumulative_difficulty_for_next_alt_pos(alt_chain_list& alt_chain, uint64_t block_height, wide_difficulty_type next_diff, uint64_t connection_height);
     uint64_t get_last_x_block_height(bool pos);
     wide_difficulty_type get_last_alt_x_block_cumulative_precise_difficulty(alt_chain_list& alt_chain, uint64_t block_height, bool pos);
-    size_t get_current_sequence_factor(bool pos);
     size_t get_current_sequence_factor_for_alt(alt_chain_list& alt_chain, bool pos);
     uint64_t get_last_block_of_type(bool is_pos);
   };
