@@ -1,3 +1,8 @@
+if(POLICY CMP0043)
+  cmake_policy(SET CMP0043 OLD)
+endif()
+
+
 cmake_policy(SET CMP0043 OLD)
 
 file(GLOB_RECURSE COMMON common/*)

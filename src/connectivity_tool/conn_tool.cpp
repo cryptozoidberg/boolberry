@@ -204,8 +204,8 @@ bool handle_get_daemon_info(po::variables_map& vm)
   }
   std::cout << "OK" << ENDL
   << "height: " << res.height << ENDL
-  << "difficulty: " << res.pos_difficulty << ENDL
-  << "difficulty: " << res.pow_difficulty << ENDL
+  << "pos_difficulty: " << res.pos_difficulty << ENDL
+  << "pow_difficulty: " << res.pow_difficulty << ENDL
   << "tx_count: " << res.tx_count << ENDL
   << "tx_pool_size: " << res.tx_pool_size << ENDL
   << "alt_blocks_count: " << res.alt_blocks_count << ENDL
@@ -218,7 +218,10 @@ bool handle_get_daemon_info(po::variables_map& vm)
   << "scratchpad_size: " << res.scratchpad_size << ENDL
   << "alias_count: " << res.alias_count << ENDL
   << "transactions_cnt_per_day: " << res.transactions_cnt_per_day << ENDL
-  << "transactions_volume_per_day: " << res.transactions_volume_per_day << ENDL;
+  << "transactions_volume_per_day: " << res.transactions_volume_per_day << ENDL
+  << "pos_sequense_factor: " << res.pos_sequense_factor << ENDL
+  << "pow_sequense_factor: " << res.pow_sequense_factor << ENDL;
+
   return true;
 }
 //---------------------------------------------------------------------------------------------------------------
