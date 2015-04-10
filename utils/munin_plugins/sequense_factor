@@ -13,6 +13,6 @@ EOM
 esac
 
 printf "pos_sequense_factor.value "
-connectivity_tool --ip=127.0.0.1 --rpc_port=10102 --timeout=1000 --rpc_get_daemon_info | grep pos_sequense_factor | cut -d ' ' -f2
+connectivity_tool --ip=127.0.0.1 --rpc_port=11112 --timeout=1000 --rpc_get_daemon_info | grep pos_sequense_factor | cut -d ' ' -f2
 printf "pow_sequense_factor.value "
-connectivity_tool --ip=127.0.0.1 --rpc_port=10102 --timeout=1000 --rpc_get_daemon_info | grep pow_sequense_factor | cut -d ' ' -f2
+connectivity_tool --ip=127.0.0.1 --rpc_port=11112 --timeout=1000 --rpc_get_daemon_info | grep pow_sequense_factor | cut -d ' ' -f2
