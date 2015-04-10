@@ -437,12 +437,18 @@ bool daemon_backend::update_wallets()
     if (m_last_daemon_height != m_last_wallet_synch_height)
     {
       wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
+      wsi.wallet_id = w.first;
       m_pview->update_wallet_status(wsi);
       try
       {
         w.second->refresh();
         w.second->scan_tx_pool();
+
+        wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
+        m_pview->update_wallet_status(wsi);
+
       }
+
 
       catch (const tools::error::daemon_busy& /*e*/)
       {
@@ -464,11 +470,7 @@ bool daemon_backend::update_wallets()
     }
   }
     m_last_wallet_synch_height = m_ccore.get_current_blockchain_height();
-    wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
-    m_pview->update_wallet_status(wsi);
     update_wallets_info();
-
-
 
     /*
     //check if PoS mining iteration is needed

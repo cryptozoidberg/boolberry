@@ -635,8 +635,6 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
   load_keys(keys_buff, password);
   LOG_PRINT_L0("Loaded wallet keys file, with public address: " << m_account.get_public_address_str());
 
-
-
   bool r = tools::portable_unserialize_obj_from_stream(*this, data_file);
   CHECK_AND_THROW_WALLET_EX(!r, error::file_read_error, m_wallet_file);
 //   CHECK_AND_THROW_WALLET_EX(

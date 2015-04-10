@@ -157,13 +157,16 @@ public:
       wallet_state_ready = 2
     };
 
-
+    uint64_t wallet_id;
     uint64_t wallet_state;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_state)
+      KV_SERIALIZE(wallet_state)
     END_KV_SERIALIZE_MAP()
-  };  struct wallet_info
+  };  
+  
+  struct wallet_info
   {
     uint64_t unlocked_balance;
     uint64_t balance;
