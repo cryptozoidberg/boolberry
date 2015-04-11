@@ -331,6 +331,8 @@ namespace currency
       uint64_t transactions_cnt_per_day;
       uint64_t transactions_volume_per_day;
       nodetool::maintainers_info_external mi;
+      uint64_t pos_sequense_factor;
+      uint64_t pow_sequense_factor;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -356,6 +358,8 @@ namespace currency
         KV_SERIALIZE(transactions_cnt_per_day)
         KV_SERIALIZE(transactions_volume_per_day)
         KV_SERIALIZE(mi)
+        KV_SERIALIZE(pos_sequense_factor)
+        KV_SERIALIZE(pow_sequense_factor)
       END_KV_SERIALIZE_MAP()
     };
   };    
