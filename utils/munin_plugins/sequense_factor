@@ -3,7 +3,7 @@
 case $1 in
    config)
         cat <<'EOM'
-graph_sequense sequense
+graph_title sequense
 graph_vlabel sequense
 graph_category luid
 pos_sequense_factor.label pos_sequense_factor

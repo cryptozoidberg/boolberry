@@ -814,8 +814,6 @@ bool wallet2::prepare_and_sign_pos_block(currency::block& b,
     << "key_ptr:" << *keys_ptrs[0]
     << "signature:" << b.miner_tx.signatures[0][0]);
 
-
-  LOG_PRINT_GREEN("Block constructed, sending to core...", LOG_LEVEL_1);
   return true;
 }
 //------------------------------------------------------------------
@@ -954,6 +952,8 @@ bool wallet2::build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& 
     const currency::txout_to_key& txtokey = boost::get<currency::txout_to_key>(target);
     keys_ptrs.push_back(&txtokey.key);
 
+    b.timestamp = rsp.block_timestamp;
+
     res = prepare_and_sign_pos_block(b,
       req.pos_entries[rsp.index],
       get_tx_pub_key_from_extra(m_transfers[req.pos_entries[rsp.index].wallet_index].m_tx),
@@ -961,6 +961,8 @@ bool wallet2::build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& 
       keys_ptrs);
     CHECK_AND_ASSERT_MES(res, false, "Failed to prepare_and_sign_pos_block");
     
+    LOG_PRINT_GREEN("Block constructed, sending to core...", LOG_LEVEL_1);
+
     currency::COMMAND_RPC_SUBMITBLOCK::request subm_req = AUTO_VAL_INIT(subm_req);
     currency::COMMAND_RPC_SUBMITBLOCK::response subm_rsp = AUTO_VAL_INIT(subm_rsp);
     subm_req.push_back(epee::string_tools::buff_to_hex_nodelimer(currency::t_serializable_object_to_blob(b)));

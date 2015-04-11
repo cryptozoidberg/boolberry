@@ -738,7 +738,7 @@ bool blockchain_storage::create_block_template(block& b,
   b.major_version = CURRENT_BLOCK_MAJOR_VERSION;
   b.minor_version = CURRENT_BLOCK_MINOR_VERSION;
   b.prev_id = get_top_block_id();
-  b.timestamp = time(NULL);
+  b.timestamp = 0;
   b.flags = 0;
   if (pos)
     b.flags |= CURRENCY_BLOCK_FLAG_POS_BLOCK;
@@ -1221,16 +1221,31 @@ bool blockchain_storage::check_keyimages(const std::list<crypto::key_image>& ima
 //------------------------------------------------------------------
 uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
 {
-  /*
-  TODO:
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   if(m_blocks.size() <= aprox_count)
     return 0;
 
-  wide_difficulty_type w_hr = (m_blocks.back().cumulative_difficulty - m_blocks[m_blocks.size() - aprox_count].cumulative_difficulty)/
-                              (m_blocks.back().bl.timestamp - m_blocks[m_blocks.size() - aprox_count].bl.timestamp);
+  uint64_t nearest_front_pow_block_i = m_blocks.size() - 1;
+  while (nearest_front_pow_block_i != 0)
+  {
+    if (!is_pos_block(m_blocks[nearest_front_pow_block_i].bl))
+      break;
+    --nearest_front_pow_block_i;
+  }
+
+  uint64_t nearest_back_pow_block_i = m_blocks.size() - aprox_count;
+  while (nearest_back_pow_block_i != 0)
+  {
+    if (!is_pos_block(m_blocks[nearest_back_pow_block_i].bl))
+      break;
+    --nearest_back_pow_block_i;
+  }
+
+
+  wide_difficulty_type w_hr = (m_blocks[nearest_front_pow_block_i].cumulative_diff_precise - m_blocks[nearest_back_pow_block_i].cumulative_diff_precise) /
+    (m_blocks[nearest_front_pow_block_i].bl.timestamp - m_blocks[nearest_back_pow_block_i].bl.timestamp);
   return w_hr.convert_to<uint64_t>();
-  */
+  
   return 0;
 }
 //------------------------------------------------------------------
