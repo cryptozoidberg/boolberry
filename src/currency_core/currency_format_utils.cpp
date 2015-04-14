@@ -1202,6 +1202,7 @@ namespace currency
     bl.timestamp = 0;
     bl.nonce = 1010101020; //bender's nightmare
     //miner::find_nonce_for_given_block(bl, 1, 0,);
+    LOG_PRINT_GREEN("Generated genesis: " << get_block_hash(bl), LOG_LEVEL_0);
     return true;
   }
   //---------------------------------------------------------------
