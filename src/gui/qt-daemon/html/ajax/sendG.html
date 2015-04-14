@@ -1,0 +1,155 @@
+    <nav class="navbar btns" role="navigation">
+
+        <ul class="nav nav-pills nav-justified">
+            <li>
+                <a class="btn btn-primary" data-toggle="modal" data-target="#send">Отправить гульдены</a>
+
+            </li>
+            <li>
+                <a class="btn btn-default" href="buyG.html">Купить гульдены</a>
+            </li>
+            <li>
+                <a href="sellG.html" class="btn btn-default">Продать гульдены</a>
+            </li>
+            <li>
+                <a aria-expanded="false" class="btn btn-default dropdown" data-toggle="dropdown">Купить/Продать товар
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="buyProduct.html">Купить товар за гульдены</a></li>
+                    <li><a href="sellProduct.html">Продать товар за гульдены</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <h1>Перевод другому пользователю</h1>
+    <h5>Здесь Вы можете отправить гульдены любому пользваотелю сети, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
+    <form class="form-horizontal">
+        <div class="tabs">
+
+            <div class="panel">
+                <div class="panel-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4 col-sm-4">Со счета</label>
+                            <select class="col-xs-8 col-sm-8 selectpicker">
+                                <option>Safelabel (@@safealias) 4.20 G</option>
+                                <option>Safelabel1 (@safealias1) 30.40 G</option>
+                                <option>Safelabel2 (@safealias2) 0.56 G</option>
+                                <option>Safelabel-997398r (@safealias5) 0.56 G</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-4 col-sm-4"></div>
+                            <div class="col-xs-4 col-sm-4">
+                                <label class="checkbox">
+                                    <input type="checkbox"> Показывать номер счета получателю
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-4 col-sm-4"></div>
+                            <div class="col-xs-4 col-sm-4">
+                                <label class="checkbox">
+                                    <input type="checkbox"> Микшировать (уровень 2)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group has-success has-feedback">
+                            <label class="control-label col-xs-4 col-sm-4">Получатель</label>
+                            <div class="col-xs-6 col-sm-6"><input type="text" class="form-control" value="1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y" placeholder="счет или алиас">
+                                <span class="fa fa-lg fa-check form-control-feedback" aria-hidden="true"></span>
+                                <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                            </div>
+                            <div class="col-xs-1 col-sm-1">
+                                <div class="btn-group pull-right">
+                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                        <i class="fa fa-lg fa-save"></i> <span class="caret"></span>
+                                    </button>
+                                    <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                                        <li><a href="#contact0">Добавить новый контакт</a></li>
+                                        <li><a href="#contacts">Добавить в существующий контакт</a></li>
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-xs-4 col-sm-4">Сумма</label>
+                            <div class="col-xs-3 col-sm-3">
+                                <div class="input-group">
+
+                                    <input type="text" class="form-control" placeholder="число">
+                                    <span class="input-group-addon">G</span>
+                                </div>
+                            </div>
+                            <div class="col-xs-3 col-sm-3">
+
+                                <div class="input-group">
+
+                                    <input type="text" class="form-control" placeholder="число" value="1.76">
+                                    <span class="input-group-addon" >G</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-3 col-sm-3 col-sm-offset-4"><button type="button" class="btn btn-link btn-block i-check collapsed" data-toggle="collapse" data-target="#deferred" aria-expanded="false"><span class="text-muted"><i class="fa fa-lg fa-square-o"></i> Отложенный перевод</span></button></div>
+                            <div class="col-xs-5 col-sm-5">
+                                <div class="help-block">Комиссия, при которой платеж будет наиболее быстро обработан системой</div>
+                            </div>
+                        </div>
+                        <div class="collapse" id="deferred">
+                            <div class="form-group">
+
+                                <label class="control-label col-xs-4 col-sm-4">Дата и время</label>
+
+                                <div class="col-xs-3 col-sm-3 sdatapicker">
+                                    <div class="input-group date">
+                                        <input type="text" class="form-control"><span class="input-group-addon"><i class="fa fa-lg fa-calendar"></i></span>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-xs-2 col-sm-2">
+                                    <div class="input-group timer">
+                                        <input type="text" class="form-control"><span class="input-group-addon"><i class="fa fa-lg fa-clock-o"></i></span>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="form-group">
+                            <label class="control-label col-xs-4 col-sm-4">Комментарий</label>
+                            <div class="col-xs-8 col-sm-8"><input type="text" class="form-control" placeholder="сообщение получателю"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xs-6 col-sm-6">
+                                <a class="btn btn-block btn-lg btn-default">Отменить</a>
+                            </div>
+                            <div class="col-xs-6 col-sm-6">
+                                <button  type="submit" id="submibtn" class="sendG_submitButton btn btn-block btn-lg btn-primary">Отправить</button>
+                            </div></div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </form>
+    <hr>
+    <div class="footer">
+
+        <p class="small text-muted">
+            Текст о том что пользователи сами берут на себя ответственность за свои заявки и исполнение обязательств по ним, текст о том что пользователи сами берут на себя ответственность за свои заявки и исполнение обязательств по ним.
+        </p>
+    </div>
+
+

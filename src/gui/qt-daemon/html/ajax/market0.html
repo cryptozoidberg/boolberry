@@ -1,0 +1,1623 @@
+    <nav class="navbar btns" role="navigation">
+        <ul class="nav nav-pills nav-justified">
+            <li>
+                <a href="sendG.html" class="btn btn-default"> Отправить гульдены</a>
+
+            </li>
+            <li>
+                <a class="btn btn-default" href="buyG.html">Купить гульдены</a>
+
+            </li>
+            <li>
+                <a href="sellG.html" class="btn btn-default">Продать гульдены</a>
+
+            </li>
+
+            <li>
+
+                <a class="btn btn-default dropdown" data-toggle="dropdown">Купить/Продать товар
+
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="buyProduct.html">Купить товар за гульдены</a></li>
+                    <li><a href="sellProduct.html">Продать товар за гульдены</a></li>
+                </ul>
+
+
+
+
+            </li>
+        </ul>
+    </nav>
+    <h1 id="market">Рынок предложений валют и товаров</h1>
+    <h5>Здесь Вы можете просмотреть рынок предложений, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
+    <ul class="nav nav-tabs toptabs" id="markettabs">
+        <li role="presentation" class="active"><a href="#currency" data-toggle="tab">Валюта</a></li>
+        <li role="presentation"><a href="#barter" data-toggle="tab">Товары</a></li>
+        <li class="dropdown" role="presentation">
+            <a aria-controls="myTabDrop1-contents" data-toggle="dropdown" class="dropdown-toggle" id="myTabDrop1" href="#">Мои заявки <span class="caret"></span></a>
+            <ul id="myTabDrop1-contents" aria-labelledby="myTabDrop1" role="menu" class="dropdown-menu">
+                <li><a aria-controls="dropdown1" data-toggle="tab" id="dropdown1-tab" role="tab" tabindex="-1" href="#myCurrency">Валюта</a></li>
+                <li><a aria-controls="dropdown2" data-toggle="tab" id="dropdown2-tab" role="tab" tabindex="-1" href="#myBarter">Товары</a></li>
+            </ul>
+        </li>
+        <li class="dropdown" role="presentation">
+            <a aria-controls="myTabDrop2-contents" data-toggle="dropdown" class="dropdown-toggle" id="myTabDrop2" href="#">Избранное<span class="caret"></span></a>
+            <ul id="myTabDrop2-contents" aria-labelledby="myTabDrop2" role="menu" class="dropdown-menu">
+                <li><a aria-controls="dropdown1" data-toggle="tab" id="dropdown1-tab" role="tab" tabindex="-1" href="#favCurrency">Валюта</a></li>
+                <li><a aria-controls="dropdown2" data-toggle="tab" id="dropdown2-tab" role="tab" tabindex="-1" href="#favBarter">Товары</a></li>
+            </ul>
+        </li>
+    </ul>
+    <div class="tab-content tabs tabs-left">
+        <div class="tab-pane active" id="currency">
+
+            <div class="navbar" id="navbar-tabs">
+
+                <form>
+                    <div class="collapse text-right filter1 close-filter">
+                        <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter1" class="btn btn-primary active"><i class="fa fa-chevron-up"></i> Фильтр</button>
+                        </div>
+                    </div>
+                    <div class="collapse filter1">
+                        <div class="row topmargin">
+                            <div class="col-xs-5 col-sm-5">
+                                <div class="form-group clearfix">
+                                    <label class="col-xs-4 col-sm-4 control-label required nopadding" style="">Валюта расчета</label>
+                                    <select class="selectpicker col-xs-3 col-sm-3 nopadding btn-sm" style=""><option selected="">USD</option><option>EURO</option><option>RUR</option></select>
+                                </div>
+                                <div class="form-group clearfix">
+                                    <label class="col-xs-4 col-sm-4 control-label required nopadding" style="">
+                                        Сумма <span class="collapse in">покупки</span><span class="collapse">продажи</span>
+                                    </label>
+                                    <div class="col-xs-8 col-sm-8 nopadding">
+                                        <div style="margin:0 -15px" class="row">
+
+                                            <div style="padding-left:0" class="col-xs-6 col-sm-6">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">от</span>
+                                                    <input type="text" class="form-control" placeholder="число">
+                                                    <span class="input-group-addon">G</span>
+                                                </div>
+                                            </div>
+                                            <div style="padding-right:0" class="col-xs-6 col-sm-6">
+
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">до</span>
+                                                    <input type="text" class="form-control" placeholder="число">
+                                                    <span class="input-group-addon">G</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group clearfix">
+                                    <label class="col-xs-4 col-sm-4 control-label required nopadding">
+                                        Курс
+                                    </label>
+
+                                    <div class="col-xs-8 col-sm-8 nopadding"><div class="row" style="margin:0 -15px">
+                                        <div style="padding-left:0" class="col-xs-6 col-sm-6">
+
+                                            <div class="input-group">
+                                                <span class="input-group-addon">от</span>
+                                                <input type="text" class="form-control" placeholder="цена 1 гульдена">
+                                                <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
+                                            </div>
+                                        </div>
+                                        <div style="padding-right:0" class="col-xs-6 col-sm-6 ">
+
+                                            <div class="input-group">
+                                                <span class="input-group-addon">до</span>
+                                                <input type="text" class="form-control" placeholder="535">
+                                                <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="form-group clearfix">
+
+                                    <label style="padding-left: 0" class="col-xs-4 col-sm-4 required"></label>
+                                    <div class="col-xs-8 col-sm-8 nopadding" style="margin-top: -4px; margin-bottom: 25px;">
+                                        <label class="checkbox"><input type="checkbox" value=""> <strong>Бонус</strong></label>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-xs-7 col-sm-7">
+                                <div class="row">
+                                    <div class="col-xs-6 col-sm-6">
+
+                                        <div class="form-group clearfix">
+                                            <label class="col-xs-6 col-sm-6 required text-right" style="padding-left: 0">
+                                                Возраст заявки</label>
+                                            <select class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding" style=""><option selected="">не важно</option><option>час</option><option>3 часа</option><option>день</option><option>два дня</option><option>три дня</option><option>неделя</option><option>больше недели</option></select>        </div>
+                                        <div class="form-group clearfix">
+                                            <label class="col-xs-6 col-sm-6 required text-right" style="">Рейтинг</label>
+                                            <div class="fslider col-xs-6 col-sm-6 nopadding">
+                                                <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="5"  data-slider-step=".25" data-slider-value="[3,5]"/>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-xs-6 col-sm-6">
+                                        <div class="form-group clearfix">
+                                            <label style="padding-left: 0" class="col-xs-6 col-sm-6 required nopadding">
+                                                Условия
+                                            </label>
+                                            <select class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding" style="">
+                                                <option selected="">
+                                                    не важно
+                                                </option>
+                                                <option>
+                                                    всю сумму
+                                                </option>
+                                                <option>
+                                                    можно частями
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group clearfix">
+                                            <label style="padding-left: 0" class=" col-xs-6 col-sm-6 required nopadding">
+                                                Способ расчета
+                                            </label>
+                                            <select class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding" style="">
+                                                <option selected="">выбрать</option>
+                                                <option>Электронные платежные системы</option>
+                                                <option>Банковская карта</option>
+                                                <option>Банковский перевод</option>
+                                                <option>Наличные</option>
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="form-group">
+
+
+
+
+                                        <label class="col-xs-3 col-sm-3 required text-right" style="">География</label>
+                                        <div class="col-xs-4 col-sm-4 nopadding">
+                                            <input type="text" class="form-control" placeholder="страны" value="">
+                                        </div>
+                                        <div class="col-xs-5 col-sm-5">
+                                            <input type="text" class="form-control" placeholder="города в странах" value="">
+                                        </div>
+
+
+
+
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-xs-4 col-sm-4">
+
+                            <div class="btn-group btn-group-justified" data-toggle="buttons" id="marketfltbtns">
+                                <label class="btn btn-primary active">
+                                    <input type="radio" name="options" id="option1" autocomplete="off" checked=""> Предложение
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" name="options" id="option2" autocomplete="off"> Спрос
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-xs-4 col-sm-4">
+                            <input type="text" class="form-control" placeholder="найти текст">
+                        </div>
+                        <div class="col-xs-4 col-sm-4">
+                            <div class="collapse filter1">
+                                <div class="row">
+                                    <div style="padding-right:5px" class="col-xs-6 col-sm-6">
+                                        <button type="button" class="btn btn-block btn-primary">Применить</button></div>
+                                    <div style="padding-left:5px" class="col-xs-6 col-sm-6"><button type="button" class="btn btn-block btn-default">Очистить фильтр</button></div>
+                                </div>
+                            </div>
+                            <div class="collapse in filter1">
+                                <div class="btn-group pull-right"><button type="button" data-toggle="collapse" data-target=".filter1" class="btn btn-default"><i class="fa fa-chevron-down"></i> Фильтр</button></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+
+            <div class="table-responsive panel market-table-responsive" id="offersTbl">
+                <table class="table table-condensed data-table table-hover">
+                    <thead>
+                    <tr>
+                        <th>
+                            <span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                        </th>
+                        <th>
+                            <span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                        </th>
+                        <th>
+                            <span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                        </th>
+                        <th>
+                            Контакт
+                        </th>
+                        <th>
+                            <span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                        </th>
+                        <th>
+                            <span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                        </th>
+                        <th>
+                            <span class="nowrap">Рассчет<i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                        </th>
+                        <th>
+                            <span class="nowrap">Местор-е<i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                        </th>
+                        <th>
+                            <span class="nowrap">Комментарий<span></span></span>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="success">
+                        <td>
+                            3 часа назад
+                        </td>
+                        <td>
+                            <span class="nowrap">420,34 </span>
+                        </td>
+                        <td>
+                            23,00 <span class="label label-danger">+ 2%</span>
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.5</span>
+                        </td>
+                        <td>
+                            вся сумма
+                        </td>
+                        <td>
+                            наличные
+                        </td>
+                        <td>
+                            Рим, Италия
+                        </td>
+                        <td>
+                            передам в городе
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="success">
+                        <td>
+                            4 часа назад
+                        </td>
+                        <td>
+                            <span class="nowrap">420,34 </span>
+                        </td>
+                        <td>
+                            23,00 <span class="label label-danger">+ 2%</span>
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.5</span>
+                        </td>
+                        <td>
+                            вся сумма
+                        </td>
+                        <td>
+                            наличные
+                        </td>
+                        <td>
+                            Рим, Италия
+                        </td>
+                        <td>
+                            передам в городе
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group" id="favbtn">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="success">
+                        <td>
+                            1 часа назад
+                        </td>
+                        <td>
+                            <span class="nowrap">420,34 </span>
+                        </td>
+                        <td>
+                            23,00 <span class="label label-danger">+ 2%</span>
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a class="nowrap" href="" mailto:bicoing@yahoo.com=""> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.5</span>
+                        </td>
+                        <td>
+                            вся сумма
+                        </td>
+                        <td>
+                            наличные
+                        </td>
+                        <td>
+                            Рим, Италия
+                        </td>
+                        <td>
+                            передам в городе
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="new">
+                        <td>
+                            3 мин назад
+                        </td>
+                        <td>
+                            <span class="nowrap">420,45</span>
+                        </td>
+                        <td>
+                            <span class="nowrap">100,00</span>
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.3</span>
+                        </td>
+                        <td>
+                            можно частями
+                        </td>
+                        <td>
+                            наличные
+                        </td>
+                        <td>
+                            Милан, Италия
+                        </td>
+                        <td>
+                            торг.центр на площади
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="new">
+                        <td>
+                            3 мин назад
+                        </td>
+                        <td>
+                            <span class="nowrap">420,45</span>
+                        </td>
+                        <td>
+                            <span class="nowrap">100,00</span>
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.3</span>
+                        </td>
+                        <td>
+                            можно частями
+                        </td>
+                        <td>
+                            наличные
+                        </td>
+                        <td>
+                            Милан, Италия
+                        </td>
+                        <td>
+                            торг.центр на площади
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="new">
+                        <td>
+                            3 мин назад
+                        </td>
+                        <td>
+                            <span class="nowrap">420,45</span>
+                        </td>
+                        <td>
+                            <span class="nowrap">100,00</span>
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.3</span>
+                        </td>
+                        <td>
+                            можно частями
+                        </td>
+                        <td>
+                            наличные
+                        </td>
+                        <td>
+                            Милан, Италия
+                        </td>
+                        <td>
+                            торг.центр на площади
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="new">
+                        <td>
+                            3 мин назад
+                        </td>
+                        <td>
+                            <span class="nowrap">420,45</span>
+                        </td>
+                        <td>
+                            <span class="nowrap">100,00</span>
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.3</span>
+                        </td>
+                        <td>
+                            можно частями
+                        </td>
+                        <td>
+                            наличные
+                        </td>
+                        <td>
+                            Милан, Италия
+                        </td>
+                        <td>
+                            торг.центр на площади
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="disable">
+                        <td>
+                            4 мин назад
+                        </td>
+                        <td>
+                            <span class="nowrap">408,67 </span>
+                        </td>
+                        <td>
+                            230,50
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.1</span>
+                        </td>
+                        <td>
+                            можно частями
+                        </td>
+                        <td>
+                            вся сумма
+                        </td>
+                        <td>
+                            Флоренция, Италия
+                        </td>
+                        <td>
+                            оплата только картами
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            4 мин назад
+                        </td>
+                        <td>
+                            <span class="nowrap">408,67 </span>
+                        </td>
+                        <td>
+                            230,50
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.1</span>
+                        </td>
+                        <td>
+                            можно частями
+                        </td>
+                        <td>
+                            вся сумма
+                        </td>
+                        <td>
+                            Флоренция, Италия
+                        </td>
+                        <td>
+                            оплата только картами
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn active" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            4 мин назад
+                        </td>
+                        <td>
+                            <span class="nowrap">408,67 </span>
+                        </td>
+                        <td>
+                            230,50
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.1</span>
+                        </td>
+                        <td>
+                            можно частями
+                        </td>
+                        <td>
+                            вся сумма
+                        </td>
+                        <td>
+                            Флоренция, Италия
+                        </td>
+                        <td>
+                            оплата только картами
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn active" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            4 мин назад
+                        </td>
+                        <td>
+                            <span class="nowrap">408,67 </span>
+                        </td>
+                        <td>
+                            230,50
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.1</span>
+                        </td>
+                        <td>
+                            можно частями
+                        </td>
+                        <td>
+                            вся сумма
+                        </td>
+                        <td>
+                            Флоренция, Италия
+                        </td>
+                        <td>
+                            оплата только картами
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            4 мин назад
+                        </td>
+                        <td>
+                            <span class="nowrap">408,67 </span>
+                        </td>
+                        <td>
+                            230,50
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.1</span>
+                        </td>
+                        <td>
+                            можно частями
+                        </td>
+                        <td>
+                            вся сумма
+                        </td>
+                        <td>
+                            Флоренция, Италия
+                        </td>
+                        <td>
+                            оплата только картами
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
+             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="navbar" id="moreload">
+                <button class="btn btn-block btn-default navbar-btn">Загрузить еще 20</button>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="barter">
+
+            <div class="navbar">
+                <form>
+                    <div class="collapse text-right filter2 close-filter">
+                        <div class="btn-group"><button type="button" data-toggle="collapse" data-target=".filter2" class="btn btn-primary active"><i class="fa fa-chevron-up"></i> Фильтр</button>
+                        </div>
+                    </div>
+                    <div class="collapse filter2">
+                        <div class="row">
+
+                            <div class="col-xs-7 col-sm-7">
+                                <div class="form-group">
+                                    <label class="col-xs-2 col-sm-2 required nopadding">География</label>
+                                    <div class="col-xs-5 col-sm-5 nopadding">
+                                        <input type="text" value="" placeholder="страны" class="form-control">
+                                    </div>
+                                    <div class="col-xs-5 col-sm-5 nopadding" style="padding-left:5px">
+                                        <input type="text" class="form-control" placeholder="города в странах" value="">
+                                    </div>
+
+
+
+
+                                </div>
+                            </div>
+
+                            <div class="col-xs-5 col-sm-5">
+                                <div class="row">
+                                    <div class="col-xs-10 col-xs-1 col-sm-10">
+
+                                        <div class="form-group clearfix">
+                                            <label style="padding-left: 0" class="col-xs-6 col-sm-6 required text-right">
+                                                Возраст заявки</label>
+                                            <select style="" class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding"><option selected="">не важно</option><option>час</option><option>3 часа</option><option>день</option><option>два дня</option><option>три дня</option><option>неделя</option><option>больше недели</option></select>        </div>
+                                        <div class="form-group clearfix">
+                                            <label style="" class="col-xs-6 col-sm-6 required text-right">Рейтинг</label>
+                                            <div class="fslider col-xs-6 col-sm-6 nopadding">
+                                                <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="5"  data-slider-step=".25" data-slider-value="[3,5]"/>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-xs-6 col-sm-6">
+
+
+
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-xs-4 col-sm-4">
+
+                            <div class="btn-group btn-group-justified" data-toggle="buttons">
+                                <label class="btn btn-primary active">
+                                    <input type="radio" name="options" id="option1" autocomplete="off" checked=""> Предложение
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" name="options" id="option2" autocomplete="off"> Спрос
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-xs-4 col-sm-4">
+                            <input type="text" class="form-control" placeholder="найти текст">
+                        </div>
+                        <div class="col-xs-4 col-sm-4">
+                            <div class="collapse filter2">
+                                <div class="row">
+                                    <div style="padding-right:5px" class="col-xs-6 col-sm-6">
+                                        <button type="button" class="btn btn-block btn-primary">Применить</button></div>
+                                    <div style="padding-left:5px" class="col-xs-6 col-sm-6"><button type="button" class="btn btn-block btn-default">Очистить фильтр</button></div>
+                                </div>
+                            </div>
+                            <div class="collapse in filter2">
+                                <div class="btn-group pull-right"><button type="button" data-toggle="collapse" data-target=".filter2" class="btn btn-default"><i class="fa fa-chevron-down"></i> Фильтр</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="table-responsive panel market-table-responsive">
+
+                <table class="table table-condensed data-table table-hover">
+                    <thead>
+                    <tr>
+                        <th>
+                            <span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                        </th>
+                        <th>
+                            Текст предложения
+                        </th>
+                        <th>
+                            <span class="nowrap">Цена, G</span>
+                        </th>
+                        <th>
+                            Контакт
+                        </th>
+                        <th>
+                            <span class="nowrap">Рейтинг <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                        </th>
+                        <th>
+                            <span class="nowrap">Место-е <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                        </th>
+                        <th>
+                            <span class="nowrap">Комментарий<span></span></span>
+                        </th>
+                        <th>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="success">
+                        <td>
+                            3 часа назад
+                        </td>
+                        <td>
+                            <a href="">Меняем биткоин на G </a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.5</span>
+                        </td>
+                        <td>
+                            Аргентина
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="success">
+                        <td>
+                            2 часа назад
+                        </td>
+                        <td>
+                            <a href="">Фотосъемка на вершине горы <span class="text-muted">...</span></a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.5</span>
+                        </td>
+                        <td>
+                            Бразилия
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="new">
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Контент для сайтов </a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.5</span>
+                        </td>
+                        <td>
+                            Перу
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="new">
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Контент для сайтов </a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a class="nowrap" href="" mailto:bicoing@yahoo.com=""> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.5</span>
+                        </td>
+                        <td>
+                            Перу
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="new">
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Контент для сайтов </a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a class="nowrap" href="" mailto:bicoing@yahoo.com=""> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.5</span>
+                        </td>
+                        <td>
+                            Перу
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="new">
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Контент для сайтов </a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a class="nowrap" href="" mailto:bicoing@yahoo.com=""> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.5</span>
+                        </td>
+                        <td>
+                            Перу
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Антиквариат (известный магазин)<span class="text-muted">..</span></a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-success">4.5</span>
+                        </td>
+                        <td>
+                            Мексика
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="disable">
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Редкие записи винил</a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-warning">3.5</span>
+                        </td>
+                        <td>
+                            Аргентина
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Интернет-магазин фототехники...</a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a class="nowrap" href="" mailto:bicoing@yahoo.com=""> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-warning">3.2</span>
+                        </td>
+                        <td class="">
+                            Аргентина
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Авиаперевозка легких грузов</a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-warning">3.5</span>
+                        </td>
+                        <td>
+                            Перу
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Авиаперевозка легких грузов</a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-warning">3.5</span>
+                        </td>
+                        <td>
+                            Перу
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Авиаперевозка легких грузов</a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-warning">3.5</span>
+                        </td>
+                        <td>
+                            Перу
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Авиаперевозка легких грузов</a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-warning">3.5</span>
+                        </td>
+                        <td>
+                            Перу
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2 минуты назад
+                        </td>
+                        <td>
+                            <a href="">Авиаперевозка легких грузов</a>
+                        </td>
+                        <td>
+                            30 G
+                        </td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul>
+                        </td>
+                        <td>
+                            <span class="label label-warning">3.5</span>
+                        </td>
+                        <td>
+                            Перу
+                        </td>
+                        <td>
+                            короткий текст
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="navbar">
+                <button class="btn btn-block btn-default navbar-btn">Загрузить еще 20</button>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="myCurrency">
+
+            <div class="navbar">
+                <div class="row">
+
+                    <div class="col-xs-4 col-sm-4">
+
+                        <div data-toggle="buttons" class="btn-group btn-group-justified">
+                            <label class="btn btn-primary active">
+                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Предложение
+                            </label>
+                            <label class="btn btn-primary">
+                                <input type="radio" autocomplete="off" id="option2" name="options"> Спрос
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 col-sm-4">
+                        <input type="text" placeholder="найти текст" class="form-control">
+                    </div>
+                    <div class="col-xs-4 col-sm-4"> <a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт моих заявок в файл</span></a></div>
+                </div>
+            </div>
+
+            <div class="table-responsive panel market-table-responsive">
+                <table class="table table-condensed data-table table-hover">
+                    <thead>
+                    <tr>
+
+                        <th><span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Тип <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th>Контакт</th>
+                        <th><span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th><span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th><span class="nowrap">Рассчет<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th><span class="nowrap">Местор-е<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th><span class="nowrap">Комментарий<span></span></span></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="success">
+
+                        <td>3 мин назад</td>
+                        <td>Покупка</td>
+                        <td><span class="nowrap">420,34 </span></td>
+                        <td>23,00 <span class="label label-danger">+ 2%</span></td>
+                        <td><ul class="list-unstyled">
+
+                            <li><a class="nowrap" href="" mailto:bicoing@yahoo.com=""> bicoinG@yahoo.com</a></li>
+                            <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                        </ul></td>
+                        <td><span class="label label-success">4.5</span></td>
+                        <td>вся сумма</td>
+                        <td>наличные</td>
+
+                        <td>Рим, Италия</td>
+                        <td>передам в городе</td>
+                        <td><div class="btn-group nowrapbtns">
+                            <button type="button" class="btn btn-link" data-target="#toptoupCurr" data-toggle="modal"><i class="fa fa-lg fa-arrow-circle-up text-muted"></i></button><button type="button" data-target="#orderCurr" data-toggle="modal" class="btn btn-link"><i class="fa fa-lg fa-edit text-muted"></i></button>
+                        </div></td>
+                    </tr>
+                    <tr class="">
+
+                        <td>3 мин назад</td>
+                        <td>Покупка</td>
+                        <td><span class="nowrap">420,45</span></td>
+                        <td><span class="nowrap">100,00</span></td>
+                        <td><ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
+                        </ul></td>
+                        <td><span class="label label-success">4.3</span></td>
+                        <td>можно частями</td>
+                        <td>наличные</td>
+                        <td>Милан, Италия</td>
+                        <td>торг.центр на площади</td>
+                        <td>
+                            <div data-toggle="buttons" class="btn-group">
+                                <button type="button" class="btn btn-link" data-target="#toptoupCurr" data-toggle="modal"><i class="fa fa-lg fa-arrow-circle-up text-muted"></i></button><button type="button" data-target="#orderCurr" data-toggle="modal" class="btn btn-link"><i class="fa fa-lg fa-edit text-muted"></i></button>
+                            </div>
+
+
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="tab-pane" id="myBarter">
+
+            <div class="navbar">
+
+
+                <div class="row">
+
+                    <div class="col-xs-4 col-sm-4">
+
+                        <div data-toggle="buttons" class="btn-group btn-group-justified">
+                            <label class="btn btn-primary active">
+                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Предложение
+                            </label>
+                            <label class="btn btn-primary">
+                                <input type="radio" autocomplete="off" id="option2" name="options"> Спрос
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 col-sm-4">
+                        <input type="text" placeholder="найти текст" class="form-control">
+                    </div>
+                    <div class="col-xs-4 col-sm-4"><a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт моих заявок в файл</span></a></div>
+                </div>
+            </div>
+            <div class="table-responsive panel market-table-responsive">
+
+                <table class="table table-condensed data-table table-hover">
+                    <thead>
+                    <tr>
+
+                        <th><span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Тип <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th>Текст предложения</th>
+                        <th><span class="nowrap">Цена, G</span></th>
+                        <th>Контакт</th>
+                        <th><span class="nowrap">Рейтинг <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Место-е <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Комментарий</span></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+
+                        <td>3 мин назад</td>
+                        <td>Продажа</td>
+                        <td><a href="">Фотосъемка на вершине горы
+                            <span class="text-muted">...</span></a></td>
+                        <td>30 G</td>
+                        <td><ul class="list-unstyled">
+
+                            <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                            <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                        </ul></td>
+                        <td><span class="label label-success">4.5</span></td>
+
+                        <td>Бразилия</td><td>короткий текст</td>
+
+                        <td><div class="btn-group nowrapbtns">
+                            <button type="button" class="btn btn-link" data-target="#toptoupBarter" data-toggle="modal"><i class="fa fa-lg fa-arrow-circle-up text-muted"></i></button>
+                            <button type="button" data-target="#orderBarter" data-toggle="modal" class="btn btn-link"><i class="fa fa-lg fa-edit text-muted"></i></button>
+
+                        </div>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="tab-pane" id="favCurrency">
+
+            <div class="navbar">
+
+
+
+                <div class="row">
+
+                    <div class="col-xs-4 col-sm-4">
+
+                        <div data-toggle="buttons" class="btn-group btn-group-justified">
+                            <label class="btn btn-primary active">
+                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Предложение
+                            </label>
+                            <label class="btn btn-primary">
+                                <input type="radio" autocomplete="off" id="option2" name="options"> Спрос
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 col-sm-4">
+                        <input type="text" placeholder="найти текст" class="form-control">
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="table-responsive panel market-table-responsive">
+                <table class="table table-condensed data-table table-hover">
+                    <thead>
+                    <tr>
+
+                        <th><span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Тип <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+
+                        <th><span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th>Контакт</th>
+                        <th><span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th><span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th><span class="nowrap">Рассчет<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th><span class="nowrap">Местор-е<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th><span class="nowrap">Комментарий<span></span></span></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="success">
+
+                        <td>3 мин назад</td>
+                        <td>Покупка</td>
+                        <td><span class="nowrap">420,34 </span></td>
+                        <td>23,00 <span class="label label-danger">+ 2%</span></td>
+                        <td><ul class="list-unstyled">
+
+                            <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                            <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                        </ul></td>
+                        <td><span class="label label-success">4.5</span></td>
+                        <td>вся сумма</td>
+                        <td>наличные</td>
+
+                        <td>Рим, Италия</td>
+                        <td>передам в городе</td>
+                        <td><div class="btn-group nowrapbtns" data-toggle="buttons">
+                            <button type="button" class="btn btn-link"><i class="fa fa-lg fa-times text-muted"></i></button><button type="button" class="btn btn-link"><i class="fa fa-lg fa-save text-muted"></i></button>
+                        </div></td>
+                    </tr>
+                    <tr class="">
+
+                        <td>3 мин назад</td>
+                        <td>Покупка</td>
+                        <td><span class="nowrap">420,45</span></td>
+                        <td><span class="nowrap">100,00</span></td>
+                        <td><ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
+                        </ul></td>
+                        <td><span class="label label-success">4.3</span></td>
+                        <td>можно частями</td>
+                        <td>наличные</td>
+                        <td>Милан, Италия</td>
+                        <td>торг.центр на площади
+
+                        </td>
+                        <td><div class="btn-group nowrapbtns" data-toggle="buttons">
+                            <button type="button" class="btn btn-link"><i class="fa fa-lg fa-times text-muted"></i></button><button type="button" class="btn btn-link"><i class="fa fa-lg fa-save text-muted"></i></button>
+                        </div></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="tab-pane" id="favBarter">
+
+
+            <div class="navbar">
+
+
+                <div class="row">
+
+                    <div class="col-xs-4 col-sm-4">
+
+                        <div data-toggle="buttons" class="btn-group btn-group-justified">
+                            <label class="btn btn-primary active">
+                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Предложение
+                            </label>
+                            <label class="btn btn-primary">
+                                <input type="radio" autocomplete="off" id="option2" name="options"> Спрос
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-xs-4 col-sm-4">
+                        <input type="text" placeholder="найти текст" class="form-control">
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="table-responsive panel market-table-responsive">
+
+                <table class="table table-condensed data-table table-hover">
+                    <thead>
+                    <tr>
+
+                        <th><span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Тип <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th>Текст предложения</th>
+                        <th><span class="nowrap">Цена, G</span></th>
+                        <th>Контакт</th>
+                        <th><span class="nowrap">Рейтинг <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Место-е <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Комментарий<span></span></span></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+
+                        <td>2 часа назад</td>
+                        <td>Продажа</td>
+                        <td><a href="">Фотосъемка на вершине горы
+                            <span class="text-muted">...</span></a></td>
+                        <td>30 G</td>
+                        <td><ul class="list-unstyled">
+
+                            <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
+                            <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                        </ul></td>
+                        <td><span class="label label-success">4.5</span></td>
+                        <td>Бразилия</td><td>короткий текст</td><td><div class="btn-group nowrapbtns" data-toggle="buttons">
+                        <button type="button" class="btn btn-link"><i class="fa fa-lg fa-times text-muted"></i></button><button type="button" class="btn btn-link"><i class="fa fa-lg fa-save text-muted"></i></button>
+                    </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <hr>
+    <div class="footer">
+
+        <p class="small text-muted">
+            Текст о том что пользователи сами берут на себя ответственность за свои заявки и исполнение обязательств по ним, текст о том что пользователи сами берут на себя ответственность за свои заявки и исполнение обязательств по ним.
+        </p>
+    </div>

@@ -1,0 +1,1564 @@
+
+<div class="panel widget" data-widget="outgoingPayments">
+
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="history/outgoing.html" class="widget-header">Исходящие платежи <span class="badge">1</span></a>
+        </h3>
+
+    </div>
+    <div class="scroll">
+    </div>
+</div>
+<div class="panel widget" data-widget="ingoingPayments">
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="history/ingoing.html" class="widget-header">Входящие платежи <span class="badge">1</span></a>
+        </h3>
+
+
+    </div>
+    <div class="scroll">
+        <div class="scroll-inner">
+            <table class="table table-condensed  data-table history-table short-history">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                                    <span class="nowrap">Дата операции <i style="opacity:0.3"
+                                                                          class="fa fa-chevron-down"></i></span>
+                    </th>
+                    <th>
+                                    <span class="nowrap">Состояние <i style="opacity:0.3"
+                                                                      class="fa fa-chevron-down"></i></span>
+                    </th>
+
+
+                    <th>
+                                    <span class="nowrap">Отправитель<i style="opacity:0.3"
+                                                                       class="fa fa-chevron-down"></i></span>
+                    </th>
+                    <th>
+                        <span class="nowrap">Комментарий</span>
+                    </th>
+
+                </tr>
+                </thead>
+                <tbody>
+
+                <tr>
+                    <td><span class="mix-label mix-label-down">
+	 <img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
+		<em><i style="color:#ddd" class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
+	</span>
+                    </td>
+                    <td>
+
+                        <small class="text-muted nowrap">12.12.14 22:56</small>
+                        <span class="chart receive-timer" data-percent="60"></span>
+
+                    </td>
+                    <td>
+                        <small class="text-info"><em>Получение</em></small>
+                    </td>
+
+
+                    <td>
+                        <small style="color:#999"><em>неизвестно</em></small>
+                    </td>
+
+                    <td><span class="text-muted">текст комментария</span></td>
+
+                </tr>
+                <tr>
+                    <td>
+	<span class="mix-label mix-label-up">
+	<img src="assets/font/svg/sound8.svg" style="opacity: 0.05;">
+	<em><i class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
+	</span>
+                    </td>
+                    <td>
+                        <small class="text-muted nowrap">12.12.14 22:56</small>
+                    </td>
+                    <td>
+                        <small class="text-muted">Получено</small>
+                    </td>
+
+
+                    <td>
+                        <div class="dropdown">
+                            <button aria-expanded="false" data-toggle="dropdown"
+                                    class="btn btn-link dropdown-toggle" type="button"><span
+                                    class="account-text"><span class="text-muted">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>
+                                            <div class="contractor">
+                                                <button class="btn btn-sm btn-default pull-right"
+                                                        style="position:absolute; bottom:0; right:0">
+                                                    скопировать
+                                                </button>
+							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                            </div>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="text-muted">текст комментария</span></td>
+
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+<div class="panel widget" data-widget="currencyFavorite">
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="market/favorites/currency.html" class="widget-header">Избранное – Валюта <span class="badge">4</span></a>
+        </h3>
+
+    </div>
+
+    <div class="scroll">
+        <div class="scroll-inner">
+            <table class="table table-condensed data-table table-hover">
+                <thead>
+                <tr>
+                    <th><span class="nowrap">Возраст <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                    </th>
+                    <th>Тип</th>
+
+                    <th><span class="nowrap">Сумма, G<i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                    </th>
+                    <th>Контакт</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="success">
+
+                    <td>3 мин назад</td>
+                    <td>Предложение</td>
+                    <td>23,00 <span class="label label-danger">+ 2%</span></td>
+                    <td>
+                        <ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="">
+
+                    <td>3 мин назад</td>
+                    <td>Спрос</td>
+                    <td><span class="nowrap">100,00</span></td>
+                    <td>
+                        <ul class="list-unstyled">
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span>
+                            </li>
+                        </ul>
+
+                    </td>
+                </tr>
+                <tr class="">
+
+                    <td>3 мин назад</td>
+                    <td>Спрос</td>
+                    <td><span class="nowrap">200,00</span></td>
+                    <td>
+                        <ul class="list-unstyled">
+                            <li><span class="nowrap"><i class="fa fa-lg fa-facebook text-primary"></i> jsdfljsf</span>
+                            </li>
+                        </ul>
+
+                    </td>
+                </tr>
+                <tr class="">
+
+                    <td>3 мин назад</td>
+                    <td>Предложение</td>
+                    <td><span class="nowrap">220,00</span></td>
+                    <td>
+                        <ul class="list-unstyled">
+                            <li><span class="nowrap"><i class="fa fa-lg fa-google-plus text-primary"></i> wepjjui</span>
+                            </li>
+                        </ul>
+
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+<div class="panel widget" data-widget="commodityFavorite">
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="market/favorites/barter.html" class="widget-header">Избранное – Товар <span class="badge">4</span></a>
+        </h3>
+
+    </div>
+
+    <div class="scroll">
+        <div class="scroll-inner">
+            <table class="table table-condensed data-table table-hover">
+                <thead>
+                <tr>
+                    <th><span class="nowrap">Возраст <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                    </th>
+                    <th>Тип</th>
+
+                    <th><span class="nowrap">Товар<i class="fa fa-chevron-down"
+                                                     style="opacity:0.3"></i></span></th>
+                    <th>Контакт</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+
+                    <td>3 мин назад</td>
+                    <td>Предложение</td>
+                    <td><a href="">Фотосъемка на вершине горы
+                        <span class="text-muted">...</span></a></td>
+                    <td>
+                        <ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+<div class="panel widget" data-widget="commodityDemand">
+
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="market/barter/bid.html" class="widget-header">Спрос на товар <span class="badge">4</span></a>
+        </h3>
+
+    </div>
+    <div class="scroll">
+        <div class="scroll-inner">
+            <table class="table table-condensed data-table table-hover">
+                <thead>
+                <tr>
+                    <th><span class="nowrap">Возраст <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                    </th>
+
+                    <th><span class="nowrap">Товар<i class="fa fa-chevron-down"
+                                                     style="opacity:0.3"></i></span></th>
+                    <th>Контакт</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+
+                    <td>3 мин назад</td>
+
+                    <td><a href="">Фотосъемка на вершине горы
+                        <span class="text-muted">...</span></a></td>
+                    <td>
+                        <ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+
+                    <td>3 мин назад</td>
+
+                    <td><a href="">Фотосъемка на вершине горы
+                        <span class="text-muted">...</span></a></td>
+                    <td>
+                        <ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+
+                    <td>3 мин назад</td>
+
+                    <td><a href="">Фотосъемка на вершине горы
+                        <span class="text-muted">...</span></a></td>
+                    <td>
+                        <ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+
+                    <td>3 мин назад</td>
+
+                    <td><a href="">Фотосъемка на вершине горы
+                        <span class="text-muted">...</span></a></td>
+                    <td>
+                        <ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+<div class="panel widget" data-widget="commodityOffer">
+
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="market/barter/ask.html" class="widget-header">Предложения товаров <span class="badge">4</span></a>
+        </h3>
+
+    </div>
+    <div class="scroll">
+        <div class="scroll-inner">
+            <table class="table table-condensed data-table table-hover">
+                <thead>
+                <tr>
+                    <th><span class="nowrap">Возраст <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                    </th>
+
+                    <th><span class="nowrap">Товар<i class="fa fa-chevron-down"
+                                                     style="opacity:0.3"></i></span></th>
+                    <th>Контакт</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+
+                    <td>3 мин назад</td>
+
+                    <td><a href="">Антикварные аудиокасеты
+                        <span class="text-muted">...</span></a></td>
+                    <td>
+                        <ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+
+                    <td>3 мин назад</td>
+
+                    <td><a href="">Робот пылесос
+                        <span class="text-muted">...</span></a></td>
+                    <td>
+                        <ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+
+                    <td>3 мин назад</td>
+
+                    <td><a href="">Статьи для сайтов
+                        <span class="text-muted">...</span></a></td>
+                    <td>
+                        <ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+
+                    <td>3 мин назад</td>
+
+                    <td><a href="">Виниловые пластинки
+                        <span class="text-muted">...</span></a></td>
+                    <td>
+                        <ul class="list-unstyled">
+
+                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+<div class="panel widget" data-widget="backendInfo">
+
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="settings.html" class="widget-header">Информация о сети</a>
+        </h3>
+
+    </div>
+    <div class="scroll">
+        <div class="scroll-inner">
+
+        </div>
+    </div>
+</div>
+
+
+<div class="panel widget widget-chart" data-widget="activeMining">
+
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="deposits.html" class="widget-header">Активная добыча <span class="badge">2</span></a>
+        </h3>
+
+    </div>
+    <div class="panel-body">
+
+
+        <div class="flot-chart">
+            <div class="flot-chart-content flot-line-chart-multi"></div>
+        </div>
+        <div class="scroll">
+            <div class="scroll-inner">
+                <table class="table table-condernsed small">
+                    <tr>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-link dropdown-toggle"
+                                        data-toggle="dropdown" aria-expanded="false"><span
+                                        class="account-text"><span class="text-muted"><big
+                                        class="text-primary">Safelabel1</big> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+                                            <li>Сейф: <a href="">Safelabel1</a></li>
+
+                                            <li>
+                                                <div class="contractor">
+                                                    <button style="position:absolute; bottom:0; right:0"
+                                                            class="btn btn-sm btn-default pull-right">
+                                                        скопировать
+                                                    </button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                                </div>
+                                            </li>
+                                            <li><a href="">@onesafekaccout</a></li>
+                                            <li><a href="">@twosafeaccout</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="nowrap"><span class="text-muted">72 дня</span></div>
+                        </td>
+                        <td>
+                            <div class="nowrap"><strong>+ 5 G</strong></div>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-link dropdown-toggle"
+                                        data-toggle="dropdown" aria-expanded="false"><span
+                                        class="account-text"><span class="text-muted"><big
+                                        class="text-primary">Safelabel2</big> <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
+			<span class="moredots">...<span class="caret"></span></span>
+			</span></button>
+                                <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                    <div style="padding:10px">
+                                        <ul class="list-unstyled">
+                                            <li>Сейф: <a href="">Safelabel2</a></li>
+
+                                            <li>
+                                                <div class="contractor">
+                                                    <button style="position:absolute; bottom:0; right:0"
+                                                            class="btn btn-sm btn-default pull-right">
+                                                        скопировать
+                                                    </button>
+							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+							</pre>
+                                                </div>
+                                            </li>
+                                            <li><a href="">@onesafekaccout</a></li>
+                                            <li><a href="">@twosafeaccout</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="nowrap"><span class="text-muted">42 дня</span></div>
+                        </td>
+                        <td>
+                            <div class="nowrap"><strong>+ 3,5 G</strong></div>
+                        </td>
+
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="panel widget" data-widget="coinDemand">
+
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="market/currency/bid.html" class="widget-header">Спрос на гульдены в системе <span class="badge">4</span></a>
+        </h3>
+
+    </div>
+
+    <div class="scroll">
+        <div class="scroll-inner">
+            <table class="table table-condensed table-hover">
+                <thead>
+                <tr>
+                    <th>Возраст</th>
+                    <th>Курс USD/G</th>
+                    <th>Сумма, G</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <tr>
+                    <td>1 мин назад</td>
+                    <td>368.89</td>
+                    <td>0.78</td>
+                </tr>
+                <tr>
+                    <td>1 мин назад</td>
+                    <td>368.89</td>
+                    <td>48.00</td>
+                </tr>
+                <tr>
+                    <td>1 мин назад</td>
+                    <td>368.88</td>
+                    <td>0.78</td>
+                </tr>
+                <tr>
+                    <td>1 мин назад</td>
+                    <td>368.91</td>
+                    <td>48.89</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>368.93</td>
+                    <td>0.78</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>368.96</td>
+                    <td>34.90</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>368.98</td>
+                    <td>10.78</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>369.00</td>
+                    <td>80.89</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>369.19</td>
+                    <td>45.80</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>369.89</td>
+                    <td>45.34</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>369.99</td>
+                    <td>3.78</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>370.09</td>
+                    <td>8.48</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+<div class="panel widget" data-widget="coinOffer">
+
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="market/currency/ask.html" class="widget-header">Предложение гульденов в системе <span class="badge">4</span></a>
+        </h3>
+
+    </div>
+
+    <div class="scroll">
+        <div class="scroll-inner">
+            <table class="table table-condensed table-hover">
+                <thead>
+                <tr>
+                    <th>Возраст</th>
+                    <th>Курс USD/G</th>
+                    <th>Сумма, G</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>1 мин назад</td>
+                    <td>368.89</td>
+                    <td>0.78</td>
+                </tr>
+                <tr>
+                    <td>1 мин назад</td>
+                    <td>368.89</td>
+                    <td>48.00</td>
+                </tr>
+                <tr>
+                    <td>1 мин назад</td>
+                    <td>368.88</td>
+                    <td>0.78</td>
+                </tr>
+                <tr>
+                    <td>1 мин назад</td>
+                    <td>368.91</td>
+                    <td>48.89</td>
+                </tr>
+                <tr>
+                    <td>1 мин назад</td>
+                    <td>368.93</td>
+                    <td>0.78</td>
+                </tr>
+                <tr>
+                    <td>1 мин назад</td>
+                    <td>368.96</td>
+                    <td>34.90</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>368.98</td>
+                    <td>10.78</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>369.00</td>
+                    <td>80.89</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>369.19</td>
+                    <td>45.80</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>369.89</td>
+                    <td>45.34</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>369.99</td>
+                    <td>3.78</td>
+                </tr>
+                <tr>
+                    <td>2 мин назад</td>
+                    <td>370.09</td>
+                    <td>8.48</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+<div class="panel widget" data-widget="exchangeDeals">
+
+    <div class="panel-heading">
+        <div class="btn-toolbar pull-right">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                        aria-expanded="false">
+                    softmarket.com <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">softmarket.com</a></li>
+                    <li><a href="#">softmarket2.com</a></li>
+                    <li><a href="#">softmarket5.com</a></li>
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                        data-toggle="dropdown" aria-expanded="true">
+                    <i class="fa fa-lg fa-caret-down"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                    <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="ingoingPayments" role="menuitem"
+                                               tabindex="-1">Входящие платежи</a></li>
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="outgoingPayments" role="menuitem"
+                                               tabindex="-1">Исходящие платежи</a></li>
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="activeMining" role="menuitem"
+                                               tabindex="-1">Активная добыча</a></li>
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="coinDemand" role="menuitem"
+                                               tabindex="-1">Спрос на гульдены в системе</a></li>
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                        гульденов в системе</a></li>
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="commodityDemand" role="menuitem"
+                                               tabindex="-1">Спрос на товар</a></li>
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="commodityOffer" role="menuitem"
+                                               tabindex="-1">Предложения товаров</a></li>
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="currencyFavorite" role="menuitem"
+                                               tabindex="-1">Избранное – Валюта</a></li>
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="commodityFavorite" role="menuitem"
+                                               tabindex="-1">Избранное – Товар</a></li>
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="lastContacts" role="menuitem"
+                                               tabindex="-1">Последние контакты</a></li>
+                    <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                               data-target-widget="exchangeDeals" role="menuitem"
+                                               tabindex="-1">Сделки на биржах</a></li>
+                    <li class="divider"></li>
+                    <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+                </ul>
+            </div>
+        </div>
+
+        <h3 class="inline">
+
+            <a href="#" class="widget-header">Сделки на биржах</a></h3>
+    </div>
+
+
+    <div class="scroll">
+        <div class="scroll-inner">
+            <table class="table table-condensed table-hover">
+                <thead>
+                <tr>
+                    <th>Возраст</th>
+                    <th>Курс USD/G</th>
+                    <th>Сумма, G</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>3 сек назад</td>
+                    <td>368.89</td>
+                    <td>0.78</td>
+                </tr>
+                <tr>
+                    <td>4 сек назад</td>
+                    <td>368.89</td>
+                    <td>48.00</td>
+                </tr>
+                <tr>
+                    <td>4 сек назад</td>
+                    <td>368.88</td>
+                    <td>0.78</td>
+                </tr>
+                <tr>
+                    <td>6 сек назад</td>
+                    <td>368.91</td>
+                    <td>48.89</td>
+                </tr>
+                <tr>
+                    <td>10 сек назад</td>
+                    <td>368.93</td>
+                    <td>0.78</td>
+                </tr>
+                <tr>
+                    <td>10 сек назад</td>
+                    <td>368.96</td>
+                    <td>34.90</td>
+                </tr>
+                <tr>
+                    <td>12 сек назад</td>
+                    <td>368.98</td>
+                    <td>10.78</td>
+                </tr>
+                <tr>
+                    <td>15 сек назад</td>
+                    <td>369.00</td>
+                    <td>80.89</td>
+                </tr>
+                <tr>
+                    <td>20 сек назад</td>
+                    <td>369.19</td>
+                    <td>45.80</td>
+                </tr>
+                <tr>
+                    <td>24 сек назад</td>
+                    <td>369.89</td>
+                    <td>45.34</td>
+                </tr>
+                <tr>
+                    <td>34 сек назад</td>
+                    <td>369.99</td>
+                    <td>3.78</td>
+                </tr>
+                <tr>
+                    <td>44 сек назад</td>
+                    <td>370.09</td>
+                    <td>8.48</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+<div class="panel widget" data-widget="lastContacts">
+
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+
+        <h3 class="inline">
+            <a href="contacts.html" class="widget-header">Последние контакты</a>
+        </h3>
+
+    </div>
+    <div class="scroll">
+        <div class="inner-scroll">
+            <table class="table table-condensed  data-table  contacts-table">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th><span class="nowrap">Контакт</span></th>
+                    <th><span class="nowrap">Счет</span></th>
+                    <th><span class="nowrap">Email/IM's <i class="fa fa-chevron-down"
+                                                           style="opacity:0.3"></i></span></th>
+
+
+                </tr>
+
+                </thead>
+                <tbody>
+
+
+                <tr>
+                    <td><i class="fa fa-lg fa-user text-primary"></i></td>
+                    <td>
+                        <a class="safename"><big>Человек</big></a>
+                    </td>
+                    <td>
+                        <a href="" class="blocklink">
+
+
+                                        <span class="account-text"><span class="text-muted">2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span
+                                                class="moredots">...</span></span>@onechelovekaccout @twochelovekaccout
+                        </a>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td><i class="fa fa-lg fa-user text-primary"></i></td>
+                    <td>
+                        <a class="safename"><big>Вася</big></a>
+                    </td>
+                    <td>
+                        <a class="blocklink" href=""><span class="account-text"><span class="text-muted">2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span
+                                class="moredots">...</span>
+                </span>@vasyaccount
+                        </a>
+                    </td>
+
+                    <td>
+                        <ul class="list-unstyled">
+                            <li><a href="">vasya@domain.com</a></li>
+                            <li>Skype: <a href="">vasya</a></li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+                </tbody>
+            </table>
+
+        </div>
+
+
+    </div>
+</div>
+<div class="panel widget" data-widget="emptyWidget">
+
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    data-toggle="dropdown" aria-expanded="true">
+                <i class="fa fa-lg fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                <li class="dropdown-header" role="presentation">Выберите виджет для этого блока</li>
+
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="ingoingPayments" role="menuitem"
+                                           tabindex="-1">Входящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="outgoingPayments" role="menuitem"
+                                           tabindex="-1">Исходящие платежи</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="activeMining" role="menuitem" tabindex="-1">Активная
+                    добыча</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinDemand" role="menuitem" tabindex="-1">Спрос
+                    на гульдены в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="coinOffer" role="menuitem" tabindex="-1">Предложение
+                    гульденов в системе</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityDemand" role="menuitem"
+                                           tabindex="-1">Спрос на товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityOffer" role="menuitem"
+                                           tabindex="-1">Предложения товаров</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="currencyFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Валюта</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="commodityFavorite" role="menuitem"
+                                           tabindex="-1">Избранное – Товар</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="backendInfo" role="menuitem"
+                                           tabindex="-1">Информация о сети</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="lastContacts" role="menuitem" tabindex="-1">Последние
+                    контакты</a></li>
+                <li role="presentation"><a class="button" ng-click="changeWidget($scope, $event)"
+                                           data-target-widget="exchangeDeals" role="menuitem" tabindex="-1">Сделки
+                    на биржах</a></li>
+                <li class="divider"></li>
+                <li role="presentation"><a ng-click="removeWidget(this)">Удалить блок</a></li>
+
+            </ul>
+        </div>
+        <h3 class="inline"><a href="#" class="widget-header">&nbsp;</a></h3>
+    </div>
+    <div class="scroll">
+        <div class="scroll-inner">
+
+
+        </div>
+
+    </div>
+</div>

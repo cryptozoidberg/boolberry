@@ -1,0 +1,281 @@
+    <nav class="navbar btns" role="navigation" id="appactions">
+
+        <ul class="nav nav-pills nav-justified">
+            <li>
+                <a href="sendG.html" class="btn btn-default"> Отправить гульдены</a>
+
+            </li>
+            <li>
+                <a class="btn btn-default" href="buyG.html">Купить гульдены</a>
+
+            </li>
+            <li>
+                <a href="sellG.html" class="btn btn-default">Продать гульдены</a>
+
+            </li>
+
+            <li>
+
+                <a aria-expanded="false" class="btn btn-default dropdown" data-toggle="dropdown">Купить/Продать товар
+
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="buyProduct.html">Купить товар за гульдены</a></li>
+                    <li><a href="sellProduct.html">Продать товар за гульдены</a></li>
+                </ul>
+
+
+
+
+            </li>
+        </ul>
+    </nav>
+    <div class="panel panel-transparent resume" id="infotablo">
+        <div class="row">
+            <div class="col-xs-3 col-sm-3">
+                <h4><span>Сейфов</span><em>0</em></h4>
+            </div>
+            <div class="col-xs-3 col-sm-3">
+                <h4><span>Платежей</span><em>0</em></h4>
+
+            </div>
+            <div class="col-xs-3 col-sm-3">
+                <h4><span>Весь баланс</span><em>0<strong>G</strong></em></h4>
+            </div>
+            <div class="col-xs-3 col-sm-3">
+                <h4><span>Заявок</span><em>0</em></h4>
+            </div>
+        </div>
+    </div>
+    <div class="tabs" id="tabsblock">
+        <div class="startbox">
+            <div class="row">
+                <div class="col-xs-4 col-sm-4" id="creatsafe">
+                    <div class="panel" >
+
+                        <div class="panel-body" >
+
+                            <h4><button  class="btn btn-link" data-target="#addSafe" type="button" data-toggle="modal"><i  class="gu gu-3x  gu-safe"></i>Создайте первый сейф</button></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4 col-sm-4" id="opensafe" >
+                    <div class="panel" >
+
+                        <div class="panel-body" >
+
+                            <h4><buttontype="button" data-toggle="modal" data-target="#openSafe" class="btn btn-link" ><i class="gu gu-3x  gu-safe" ></i>Откройте файл сейфа</button></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4 col-sm-4" id="repairsafe">
+                    <div class="panel" >
+
+                        <div class="panel-body" >
+
+                            <h4><button id="repairsafe" type="button" data-toggle="modal" data-target="#onensmartSafe" class="btn btn-link" ><i class="gu gu-3x  gu-safe" ></i>Восcтановите из Smartsafe</button></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row widgets" id="widgets">
+            <div class="col-xs-6 col-sm-6">
+                <div class="startbox">
+
+                    <div  class="panel">
+
+                        <div  class="panel-body">
+                            <div style="position: absolute; top: 10px; right: 15px;" class="dropdown pull-right" id="dropdowndemo">
+                                <button style="background:transparent" aria-expanded="false" data-toggle="dropdown" id="dropdownMenu1" type="button" class="btn btn-default dropdown-toggle">
+                                    <i class="fa fa-2x fa-caret-down" style="margin-right:0; color:#aaa; margin-bottom:-2px"></i>
+                                </button>
+                                <ul aria-labelledby="dropdownMenu1" role="menu" class="dropdown-menu dropdown-menu-right">
+
+                                    <li role="presentation" class="dropdown-header">Выберите виджет для этого блока</li>
+
+                                    <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Входящие платежи</a></li>
+                                    <li role="presentation"><a href="#">Исходящие платежи</a></li>
+
+                                    <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Активная добыча</a></li>
+                                    <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Спрос на гульдены в системе</a></li>
+                                    <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Предложение гульденов  в системе</a></li>
+                                    <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Спрос на товар</a></li>
+                                    <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Предложения товаров</a></li>
+                                    <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Избранное &ndash; Валюта</a></li><li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Избранное &ndash; Товар</a></li>
+                                    <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Новые контакты</a></li>
+                                    <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Последние сделки на биржах</a></li><li class="divider"></li><li role="presentation"><a href="#">Удалить блок</a></li>
+
+                                </ul>
+                            </div>
+                            <h4 id="inpays"><a class="btn btn-link" href="history.html"><i  class="gu gu-3x gu-money"></i>Входящие платежи</a></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="startbox">
+
+                    <div class="panel">
+
+                        <div class="panel-body">
+
+                            <h4 id="outpays"><a class="btn btn-link" href="history.html"><i  class="gu gu-3x gu-money"></i>Исходящие платежи</a></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="startbox">
+
+                    <div class="panel">
+
+                        <div class="panel-body">
+
+                            <h4 id="favcurrercy"><a href="/market.html#favCurrency" class="btn btn-link" ><i class="fa fa-2x fa-bookmark" ></i> Избранное &ndash; Валюта</a></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="startbox">
+
+                    <div class="panel" >
+
+                        <div class="panel-body" >
+
+                            <h4 id="favbart"><a  href="/market.html#favBarter" class="btn btn-link" ><i class="fa fa-2x fa-bookmark" ></i> Избранное &ndash; Товары</a></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="startbox">
+
+                    <div class="panel" >
+
+                        <div class="panel-body" >
+
+                            <h4 id="needgoods"><a href="/market.html#barter" class="btn btn-link" ><i class="gu gu-3x  gu-market" ></i> Спрос &ndash; Товары</a></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="startbox">
+
+                    <div class="panel" >
+
+                        <div class="panel-body" >
+
+                            <h4 id="offergoods"><a class="btn btn-link"  href="/market.html#barter"><i  class="gu gu-3x  gu-market"></i> Предложения &ndash; Товары</a></h4>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+            <div class="col-xs-6 col-sm-6">
+                <div class="startbox">
+
+                    <div  class="panel">
+
+                        <div  class="panel-body">
+
+                            <h4 id="deposits"><a class="btn btn-link" href="deposits.html"><i  class="gu gu-3x  gu-chart"></i>Активная добыча</a></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="startbox">
+
+                    <div class="panel" >
+
+                        <div class="panel-body" >
+
+                            <h4 id="needguilders"><a href="market.html" class="btn btn-link" ><i class="gu gu-3x  gu-coins" ></i>Спрос на гульдены в системе </a></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="startbox">
+
+                    <div class="panel" >
+
+                        <div class="panel-body" >
+
+                            <h4 id="offerguilders"><a href="market.html" class="btn btn-link" ><i class="gu gu-3x  gu-coins" ></i>Предложение гульденов в системе</a></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="startbox">
+
+                    <div class="panel" >
+
+                        <div class="panel-body" >
+
+                            <h4 id="lastdeals"><a href="market.html" class="btn btn-link" ><i class="gu gu-3x  gu-coins" ></i>Последние сделки на биржах</a></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="startbox">
+
+                    <div  class="panel">
+
+                        <div  class="panel-body">
+
+                            <h4 id="newcontacts"><a href=contacts.html"" class="btn btn-link" ><i  class="gu gu-3x  gu-adressbook"></i>Недавно добавленные контакты</a></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="startbox">
+
+                    <div  class="panel">
+
+                        <div  class="panel-body">
+
+                            <h4><button  class="btn btn-link" data-toggle="collapse" data-target=".panel-collapsed" type="button" id="addwidget"><i  class="fa fa-2x  fa-plus"></i> Добавить виджет</button></h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel collapse panel-collapsed">
+
+                    <div class="panel-heading">
+                        <div class="dropdown pull-right">
+                            <button aria-expanded="true" data-toggle="dropdown" id="dropdownMenu1" type="button" class="btn btn-default dropdown-toggle">
+                                <i class="fa fa-lg fa-caret-down"></i>
+                            </button>
+                            <ul aria-labelledby="dropdownMenu1" role="menu" class="dropdown-menu dropdown-menu-right">
+
+                                <li role="presentation" class="dropdown-header">Выберите виджет для этого блока</li>
+
+                                <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Входящие платежи</a></li>
+                                <li role="presentation"><a href="#">Исходящие платежи</a></li>
+
+                                <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Активная добыча</a></li>
+                                <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Спрос на гульдены в системе</a></li>
+                                <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Предложение гульденов в системе</a></li>
+                                <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Спрос на товар</a></li>
+                                <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Предложения товаров</a></li>
+                                <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Избранное &ndash; Валюта</a></li><li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Избранное &ndash; Товар</a></li>
+                                <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Новые контакты</a></li>
+                                <li role="presentation"><a tabindex="-1" role="menuitem" href="#" class="button">Последние сделки на биржах</a></li><li class="divider"></li><li role="presentation"><a href="#">Удалить блок</a></li>
+
+                            </ul>
+                        </div>
+                        <h3 class="inline"><a class="" href="safes.html">&nbsp;</a></h3>
+                    </div>
+                    <div class="scroll"><div class="scroll-inner">
+
+
+                    </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+    <div class="footer">
+
+        <p class="small text-muted">
+            Текст о том что пользователи сами берут на себя ответственность за свои заявки и исполнение обязательств по ним, текст о том что пользователи сами берут на себя ответственность за свои заявки и исполнение обязательств по ним.
+        </p>
+    </div>
+
+
