@@ -857,7 +857,7 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
   {
     //set timestamp starting from timestamp%POS_SCAN_STEP = 0
     uint64_t starter_timestamp = timstamp_start - POS_SCAN_WINDOW;
-    starter_timestamp = POS_SCAN_STEP - (starter_timestamp%POS_SCAN_STEP) + starter_timestamp;
+    starter_timestamp = POS_SCAN_STEP*2 - (starter_timestamp%POS_SCAN_STEP) + starter_timestamp;
 
     for (uint64_t ts = starter_timestamp; ts < timstamp_start + POS_SCAN_WINDOW; ts += POS_SCAN_STEP)
     {
