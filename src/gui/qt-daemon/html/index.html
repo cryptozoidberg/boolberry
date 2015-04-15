@@ -11,17 +11,27 @@
     <title>Guilder</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="assets/css/dashboard.css" rel="stylesheet">
     <link href="assets/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link href="assets/font/guilder/styles.css" rel="stylesheet">
+
+
     <link href="assets/css/bootstrap-tour.css" rel="stylesheet">
     <link href="assets/css/bootstrap-slider.css" rel="stylesheet">
-    <link href="assets/js/owl.carousel.2.0.0-beta.2.4/assets/owl.carousel.css" rel="stylesheet">
+
+    <link href="assets/js/owl-carousel/owl.carousel.css" rel="stylesheet">
+    <link href="assets/js/owl-carousel/owl.theme.css" rel="stylesheet">
+    <link href="assets/js/owl-carousel/owl.transitions.css" rel="stylesheet">
+
+
     <link href="assets/css/bootstrap-select.css" rel="stylesheet">
     <link href="assets/css/datepicker3.css" rel="stylesheet">
 
+    
+
+    <link href="assets/css/custom.css" rel="stylesheet">
     <link href="assets/css/app.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -30,14 +40,37 @@
       <script src="assets/js/respond.min.js"></script>
     <![endif]-->
 
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-route.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-sanitize.js"></script>
+    <script src="assets/js/angular/angular.min.js"></script>
+    <script src="assets/js/angular/angular-route.min.js"></script>
+    <script src="assets/js/angular/angular-sanitize.min.js"></script>
+    <script src="assets/js/angular/ui-bootstrap-0.12.1.min.js"></script>
+    <script src="assets/js/angular/ui-bootstrap-tpls-0.12.1.min.js"></script>
 </head>
 
-<body ng-controller="PageController">
+<body>
+<div class="guilder-bar" role="navigation" ng-controller="NavbarTopController">
+    <div class="row">
+        <div class="col-xs-4 col-sm-7 guilder-bar-logo">
+            <span>
+                <img style="max-width:100%;" src="assets/img/bitcoin11.svg">
+            </span>
+            Guilder app
+        </div>
+        <div class="col-xs-5 col-sm-3 guilder-bar-info">
+            <small>Архитектура сети обеспечивает полную безопасность и анонимность</small>
+        </div>
+        <div class="col-xs-3 col-sm-2 guilder-bar-state">
+            <a class="pull-right" href="market.html">
+                <span ng-show="deamon_state.daemon_network_state == 0" class="ifOnlineText offline" style="color:#b85c5c"><i class="fa fa-2x fa-times-circle-o"></i> Оффлайн</span>
+                <span ng-show="deamon_state.daemon_network_state == 1" class="ifOnlineText loading" style="color:#ec971f"><i class="fa fa-2x fa-circle-o-notch fa-spin"></i> Загружается...</span>
+                <span ng-show="deamon_state.daemon_network_state == 2" class="ifOnlineText online" style="color:#5cb85c"><i class="fa fa-2x fa-check-circle-o"></i> Онлайн</span>
+            </a>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
 
-<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+<!-- <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
             <a class="navbar-brand" href="#">
@@ -65,7 +98,7 @@
             </ul>
         </div>
     </div>
-</nav>
+</nav> -->
 
 <div class="container-fluid">
     <div class="row row-sidebar-collapse">
@@ -93,125 +126,16 @@
             <noscript><div class="nojsError">Невозможно загрузить интерфейс, потому что отключен JavaScript :(</div></noscript>
         </div-->
 
+        
         <div class="col-xs-9 col-sm-9 col-xs-offset-3 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-view>
+            
             <noscript><div class="nojsError">Невозможно загрузить интерфейс, потому что отключен JavaScript :(</div></noscript>
         </div>
 
     </div>
 </div>
 
-<div class="modal modal-preloaded" id="addSafe" tabindex="-1" role="dialog" aria-labelledby="addSafeLabel" aria-hidden="true" style="display:block">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header btn btn-primary btn-block">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title text-center">Создание нового сейфа</h4>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div id="owl-panels">
-                        <div class="item create-safe_screen-1 create-safe_screen" data-hash="screen1">
-                            <div class="form-group">
-                                <label class="requred">
-                                    Имя для обозначения сейфа в приложении<!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
-                                </label>
-                                <div class="help-block">Вы сможете создать сколько угодно сейфов.  Имя для сейфа &ndash; это любое слово или словосочетание для
-                                    обозначения этого сейфа в списке</div>
-                                <input id="create-safe_safe-name-input" type="text" class="input-lg form-control" placeholder="любое слово или словосочетание">
-                            </div>
-                            <div class="row">
-                                <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
-                                <div class="col-xs-6 col-sm-6"><a class="create-safe_step-2-button btn btn-primary btn-block btn-lg" type="button" href="#screen2">Продолжить</a></div>
-                            </div>
-                        </div>
-                        <div class="item create-safe_screen-2 create-safe_screen" data-hash="screen2">
-                            <div class="form-group clearfix">
-                                <label class="requred">Пароль для сейфа
-                                </label>
-                                <div class="help-block">Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы.</div>
-                                <input id="create-safe_safe-password-input-1" type="password" placeholder="" class="input-lg form-control">
 
-                            </div>
-                            <div class="form-group clearfix">
-                                <label>Надежность</label>
-                                <div class="create-safe_password-strength-bar"></div>
-                                <!--<div class="progress">-->
-                                    <!--<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">-->
-                                        <!--<span class="sr-only">40% (высокая)</span>-->
-                                    <!--</div>-->
-                                <!--</div>-->
-                                <!--div class="col-xs-6 col-sm-6 text-right"><button data-target="#generator" data-toggle="modal" class="btn btn-success" type="button">Генератор паролей</button> </div-->
-                            </div>
-                            <a href="#screen1" type="button" class="btn btn-link text-muted create-safe_step-1-button"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
-                            <div class="form-group clearfix">
-                                <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
-                                <div class="col-xs-6 col-sm-6"> <a class="btn btn-primary btn-block btn-lg create-safe_step-3-button" type="button" href="#screen3">Продолжить</a></div>
-                            </div>
-                        </div>
-                        <div class="item create-safe_screen-3 create-safe_screen" data-hash="screen3">
-                            <div class="alert alert-warning">
-                                <h4 class="text-danger" style="margin:0">Важно</h4>
-                                <p>Восстановить пароль невозможно. При утере пароля от сейфа, сейф придется отключить из приложения. Восстановить сейф можно только из цифровой копии ( brainwallet) или физической копии файла с другим паролем, который вы помните. </p>
-                            </div>
-                            <h4>Проверьте точно ли вы запомнили пароль? </h4>
-                            <div class="form-group">
-                                <label  class="requred">Введите пароль повторно</label>
-                                <input id="create-safe_safe-password-input-2" class="form-control" type="password">
-                            </div>
-
-
-                            <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savefile" id="savefilebtn">Сохранить файл сейфа <i class="fa fa-lg fa-check" id="savestate" style="display:none"></i></a>
-
-
-                            <hr>
-                            <h5>Чтобы не потерять и надежно защитить файл сейфа, вам необходимо создать  бекапы файла сейфа и smartsafe на следующем шаге</h5>
-
-                            <div class="form-group">
-                                <button type="button" class="btn btn-primary btn-block btn-lg" disabled="" id="gotoBackups">Продолжить</button>
-                                <a href="#screen4" class="btn btn-primary btn-block btn-lg create-safe_step-4-button" id="gotoBackupslink" style="display:none">Продолжить</a>
-                            </div>
-                        </div>
-                        <div class="item create-safe_screen-4 create-safe_screen" data-hash="screen4">
-
-                            <div class="form-group">
-                                <div class="help-block">Файл сейфа является хранищем ваших средств. История платежей и Контакты также хранится в этом файле. Чтобы файл сейфа оставался подключенным в приложение, не перемещайте его из той директории, куда вы его сохранили.</div>
-                            </div>
-                            <h4>Физический бекап файла сейфа</h4>
-                            <div class="form-group">
-                                <div class="help-block">Скопируйте созданный файл сейфа в другое надежное место, не храните бекап на том же компьютере.</div>
-                            </div>
-                            <div class="form-group">
-                                <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savecopyfile">Сохранить копию файла на компьютере
-                                    <i class="fa fa-lg fa-check savefilesuccess" id="" style="display:none"></i>
-                                </a>
-                            </div>
-                            <h4>Цифровой бекап файла сейфа</h4>
-                            <div class="form-group">
-                                <div class="help-block"><strong><span class="text-primary">Smartsafe</span> – это фраза в которой зашифрован сейф.</strong> Эту фразу Вам нужно запомнить или распечатать и хранить в надежном месте. Smartsafe позволит Вам восстановить сейф в приложении даже если Вы потеряете файл сейфа или если Вы забудете пароль от сейфа.</div>
-                            </div>
-                            <div class="form-group">
-                                <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#smartsafe">Создать цифровую копию (Smartsafe)
-                                    <i class="fa fa-lg fa-check smartsafesuccess" style="display:none"></i>
-                                </a>
-                            </div>
-
-                            <hr>
-
-                            <div class="form-group">
-                                <button type="button" disabled="" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn" data-dismiss="modal">Начать использовать сейф</button>
-                            </div>
-
-                </form>
-
-
-            </div>
-
-        </div>
-        </form>
-    </div>
-</div><!-- /.modal-content -->
-</div><!-- /.modal-dialog -->
-</div>
 
 <div class="modal modal-preloaded" id="openSafe" tabindex="-1" role="dialog" aria-labelledby="openSafeLabel"
      aria-hidden="true">
@@ -1271,7 +1195,7 @@
 <script src="assets/js/bootstrap.min.js"></script>
 <!--script src="assets/js/docs.min.js"></script--><!-- do not switch on - throws errors! -->
 
-<script src="assets/js/owl.carousel.2.0.0-beta.2.4/owl.carousel.js"></script>
+<script src="assets/js/owl-carousel/owl.carousel.min.js"></script>
 <script src="assets/js/bootstrap-slider.js"></script>
 <script src="assets/js/sidebar-collapse.js"></script>
 <script src="assets/js/bootstrap-tour.js"></script>
@@ -1321,6 +1245,7 @@
 <script src="controllers/NavbarController.js"></script>
 <script src="services/backend.js"></script>
 <script src="services/main.js"></script>
+<script src="services/directives.js"></script>
 
 
 </body>

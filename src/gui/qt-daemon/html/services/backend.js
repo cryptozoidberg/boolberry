@@ -2,36 +2,37 @@
     'use strict';
 
     var module = angular.module('app.backendServices', [])
-    
-    module.factory('backend', ['$interval', '$timeout',
-        function($interval, $timeout) {
+
+    module.factory('backend', ['$interval', '$timeout', 'emulator',
+        function($interval, $timeout, emulator) {
         
-        var daemonStateInfo = {};
-        var daemonStateText = 'Loading';
-        var emulator        = emulator;
-        var callbacks       = {};
+        var callbacks = {};
 
         var returnObject =  {
             
             runCommand : function(command, params, callback) {
-
-                var action = Qt_parent[command];
-                if(typeof action === undefined){
-                    console.log("API Error for command '"+command+"': command not found in Qt object");
+                if(this.shouldUseEmulator()){
+                    emulator.runCommand(command, params, callback);
                 }else{
-                    var resultString = action(JSON.stringify(params)); 
-                    var result = (resultString === '') ? {} : JSON.parse(resultString);
-                    
-                    console.log('API command ' + command +' call result: '+JSON.stringify(result));
-                    
-                    if(result.error_code != 'OK'){
-                        console.log("API Error for command '"+command+"': " + result.error_code);
+                    var action = Qt_parent[command];
+                    if(typeof action === undefined){
+                        console.log("API Error for command '"+command+"': command not found in Qt object");
                     }else{
+                        var resultString = action(JSON.stringify(params)); 
+                        var result = (resultString === '') ? {} : JSON.parse(resultString);
                         
-                        var request_id = result.request_id
-                        callbacks[request_id] = callback;
+                        console.log('API command ' + command +' call result: '+JSON.stringify(result));
+                        
+                        if(result.error_code != 'OK'){
+                            console.log("API Error for command '"+command+"': " + result.error_code);
+                        }else{
+                            
+                            var request_id = result.request_id
+                            callbacks[request_id] = callback;
+                        }
                     }
                 }
+                
             },
 
             backendCallback: function(status, param) {
@@ -81,104 +82,64 @@
                 if (actualBackend.indexOf(command) >= 0) {
                     // *Deep backend layer* fires the event
 
-                    // if (this.shouldUseEmulator()) {
-                    //     this.emulator.eventCallbacks[command] = callback;
-                    // } else {
-                    //     console.log(command);
+                    if (this.shouldUseEmulator()) {
+                        emulator.subscribe(command,callback);
+                    } else {
+                        console.log(command);
                         Qt[command].connect(this.callbackStrToObj.bind({callback: callback}));
-                    // }
+                    }
                 } 
-                // else {
-                //     // *This service* fires the event
-                //     this.backendEventSubscribers[command] = callback;
-                // }
+                else {
+                    // *This service* fires the event
+                    console.log('Subscribe:: command is not supported '+command);
+                    this.backendEventSubscribers[command] = callback;
+                }
             },
 
         }
 
-        Qt.dispatch.connect(returnObject.backendCallback); // register backend callback
+        if(!returnObject.shouldUseEmulator()){
+            Qt.dispatch.connect(returnObject.backendCallback); // register backend callback    
+        }
+        
 
         return returnObject;
 
     }]);
 
-    module.factory('emulator', [function() {
-        return new Emulator();
-    }]);
+    module.factory('emulator', ['$interval',function($interval){
+        var callbacks = {};
 
-    function Backend(emulator, $rootScope, $timeout) {
-        this.daemonStateInfo = {};
-        this.daemonStateText = 'Loading';
-        this.emulator = emulator;
-
-        var backend = this;
-
-        this.openSafe = function() {
-            var params = {caption: "test", filemask: "*.lui2"};
-            console.log(JSON.stringify(params));
-            var result = Qt_parent['show_openfile_dialog'](JSON.stringify(params));
-            console.log(result);
-            return;
-        };
-
-        // Fires at the end of parent Backend function
-        this.init = function() {
-            this.subscribe('update_daemon_state', function(data) {
-                // upper right corner indicator
-                backend.daemonStateText = data.text_state;
-
-                // info widget
-                backend.daemonStateInfo = data;
-                // $timeout(function(){
-                //     $rootScope.$apply();    
-                // });
-                
-            });
-            this.subscribe('update_wallet_info',function(data) {
-                //console.log(data);
-            });
-        };
-
-        this.subscribe = function(command, callback) {
-            var actualBackend = ['update_daemon_state', 'update_wallet_info'];
-
-            if (actualBackend.indexOf(command) >= 0) {
-                // *Deep backend layer* fires the event
-
-                if (this.shouldUseEmulator()) {
-                    this.emulator.eventCallbacks[command] = callback;
-                } else {
-                    console.log(command);
-                    Qt[command].connect(this.callbackStrToObj.bind({callback: callback}));
+        return {
+            runCommand : function(command, params, callback) {
+                var data = {};
+                switch(command){
+                    case 'open_wallet':
+                        data = {
+                            wallet_id : 1
+                        };
+                        break;
                 }
-            } else {
-                // *This service* fires the event
-                this.backendEventSubscribers[command] = callback;
-            }
-        };
+                if(angular.isDefined(callback)){
+                    callback(data);
+                }else{
+                    console.log('fire event '+command);
+                }
+                
+            },
+            subscribe : function(command, callback) {
+                var data = {};
 
-        this.callbackStrToObj = function(str) {
-            var obj = $.parseJSON(str);
-            this.callback(obj);
-        };
+                if(angular.isDefined(this.dataBank[command])){
+                    data = this.dataBank[command];
+                }
 
-        this.shouldUseEmulator = function() {
-            var use_emulator = (typeof Qt == 'undefined');
-            console.log("UseEmulator: " + use_emulator);
-            return use_emulator;
-        };
-
-        this.init();
-    }
-
-    function Emulator() {
-        this.eventCallbacks = [];
-        var emulator = this;
-
-        setInterval(function() {
-            var data = {};
-            if (emulator.eventCallbacks['update_daemon_state']) {
-                data = {
+                var interval = $interval(function(){
+                    callback(data);
+                },1000);
+            },
+            dataBank : {
+                'update_daemon_state': {
                     "daemon_network_state": 2,
                     "hashrate": 0,
                     "height": 9729,
@@ -204,15 +165,9 @@
                     "pow_difficulty": "2759454",
                     "synchronization_start_height": 9725,
                     "text_state": "Offline"
-                };
-
-                emulator.eventCallbacks['update_daemon_state'](data);
+                }
             }
-            if (emulator.eventCallbacks['update_wallet_info']) {
-                data = {result : true}
-                emulator.eventCallbacks['update_wallet_info'](data);
-            }
-        }, 5000, emulator);
-    }
+        }
+    }]);
 
 }).call(this);

@@ -9,17 +9,18 @@
 
         $scope.wallet_info  = {};
         backend.subscribe('update_daemon_state', function(data){
-            console.log('update deamon state complete');
+            // console.log('update deamon state complete');
             $timeout(function(){
             	$scope.deamon_state = data;	
             });
             
-            console.log($scope.deamon_state.daemon_network_state);
         });
         
         backend.subscribe('update_wallet_info', function(data){
-            console.log('update wallet info complete');
-            $scope.wallet_info  = data;
+            // console.log('update wallet info complete');
+            $timeout(function(){
+                $scope.wallet_info  = data;
+            });
         });
     }]);
 

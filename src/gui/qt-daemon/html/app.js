@@ -1,12 +1,14 @@
 (function() {
   'use strict';
     var app = angular.module('app', [
+        'ui.bootstrap',
         'ngRoute', 
         'ngSanitize', 
         'app.services',
         'app.backendServices',
         'app.dashboard',
-        'app.navbar'
+        'app.navbar',
+        'app.directives'
     ]);
 
     app.config(['$routeProvider', function($routeProvider) {

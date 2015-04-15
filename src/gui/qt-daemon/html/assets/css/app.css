@@ -1594,3 +1594,34 @@ min-width: 96px;
     color: #999;
     text-decoration: none;
 }
+
+
+/* custom additional styles for modals*/
+
+.modal-backdrop {
+    background-color: #3BB69B!important;
+    opacity: 0.9;  
+    height: 100%; 
+}
+
+
+/* custom additional styles for navbar*/
+
+.guilder-bar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+.guilder-bar .guilder-bar-logo{
+    font-size: 20px;
+}
+
+.guilder-bar .guilder-bar-info{
+    padding: 7px;
+}
+
+.guilder-bar .guilder-bar-state{
+  padding: 10px 30px;
+}
+

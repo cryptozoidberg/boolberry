@@ -39,7 +39,7 @@
     </div>
 </div>
 
-<div class="tabs" ng-controller="IndexController">
+<div class="tabs">
     <div class="navbar" style="margin-bottom:0">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-head"
@@ -53,7 +53,7 @@
     </div>
     <div class="btn-toolbar">
         <div class="btn-group">
-            <button class="btn btn-primary navbar-btn index_create-safe-button" type="button">
+            <button class="btn btn-primary navbar-btn index_create-safe-button" ng-click="openSafeForm();" type="button">
                 Создать сейф
             </button>
         </div>
@@ -64,8 +64,7 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-right" role="menu">
                 <li><a type="button" class="index_open-safe-button" ng-click="openFiledialog()">Открыть файл-сейф</a></li>
-                <li><a type="button" data-toggle="modal" data-target="#onensmartSafe">Восстановить из
-                    smartsafe</a></li>
+                <li><a type="button" data-toggle="modal" data-target="#onensmartSafe">Восстановить из smartsafe</a></li>
             </ul>
         </div>
     </div>
