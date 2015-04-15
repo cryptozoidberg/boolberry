@@ -444,6 +444,27 @@ bool blockchain_storage::get_block_by_hash(const crypto::hash &h, block &blk) {
   return false;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::get_block_extended_info_by_hash(const crypto::hash &h, block_extended_info &blk)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
+  // try to find block in main chain
+  blocks_by_id_index::const_iterator it = m_blocks_index.find(h);
+  if (m_blocks_index.end() != it) {
+    blk = m_blocks[it->second];
+    return true;
+  }
+
+  // try to find block in alternative chain
+  blocks_ext_by_hash::const_iterator it_alt = m_alternative_chains.find(h);
+  if (m_alternative_chains.end() != it_alt) {
+    blk = it_alt->second;
+    return true;
+  }
+
+  return false;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::get_block_by_height(uint64_t h, block &blk)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -1065,7 +1086,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     else
       cumulative_diff_delta = current_diff;
 
-    size_t n = get_current_sequence_factor_for_alt(alt_chain, pos_block);
+    size_t n = get_current_sequence_factor_for_alt(alt_chain, pos_block, connection_height);
     if (m_blocks.size() >= m_pos_config.pos_minimum_heigh)
       cumulative_diff_delta = correct_difficulty_with_sequence_factor(n, cumulative_diff_delta);
 
@@ -1513,7 +1534,7 @@ size_t blockchain_storage::get_current_sequence_factor(bool pos)
   return n;
 }
 //------------------------------------------------------------------
-size_t blockchain_storage::get_current_sequence_factor_for_alt(alt_chain_list& alt_chain, bool pos)
+size_t blockchain_storage::get_current_sequence_factor_for_alt(alt_chain_list& alt_chain, bool pos, uint64_t connection_height)
 {
   size_t n = 0;
   for (auto it = alt_chain.rbegin(); it != alt_chain.rend(); it++, n++)
@@ -1523,9 +1544,9 @@ size_t blockchain_storage::get_current_sequence_factor_for_alt(alt_chain_list& a
   }
 
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  for (auto it = m_blocks.rbegin(); it != m_blocks.rend(); ++it, n++)
+  for (uint64_t h = connection_height - 1; h != 0; --h, n++)
   {
-    if (pos != is_pos_block(it->bl))
+    if (pos != is_pos_block(m_blocks[h].bl))
     {
       return n;
     }
@@ -2620,7 +2641,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   }
   LOG_PRINT_L1("+++++ BLOCK SUCCESSFULLY ADDED" << (is_pos_bl ? "[PoS]":"[PoW]") << ENDL << "id:\t" << id
     << ENDL << powpos_str_entry.str()
-    << ENDL << "HEIGHT " << bei.height << ", difficulty:\t" << current_diffic << "cumul_diff_adj: " << bei.cumulative_diff_adjusted
+    << ENDL << "HEIGHT " << bei.height << ", difficulty:\t" << current_diffic << " cumul_diff_adj: " << bei.cumulative_diff_adjusted
     << ENDL << "block reward: " << print_money(fee_summary + base_reward) << "(" << print_money(base_reward) << " + " << print_money(fee_summary) 
     << ")" << ", coinbase_blob_size: " << coinbase_blob_size << ", cumulative size: " << cumulative_block_size
     << ", " << block_processing_time << "("<< target_calculating_time << "/" << longhash_calculating_time << ")ms");

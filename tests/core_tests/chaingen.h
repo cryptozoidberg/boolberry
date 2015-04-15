@@ -294,11 +294,12 @@ public:
     const currency::alias_info& ai = currency::alias_info(), 
     const std::list<currency::account_base>& coin_stake_sources = std::list<currency::account_base>() //in case of PoS block
     );
-  bool construct_block(currency::block& blk, 
+  bool construct_genesis_block(currency::block& blk, 
     const currency::account_base& miner_acc, 
     uint64_t timestamp, 
     const currency::alias_info& ai = currency::alias_info());
-  bool construct_block(currency::block& blk, 
+  bool construct_block(const std::vector<test_event_entry>& events,
+    currency::block& blk,
     const currency::block& blk_prev, 
     const currency::account_base& miner_acc, 
     const std::list<currency::transaction>& tx_list = std::list<currency::transaction>(), 
@@ -765,23 +766,23 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
 #define MAKE_GENESIS_BLOCK(VEC_EVENTS, BLK_NAME, MINER_ACC, TS)                       \
   test_generator generator;                                                           \
   currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
-  generator.construct_block(BLK_NAME, MINER_ACC, TS);                                 \
+  generator.construct_genesis_block(BLK_NAME, MINER_ACC, TS);                                 \
   VEC_EVENTS.push_back(BLK_NAME);
 
 #define MAKE_NEXT_BLOCK(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC)                  \
   currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
-  generator.construct_block(BLK_NAME, PREV_BLOCK, MINER_ACC);                         \
+  generator.construct_block(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC);                         \
   VEC_EVENTS.push_back(BLK_NAME);
 
 #define MAKE_NEXT_POS_BLOCK(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, MINERS_ACC_LIST)         \
   currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
-  generator.construct_block(BLK_NAME, PREV_BLOCK, MINER_ACC, std::list<currency::transaction>(), currency::alias_info(), MINERS_ACC_LIST);                         \
+  generator.construct_block(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, std::list<currency::transaction>(), currency::alias_info(), MINERS_ACC_LIST);                         \
   VEC_EVENTS.push_back(BLK_NAME);
 
 
 #define MAKE_NEXT_BLOCK_ALIAS(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, ALIAS)     \
   currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
-  generator.construct_block(BLK_NAME, PREV_BLOCK, MINER_ACC,                          \
+  generator.construct_block(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, \
                   std::list<currency::transaction>(), ALIAS);                         \
   VEC_EVENTS.push_back(BLK_NAME);
 
@@ -791,13 +792,13 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
   {                                                                                   \
     std::list<currency::transaction> tx_list;                                         \
     tx_list.push_back(TX1);                                                           \
-    generator.construct_block(BLK_NAME, PREV_BLOCK, MINER_ACC, tx_list);              \
+    generator.construct_block(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, tx_list);              \
   }                                                                                   \
   VEC_EVENTS.push_back(BLK_NAME);
 
 #define MAKE_NEXT_BLOCK_TX_LIST(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, TXLIST)  \
   currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
-  generator.construct_block(BLK_NAME, PREV_BLOCK, MINER_ACC, TXLIST);                 \
+  generator.construct_block(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, TXLIST);                 \
   VEC_EVENTS.push_back(BLK_NAME);
 
 #define REWIND_BLOCKS_N(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, COUNT)           \

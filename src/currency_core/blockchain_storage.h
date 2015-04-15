@@ -75,6 +75,7 @@ namespace currency
     size_t get_alternative_blocks_count();
     crypto::hash get_block_id_by_height(uint64_t height);
     bool get_block_by_hash(const crypto::hash &h, block &blk);
+    bool get_block_extended_info_by_hash(const crypto::hash &h, block_extended_info &blk);
     bool get_block_by_height(uint64_t h, block &blk);
     void get_all_known_block_ids(std::list<crypto::hash> &main, std::list<crypto::hash> &alt, std::list<crypto::hash> &invalid);
 
@@ -301,7 +302,7 @@ namespace currency
     wide_difficulty_type get_adjusted_cumulative_difficulty_for_next_alt_pos(alt_chain_list& alt_chain, uint64_t block_height, wide_difficulty_type next_diff, uint64_t connection_height);
     uint64_t get_last_x_block_height(bool pos);
     wide_difficulty_type get_last_alt_x_block_cumulative_precise_difficulty(alt_chain_list& alt_chain, uint64_t block_height, bool pos);
-    size_t get_current_sequence_factor_for_alt(alt_chain_list& alt_chain, bool pos);
+    size_t get_current_sequence_factor_for_alt(alt_chain_list& alt_chain, bool pos, uint64_t connection_height);
     uint64_t get_last_block_of_type(bool is_pos);
   };
 
