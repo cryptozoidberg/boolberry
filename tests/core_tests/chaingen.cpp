@@ -592,24 +592,74 @@ bool test_generator::find_nounce(currency::block& blk, std::vector<const block_i
   return r;
 }
 
-bool test_generator::construct_block(currency::block& blk, const currency::account_base& miner_acc, uint64_t timestamp, const currency::alias_info& ai)
+bool test_generator::construct_genesis_block(currency::block& blk, const currency::account_base& miner_acc, uint64_t timestamp, const currency::alias_info& ai)
 {
   std::vector<size_t> block_sizes;
   std::list<currency::transaction> tx_list;
   return construct_block(blk, 0, null_hash, miner_acc, timestamp, 0, block_sizes, tx_list, ai);
 }
 
-bool test_generator::construct_block(currency::block& blk, 
+size_t get_prev_block_of_type(const std::vector<currency::block>& blockchain, bool pos)
+{
+  if (!blockchain.size())
+    return 0;
+
+  for (size_t i = blockchain.size() - 1; i != 0; i--)
+  {
+    if (is_pos_block(blockchain[i]) == pos)
+    {
+      return i;
+    }
+  }
+  return 0;
+}
+
+bool have_10_blocks_of_type(const std::vector<currency::block>& blockchain, bool pos)
+{
+  size_t count = 0;
+  for (auto it = blockchain.rbegin(); it != blockchain.rend(); it++)
+  {
+    if (is_pos_block(*it) == pos)
+    {
+      ++count;
+      if (count >= 10)
+        return true;
+    }
+  }
+  return false;
+}
+
+bool test_generator::construct_block(const std::vector<test_event_entry>& events,
+                                     currency::block& blk,
                                      const currency::block& blk_prev,
                                      const currency::account_base& miner_acc,
                                      const std::list<currency::transaction>& tx_list, 
                                      const currency::alias_info& ai,
-                                     const std::list<currency::account_base>& coin_stake_sources)
+                                     const std::list<currency::account_base>& coin_stake_sources
+                                     )
 {
   uint64_t height = boost::get<txin_gen>(blk_prev.miner_tx.vin.front()).height + 1;
   crypto::hash prev_id = get_block_hash(blk_prev);
   // Keep push difficulty little up to be sure about PoW hash success
-  uint64_t timestamp = height > 10 ? blk_prev.timestamp + DIFFICULTY_POW_TARGET : blk_prev.timestamp + DIFFICULTY_POW_TARGET - DIFF_UP_TIMESTAMP_DELTA;
+  std::vector<currency::block> blockchain;
+  map_hash2tx_t mtx;
+  find_block_chain(events, blockchain, mtx, get_block_hash(blk_prev));
+  bool pos_bl = coin_stake_sources.size();
+  bool adjust_timestamp_finished = have_10_blocks_of_type(blockchain, pos_bl);
+  
+  if (pos_bl)
+  {
+    //in debug purpose
+  }
+
+  uint64_t diff_target = pos_bl ? DIFFICULTY_POS_TARGET : DIFFICULTY_POW_TARGET;
+
+  uint64_t timestamp = 0;
+  size_t prev_i = get_prev_block_of_type(blockchain, pos_bl);
+  block& prev_same_type = blockchain[prev_i];
+
+  timestamp = adjust_timestamp_finished ? prev_same_type.timestamp + diff_target : prev_same_type.timestamp + diff_target - DIFF_UP_TIMESTAMP_DELTA;
+
   uint64_t already_generated_coins = get_already_generated_coins(prev_id);
   std::vector<size_t> block_sizes;
   get_last_n_block_sizes(block_sizes, prev_id, CURRENCY_REWARD_BLOCKS_WINDOW);
@@ -1081,6 +1131,8 @@ bool find_block_chain(const std::vector<test_event_entry>& events, std::vector<c
 
     return b_success;
 }
+
+
 
 
 void test_chain_unit_base::register_callback(const std::string& cb_name, verify_callback cb)
