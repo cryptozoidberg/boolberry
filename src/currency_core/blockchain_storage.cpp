@@ -764,7 +764,7 @@ bool blockchain_storage::create_block_template(block& b,
   if (pos)
   {
     b.flags |= CURRENCY_BLOCK_FLAG_POS_BLOCK;
-    b.timestamp;
+    b.timestamp = 0;
   }
 
   diffic = get_next_diff_conditional(pos);
