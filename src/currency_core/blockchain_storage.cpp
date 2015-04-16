@@ -759,10 +759,13 @@ bool blockchain_storage::create_block_template(block& b,
   b.major_version = CURRENT_BLOCK_MAJOR_VERSION;
   b.minor_version = CURRENT_BLOCK_MINOR_VERSION;
   b.prev_id = get_top_block_id();
-  b.timestamp = 0;
+  b.timestamp = time(nullptr);
   b.flags = 0;
   if (pos)
+  {
     b.flags |= CURRENCY_BLOCK_FLAG_POS_BLOCK;
+    b.timestamp;
+  }
 
   diffic = get_next_diff_conditional(pos);
 
