@@ -839,7 +839,7 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
   wide_difficulty_type basic_diff = 0;
   timstamp_start = m_last_bc_timestamp;
   if (!timstamp_start)
-    timstamp_start = time();
+    timstamp_start = time(nullptr);
   
   currency::COMMAND_RPC_GET_POS_MINING_DETAILS::request pos_details_req = AUTO_VAL_INIT(pos_details_req);
   currency::COMMAND_RPC_GET_POS_MINING_DETAILS::response pos_details_resp = AUTO_VAL_INIT(pos_details_resp);
