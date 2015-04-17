@@ -2,17 +2,107 @@
     'use strict';
     var module = angular.module('app.dashboard',[]);
 
-    module.controller('safeAddCtrl', ['$scope','backend', '$modalInstance',
-        function($scope, backend, $modalInstance) {
+    module.controller('safeAddCtrl', ['$scope','backend', '$modalInstance', '$modal', '$timeout',
+        function($scope, backend, $modalInstance, $modal, $timeout) {
+            $scope.owl_options  = {
+              singleItem: true,
+              autoHeight: true,
+              navigation: false,
+              pagination: false,
+              margin: 16,
+              mouseDrag: false,
+              touchDrag: false,
+              callbacks: true,
+              smartSpeed: 100,
+              autoplayHoverPause: true,
+            };
+
+            $scope.safe = {};
+
             $scope.closeSafeForm = function(){
                 $modalInstance.close();
+            };
+
+            $scope.saveSafeFile = function(safe) {
+                var caption = "Please, choose the file";
+                var filemask = "*.lui";
+                var result = backend.saveFileDialog(caption, filemask); // TODO digest angular error fix
+                if(result.error_code == 'OK'){
+                    backend.generateWallet(result.path,safe.password,function(data){
+                        console.log(data);
+                        var wallet_id = data.param.wallet_id;
+                        $timeout(function(){
+                            $scope.safe.wallet_id = wallet_id;    
+                        });
+                    });    
+                }else{
+                    console.log(result.error_code);
+                }
+            };
+
+            $scope.openSmartSafeForm = function() {
+                var modalInstance = $modal.open({
+                    templateUrl: "views/safe_smartsafe_new.html",
+                    controller: 'smartSafeAddCtrl',
+                    size: 'md',
+                    windowClass: 'modal fade in out',
+                });
+                modalInstance.result.then((function() {
+                    //console.log('Safe form closed');
+                }), function() {
+                    //console.log('Safe form dismissed');
+                });
+            };
+        }
+    ]);
+
+    module.controller('safeRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes',
+        function($scope, backend, $modalInstance, $modal, $timeout, path, safes) {
+            $scope.owl_options  = {
+              singleItem: true,
+              autoHeight: true,
+              navigation: false,
+              pagination: false,
+              margin: 16,
+              mouseDrag: false,
+              touchDrag: false,
+              callbacks: true,
+              smartSpeed: 100,
+              autoplayHoverPause: true,
+            };
+
+            $scope.safe = {path: path};
+
+            $scope.closeSafeForm = function(){
+                $modalInstance.close();
+            };
+
+            $scope.openSafe = function(safe){
+                backend.openWallet(safe.path, safe.pass,function(data){
+                    console.log(data);
+                    data.name = safe.name;
+                    safes.unshift(data);
+                    $modalInstance.close();
+                });
+            };
+            
+        }
+    ]);
+
+    module.controller('smartSafeAddCtrl', ['$scope','backend', '$modalInstance',
+        function($scope, backend, $modalInstance) {
+
+            $scope.closeSmartSafeForm = function(){
+                $modalInstance.close();
             }
+
+
         }
     ]);
 
 
-    module.controller('IndexController', ['utils', 'backend', '$scope', '$modal',
-        function(utils, backend, $scope, $modal) {
+    module.controller('IndexController', ['utils', 'backend', '$scope', '$modal','$timeout',
+        function(utils, backend, $scope, $modal, $timeout) {
             // $scope.settings = {
             //     maxWidgets: 12,
             //     userSettings: {
@@ -20,16 +110,21 @@
             //     }
             // };
 
-            // backend.openWallet('/home/master/Lui/test_wallet.lui', '12345',function(data){
-            //     console.log(data);
-            // });
 
-            $scope.openFiledialog = function(){
+            $scope.safes = [];
+
+            // backend.openWallet('/home/master/Lui/test_wallet.lui', '12345',function(data){
+            //     $scope.safes.push(data);
+            // });
+            
+            $scope.openFileDialog = function(){
                 var caption = "Please, choose the file";
                 var filemask = "*.lui";
-                backend.openFiledialog(caption, filemask);
+                var result = backend.openFileDialog(caption, filemask);
+                var path = result.path;
+                $scope.openSafeRestoreForm(path);
+                
             };
-
 
             $scope.openSafeForm = function() {
                 var modalInstance = $modal.open({
@@ -39,9 +134,31 @@
                     windowClass: 'modal fade in out',
                 });
                 modalInstance.result.then((function() {
-                    console.log('Safe form closed');
+                    // console.log('Safe form closed');
                 }), function() {
-                    console.log('Safe form dismissed');
+                    // console.log('Safe form dismissed');
+                });
+            };
+
+            $scope.openSafeRestoreForm = function(path) {
+                var modalInstance = $modal.open({
+                    templateUrl: "views/safe_restore.html",
+                    controller: 'safeRestoreCtrl',
+                    size: 'md',
+                    windowClass: 'modal fade in out',
+                    resolve: {
+                        path: function(){
+                            return path;
+                        },
+                        safes: function(){
+                            return $scope.safes;
+                        }
+                    }
+                });
+                modalInstance.result.then((function() {
+                    // console.log('Safe form closed');
+                }), function() {
+                    // console.log('Safe form dismissed');
                 });
             };
 

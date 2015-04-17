@@ -1,25 +1,10 @@
-<!-- <div class="modal modal-preloaded" id="addSafe" tabindex="-1" role="dialog" aria-labelledby="addSafeLabel" aria-hidden="true" style="display:block">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            
-        </div>
-    </div>
-</div> 
-
-
-
-
-
--->
-
-
 <div class="modal-header btn btn-primary btn-block">
     <button type="button" class="close" data-dismiss="modal" ng-click="closeSafeForm()"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
     <h4 class="modal-title text-center">Создание нового сейфа</h4>
 </div>
 <div class="modal-body">
-    <form>
-        <div class="owl-carousel" data-owl-carousel>
+    <form name="new_safe_form" novalidate >
+        <div class="owl-carousel" data-owl-carousel data-options="owl_options">
             <div class="item create-safe_screen-1 create-safe_screen">
                 <div class="form-group">
                     <label class="requred">
@@ -27,34 +12,41 @@
                     </label>
                     <div class="help-block">Вы сможете создать сколько угодно сейфов.  Имя для сейфа &ndash; это любое слово или словосочетание для
                         обозначения этого сейфа в списке</div>
-                    <input id="create-safe_safe-name-input" type="text" class="input-lg form-control" placeholder="любое слово или словосочетание">
+                    <input id="create-safe_safe-name-input" ng-model="safe.name" type="text" required name="safe_name" class="input-lg form-control" placeholder="любое слово или словосочетание">
                 </div>
                 <div class="row">
-                    <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
-                    <div class="col-xs-6 col-sm-6"><a class="create-safe_step-2-button btn btn-primary btn-block btn-lg" type="button" href="#screen2">Продолжить</a></div>
+                    <div class="col-xs-6 col-sm-6">
+                        <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-click="closeSafeForm()"> Отменить</a>
+                    </div>
+                    <div class="col-xs-6 col-sm-6">
+                        <a class="create-safe_step-2-button btn btn-primary btn-block btn-lg owl-next" ng-disabled="!new_safe_form.safe_name.$valid" type="button" href="">Продолжить</a>
+                    </div>
                 </div>
             </div>
             <div class="item create-safe_screen-2 create-safe_screen">
                 <div class="form-group clearfix">
                     <label class="requred">Пароль для сейфа</label>
                     <div class="help-block">Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы.</div>
-                    <input id="create-safe_safe-password-input-1" type="password" placeholder="" class="input-lg form-control">
-
+                    <input id="create-safe_safe-password-input-1" ng-model="safe.password" required name="safe_password" type="password" class="input-lg form-control">
                 </div>
-                <div class="form-group clearfix">
+                <!-- <div class="form-group clearfix">
                     <label>Надежность</label>
                     <div class="create-safe_password-strength-bar"></div>
-                    <!--<div class="progress">-->
-                        <!--<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">-->
-                            <!--<span class="sr-only">40% (высокая)</span>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                    <!--div class="col-xs-6 col-sm-6 text-right"><button data-target="#generator" data-toggle="modal" class="btn btn-success" type="button">Генератор паролей</button> </div-->
-                </div>
-                <a href="#screen1" type="button" class="btn btn-link text-muted create-safe_step-1-button"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                            <span class="sr-only">40% (высокая)</span>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 text-right"><button data-target="#generator" data-toggle="modal" class="btn btn-success" type="button">Генератор паролей</button> </div>
+                </div> -->
+                <a href="" type="button" class="btn btn-link text-muted create-safe_step-1-button owl-prev"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
                 <div class="form-group clearfix">
-                    <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button" href="#" data-dismiss="modal"> Отменить</a></div>
-                    <div class="col-xs-6 col-sm-6"> <a class="btn btn-primary btn-block btn-lg create-safe_step-3-button" type="button" href="#screen3">Продолжить</a></div>
+                    <div class="col-xs-6 col-sm-6">
+                        <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-click="closeSafeForm()"> Отменить</a>
+                    </div>
+                    <div class="col-xs-6 col-sm-6"> 
+                        <a class="btn btn-primary btn-block btn-lg create-safe_step-3-button owl-next" ng-disabled="!new_safe_form.safe_password.$valid" type="button" href="">Продолжить</a>
+                    </div>
                 </div>
             </div>
             <div class="item create-safe_screen-3 create-safe_screen">
@@ -65,33 +57,34 @@
                 <h4>Проверьте точно ли вы запомнили пароль? </h4>
                 <div class="form-group">
                     <label  class="requred">Введите пароль повторно</label>
-                    <input id="create-safe_safe-password-input-2" class="form-control" type="password">
+                    <input id="create-safe_safe-password-input-2" class="form-control" required ng-model="safe.confirm_password" match="safe.password" name="safe_password_confirm" type="password">
                 </div>
 
+                <a href="" type="button" class="btn btn-link text-muted create-safe_step-1-button owl-prev"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
 
-                <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savefile" id="savefilebtn">Сохранить файл сейфа <i class="fa fa-lg fa-check" id="savestate" style="display:none"></i></a>
-
+                <a class="btn btn-success btn-block btn-lg" type="button" ng-click="saveSafeFile(safe)" ng-disabled="!new_safe_form.safe_password_confirm.$valid" data-target="#savefile" id="savefilebtn">Сохранить файл сейфа <i class="fa fa-lg fa-check" id="savestate" ng-show="safe.wallet_id"></i></a>
 
                 <hr>
-                <h5>Чтобы не потерять и надежно защитить файл сейфа, вам необходимо создать  бекапы файла сейфа и smartsafe на следующем шаге</h5>
+                <h5>Чтобы не потерять и надежно защитить файл сейфа, вам необходимо создать бекапы файла сейфа и smartsafe на следующем шаге</h5>
 
                 <div class="form-group">
                     <button type="button" class="btn btn-primary btn-block btn-lg" disabled="" id="gotoBackups">Продолжить</button>
-                    <a href="#screen4" class="btn btn-primary btn-block btn-lg create-safe_step-4-button" id="gotoBackupslink" style="display:none">Продолжить</a>
+                    <a href="" class="btn btn-primary btn-block btn-lg create-safe_step-4-button owl-next" id="gotoBackupslink">Продолжить</a>
                 </div>
             </div>
             <div class="item create-safe_screen-4 create-safe_screen">
 
                 <div class="form-group">
-                    <div class="help-block">Файл сейфа является хранищем ваших средств. История платежей и Контакты также хранится в этом файле. Чтобы файл сейфа оставался подключенным в приложение, не перемещайте его из той директории, куда вы его сохранили.</div>
+                    <div class="help-block">Файл сейфа является хранилищем ваших средств. История платежей и Контакты также хранится в этом файле. Чтобы файл сейфа оставался подключенным в приложение, не перемещайте его из той директории, куда вы его сохранили.</div>
                 </div>
                 <h4>Физический бекап файла сейфа</h4>
                 <div class="form-group">
                     <div class="help-block">Скопируйте созданный файл сейфа в другое надежное место, не храните бекап на том же компьютере.</div>
                 </div>
+                <a href="" type="button" class="btn btn-link text-muted create-safe_step-1-button owl-prev"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
                 <div class="form-group">
-                    <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savecopyfile">Сохранить копию файла на компьютере
-                        <i class="fa fa-lg fa-check savefilesuccess" id="" style="display:none"></i>
+                    <a class="btn btn-success btn-block btn-lg" type="button">Сохранить копию файла на компьютере
+                        <i class="fa fa-lg fa-check savefilesuccess" ng-show="false"></i>
                     </a>
                 </div>
                 <h4>Цифровой бекап файла сейфа</h4>
@@ -99,15 +92,15 @@
                     <div class="help-block"><strong><span class="text-primary">Smartsafe</span> – это фраза в которой зашифрован сейф.</strong> Эту фразу Вам нужно запомнить или распечатать и хранить в надежном месте. Smartsafe позволит Вам восстановить сейф в приложении даже если Вы потеряете файл сейфа или если Вы забудете пароль от сейфа.</div>
                 </div>
                 <div class="form-group">
-                    <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#smartsafe">Создать цифровую копию (Smartsafe)
-                        <i class="fa fa-lg fa-check smartsafesuccess" style="display:none"></i>
+                    <a class="btn btn-success btn-block btn-lg" type="button" ng-click="openSmartSafeForm()">Создать цифровую копию (Smartsafe)
+                        <i class="fa fa-lg fa-check smartsafesuccess" ng-show="false"></i>
                     </a>
                 </div>
 
                 <hr>
 
                 <div class="form-group">
-                    <button type="button" disabled="" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn" data-dismiss="modal">Начать использовать сейф</button>
+                    <button type="button" disabled="" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn" ng-click="closeSafeForm()">Начать использовать сейф</button>
                 </div>
             </div>
 

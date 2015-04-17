@@ -25,13 +25,9 @@
     <link href="assets/js/owl-carousel/owl.theme.css" rel="stylesheet">
     <link href="assets/js/owl-carousel/owl.transitions.css" rel="stylesheet">
 
-
     <link href="assets/css/bootstrap-select.css" rel="stylesheet">
     <link href="assets/css/datepicker3.css" rel="stylesheet">
 
-    
-
-    <link href="assets/css/custom.css" rel="stylesheet">
     <link href="assets/css/app.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -40,15 +36,20 @@
       <script src="assets/js/respond.min.js"></script>
     <![endif]-->
 
+    
     <script src="assets/js/angular/angular.min.js"></script>
     <script src="assets/js/angular/angular-route.min.js"></script>
     <script src="assets/js/angular/angular-sanitize.min.js"></script>
+    <script src="assets/js/angular/angular-input-match.min.js"></script>
+
+
+
     <script src="assets/js/angular/ui-bootstrap-0.12.1.min.js"></script>
     <script src="assets/js/angular/ui-bootstrap-tpls-0.12.1.min.js"></script>
 </head>
 
-<body>
-<div class="guilder-bar" role="navigation" ng-controller="NavbarTopController">
+<body data-turn-links>
+<div class="guilder-bar navbar navbar-default navbar-fixed-top" role="navigation" ng-controller="NavbarTopController">
     <div class="row">
         <div class="col-xs-4 col-sm-7 guilder-bar-logo">
             <span>
@@ -132,75 +133,6 @@
             <noscript><div class="nojsError">Невозможно загрузить интерфейс, потому что отключен JavaScript :(</div></noscript>
         </div>
 
-    </div>
-</div>
-
-
-
-<div class="modal modal-preloaded" id="openSafe" tabindex="-1" role="dialog" aria-labelledby="openSafeLabel"
-     aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header btn btn-primary btn-block">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
-                        class="sr-only">Close</span></button>
-                <h4 class="modal-title text-center">Восстановление сейфа из файла</h4>
-            </div>
-
-            <div class="modal-body">
-
-                <div id="owl-panels0">
-                    <div class="item open-safe_screen-1 open-safe_screen">
-                        <div class="form-group">
-                            <input type="hidden" name="open-safe_file-name-input" value=""/>
-                            <label class="requred">
-                                Имя для обозначения сейфа в приложении
-                                <!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
-                            </label>
-
-                            <div class="help-block">Вы сможете создать сколько угодно сейфов. Имя для сейфа &ndash; это
-                                любое слово или словосочетание для
-                                обозначения этого сейфа в списке
-                            </div>
-                            <input type="text" name="open-safe_safe-name-input" class="input-lg form-control open-safe_safe-name-input"
-                                   placeholder="любое слово или словосочетание">
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button"
-                                                              href="#" data-dismiss="modal"> Отменить</a></div>
-                            <div class="col-xs-6 col-sm-6">
-
-                                <a type="button" class="btn btn-primary btn-block btn-lg open-safe_step-2-button" href="#">Продолжить</a></div>
-                        </div>
-                    </div>
-
-                    <div class="item open-safe_screen-2 open-safe_screen">
-                        <div class="form-group clearfix">
-                            <label class="requred">Заданный при создании файла сейфа пароль
-                            </label>
-                            <input type="password" placeholder="" name="open-safe_safe-password-input" class="input-lg form-control open-safe_safe-password-input">
-                        </div>
-                        <p>Восстановить пароль невозможно. При утере пароля от сейфа, используйте другой способ
-                            восстановления – из цифровой копии ( brainwallet) или физической копии файла этого же сейфа
-                            с другим паролем, который вы помните. </p>
-
-                        <a href="#" class="btn btn-link open-safe_step-1-button"><i
-                                class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span
-                                class="text-muted">Назад</span></a>
-
-                        <div class="row">
-                            <div class="col-xs-6 col-sm-6"><a class="btn btn-default btn-block btn-lg" type="button"
-                                                              href="#" data-dismiss="modal"> Отменить</a></div>
-                            <div class="col-xs-6 col-sm-6">
-                                <button type="button" class="btn btn-primary btn-block btn-lg open-safe_open-safe-button" type="button"
-                                        data-dismiss="modal">Открыть сейф</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
     </div>
 </div>
 
@@ -640,62 +572,7 @@
 </div>
 
 
-<div class="modal fade second-layer" id="smartsafe" tabindex="-1" role="dialog" aria-labelledby="smartsafeLabel" aria-hidden="true">
 
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header btn btn-block btn-info">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="generatorLabel">Создание цифровой копии сейфа (Smartsafe)</h4>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <label class="requred">Фраза для шифрования сейфа</label>
-                    <div class="help-block">
-                        Случайный набор букв, сгенерированный компьютером, в которой зашифрован сейф. Распечатайте и храните это в бумажном виде. С помощью этой фразы можно будет восстановить сейф, даже если Вы потеряете файл сейфа или если вы забудете пароль от сейфа.
-                    </div>
-                    <div class="form-group clearfix">
-                        <div class="col-xs-3 col-sm-3">
-                            <input type="text" value="KFDK" class="form-control">
-                        </div>
-                        <div class="col-xs-3 col-sm-3">
-                            <input type="text" value="TLIU" class="form-control">
-                        </div>
-                        <div class="col-xs-3 col-sm-3">
-                            <input type="text" value="WSED" class="form-control">
-                        </div>
-                        <div class="col-xs-3 col-sm-3">
-                            <input type="text" value="REBY" class="form-control">
-                        </div>
-
-                    </div>
-                    <div class="form-group clearfix">
-                        <div class="col-xs-3 col-sm-3">
-                            <input type="text" value="IOKM" class="form-control">
-                        </div>
-                        <div class="col-xs-3 col-sm-3">
-                            <input type="text" value="TGHJ" class="form-control">
-                        </div>
-                        <div class="col-xs-3 col-sm-3">
-                            <input type="text" value="KLGO" class="form-control">
-                        </div>
-                        <div class="col-xs-3 col-sm-3">
-                            <input type="text" value="RDDV" class="form-control">
-                        </div>
-
-                    </div>
-                    <div class="btn-toolbar">
-                        <div class="btn-group pull-right"><button type="button" class="btn btn-primary"><i class="fa fa-lg fa-print"></i> Печать</button></div><div class="btn-group  pull-right"><button type="button" class="btn btn-default"><i class="fa fa-lg fa-qrcode"></i> QR-код</button></div>
-                    </div>
-                    <div class="checkbox"><label><input type="checkbox" onchange="onblockBtn()"> Я распечатал фразу и сохранил в надежном месте</label></div>
-                    <div class="form-group">
-                        <button class="btn btn-lg btn-block btn-info" data-dismiss="modal" type="button" disabled="" id="printbtncheck">Продолжить</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 <div class="alert alert-warning" style="position:fixed; display: none; right:20px; top:20px;box-shadow: 0 2px 8px;z-index:1090">

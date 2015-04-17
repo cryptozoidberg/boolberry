@@ -3,12 +3,14 @@
     var app = angular.module('app', [
         'ui.bootstrap',
         'ngRoute', 
-        'ngSanitize', 
+        'ngSanitize',
+        'validation.match', // allow to validate inputs match 
         'app.services',
         'app.backendServices',
         'app.dashboard',
         'app.navbar',
-        'app.directives'
+        'app.directives',
+
     ]);
 
     app.config(['$routeProvider', function($routeProvider) {
@@ -32,18 +34,7 @@
             .otherwise({
                 templateUrl: 'views/routingError.html'
             });
-        // TODO create directive for this
-        // Turn all '*.html' links to '#/*'
-        $(document).on('click', 'a[href*=".html"]', function() {
-            var hash = $(this).attr('href').split("#")[1];
-            var request = $(this).attr('href').replace('.html', '').split("#")[0];
-            if (hash && hash != '') {
-                location.hash = request + '/' + hash;
-            } else {
-                location.hash = request;
-            }
-            return false;
-        });
+        
     }]);
 
 }).call(this);

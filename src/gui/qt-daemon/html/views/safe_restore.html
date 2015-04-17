@@ -1,0 +1,78 @@
+<div class="modal-content">
+    <div class="modal-header btn btn-primary btn-block">
+        <button type="button" class="close" ng-click="closeSafeForm()"><span aria-hidden="true">×</span><span
+                class="sr-only">Close</span></button>
+        <h4 class="modal-title text-center">Восстановление сейфа из файла</h4>
+    </div>
+
+    <div class="modal-body">
+        <form name="restore_safe_form" novalidate>
+            <div class="owl-carousel" data-owl-carousel data-options="owl_options">
+                <div class="item open-safe_screen-1 open-safe_screen">
+                    <div class="form-group">
+                        <input type="hidden" name="open-safe_file-name-input" value=""/>
+                        <label class="requred">
+                            Имя для обозначения сейфа в приложении
+                            <!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
+                        </label>
+
+                        <div class="help-block">Вы сможете создать сколько угодно сейфов. Имя для сейфа &ndash; это
+                            любое слово или словосочетание для
+                            обозначения этого сейфа в списке
+                        </div>
+                        <input 
+                            type="text" 
+                            name="safe_name"
+                            required
+                            class="input-lg form-control open-safe_safe-name-input"
+                            placeholder="любое слово или словосочетание"
+                            ng-model="safe.name"
+                        >
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-6 col-sm-6">
+                            <a class="btn btn-default btn-block btn-lg" type="button" ng-click="closeSafeForm()" href=""> Отменить</a>
+                        </div>
+                        <div class="col-xs-6 col-sm-6">
+                            <a type="button" ng-disabled="!restore_safe_form.safe_name.$valid" class="btn btn-primary btn-block btn-lg open-safe_step-2-button owl-next" href="">Продолжить</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item open-safe_screen-2 open-safe_screen">
+                    <div class="form-group clearfix">
+                        <label class="requred">Заданный при создании файла сейфа пароль
+                        </label>
+                        <input 
+                            type="password" 
+                            placeholder="" 
+                            name="safe_password"
+                            required 
+                            class="input-lg form-control open-safe_safe-password-input"
+                            ng-model="safe.pass"
+                        >
+                    </div>
+                    <p>
+                        Восстановить пароль невозможно. При утере пароля от сейфа, используйте другой способ
+                        восстановления – из цифровой копии ( brainwallet) или физической копии файла этого же сейфа
+                        с другим паролем, который вы помните. 
+                    </p>
+
+                    <a href="" class="btn btn-link open-safe_step-1-button owl-prev">
+                        <i class="fa fa-lg fa-arrow-circle-left text-muted"></i>
+                        <span class="text-muted">Назад</span>
+                    </a>
+
+                    <div class="row">
+                        <div class="col-xs-6 col-sm-6">
+                            <a class="btn btn-default btn-block btn-lg" type="button"  ng-click="closeSafeForm()" href=""> Отменить</a>
+                        </div>
+                        <div class="col-xs-6 col-sm-6">
+                            <button type="button" ng-disabled="!restore_safe_form.safe_password.$valid" class="btn btn-primary btn-block btn-lg open-safe_open-safe-button" ng-click="openSafe(safe)" type="button">Открыть сейф</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
