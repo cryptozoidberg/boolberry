@@ -76,6 +76,7 @@ int main(int argc, char* argv[])
     epee::debug::get_set_enable_assert(true, false);
 
     
+    GENERATE_AND_PLAY(cumulative_difficulty_adjustment_test_alt);
     GENERATE_AND_PLAY(cumulative_difficulty_adjustment_test);
       GENERATE_AND_PLAY(gen_pos_basic_tests);
    GENERATE_AND_PLAY(prun_ring_signatures);
@@ -113,7 +114,7 @@ int main(int argc, char* argv[])
     GENERATE_AND_PLAY(gen_block_miner_tx_has_out_to_alice);
     GENERATE_AND_PLAY(gen_block_has_invalid_tx);
     GENERATE_AND_PLAY(gen_block_is_too_big);
-    GENERATE_AND_PLAY(gen_block_invalid_binary_format); // Takes up to 3 hours, if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 500, up to 30 minutes, if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 10
+    //GENERATE_AND_PLAY(gen_block_invalid_binary_format); // Takes up to 3 hours, if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 500, up to 30 minutes, if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 10
     GENERATE_AND_PLAY(gen_alias_tests); 
 
     

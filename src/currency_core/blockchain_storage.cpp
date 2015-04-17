@@ -1093,7 +1093,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
       cumulative_diff_delta = current_diff;
 
     size_t n = get_current_sequence_factor_for_alt(alt_chain, pos_block, connection_height);
-    if (m_blocks.size() >= m_pos_config.pos_minimum_heigh)
+    if (bei.height >= m_pos_config.pos_minimum_heigh)
       cumulative_diff_delta = correct_difficulty_with_sequence_factor(n, cumulative_diff_delta);
 
     bei.cumulative_diff_adjusted += cumulative_diff_delta;
@@ -1532,7 +1532,7 @@ size_t blockchain_storage::get_current_sequence_factor(bool pos)
 {
   size_t n = 0;
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  for (auto it = m_blocks.rbegin(); it != m_blocks.rend(); it++, n++)
+  for (auto it = m_blocks.rbegin(); it != m_blocks.rend() && it->height != 0; it++, n++)
   {
     if (pos != is_pos_block(it->bl))
       break;
@@ -2573,6 +2573,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   //fill block_extended_info
   block_extended_info bei = boost::value_initialized<block_extended_info>();
   bei.bl = bl;
+  bei.height = m_blocks.size();
   bei.scratch_offset = m_scratchpad.size();
   bei.block_cumulative_size = cumulative_block_size;
   bei.difficulty = current_diffic;
@@ -2597,16 +2598,17 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     cumulative_diff_delta = get_adjusted_cumulative_difficulty_for_next_pos(current_diffic);
   else
     cumulative_diff_delta += current_diffic;
- 
+
+
   size_t n = get_current_sequence_factor(is_pos_bl);
-  if (m_blocks.size() >= m_pos_config.pos_minimum_heigh)
+  if (bei.height >= m_pos_config.pos_minimum_heigh)
     cumulative_diff_delta = correct_difficulty_with_sequence_factor(n, cumulative_diff_delta);
   
   bei.cumulative_diff_adjusted += cumulative_diff_delta;
 
   //etc 
   bei.already_generated_coins = already_generated_coins + base_reward;
-  bei.height = m_blocks.size();
+
 
   auto ind_res = m_blocks_index.insert(std::pair<crypto::hash, size_t>(id, bei.height));
   if(!ind_res.second)

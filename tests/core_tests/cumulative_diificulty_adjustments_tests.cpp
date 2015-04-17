@@ -53,22 +53,6 @@ bool cumulative_difficulty_adjustment_test::generate(std::vector<test_event_entr
   MAKE_NEXT_POS_BLOCK(events, blk_37, blk_36, miner_account, coin_stake_sources);
   MAKE_NEXT_POS_BLOCK(events, blk_38, blk_37, miner_account, coin_stake_sources);
   MAKE_NEXT_POS_BLOCK(events, blk_39, blk_38, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_40, blk_39, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_41, blk_40, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_42, blk_41, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_43, blk_42, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_44, blk_43, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_45, blk_44, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_46, blk_45, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_47, blk_46, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_48, blk_47, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_49, blk_48, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_50, blk_49, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_51, blk_50, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_52, blk_51, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_53, blk_52, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_54, blk_53, miner_account, coin_stake_sources);
-//   MAKE_NEXT_POS_BLOCK(events, blk_55, blk_54, miner_account, coin_stake_sources);
   DO_CALLBACK(events, "memorize_main_chain");
   MAKE_NEXT_BLOCK(events, blk_39_pow, blk_38, miner_account);
   DO_CALLBACK(events, "check_main_chain");
@@ -109,3 +93,54 @@ bool cumulative_difficulty_adjustment_test::check_main_chain(currency::core& c, 
   CHECK_EQ(bei.cumulative_diff_adjusted, bei_2.cumulative_diff_adjusted);
   return true;
 }
+//==================================================================================================
+cumulative_difficulty_adjustment_test_alt::cumulative_difficulty_adjustment_test_alt()
+{
+  //REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, configure_core);
+  REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test_alt, configure_check_height1);
+  //REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, memorize_main_chain);
+  //REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, check_main_chain);
+}
+#define FIRST_ALIAS_NAME "first"
+#define SECOND_ALIAS_NAME "second"
+
+bool cumulative_difficulty_adjustment_test_alt::generate(std::vector<test_event_entry>& events) const
+{
+  uint64_t ts_start = 1338224400;
+
+  GENERATE_ACCOUNT(miner_account);
+
+  MAKE_GENESIS_BLOCK(events, blk_0, miner_account, ts_start);
+  REWIND_BLOCKS_N(events, blk_41, blk_0, miner_account, 40);
+
+  REWIND_BLOCKS_N(events, blk_41_a, blk_0, miner_account, 40);
+  MAKE_NEXT_BLOCK(events, blk_42, blk_41_a, miner_account);
+  DO_CALLBACK(events, "configure_check_height1");
+  return true;
+}
+
+bool cumulative_difficulty_adjustment_test_alt::configure_check_height1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+{
+  //uint64_t h = c.get_current_blockchain_height();
+  //CHECK_EQ(h, 27);
+  return true;
+}
+// bool cumulative_difficulty_adjustment_test_alt::memorize_main_chain(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+// {
+//   currency::block b_from_main = boost::get<currency::block>(events[ev_index - 1]);
+// 
+//   bool r = c.get_blockchain_storage().get_block_extended_info_by_hash(get_block_hash(b_from_main), bei);
+//   CHECK_EQ(r, true);
+// 
+//   return true;
+// }
+// bool cumulative_difficulty_adjustment_test_alt::check_main_chain(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+// {
+// 
+//   currency::blockchain_storage::block_extended_info bei_2;
+//   bool r = c.get_blockchain_storage().get_block_extended_info_by_hash(get_block_hash(bei.bl), bei_2);
+// 
+//   //r = is_pos_block(b);
+//   CHECK_EQ(bei.cumulative_diff_adjusted, bei_2.cumulative_diff_adjusted);
+//   return true;
+// }
