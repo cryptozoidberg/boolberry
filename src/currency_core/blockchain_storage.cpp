@@ -627,7 +627,10 @@ wide_difficulty_type blockchain_storage::get_next_difficulty_for_alternative_cha
   }
 
   size_t main_chain_start_offset = (alt_chain.size() ? alt_chain.front()->second.height : bei.height)-1;
-  CHECK_AND_ASSERT_MES(main_chain_start_offset > 0, false, "Internal error: main_chain_start_offset > 0 check failed");
+  //CHECK_AND_ASSERT_MES(main_chain_start_offset > 0, false, "Internal error: main_chain_start_offset > 0 check failed");
+  if(main_chain_start_offset == 0)
+    return DIFFICULTY_STARTER;
+
   for (uint64_t i = main_chain_start_offset; i != 0 && timestamps.size() < DIFFICULTY_BLOCKS_COUNT; --i)
   {
     bool is_pos_bl = is_pos_block(m_blocks[i].bl);
@@ -2711,7 +2714,7 @@ bool blockchain_storage::build_stake_modifier(stake_modifier_type& sm)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   //temporary implementation (to close to beginning atm)
-  uint64_t height_for_modifier = get_current_blockchain_height();
+  //uint64_t height_for_modifier = get_current_blockchain_height();
   sm = stake_modifier_type();
 
   uint64_t last_pos_i = get_last_block_of_type(true);
