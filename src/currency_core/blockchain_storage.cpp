@@ -628,8 +628,8 @@ wide_difficulty_type blockchain_storage::get_next_difficulty_for_alternative_cha
 
   size_t main_chain_start_offset = (alt_chain.size() ? alt_chain.front()->second.height : bei.height)-1;
   //CHECK_AND_ASSERT_MES(main_chain_start_offset > 0, false, "Internal error: main_chain_start_offset > 0 check failed");
-  if(main_chain_start_offset == 0)
-    return DIFFICULTY_STARTER;
+  //if(main_chain_start_offset == 0)
+  //  return DIFFICULTY_STARTER;
 
   for (uint64_t i = main_chain_start_offset; i != 0 && timestamps.size() < DIFFICULTY_BLOCKS_COUNT; --i)
   {
