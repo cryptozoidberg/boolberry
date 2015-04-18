@@ -20,7 +20,8 @@ struct cumulative_difficulty_adjustment_test : public test_chain_unit_base
   bool memorize_main_chain(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
   bool check_main_chain(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
   bool check_reorganize(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
-
+  bool remember_block_befor_alt(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
+  
 
 private:
   currency::blockchain_storage::block_extended_info bei;

@@ -272,6 +272,7 @@ public:
   uint64_t get_already_generated_coins(const crypto::hash& blk_id) const;
   uint64_t get_already_generated_coins(const currency::block& blk) const;
   currency::wide_difficulty_type get_block_difficulty(const crypto::hash& blk_id) const;
+  uint64_t get_timestamps_median(const blockchain_vector& blck_chain);
 
   bool build_outputs_indext_for_chain(const std::vector<const block_info*>& blocks, outputs_index& index, tx_global_indexes& txs_outs);
 

@@ -149,7 +149,7 @@ namespace currency
     bool validate_pos_block(const block& b, wide_difficulty_type basic_diff, const crypto::hash& id, bool for_altchain);
     bool validate_pos_block(const block& b, 
                             wide_difficulty_type basic_diff, 
-                            uint64_t& coin_age, 
+                            uint64_t& amount,
                             wide_difficulty_type& final_diff, 
                             crypto::hash& proof_hash, 
                             const crypto::hash& id, 

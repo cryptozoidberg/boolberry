@@ -18,6 +18,7 @@ cumulative_difficulty_adjustment_test::cumulative_difficulty_adjustment_test()
   REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, memorize_main_chain);
   REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, check_main_chain);
   REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, check_reorganize);
+  REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, remember_block_befor_alt);
 
 }
 #define FIRST_ALIAS_NAME "first"
@@ -62,6 +63,7 @@ bool cumulative_difficulty_adjustment_test::generate(std::vector<test_event_entr
   MAKE_NEXT_BLOCK(events, blk_41_pow, blk_40_pow, miner_account);
   MAKE_NEXT_BLOCK(events, blk_42_pow, blk_41_pow, miner_account);
   MAKE_NEXT_POS_BLOCK(events, blk_43, blk_42_pow, miner_account, coin_stake_sources);
+  DO_CALLBACK(events, "remember_block_befor_alt");
   //start alt chain
   MAKE_NEXT_BLOCK(events, blk_40_new_pow, blk_39_pow, miner_account);
   MAKE_NEXT_POS_BLOCK(events, blk_41_new_pos, blk_40_new_pow, miner_account, coin_stake_sources);
@@ -105,16 +107,23 @@ bool cumulative_difficulty_adjustment_test::check_main_chain(currency::core& c, 
   currency::blockchain_storage::block_extended_info bei_2;
   bool r = c.get_blockchain_storage().get_block_extended_info_by_hash(get_block_hash(bei.bl), bei_2);
 
-  //r = is_pos_block(b);
   CHECK_EQ(bei.cumulative_diff_adjusted, bei_2.cumulative_diff_adjusted);
+  return true;
+}
+bool cumulative_difficulty_adjustment_test::remember_block_befor_alt(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+{
+  currency::block b_from_main = boost::get<currency::block>(events[ev_index - 1]);
+  bool r = c.get_blockchain_storage().get_block_extended_info_by_hash(get_block_hash(b_from_main), bei);
+  CHECK_EQ(r, true);
+
   return true;
 }
 bool cumulative_difficulty_adjustment_test::check_reorganize(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  crypto::hash h_top = c.get_blockchain_storage().get_top_block_id();
-  crypto::hash h_reorg = currency::get_block_hash(boost::get<currency::block>(events[events.size() - 2]));
+  currency::blockchain_storage::block_extended_info bei_2;
+  bool r = c.get_blockchain_storage().get_block_extended_info_by_hash(get_block_hash(bei.bl), bei_2);
+  CHECK_EQ(bei.stake_hash, bei_2.stake_hash);
 
-  CHECK_EQ(h_reorg, h_top);
   return true;
 }
 

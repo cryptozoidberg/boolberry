@@ -54,6 +54,22 @@ void test_generator::get_last_n_block_sizes(std::vector<size_t>& block_sizes, co
   }
 }
 
+uint64_t get_last_block_of_type(bool looking_for_pos, const test_generator::blockchain_vector& blck_chain)
+{
+  uint64_t sz = blck_chain.size();
+  if (!sz)
+    return 0;
+  for (uint64_t i = sz - 1; i != 0; --i)
+  {
+    bool is_pos_bl = is_pos_block(blck_chain[i]->b);
+    if ((looking_for_pos && !is_pos_bl) || (!looking_for_pos && is_pos_bl))
+      continue;
+    return i;
+  }
+  return 0;
+}
+
+
 uint64_t test_generator::get_already_generated_coins(const crypto::hash& blk_id) const
 {
   auto it = m_blocks_info.find(blk_id);
@@ -152,7 +168,14 @@ bool test_generator::construct_block(currency::block& blk,
 
     //build wallets
     build_wallets(blocks, coin_stake_sources, txs_outs, wallets);
-    bool r = find_kernel(coin_stake_sources, blocks, oi, wallets, pe, won_walled_index, blk.timestamp, kernerl_hash);
+    bool r = find_kernel(coin_stake_sources, 
+                         blocks, 
+                         oi, 
+                         wallets, 
+                         pe, 
+                         won_walled_index, 
+                         blk.timestamp, 
+                         kernerl_hash);
     CHECK_AND_ASSERT_THROW_MES(r, "failed to find_kernel ");
     blk.flags = CURRENCY_BLOCK_FLAG_POS_BLOCK;
   }
@@ -327,6 +350,18 @@ bool test_generator::build_wallets(const blockchain_vector& blocks,
   }
   return true;
 }
+
+uint64_t test_generator::get_timestamps_median(const blockchain_vector& blck_chain)
+{
+  std::vector<uint64_t> tsms;
+  tsms.resize(std::min<uint64_t>(BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW, blck_chain.size()));
+  auto it = blck_chain.begin();
+  for (size_t i = 0; i != BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW && i < blck_chain.size(); i++, it++)
+    tsms[i] = (*it)->b.timestamp;
+
+  return epee::misc_utils::median(tsms);
+}
+
 bool test_generator::find_kernel(const std::list<currency::account_base>& accs,
   const blockchain_vector& blck_chain,
   const outputs_index& indexes,
@@ -336,9 +371,16 @@ bool test_generator::find_kernel(const std::list<currency::account_base>& accs,
   uint64_t& found_timestamp,
   crypto::hash& found_kh)
 {
-  uint64_t last_block_timestamp = 0;
+  uint64_t median_timestamp = get_timestamps_median(blck_chain);
   wide_difficulty_type basic_diff = 0;
-  last_block_timestamp = blck_chain.back()->b.timestamp;
+
+  uint64_t i_last_pow_block = get_last_block_of_type(false, blck_chain);
+  uint64_t expected_avr_timestamp = blck_chain[i_last_pow_block]->b.timestamp + (blck_chain.size() - i_last_pow_block - 1)*DIFFICULTY_POW_TARGET;
+  uint64_t starter_timestamp = expected_avr_timestamp - POS_SCAN_WINDOW;
+  if (starter_timestamp < median_timestamp)
+    starter_timestamp = median_timestamp;
+
+  
   basic_diff = get_difficulty_for_next_block(blck_chain, false);
 
   //lets try to find block
@@ -351,11 +393,11 @@ bool test_generator::find_kernel(const std::list<currency::account_base>& accs,
 
     for (size_t i = 0; i != scan_pos_entries.pos_entries.size(); i++)
     {
-      //set timestamp starting from timestamp%POS_SCAN_STEP = 0
-      uint64_t starter_timestamp = last_block_timestamp - POS_SCAN_WINDOW;
+      //adjust timestamp starting from timestamp%POS_SCAN_STEP = 0
+      starter_timestamp = starter_timestamp - POS_SCAN_WINDOW;
       starter_timestamp = POS_SCAN_STEP - (starter_timestamp%POS_SCAN_STEP) + starter_timestamp;
 
-      for (uint64_t ts = starter_timestamp; ts < last_block_timestamp + POS_SCAN_WINDOW; ts += POS_SCAN_STEP)
+      for (uint64_t ts = starter_timestamp; ts < expected_avr_timestamp + POS_SCAN_WINDOW; ts += POS_SCAN_STEP)
       {
         stake_kernel sk = AUTO_VAL_INIT(sk);
         uint64_t coindays_weight = 0;
@@ -380,6 +422,7 @@ bool test_generator::find_kernel(const std::list<currency::account_base>& accs,
           pe = scan_pos_entries.pos_entries[i];
           found_wallet_index = i;
           found_kh = kernel_hash;
+          found_timestamp = ts;
           return true;
         }
       }
@@ -488,20 +531,6 @@ bool test_generator::build_kernel(uint64_t amount,
   return true;
 }
 
-uint64_t get_last_block_of_type(bool looking_for_pos, const test_generator::blockchain_vector& blck_chain)
-{
-  uint64_t sz = blck_chain.size();
-  if (!sz)
-    return 0;
-  for (uint64_t i = sz - 1; i != 0; --i)
-  {
-    bool is_pos_bl = is_pos_block(blck_chain[i]->b);
-    if ((looking_for_pos && !is_pos_bl) || (!looking_for_pos && is_pos_bl))
-      continue;
-    return i;
-  }
-  return 0;
-}
 
 bool test_generator::build_stake_modifier(stake_modifier_type& sm, const test_generator::blockchain_vector& blck_chain)
 {

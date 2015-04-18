@@ -835,9 +835,7 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
 {
   uint64_t timstamp_start = 0;
   wide_difficulty_type basic_diff = 0;
-  timstamp_start = m_last_bc_timestamp;
-  if (!timstamp_start)
-    timstamp_start = time(nullptr);
+  timstamp_start = time(nullptr);
   
   currency::COMMAND_RPC_GET_POS_MINING_DETAILS::request pos_details_req = AUTO_VAL_INIT(pos_details_req);
   currency::COMMAND_RPC_GET_POS_MINING_DETAILS::response pos_details_resp = AUTO_VAL_INIT(pos_details_resp);
@@ -850,17 +848,17 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
     return false;
   }
 
-
   basic_diff = pos_details_resp.pos_basic_difficulty;
 
   for (size_t i = 0; i != sp.pos_entries.size(); i++)
   {
     //set timestamp starting from timestamp%POS_SCAN_STEP = 0
-    uint64_t starter_timestamp = timstamp_start - POS_SCAN_STEP;
-    starter_timestamp = POS_SCAN_STEP*2 - (starter_timestamp%POS_SCAN_STEP) + starter_timestamp;
-
-    for (uint64_t ts = starter_timestamp; ts < timstamp_start + POS_SCAN_WINDOW; ts += POS_SCAN_STEP)
+    uint64_t adjusted_starter_timestamp = timstamp_start - POS_SCAN_STEP;
+    adjusted_starter_timestamp = POS_SCAN_STEP*2 - (adjusted_starter_timestamp%POS_SCAN_STEP) + adjusted_starter_timestamp;
+    bool go_past = true;
+    for (uint64_t step = 0; step <= POS_SCAN_WINDOW; )
     {
+      uint64_t ts = go_past ? adjusted_starter_timestamp - step : adjusted_starter_timestamp + step;
       PROFILE_FUNC("general_mining_iteration");
       if (!keep_mining)
         return false;
@@ -880,7 +878,22 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
         check_hash_res = check_hash(kernel_hash, this_coin_diff);
       }
       if (!check_hash_res)
-        continue;
+      {
+        if (!step)
+        {
+          step += POS_SCAN_STEP;
+          continue;
+        }
+        else if (go_past)
+        {
+          go_past = false;
+        }
+        else
+        {
+          go_past = true;
+          step += POS_SCAN_STEP;
+        } 
+      }
       else
       {
         //found kernel

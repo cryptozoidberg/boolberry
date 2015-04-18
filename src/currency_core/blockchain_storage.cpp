@@ -1012,7 +1012,9 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     if (pos_block)
     {
       //POS
-      bool res = validate_pos_block(bei.bl, current_diff, id, true);
+      uint64_t amount = 0;
+      wide_difficulty_type diff_final;
+      bool res = validate_pos_block(bei.bl, current_diff, amount, diff_final, bei.stake_hash, id, true);
       CHECK_AND_ASSERT_MES(res, false, "Failed to validate_pos_block on alternative block, height = " 
                                         << bei.height 
                                         << ", block id: " << get_block_hash(bei.bl));
@@ -2267,7 +2269,7 @@ bool blockchain_storage::validate_pos_block(const block& b, wide_difficulty_type
   return validate_pos_block(b, basic_diff, coin_age, final_diff, proof_hash, id, for_altchain);
 }
 //------------------------------------------------------------------
-bool blockchain_storage::validate_pos_block(const block& b, wide_difficulty_type basic_diff, uint64_t& coin_age, wide_difficulty_type& final_diff, crypto::hash& proof_hash, const crypto::hash& id, bool for_altchain)
+bool blockchain_storage::validate_pos_block(const block& b, wide_difficulty_type basic_diff, uint64_t& amount, wide_difficulty_type& final_diff, crypto::hash& proof_hash, const crypto::hash& id, bool for_altchain)
 {
   bool is_pos = is_pos_block(b);
   CHECK_AND_ASSERT_MES(is_pos, false, "is_pos_block() returned false validate_pos_block()");
@@ -2290,7 +2292,7 @@ bool blockchain_storage::validate_pos_block(const block& b, wide_difficulty_type
   stake_modifier_type sm = AUTO_VAL_INIT(sm);
   bool r = build_stake_modifier(sm);
   CHECK_AND_ASSERT_MES(r, false, "failed to build_stake_modifier");
-  uint64_t amount = 0;
+  amount = 0;
   r = build_kernel(b, sk, amount, sm);
   CHECK_AND_ASSERT_MES(r, false, "failed to build kernel_stake");
   CHECK_AND_ASSERT_MES(amount!=0, false, "failed to build kernel_stake, amount == 0");
@@ -2782,7 +2784,6 @@ bool blockchain_storage::build_kernel(uint64_t amount,
   
   auto tx_it = m_transactions.find(it->second[kernel.tx_out_global_index].first);
   CHECK_AND_ASSERT_MES(tx_it != m_transactions.end(), false, "internal error: transaction " << it->second[kernel.tx_out_global_index].first << " reffered in index not found");
-  CHECK_AND_ASSERT_MES(m_blocks[tx_it->second.m_keeper_block_height].bl.timestamp <= m_blocks.back().bl.timestamp, false, "wrong coin age");
 
   return true;
 }
