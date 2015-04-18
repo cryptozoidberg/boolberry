@@ -120,9 +120,23 @@ bool cumulative_difficulty_adjustment_test::remember_block_befor_alt(currency::c
 }
 bool cumulative_difficulty_adjustment_test::check_reorganize(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
+  //check reorganize happend
+  crypto::hash top_id = c.get_blockchain_storage().get_top_block_id();
+
+  currency::block top_bl = boost::get<currency::block>(events[ev_index - 1]);
+  crypto::hash event_reorganized_id = get_block_hash(top_bl);
+  CHECK_EQ(top_id, event_reorganized_id);
+
+
   currency::blockchain_storage::block_extended_info bei_2;
   bool r = c.get_blockchain_storage().get_block_extended_info_by_hash(get_block_hash(bei.bl), bei_2);
   CHECK_EQ(bei.stake_hash, bei_2.stake_hash);
+  CHECK_EQ(bei.already_generated_coins, bei_2.already_generated_coins);
+  CHECK_EQ(bei.block_cumulative_size, bei_2.block_cumulative_size);
+  CHECK_EQ(bei.cumulative_diff_adjusted, bei_2.cumulative_diff_adjusted);
+  CHECK_EQ(bei.cumulative_diff_precise, bei_2.cumulative_diff_precise);
+  CHECK_EQ(bei.difficulty, bei_2.difficulty);
+  CHECK_EQ(bei.height, bei_2.height);
 
   return true;
 }

@@ -36,7 +36,8 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool):m_tx_pool(tx_poo
                                                                 m_is_in_checkpoint_zone(false), 
                                                                 m_is_blockchain_storing(false), 
                                                                 m_current_pruned_rs_height(0), 
-                                                                m_pos_config(get_default_pos_config())
+                                                                m_pos_config(get_default_pos_config()),
+                                                                m_bei_stub(AUTO_VAL_INIT(m_bei_stub))
 {}
 //------------------------------------------------------------------
 bool blockchain_storage::have_tx(const crypto::hash &id)
@@ -508,7 +509,7 @@ bool blockchain_storage::rollback_blockchain_switching(std::list<block>& origina
   return true;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::switch_to_alternative_blockchain(std::list<blocks_ext_by_hash::iterator>& alt_chain)
+bool blockchain_storage::switch_to_alternative_blockchain(alt_chain_type& alt_chain)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   CHECK_AND_ASSERT_MES(alt_chain.size(), false, "switch_to_alternative_blockchain: empty chain passed");
@@ -595,24 +596,56 @@ wide_difficulty_type blockchain_storage::get_next_diff_conditional(bool pos)
   return next_difficulty(timestamps, commulative_difficulties, pos ? DIFFICULTY_POS_TARGET : DIFFICULTY_POW_TARGET);
 }
 //------------------------------------------------------------------
-uint64_t blockchain_storage::get_last_block_of_type(bool looking_for_pos)
+wide_difficulty_type blockchain_storage::get_next_diff_conditional2(bool pos, const alt_chain_type& alt_chain, uint64_t split_height)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  std::vector<uint64_t> timestamps;
+  std::vector<wide_difficulty_type> commulative_difficulties;
+  size_t count = 0;
+  if (!m_blocks.size())
+    return DIFFICULTY_STARTER;
 
-  uint64_t sz = m_blocks.size();
-  if (!sz)
-    return 0;
-  for (uint64_t i = sz - 1; i != 0; --i)
-  {
-    bool is_pos_bl = is_pos_block(m_blocks[i].bl);
-    if ((looking_for_pos && !is_pos_bl) || (!looking_for_pos && is_pos_bl))
-      continue;
-    return i;
-  }
-  return 0;
+  auto cb = [&](const block_extended_info& bei, bool is_main){
+    if (!bei.height)
+      return false;
+    bool is_pos_bl = is_pos_block(bei.bl);
+    if (pos != is_pos_bl)
+      return true;
+    timestamps.push_back(bei.bl.timestamp);
+    commulative_difficulties.push_back(bei.cumulative_diff_precise);
+    ++count;
+    if (count >= DIFFICULTY_WINDOW)
+      return false;
+    return true;
+  };
+  enum_blockchain(cb, alt_chain, split_height);
+  return next_difficulty(timestamps, commulative_difficulties, pos ? DIFFICULTY_POS_TARGET : DIFFICULTY_POW_TARGET);
+}
+
+//------------------------------------------------------------------
+const blockchain_storage::block_extended_info&  blockchain_storage::get_last_block_of_type(bool looking_for_pos, const alt_chain_type& alt_chain, uint64_t split_height)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  const block_extended_info* pbei = nullptr;
+
+  bool res = enum_blockchain([&](const block_extended_info& bei, bool is_main){
+    if (looking_for_pos == is_pos_block(bei.bl))
+    {
+      pbei = &bei;
+      return false;
+    }
+    return true;
+  }, alt_chain, split_height);
+
+  if (pbei)
+    return *pbei;
+  else if (m_blocks.size())
+    return m_blocks[0];
+  else
+    return m_bei_stub;
 }
 //------------------------------------------------------------------
-wide_difficulty_type blockchain_storage::get_next_difficulty_for_alternative_chain(const std::list<blocks_ext_by_hash::iterator>& alt_chain, block_extended_info& bei, bool pos)
+wide_difficulty_type blockchain_storage::get_next_difficulty_for_alternative_chain(const alt_chain_type& alt_chain, block_extended_info& bei, bool pos)
 {
   std::vector<uint64_t> timestamps;
   std::vector<wide_difficulty_type> commulative_difficulties;
@@ -928,7 +961,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     //we have new block in alternative chain
     //build alternative subchain, front -> mainchain, back -> alternative head
     blocks_ext_by_hash::iterator alt_it = it_prev; //m_alternative_chains.find()
-    std::list<blocks_ext_by_hash::iterator> alt_chain;
+    alt_chain_type alt_chain;
     std::vector<crypto::hash> alt_scratchppad;
     std::map<uint64_t, crypto::hash> alt_scratchppad_patch;
     std::vector<uint64_t> timestamps;
@@ -1005,7 +1038,9 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     CHECK_AND_ASSERT_MES(!(pos_block && bei.height < m_pos_config.pos_minimum_heigh), false, "PoS block is not allowed on this height");
 
 
-    wide_difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei, pos_block);
+    //wide_difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei, pos_block);
+    wide_difficulty_type current_diff = get_next_diff_conditional2(pos_block, alt_chain, connection_height);
+    
     CHECK_AND_ASSERT_MES(current_diff, false, "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!");
     
     crypto::hash proof_of_work = null_hash;
@@ -1014,7 +1049,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
       //POS
       uint64_t amount = 0;
       wide_difficulty_type diff_final;
-      bool res = validate_pos_block(bei.bl, current_diff, amount, diff_final, bei.stake_hash, id, true);
+      bool res = validate_pos_block(bei.bl, current_diff, amount, diff_final, bei.stake_hash, id, true, alt_chain, connection_height);
       CHECK_AND_ASSERT_MES(res, false, "Failed to validate_pos_block on alternative block, height = " 
                                         << bei.height 
                                         << ", block id: " << get_block_hash(bei.bl));
@@ -2269,7 +2304,16 @@ bool blockchain_storage::validate_pos_block(const block& b, wide_difficulty_type
   return validate_pos_block(b, basic_diff, coin_age, final_diff, proof_hash, id, for_altchain);
 }
 //------------------------------------------------------------------
-bool blockchain_storage::validate_pos_block(const block& b, wide_difficulty_type basic_diff, uint64_t& amount, wide_difficulty_type& final_diff, crypto::hash& proof_hash, const crypto::hash& id, bool for_altchain)
+bool blockchain_storage::validate_pos_block(const block& b,   
+                                            wide_difficulty_type basic_diff, 
+                                            uint64_t& amount, 
+                                            wide_difficulty_type& final_diff, 
+                                            crypto::hash& proof_hash, 
+                                            const crypto::hash& id, 
+                                            bool for_altchain, 
+                                            const alt_chain_type& alt_chain,
+                                            uint64_t split_height
+                                            )
 {
   bool is_pos = is_pos_block(b);
   CHECK_AND_ASSERT_MES(is_pos, false, "is_pos_block() returned false validate_pos_block()");
@@ -2290,7 +2334,7 @@ bool blockchain_storage::validate_pos_block(const block& b, wide_difficulty_type
   stake_kernel sk = AUTO_VAL_INIT(sk);
 
   stake_modifier_type sm = AUTO_VAL_INIT(sm);
-  bool r = build_stake_modifier(sm);
+  bool r = build_stake_modifier(sm, alt_chain, split_height);
   CHECK_AND_ASSERT_MES(r, false, "failed to build_stake_modifier");
   amount = 0;
   r = build_kernel(b, sk, amount, sm);
@@ -2721,44 +2765,23 @@ bool blockchain_storage::build_kernel(const block& bl, stake_kernel& kernel, uin
   return build_kernel(txin.amount, txin.key_offsets[0], txin.k_image, kernel, stake_modifier, bl.timestamp);
 }
 //------------------------------------------------------------------
-bool blockchain_storage::build_stake_modifier(stake_modifier_type& sm)
+bool blockchain_storage::build_stake_modifier(stake_modifier_type& sm, const alt_chain_type& alt_chain, uint64_t split_height)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   sm = stake_modifier_type();
 
-  uint64_t last_pos_i = get_last_block_of_type(true);
-  uint64_t last_pow_i = get_last_block_of_type(false);
+  auto bei_last_pos = get_last_block_of_type(true, alt_chain, split_height);
+  auto bei_last_pow = get_last_block_of_type(false, alt_chain, split_height);
 
-  if (last_pos_i)
-    sm.last_pos_kernel_id = m_blocks[last_pos_i].stake_hash;
+  if (bei_last_pos.stake_hash != null_hash)
+    sm.last_pos_kernel_id = bei_last_pos.stake_hash;
   else
   {
     bool r = string_tools::parse_tpod_from_hex_string(POS_STARTER_KERNEL_HASH, sm.last_pos_kernel_id);
     CHECK_AND_ASSERT_MES(r, false, "Failed to parse POS_STARTER_MODFIFIER");
   }
 
-  sm.last_pow_id = get_block_hash(m_blocks[last_pow_i].bl);
-  return true;
-}
-//------------------------------------------------------------------
-bool blockchain_storage::build_stake_modifier_for_alt(const std::list<blocks_ext_by_hash::iterator>& alt_chain, stake_modifier_type& sm)
-{
-  /*
-  CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  sm = stake_modifier_type();
-
-  uint64_t last_pos_i = get_last_block_of_type(true);
-  uint64_t last_pow_i = get_last_block_of_type(false);
-
-  if (last_pos_i)
-    sm.last_pos_kernel_id = m_blocks[last_pos_i].stake_hash;
-  else
-  {
-    bool r = string_tools::parse_tpod_from_hex_string(POS_STARTER_KERNEL_HASH, sm.last_pos_kernel_id);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to parse POS_STARTER_MODFIFIER");
-  }
-
-  sm.last_pow_id = get_block_hash(m_blocks[last_pow_i].bl);*/
+  sm.last_pow_id = get_block_hash(bei_last_pow.bl);
   return true;
 }
 //------------------------------------------------------------------

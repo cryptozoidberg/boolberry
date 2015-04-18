@@ -57,6 +57,8 @@ namespace currency
       uint64_t scratch_offset;
       crypto::hash stake_hash; //TODO: unused field for PoW blocks, subject for refactoring
     };
+    typedef std::unordered_map<crypto::hash, block_extended_info> blocks_ext_by_hash;
+    typedef std::list<blocks_ext_by_hash::iterator> alt_chain_type;
 
     blockchain_storage(tx_memory_pool& tx_pool);
 
@@ -95,6 +97,7 @@ namespace currency
     crypto::hash get_top_block_id(uint64_t& height);
     bool get_top_block(block& b);
     wide_difficulty_type get_next_diff_conditional(bool pos);
+    wide_difficulty_type get_next_diff_conditional2(bool pos, const alt_chain_type& alt_chain, uint64_t split_height);
  
     bool add_new_block(const block& bl_, block_verification_context& bvc);
     bool reset_and_set_genesis_block(const block& b);
@@ -143,7 +146,8 @@ namespace currency
                       stake_kernel& kernel, 
                       const stake_modifier_type& stake_modifier, 
                       uint64_t timestamp);
-    bool build_stake_modifier(stake_modifier_type& sm);
+    bool build_stake_modifier(stake_modifier_type& sm, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
+
     bool scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMAND_RPC_SCAN_POS::response& rsp);
     bool validate_pos_block(const block& b, const crypto::hash& id, bool for_altchain);
     bool validate_pos_block(const block& b, wide_difficulty_type basic_diff, const crypto::hash& id, bool for_altchain);
@@ -153,7 +157,9 @@ namespace currency
                             wide_difficulty_type& final_diff, 
                             crypto::hash& proof_hash, 
                             const crypto::hash& id, 
-                            bool for_altchain);
+                            bool for_altchain, 
+                            const alt_chain_type& alt_chain = alt_chain_type(), 
+                            uint64_t split_height = 0);
     bool is_coin_age_okay(uint64_t source_tx_block_timestamp, uint64_t last_block_timestamp);
     void set_pos_config(const pos_config& pc);
     size_t get_current_sequence_factor(bool pos);
@@ -217,7 +223,6 @@ namespace currency
     typedef std::unordered_map<crypto::hash, transaction_chain_entry> transactions_container;
     typedef std::unordered_set<crypto::key_image> key_images_container;
     typedef std::vector<block_extended_info> blocks_container;
-    typedef std::unordered_map<crypto::hash, block_extended_info> blocks_ext_by_hash;
     typedef std::unordered_map<crypto::hash, block> blocks_by_hash;
     typedef std::map<uint64_t, std::vector<std::pair<crypto::hash, size_t>>> outputs_container; //crypto::hash - tx hash, size_t - index of out in transaction
     typedef std::map<std::string, std::list<alias_info_base>> aliases_container; //alias can be address address address + view key
@@ -253,17 +258,18 @@ namespace currency
 
     //pos
     pos_config m_pos_config;
-    
+    block_extended_info m_bei_stub;
+
     //offers
     std::list<offer_details> m_offers;
 
 
-    bool switch_to_alternative_blockchain(std::list<blocks_ext_by_hash::iterator>& alt_chain);
+    bool switch_to_alternative_blockchain(alt_chain_type& alt_chain);
     bool pop_block_from_blockchain();
     bool purge_block_data_from_blockchain(const block& b, size_t processed_tx_count);
     bool purge_transaction_from_blockchain(const crypto::hash& tx_id);
     bool purge_transaction_keyimages_from_blockchain(const transaction& tx, bool strict_check);
-    wide_difficulty_type get_next_difficulty_for_alternative_chain(const std::list<blocks_ext_by_hash::iterator>& alt_chain, block_extended_info& bei, bool pos);
+    wide_difficulty_type get_next_difficulty_for_alternative_chain(const alt_chain_type& alt_chain, block_extended_info& bei, bool pos);
     bool handle_block_to_main_chain(const block& bl, block_verification_context& bvc);
     bool handle_block_to_main_chain(const block& bl, const crypto::hash& id, block_verification_context& bvc);
     bool handle_alternative_block(const block& b, const crypto::hash& id, block_verification_context& bvc);
@@ -296,7 +302,11 @@ namespace currency
     bool resync_spent_tx_flags();
     bool prune_ring_signatures_if_need();
     bool prune_ring_signatures(uint64_t height, uint64_t& transactions_pruned, uint64_t& signatures_pruned);
-    bool build_stake_modifier_for_alt(const std::list<blocks_ext_by_hash::iterator>& alt_chain, stake_modifier_type& sm);
+//    bool build_stake_modifier_for_alt(const alt_chain_type& alt_chain, stake_modifier_type& sm);
+    template<class visitor_t>
+    bool enum_blockchain(visitor_t& v, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
+
+
 
     //POS
     wide_difficulty_type get_adjusted_cumulative_difficulty_for_next_pos(wide_difficulty_type next_diff);
@@ -304,7 +314,7 @@ namespace currency
     uint64_t get_last_x_block_height(bool pos);
     wide_difficulty_type get_last_alt_x_block_cumulative_precise_difficulty(alt_chain_list& alt_chain, uint64_t block_height, bool pos);
     size_t get_current_sequence_factor_for_alt(alt_chain_list& alt_chain, bool pos, uint64_t connection_height);
-    uint64_t get_last_block_of_type(bool is_pos);
+    const block_extended_info&  get_last_block_of_type(bool looking_for_pos, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
   };
 
 
@@ -315,6 +325,34 @@ namespace currency
   #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          33
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
+
+  template<class visitor_t>
+  bool blockchain_storage::enum_blockchain(visitor_t& v, const std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain, uint64_t split_height)
+  {
+
+    bool keep_going = true;
+    for (auto it = alt_chain.rbegin(); it != alt_chain.rend() && keep_going; it++)
+    {
+      keep_going = v((*it)->second, false);
+    }
+    
+    if (!keep_going || !m_blocks.size())
+      return !keep_going;
+
+    size_t main_chain_start_offset = 0;
+    if (split_height)
+      main_chain_start_offset = split_height - 1;
+    else
+      main_chain_start_offset = (alt_chain.size() ? alt_chain.front()->second.height : m_blocks.size()) - 1;
+
+    CRITICAL_REGION_LOCAL(m_blockchain_lock);
+    for (uint64_t i = main_chain_start_offset; i != 0 && keep_going; --i)
+    {
+      keep_going = v(m_blocks[i], true);
+    }
+
+    return !keep_going;
+  }
 
   template<class archive_t>
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
