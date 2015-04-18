@@ -23,7 +23,8 @@ using namespace std;
 using namespace epee;
 using namespace currency;
 
-#define DIFF_UP_TIMESTAMP_DELTA 180
+#define POW_DIFF_UP_TIMESTAMP_DELTA 180
+#define POS_DIFF_UP_TIMESTAMP_DELTA 200
 
 void test_generator::get_block_chain(std::vector<const block_info*>& blockchain, const crypto::hash& head, size_t n) const
 {
@@ -480,13 +481,9 @@ bool test_generator::build_kernel(uint64_t amount,
                                      out_key);
   CHECK_AND_ASSERT_THROW_MES(r,"Failed to get_output_details_by_global_index()");
 
-
-  CHECK_AND_ASSERT_THROW_MES(blck_chain[h]->b.timestamp <= blck_chain.back()->b.timestamp, "wrong coin age");
-
-  uint64_t coin_age = blck_chain.back()->b.timestamp - blck_chain[h]->b.timestamp;
   kernel.block_timestamp = timestamp;
 
-  coindays_weight = get_coinday_weight(amount, coin_age);
+  coindays_weight = get_coinday_weight(amount);
   build_stake_modifier(kernel.stake_modifier, blck_chain);
   return true;
 }
@@ -614,15 +611,19 @@ size_t get_prev_block_of_type(const std::vector<currency::block>& blockchain, bo
   return 0;
 }
 
-bool have_10_blocks_of_type(const std::vector<currency::block>& blockchain, bool pos)
+bool have_n_blocks_of_type(const std::vector<currency::block>& blockchain, bool pos)
 {
   size_t count = 0;
+  size_t stop_count = 10;
+  if (pos)
+    stop_count = 20;
+
   for (auto it = blockchain.rbegin(); it != blockchain.rend(); it++)
   {
     if (is_pos_block(*it) == pos)
     {
       ++count;
-      if (count >= 10)
+      if (count >= stop_count)
         return true;
     }
   }
@@ -645,11 +646,12 @@ bool test_generator::construct_block(const std::vector<test_event_entry>& events
   map_hash2tx_t mtx;
   find_block_chain(events, blockchain, mtx, get_block_hash(blk_prev));
   bool pos_bl = coin_stake_sources.size();
-  bool adjust_timestamp_finished = have_10_blocks_of_type(blockchain, pos_bl);
-  
+  bool adjust_timestamp_finished = have_n_blocks_of_type(blockchain, pos_bl);
+  uint64_t diff_up_timestamp_delta = POW_DIFF_UP_TIMESTAMP_DELTA;
   if (pos_bl)
   {
     //in debug purpose
+    diff_up_timestamp_delta = POS_DIFF_UP_TIMESTAMP_DELTA;
   }
 
   uint64_t diff_target = pos_bl ? DIFFICULTY_POS_TARGET : DIFFICULTY_POW_TARGET;
@@ -658,7 +660,7 @@ bool test_generator::construct_block(const std::vector<test_event_entry>& events
   size_t prev_i = get_prev_block_of_type(blockchain, pos_bl);
   block& prev_same_type = blockchain[prev_i];
 
-  timestamp = adjust_timestamp_finished ? prev_same_type.timestamp + diff_target : prev_same_type.timestamp + diff_target - DIFF_UP_TIMESTAMP_DELTA;
+  timestamp = adjust_timestamp_finished ? prev_same_type.timestamp + diff_target : prev_same_type.timestamp + diff_target - diff_up_timestamp_delta;
 
   uint64_t already_generated_coins = get_already_generated_coins(prev_id);
   std::vector<size_t> block_sizes;
@@ -678,7 +680,7 @@ bool test_generator::construct_block(const std::vector<test_event_entry>& events
   size_t height = get_block_height(prev_block) + 1;
   blk.major_version = actual_params & bf_major_ver ? major_ver : CURRENT_BLOCK_MAJOR_VERSION;
   blk.minor_version = actual_params & bf_minor_ver ? minor_ver : CURRENT_BLOCK_MINOR_VERSION;
-  blk.timestamp     = actual_params & bf_timestamp ? timestamp : (height > 10 ? prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN: prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN-DIFF_UP_TIMESTAMP_DELTA); // Keep difficulty unchanged
+  blk.timestamp     = actual_params & bf_timestamp ? timestamp : (height > 10 ? prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN: prev_block.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN-POW_DIFF_UP_TIMESTAMP_DELTA); // Keep difficulty unchanged
   blk.prev_id       = actual_params & bf_prev_id   ? prev_id   : get_block_hash(prev_block);
   blk.tx_hashes     = actual_params & bf_tx_hashes ? tx_hashes : std::vector<crypto::hash>();
 

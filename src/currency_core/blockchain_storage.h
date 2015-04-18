@@ -136,12 +136,11 @@ namespace currency
     bool get_transactions_daily_stat(uint64_t& daily_cnt, uint64_t& daily_volume);
     bool check_keyimages(const std::list<crypto::key_image>& images, std::list<bool>& images_stat);//true - unspent, false - spent
     // --- PoS ---    
-    bool build_kernel(const block& bl, stake_kernel& kernel, uint64_t& coindays_weight, const stake_modifier_type& stake_modifier);
+    bool build_kernel(const block& bl, stake_kernel& kernel, uint64_t& amount, const stake_modifier_type& stake_modifier);
     bool build_kernel(uint64_t amount, 
                       uint64_t global_index, 
                       const crypto::key_image& ki, 
                       stake_kernel& kernel, 
-                      uint64_t& coindays_weight, 
                       const stake_modifier_type& stake_modifier, 
                       uint64_t timestamp);
     bool build_stake_modifier(stake_modifier_type& sm);
@@ -297,6 +296,8 @@ namespace currency
     bool resync_spent_tx_flags();
     bool prune_ring_signatures_if_need();
     bool prune_ring_signatures(uint64_t height, uint64_t& transactions_pruned, uint64_t& signatures_pruned);
+    bool build_stake_modifier_for_alt(const std::list<blocks_ext_by_hash::iterator>& alt_chain, stake_modifier_type& sm);
+
     //POS
     wide_difficulty_type get_adjusted_cumulative_difficulty_for_next_pos(wide_difficulty_type next_diff);
     wide_difficulty_type get_adjusted_cumulative_difficulty_for_next_alt_pos(alt_chain_list& alt_chain, uint64_t block_height, wide_difficulty_type next_diff, uint64_t connection_height);

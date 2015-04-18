@@ -17,6 +17,8 @@ cumulative_difficulty_adjustment_test::cumulative_difficulty_adjustment_test()
   REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, configure_check_height1);
   REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, memorize_main_chain);
   REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, check_main_chain);
+  REGISTER_CALLBACK_METHOD(cumulative_difficulty_adjustment_test, check_reorganize);
+
 }
 #define FIRST_ALIAS_NAME "first"
 #define SECOND_ALIAS_NAME "second"
@@ -46,8 +48,8 @@ bool cumulative_difficulty_adjustment_test::generate(std::vector<test_event_entr
   MAKE_NEXT_POS_BLOCK(events, blk_30, blk_29, miner_account, coin_stake_sources);
   MAKE_NEXT_POS_BLOCK(events, blk_31, blk_30, miner_account, coin_stake_sources);
   MAKE_NEXT_POS_BLOCK(events, blk_32, blk_31, miner_account, coin_stake_sources);
-   MAKE_NEXT_POS_BLOCK(events, blk_33, blk_32, miner_account, coin_stake_sources);
-   MAKE_NEXT_POS_BLOCK(events, blk_34, blk_33, miner_account, coin_stake_sources);
+  MAKE_NEXT_POS_BLOCK(events, blk_33, blk_32, miner_account, coin_stake_sources);
+  MAKE_NEXT_POS_BLOCK(events, blk_34, blk_33, miner_account, coin_stake_sources);
   MAKE_NEXT_POS_BLOCK(events, blk_35, blk_34, miner_account, coin_stake_sources);
   MAKE_NEXT_POS_BLOCK(events, blk_36, blk_35, miner_account, coin_stake_sources);
   MAKE_NEXT_POS_BLOCK(events, blk_37, blk_36, miner_account, coin_stake_sources);
@@ -56,6 +58,20 @@ bool cumulative_difficulty_adjustment_test::generate(std::vector<test_event_entr
   DO_CALLBACK(events, "memorize_main_chain");
   MAKE_NEXT_BLOCK(events, blk_39_pow, blk_38, miner_account);
   DO_CALLBACK(events, "check_main_chain");
+  MAKE_NEXT_BLOCK(events, blk_40_pow, blk_39_pow, miner_account);
+  MAKE_NEXT_BLOCK(events, blk_41_pow, blk_40_pow, miner_account);
+  MAKE_NEXT_BLOCK(events, blk_42_pow, blk_41_pow, miner_account);
+  MAKE_NEXT_POS_BLOCK(events, blk_43, blk_42_pow, miner_account, coin_stake_sources);
+  //start alt chain
+  MAKE_NEXT_BLOCK(events, blk_40_new_pow, blk_39_pow, miner_account);
+  MAKE_NEXT_POS_BLOCK(events, blk_41_new_pos, blk_40_new_pow, miner_account, coin_stake_sources);
+  MAKE_NEXT_BLOCK(events, blk_42_new_pow, blk_41_new_pos, miner_account);
+  MAKE_NEXT_POS_BLOCK(events, blk_43_new_pos, blk_42_new_pow, miner_account, coin_stake_sources);
+  MAKE_NEXT_BLOCK(events, blk_44_new_pow, blk_43_new_pos, miner_account);
+  MAKE_NEXT_POS_BLOCK(events, blk_45_new_pos, blk_44_new_pow, miner_account, coin_stake_sources);
+  //check reorganize
+  DO_CALLBACK(events, "check_reorganize");
+
   return true;
 }
 
@@ -93,6 +109,15 @@ bool cumulative_difficulty_adjustment_test::check_main_chain(currency::core& c, 
   CHECK_EQ(bei.cumulative_diff_adjusted, bei_2.cumulative_diff_adjusted);
   return true;
 }
+bool cumulative_difficulty_adjustment_test::check_reorganize(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+{
+  crypto::hash h_top = c.get_blockchain_storage().get_top_block_id();
+  crypto::hash h_reorg = currency::get_block_hash(boost::get<currency::block>(events[events.size() - 2]));
+
+  CHECK_EQ(h_reorg, h_top);
+  return true;
+}
+
 //==================================================================================================
 cumulative_difficulty_adjustment_test_alt::cumulative_difficulty_adjustment_test_alt()
 {
@@ -121,8 +146,10 @@ bool cumulative_difficulty_adjustment_test_alt::generate(std::vector<test_event_
 
 bool cumulative_difficulty_adjustment_test_alt::configure_check_height1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  //uint64_t h = c.get_current_blockchain_height();
-  //CHECK_EQ(h, 27);
+  crypto::hash h_top = c.get_blockchain_storage().get_top_block_id();
+  crypto::hash h_reorg = currency::get_block_hash(boost::get<currency::block>(events[events.size() - 2]));
+
+  CHECK_EQ(h_reorg, h_top);
   return true;
 }
 // bool cumulative_difficulty_adjustment_test_alt::memorize_main_chain(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)

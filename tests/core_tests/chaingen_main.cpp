@@ -76,9 +76,9 @@ int main(int argc, char* argv[])
     epee::debug::get_set_enable_assert(true, false);
 
     
-    GENERATE_AND_PLAY(cumulative_difficulty_adjustment_test_alt);
     GENERATE_AND_PLAY(cumulative_difficulty_adjustment_test);
-      GENERATE_AND_PLAY(gen_pos_basic_tests);
+    GENERATE_AND_PLAY(cumulative_difficulty_adjustment_test_alt);
+    GENERATE_AND_PLAY(gen_pos_basic_tests);
    GENERATE_AND_PLAY(prun_ring_signatures);
    GENERATE_AND_PLAY(get_random_outs_test);
    GENERATE_AND_PLAY(mix_attr_tests);

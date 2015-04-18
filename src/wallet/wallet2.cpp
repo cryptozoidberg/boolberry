@@ -827,9 +827,7 @@ bool wallet2::build_kernel(const pos_entry& pe, const stake_modifier_type& stake
   kernel.stake_modifier = stake_modifier;
   kernel.block_timestamp = timestamp;
 
-  uint64_t coin_age = m_last_bc_timestamp - pe.block_timestamp;
-
-  coindays_weight = get_coinday_weight(pe.amount, coin_age);
+  coindays_weight = get_coinday_weight(pe.amount);
   return true;
 }
 //----------------------------------------------------------------------------------------------------

@@ -79,7 +79,7 @@ namespace currency
                                                                             pos_entry());
   }*/
   //---------------------------------------------------------------
-  uint64_t get_coinday_weight(uint64_t amount, uint64_t coin_age)
+  uint64_t get_coinday_weight(uint64_t amount)
   {
     return amount;
   }
