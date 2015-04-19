@@ -628,14 +628,17 @@ const blockchain_storage::block_extended_info&  blockchain_storage::get_last_blo
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   const block_extended_info* pbei = nullptr;
 
-  bool res = enum_blockchain([&](const block_extended_info& bei, bool is_main){
+  auto cb = [&](const block_extended_info& bei, bool is_main){
     if (looking_for_pos == is_pos_block(bei.bl))
     {
       pbei = &bei;
       return false;
     }
     return true;
-  }, alt_chain, split_height);
+  };
+
+
+  bool res = enum_blockchain(cb, alt_chain, split_height);
 
   if (pbei)
     return *pbei;
