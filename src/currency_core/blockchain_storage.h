@@ -163,6 +163,7 @@ namespace currency
     bool is_coin_age_okay(uint64_t source_tx_block_timestamp, uint64_t last_block_timestamp);
     void set_pos_config(const pos_config& pc);
     size_t get_current_sequence_factor(bool pos);
+    const block_extended_info&  get_last_block_of_type(bool looking_for_pos, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
 
 
     //exchange access functions
@@ -314,7 +315,6 @@ namespace currency
     uint64_t get_last_x_block_height(bool pos);
     wide_difficulty_type get_last_alt_x_block_cumulative_precise_difficulty(alt_chain_list& alt_chain, uint64_t block_height, bool pos);
     size_t get_current_sequence_factor_for_alt(alt_chain_list& alt_chain, bool pos, uint64_t connection_height);
-    const block_extended_info&  get_last_block_of_type(bool looking_for_pos, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
   };
 
 

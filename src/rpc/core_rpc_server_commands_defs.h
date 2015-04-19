@@ -333,6 +333,8 @@ namespace currency
       nodetool::maintainers_info_external mi;
       uint64_t pos_sequense_factor;
       uint64_t pow_sequense_factor;
+      uint64_t last_pow_timestamp;
+      uint64_t last_pos_timestamp;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -360,6 +362,8 @@ namespace currency
         KV_SERIALIZE(mi)
         KV_SERIALIZE(pos_sequense_factor)
         KV_SERIALIZE(pow_sequense_factor)
+        KV_SERIALIZE(last_pow_timestamp)
+        KV_SERIALIZE(last_pos_timestamp)
       END_KV_SERIALIZE_MAP()
     };
   };    

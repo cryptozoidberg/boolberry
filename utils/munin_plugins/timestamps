@@ -1,0 +1,18 @@
+#!/bin/bash
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title timestamps
+graph_vlabel timestamp
+graph_category luid
+last_pos_timestamp.label last_pos_timestamp
+last_pow_timestamp.label last_pow_timestamp
+EOM
+        exit 0;;
+esac
+
+printf "last_pos_timestamp.value "
+connectivity_tool --ip=127.0.0.1 --rpc_port=11112 --timeout=1000 --rpc_get_daemon_info | grep last_pos_timestamp | cut -d ' ' -f2
+printf "last_pow_timestamp.value "
+connectivity_tool --ip=127.0.0.1 --rpc_port=11112 --timeout=1000 --rpc_get_daemon_info | grep last_pow_timestamp | cut -d ' ' -f2

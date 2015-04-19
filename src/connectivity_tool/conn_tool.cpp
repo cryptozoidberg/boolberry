@@ -220,7 +220,9 @@ bool handle_get_daemon_info(po::variables_map& vm)
   << "transactions_cnt_per_day: " << res.transactions_cnt_per_day << ENDL
   << "transactions_volume_per_day: " << res.transactions_volume_per_day << ENDL
   << "pos_sequense_factor: " << res.pos_sequense_factor << ENDL
-  << "pow_sequense_factor: " << res.pow_sequense_factor << ENDL;
+  << "pow_sequense_factor: " << res.pow_sequense_factor << ENDL
+  << "last_pos_timestamp: " << res.last_pos_timestamp << ENDL
+  << "last_pow_timestamp: " << res.last_pow_timestamp << ENDL;
 
   return true;
 }
