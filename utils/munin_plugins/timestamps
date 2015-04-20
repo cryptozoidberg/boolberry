@@ -3,6 +3,7 @@
 case $1 in
    config)
         cat <<'EOM'
+graph_args --alt-autoscale
 graph_title timestamps
 graph_vlabel timestamp
 graph_category luid
