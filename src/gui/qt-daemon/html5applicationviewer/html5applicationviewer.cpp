@@ -51,8 +51,7 @@ signals:
   void set_recent_transfers(const QString str);
   void handle_internal_callback(const QString str, const QString callback_name);
   void update_pos_mining_text(const QString str);
-  //general function
-  void dispatch(const QString status, const QString params);
+  void do_dispatch(const QString status, const QString params);  //general function
 
 
 
@@ -802,7 +801,7 @@ QString Html5ApplicationViewer::get_wallet_info(const QString& param)
 
 void Html5ApplicationViewer::dispatch(const QString& status, const QString& param)
 {
-  m_d->dispatch(status, param);
+  m_d->do_dispatch(status, param);
 }
 
 
