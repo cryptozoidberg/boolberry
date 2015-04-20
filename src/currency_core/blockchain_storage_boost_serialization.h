@@ -40,6 +40,7 @@ namespace boost
       ar & ei.block_cumulative_size;
       ar & ei.already_generated_coins;
       ar & ei.scratch_offset;
+      ar & ei.stake_hash;
     }
 
     template<class archive_t>
