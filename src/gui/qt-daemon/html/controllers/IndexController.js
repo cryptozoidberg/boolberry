@@ -81,7 +81,9 @@
                 backend.openWallet(safe.path, safe.pass,function(data){
                     console.log(data);
                     data.name = safe.name;
-                    safes.unshift(data);
+                    $timeout(function(){
+                        safes.unshift(data);    
+                    });
                     $modalInstance.close();
                 });
             };
@@ -91,25 +93,25 @@
 
     module.controller('smartSafeAddCtrl', ['$scope','backend', '$modalInstance',
         function($scope, backend, $modalInstance) {
-
             $scope.closeSmartSafeForm = function(){
                 $modalInstance.close();
             }
-
-
         }
     ]);
 
+    module.controller('indexController', ['utils', 'backend', '$scope', '$modal','$timeout','emulator',
+        function(utils, backend, $scope, $modal, $timeout, emulator) {
+            $scope.settings = {
+                maxWidgets: 12,
+                userSettings: {
+                    'sendG_showPassword': true
+                }
+            };
 
-    module.controller('IndexController', ['utils', 'backend', '$scope', '$modal','$timeout',
-        function(utils, backend, $scope, $modal, $timeout) {
-            // $scope.settings = {
-            //     maxWidgets: 12,
-            //     userSettings: {
-            //         'sendG_showPassword': true
-            //     }
-            // };
-
+            $scope.safes_owl_options  = {
+              items: 2,
+              navText: ''
+            };
 
             $scope.safes = [];
 
@@ -162,6 +164,8 @@
                 });
             };
 
+            setUpWidgets();
+
             function setUpWidgets() {
                 $scope.widgetColumns = {
                     'left': {},
@@ -182,8 +186,11 @@
                     return Object.size($scope.widgetColumns.left) + Object.size($scope.widgetColumns.right);
                 };
                 $scope.widgetCountSanityCheck = function() {
-                    return ($scope.getWidgetCount >= $scope.settings.maxWidgets);
+                    return ($scope.getWidgetCount() >= $scope.settings.maxWidgets);
                 };
+
+                $scope.am = {}; //active mining chart data
+
                 $scope.changeWidget = function(id, type) {
                     var col = ($scope.widgetColumns.left[id]) ? $scope.widgetColumns.left : $scope.widgetColumns.right;
 
@@ -192,7 +199,54 @@
 
                     // Patches
                     if (type == 'activeMining') {
-                        doPlot("right"); // draw charts
+
+                        var euroFormatter = function (v, axis) {
+                            return v.toFixed(axis.tickDecimals) + "G";
+                        }
+
+                        $scope.am.data = [{
+                            data: emulator.getAMData(),
+                            label: "Safelabel1"
+                        }, {
+                            data: emulator.getAMData(),
+                            label: "Safelabel2",
+                            // yaxis: 2
+                        }];
+                        var position = "right";
+                        $scope.am.options = {
+                            xaxes: [{
+                                mode: 'time'
+                            }],
+                            yaxes: [{
+                                min: 0
+                            }, {
+                                // align if we are to the right
+                                alignTicksWithAxis: position == "right" ? 1 : null,
+                                position: position,
+                                tickFormatter: euroFormatter
+                            }],
+                            legend: {
+                                position: 'sw'
+                            },
+                            colors: ["#1ab394"],
+                            grid: {
+                                color: "#999999",
+                                clickable: true,
+                                tickColor: "#D4D4D4",
+                                borderWidth:0,
+                                hoverable: true //IMPORTANT! this is needed for tooltip to work,
+
+                            },
+                            tooltip: true,
+                            tooltipOpts: {
+                                content: "%s for %x was %y",
+                                xDateFormat: "%y-%0m-%0d",
+
+                                onHover: function(flotItem, $tooltipEl) {
+                                    // console.log(flotItem, $tooltipEl);
+                                }
+                            }
+                        };
                     }
                     if (type == 'backendInfo') {
                         //console.log($scope.backend);

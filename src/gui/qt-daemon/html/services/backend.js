@@ -155,7 +155,20 @@
         function($interval, $timeout, loader){
         var callbacks = {};
 
-        var get_wallet_info = function() {
+        this.getAMData = function() { //generate one year of mining data
+            var data = [];
+            var avarageValue = Math.random()*100;
+            var startDate = new Date() - 1000*60*60*24*365; //one year before
+            var nextDate = startDate;
+            var step = 0;
+            for(var i=1; i!=365; i++){
+                step = Math.random()*10 - 5;
+                data.push([nextDate, avarageValue+step]);
+                nextDate += 1000*60*60*24;
+            }
+            return data;
+        };
+        this.getWalletInfo = function() {
             
             var random_balance = function(){
                 return Math.random() * 1000000;
@@ -173,95 +186,92 @@
             console.log(object);
             return object;
         };
-
-
-        return {
-            runCommand : function(command, params, callback) {
-                var data = {};
-                var commandData = false;
-                if(commandData = this.getData(command)){
-                    data = commandData;
-                }
-                if(angular.isDefined(callback)){
-                    var loaderInst = loader.open('Run command ' + command + ' params = ' + JSON.stringify(params));
-                    $timeout(function(){
-                        loaderInst.close();
-                        callback(data);
-                    },3000);
-                    
-                }else{
-                    console.log('fire event '+command);
-                    return data;
-                }
-                
-            },
-            subscribe : function(command, callback) {
-                var data = {};
-                var commandData = false;
-                if(commandData = this.getData(command)){
-                    data = commandData;
-                }
-
-                var interval = $interval(function(){
-                    //data.daemon_network_state = Math.floor(Math.random()*3);
+        this.runCommand = function(command, params, callback) {
+            var data = {};
+            var commandData = false;
+            if(commandData = this.getData(command)){
+                data = commandData;
+            }
+            if(angular.isDefined(callback)){
+                var loaderInst = loader.open('Run command ' + command + ' params = ' + JSON.stringify(params));
+                $timeout(function(){
+                    loaderInst.close();
                     callback(data);
                 },3000);
-            },
-            getData : function(command){
-                var result = false;
-                switch (command){
-                    case 'show_openfile_dialog' : 
-                        result = { // why do we need this? I think angular can do it
-                            "error_code": "OK",
-                            "path": "/home/master/Lui/test_wallet.lui"
-                        };
-                        break;
-                    case 'show_savefile_dialog' : 
-                        result = { // why do we need this? I think angular can do it
-                            "error_code": "OK",
-                            "path": "/home/master/Lui/test_wallet_for_save.lui"
-                        };
-                        break;
-                    case 'open_wallet' : 
-                        result = get_wallet_info();
-                        break;
-                    
-                    case 'update_daemon_state': 
-                        result = {
-                            "daemon_network_state": 2,
-                            "hashrate": 0,
-                            "height": 9729,
-                            "inc_connections_count": 0,
-                            "last_blocks": [
-                                {
-                                    "date": 1425441268,
-                                    "diff": "107458354441446",
-                                    "h": 9728,
-                                    "type": "PoS"
-                                }, {
-                                    "date": 1425441256,
-                                    "diff": "2778612",
-                                    "h": 9727,
-                                    "type": "PoW"
-                                }
-                            ],
-                            "last_build_available": "0.0.0.0",
-                            "last_build_displaymode": 0,
-                            "max_net_seen_height": 9726,
-                            "out_connections_count": 2,
-                            "pos_difficulty": "107285151137540",
-                            "pow_difficulty": "2759454",
-                            "synchronization_start_height": 9725,
-                            "text_state": "Offline"
-                        };
-                        break;
-                    default:
-                        result = false;
-                }
-
-                return result;
+                
+            }else{
+                console.log('fire event '+command);
+                return data;
             }
+            
+        };
+        this.subscribe = function(command, callback) {
+            var data = {};
+            var commandData = false;
+            if(commandData = this.getData(command)){
+                data = commandData;
+            }
+
+            var interval = $interval(function(){
+                //data.daemon_network_state = Math.floor(Math.random()*3);
+                callback(data);
+            },3000);
+        };
+        this.getData = function(command){
+            var result = false;
+            switch (command){
+                case 'show_openfile_dialog' : 
+                    result = { // why do we need this? I think angular can do it
+                        "error_code": "OK",
+                        "path": "/home/master/Lui/test_wallet.lui"
+                    };
+                    break;
+                case 'show_savefile_dialog' : 
+                    result = { // why do we need this? I think angular can do it
+                        "error_code": "OK",
+                        "path": "/home/master/Lui/test_wallet_for_save.lui"
+                    };
+                    break;
+                case 'open_wallet' : 
+                    result = this.getWalletInfo();
+                    break;
+                
+                case 'update_daemon_state': 
+                    result = {
+                        "daemon_network_state": 2,
+                        "hashrate": 0,
+                        "height": 9729,
+                        "inc_connections_count": 0,
+                        "last_blocks": [
+                            {
+                                "date": 1425441268,
+                                "diff": "107458354441446",
+                                "h": 9728,
+                                "type": "PoS"
+                            }, {
+                                "date": 1425441256,
+                                "diff": "2778612",
+                                "h": 9727,
+                                "type": "PoW"
+                            }
+                        ],
+                        "last_build_available": "0.0.0.0",
+                        "last_build_displaymode": 0,
+                        "max_net_seen_height": 9726,
+                        "out_connections_count": 2,
+                        "pos_difficulty": "107285151137540",
+                        "pow_difficulty": "2759454",
+                        "synchronization_start_height": 9725,
+                        "text_state": "Offline"
+                    };
+                    break;
+                default:
+                    result = false;
+            }
+
+            return result;
         }
+        return this;
     }]);
 
     module.factory('loader',['$modal',function($modal){

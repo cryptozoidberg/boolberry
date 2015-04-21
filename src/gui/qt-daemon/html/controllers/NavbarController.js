@@ -2,9 +2,9 @@
     'use strict';
     var module = angular.module('app.navbar',[]);
 
-    module.controller('NavbarTopController', ['backend', '$scope','$timeout', 'loader', 
-        function(backend, $scope, $timeout, loader) {
-        $scope.deamon_state = {
+    module.controller('NavbarTopController', ['backend', '$scope','$timeout', 'loader', '$rootScope',
+        function(backend, $scope, $timeout, loader, $rootScope) {
+        $rootScope.deamon_state = {
         	daemon_network_state: 0
         };
 
@@ -14,7 +14,6 @@
         var li = loader.open(loadinMessage);
 
         backend.subscribe('update_daemon_state', function(data){
-            console.log(data);
             if(data.daemon_network_state == 2){
                 if(li && angular.isDefined(li)){
                     li.close();
@@ -24,12 +23,10 @@
                 if(!li){
                     li = loader.open(loadinMessage);
                 }
-                
             }
             $timeout(function(){
-            	$scope.deamon_state = data;	
+            	$rootScope.deamon_state = data;	
             });
-            
         });
         
         
