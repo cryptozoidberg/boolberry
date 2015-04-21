@@ -84,7 +84,8 @@
                 
             },
 
-            backendCallback: function(status, param) {
+            backendCallback: function (status, param) {
+                console.log('DISPATCH: got result from backend request id = ' + request_id);
                 status = (status) ? JSON.parse(status) : null;
                 param  = (param)  ? JSON.parse(param)  : null;
                 result = {
@@ -93,7 +94,7 @@
                 };
                 var request_id = status.request_id;
                 loaders[request_id].close();
-                console.log('got result from backend request id = '+request_id);
+                console.log('DISPATCH: got result from backend request id = '+request_id);
                 console.log(callbacks[request_id]);
                 if(result.status.error_code == 'OK'){
                     $timer(function(){
@@ -142,8 +143,9 @@
 
         }
 
-        if(!returnObject.shouldUseEmulator()){
-            Qt.dispatch.connect(returnObject.backendCallback); // register backend callback    
+        if (!returnObject.shouldUseEmulator()) {
+            console.log('Subscribed on "dispatch"');
+            Qt["do_dispatch"].connect(returnObject.backendCallback); // register backend callback
         }
         
 
