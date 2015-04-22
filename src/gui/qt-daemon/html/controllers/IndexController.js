@@ -80,11 +80,16 @@
             $scope.openSafe = function(safe){
                 backend.openWallet(safe.path, safe.pass,function(data){
                     console.log(data);
-                    data.name = safe.name;
-                    $timeout(function(){
-                        safes.unshift(data);    
+                    var wallet_id = data.wallet_id;
+                    backend.getWalletInfo(wallet_id, function (safe_data){
+                        //var new_safe = safe_data.param
+                        safe_data.name = safe.name;
+                        safe_data.wallet_id = wallet_id;
+                        $timeout(function(){
+                            safes.unshift(safe_data);    
+                        });
+                        $modalInstance.close();
                     });
-                    $modalInstance.close();
                 });
             };
             
@@ -99,8 +104,8 @@
         }
     ]);
 
-    module.controller('indexController', ['utils', 'backend', '$scope', '$modal','$timeout','emulator',
-        function(utils, backend, $scope, $modal, $timeout, emulator) {
+    module.controller('indexController', ['utils', 'backend', '$scope', '$modal','$timeout','emulator','$rootScope',
+        function(utils, backend, $scope, $modal, $timeout, emulator, $rootScope) {
             $scope.settings = {
                 maxWidgets: 12,
                 userSettings: {
@@ -110,10 +115,13 @@
 
             $scope.safes_owl_options  = {
               items: 2,
-              navText: ''
+              navText: '',
+              responsive: false
             };
 
-            $scope.safes = [];
+            if(angular.isUndefined($rootScope.safes)){
+                $rootScope.safes = [];
+            }
 
             // backend.openWallet('/home/master/Lui/test_wallet.lui', '12345',function(data){
             //     $scope.safes.push(data);

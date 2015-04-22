@@ -32,6 +32,24 @@
                 return this.runCommand('show_savefile_dialog',params);
             },
 
+            transfer: function(from, to, ammount, fee, comment, callback) {
+                 var params = {
+                    wallet_id : from,
+                    destinations : [
+                        {
+                            address : to,
+                            amount : "10.0"
+                        }
+                    ],
+                    mixin_count : 0,
+                    lock_time : 0,
+                    payment_id : "",
+                    fee : fee
+                };
+                console.log(params);
+                return this.runCommand('transfer', params, callback);
+            },
+
             openWallet : function(file, pass, callback) {
                 var params = {
                     path: file,
@@ -39,6 +57,21 @@
                 };
                 
                 return this.runCommand('open_wallet', params, callback);
+            },
+
+            getWalletInfo : function(wallet_id, callback) {
+                var params = {
+                    wallet_id: wallet_id
+                };
+                
+                return this.runCommand('get_wallet_info', params, callback);
+            },
+
+            getRecentTransfers : function(wallet_id, callback) {
+                var params = {
+                    wallet_id: wallet_id
+                };
+                return this.runCommand('get_recent_transfers', params, callback);
             },
 
             generateWallet : function(path, pass, callback) {
@@ -61,8 +94,9 @@
                 }else{
                     var action = Qt_parent[command];
                     if(!angular.isDefined(action)){
-                        console.log("API Error for command '"+command+"': command not found in Qt object");
+                        console.log("API Error for command '"+command+"': command not found in Qt_parent object");
                     }else{
+                        console.log(params);
                         var resultString = action(JSON.stringify(params)); 
                         var result = (resultString === '') ? {} : JSON.parse(resultString);
                         
@@ -85,20 +119,24 @@
             },
 
             backendCallback: function (status, param) {
-                console.log('DISPATCH: got result from backend request id = ' + request_id);
+                console.log('DISPATCH: got result from backend');
                 status = (status) ? JSON.parse(status) : null;
                 param  = (param)  ? JSON.parse(param)  : null;
-                result = {
-                    status: status,
-                    param:  param
-                };
+                
+                var result = {};
+                result.status = status;
+                result.param = param;
+
                 var request_id = status.request_id;
+                
                 loaders[request_id].close();
                 console.log('DISPATCH: got result from backend request id = '+request_id);
-                console.log(callbacks[request_id]);
+                console.log(result);
                 if(result.status.error_code == 'OK'){
-                    $timer(function(){
-                        callbacks[request_id](result);
+                    console.log('run callback');
+                    $timeout(function(){
+                        console.log('run callback 2');
+                        callbacks[request_id](result.param); 
                     },1000);
                     
                 }else{
@@ -235,6 +273,11 @@
                     };
                     break;
                 case 'open_wallet' : 
+                    result = {
+                        "wallet_id" : "1"
+                    }
+                    break;
+                case 'get_wallet_info' : 
                     result = this.getWalletInfo();
                     break;
                 

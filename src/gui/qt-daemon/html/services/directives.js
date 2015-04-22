@@ -117,23 +117,23 @@
   }]);
 
 
-  module.directive('turnLinks', [function(){
-    return {
-        restrict: 'A',
-        link: function (scope, element, attrs) {
-          $(document).on('click', 'a[href*=".html"]', function() {
-              var hash = $(this).attr('href').split("#")[1];
-              var request = $(this).attr('href').replace('.html', '').split("#")[0];
-              if (hash && hash != '') {
-                  location.hash = request + '/' + hash;
-              } else {
-                  location.hash = request;
-              }
-              return false;
-          });
-        }
-    };
-  }]);
+  // module.directive('turnLinks', [function(){
+  //   return {
+  //       restrict: 'A',
+  //       link: function (scope, element, attrs) {
+  //         $(document).on('click', 'a[href*=".html"]', function() {
+  //             var hash = $(this).attr('href').split("#")[1];
+  //             var request = $(this).attr('href').replace('.html', '').split("#")[0];
+  //             if (hash && hash != '') {
+  //                 location.hash = request + '/' + hash;
+  //             } else {
+  //                 location.hash = request;
+  //             }
+  //             return false;
+  //         });
+  //       }
+  //   };
+  // }]);
 
   module.service('templateCompiler', function ($compile, $templateCache, $rootScope) {
     var service = {}

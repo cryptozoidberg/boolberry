@@ -2,37 +2,53 @@
   'use strict';
     var app = angular.module('app', [
         'ui.bootstrap',
+        'ui.chart',
+        'angular-bootstrap-select',
+
         'ngRoute', 
         'ngSanitize',
         'validation.match', // allow to validate inputs match 
+
         'app.services',
         'app.backendServices',
         'app.dashboard',
         'app.navbar',
         'app.directives',
-        'ui.chart'
+        'app.safes',
+        'app.guldens',
 
     ]);
 
     app.config(['$routeProvider', function($routeProvider) {
-        $routeProvider
-            .when('/', {
-                templateUrl: 'views/index.html'
-            })
-            .when('/index', {
-                templateUrl: 'views/index.html'
-            })
-            .when('/safes', {
-                templateUrl: 'views/safes.html',
-                controller: 'SafesController'
-            })
-            .when('/someRoute/:id', { // $routeParams object
-                templateUrl: 'views/contact.html',
-                controller: 'ParameterController'
-            })
-            .otherwise({
-                templateUrl: 'views/routingError.html'
-            });
+        
+        var routes = [
+            {route: '/',                 template: 'views/index.html'},
+            {route: '/index',            template: 'views/index.html'},
+            {route: '/safes',            template: 'views/safes.html'},
+            {route: '/safe/:wallet_id',  template: 'views/safe.html'},
+            {route: '/market',           template: 'views/market.html'},
+            {route: '/contacts',         template: 'views/contacts.html'},
+            {route: '/history',          template: 'views/history.html'},
+            {route: '/deposits',         template: 'views/deposits.html'},
+            {route: '/settings',         template: 'views/settings.html'},
+            {route: '/safety',           template: 'views/safety.html'},
+            {route: '/maining',          template: 'views/maining.html'},
+            {route: '/interface',        template: 'views/interface.html'},
+            {route: '/common',           template: 'views/common.html'},
+            {route: '/sendG',            template: 'views/sendG.html'},
+            {route: '/buyG',             template: 'views/buyG.html'},
+            {route: '/sellG',            template: 'views/sellG.html'},
+            {route: '/buyProduct',       template: 'views/buyProduct.html'},
+            {route: '/sellProduct',      template: 'views/sellProduct.html'},
+        ];
+
+        for (var i in routes){
+            $routeProvider.when(routes[i].route, {templateUrl: routes[i].template});
+        }
+
+        $routeProvider.otherwise({
+            templateUrl: 'views/routingError.html'
+        });
         
     }]);
 
