@@ -112,7 +112,8 @@ namespace tools
       }
 
       currency::transaction tx;
-      m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, extra, tx);
+      std::vector<currency::attachment_v> attachments;
+      m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, extra, attachments, tx);
       res.tx_hash = boost::lexical_cast<std::string>(currency::get_transaction_hash(tx));
       return true;
     }
@@ -206,7 +207,9 @@ namespace tools
     try
     {
       std::vector<currency::extra_v> extra;
-      m_wallet.transfer(dsts, 0, 0, DEFAULT_FEE, extra, tx);
+      std::vector<currency::attachment_v> attachments;
+
+      m_wallet.transfer(dsts, 0, 0, DEFAULT_FEE, extra, attachments, tx);
     }
     catch (const std::runtime_error& er)
     {

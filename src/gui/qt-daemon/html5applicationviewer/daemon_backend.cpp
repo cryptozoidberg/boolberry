@@ -691,7 +691,8 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
     if (tp.lock_time)
       unlock_time = w->get_blockchain_current_height() + tp.lock_time;
 
-    w->transfer(dsts, tp.mixin_count, unlock_time ? unlock_time + 1:0, fee, extra, res_tx);
+    std::vector<currency::attachment_v> attachments;
+    w->transfer(dsts, tp.mixin_count, unlock_time ? unlock_time + 1:0, fee, extra, attachments, res_tx);
     update_wallets_info();
   }
   catch (const std::exception& e)
@@ -731,6 +732,32 @@ std::string daemon_backend::get_wallet_info(tools::wallet2& w, view::wallet_info
   wi.mint_is_in_progress = m_mint_is_running;
   return API_RETURN_CODE_OK;
 }
+
+std::string daemon_backend::push_offer(size_t wallet_id, const currency::offer_details& od)
+{
+  CRITICAL_REGION_LOCAL(m_wallets_lock);
+  auto w = m_wallets[wallet_id];
+  if (w.get() == nullptr)
+    return API_RETURN_CODE_WALLET_WRONG_ID;
+  try
+  {
+    w->push_offer(od);
+    return API_RETURN_CODE_OK;
+  }
+  catch (const std::exception& e)
+  {
+    LOG_ERROR("Transfer error: " << e.what());
+    std::string err_code = API_RETURN_CODE_INTERNAL_ERROR;
+    err_code += std::string(":") + e.what();
+    return err_code;
+  }
+  catch (...)
+  {
+    LOG_ERROR("Transfer error: unknown error");
+    return API_RETURN_CODE_INTERNAL_ERROR;
+  }
+}
+
 
 void daemon_backend::on_new_block(uint64_t /*height*/, const currency::block& /*block*/)
 {
