@@ -859,6 +859,16 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
+  std::string get_comment_from_tx(const transaction& tx)
+  {
+    for (auto& a : tx.attachment)
+    {
+      if (a.type() == typeid(tx_comment))
+        return boost::get<tx_comment>(a).comment;
+    }
+    return "";
+  }
+  //---------------------------------------------------------------
   bool get_payment_id_from_tx_extra(const transaction& tx, std::string& payment_id)
   {
     tx_extra_info tei = AUTO_VAL_INIT(tei);

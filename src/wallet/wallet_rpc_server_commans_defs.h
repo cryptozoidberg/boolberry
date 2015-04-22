@@ -38,6 +38,7 @@ namespace wallet_rpc
     std::string   payment_id;
     std::string   recipient;       //optional
     std::string   recipient_alias; //optional
+    std::string   comment;
     bool          is_income;
     uint64_t      fee;
     wallet_transfer_info_details td;

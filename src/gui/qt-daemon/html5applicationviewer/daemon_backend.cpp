@@ -42,7 +42,7 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
 
   log_space::get_set_log_detalisation_level(true, LOG_LEVEL_2);
 //#if !defined(NDEBUG)
-  log_space::log_singletone::add_logger(LOGGER_DEBUGGER, nullptr, nullptr);
+//  log_space::log_singletone::add_logger(LOGGER_DEBUGGER, nullptr, nullptr);
 //#endif
   LOG_PRINT_L0("Initing...");
 

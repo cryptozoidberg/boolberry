@@ -2246,7 +2246,6 @@ bool blockchain_storage::check_block_timestamp(std::vector<uint64_t> timestamps,
 
   return true;
 }
-
 //------------------------------------------------------------------
 bool blockchain_storage::get_block_for_scratchpad_alt(uint64_t connection_height, uint64_t block_index, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain, block & b)
 {
