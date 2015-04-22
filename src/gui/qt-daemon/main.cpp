@@ -7,6 +7,8 @@
 #include "qdebug.h"
 #include <thread>
 
+
+
 int main(int argc, char *argv[])
 {
     string_tools::set_module_name_and_folder(argv[0]);
@@ -22,4 +24,9 @@ int main(int argc, char *argv[])
       return false;
     viewer.init_config();
     return app.exec();
+
+
+
+
+
 }

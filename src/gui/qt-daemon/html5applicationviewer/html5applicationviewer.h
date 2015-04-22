@@ -58,6 +58,7 @@ protected:
   QString get_app_data(const QString& param);
   QString store_app_data(const QString& param);
   QString get_default_user_dir(const QString& param);
+  QString get_recent_transfers(const QString& param);
 
   void message_box(const QString& msg);
   QString request_uri(const QString& url_str, const QString& params, const QString& callbackname);
@@ -124,6 +125,42 @@ private:
   std::thread m_dispatcher;
 
   template<typename callback_t>
+  QString que_call(const char* name, size_t request_id, std::shared_ptr<std::string> param_ptr, callback_t cb)
+  {
+    LOG_PRINT_L0("que_call: [" << name << "]" << request_id);
+    CRITICAL_REGION_LOCAL(m_dispatch_que_lock);
+    if (m_dispatch_que.size() > GUI_DISPATCH_QUE_MAXSIZE)
+    {
+      view::api_response air;
+      air.request_id = std::to_string(request_id);
+      air.error_code = API_RETURN_CODE_INTERNAL_ERROR_QUE_FULL;
+      return epee::serialization::store_t_to_json(air).c_str();
+    }
+    m_dispatch_que.push_back(dispatch_entry());
+    dispatch_entry& de = m_dispatch_que.back();
+    de.cb = epee::misc_utils::build_abstract_callback([cb, param_ptr]()
+    {
+      view::api_response ar;
+      ar.request_id = std::to_string(request_id);
+
+      callback_t::arg_type wio = AUTO_VAL_INIT(wio);
+      if (!epee::serialization::load_t_from_json(wio, *param_ptr))
+      {
+        view::api_void av;
+        ar.error_code = API_RETURN_CODE_BAD_ARG;
+        dispatch(ar, av);
+        return;
+      }
+      cb(wio);
+    });
+
+    view::api_response air;
+    air.request_id = std::to_string(request_id);
+    air.error_code = API_RETURN_CODE_OK;
+    return epee::serialization::store_t_to_json(air).c_str();
+  }
+
+  template<typename callback_t>
   QString que_call(const char* name, size_t request_id, callback_t cb)
   {
     LOG_PRINT_L0("que_call: [" << name << "]" << request_id);
@@ -144,6 +181,49 @@ private:
     air.error_code = API_RETURN_CODE_OK;
     return epee::serialization::store_t_to_json(air).c_str();
   }
+
+  template<typename argument_type, typename callback_t>
+  QString que_call2(const char* name, const QString& param,  callback_t cb)
+  {
+   
+    std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
+    size_t request_id = m_request_id_counter++;
+    LOG_PRINT_L0("que_call: [" << name << "]" << request_id);
+
+
+    CRITICAL_REGION_LOCAL(m_dispatch_que_lock);
+    if (m_dispatch_que.size() > GUI_DISPATCH_QUE_MAXSIZE)
+    {
+      view::api_response air;
+      air.request_id = std::to_string(request_id);
+      air.error_code = API_RETURN_CODE_INTERNAL_ERROR_QUE_FULL;
+      return epee::serialization::store_t_to_json(air).c_str();
+    }
+    m_dispatch_que.push_back(dispatch_entry());
+    dispatch_entry& de = m_dispatch_que.back();
+    de.cb = epee::misc_utils::build_abstract_callback([this, cb, request_id, param_ptr]()
+    {
+      view::api_response ar;
+      ar.request_id = std::to_string(request_id);
+
+      argument_type wio = AUTO_VAL_INIT(wio);
+      if (!epee::serialization::load_t_from_json(wio, *param_ptr))
+      {
+        view::api_void av;
+        ar.error_code = API_RETURN_CODE_BAD_ARG;
+        dispatch(ar, av);
+        return;
+      }
+      cb(wio, ar);
+    });
+
+    view::api_response air;
+    air.request_id = std::to_string(request_id);
+    air.error_code = API_RETURN_CODE_OK;
+    return epee::serialization::store_t_to_json(air).c_str();
+  }
+
+
 
   template<typename t_response>
   void dispatch(const view::api_response& status, const t_response& rsp)

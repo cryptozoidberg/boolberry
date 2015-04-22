@@ -1062,6 +1062,19 @@ namespace
   }
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::push_offer(const currency::offer_details& od)
+{
+  currency::tx_destination_entry tx_dest;
+  tx_dest.addr = m_account.get_keys().m_account_address;
+  tx_dest.amount = DEFAULT_FEE;
+  std::vector<currency::tx_destination_entry> destinations;
+  std::vector<currency::extra_v> extra;
+  std::vector<currency::attachment_v> attachments;
+  attachments.push_back(od);
+  destinations.push_back(tx_dest);
+  transfer(destinations, 0, 0, DEFAULT_FEE, extra, attachments);
+}
+//----------------------------------------------------------------------------------------------------
 uint64_t wallet2::select_indices_for_transfer(std::list<size_t>& selected_indexes, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money)
 {
   uint64_t found_money = 0;
@@ -1179,16 +1192,19 @@ std::string wallet2::get_alias_for_address(const std::string& addr)
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-                       uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, currency::transaction& tx)
+  uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, 
+  const std::vector<currency::attachment_v> attachments, 
+  currency::transaction& tx)
 {
-  transfer(dsts, fake_outputs_count, unlock_time, fee, extra, detail::digit_split_strategy, tx_dust_policy(fee), tx);
+  transfer(dsts, fake_outputs_count, unlock_time, fee, extra, attachments, detail::digit_split_strategy, tx_dust_policy(fee), tx);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-                       uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra)
+  uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, 
+  const std::vector<currency::attachment_v> attachments)
 {
   currency::transaction tx;
-  transfer(dsts, fake_outputs_count, unlock_time, fee, extra, tx);
+  transfer(dsts, fake_outputs_count, unlock_time, fee, extra, attachments, tx);
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::is_connected_to_net()

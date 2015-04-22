@@ -773,31 +773,24 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
 
 QString Html5ApplicationViewer::get_wallet_info(const QString& param)
 {
-
-  size_t request_id = m_request_id_counter++;
-  std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
-
-  return que_call("get_wallet_info", request_id, [request_id, param_ptr, this](void){
-
-    view::api_response ar;
-    ar.request_id = std::to_string(request_id);
-
-    view::wallet_id_obj wio = AUTO_VAL_INIT(wio);
-    if (!epee::serialization::load_t_from_json(wio, *param_ptr))
-    {
-      view::api_void av;
-      ar.error_code = API_RETURN_CODE_BAD_ARG;
-      dispatch(ar, av);
-      return;
-    }
+  return que_call2<view::wallet_id_obj>("get_wallet_info", param, [this](const view::wallet_id_obj& a, view::api_response& ar){
 
     view::wallet_info wi = AUTO_VAL_INIT(wi);
-    ar.error_code = m_backend.get_wallet_info(wio.wallet_id, wi);
+    ar.error_code = m_backend.get_wallet_info(a.wallet_id, wi);
     dispatch(ar, wi);
-    return;
-
   });
 }
+
+QString Html5ApplicationViewer::get_recent_transfers(const QString& param)
+{
+  return que_call2<view::wallet_id_obj>("get_recent_transfers", param, [this](const view::wallet_id_obj& a, view::api_response& ar){
+
+    view::transfers_array ta = AUTO_VAL_INIT(ta);
+    ar.error_code = m_backend.get_recent_transfers(a.wallet_id, ta);
+    dispatch(ar, ta);
+  });
+}
+
 
 void Html5ApplicationViewer::dispatch(const QString& status, const QString& param)
 {
