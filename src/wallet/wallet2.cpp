@@ -184,7 +184,7 @@ void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height
     wti.payment_id = string_tools::pod_to_hex(pid);
   fill_transfer_details(tx, td, wti.td);
   wti.timestamp = timestamp;
-  wti.comment = currency::get_te(tx);
+  wti.comment = currency::get_comment_from_tx(tx);
   wti.fee = currency::is_coinbase(tx) ? 0:currency::get_tx_fee(tx);
   wti.unlock_time = tx.unlock_time;
   wti.tx_blob_size = static_cast<uint32_t>(currency::get_object_blobsize(wti.tx));
