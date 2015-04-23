@@ -221,7 +221,7 @@
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-4">
-                                        <input type="text" class="form-control" placeholder="найти текст">
+                                        <input type="text" class="form-control" placeholder="найти текст" ng-model="sometext"> {{ sometext | gulden}}
                                     </div>
                                     <div class="col-xs-4 col-sm-4">
                                         <div role="group" class="row">
@@ -233,7 +233,7 @@
                                 </div>
                             </form>
                         </div>
-                        <div class="table-responsive panel">
+                        <div class="table-responsive panel" ng-if="history.length">
                             <table class="table table-condensed  data-table history-table">
                                 <thead>
                                 <tr>
@@ -262,78 +262,131 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
+                                <tr ng-repeat="item in history" class="transaction-item">
                                     <td>
-	<span class="mix-label mix-label-up">
-	 <img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
-		<em><i style="color:#ddd" class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
-	</span>
+                                        <span class="mix-label mix-label-up">
+                                         <img src="assets/font/svg/sound8.svg">
+                                            <em>
+                                                <i 
+                                                    class="fa fa-lg"
+                                                    ng-class="{
+                                                        'text-muted': !item.height,
+                                                        'text-danger': item.height && !item.is_income,
+                                                        'text-success': item.height && item.is_income,
+                                                        'fa-arrow-circle-o-up' : !item.is_income,
+                                                        'fa-arrow-circle-o-down' : item.is_income,
+                                                    }"
+                                                >
+                                                </i>
+                                            </em>
+                                        </span>
                                     </td>
+                                    
                                     <td>
+                                        <small class="text-muted nowrap">{{item.timestamp | intToDate | date:'dd.MM.yy hh:mm'}}</small>
+                                        <span class="chart send-timer" data-percent="86">
+                                        </span>
+                                    </td>
 
-                                        <small class="text-muted nowrap">12.12.14 22:56</small>
-			<span class="chart send-timer" data-percent="86">
+                                    <td>
+                                        <small class="text-muted" ng-if="!item.is_income && !item.height">
+                                            <em>Отправление</em>
+                                        </small>
+                                        <small class="text-warning" ng-if="!item.is_income && item.height">
+                                            <em>Отправлено</em>
+                                        </small>
+                                        <small class="text-muted" ng-if="item.is_income && !item.height">
+                                            <em>Получение</em>
+                                        </small>
+                                        <small class="text-info" ng-if="item.is_income && item.height">
+                                            <em>Получено</em>
+                                        </small>
+                                    </td>
 
-			</span>
+                                    <td>
+                                        <span ng-if="!item.is_income">&ndash;</span>{{item.amount | gulden}}
+                                    </td>
 
-                                    </td>
                                     <td>
-                                        <small class="text-warning"><em>Отправление</em></small>
+                                        <span ng-if="!item.is_income">&ndash;</span>{{item.fee | gulden}}
                                     </td>
+
                                     <td>
-                                        &ndash;23,00
-                                    </td>
-                                    <td>
-                                        &ndash;1,67
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
+                                        
+                                        <div class="dropdown" ng-if="item.remote_address">
+                                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                <span class="account-text">
+                                                    <span class="text-muted">
+                                                        Safelabel1 
+                                                        <span style="color:#999">
+                                                            {{item.remote_address}}
+                                                        </span>
+                                                    </span>
+                                                    <span class="moredots">...<span class="caret"></span></span>
+                                                </span>
+                                            </button>
+                                            
                                             <div role="menu" class="dropdown-menu dropdown-menu-left">
                                                 <div style="padding:10px">
                                                     <ul class="list-unstyled">
                                                         <li>Сейф: <a href="">Safelabel1</a></li>
-
-                                                        <li><div class="contractor">
-                                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                                        </div></li>
+                                                        <li>
+                                                            <div class="contractor">
+                                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                                    скопировать
+                                                                </button>
+                                                                <pre class="safe-number" style="height:60px">{{item.remote_address}}
+                                                                </pre>
+                                                            </div>
+                                                        </li>
                                                         <li><a href="">@onesafekaccout</a></li>
                                                         <li><a href="">@twosafeaccout</a></li>
                                                     </ul>
                                                 </div>
                                             </div>
                                         </div>
+                                        <small class="text-muted" ng-if="!item.remote_address">
+                                            <em>неизвестно</em>
+                                        </small>
                                     </td>
+
                                     <td>
-                                        <div class="dropdown">
-                                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">B4QqkxudA7hJjwhPYFSc1HUWFZP3giGepi2foJocRhav7mSQ2RnYYTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
+                                        
+                                        <div class="dropdown" ng-if="item.remote_address">
+                                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                <span class="account-text">
+                                                    <span class="text-muted">{{item.remote_address}}</span>
+                                                    <span class="moredots">...<span class="caret"></span></span>
+                                                </span>
+                                            </button>
                                             <div role="menu" class="dropdown-menu dropdown-menu-left">
                                                 <div style="padding:10px">
                                                     <ul class="list-unstyled">
-                                                        <li><div class="contractor">
-                                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                                        </div>
+                                                        <li>
+                                                            <div class="contractor">
+                                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                                    скопировать
+                                                                </button>
+                                                                <pre class="safe-number" style="height:60px">{{item.remote_address}}</pre>
+                                                            </div>
                                                         </li>
                                                     </ul>
                                                 </div>
                                             </div>
                                         </div>
+                                        <small class="text-muted" ng-if="!item.remote_address">
+                                            <em>неизвестно</em>
+                                        </small>
                                     </td>
-                                    <td><span class="text-muted">текст комментария</span></td>
+
+                                    <td><span class="text-muted">{{item.comment}}</span></td>
                                 </tr>
-                                <tr>
+
+                                <!-- <tr>
                                     <td><span class="mix-label mix-label-down">
-	 <img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
-		<em><i style="color:#ddd" class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
-	</span>
+     <img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
+        <em><i style="color:#ddd" class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
+    </span>
                                     </td>
                                     <td>
 
@@ -355,8 +408,8 @@
                                     <td>
                                         <div class="dropdown">
                                             <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
+            <span class="moredots">...<span class="caret"></span></span>
+            </span></button>
                                             <div class="dropdown-menu dropdown-menu-left" role="menu">
                                                 <div style="padding:10px">
                                                     <ul class="list-unstyled">
@@ -364,8 +417,8 @@
 
                                                         <li><div class="contractor">
                                                             <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
+                            <pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+                            </pre>
                                                         </div></li>
                                                         <li><a href="">@onesafekaccout</a></li>
                                                         <li><a href="">@twosafeaccout</a></li>
@@ -378,10 +431,10 @@
                                 </tr>
                                 <tr>
                                     <td>
-	<span class="mix-label mix-label-up">
-	 <img src="assets/font/svg/sound8.svg" style="opacity: 0.75;">
-		<em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
-	</span>
+    <span class="mix-label mix-label-up">
+     <img src="assets/font/svg/sound8.svg" style="opacity: 0.75;">
+        <em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
+    </span>
                                     </td>
                                     <td>
 
@@ -401,8 +454,8 @@
                                     <td>
                                         <div class="dropdown">
                                             <button aria-expanded="true" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
+            <span class="moredots">...<span class="caret"></span></span>
+            </span></button>
                                             <div class="dropdown-menu dropdown-menu-left" role="menu">
                                                 <div style="padding:10px">
                                                     <ul class="list-unstyled">
@@ -410,8 +463,8 @@
 
                                                         <li><div class="contractor">
                                                             <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
-							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
+                            <pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+                            </pre>
                                                         </div></li>
                                                         <li><a href="">@onesafekaccout</a></li>
                                                         <li><a href="">@twosafeaccout</a></li>
@@ -424,14 +477,14 @@
                                         <div class="dropdown">
                                             <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">@fjjhtyjlmnbg<span class="caret"></span></span>
 
-			</span></button>
+            </span></button>
                                             <div class="dropdown-menu dropdown-menu-left" role="menu">
                                                 <div style="padding:10px">
                                                     <ul class="list-unstyled">
                                                         <li><div class="contractor">
                                                             <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
+                            <pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
+                            </pre>
                                                         </div>
                                                         </li>
                                                         <li><a href="">@fjjhtyjlmnbg</a>
@@ -440,7 +493,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td><span class="text-muted">текст комментария</span></td></tr>
+                                    <td><span class="text-muted">текст комментария</span></td></tr> -->
 
                                 </tbody>
 

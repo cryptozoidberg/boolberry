@@ -3,8 +3,8 @@
 
     var module = angular.module('app.backendServices', [])
 
-    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader',
-        function($interval, $timeout, emulator, loader) {
+    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer',
+        function($interval, $timeout, emulator, loader, informer) {
         
         var callbacks = {};
 
@@ -32,7 +32,7 @@
                 return this.runCommand('show_savefile_dialog',params);
             },
 
-            transfer: function(from, to, ammount, fee, comment, callback) {
+            transfer: function(from, to, ammount, fee, comment, push_payer, callback) {
                  var params = {
                     wallet_id : from,
                     destinations : [
@@ -44,7 +44,9 @@
                     mixin_count : 0,
                     lock_time : 0,
                     payment_id : "",
-                    fee : fee
+                    fee : fee,
+                    comment: comment,
+                    push_payer: push_payer 
                 };
                 console.log(params);
                 return this.runCommand('transfer', params, callback);
@@ -71,6 +73,7 @@
                 var params = {
                     wallet_id: wallet_id
                 };
+                console.log('RUN get_recent_transfers, params = '+JSON.stringify(params));
                 return this.runCommand('get_recent_transfers', params, callback);
             },
 
@@ -120,6 +123,8 @@
 
             backendCallback: function (status, param) {
                 console.log('DISPATCH: got result from backend');
+                console.log(status);
+                console.log(param);
                 status = (status) ? JSON.parse(status) : null;
                 param  = (param)  ? JSON.parse(param)  : null;
                 
@@ -132,7 +137,7 @@
                 loaders[request_id].close();
                 console.log('DISPATCH: got result from backend request id = '+request_id);
                 console.log(result);
-                if(result.status.error_code == 'OK'){
+                if(result.status.error_code == 'OK' || result.status.error_code == ''){
                     console.log('run callback');
                     $timeout(function(){
                         console.log('run callback 2');
@@ -140,6 +145,7 @@
                     },1000);
                     
                 }else{
+                    informer.error(result.status.error_code);
                     console.log(result.status.error_code);
                 }
                 
@@ -277,6 +283,55 @@
                         "wallet_id" : "1"
                     }
                     break;
+                case 'get_recent_transfers' :
+                    result = {
+                        'history': [
+                            {
+                                '$$hashKey': "object:45",
+                                'amount': 1000000000000,
+                                'fee': 1000000000000,
+                                'height': 2616,
+                                'is_income': false,
+                                'payment_id': "",
+                                'remote_address': "HhTZP7Sy4FoDR1kJHbFjzd5gSnUPdpHWHj7Gaaeqjt52KS23rHGa1sN73yZYPt77TkN8VVmHrT5qmBJQGzDLYJGjQpxGRid",
+                                'recipient_alias': "",
+                                'td': {
+                                    'rcv': [
+                                        9000000000000,
+                                        10000000000000,
+                                        80000000000000,
+                                        100000000000000,
+                                    ],
+                                    'spn': [200000000000000]
+                                },
+                                'timestamp': 1429715920,
+                                'tx_blob_size': 311,
+                                'tx_hash': "62b4f42bcff74c05199a4961ed226b542db38ea2bffbb4c2c384ee3b84f34e59",
+                                'unlock_time': 0
+                            },
+                            {
+                                '$$hashKey': "object:46",
+                                'amount': 200000000000000,
+                                'fee': 1000000000,
+                                'height': 1734,
+                                'is_income': true,
+                                'payment_id': "",
+                                'remote_address': "",
+                                'recipient_alias': "",
+                                'td': {
+                                    'rcv': [200000000000000]
+                                },
+                                'length': 1,
+                                'timestamp': 1429608249,
+                                'tx_blob_size': 669,
+                                'tx_hash': "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b9",
+                                'unlock_time': 0
+                            }
+
+                        ]
+
+                    }
+                    break;
                 case 'get_wallet_info' : 
                     result = this.getWalletInfo();
                     break;
@@ -319,48 +374,6 @@
         return this;
     }]);
 
-    module.factory('loader',['$modal',function($modal){
-        var ModalInstanceCtrl = function($scope, $modalInstance) {
-
-            $scope.cancel = function() {
-              $modalInstance.dismiss('cancel');
-            };
-        };
-
-
-        return {
-            open: function(message){
-               
-                if(!angular.isDefined(message)){
-                    message = 'Пожалуйста, подождите...';
-                }
-
-                var modalHtml = '<div class="modal-header btn btn-primary btn-block">';
-                modalHtml += '<button type="button" class="close" data-dismiss="modal" ng-click="cancel()">';
-                modalHtml += '<span aria-hidden="true">.</span><span class="sr-only">Close</span>';
-                modalHtml += '</button>';
-                modalHtml += '<h4 class="modal-title text-center">Загружается...</h4>';
-                modalHtml += '</div>';
-                modalHtml += '<div class="modal-body">';
-                modalHtml += '<span class="ifOnlineText loading text-primary">';
-                modalHtml += '<i class="fa fa-2x fa-circle-o-notch fa-spin"></i> '+message;
-                modalHtml += '</span>';
-                modalHtml += '</div>';
-
-                return $modal.open({
-                  template: modalHtml,
-                  controller: ModalInstanceCtrl,
-                  backdrop: false,
-                  size: 'sm'
-                });
-            },
-            close: function(instance){
-                if(angular.isDefined(instance)){
-                    instance.close();
-                }
-            }
-        }
-
-    }]);
+    
 
 }).call(this);

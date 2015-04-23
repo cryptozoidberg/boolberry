@@ -78,26 +78,6 @@
         }else{
           init();
         }
-        
-
-        
-
-
-        // angular.forEach(items,function(index, item){
-        //   console.log(templateCompiler.bind(template_id,item));
-        // });
-
-        
-          
-        // }
-
-        // scope.init();
-
-        // scope.addCarouselItem = function (item){
-        //   scope.init();
-        //   owl.addItem(scope.$eval($(item).html()));
-        //   // scope.init();
-        // };
 
       }
     };
@@ -108,32 +88,11 @@
           restrict: 'A',
           transclude: false,
           link: function(scope, element) {
-            // wait for the last item in the ng-repeat then call init
-              // if(scope.$last) {
-                  scope.addCarouselItem(element);
-              // }
+            scope.addCarouselItem(element);
           }
       };
   }]);
 
-
-  // module.directive('turnLinks', [function(){
-  //   return {
-  //       restrict: 'A',
-  //       link: function (scope, element, attrs) {
-  //         $(document).on('click', 'a[href*=".html"]', function() {
-  //             var hash = $(this).attr('href').split("#")[1];
-  //             var request = $(this).attr('href').replace('.html', '').split("#")[0];
-  //             if (hash && hash != '') {
-  //                 location.hash = request + '/' + hash;
-  //             } else {
-  //                 location.hash = request;
-  //             }
-  //             return false;
-  //         });
-  //       }
-  //   };
-  // }]);
 
   module.service('templateCompiler', function ($compile, $templateCache, $rootScope) {
     var service = {}

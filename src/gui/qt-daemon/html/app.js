@@ -9,6 +9,7 @@
         'ngSanitize',
         'validation.match', // allow to validate inputs match 
 
+        'app.filters',
         'app.services',
         'app.backendServices',
         'app.dashboard',

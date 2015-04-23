@@ -104,8 +104,8 @@
         }
     ]);
 
-    module.controller('indexController', ['utils', 'backend', '$scope', '$modal','$timeout','emulator','$rootScope',
-        function(utils, backend, $scope, $modal, $timeout, emulator, $rootScope) {
+    module.controller('indexController', ['utils', 'backend', '$scope', '$modal','$timeout','emulator','$rootScope', 'informer',
+        function(utils, backend, $scope, $modal, $timeout, emulator, $rootScope, informer) {
             $scope.settings = {
                 maxWidgets: 12,
                 userSettings: {
@@ -125,6 +125,7 @@
 
             // backend.openWallet('/home/master/Lui/test_wallet.lui', '12345',function(data){
             //     $scope.safes.push(data);
+            //     informer.info('Ура!!!');
             // });
             
             $scope.openFileDialog = function(){

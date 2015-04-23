@@ -1631,4 +1631,13 @@ min-width: 96px;
     margin-right: 10px!important;
 }
 
+.transaction-item i.text-muted{
+	color: #ddd;
+}
+
+.transaction-item img.pale{
+	opacity: 0.05;
+}
+
+
 

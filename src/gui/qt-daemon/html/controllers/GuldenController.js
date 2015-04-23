@@ -2,14 +2,16 @@
     'use strict';
     var module = angular.module('app.guldens',[]);
 
-    module.controller('guldenSendCtrl',['backend','$rootScope','$scope',
-        function(backend,$rootScope,$scope){
+    module.controller('guldenSendCtrl',['backend','$rootScope','$scope','informer',
+        function(backend,$rootScope,$scope,informer){
             $scope.transaction = {
-                to: 'HhTZP7Sy4FoDR1kJHbFjzd5gSnUPdpHWHj7Gaaeqjt52KS23rHGa1sN73yZYPt77TkN8VVmHrT5qmBJQGzDLYJGjQpxGRid'
+                to: 'Hc51bpKjQRy1mMMF1zgHVkRbPExx2pwXFFXcaKS93LMmRZtbCVJGMmmRCtVSXz75hvJASHP5Yvu99aH5BjLapN223SDXv6y',
+                push_payer: false
             };
             $scope.send = function(tr){
-                backend.transfer(tr.from, tr.to, tr.ammount, tr.fee, tr.comment, function(data){
+                backend.transfer(tr.from, tr.to, tr.ammount, tr.fee, tr.comment, tr.push_payer, function(data){
                     console.log(data);
+                    informer.success('Транзакция поступила в обработку');
                 });
             };
         }

@@ -6,11 +6,15 @@
 
     }]);
 
-    module.controller('safeDetailsCtrl',['$routeParams','backend',function($routeParams,backend){
-        var wallet_id = $routeParams.wallet_id;
-        console.log(wallet_id);
+    module.controller('safeDetailsCtrl',['$routeParams','backend','$scope',
+        function($routeParams,backend,$scope){
+        var wallet_id = parseInt($routeParams.wallet_id);
+        $scope.history = {};
         backend.getRecentTransfers(wallet_id, function(data){
-            console.log(data);
+            if(angular.isDefined(data.unconfirmed)){
+                data.history = data.unconfirmed.concat(data.history);
+            }
+            $scope.history = data.history;
 
         });
     }]);
