@@ -898,7 +898,12 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
       else
       {
         //found kernel
-        LOG_PRINT_GREEN("Found kernel: amount=" << sp.pos_entries[i].amount << ", index=" << sp.pos_entries[i].index << ", key_image" << sp.pos_entries[i].keyimage, LOG_LEVEL_0);
+        LOG_PRINT_GREEN("Found kernel: amount=" << sp.pos_entries[i].amount << ENDL
+          << ", difficulty_basic=" << basic_diff << ", diff for this coin: " << this_coin_diff << ENDL
+          << ", index=" << sp.pos_entries[i].index << ENDL
+          << ", key_image" << sp.pos_entries[i].keyimage << ENDL
+          << ", kernel " << kernel_hash, 
+          LOG_LEVEL_0);
         rsp.index = i;
         rsp.block_timestamp = ts;
         rsp.status = CORE_RPC_STATUS_OK;
