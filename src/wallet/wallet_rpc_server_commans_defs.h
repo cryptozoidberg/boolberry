@@ -36,7 +36,7 @@ namespace wallet_rpc
     uint64_t      unlock_time;
     uint32_t      tx_blob_size;
     std::string   payment_id;
-    std::string   recipient;       //optional
+    std::string   remote_address;       //optional
     std::string   recipient_alias; //optional
     std::string   comment;
     bool          is_income;
@@ -54,7 +54,7 @@ namespace wallet_rpc
       KV_SERIALIZE(unlock_time)
       KV_SERIALIZE(tx_blob_size)
       KV_SERIALIZE(payment_id)
-      KV_SERIALIZE(recipient)      
+      KV_SERIALIZE(remote_address)      
       KV_SERIALIZE(recipient_alias)
       KV_SERIALIZE(is_income)
       KV_SERIALIZE(timestamp)

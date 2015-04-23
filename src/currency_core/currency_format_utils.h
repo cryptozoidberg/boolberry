@@ -173,6 +173,20 @@ namespace currency
   void print_currency_details();
     
   //---------------------------------------------------------------
+  template<typename attacment_t>
+  bool get_attachment(const std::vector<attachment_v>& av, attacment_t& a)
+  {
+    for (auto& ai : av)
+    {
+      if (ai.type() == typeid(attacment_t))
+      {
+        a = boost::get<attacment_t&>(ai);
+        return true;
+      }
+    }
+    return false;
+  }
+  //---------------------------------------------------------------
   template<class extra_t>
   extra_t& get_or_add_field_to_extra(std::vector<extra_v>& extra)
   {

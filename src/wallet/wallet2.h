@@ -313,7 +313,7 @@ namespace boost
       a & x.height;
       a & x.tx_blob_size;
       a & x.payment_id;
-      a & x.recipient; 
+      a & x.remote_address; 
       a & x.is_income;
       a & x.td;
       a & x.tx;
