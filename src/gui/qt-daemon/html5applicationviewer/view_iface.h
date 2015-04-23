@@ -44,6 +44,7 @@ namespace view
     std::string payment_id;
     std::string comment;
     std::string fee;
+    bool push_payer;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_id)
@@ -53,6 +54,7 @@ namespace view
       KV_SERIALIZE(payment_id)
       KV_SERIALIZE(comment)
       KV_SERIALIZE(fee)
+      KV_SERIALIZE(push_payer)
     END_KV_SERIALIZE_MAP()
   };
 

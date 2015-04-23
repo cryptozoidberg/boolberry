@@ -690,8 +690,22 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
     uint64_t unlock_time = 0;
     if (tp.lock_time)
       unlock_time = w->get_blockchain_current_height() + tp.lock_time;
-
+    
+    //proces attachments
     std::vector<currency::attachment_v> attachments;
+    if (tp.comment.size())
+    {
+      currency::tx_comment tc;
+      tc.comment = tp.comment;
+      attachments.push_back(tc);
+    }
+    if (tp.push_payer)
+    {
+      currency::tx_payer txp;
+      txp.acc_addr = w->get_account().get_keys().m_account_address;
+      attachments.push_back(txp);
+    }
+    
     w->transfer(dsts, tp.mixin_count, unlock_time ? unlock_time + 1:0, fee, extra, attachments, res_tx);
     update_wallets_info();
   }
