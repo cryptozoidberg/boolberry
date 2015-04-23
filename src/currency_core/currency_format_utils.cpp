@@ -249,6 +249,18 @@ namespace currency
 
     return string_tools::get_xtype_from_string(amount, str_amount);
   }
+  //--------------------------------------------------------------------------------
+  std::string print_stake_kernel_info(const stake_kernel& sk)
+  {
+    std::stringstream ss;
+    ss << "block_timestampL " << sk.block_timestamp << ENDL
+      << "kimage: " << sk.kimage << ENDL
+      << "sk.stake_modifier.last_pos_kernel_id" << sk.stake_modifier.last_pos_kernel_id << ENDL
+      << "sk.stake_modifier.last_pow_id" << sk.stake_modifier.last_pow_id << ENDL
+      << "sk.tx_out_global_index" << sk.tx_out_global_index << ENDL;
+    return ss.str();
+  }
+
   //---------------------------------------------------------------
   bool get_tx_fee(const transaction& tx, uint64_t & fee)
   {

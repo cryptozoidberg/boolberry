@@ -175,7 +175,6 @@ namespace currency {
     return currency::get_block_hash(a) == currency::get_block_hash(b);
   }
 }
-
 //--------------------------------------------------------------------------------
 bool parse_hash256(const std::string str_hash, crypto::hash& hash)
 {

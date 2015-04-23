@@ -163,7 +163,7 @@ namespace currency
   crypto::hash get_blob_longhash_opt(const blobdata& bd, const std::vector<crypto::hash>& scratchpad);
   bool add_padding_to_tx(transaction& tx, size_t count);
   std::string get_comment_from_tx(const transaction& tx);
-
+  std::string print_stake_kernel_info(const stake_kernel& sk);
   //PoS
   bool is_pos_block(const block& b);
   bool is_pos_block(const transaction& tx);
