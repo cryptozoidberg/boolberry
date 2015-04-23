@@ -2344,8 +2344,7 @@ bool blockchain_storage::validate_pos_block(const block& b,
   CHECK_AND_ASSERT_MES(amount!=0, false, "failed to build kernel_stake, amount == 0");
 
   LOG_PRINT_L2("STAKE KERNEL for bl ID: " << get_block_hash(b) << ENDL
-    << print_stake_kernel_info(sk);
-    );
+    << print_stake_kernel_info(sk));
 
   proof_hash = crypto::cn_fast_hash(&sk, sizeof(sk));
   final_diff = basic_diff / amount;

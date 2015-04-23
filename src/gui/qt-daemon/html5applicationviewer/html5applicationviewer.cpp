@@ -562,25 +562,9 @@ QString Html5ApplicationViewer::request_uri(const QString& url_str, const QStrin
 
 QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
 {
-  size_t request_id = m_request_id_counter++;
-  std::shared_ptr<std::string> param(new std::string(json_transfer_object.toStdString()));
+  return que_call2<view::transfer_params>("transfer", json_transfer_object, [this](const view::transfer_params& tp, view::api_response& ar){
 
-  return que_call("transfer", request_id, [request_id, param, this](void){
-
-    view::api_response ar;
-    ar.request_id = std::to_string(request_id);
-
-    view::transfer_params tp = AUTO_VAL_INIT(tp);
     view::transfer_response tr = AUTO_VAL_INIT(tr);
-    tr.success = false;
-    if (!epee::serialization::load_t_from_json(tp, *param))
-    {
-      view::api_void av;
-      ar.error_code = API_RETURN_CODE_BAD_ARG;
-      dispatch(ar, av);
-      return;
-    }
-
     if (!tp.destinations.size())
     {
       view::api_void av;
@@ -605,10 +589,6 @@ QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
     return;
 
   });
-  view::api_response ar;
-  ar.error_code = API_RETURN_CODE_OK;
-  ar.request_id = std::to_string(request_id);
-  return epee::serialization::store_t_to_json(ar).c_str();
 }
 
 void Html5ApplicationViewer::message_box(const QString& msg)
@@ -683,91 +663,30 @@ QString Html5ApplicationViewer::show_savefile_dialog(const QString& param)
 
 QString Html5ApplicationViewer::close_wallet(const QString& param)
 {
-  size_t request_id = m_request_id_counter++;
-  std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
+  return que_call2<view::wallet_id_obj>("close_wallet", param, [this](const view::wallet_id_obj& owd, view::api_response& ar){
 
-  return que_call("close_wallet", request_id, [request_id, param_ptr, this](void){
-
-    view::api_response ar;
-    ar.request_id = std::to_string(request_id);
-
-    view::wallet_id_obj cwr = AUTO_VAL_INIT(cwr);
-    if (!epee::serialization::load_t_from_json(cwr, *param_ptr))
-    {
-      view::api_void av;
-      ar.error_code = API_RETURN_CODE_BAD_ARG;
-      dispatch(ar, av);
-      return;
-    }
-
-    ar.error_code = m_backend.close_wallet(cwr.wallet_id);
-    dispatch(ar, cwr);
+    ar.error_code = m_backend.close_wallet(owd.wallet_id);
+    dispatch(ar, owd);
     return;
   });
-
-  view::api_response ar;
-  ar.error_code = API_RETURN_CODE_OK;
-  ar.request_id = std::to_string(request_id);
-  return epee::serialization::store_t_to_json(ar).c_str();
 }
-
 
 QString Html5ApplicationViewer::generate_wallet(const QString& param)
 {
-  size_t request_id = m_request_id_counter++;
-  std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
-
-  return que_call("generate_wallet", request_id, [request_id, param_ptr, this](void){
-
-    view::api_response ar;
-    ar.request_id = std::to_string(request_id);
-
-    view::open_wallet_request owd = AUTO_VAL_INIT(owd);
-    if (!epee::serialization::load_t_from_json(owd, *param_ptr))
-    {
-      view::api_void av;
-      ar.error_code = API_RETURN_CODE_BAD_ARG;
-      dispatch(ar, av);
-      return;
-    }
-
+  return que_call2<view::open_wallet_request>("generate_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
     view::wallet_id_obj owr = AUTO_VAL_INIT(owr);
     ar.error_code = m_backend.generate_wallet(owd.path, owd.pass, owr.wallet_id);
     dispatch(ar, owr);
-    return;
   });
-
-  view::api_response ar;
-  ar.error_code = API_RETURN_CODE_OK;
-  ar.request_id = std::to_string(request_id);
-  return epee::serialization::store_t_to_json(ar).c_str();
-
 }
 
 QString Html5ApplicationViewer::open_wallet(const QString& param)
 {
-  size_t request_id = m_request_id_counter++;
-  std::shared_ptr<std::string> param_ptr(new std::string(param.toStdString()));
-
-  return que_call("open_wallet", request_id, [request_id, param_ptr, this](void){
-
-    view::api_response ar;
-    ar.request_id = std::to_string(request_id);
-
-    view::open_wallet_request owd = AUTO_VAL_INIT(owd);
-    if (!epee::serialization::load_t_from_json(owd, *param_ptr))
-    {
-      view::api_void av;
-      ar.error_code = API_RETURN_CODE_BAD_ARG;
-      dispatch(ar, av);
-      return;
-    }
+  return que_call2<view::open_wallet_request>("open_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
 
     view::wallet_id_obj owr = AUTO_VAL_INIT(owr);
     ar.error_code = m_backend.open_wallet(owd.path, owd.pass, owr.wallet_id);
     dispatch(ar, owr);
-    return;
-
   });
 }
 
