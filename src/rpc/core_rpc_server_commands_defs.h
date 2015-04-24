@@ -678,11 +678,13 @@ namespace currency
       std::string status;
       uint64_t index;
       uint64_t block_timestamp;
+      uint64_t height;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
         KV_SERIALIZE(index)
         KV_SERIALIZE(block_timestamp)
+        KV_SERIALIZE(height)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -699,11 +701,13 @@ namespace currency
     {
       stake_modifier_type sm;
       uint64_t pos_basic_difficulty;
+      uint64_t height;
       std::string status;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE_VAL_POD_AS_BLOB(sm)
         KV_SERIALIZE(pos_basic_difficulty)
+        KV_SERIALIZE(height)
         KV_SERIALIZE(status)
       END_KV_SERIALIZE_MAP()
     };

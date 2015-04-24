@@ -281,6 +281,9 @@ namespace currency
     }
     res.pos_basic_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(true).convert_to<uint64_t>();
     m_core.get_blockchain_storage().build_stake_modifier(res.sm);
+    
+    //TODO: need atomic operation with  build_stake_modifier()
+    res.height = m_core.get_blockchain_storage().get_current_blockchain_height();
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }

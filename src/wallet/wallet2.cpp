@@ -915,6 +915,7 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
           LOG_LEVEL_0);
         rsp.index = i;
         rsp.block_timestamp = ts;
+        rsp.height = pos_details_resp.height;
         rsp.status = CORE_RPC_STATUS_OK;
         return true;
       }
@@ -938,10 +939,7 @@ bool wallet2::try_mint_pos()
   {
       build_minted_block(req, rsp);
   }
-  else 
-  {
-    LOG_PRINT_L0("PoS mint iteration finished(" << rsp.status  << ")");
-  }
+  LOG_PRINT_L0("PoS mint iteration finished(" << rsp.status << ")");
 
   return true;
 }
@@ -961,8 +959,8 @@ bool wallet2::build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& 
     tmpl_req.pos_amount = req.pos_entries[rsp.index].amount;
     tmpl_req.pos_index = req.pos_entries[rsp.index].index;
     m_core_proxy->call_COMMAND_RPC_GETBLOCKTEMPLATE(tmpl_req, tmpl_rsp);
-
     CHECK_AND_ASSERT_MES(tmpl_rsp.status == CORE_RPC_STATUS_OK, false, "Failed to create block template after kernel hash found!");
+
     currency::block b = AUTO_VAL_INIT(b);
     currency::blobdata block_blob;
     bool res = epee::string_tools::parse_hexstr_to_binbuff(tmpl_rsp.blocktemplate_blob, block_blob);
@@ -970,7 +968,13 @@ bool wallet2::build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& 
     res = parse_and_validate_block_from_blob(block_blob, b);
     CHECK_AND_ASSERT_MES(res, false, "Failed to create block template after kernel hash found!");
 
-      std::vector<const crypto::public_key*> keys_ptrs;
+    if (rsp.height != currency::get_block_height(b))
+    {
+      LOG_PRINT_YELLOW("Found kernel but block is behindhand", LOG_LEVEL_0);
+      return false;
+    }
+
+    std::vector<const crypto::public_key*> keys_ptrs;
     CHECK_AND_ASSERT_MES(req.pos_entries[rsp.index].wallet_index < m_transfers.size(),
         false, "Wrong wallet_index at generating coinbase transacton");
 
