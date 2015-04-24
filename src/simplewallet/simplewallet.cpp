@@ -541,7 +541,7 @@ bool print_wti(const tools::wallet_rpc::wallet_transfer_info& wti)
   message_writer(cl) << epee::misc_utils::get_time_str_v2(wti.timestamp) << " "
     << (wti.is_income ? "Received " : "Sent    ")
     << print_money(wti.amount) << "(fee:" << print_money(wti.fee) << ")  "
-    << (wti.recipient_alias.size() ? wti.recipient_alias : wti.recipient)
+    << (wti.recipient_alias.size() ? wti.recipient_alias : wti.remote_address)
     << " " << wti.tx_hash << payment_id_placeholder;
   return true;
 }
