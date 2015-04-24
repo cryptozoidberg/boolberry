@@ -14,19 +14,21 @@
     <link href="assets/css/bootstrap.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="assets/css/dashboard.css" rel="stylesheet">
-    <link href="assets/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link href="assets/font/guilder/styles.css" rel="stylesheet">
-
+    <!-- Custom styles for this template -->
+    <link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">
+   
 
     <link href="assets/css/bootstrap-tour.css" rel="stylesheet">
     <link href="assets/css/bootstrap-slider.css" rel="stylesheet">
 
+    <!-- Owl carousel styles -->
     <link href="assets/js/owl-carousel/owl.carousel.css" rel="stylesheet">
     <link href="assets/js/owl-carousel/owl.theme.css" rel="stylesheet">
     <link href="assets/js/owl-carousel/owl.transitions.css" rel="stylesheet">
 
     <link href="assets/css/bootstrap-select.css" rel="stylesheet">
-    <link href="assets/css/datepicker3.css" rel="stylesheet">
+    <!-- <link href="assets/css/datepicker3.css" rel="stylesheet"> -->
 
     <link href="assets/css/app.css" rel="stylesheet">
 
@@ -63,11 +65,24 @@
             <small>Архитектура сети обеспечивает полную безопасность и анонимность</small>
         </div>
         <div class="col-xs-3 col-sm-2 guilder-bar-state">
-            <a class="pull-right" href="#market">
+            <a class="pull-right" href="#market" ng-hide="deamon_state.daemon_network_state == 1">
                 <span ng-show="deamon_state.daemon_network_state == 0" class="ifOnlineText offline" style="color:#b85c5c"><i class="fa fa-2x fa-times-circle-o"></i> Оффлайн</span>
-                <span ng-show="deamon_state.daemon_network_state == 1" class="ifOnlineText loading" style="color:#ec971f"><i class="fa fa-2x fa-circle-o-notch fa-spin"></i> Загружается...</span>
+                
+                <!-- <span ng-show="deamon_state.daemon_network_state == 1" class="ifOnlineText loading" style="color:#ec971f">
+                    <i class="fa fa-2x fa-circle-o-notch fa-spin"></i> Загружается...
+                </span> -->
+                
                 <span ng-show="deamon_state.daemon_network_state == 2" class="ifOnlineText online" style="color:#5cb85c"><i class="fa fa-2x fa-check-circle-o"></i> Онлайн</span>
             </a>
+            <progressbar 
+                ng-if="deamon_state.daemon_network_state == 1" 
+                class="progress-striped active" 
+                max="100" 
+                value="progress_value()"
+                type="warning"
+            >
+                <i>{{progress_value()}} %</i>
+            </progressbar>
             <div class="clearfix"></div>
         </div>
     </div>
@@ -363,73 +378,6 @@
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="savefile" tabindex="-1" role="dialog" aria-labelledby="savefileLabel" aria-hidden="true">
-
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="form-group">
-                    <em>системный диалог "сохранить файл"</em>
-                </div>
-                <div class="form-group">
-                    <a class="btn btn-default" type="button" data-dismiss="modal">Закрыть</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-<div class="modal fade" id="savecopyfile" tabindex="-1" role="dialog" aria-labelledby="savecopyfilefileLabel" aria-hidden="true">
-
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="form-group">
-                    <em>системный диалог "сохранить файл"</em>
-                    <p class="small text-muted">---сделать недоступным пересохранение оригинальной копии файла-- </p>
-                </div>
-                <div class="form-group">
-                    <a class="btn btn-default" type="button" data-dismiss="modal">Закрыть</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<div class="modal fade" id="savefile0" tabindex="-1" role="dialog" aria-labelledby="savefile0Label" aria-hidden="true">
-
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="form-group">
-                    <em>системный диалог "сохранить файл"</em>
-                </div>
-                <div class="form-group">
-                    <a class="btn btn-default" type="button" data-dismiss="modal">Закрыть</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-<div class="modal fade" id="savecopyfile0" tabindex="-1" role="dialog" aria-labelledby="savecopyfilefile0Label" aria-hidden="true">
-
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="form-group">
-                    <em>системный диалог "сохранить файл"</em>
-                    <p class="small text-muted">---сделать недоступным пересохранение оригинальной копии файла-- </p>
-                </div>
-                <div class="form-group">
-                    <a class="btn btn-default" type="button" data-dismiss="modal">Закрыть</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 <div class="modal fade" id="confirm_operation_modal" tabindex="-1" role="dialog" aria-labelledby="confirm_operation_label" aria-hidden="true">
@@ -1084,10 +1032,10 @@
 <script src="assets/js/jquery.alphanum.js"></script>
 <script src="assets/js/bootstrap-tour.app.js"></script>
 <script src="assets/js/spin.js"></script>
-<script src="assets/js/bootstrap-datepicker.ru.js"></script>
+<!-- <script src="assets/js/bootstrap-datepicker.ru.js"></script> -->
 
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-<script src="assets/js/ie10-viewport-bug-workaround.js"></script>
+<!-- <script src="assets/js/ie10-viewport-bug-workaround.js"></script> -->
 
 <!-- Flot -->
 <script src="assets/js/flot/jquery.flot.js"></script>
@@ -1099,22 +1047,16 @@
 
 <script src="assets/js/bootstrap-select/bootstrap-select.js"></script>
 <script src="assets/js/bootstrap-select/i18n/defaults-ru_RU.min.js"></script>
-<script src="assets/js/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-<script src="assets/js/bootstrap-datepicker/locales/bootstrap-datepicker.ru.js"></script>
+<!-- <script src="assets/js/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+<script src="assets/js/bootstrap-datepicker/locales/bootstrap-datepicker.ru.js"></script> -->
 <script src="assets/js/jquery.easing.min.js"></script>
 <script src="assets/js/jquery.easypiechart.js"></script>
-<script src="assets/js/ajax-mining-diagrams.js"></script>
+<!-- <script src="assets/js/ajax-mining-diagrams.js"></script> -->
 
 <!-- Password strength -->
 <script src="assets/js/password-score.js"></script>
 <script src="assets/js/password-score-options.js"></script>
 <script src="assets/js/bootstrap-strength-meter.js"></script>
-
-<!-- Application Dependencies -->
-<!--script src="Application.js"></script>
-<script src="Backend-old.js"></script>
-<script src="Emulator.js"></script>
-<script src="Router.js"></script-->
 
 <script src="app.js"></script>
 

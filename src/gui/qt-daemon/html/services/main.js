@@ -35,9 +35,12 @@
                 modalHtml += '<h4 class="modal-title text-center">Загружается...</h4>';
                 modalHtml += '</div>';
                 modalHtml += '<div class="modal-body">';
-                modalHtml += '<span class="ifOnlineText loading text-primary">';
-                modalHtml += '<i class="fa fa-2x fa-circle-o-notch fa-spin"></i> '+message;
-                modalHtml += '</span>';
+                modalHtml += '<div class="text-center margin-bottom">';
+                modalHtml += '<span  class="text-primary"><i class="fa fa-3x fa-spinner fa-pulse"></i></span>';
+                modalHtml += '</div>';
+                modalHtml += '<div>';
+                modalHtml += message;
+                modalHtml += '</div>';
                 modalHtml += '</div>';
 
                 return $modal.open({

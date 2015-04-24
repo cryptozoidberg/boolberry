@@ -61,22 +61,46 @@
 
                     <div class="form-group">
                         <div class="col-xs-3 col-sm-3 col-sm-offset-4">
-                            <button type="button" class="btn btn-link btn-block i-check collapsed" data-toggle="collapse" data-target="#deferred" aria-expanded="false">
+                            <!-- <button type="button" class="btn btn-link btn-block i-check collapsed" data-target="#deferred" aria-expanded="false">
                                 <span class="text-muted"><i class="fa fa-lg fa-square-o"></i> Отложенный перевод</span>
-                            </button>
+                            </button> -->
+                            <label class="ui-checkbox ui-checkbox">
+                                <input type="checkbox" ng-model="transaction.is_delay" class="ng-pristine ng-untouched ng-valid">
+                                <span class="text-muted">Отложенный перевод</span>
+                            </label>
                         </div>
                         <div class="col-xs-5 col-sm-5">
                             <div class="help-block">Комиссия, при которой платеж будет наиболее быстро обработан системой</div>
                         </div> 
                     </div>
 
-                    <div class="collapse" id="deferred">
+                    <div ng-show="transaction.is_delay">
                         <div class="form-group">
                             <label class="control-label col-xs-4 col-sm-4">Дата и время</label>
                             <div class="col-xs-3 col-sm-3 sdatapicker">
                                 <div class="input-group date">
                                     <input type="text" class="form-control"><span class="input-group-addon"><i class="fa fa-lg fa-calendar"></i></span>
-                                </div>                 
+                                </div>
+                                <div class="input-group date">
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        datepicker-popup="{{format}}" 
+                                        ng-model="dt" 
+                                        is-open="opened" 
+                                        min-date="minDate" 
+                                        max-date="'2015-06-22'" 
+                                        datepicker-options="dateOptions" 
+                                        date-disabled="disabled(date, mode)" 
+                                        ng-required="true" 
+                                        close-text="Close" 
+                                    />
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default" ng-click="open($event)">
+                                            <i class="fa fa-lg fa-calendar"></i>
+                                        </button>
+                                    </span>
+                                </div>             
                             </div>
                             <div class="col-xs-2 col-sm-2">
                                 <div class="input-group timer">

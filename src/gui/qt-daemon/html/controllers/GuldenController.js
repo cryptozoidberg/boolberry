@@ -6,7 +6,8 @@
         function(backend,$rootScope,$scope,informer){
             $scope.transaction = {
                 to: 'Hc51bpKjQRy1mMMF1zgHVkRbPExx2pwXFFXcaKS93LMmRZtbCVJGMmmRCtVSXz75hvJASHP5Yvu99aH5BjLapN223SDXv6y',
-                push_payer: false
+                push_payer: false,
+                is_delay : false
             };
             $scope.send = function(tr){
                 backend.transfer(tr.from, tr.to, tr.ammount, tr.fee, tr.comment, tr.push_payer, function(data){

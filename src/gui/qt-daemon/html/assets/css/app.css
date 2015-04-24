@@ -1639,5 +1639,9 @@ min-width: 96px;
 	opacity: 0.05;
 }
 
+.margin-bottom {
+    margin-bottom: 10px !important;
+}
+
 
 

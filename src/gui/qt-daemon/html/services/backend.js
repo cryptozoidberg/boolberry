@@ -340,6 +340,8 @@
                     result = {
                         "daemon_network_state": 2,
                         "hashrate": 0,
+                        "max_net_seen_height": 9800,
+                        "synchronization_start_height": 9700,
                         "height": 9729,
                         "inc_connections_count": 0,
                         "last_blocks": [
@@ -357,11 +359,11 @@
                         ],
                         "last_build_available": "0.0.0.0",
                         "last_build_displaymode": 0,
-                        "max_net_seen_height": 9726,
+
                         "out_connections_count": 2,
                         "pos_difficulty": "107285151137540",
                         "pow_difficulty": "2759454",
-                        "synchronization_start_height": 9725,
+                        
                         "text_state": "Offline"
                     };
                     break;
