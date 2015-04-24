@@ -2,8 +2,9 @@
     'use strict';
     var module = angular.module('app.safes',[]);
 
-    module.controller('safeListCtrl',['backend',function(backend){
-
+    module.controller('safeListCtrl',['backend','$scope','$rootScope',
+        function(backend, $rootScope ,$scope){
+        console.log($scope.safes);
     }]);
 
     module.controller('safeDetailsCtrl',['$routeParams','backend','$scope',

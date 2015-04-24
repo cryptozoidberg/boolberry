@@ -8,6 +8,7 @@
         'ngRoute', 
         'ngSanitize',
         'validation.match', // allow to validate inputs match 
+        'angularSlideables', // show/hide animations
 
         'app.filters',
         'app.services',

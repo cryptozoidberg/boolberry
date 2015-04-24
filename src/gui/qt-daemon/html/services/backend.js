@@ -32,17 +32,17 @@
                 return this.runCommand('show_savefile_dialog',params);
             },
 
-            transfer: function(from, to, ammount, fee, comment, push_payer, callback) {
+            transfer: function(from, to, ammount, fee, comment, push_payer, lock_time, callback) {
                  var params = {
                     wallet_id : from,
                     destinations : [
                         {
                             address : to,
-                            amount : "10.0"
+                            amount : ammount
                         }
                     ],
                     mixin_count : 0,
-                    lock_time : 0,
+                    lock_time : lock_time,
                     payment_id : "",
                     fee : fee,
                     comment: comment,

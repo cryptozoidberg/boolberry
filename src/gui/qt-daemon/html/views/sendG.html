@@ -61,9 +61,7 @@
 
                     <div class="form-group">
                         <div class="col-xs-3 col-sm-3 col-sm-offset-4">
-                            <!-- <button type="button" class="btn btn-link btn-block i-check collapsed" data-target="#deferred" aria-expanded="false">
-                                <span class="text-muted"><i class="fa fa-lg fa-square-o"></i> Отложенный перевод</span>
-                            </button> -->
+                            
                             <label class="ui-checkbox ui-checkbox">
                                 <input type="checkbox" ng-model="transaction.is_delay" class="ng-pristine ng-untouched ng-valid">
                                 <span class="text-muted">Отложенный перевод</span>
@@ -79,20 +77,17 @@
                             <label class="control-label col-xs-4 col-sm-4">Дата и время</label>
                             <div class="col-xs-3 col-sm-3 sdatapicker">
                                 <div class="input-group date">
-                                    <input type="text" class="form-control"><span class="input-group-addon"><i class="fa fa-lg fa-calendar"></i></span>
-                                </div>
-                                <div class="input-group date">
                                     <input 
                                         type="text" 
                                         class="form-control" 
                                         datepicker-popup="{{format}}" 
-                                        ng-model="dt" 
+                                        show-button-bar="false"
+                                        ng-model="transaction.lock_time" 
                                         is-open="opened" 
-                                        min-date="minDate" 
-                                        max-date="'2015-06-22'" 
                                         datepicker-options="dateOptions" 
                                         date-disabled="disabled(date, mode)" 
                                         ng-required="true" 
+                                        ng-change=""
                                         close-text="Close" 
                                     />
                                     <span class="input-group-btn">
@@ -103,9 +98,22 @@
                                 </div>             
                             </div>
                             <div class="col-xs-2 col-sm-2">
-                                <div class="input-group timer">
-                                    <input type="text" class="form-control"><span class="input-group-addon"><i class="fa fa-lg fa-clock-o"></i></span>
-                                </div> 
+                                <div class="btn-group" dropdown is-open="status.isopen">
+                                  <button type="button" class="btn btn-default dropdown-toggle btn-w-md" dropdown-toggle  style="width: 120px;">
+                                    {{transaction.lock_time | date:'shortTime' }} <i class="fa fa-lg fa-clock-o"></i>
+                                  </button>
+                                  <ul class="dropdown-menu" role="menu" style="padding: 10px;">
+                                    <li>
+                                        <timepicker 
+                                            ng-model="transaction.lock_time" 
+                                            hour-step="1" 
+                                            minute-step="15" 
+                                            show-meridian="false"
+                                        >
+                                        </timepicker>
+                                    </li>
+                                  </ul>
+                                </div>
                             </div>
                         </div>
                     </div>

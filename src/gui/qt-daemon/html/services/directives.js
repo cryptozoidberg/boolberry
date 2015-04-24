@@ -115,5 +115,17 @@
     };  
   });
 
+  module.directive('datepickerPopup', function (){
+    return {
+        restrict: 'EAC',
+        require: 'ngModel',
+        link: function(scope, element, attr, controller) {
+              //remove the default formatter from the input directive to prevent conflict
+              console.log('picker');
+              controller.$formatters.shift();
+          }
+        }
+  });
+
 
 }).call(this);
