@@ -60,7 +60,7 @@
         function($scope, backend, $modalInstance, $modal, $timeout, path, safes) {
             $scope.owl_options  = {
               singleItem: true,
-              autoHeight: true,
+              autoHeight: false,
               navigation: false,
               pagination: false,
               margin: 16,
