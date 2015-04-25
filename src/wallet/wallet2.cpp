@@ -29,6 +29,7 @@ void fill_transfer_details(const currency::transaction& tx, const tools::money_t
   for (auto si : td.spent_indices)
   {
     CHECK_AND_ASSERT_MES(si < tx.vin.size(), void(), "Internal error: wrong tx transfer details: spend index=" << si << " is greater than transaction inputs vector " << tx.vin.size());
+    CHECK_AND_ASSERT_MES(tx.vin[si].type() == typeid(currency::txin_to_key), void(), "Internal error: Wrong type of tx.vin[si]: " << tx.vin[si].type().name() << ", expected: currency::txin_to_key");
     res_td.spn.push_back(boost::get<currency::txin_to_key>(tx.vin[si]).amount);
   }
 
