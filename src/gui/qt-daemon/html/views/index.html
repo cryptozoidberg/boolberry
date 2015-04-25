@@ -6,11 +6,13 @@
                     Операции <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    <li><a href="market.html">Отправить гульдены</a></li>
-                    <li><a href="market.html">Продать гульдены</a></li>
-                    <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Начать добычу</a></li>
+                    <li><a href="#sendG/{{wallet_id}}">Отправить гульдены</a></li>
+                    <li><a href="">Продать гульдены</a></li>
+                    <li><a href="">Купить гульдены</a></li>
+                    <li><a href="#">Начать добычу</a></li>
                     <li class="divider"></li>
-                    <li><a href="safe.html#information">Присвоить алиас</a></li><li><a href="">Отключить сейф</a></li>
+                    <li><a href="">Присвоить алиас</a></li>
+                    <li><a ng-click="closeWallet(wallet_id)">Отключить сейф</a></li>
                     <li><a href="market.html">Сделать бекап</a></li>
                 </ul>
             </div>
@@ -34,7 +36,7 @@
                         <ul class="list-unstyled">
                             <li>
                                 <div class="contractor">
-                                    <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
+                                    // <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
                                     <pre style="height:60px" class="safe-number">
                                         {{address}}
                                     </pre>
@@ -58,7 +60,8 @@
                             Ожидается:  <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">               
                         </li>
                     </ul>
-                    <div class="balance">Баланс: {{unlocked_balance}} ({{balance}})G </div>
+                    <div class="balance">Баланс: {{balance | gulden }} </div>
+                    <div class="balance">Доступно: {{unlocked_balance | gulden }}</div>
                 </div>
 
                 <div class="col-xs-3 col-sm-3">
@@ -100,7 +103,7 @@
             </h3>
         </div>
     </div>
-    <div class="btn-toolbar">
+    <div class="btn-toolbar" ng-controller="safeModals">
         <div class="btn-group">
             <button class="btn btn-primary navbar-btn index_create-safe-button" ng-click="openSafeForm();" type="button">
                 Создать сейф
@@ -184,6 +187,7 @@
 
 </div>
 <hr>
+
 <div class="footer">
 
     <p class="small text-muted">
@@ -191,59 +195,3 @@
         текст о том что пользователи сами берут на себя ответственность за свои заявки и исполнение обязательств по ним.
     </p>
 </div>
-
-
-<script>
-    //    $("#pincode").modal({
-    //        backdrop: 'static'
-    //    });
-    function hideModalAdd(event) {
-        $('#addSafe').on('shown.bs.modal', function (e) {
-            $('#addSafe').addClass('modal-ready');
-        })
-    }
-    function hideModalOpen(event) {
-        $('#openSafe').on('shown.bs.modal', function (e) {
-            $('#openSafe').addClass('modal-ready');
-        })
-    }
-    function hideModalOpensmart(event) {
-        $('#onensmartSafe').on('shown.bs.modal', function (e) {
-            $('#onensmartSafe').addClass('modal-ready');
-        })
-    }
-    function hideModalConfirmOperation(event) {
-        $('#confirm_operation_modal').on('shown.bs.modal', function (e) {
-            $('#confirm_operation_modal').addClass('modal-ready');
-        })
-    }
-    function hideModalPinreset(event) {
-        $('#resetpin').on('shown.bs.modal', function (e) {
-            $('#resetpin').addClass('modal-ready');
-        })
-    }
-
-    function onblockBtn() {
-        $('#printbtncheck').attr("disabled", false);
-    }
-    function onblockBtn0() {
-        $('#printbtncheck0').attr("disabled", false);
-    }
-
-
-
-    $(function () {
-
-        $('.js_update').on('click', function () {
-            chart.update(Math.random() * 200 - 100);
-        });
-        $('.js_update').on('click', function () {
-            chart.update(Math.random() * 200 - 100);
-        });
-        $('#cancelbtn').on('click', function () {
-            $('#pincode').modal("show");
-        });
-    });
-
-
-</script>

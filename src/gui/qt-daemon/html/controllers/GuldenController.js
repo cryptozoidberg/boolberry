@@ -2,14 +2,18 @@
     'use strict';
     var module = angular.module('app.guldens',[]);
 
-    module.controller('guldenSendCtrl',['backend','$rootScope','$scope','informer',
-        function(backend,$rootScope,$scope,informer){
+    module.controller('guldenSendCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter){
             $scope.transaction = {
-                to: 'Hc51bpKjQRy1mMMF1zgHVkRbPExx2pwXFFXcaKS93LMmRZtbCVJGMmmRCtVSXz75hvJASHP5Yvu99aH5BjLapN223SDXv6y',
+                //to: 'Hc51bpKjQRy1mMMF1zgHVkRbPExx2pwXFFXcaKS93LMmRZtbCVJGMmmRCtVSXz75hvJASHP5Yvu99aH5BjLapN223SDXv6y',
                 push_payer: false,
-                is_delay : true,
-                lock_time: new Date()
+                is_delay : false,
+                lock_time: new Date(),
             };
+
+            if($routeParams.wallet_id){
+                $scope.transaction.from = $routeParams.wallet_id+'';
+            }
 
             $scope.send = function(tr){
                 var TS = 0;

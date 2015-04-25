@@ -8,36 +8,44 @@
                     <div class="row">
                         <div class="col-xs-9 col-sm-9">
 
-                            <h2 style="margin:0 0 5px;"><span class="pull-right">804,40 G</span> Safelabel <button data-content="Сейф зашифрован" data-toggle="popover" data-trigger="hover" class="btn btn-link popover-name" type="button" data-original-title="" title=""><i class="fa fa-1x fa-lock text-primary"></i></button></h2>
+                            <h2 style="margin:0 0 5px;">
+                                <span class="pull-right">{{safe.balance | gulden}}</span> 
+                                {{safe.name}} 
+                                <button data-content="Сейф зашифрован" data-toggle="popover" data-trigger="hover" class="btn btn-link popover-name" type="button" data-original-title="" title=""><i class="fa fa-1x fa-lock text-primary"></i></button>
+                            </h2>
 
-                            <span class="label label-info">@safealias</span> <span class="label label-info">@safealias</span>
+                            <span class="label label-info">@safealias</span> 
+                            <span class="label label-info">@safealias</span>
+
                             <div style="position: relative; margin: 15px 0px 0px;" class="rel">
-                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-                                <pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y</pre>
+                                <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button> -->
+                                <pre class="safe-number" style="height:60px">{{safe.address}}</pre>
                             </div>
+
                             <h4><a href="#" type="button" data-toggle="collapse" data-target=".collapse00"><span>Состояние</span></a></h4>
+
                             <div class="form-group nomargin">
                                 <label class="col-xs-4 col-sm-4 control-label ">Общее количество средств</label>
-                                <div class="col-xs-4 col-sm-4"><div class="help-block required">4,20 G</div></div>
+                                <div class="col-xs-4 col-sm-4"><div class="help-block required">{{safe.balance | gulden}}</div></div>
                             </div>
                             <div class="form-group nomargin">
                                 <label class="col-xs-4 col-sm-4 control-label ">Доступно для платежей</label>
-                                <div class="col-xs-4 col-sm-4"><div class="help-block required">4.20 G</div></div>
+                                <div class="col-xs-4 col-sm-4"><div class="help-block required">{{safe.unlocked_balance | gulden}}</div></div>
                             </div>
                             <div class="form-group nomargin">
                                 <label class="col-xs-4 col-sm-4 control-label ">Ожидается</label>
-                                <div class="col-xs-8 col-sm-8"><div class="help-block required">0,20 G <span class="chart receive-timer" data-percent="86"></span></div>
+                                <div class="col-xs-8 col-sm-8"><div class="help-block required">-- <span class="chart receive-timer" data-percent="86"></span></div>
                                 </div>
 
                                 <div class="col-xs-4 col-sm-4"></div>
                             </div>
                             <div class="form-group nomargin">
                                 <label class="col-xs-4 col-sm-4 control-label ">Отправляется</label>
-                                <div class="col-xs-4 col-sm-4"><div class="help-block required">0 G </div></div>
+                                <div class="col-xs-4 col-sm-4"><div class="help-block required">-- </div></div>
                             </div>
                             <div class="form-group nomargin">
                                 <label class="col-xs-4 col-sm-4 control-label ">Размещено в добычу</label>
-                                <div class="col-xs-4 col-sm-4"><div class="help-block required">800 G </div></div>
+                                <div class="col-xs-4 col-sm-4"><div class="help-block required">-- </div></div>
                             </div>
 
 
@@ -52,14 +60,14 @@
                                             Операции <span class="caret"></span>
                                         </button>
                                         <ul role="menu" class="dropdown-menu dropdown-menu-right">
-                                            <li><a href="#sendG">Отправить гульдены</a></li>
+                                            <li><a href="#sendG/{{safe.wallet_id}}">Отправить гульдены</a></li>
 
                                             <li><a href="#sellG">Продать гульдены</a></li>
                                             <li><a href="#buyG">Купить гульдены</a></li>
 
                                             <li class="divider"></li>
                                             <li><a href="#" onclick="return false;" type="button" data-toggle="modal" data-target="#alias">Присвоить алиас</a></li>
-                                            <li><a href="#" onclick="return false;">Отключить сейф</a></li>
+                                            <li><a ng-click="closeWallet(safe.wallet_id)">Отключить сейф</a></li>
                                             <li><a href="#" onclick="return false;">Сделать бекап</a></li>
                                         </ul>
                                     </div>
@@ -75,7 +83,7 @@
 
 
             </div>
-            <div class="panel" id="information">
+<!--             <div class="panel" id="information">
                 <div class="panel-body">
                     <h4><a href="#" type="button" data-toggle="collapse" data-target=".collapse000"><span>Информация</span></a></h4>
                     <div class="collapse in collapse000">
@@ -120,9 +128,7 @@
                                     <div class="btn-group"><button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#alias"><i class="fa fa-lg fa-plus"></i> Присвоить новый алиас</button></div></div>
                             </div>
                         </div>
-                        <!--
-
-                        -->
+                    
 
                         <div class="form-group inline-edit-field">
                             <label class="col-xs-4 col-sm-4 control-label">Дата открытия</label>
@@ -141,7 +147,7 @@
 
 
                 </div>
-            </div>
+            </div> -->
             <div class="panel">
                 <div class="panel-body">
 
@@ -332,9 +338,9 @@
                                                         <li>Сейф: <a href="">Safelabel1</a></li>
                                                         <li>
                                                             <div class="contractor">
-                                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                                <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
                                                                     скопировать
-                                                                </button>
+                                                                </button> -->
                                                                 <pre class="safe-number" style="height:60px">{{item.remote_address}}
                                                                 </pre>
                                                             </div>
@@ -364,9 +370,9 @@
                                                     <ul class="list-unstyled">
                                                         <li>
                                                             <div class="contractor">
-                                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                                <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
                                                                     скопировать
-                                                                </button>
+                                                                </button> -->
                                                                 <pre class="safe-number" style="height:60px">{{item.remote_address}}</pre>
                                                             </div>
                                                         </li>
@@ -382,119 +388,6 @@
                                     <td><span class="text-muted">{{item.comment}}</span></td>
                                 </tr>
 
-                                <!-- <tr>
-                                    <td><span class="mix-label mix-label-down">
-     <img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
-        <em><i style="color:#ddd" class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
-    </span>
-                                    </td>
-                                    <td>
-
-                                        <small class="text-muted nowrap">12.12.14 22:56</small><span class="chart receive-timer" data-percent="60"></span>
-
-                                    </td>
-                                    <td>
-                                        <small class="text-info"><em>Получение</em></small>
-                                    </td>
-                                    <td>
-                                        +3,00
-                                    </td>
-                                    <td>
-                                        0
-                                    </td>
-                                    <td>
-                                        <small style="color:#999"><em>неизвестно</em></small>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-            <span class="moredots">...<span class="caret"></span></span>
-            </span></button>
-                                            <div class="dropdown-menu dropdown-menu-left" role="menu">
-                                                <div style="padding:10px">
-                                                    <ul class="list-unstyled">
-                                                        <li>Сейф: <a href="">Safelabel1</a></li>
-
-                                                        <li><div class="contractor">
-                                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-                            <pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-                            </pre>
-                                                        </div></li>
-                                                        <li><a href="">@onesafekaccout</a></li>
-                                                        <li><a href="">@twosafeaccout</a></li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-muted">текст комментария</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-    <span class="mix-label mix-label-up">
-     <img src="assets/font/svg/sound8.svg" style="opacity: 0.75;">
-        <em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
-    </span>
-                                    </td>
-                                    <td>
-
-                                        <small class="text-muted nowrap">12.12.14 22:56</small>
-
-
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">Отправлено</small>
-                                    </td>
-                                    <td>
-                                        &ndash;6,00
-                                    </td>
-                                    <td>
-                                        &ndash;1,67
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button aria-expanded="true" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-            <span class="moredots">...<span class="caret"></span></span>
-            </span></button>
-                                            <div class="dropdown-menu dropdown-menu-left" role="menu">
-                                                <div style="padding:10px">
-                                                    <ul class="list-unstyled">
-                                                        <li>Сейф: <a href="">Safelabel1</a></li>
-
-                                                        <li><div class="contractor">
-                                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
-                            <pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-                            </pre>
-                                                        </div></li>
-                                                        <li><a href="">@onesafekaccout</a></li>
-                                                        <li><a href="">@twosafeaccout</a></li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">@fjjhtyjlmnbg<span class="caret"></span></span>
-
-            </span></button>
-                                            <div class="dropdown-menu dropdown-menu-left" role="menu">
-                                                <div style="padding:10px">
-                                                    <ul class="list-unstyled">
-                                                        <li><div class="contractor">
-                                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-                            <pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-                            </pre>
-                                                        </div>
-                                                        </li>
-                                                        <li><a href="">@fjjhtyjlmnbg</a>
-                                                        </li></ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-muted">текст комментария</span></td></tr> -->
-
                                 </tbody>
 
                             </table>
@@ -502,13 +395,13 @@
                         </div>
                 </div>
             </div>
-            <div class="panel">
+          <!--   <div class="panel">
                 <div class="panel-body">
                     <h4><a href="#" type="button" data-toggle="collapse" data-target=".collapse1">  <span>Добыча</span></a></h4>
                     <div class="collapse in collapse1">
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
 

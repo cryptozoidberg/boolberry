@@ -61,6 +61,14 @@
                 return this.runCommand('open_wallet', params, callback);
             },
 
+            closeWallet : function(wallet_id, callback) {
+                var params = {
+                    wallet_id: wallet_id
+                };
+                
+                return this.runCommand('close_wallet', params, callback);
+            },
+
             getWalletInfo : function(wallet_id, callback) {
                 var params = {
                     wallet_id: wallet_id
@@ -217,7 +225,7 @@
         this.getWalletInfo = function() {
             
             var random_balance = function(){
-                return Math.random() * 1000000;
+                return Math.floor(Math.random() * 100) * 10000000000;
             }
 
             var object = {
@@ -281,6 +289,11 @@
                 case 'open_wallet' : 
                     result = {
                         "wallet_id" : "1"
+                    }
+                    break;
+                case 'generate_wallet' : 
+                    result = {
+                        param: {"wallet_id" : "1"}
                     }
                     break;
                 case 'get_recent_transfers' :

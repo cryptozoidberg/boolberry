@@ -17,7 +17,6 @@
 					}
 
 					result = result.substr(0, result.length - CDDP) + "." + result.substr(result.length - CDDP);
-
 					var pos = 0;
 					for (var i = (result.length-1); i > 0; i--) {
 						if (result[i] == '0' && result[i-2] != '.'){
@@ -26,7 +25,10 @@
 							break;
 						}
 					}
-					result = result.substr(0,pos);
+					if(pos){
+						result = result.substr(0,pos);	
+					}
+					
 					result += ' G';
 
 				}

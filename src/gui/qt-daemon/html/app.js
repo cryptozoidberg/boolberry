@@ -38,6 +38,7 @@
             {route: '/interface',        template: 'views/interface.html'},
             {route: '/common',           template: 'views/common.html'},
             {route: '/sendG',            template: 'views/sendG.html'},
+            {route: '/sendG/:wallet_id', template: 'views/sendG.html'},
             {route: '/buyG',             template: 'views/buyG.html'},
             {route: '/sellG',            template: 'views/sellG.html'},
             {route: '/buyProduct',       template: 'views/buyProduct.html'},
@@ -54,7 +55,12 @@
         
     }]);
 
-    app.run([function(){
+    app.run(['$rootScope',function($rootScope){
+        
+        if(angular.isUndefined($rootScope.safes)){
+            $rootScope.safes = [];
+        }
+
         // Randomly shuffles strings. Mostly the emulator needs it
         String.prototype.shuffle = function () {
             var a = this.split(""),
@@ -80,6 +86,3 @@
     }]);
 
 }).call(this);
-
-
-//TODO move it somewhere!!!!

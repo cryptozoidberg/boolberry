@@ -182,7 +182,7 @@ padding: 0 3px;
 }
 .safe-number {
 display: block;
-overflow: hidden;
+overflow: auto;
 clear: left;
 }
 .navbar h4 {
