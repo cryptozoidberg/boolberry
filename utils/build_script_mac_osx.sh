@@ -1,8 +1,5 @@
-cd lui
-if [ $? -ne 0 ]; then
-    echo "Failed to cd boolberry"
-    exit $?
-fi
+set -x #echo on
+
 
 git pull
 if [ $? -ne 0 ]; then
@@ -20,9 +17,9 @@ fi
 
 
 
-make qt-boolb
+make qt-lui
 if [ $? -ne 0 ]; then
-    echo "Failed to make qt-boolb"
+    echo "Failed to make qt-lui"
     exit $?
 fi
 
@@ -33,25 +30,25 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 
-/Users/roky/Qt/5.3/clang_64/bin/macdeployqt qt-boolb.app
+/Users/roky/Qt/5.3/clang_64/bin/macdeployqt qt-lui.app
 if [ $? -ne 0 ]; then
-    echo "Failed to macdeployqt qt-boolb.app"
+    echo "Failed to macdeployqt qt-lui.app"
     exit $?
 fi
 
-cp -R ../../../src/gui/qt-daemon/html qt-boolb.app/Contents/MacOS
+cp -R ../../../src/gui/qt-daemon/html qt-lui.app/Contents/MacOS
 if [ $? -ne 0 ]; then
     echo "Failed to cp html to MacOS"
     exit $?
 fi
 
-cp ../../../src/gui/qt-daemon/app.icns qt-boolb.app/Contents/Resources
+cp ../../../src/gui/qt-daemon/app.icns qt-lui.app/Contents/Resources
 if [ $? -ne 0 ]; then
     echo "Failed to cp app.icns to resources"
     exit $?
 fi
 
-zip -r -y "bbr-macos-x64-v0.2.0.zip" qt-boolb.app
+zip -r -y "lui-macos-x64-v0.1.0.zip" qt-lui.app
 if [ $? -ne 0 ]; then
     echo "Failed to zip app"
     exit $?
