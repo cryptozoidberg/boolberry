@@ -689,7 +689,13 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
     //set transaction unlock time if it was specified by user 
     uint64_t unlock_time = 0;
     if (tp.lock_time)
-      unlock_time = w->get_blockchain_current_height() + tp.lock_time;
+    {
+      if (tp.lock_time > CURRENCY_MAX_BLOCK_NUMBER)
+        unlock_time = tp.lock_time;
+      else
+        unlock_time = w->get_blockchain_current_height() + tp.lock_time;
+    }
+      
     
     //proces attachments
     std::vector<currency::attachment_v> attachments;
