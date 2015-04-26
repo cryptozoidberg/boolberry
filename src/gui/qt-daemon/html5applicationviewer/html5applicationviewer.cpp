@@ -675,7 +675,7 @@ QString Html5ApplicationViewer::generate_wallet(const QString& param)
 {
   return que_call2<view::open_wallet_request>("generate_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
     view::wallet_id_obj owr = AUTO_VAL_INIT(owr);
-    ar.error_code = m_backend.generate_wallet(owd.path, owd.pass, static_cast<size_t&>(owr.wallet_id));
+    ar.error_code = m_backend.generate_wallet(owd.path, owd.pass, owr.wallet_id);
     dispatch(ar, owr);
   });
 }
@@ -685,7 +685,7 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
   return que_call2<view::open_wallet_request>("open_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
 
     view::wallet_id_obj owr = AUTO_VAL_INIT(owr);
-    ar.error_code = m_backend.open_wallet(owd.path, owd.pass, static_cast<size_t&>(owr.wallet_id));
+    ar.error_code = m_backend.open_wallet(owd.path, owd.pass, owr.wallet_id);
     dispatch(ar, owr);
   });
 }

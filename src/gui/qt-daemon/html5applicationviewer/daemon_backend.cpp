@@ -522,7 +522,7 @@ void daemon_backend::loop()
   }
 }
 
-std::string daemon_backend::open_wallet(const std::string& path, const std::string& password, size_t& wallet_id)
+std::string daemon_backend::open_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
   wallet_id = m_wallet_id_counter++;
@@ -574,7 +574,7 @@ std::string daemon_backend::get_recent_transfers(size_t wallet_id, view::transfe
   return API_RETURN_CODE_OK;
 }
 
-std::string daemon_backend::generate_wallet(const std::string& path, const std::string& password, size_t& wallet_id)
+std::string daemon_backend::generate_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
   wallet_id = m_wallet_id_counter++;
