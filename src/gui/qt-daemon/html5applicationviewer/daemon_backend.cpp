@@ -37,7 +37,6 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
 
   view::daemon_status_info dsi = AUTO_VAL_INIT(dsi);
   dsi.pos_difficulty = dsi.pow_difficulty = "---";
-  dsi.text_state = "Initializing...";
   pview_handler->update_daemon_status(dsi);
 
   log_space::get_set_log_detalisation_level(true, LOG_LEVEL_2);
@@ -209,7 +208,6 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   { \
     LOG_ERROR(mess); \
     dsi.daemon_network_state = 4; \
-    dsi.text_state = mess; \
     m_pview->update_daemon_status(dsi); \
     m_pview->on_backend_stopped(); \
     return res; \
@@ -221,7 +219,6 @@ void daemon_backend::main_worker(const po::variables_map& vm)
 
   //initialize objects
   LOG_PRINT_L0("Initializing p2p server...");
-  dsi.text_state = "Initializing p2p server";
   m_pview->update_daemon_status(dsi);
   bool res = m_p2psrv.init(vm);
   CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize p2p server.");
@@ -231,14 +228,13 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   //upnp_helper.run_port_mapping_loop(p2psrv.get_this_peer_port(), p2psrv.get_this_peer_port(), 20*60*1000);
 
   LOG_PRINT_L0("Initializing currency protocol...");
-  dsi.text_state = "Initializing currency protocol";
   m_pview->update_daemon_status(dsi);
   res = m_cprotocol.init(vm);
   CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize currency protocol.");
   LOG_PRINT_L0("Currency protocol initialized OK");
 
   LOG_PRINT_L0("Initializing core rpc server...");
-  dsi.text_state = "Initializing core rpc server";
+  //dsi.text_state = "Initializing core rpc server";
   m_pview->update_daemon_status(dsi);
   res = m_rpc_server.init(vm);
   CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize core rpc server.");
@@ -246,21 +242,21 @@ void daemon_backend::main_worker(const po::variables_map& vm)
 
   //initialize core here
   LOG_PRINT_L0("Initializing core...");
-  dsi.text_state = "Initializing core";
+  //dsi.text_state = "Initializing core";
   m_pview->update_daemon_status(dsi);
   res = m_ccore.init(vm);
   CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize core");
   LOG_PRINT_L0("Core initialized OK");
 
   LOG_PRINT_L0("Starting core rpc server...");
-  dsi.text_state = "Starting core rpc server";
+  //dsi.text_state = "Starting core rpc server";
   m_pview->update_daemon_status(dsi);
   res = m_rpc_server.run(2, false);
   CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize core rpc server.");
   LOG_PRINT_L0("Core rpc server started ok");
 
   LOG_PRINT_L0("Starting p2p net loop...");
-  dsi.text_state = "Starting network loop";
+  //dsi.text_state = "Starting network loop";
   m_pview->update_daemon_status(dsi);
   res = m_p2psrv.run(false);
   CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to run p2p loop.");
@@ -275,21 +271,21 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   for (auto& w : m_wallets)
   {
     LOG_PRINT_L0("Storing wallet data...");
-    dsi.text_state = "Storing wallets data...";
+    //dsi.text_state = "Storing wallets data...";
     m_pview->update_daemon_status(dsi);
     w.second->store();
   }
   CRITICAL_REGION_END();
 
   LOG_PRINT_L0("Stopping core p2p server...");
-  dsi.text_state = "Stopping p2p network server";
+  //dsi.text_state = "Stopping p2p network server";
   m_pview->update_daemon_status(dsi);
   m_p2psrv.send_stop_signal();
   m_p2psrv.timed_wait_server_stop(10);
 
   //stop components
   LOG_PRINT_L0("Stopping core rpc server...");
-  dsi.text_state = "Stopping rpc network server";
+  //dsi.text_state = "Stopping rpc network server";
   m_pview->update_daemon_status(dsi);
 
   m_rpc_server.send_stop_signal();
@@ -298,25 +294,25 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   //deinitialize components
 
   LOG_PRINT_L0("Deinitializing core...");
-  dsi.text_state = "Deinitializing core";
+  //dsi.text_state = "Deinitializing core";
   m_pview->update_daemon_status(dsi);
   m_ccore.deinit();
 
 
   LOG_PRINT_L0("Deinitializing rpc server ...");
-  dsi.text_state = "Deinitializing rpc server";
+  //dsi.text_state = "Deinitializing rpc server";
   m_pview->update_daemon_status(dsi);
   m_rpc_server.deinit();
 
 
   LOG_PRINT_L0("Deinitializing currency_protocol...");
-  dsi.text_state = "Deinitializing currency_protocol";
+  //dsi.text_state = "Deinitializing currency_protocol";
   m_pview->update_daemon_status(dsi);
   m_cprotocol.deinit();
 
 
   LOG_PRINT_L0("Deinitializing p2p...");
-  dsi.text_state = "Deinitializing p2p";
+  //dsi.text_state = "Deinitializing p2p";
   m_pview->update_daemon_status(dsi);
 
   m_p2psrv.deinit();
@@ -325,7 +321,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   m_cprotocol.set_p2p_endpoint(NULL);
 
   LOG_PRINT("Node stopped.", LOG_LEVEL_0);
-  dsi.text_state = "Node stopped";
+  //dsi.text_state = "Node stopped";
   m_pview->update_daemon_status(dsi);
 
   m_pview->on_backend_stopped();
@@ -339,7 +335,7 @@ bool daemon_backend::update_state_info()
   currency::COMMAND_RPC_GET_INFO::response inf = AUTO_VAL_INIT(inf);
   if (!m_rpc_proxy->call_COMMAND_RPC_GET_INFO(req, inf))
   {
-    dsi.text_state = "get_info failed";
+    //dsi.text_state = "get_info failed";
     m_pview->update_daemon_status(dsi);
     LOG_ERROR("Failed to call get_info");
     return false;
@@ -349,13 +345,6 @@ bool daemon_backend::update_state_info()
   dsi.hashrate = inf.current_network_hashrate_350;
   dsi.inc_connections_count = inf.incoming_connections_count;
   dsi.out_connections_count = inf.outgoing_connections_count;
-  switch(inf.daemon_network_state)
-  {
-  case currency::COMMAND_RPC_GET_INFO::daemon_network_state_connecting:     dsi.text_state = "Connecting";break;
-  case currency::COMMAND_RPC_GET_INFO::daemon_network_state_online:         dsi.text_state = "Online";break;
-  case currency::COMMAND_RPC_GET_INFO::daemon_network_state_synchronizing:  dsi.text_state = "Synchronizing";break;
-  default: dsi.text_state = "unknown";break;
-  }
   dsi.daemon_network_state = inf.daemon_network_state;
   dsi.synchronization_start_height = inf.synchronization_start_height;
   dsi.max_net_seen_height = inf.max_net_seen_height;
@@ -432,9 +421,10 @@ bool daemon_backend::update_wallets()
 {
   view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
   CRITICAL_REGION_LOCAL(m_wallets_lock);
-  for (auto& w : m_wallets)
+
+  if (m_last_daemon_height != m_last_wallet_synch_height)
   {
-    if (m_last_daemon_height != m_last_wallet_synch_height)
+    for (auto& w : m_wallets)
     {
       wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
       wsi.wallet_id = w.first;
@@ -443,10 +433,8 @@ bool daemon_backend::update_wallets()
       {
         w.second->refresh();
         w.second->scan_tx_pool();
-
         wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
         m_pview->update_wallet_status(wsi);
-
       }
 
 
@@ -468,40 +456,18 @@ bool daemon_backend::update_wallets()
         return false;
       }
     }
-  }
     m_last_wallet_synch_height = m_ccore.get_current_blockchain_height();
     update_wallets_info();
-
-    /*
-    //check if PoS mining iteration is needed
-    if (!m_mint_is_running && m_do_mint && time(nullptr) - m_last_wallet_mint_time > POS_WALLET_MINING_SCAN_INTERVAL)
+  }
+  else
+  {
+    for (auto& w : m_wallets)
     {
-      LOG_PRINT_L0("Starting PoS mint iteration");
-      std::shared_ptr<currency::COMMAND_RPC_SCAN_POS::request> req(new currency::COMMAND_RPC_SCAN_POS::request());
-      bool r = m_wallet->get_pos_entries(*req);
-      LOG_PRINT_L0("POS entries: " << req->pos_entries.size());
-
-      CHECK_AND_ASSERT_MES(r, false, "Failed to get_pos_entries()");
-      m_mint_is_running = true;
-      if (m_miner_thread.joinable())
-        m_miner_thread.join();
-
-      m_miner_thread = std::thread([this, req]()
-      {
-        LOG_PRINT_L0("Starting PoS mint thread...");
-        currency::COMMAND_RPC_SCAN_POS::response rsp = AUTO_VAL_INIT(rsp);
-        m_wallet->scan_pos(*req, rsp, m_do_mint);
-        if (rsp.status == CORE_RPC_STATUS_OK)
-        {
-          CRITICAL_REGION_LOCAL(m_wallets_lock);
-          m_wallet->build_minted_block(*req, rsp);
-        }
-        m_mint_is_running = false;
-        LOG_PRINT_L0("PoS mint iteration finished, rsp.status = " << rsp.status);
-      });
-      m_last_wallet_mint_time = time(nullptr);
+      w.second->scan_tx_pool();
     }
-    */
+  }
+
+
   return true;
 }
 
