@@ -56,6 +56,7 @@ namespace wallet_rpc
       KV_SERIALIZE(payment_id)
       KV_SERIALIZE(remote_address)      
       KV_SERIALIZE(recipient_alias)
+      KV_SERIALIZE(comment)
       KV_SERIALIZE(is_income)
       KV_SERIALIZE(timestamp)
       KV_SERIALIZE(td)

@@ -548,7 +548,7 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
   //w->init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
   m_wallets[wallet_id] = w;
   update_wallets_info();
-  m_pview->show_wallet();
+  //m_pview->show_wallet();
   m_last_wallet_synch_height = 0;  
   return API_RETURN_CODE_OK;
 }

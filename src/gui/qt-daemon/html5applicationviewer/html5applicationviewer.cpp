@@ -45,10 +45,10 @@ signals:
   void update_wallet_status(const QString str);
   void update_wallet_info(const QString str);
   void money_transfer(const QString str);
-  void show_wallet();
-  void hide_wallet();
-  void switch_view(const QString str);
-  void set_recent_transfers(const QString str);
+//  void show_wallet();
+//  void hide_wallet();
+//  void switch_view(const QString str);
+  //void set_recent_transfers(const QString str);
   void handle_internal_callback(const QString str, const QString callback_name);
   void update_pos_mining_text(const QString str);
   void do_dispatch(const QString status, const QString params);  //general function
@@ -470,38 +470,39 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
 }
 
 
-bool Html5ApplicationViewer::hide_wallet()
-{
-  LOG_PRINT_L0("SENDING SIGNAL -> [hide_wallet]");
-  m_d->hide_wallet();
-  return true;
-}
-bool Html5ApplicationViewer::show_wallet()
-{
-  LOG_PRINT_L0("SENDING SIGNAL -> [show_wallet]");
-  m_d->show_wallet();
-  return true;
-}
+// bool Html5ApplicationViewer::hide_wallet()
+// {
+//   LOG_PRINT_L0("SENDING SIGNAL -> [hide_wallet]");
+//   m_d->hide_wallet();
+//   return true;
+// }
+// bool Html5ApplicationViewer::show_wallet()
+// {
+//   LOG_PRINT_L0("SENDING SIGNAL -> [show_wallet]");
+//   m_d->show_wallet();
+//   return true;
+// }
 
-bool Html5ApplicationViewer::switch_view(int view_no)
-{
-  view::switch_view_info swi = AUTO_VAL_INIT(swi);
-  swi.view = view_no;
-  std::string json_str;
-  epee::serialization::store_t_to_json(swi, json_str);
-  LOG_PRINT_L0("SENDING SIGNAL -> [switch_view]");
-  m_d->switch_view(json_str.c_str());
-  return true;
-}
+// bool Html5ApplicationViewer::switch_view(int view_no)
+// {
+//   view::switch_view_info swi = AUTO_VAL_INIT(swi);
+//   swi.view = view_no;
+//   std::string json_str;
+//   epee::serialization::store_t_to_json(swi, json_str);
+//   LOG_PRINT_L0("SENDING SIGNAL -> [switch_view]");
+//   m_d->switch_view(json_str.c_str());
+//   return true;
+// }
 
-bool Html5ApplicationViewer::set_recent_transfers(const view::transfers_array& ta)
-{
-  std::string json_str;
-  epee::serialization::store_t_to_json(ta, json_str);
-  LOG_PRINT_L0("SENDING SIGNAL -> [set_recent_transfers]");
-  m_d->set_recent_transfers(json_str.c_str());
-  return true;
-}
+// bool Html5ApplicationViewer::set_recent_transfers(const view::transfers_array& ta)
+// {
+//   std::string json_str;
+//   epee::serialization::store_t_to_json(ta, json_str);
+//   LOG_PRINT_L0("SENDING SIGNAL -> [set_recent_transfers]");
+//   m_d->set_recent_transfers(json_str.c_str());
+//   return true;
+// }
+
 
 bool Html5ApplicationViewer::set_html_path(const std::string& path)
 {
