@@ -61,6 +61,7 @@ namespace wallet_rpc
       KV_SERIALIZE(timestamp)
       KV_SERIALIZE(td)
       KV_SERIALIZE(fee)
+      KV_SERIALIZE(wallet_id)
     END_KV_SERIALIZE_MAP()
   };
 
