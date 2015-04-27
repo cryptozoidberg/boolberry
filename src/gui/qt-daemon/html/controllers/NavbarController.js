@@ -2,16 +2,16 @@
     'use strict';
     var module = angular.module('app.navbar',[]);
 
-    module.controller('NavbarTopController', ['backend', '$scope','$timeout', 'loader', '$rootScope','$location',
-        function(backend, $scope, $timeout, loader, $rootScope, $location) {
+    module.controller('NavbarTopController', ['backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter',
+        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter) {
         $rootScope.deamon_state = {
         	daemon_network_state: 0
         };
 
         $scope.wallet_info  = {};
 
-        var loadinMessage = 'Cеть загружается, или оффлайн. Пожалуйста, подождите...';
-        var li = loader.open(loadinMessage);
+        var loadingMessage = 'Cеть загружается, или оффлайн. Пожалуйста, подождите...';
+        var li = loader.open(loadingMessage);
 
         $scope.progress_value = function(){
             var max = $scope.deamon_state.max_net_seen_height - $scope.deamon_state.synchronization_start_height;
@@ -38,6 +38,8 @@
         }
 
         backend.subscribe('update_daemon_state', function(data){// move to run
+            // console.log('update_daemon_state');
+            // console.log(data);
             if(data.daemon_network_state == 2){
                 if(li && angular.isDefined(li)){
                     li.close();
@@ -53,12 +55,35 @@
             });
         });
         
-        
         backend.subscribe('update_wallet_info', function(data){
-            $timeout(function(){
-                $scope.wallet_info  = data;
+            angular.forEach(data.wallets,function (wallet){
+                var wallet_id = wallet.wallet_id;
+                var wallet_info = wallet.wi;
+                safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+                if(safe.length){
+                    safe = safe[0];
+                }else{
+                    return;
+                }
+                angular.forEach(wallet_info, function(value,property){
+                    if(angular.isDefined(safe[property])){
+                        safe[property] = value;
+                    }
+                });
             });
         });
+
+        backend.subscribe('update_wallet_status', function(data){
+            console.log('update_wallet_status');
+            console.log(data);
+        });
+
+        backend.subscribe('money_transfer', function(data){
+            console.log('money_transfer');
+            console.log(data);
+        });
+
+
     }]);
 
 }).call(this);
