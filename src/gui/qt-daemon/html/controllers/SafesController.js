@@ -20,14 +20,15 @@
                 return;
             }
             $scope.safe = safe;
-            $scope.history = {};
-            backend.getRecentTransfers(wallet_id, function(data){
-                if(angular.isDefined(data.unconfirmed)){
-                    data.history = data.unconfirmed.concat(data.history);
-                }
-                $scope.history = data.history;
-
-            });
+            if(angular.isUndefined(safe.history)){
+                backend.getRecentTransfers(wallet_id, function(data){
+                    if(angular.isDefined(data.unconfirmed)){
+                        data.history = data.unconfirmed.concat(data.history);
+                    }
+                    safe.history = data.history;
+                });
+            }
+            
         }
     ]);
 
@@ -36,9 +37,10 @@
             var caption = "Please, choose the file";
             var filemask = "*.lui";
             var result = backend.openFileDialog(caption, filemask);
-            var path = result.path;
-            $scope.openSafeRestoreForm(path);
-            
+            if(typeof result !== 'undefined' && typeof result.path !== 'undefined'){
+                var path = result.path;
+                $scope.openSafeRestoreForm(path);    
+            }
         };
 
         $scope.openSafeForm = function() {

@@ -9,6 +9,7 @@
                 push_payer: false,
                 is_delay : false,
                 lock_time: new Date(),
+                fee: '0.01'
             };
 
             if($routeParams.wallet_id){

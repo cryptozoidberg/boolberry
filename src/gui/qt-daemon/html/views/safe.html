@@ -239,7 +239,7 @@
                                 </div>
                             </form>
                         </div>
-                        <div class="table-responsive panel" ng-if="history.length">
+                        <div class="table-responsive panel" ng-if="safe.history.length">
                             <table class="table table-condensed  data-table history-table">
                                 <thead>
                                 <tr>
@@ -268,7 +268,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr ng-repeat="item in history" class="transaction-item">
+                                <tr ng-repeat="item in safe.history" class="transaction-item">
                                     <td>
                                         <span class="mix-label mix-label-up">
                                          <img src="assets/font/svg/sound8.svg">

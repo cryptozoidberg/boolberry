@@ -56,6 +56,7 @@
         });
         
         backend.subscribe('update_wallet_info', function(data){
+            return; //temporary
             angular.forEach(data.wallets,function (wallet){
                 var wallet_id = wallet.wallet_id;
                 var wallet_info = wallet.wi;
@@ -81,6 +82,34 @@
         backend.subscribe('money_transfer', function(data){
             console.log('money_transfer');
             console.log(data);
+            var wallet_id = data.ti.wallet_id;
+            var tr_info   = data.ti;
+            safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            if(safe.length){
+                safe = safe[0];
+                safe.balance = data.balance;
+                safe.unlocked_balance = data.unlocked_balance;
+                if(angular.isUndefined(safe.history)){
+                    safe.history = [];
+                    backend.getRecentTransfers(wallet_id, function(data){
+                        if(angular.isDefined(data.unconfirmed)){
+                            data.history = data.unconfirmed.concat(data.history);
+                        }
+                        safe.history = data.history;
+                        safe.history.unshift(tr_info);
+                    });
+                }else{
+                    safe.history.unshift(tr_info);    
+                }
+                
+            }else{
+                return;
+            }
+            // angular.forEach(wallet_info, function(value,property){
+            //     if(angular.isDefined(safe[property])){
+            //         safe[property] = value;
+            //     }
+            // });
         });
 
 
