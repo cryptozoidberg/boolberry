@@ -254,11 +254,14 @@ public:
     tools::wallet_rpc::wallet_transfer_info ti;
     uint64_t unlocked_balance;
     uint64_t balance;
+    uint64_t wallet_id;
+
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(ti)
       KV_SERIALIZE(unlocked_balance)
       KV_SERIALIZE(balance)
+      KV_SERIALIZE(wallet_id)
     END_KV_SERIALIZE_MAP()
   };
 

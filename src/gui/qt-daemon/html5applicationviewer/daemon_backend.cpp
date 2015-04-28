@@ -761,6 +761,7 @@ void daemon_backend::on_transfer2(size_t wallet_id, const tools::wallet_rpc::wal
   {
     tei.balance = w->balance();
     tei.unlocked_balance = w->unlocked_balance();
+    tei.wallet_id = wallet_id;
   }else
   {
     LOG_ERROR("on_transfer() wallet with id = " << wallet_id <<  " not found");

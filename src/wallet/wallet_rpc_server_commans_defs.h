@@ -42,7 +42,6 @@ namespace wallet_rpc
     bool          is_income;
     uint64_t      fee;
     wallet_transfer_info_details td;
-    uint64_t      wallet_id;
     
     //not included in serialization map
     currency::transaction tx;
@@ -61,7 +60,6 @@ namespace wallet_rpc
       KV_SERIALIZE(timestamp)
       KV_SERIALIZE(td)
       KV_SERIALIZE(fee)
-      KV_SERIALIZE(wallet_id)
     END_KV_SERIALIZE_MAP()
   };
 
