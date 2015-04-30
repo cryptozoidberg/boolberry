@@ -248,6 +248,16 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct push_offer_param
+  {
+    uint64_t wallet_id;
+    currency::offer_details od;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
+      KV_SERIALIZE(od)
+    END_KV_SERIALIZE_MAP()
+  };
 
   struct transfer_event_info
   {
@@ -255,7 +265,6 @@ public:
     uint64_t unlocked_balance;
     uint64_t balance;
     uint64_t wallet_id;
-
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(ti)
@@ -351,6 +360,8 @@ public:
 #define API_RETURN_CODE_FILE_NOT_FOUND                          "FILE_NOT_FOUND"
 #define API_RETURN_CODE_FILE_ALREADY_EXISTS                     "FILE_ALREADY_EXISTS"
 #define API_RETURN_CODE_CANCELED                                "CANCELED"
+#define API_RETURN_CODE_FILE_RESTORED                           "FILE_RESTORED"
+
 
 
 

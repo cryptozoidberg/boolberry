@@ -507,6 +507,14 @@ namespace tools
       }
     };
     //----------------------------------------------------------------------------------------------------
+    struct wallet_load_notice_wallet_restored : public wallet_runtime_error
+    {
+      explicit wallet_load_notice_wallet_restored(std::string&& loc, const std::string& message)
+        : wallet_runtime_error(std::move(loc), message)
+      {
+      }
+    };
+    //----------------------------------------------------------------------------------------------------
     struct wallet_rpc_error : public wallet_logic_error
     {
       const std::string& request() const { return m_request; }

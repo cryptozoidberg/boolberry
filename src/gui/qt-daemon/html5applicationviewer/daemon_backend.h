@@ -53,6 +53,7 @@ public:
   std::string get_wallet_info(tools::wallet2& w, view::wallet_info& wi);
   std::string close_wallet(size_t wallet_id);
   std::string push_offer(size_t wallet_id, const currency::offer_details& od);
+  std::string get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS::response& od);
 
 
   void toggle_pos_mining();

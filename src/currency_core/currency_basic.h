@@ -181,6 +181,19 @@ namespace currency
       VALUE(payment_types)
       VALUE(expiration_time)
     END_SERIALIZE()
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(offer_type)
+      KV_SERIALIZE(amount_lui)
+      KV_SERIALIZE(amount_etc)
+      KV_SERIALIZE(target)
+      KV_SERIALIZE(location)
+      KV_SERIALIZE(contacts)
+      KV_SERIALIZE(comment)
+      KV_SERIALIZE(payment_types)
+      KV_SERIALIZE(expiration_time)
+      END_KV_SERIALIZE_MAP()
+
   };
 
 

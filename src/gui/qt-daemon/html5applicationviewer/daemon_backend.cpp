@@ -506,6 +506,10 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
   {
     return API_RETURN_CODE_FILE_NOT_FOUND;
   }
+  catch (const tools::error::wallet_load_notice_wallet_restored& /**/)
+  {
+    return API_RETURN_CODE_FILE_RESTORED;
+  }
   catch (const std::exception& e)
   {
     return std::string(API_RETURN_CODE_WALLET_WRONG_PASSWORD) + ":" + e.what();
@@ -744,6 +748,12 @@ std::string daemon_backend::push_offer(size_t wallet_id, const currency::offer_d
   }
 }
 
+std::string daemon_backend::get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS::response& od)
+{
+  currency::COMMAND_RPC_GET_ALL_OFFERS::request rq = AUTO_VAL_INIT(rq);
+  m_rpc_proxy->call_COMMAND_RPC_GET_ALL_OFFERS(rq, od);
+  return API_RETURN_CODE_OK;
+}
 
 void daemon_backend::on_new_block(uint64_t /*height*/, const currency::block& /*block*/)
 {

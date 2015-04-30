@@ -104,6 +104,10 @@ namespace tools
       return m_rpc.on_rpc_get_blocks_details(req, res, m_cntxt_stub);
     }
     //------------------------------------------------------------------------------------------------------------------------------
+    bool call_COMMAND_RPC_GET_ALL_OFFERS(const currency::COMMAND_RPC_GET_ALL_OFFERS::request& req, currency::COMMAND_RPC_GET_ALL_OFFERS::response& res)
+    {
+      return m_rpc.on_rpc_get_all_offers(req, res, m_cntxt_stub);
+    }
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
     {
       return tools::get_transfer_address(adr_str, addr, this);

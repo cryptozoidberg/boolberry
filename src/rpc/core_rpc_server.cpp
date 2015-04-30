@@ -272,6 +272,13 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_rpc_get_all_offers(const COMMAND_RPC_GET_ALL_OFFERS::request& req, COMMAND_RPC_GET_ALL_OFFERS::response& res, connection_context& cntx)
+  {
+    m_core.get_blockchain_storage().get_all_offers(res.offers);
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_pos_mining_details(const COMMAND_RPC_GET_POS_MINING_DETAILS::request& req, COMMAND_RPC_GET_POS_MINING_DETAILS::response& res, connection_context& cntx)
   {
     if (!m_p2p.get_connections_count())

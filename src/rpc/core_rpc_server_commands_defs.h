@@ -752,5 +752,26 @@ namespace currency
     };
   };
 
+  struct COMMAND_RPC_GET_ALL_OFFERS
+  {
+    struct request
+    {
+
+      BEGIN_KV_SERIALIZE_MAP()
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+      std::list<currency::offer_details> offers;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(offers)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
 }
 
