@@ -1,0 +1,63 @@
+get_all_offers() requests all offers from exchange
+
+
+param:
+
+{}
+
+response:
+
+{
+  "offers": [
+    {
+      "offer_type": 0,
+      "amount_lui": 2300000000,
+      "amount_etc": 2,
+      "target": "EUR",
+      "location": "USA, NYC",
+    "contacts": "+89876782342",
+    "comment": "Best ever service",
+    "payment_types": "cash",
+    "expiration_time":"two days"
+    }, 
+    {
+      "offer_type": 0,
+      "amount_lui": 4300000000,
+      "amount_etc": 2,
+      "target": "EUR",
+      "location": "USA, Washington",
+    "contacts": "+89876782342",
+    "comment": "Best ever service",
+    "payment_types": "cash",
+    "expiration_time":"two days"
+    }
+  ]
+}
+
+
+push_offer() send offer to network
+
+
+param:
+
+{
+  "wallet_id" : 0,
+  "od": 
+    {
+      "offer_type": 0,
+      "amount_lui": 2300000000,
+      "amount_etc": 2,
+      "target": "EUR",
+      "location": "USA, NYC",
+    "contacts": "+89876782342",
+    "comment": "Best ever service",
+    "payment_types": "cash",
+    "expiration_time":"two days"
+    }
+}
+
+response:
+
+{
+  "status":"OK"
+}
