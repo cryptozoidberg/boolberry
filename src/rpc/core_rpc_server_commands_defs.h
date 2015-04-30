@@ -764,7 +764,7 @@ namespace currency
     struct response
     {
       std::string status;
-      std::list<offer_details> offers;
+      std::list<currency::offer_details> offers;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
