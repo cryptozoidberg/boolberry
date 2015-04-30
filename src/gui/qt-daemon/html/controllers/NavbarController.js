@@ -82,15 +82,19 @@
         backend.subscribe('money_transfer', function(data){
             console.log('money_transfer');
             console.log(data);
-            var wallet_id = data.ti.wallet_id;
+            if(angular.isUndefined(data.ti)){
+                return;
+            }
+            var wallet_id = data.wallet_id;
             var tr_info   = data.ti;
             safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             if(safe.length){
                 safe = safe[0];
                 safe.balance = data.balance;
                 safe.unlocked_balance = data.unlocked_balance;
+
                 if(angular.isUndefined(safe.history)){
-                    safe.history = [];
+                    console.log('no tr history');
                     backend.getRecentTransfers(wallet_id, function(data){
                         if(angular.isDefined(data.unconfirmed)){
                             data.history = data.unconfirmed.concat(data.history);
@@ -99,7 +103,24 @@
                         safe.history.unshift(tr_info);
                     });
                 }else{
-                    safe.history.unshift(tr_info);    
+                    console.log('history exists');
+                    //transaction = $filter('filter')(safe.history,{tx_hash : tr_info.tx_hash}); // check if transaction has already in list
+                    var tr_exists = false;
+                    angular.forEach(safe.history,function(tr_item, key){
+                        if(tr_item.tx_hash == tr_info.tx_hash){
+                            // tr_item = tr_info;
+                            safe.history[key] = tr_info;
+                            tr_exists = true;
+
+                        }
+                    });
+                    if(tr_exists){
+                        console.log(tr_info.tx_hash+' tr exists');
+                    }else{
+                        console.log(tr_info.tx_hash+' does not tr exist');
+                        safe.history.unshift(tr_info); // insert new
+                    }
+                    
                 }
                 
             }else{

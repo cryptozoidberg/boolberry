@@ -289,7 +289,7 @@
                                     </td>
                                     
                                     <td>
-                                        <small class="text-muted nowrap">{{item.timestamp | intToDate | date:'dd.MM.yy hh:mm'}}</small>
+                                        <a ng-click="trDetails(item)"><small class="text-muted nowrap">{{item.timestamp | intToDate | date:'dd.MM.yy hh:mm'}}</small></a>
                                         <span class="chart send-timer" data-percent="86">
                                         </span>
                                     </td>

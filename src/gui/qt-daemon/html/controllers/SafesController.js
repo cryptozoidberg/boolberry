@@ -8,8 +8,8 @@
         }
     ]);
 
-    module.controller('safeDetailsCtrl',['$routeParams','backend','$scope','$filter','$location','informer',
-        function($routeParams,backend,$scope,$filter,$location,informer){
+    module.controller('safeDetailsCtrl',['$routeParams','backend','$scope','$filter','$location','informer','$modal',
+        function($routeParams,backend,$scope,$filter,$location,informer,$modal){
             var wallet_id = parseInt($routeParams.wallet_id);
             var safe = $filter('filter')($scope.safes,{wallet_id : wallet_id});
             if(safe.length){
@@ -28,7 +28,29 @@
                     safe.history = data.history;
                 });
             }
-            
+            $scope.trDetails = function(item){
+                var modalInstance = $modal.open({
+                    templateUrl: "views/tr_details.html",
+                    controller: 'trDetailsModalCtrl',
+                    size: 'md',
+                    windowClass: 'modal fade in',
+                    resolve: {
+                        item: function(){
+                            return item;
+                        }
+                    }
+                });
+            }
+        }
+    ]);
+
+    module.controller('trDetailsModalCtrl',['$scope', '$modalInstance', 'item',
+        function($scope, $modalInstance, item){
+            $scope.item = item;
+
+            $scope.close = function(){
+                $modalInstance.close();
+            };
         }
     ]);
 

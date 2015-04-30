@@ -424,6 +424,14 @@ void wallet2::scan_tx_pool()
       prepare_wti(wti, 0, 0, tx, tx_money_got_in_outs, money_transfer2_details());
       if (m_callback)
         m_callback->on_transfer2(wti);
+
+      unconfirmed_transfer_details& utd = m_unconfirmed_txs[currency::get_transaction_hash(tx)];
+      utd.m_change = 0;
+      utd.m_sent_time = time(NULL);
+      utd.m_tx = tx;
+      //utd.m_recipient 
+      //utd.m_recipient_alias
+      utd.m_is_income = true;
     }
   }
 }
@@ -1018,6 +1026,7 @@ void wallet2::wallet_transfer_info_from_unconfirmed_transfer_details(const uncon
   get_inputs_money_amount(u.m_tx, ins);
   wti.remote_address = u.m_recipient;
   wti.recipient_alias = u.m_recipient_alias;
+  wti.is_income = u.m_is_income;  
   prepare_wti(wti, 0, u.m_sent_time, u.m_tx, outs - u.m_change, money_transfer2_details());
 }
 //----------------------------------------------------------------------------------------------------
@@ -1189,11 +1198,11 @@ void wallet2::add_sent_unconfirmed_tx(const currency::transaction& tx, uint64_t 
   utd.m_tx = tx;
   utd.m_recipient = recipient;
   utd.m_recipient_alias = get_alias_for_address(recipient);
+  utd.m_is_income = false;
 
   if (m_callback)
   {
     wallet_rpc::wallet_transfer_info wti = AUTO_VAL_INIT(wti);
-    wti.is_income = false;
     wallet_transfer_info_from_unconfirmed_transfer_details(utd, wti);
     m_callback->on_transfer2(wti);
   }

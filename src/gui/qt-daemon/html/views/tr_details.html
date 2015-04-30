@@ -1,0 +1,101 @@
+<div class="modal-header btn btn-primary btn-block">
+    <button type="button" class="close" data-dismiss="modal" ng-click="close()"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+    <h4 class="modal-title text-center">Детали транзакции</h4>
+</div>
+<div class="modal-body">
+    
+    <table class="table">
+        <tr>
+            <td width="150">
+                <strong>Номер тарнзакции</strong>
+            </td>
+            <td><pre style="width: 400px; overflow: auto;">{{item.tx_hash}}</pre></td>
+        </tr>
+        <tr>
+            <td width="150">
+                <strong>Дата</strong>
+            </td>
+            <td>{{item.timestamp | intToDate | date:'dd.MM.yy hh:mm'}}</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Тип</strong>
+            </td>
+            <td>
+                <span ng-if="item.is_income" class="text-success">Входящая</span>
+                <span ng-if="!item.is_income" class="text-danger">Исходящая</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <strong ng-if="item.is_income">Отправитель</strong>
+                <strong ng-if="!item.is_income">Получатель</strong>
+            </td>
+            <td>
+                <pre ng-if="item.remote_address" style="width: 400px; overflow: auto;">{{item.remote_address}}</pre>
+                <span class="text-muted" ng-if="!item.remote_address">неизвестно</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Сумма</strong>
+            </td>
+            <td>{{item.amount | gulden}}</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Комиссия</strong>
+            </td>
+            <td>{{item.fee | gulden}}</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Высота</strong>
+            </td>
+            <td>{{item.height}}</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Размер блока</strong>
+            </td>
+            <td>{{item.tx_blob_size}}</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Детали</strong>
+            </td>
+            <td>
+                <div class="row" ng-repeat="amount in item.td.rcv">
+                    <div class="col-sm-1">
+                        <span class="mix-label mix-label-up">
+                            <em><i class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
+                        </span>
+                    </div>
+                    <div class="col-sm-11">
+                        {{amount | gulden}}    
+                    </div>
+                </div>
+
+                <div class="row" ng-repeat="amount in item.td.spn">
+                    <div class="col-sm-1">
+                        <span class="mix-label mix-label-up">
+                            <em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
+                        </span>
+                    </div>
+                    <div class="col-sm-11">
+                        {{amount | gulden}}    
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="row">
+        <div class="col-xs-6 col-sm-6">
+            <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-click="close()"> Закрыть</a>
+        </div>
+    </div>
+
+</div>
+
+

@@ -100,6 +100,7 @@ namespace tools
       time_t        m_sent_time; 
       std::string   m_recipient;
       std::string   m_recipient_alias;
+      bool          m_is_income;
     };
 
     struct payment_details
@@ -233,7 +234,6 @@ namespace tools
     std::vector<crypto::hash> m_blockchain;
     std::atomic<uint64_t> m_local_bc_height; //temporary workaround 
     std::atomic<uint64_t> m_last_bc_timestamp; 
-    std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;
 
     transfer_container m_transfers;
     payment_container m_payments;
@@ -244,6 +244,8 @@ namespace tools
     std::atomic<bool> m_run;
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
     std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
+    std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;
+
     std::shared_ptr<i_core_proxy> m_core_proxy;
     std::shared_ptr<i_wallet2_callback> m_callback_holder;
     i_wallet2_callback* m_callback;
@@ -278,12 +280,9 @@ namespace boost
       a & x.m_change;
       a & x.m_sent_time;
       a & x.m_tx;
-      if (ver < 2)
-        return;
       a & x.m_recipient;
-      if (ver < 3)
-        return;
       a & x.m_recipient_alias;
+      a & x.m_is_income;
     }
 
     template <class Archive>
