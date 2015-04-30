@@ -421,7 +421,7 @@ void wallet2::scan_tx_pool()
       wti.timestamp = time(NULL);
       wti.is_income = true;
       m_unconfirmed_in_transfers[tx_hash] = tx;
-      prepare_wti(wti, 0, 0, tx, tx_money_got_in_outs, money_transfer2_details());
+      prepare_wti(wti, 0, wti.timestamp, tx, tx_money_got_in_outs, money_transfer2_details());
       if (m_callback)
         m_callback->on_transfer2(wti);
     }
@@ -647,7 +647,7 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
   LOG_PRINT_L0("Loaded wallet keys file, with public address: " << m_account.get_public_address_str());
 
   bool r = tools::portable_unserialize_obj_from_stream(*this, data_file);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_read_error, m_wallet_file);
+//CHECK_AND_THROW_WALLET_EX(!r, error::file_read_error, m_wallet_file);
 //   CHECK_AND_THROW_WALLET_EX(
 //     m_account_public_address.m_spend_public_key != m_account.get_keys().m_account_address.m_spend_public_key ||
 //     m_account_public_address.m_view_public_key  != m_account.get_keys().m_account_address.m_view_public_key,
@@ -660,6 +660,7 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
     m_blockchain.push_back(get_block_hash(b));
   }
   m_local_bc_height = m_blockchain.size();
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_load_notice_wallet_restored, m_wallet_file);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::store()

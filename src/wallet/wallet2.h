@@ -278,11 +278,7 @@ namespace boost
       a & x.m_change;
       a & x.m_sent_time;
       a & x.m_tx;
-      if (ver < 2)
-        return;
       a & x.m_recipient;
-      if (ver < 3)
-        return;
       a & x.m_recipient_alias;
     }
 

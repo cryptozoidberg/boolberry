@@ -697,6 +697,27 @@ QString Html5ApplicationViewer::get_recent_transfers(const QString& param)
   });
 }
 
+QString Html5ApplicationViewer::get_all_offers(const QString& param)
+{
+  return que_call2<view::api_void>("get_recent_transfers", param, [this](const view::api_void& a, view::api_response& ar){
+
+    view::transfers_array ta = AUTO_VAL_INIT(ta);
+    currency::COMMAND_RPC_GET_ALL_OFFERS::response rp = AUTO_VAL_INIT(rp);
+    ar.error_code = m_backend.get_all_offers(rp);
+    dispatch(ar, rp);
+  });
+}
+
+QString Html5ApplicationViewer::push_offer(const QString& param)
+{
+  return que_call2<view::push_offer_param>("get_recent_transfers", param, [this](const view::push_offer_param& a, view::api_response& ar){
+
+    view::transfers_array ta = AUTO_VAL_INIT(ta);
+    ar.error_code = m_backend.push_offer(a.wallet_id, a.od);
+    dispatch(ar, ta);
+  });
+}
+
 
 void Html5ApplicationViewer::dispatch(const QString& status, const QString& param)
 {
