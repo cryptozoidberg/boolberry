@@ -18,6 +18,7 @@
         'app.directives',
         'app.safes',
         'app.guldens',
+        'app.market'
 
     ]);
 

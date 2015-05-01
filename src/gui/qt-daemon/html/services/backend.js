@@ -32,6 +32,32 @@
                 return this.runCommand('show_savefile_dialog',params);
             },
 
+            get_all_offers : function(callback) {
+                var params = {};
+                return this.runCommand('get_all_offers', params, callback);
+            },
+
+            push_offer : function(callback){
+                // wallet_id, offer_type, amount_lui, amount_etc, target, 
+                // location, contacts, comment, payment_types, expiration_time
+
+                var params = {
+                    "wallet_id" : 0,
+                    "od": {
+                        "offer_type": 0, //0 buy, 1 sell
+                        "amount_lui": 2300000000,
+                        "amount_etc": 2,
+                        "target": "EUR",
+                        "location": "USA, NYC",
+                        "contacts": "+89876782342",
+                        "comment": "Best ever service",
+                        "payment_types": "cash",
+                        "expiration_time":3
+                    }
+                };
+                return this.runCommand('push_offer', params, callback);
+            },
+
             transfer: function(from, to, ammount, fee, comment, push_payer, lock_time, callback) {
                  var params = {
                     wallet_id : from,
