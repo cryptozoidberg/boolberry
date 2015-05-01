@@ -318,6 +318,16 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct password_data
+  {
+    std::string pass;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(pass)
+    END_KV_SERIALIZE_MAP()
+  };
+
+
   struct alias_set
   {
     std::list<currency::alias_rpc_details> aliases;
@@ -345,6 +355,7 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+
 #define API_RETURN_CODE_OK                                      "OK"
 #define API_RETURN_CODE_FAIL                                    "FAIL"
 #define API_RETURN_CODE_INTERNAL_ERROR                          "INTERNAL_ERROR"
@@ -361,6 +372,8 @@ public:
 #define API_RETURN_CODE_FILE_ALREADY_EXISTS                     "FILE_ALREADY_EXISTS"
 #define API_RETURN_CODE_CANCELED                                "CANCELED"
 #define API_RETURN_CODE_FILE_RESTORED                           "FILE_RESTORED"
+#define API_RETURN_CODE_TRUE                                    "TRUE"
+#define API_RETURN_CODE_FALSE                                   "FALSE"
 
 
 

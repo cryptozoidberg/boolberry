@@ -17,6 +17,16 @@
 class QGraphicsWebView;
 
 
+#pragma pack(push, 1)
+struct app_data_file_binary_header
+{
+  uint64_t m_signature;
+  uint64_t m_cb_body;
+};
+#pragma pack (pop)
+#define  APP_DATA_FILE_BINARY_SIGNATURE   0x1000111101101021LL
+
+
 class Html5ApplicationViewer : public QWidget, public view::i_view
 {
   Q_OBJECT
@@ -55,8 +65,9 @@ protected:
   QString close_wallet(const QString& wallet_id);
   QString get_version();
   QString transfer(const QString& json_transfer_object);
+  QString have_app_data(const QString& param);
   QString get_app_data(const QString& param);
-  QString store_app_data(const QString& param);
+  QString store_app_data(const QString& param, const QString& pass);
   QString get_default_user_dir(const QString& param);
   QString get_recent_transfers(const QString& param);
   QString get_all_offers(const QString& param);
