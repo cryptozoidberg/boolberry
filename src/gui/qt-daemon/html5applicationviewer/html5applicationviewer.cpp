@@ -170,20 +170,6 @@ void Html5ApplicationViewer::dispatcher()
 }
 bool Html5ApplicationViewer::init_config()
 {
-  //TODO remove me!
-
-  ::MessageBoxA(::GetDesktopWindow(), "ZZZ", "ZZZ", MB_OK);
-
-  std::string res = have_app_data("").toStdString();
-
-  view::password_data pwd = AUTO_VAL_INIT(pwd);
-  pwd.pass = "wdwecw";
-
-  res = get_app_data(epee::serialization::store_t_to_json(pwd).c_str()).toStdString();
-  res = store_app_data("{}", pwd.pass.c_str()).toStdString();
-
-  res = get_app_data(epee::serialization::store_t_to_json(pwd).c_str()).toStdString();
-
   return true;
 }
 
