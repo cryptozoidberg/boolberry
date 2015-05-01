@@ -169,6 +169,8 @@ namespace currency
     std::string comment;       //[max 160 characters]
     std::string payment_types; //[max 20 characters ]money accept type(bank transaction, internet money, cash, etc)
     uint8_t expiration_time;   //n-days
+    uint64_t timestamp;        //this is not kept by transaction, info filled by corresponding transaction
+
 
     BEGIN_SERIALIZE_OBJECT()
       VALUE(offer_type)

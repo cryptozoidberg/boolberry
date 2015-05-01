@@ -278,7 +278,7 @@ namespace currency
     bool validate_miner_transaction(const block& b, size_t cumulative_block_size, uint64_t fee, uint64_t& base_reward, uint64_t already_generated_coins);
     bool validate_transaction(const block& b, uint64_t height, const transaction& tx);
     bool rollback_blockchain_switching(std::list<block>& original_chain, size_t rollback_height);
-    bool add_transaction_from_block(const transaction& tx, const crypto::hash& tx_id, const crypto::hash& bl_id, uint64_t bl_height);
+    bool add_transaction_from_block(const transaction& tx, const crypto::hash& tx_id, const crypto::hash& bl_id, uint64_t bl_height, uint64_t timestamp);
     bool push_transaction_to_global_outs_index(const transaction& tx, const crypto::hash& tx_id, std::vector<uint64_t>& global_indexes);
     bool pop_transaction_from_global_index(const transaction& tx, const crypto::hash& tx_id);
     bool get_last_n_blocks_sizes(std::vector<size_t>& sz, size_t count);
@@ -295,7 +295,7 @@ namespace currency
     bool get_block_for_scratchpad_alt(uint64_t connection_height, uint64_t block_index, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain, block & b);
     bool process_blockchain_tx_extra(const transaction& tx);
     bool unprocess_blockchain_tx_extra(const transaction& tx);
-    bool process_blockchain_tx_offers(const transaction& tx);
+    bool process_blockchain_tx_offers(const transaction& tx, uint64_t timestamp);
     bool unprocess_blockchain_tx_offers(const transaction& tx);
     bool pop_alias_info(const alias_info& ai);
     bool put_alias_info(const alias_info& ai);
@@ -322,7 +322,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          35
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          36
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 
@@ -357,7 +357,7 @@ namespace currency
   template<class archive_t>
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
   {
-    if(version < 35)
+    if(version < 36)
       return;
     CHECK_PROJECT_NAME();
     CRITICAL_REGION_LOCAL(m_blockchain_lock);

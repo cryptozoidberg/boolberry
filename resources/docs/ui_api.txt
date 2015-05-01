@@ -61,3 +61,50 @@ response:
 {
   "status":"OK"
 }
+
+
+
+[sync] have_app_data(const QString& param)
+param: ignored
+
+response: 
+{
+  "status" : "TRUE", //"TRUE" or "FALSE"
+  "request_id": ""   //ignored
+}
+
+[sync] store_app_data(const QString& param, const QString& pass)
+
+param: 
+"APP_BUFFER" - buffer of application in any format (may be json) fo encryption
+pass: 
+"PASSWORD" - password to encrypt APP_BUFFER
+
+response: 
+{
+}
+
+
+[sync] get_app_data(const QString& param)
+
+param: 
+{
+  "pass": "12345"
+}
+
+response:
+
+"APP_BUFFER" in case of success
+
+or in case of failure: 
+
+{
+  "status":"FAILED" //reason fo error
+}
+
+
+
+
+
+
+

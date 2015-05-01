@@ -1928,13 +1928,14 @@ bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
   return true;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::process_blockchain_tx_offers(const transaction& tx)
+bool blockchain_storage::process_blockchain_tx_offers(const transaction& tx, uint64_t timestamp)
 {
   //check transaction extra
   for (const auto& at : tx.attachment)
   {
     if (at.type() == typeid(offer_details))
       m_offers.push_back(boost::get<offer_details>(at));
+    m_offers.back().timestamp = timestamp;
   }
 
   return true;
@@ -1960,14 +1961,14 @@ bool blockchain_storage::unprocess_blockchain_tx_offers(const transaction& tx)
   return true;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::add_transaction_from_block(const transaction& tx, const crypto::hash& tx_id, const crypto::hash& bl_id, uint64_t bl_height)
+bool blockchain_storage::add_transaction_from_block(const transaction& tx, const crypto::hash& tx_id, const crypto::hash& bl_id, uint64_t bl_height, uint64_t timestamp)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
 
   bool r = process_blockchain_tx_extra(tx);
   CHECK_AND_ASSERT_MES(r, false, "failed to process_blockchain_tx_extra");
 
-  r = process_blockchain_tx_offers(tx);
+  r = process_blockchain_tx_offers(tx, timestamp);
   CHECK_AND_ASSERT_MES(r, false, "failed to process_blockchain_tx_offers");
 
 
@@ -2558,7 +2559,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   size_t coinbase_blob_size = get_object_blobsize(bl.miner_tx);
   size_t cumulative_block_size = coinbase_blob_size;
   //process transactions
-  if(!add_transaction_from_block(bl.miner_tx, get_transaction_hash(bl.miner_tx), id, get_current_blockchain_height()))
+  if (!add_transaction_from_block(bl.miner_tx, get_transaction_hash(bl.miner_tx), id, get_current_blockchain_height(), bl.timestamp))
   {
     LOG_PRINT_L0("Block with id: " << id << " failed to add transaction to blockchain storage");
     bvc.m_verifivation_failed = true;
@@ -2599,7 +2600,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
       return false;
     }
 
-    if(!add_transaction_from_block(tx, tx_id, id, get_current_blockchain_height()))
+    if(!add_transaction_from_block(tx, tx_id, id, get_current_blockchain_height(), bl.timestamp))
     {
        LOG_PRINT_L0("Block with id: " << id << " failed to add transaction to blockchain storage");
        currency::tx_verification_context tvc = AUTO_VAL_INIT(tvc);

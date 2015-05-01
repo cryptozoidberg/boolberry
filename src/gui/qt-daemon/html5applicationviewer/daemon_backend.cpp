@@ -526,9 +526,11 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
 std::string daemon_backend::get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist)
 {
   CRITICAL_REGION_LOCAL(m_wallets_lock);
-  auto w = m_wallets[wallet_id];
-  if (w.get() == nullptr)
+  auto it = m_wallets.find(wallet_id);
+  if (it == m_wallets.end())
     return API_RETURN_CODE_WALLET_WRONG_ID;
+
+  auto& w = it->second;
 
   w->get_recent_transfers_history(tr_hist.history, 0, 1000);
   w->get_unconfirmed_transfers(tr_hist.unconfirmed);
@@ -649,9 +651,12 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
   }
 
   CRITICAL_REGION_LOCAL(m_wallets_lock);
-  auto w = m_wallets[wallet_id];
-  if (w.get() == nullptr)
+  auto it = m_wallets.find(wallet_id);
+  if (it == m_wallets.end())
     return API_RETURN_CODE_WALLET_WRONG_ID;
+
+  auto& w = it->second;
+
 
 
   try
@@ -704,9 +709,11 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
 std::string daemon_backend::get_wallet_info(size_t wallet_id, view::wallet_info& wi)
 {
   CRITICAL_REGION_LOCAL(m_wallets_lock);
-  auto w = m_wallets[wallet_id];
-  if (w.get() == nullptr)
+  auto it = m_wallets.find(wallet_id);
+  if (it == m_wallets.end())
     return API_RETURN_CODE_WALLET_WRONG_ID;
+
+  auto& w = it->second;
   return get_wallet_info(*w, wi);
 }
 
@@ -726,9 +733,12 @@ std::string daemon_backend::get_wallet_info(tools::wallet2& w, view::wallet_info
 std::string daemon_backend::push_offer(size_t wallet_id, const currency::offer_details& od)
 {
   CRITICAL_REGION_LOCAL(m_wallets_lock);
-  auto w = m_wallets[wallet_id];
-  if (w.get() == nullptr)
+  auto it = m_wallets.find(wallet_id);
+  if (it == m_wallets.end())
     return API_RETURN_CODE_WALLET_WRONG_ID;
+
+  auto& w = it->second;
+
   try
   {
     w->push_offer(od);
