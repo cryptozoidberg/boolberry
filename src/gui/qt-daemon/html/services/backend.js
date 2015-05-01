@@ -323,6 +323,34 @@
                         param: {"wallet_id" : "1"}
                     }
                     break;
+                case 'get_all_offers':
+                    result = {
+                      "offers": [
+                        {
+                            "offer_type": 0,
+                            "amount_lui": 2300000000,
+                            "amount_etc": 2,
+                            "target": "EUR",
+                            "location": "USA, NYC",
+                            "contacts": "+89876782342",
+                            "comment": "Best ever service",
+                            "payment_types": "cash",
+                            "expiration_time":3
+                        }, 
+                        {
+                            "offer_type": 0,
+                            "amount_lui": 4300000000,
+                            "amount_etc": 2,
+                            "target": "EUR",
+                            "location": "USA, Washington",
+                            "contacts": "+89876782342",
+                            "comment": "Best ever service",
+                            "payment_types": "cash",
+                            "expiration_time":5
+                        }
+                      ]
+                    };
+                    break;
                 case 'get_recent_transfers' :
                     result = {
                         'history': [

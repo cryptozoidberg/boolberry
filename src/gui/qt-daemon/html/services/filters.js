@@ -4,7 +4,11 @@
     var module = angular.module('app.filters', []);
 
 	module.filter('gulden',[function(){
-		return function(input){
+		return function(input, need_g){
+			if(angular.isUndefined(need_g)){
+				need_g = true;
+			}
+
 			if(angular.isDefined(input)){
 				input = input.toString();
 
@@ -28,8 +32,10 @@
 					if(pos){
 						result = result.substr(0,pos);	
 					}
+					if(need_g){
+						result += ' G';	
+					}
 					
-					result += ' G';
 
 				}
 				return result;	

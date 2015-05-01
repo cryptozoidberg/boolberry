@@ -1,5 +1,10 @@
 
-    <div ng-controller="marketCtrl" class="market_export-my-orders col-xs-3 col-sm-3 pull-right"> <a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт моих заявок в файл</span></a></div>
+    <div class="market_export-my-orders col-xs-3 col-sm-3 pull-right"> 
+        <a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact">
+            <i class="fa fa-lg fa-file-excel-o text-muted"></i> 
+            <span class="underlined text-muted">Экспорт моих заявок в файл</span>
+        </a>
+    </div>
     <h1 id="market">Рынок предложений валют и товаров</h1>
     <h5>Здесь Вы можете просмотреть рынок предложений, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
     <ul class="nav nav-tabs toptabs">
@@ -22,11 +27,9 @@
             <!--</ul>-->
         <!--</li>-->
     </ul>
-    <div class="tab-content tabs tabs-left">
+    <div class="tab-content tabs tabs-left" ng-controller="marketCtrl">
         <div class="tab-pane active market_currencyTab" id="currency">
-
             <div class="navbar">
-
                 <form>
                     <div class="collapse filter11">
                         <div class="row topmargin">
@@ -137,8 +140,6 @@
                                                 </option>
                                             </select>
                                         </div>
-
-
                                     </div>
                                     <div class="col-xs-6 col-sm-6">
                                         <div class="form-group clearfix" style="height: 32px;">
@@ -274,453 +275,57 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr class="success">
-                        <td>
-                            3 часа назад
-                        </td>
-                        <td>
-                            <span class="nowrap">420,34 </span>
-                        </td>
-                        <td>
-                            23,00 <span class="label label-danger">+ 2%</span>
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
-                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.5</span>
-                        </td>
-                        <td>
-                            вся сумма
-                        </td>
-                        <td>
-                            наличные
-                        </td>
-                        <td>
-                            Рим, Италия
-                        </td>
-                        <td>
-                            передам в городе
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="success">
-                        <td>
-                            4 часа назад
-                        </td>
-                        <td>
-                            <span class="nowrap">420,34 </span>
-                        </td>
-                        <td>
-                            23,00 <span class="label label-danger">+ 2%</span>
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
-                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.5</span>
-                        </td>
-                        <td>
-                            вся сумма
-                        </td>
-                        <td>
-                            наличные
-                        </td>
-                        <td>
-                            Рим, Италия
-                        </td>
-                        <td>
-                            передам в городе
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="success">
-                        <td>
-                            1 часа назад
-                        </td>
-                        <td>
-                            <span class="nowrap">420,34 </span>
-                        </td>
-                        <td>
-                            23,00 <span class="label label-danger">+ 2%</span>
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><a class="nowrap" href="" mailto:bicoing@yahoo.com=""> bicoinG@yahoo.com</a></li>
-                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.5</span>
-                        </td>
-                        <td>
-                            вся сумма
-                        </td>
-                        <td>
-                            наличные
-                        </td>
-                        <td>
-                            Рим, Италия
-                        </td>
-                        <td>
-                            передам в городе
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="new">
-                        <td>
-                            3 мин назад
-                        </td>
-                        <td>
-                            <span class="nowrap">420,45</span>
-                        </td>
-                        <td>
-                            <span class="nowrap">100,00</span>
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.3</span>
-                        </td>
-                        <td>
-                            можно частями
-                        </td>
-                        <td>
-                            наличные
-                        </td>
-                        <td>
-                            Милан, Италия
-                        </td>
-                        <td>
-                            торг.центр на площади
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="new">
-                        <td>
-                            3 мин назад
-                        </td>
-                        <td>
-                            <span class="nowrap">420,45</span>
-                        </td>
-                        <td>
-                            <span class="nowrap">100,00</span>
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.3</span>
-                        </td>
-                        <td>
-                            можно частями
-                        </td>
-                        <td>
-                            наличные
-                        </td>
-                        <td>
-                            Милан, Италия
-                        </td>
-                        <td>
-                            торг.центр на площади
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="new">
-                        <td>
-                            3 мин назад
-                        </td>
-                        <td>
-                            <span class="nowrap">420,45</span>
-                        </td>
-                        <td>
-                            <span class="nowrap">100,00</span>
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.3</span>
-                        </td>
-                        <td>
-                            можно частями
-                        </td>
-                        <td>
-                            наличные
-                        </td>
-                        <td>
-                            Милан, Италия
-                        </td>
-                        <td>
-                            торг.центр на площади
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="new">
-                        <td>
-                            3 мин назад
-                        </td>
-                        <td>
-                            <span class="nowrap">420,45</span>
-                        </td>
-                        <td>
-                            <span class="nowrap">100,00</span>
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.3</span>
-                        </td>
-                        <td>
-                            можно частями
-                        </td>
-                        <td>
-                            наличные
-                        </td>
-                        <td>
-                            Милан, Италия
-                        </td>
-                        <td>
-                            торг.центр на площади
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="disable">
-                        <td>
-                            4 мин назад
-                        </td>
-                        <td>
-                            <span class="nowrap">408,67 </span>
-                        </td>
-                        <td>
-                            230,50
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span></li>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.1</span>
-                        </td>
-                        <td>
-                            можно частями
-                        </td>
-                        <td>
-                            вся сумма
-                        </td>
-                        <td>
-                            Флоренция, Италия
-                        </td>
-                        <td>
-                            оплата только картами
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            4 мин назад
-                        </td>
-                        <td>
-                            <span class="nowrap">408,67 </span>
-                        </td>
-                        <td>
-                            230,50
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span></li>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.1</span>
-                        </td>
-                        <td>
-                            можно частями
-                        </td>
-                        <td>
-                            вся сумма
-                        </td>
-                        <td>
-                            Флоренция, Италия
-                        </td>
-                        <td>
-                            оплата только картами
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn active" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            4 мин назад
-                        </td>
-                        <td>
-                            <span class="nowrap">408,67 </span>
-                        </td>
-                        <td>
-                            230,50
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span></li>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.1</span>
-                        </td>
-                        <td>
-                            можно частями
-                        </td>
-                        <td>
-                            вся сумма
-                        </td>
-                        <td>
-                            Флоренция, Италия
-                        </td>
-                        <td>
-                            оплата только картами
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn active" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            4 мин назад
-                        </td>
-                        <td>
-                            <span class="nowrap">408,67 </span>
-                        </td>
-                        <td>
-                            230,50
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span></li>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.1</span>
-                        </td>
-                        <td>
-                            можно частями
-                        </td>
-                        <td>
-                            вся сумма
-                        </td>
-                        <td>
-                            Флоренция, Италия
-                        </td>
-                        <td>
-                            оплата только картами
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            4 мин назад
-                        </td>
-                        <td>
-                            <span class="nowrap">408,67 </span>
-                        </td>
-                        <td>
-                            230,50
-                        </td>
-                        <td>
-                            <ul class="list-unstyled">
-                                <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span></li>
-                            </ul>
-                        </td>
-                        <td>
-                            <span class="label label-success">4.1</span>
-                        </td>
-                        <td>
-                            можно частями
-                        </td>
-                        <td>
-                            вся сумма
-                        </td>
-                        <td>
-                            Флоренция, Италия
-                        </td>
-                        <td>
-                            оплата только картами
-                        </td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
-                                <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover"  data-content="
-             Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                            </div>
-                        </td>
-                    </tr>
+                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers">
+                            <td>
+                                3 часа назад
+                            </td>
+                            <td>
+                                <span class="nowrap">420,34 </span>
+                            </td>
+                            <td>
+                                {{offer.amount_lui | gulden:false}} <span class="label label-danger">+ 2%</span>
+                            </td>
+                            <td>
+                                <ul class="list-unstyled">
+                                    <li>
+                                        <!-- <a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a> -->
+                                        {{offer.contacts}}
+                                    </li>
+                                    <!-- <span class="nowrap">
+                                        <i class="fa fa-lg fa-skype text-primary"></i> 40324309d
+                                    </span> -->
+                                </ul>
+                            </td>
+                            <td>
+                                <span class="label label-success">4.5</span>
+                            </td>
+                            <td>
+                                вся сумма
+                            </td>
+                            <td>
+                                наличные
+                            </td>
+                            <td>
+                                {{offer.location}}
+                            </td>
+                            <td>
+                                {{offer.comment}}
+                            </td>
+                            <td>
+                                <div data-toggle="buttons" class="btn-group">
+                                    <label 
+                                        class="btn btn-sm btn-link popover-name favbtn" 
+                                        data-trigger="hover" 
+                                        data-toggle="popover"  
+                                        data-content="Избранное" 
+                                        data-placement="left"
+                                    >
+                                        <i class="fa fa-lg fa-star-o text-muted"></i>
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                    
                     </tbody>
                 </table>
             </div>

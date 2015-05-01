@@ -6,6 +6,10 @@
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location){
             console.log('market');
             backend.get_all_offers(function(data){
+                if(angular.isDefined(data.offers)){
+                    console.log(data.offers[0]);
+                    $scope.offers = data.offers;
+                }
                 console.log(data);
             });
         }
@@ -17,10 +21,9 @@
             $scope.offer = {};
 
             $scope.addOffer = function(offer){
-                console.log(offer);
+                // o = offer;
                 backend.push_offer(function(data){
-                    console.log('PUSH OFFER RESULT');
-                    console.log(data);
+                    informer.success('Спасибо. Заявка Добавлена');
                 });
             };
         }
