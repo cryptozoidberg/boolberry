@@ -52,6 +52,23 @@ namespace crypto {
     memcpy(&key, pwd_hash, sizeof(key));
     memset(pwd_hash, 0, sizeof(pwd_hash));
   }
+
+  inline bool chacha_encrypt(std::string& buff, const std::string& pass)
+  {
+    crypto::chacha8_key key;
+    crypto::chacha8_iv iv;
+
+    std::string decrypted_buff;
+    decrypted_buff.resize(buff.size());
+    crypto::generate_chacha8_key(pass, key);
+    crypto::chacha8(buff.data(), buff.size(), key, iv, &decrypted_buff[0]);
+    buff = decrypted_buff;
+    return true;
+  }
+  inline bool chacha_decrypt(std::string& buff, const std::string& pass)
+  {
+    return chacha_encrypt(buff, pass);
+  }
 }
 
 #endif

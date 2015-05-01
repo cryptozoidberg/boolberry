@@ -170,6 +170,20 @@ void Html5ApplicationViewer::dispatcher()
 }
 bool Html5ApplicationViewer::init_config()
 {
+  //TODO remove me!
+
+  ::MessageBoxA(::GetDesktopWindow(), "ZZZ", "ZZZ", MB_OK);
+
+  std::string res = have_app_data("").toStdString();
+
+  view::password_data pwd = AUTO_VAL_INIT(pwd);
+  pwd.pass = "wdwecw";
+
+  res = get_app_data(epee::serialization::store_t_to_json(pwd).c_str()).toStdString();
+  res = store_app_data("{}", pwd.pass.c_str()).toStdString();
+
+  res = get_app_data(epee::serialization::store_t_to_json(pwd).c_str()).toStdString();
+
   return true;
 }
 
@@ -585,16 +599,69 @@ void Html5ApplicationViewer::message_box(const QString& msg)
 
 QString Html5ApplicationViewer::get_app_data(const QString& param)
 {
-  std::string app_data_buff;
-  file_io_utils::load_file_to_string(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, app_data_buff);
 
-  return app_data_buff.c_str();
+  view::password_data pwd = AUTO_VAL_INIT(pwd);
+
+  if (!epee::serialization::load_t_from_json(pwd, param.toStdString()))
+  { 
+    view::api_response ar;
+    ar.error_code = API_RETURN_CODE_BAD_ARG;
+    return epee::serialization::store_t_to_json(ar).c_str();
+  }
+
+  std::string app_data_buff;
+  bool r = file_io_utils::load_file_to_string(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, app_data_buff);
+  if (!r)
+    return "";
+
+  if (app_data_buff.size() < sizeof(app_data_file_binary_header))
+  {
+    LOG_ERROR("app_data_buff.size() < sizeof(app_data_file_binary_header) check failed");
+    view::api_response ar;
+    ar.error_code = API_RETURN_CODE_FAIL;
+    return epee::serialization::store_t_to_json(ar).c_str();
+  }
+
+  crypto::chacha_decrypt(app_data_buff, pwd.pass);
+
+  const app_data_file_binary_header* phdr = reinterpret_cast<const app_data_file_binary_header*>(app_data_buff.data());
+  if (phdr->m_signature != APP_DATA_FILE_BINARY_SIGNATURE)
+  {
+    LOG_ERROR("app_data_buff.size() < sizeof(app_data_file_binary_header) check failed");
+    view::api_response ar;
+    ar.error_code = API_RETURN_CODE_FAIL;
+    return epee::serialization::store_t_to_json(ar).c_str();
+  }
+
+  return app_data_buff.substr(sizeof(app_data_file_binary_header)).c_str();
 }
 
-QString Html5ApplicationViewer::store_app_data(const QString& param)
+QString Html5ApplicationViewer::store_app_data(const QString& param, const QString& pass)
 {
-  file_io_utils::save_string_to_file(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, param.toStdString());
+
+  std::string buff(sizeof(app_data_file_binary_header), 0);
+  app_data_file_binary_header* phdr = (app_data_file_binary_header*)buff.data();
+  phdr->m_signature = APP_DATA_FILE_BINARY_SIGNATURE;
+  phdr->m_cb_body = 0; // for future use
+
+  buff.append(param.toStdString());
+  crypto::chacha_encrypt(buff, pass.toStdString());
+
+  file_io_utils::save_string_to_file(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, buff);
   return "";
+}
+
+QString Html5ApplicationViewer::have_app_data(const QString& param)
+{
+  view::api_response ar = AUTO_VAL_INIT(ar);
+
+  boost::system::error_code ec;
+  if (boost::filesystem::exists(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, ec))
+    ar.error_code = API_RETURN_CODE_TRUE;
+  else
+    ar.error_code = API_RETURN_CODE_FALSE;
+
+  return epee::serialization::store_t_to_json(ar).c_str();
 }
 
 QString Html5ApplicationViewer::show_openfile_dialog(const QString& param)
