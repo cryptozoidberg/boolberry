@@ -1313,11 +1313,8 @@ POP_WARNINGS
     return true;
   }
 }
-#if defined(_DEBUG) || defined(__GNUC__)
-  #define  ENABLE_LOGGING_INTERNAL
-#endif
 
-#if defined(ENABLE_RELEASE_LOGGING)
+#if !defined(DISABLE_RELEASE_LOGGING)
   #define  ENABLE_LOGGING_INTERNAL
 #endif
 

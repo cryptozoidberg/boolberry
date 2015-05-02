@@ -78,7 +78,6 @@ protected:
 
   void message_box(const QString& msg);
   QString request_uri(const QString& url_str, const QString& params, const QString& callbackname);
-  QString request_aliases();
   bool init_config();
   bool toggle_mining();
   void trayIconActivated(QSystemTrayIcon::ActivationReason reason);

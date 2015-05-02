@@ -396,19 +396,6 @@ bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info
   return true;
 }
 
-QString Html5ApplicationViewer::request_aliases()
-{
-  QString res = "{}";
-  view::alias_set al_set;
-  if (m_backend.get_aliases(al_set))
-  {
-    std::string json_str;
-    epee::serialization::store_t_to_json(al_set, json_str);
-
-    res = json_str.c_str();
-  }
-  return res;
-}
 
 bool Html5ApplicationViewer::show_msg_box(const std::string& message)
 {

@@ -602,16 +602,16 @@ std::string daemon_backend::close_wallet(size_t wallet_id)
   return API_RETURN_CODE_OK;
 }
 
-bool daemon_backend::get_aliases(view::alias_set& al_set)
+std::string daemon_backend::get_aliases(view::alias_set& al_set)
 {
   currency::COMMAND_RPC_GET_ALL_ALIASES::response aliases = AUTO_VAL_INIT(aliases);
   if (m_rpc_proxy->call_COMMAND_RPC_GET_ALL_ALIASES(aliases) && aliases.status == CORE_RPC_STATUS_OK)
   {
     al_set.aliases = aliases.aliases;
-    return true;
+    return API_RETURN_CODE_OK;
   }
 
-  return false;
+  return API_RETURN_CODE_FAIL;
 }
 
 
