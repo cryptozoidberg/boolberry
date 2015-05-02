@@ -322,7 +322,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          37
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          38
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 
@@ -357,7 +357,7 @@ namespace currency
   template<class archive_t>
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
   {
-    if(version < 37)
+    if(version < 38)
       return;
     CHECK_PROJECT_NAME();
     CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -370,6 +370,7 @@ namespace currency
     ar & m_current_block_cumul_sz_limit;
     ar & m_aliases;
     ar & m_scratchpad;
+    ar & m_offers;
     
 
     /*---- serialization bug workaround ----*/    

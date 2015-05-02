@@ -1934,8 +1934,10 @@ bool blockchain_storage::process_blockchain_tx_offers(const transaction& tx, uin
   for (const auto& at : tx.attachment)
   {
     if (at.type() == typeid(offer_details))
+    {
       m_offers.push_back(boost::get<offer_details>(at));
-    m_offers.back().timestamp = timestamp;
+      m_offers.back().timestamp = timestamp;
+    }
   }
 
   return true;
