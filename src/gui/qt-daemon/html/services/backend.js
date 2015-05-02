@@ -139,9 +139,7 @@
                         
                         console.log('API command ' + command +' call result: '+JSON.stringify(result));
                         
-                        if(result.error_code != 'OK'){
-                            console.log("API Error for command '"+command+"': " + result.error_code);
-                        }else{
+                        if(result.error_code == 'OK'){
                             if(angular.isDefined(callback)){
                                 var request_id = result.request_id;
                                 loaders[request_id] = loader.open();
@@ -149,6 +147,8 @@
                             }else{
                                 return result; // If we didn't pass callback, its mean the function is synch
                             }
+                        }else{
+                            console.log("API Error for command '"+command+"': " + result.error_code);
                         }
                     }
                 }
@@ -167,16 +167,25 @@
                 result.param = param;
 
                 var request_id = status.request_id;
+                var error_code = result.status.error_code;
                 
                 loaders[request_id].close();
                 console.log('DISPATCH: got result from backend request id = '+request_id);
                 console.log(result);
-                if(result.status.error_code == 'OK' || result.status.error_code == ''){
-                    console.log('run callback');
+
+                var warningCodes = {
+                    'FILE_RESTORED' : 'Мы определили что ваш файл кошелька был поврежден и восстановили ключи истории транзакций, синхронизация может занять какое-то время',
+                    // some other warning codes
+                };
+                var is_warning = warningCodes.hasOwnProperty(error_code);
+
+                if(error_code == 'OK' || error_code == '' || is_warning){
+                    if(is_warning){
+                        informer.warning(warningCodes[error_code]);
+                    }
                     $timeout(function(){
-                        console.log('run callback 2');
                         callbacks[request_id](result.param); 
-                    },1000);
+                    });
                     
                 }else{
                     informer.error(result.status.error_code);
@@ -191,8 +200,6 @@
                 console.log("UseEmulator: " + use_emulator);
                 return use_emulator;
             },
-
-            
 
             callbackStrToObj : function(str) {
                 var obj = $.parseJSON(str);
@@ -232,8 +239,8 @@
 
     }]);
 
-    module.factory('emulator', ['$interval', '$timeout', 'loader',
-        function($interval, $timeout, loader){
+    module.factory('emulator', ['$interval', '$timeout', 'loader','informer',
+        function($interval, $timeout, loader, informer){
         var callbacks = {};
 
         this.getAMData = function() { //generate one year of mining data
@@ -300,15 +307,16 @@
         };
         this.getData = function(command){
             var result = false;
+
             switch (command){
                 case 'show_openfile_dialog' : 
-                    result = { // why do we need this? I think angular can do it
+                    result = { 
                         "error_code": "OK",
                         "path": "/home/master/Lui/test_wallet.lui"
                     };
                     break;
                 case 'show_savefile_dialog' : 
-                    result = { // why do we need this? I think angular can do it
+                    result = { 
                         "error_code": "OK",
                         "path": "/home/master/Lui/test_wallet_for_save.lui"
                     };
