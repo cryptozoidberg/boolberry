@@ -152,6 +152,7 @@ namespace boost
     a & x.vout;
     a & x.extra;
     a & x.signatures;
+    a & x.attachment;
   }
   template <class Archive>
   inline void serialize(Archive &a, currency::block &b, const boost::serialization::version_type ver)

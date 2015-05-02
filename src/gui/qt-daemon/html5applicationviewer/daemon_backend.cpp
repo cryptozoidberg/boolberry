@@ -495,32 +495,36 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
 
   w->callback(std::shared_ptr<tools::i_wallet2_callback>(new i_wallet_to_i_backend_adapter(this, wallet_id)));
   w->set_core_proxy(std::shared_ptr<tools::i_core_proxy>(new tools::core_fast_rpc_proxy(m_rpc_server)));
-
+  std::string return_code = API_RETURN_CODE_OK;
   CRITICAL_REGION_LOCAL(m_wallets_lock);
-  try
+  while (true)
   {
-    w->load(path, password);
-    m_last_wallet_mint_time = 0;
-  }
-  catch (const tools::error::file_not_found& /**/)
-  {
-    return API_RETURN_CODE_FILE_NOT_FOUND;
-  }
-  catch (const tools::error::wallet_load_notice_wallet_restored& /**/)
-  {
-    return API_RETURN_CODE_FILE_RESTORED;
-  }
-  catch (const std::exception& e)
-  {
-    return std::string(API_RETURN_CODE_WALLET_WRONG_PASSWORD) + ":" + e.what();
+    try
+    {
+      w->load(path, password);
+      m_last_wallet_mint_time = 0;
+      break;
+    }
+    catch (const tools::error::file_not_found& /**/)
+    {
+      return API_RETURN_CODE_FILE_NOT_FOUND;
+    }
+    catch (const tools::error::wallet_load_notice_wallet_restored& /**/)
+    {
+      return_code = API_RETURN_CODE_FILE_RESTORED;
+      break;
+    }
+    catch (const std::exception& e)
+    {
+      return std::string(API_RETURN_CODE_WALLET_WRONG_PASSWORD) + ":" + e.what();
+    }
   }
 
-  //w->init(std::string("127.0.0.1:") + std::to_string(m_rpc_server.get_binded_port()));
   m_wallets[wallet_id] = w;
   update_wallets_info();
   //m_pview->show_wallet();
   m_last_wallet_synch_height = 0;  
-  return API_RETURN_CODE_OK;
+  return return_code;
 }
 
 std::string daemon_backend::get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist)
