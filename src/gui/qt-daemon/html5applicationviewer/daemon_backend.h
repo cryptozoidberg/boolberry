@@ -54,11 +54,12 @@ public:
   std::string close_wallet(size_t wallet_id);
   std::string push_offer(size_t wallet_id, const currency::offer_details& od);
   std::string get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS::response& od);
+  std::string get_aliases(view::alias_set& al_set);
+  std::string validate_address(const std::string& addr);
 
 
   void toggle_pos_mining();
   std::string transfer(size_t wallet_id, const view::transfer_params& tp, currency::transaction& res_tx);
-  bool get_aliases(view::alias_set& al_set);
   std::string get_config_folder();
 private:
   void main_worker(const po::variables_map& vm);

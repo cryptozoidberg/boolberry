@@ -649,7 +649,19 @@ QString Html5ApplicationViewer::have_app_data(const QString& param)
 
   return epee::serialization::store_t_to_json(ar).c_str();
 }
+QString Html5ApplicationViewer::get_all_aliases(const QString& param)
+{
+  view::alias_set a;
+  m_backend.get_aliases(a);
+  return epee::serialization::store_t_to_json(a).c_str();
+}
+QString Html5ApplicationViewer::validate_address(const QString& param)
+{
+  view::api_response ar = AUTO_VAL_INIT(ar);
+  ar.error_code = m_backend.validate_address(param.toStdString());
+  return epee::serialization::store_t_to_json(ar).c_str();
 
+}
 QString Html5ApplicationViewer::show_openfile_dialog(const QString& param)
 {
   view::system_filedialog_request ofdr = AUTO_VAL_INIT(ofdr);

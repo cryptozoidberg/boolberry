@@ -769,6 +769,15 @@ std::string daemon_backend::get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS:
   return API_RETURN_CODE_OK;
 }
 
+std::string daemon_backend::validate_address(const std::string& path)
+{
+  currency::account_public_address acc = AUTO_VAL_INIT(acc);
+  if (currency::get_account_address_from_str(acc, path))
+    return API_RETURN_CODE_TRUE;
+  else
+    return API_RETURN_CODE_FALSE;
+}
+
 void daemon_backend::on_new_block(uint64_t /*height*/, const currency::block& /*block*/)
 {
 
