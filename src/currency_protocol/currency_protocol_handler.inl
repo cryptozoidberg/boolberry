@@ -399,7 +399,7 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::on_idle()
   {
-    if (m_p2p->get_connections_count())
+    if (!m_p2p->get_connections_count())
       m_synchronized = false;
 
     return m_core.on_idle();
