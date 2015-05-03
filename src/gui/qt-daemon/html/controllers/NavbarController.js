@@ -51,8 +51,8 @@
         }
 
         backend.subscribe('update_daemon_state', function(data){// move to run
-            // console.log('update_daemon_state');
-            // console.log(data);
+            console.log('update_daemon_state');
+            console.log(data);
             if(data.daemon_network_state == 2){
                 if(li && angular.isDefined(li)){
                     li.close();
