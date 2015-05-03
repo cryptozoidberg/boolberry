@@ -58,7 +58,7 @@
           count = angular.copy(items).length;
 
           scope.$watch('items',function(){
-            if(count !== items.length){ //new element
+            //if(count !== items.length){ //new element
               count = items.length;
               buildHtml(items).then(function(data){
                 $(element).html(data);
@@ -67,7 +67,7 @@
                 },500);
                 
               });
-            }
+            //}
             console.log('items changed');
             console.log(items);
             

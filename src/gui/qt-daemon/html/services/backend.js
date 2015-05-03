@@ -23,6 +23,8 @@
                 return this.runCommand('show_openfile_dialog',params);
             },
 
+            
+
             saveFileDialog : function(caption, filemask) {
                 var params = {
                     caption: caption, 
@@ -35,6 +37,26 @@
             get_all_offers : function(callback) {
                 var params = {};
                 return this.runCommand('get_all_offers', params, callback);
+            },
+
+            haveAppData: function() {
+                return this.runCommand('have_app_data');
+            },
+
+            getAppData: function(pass) {
+                if(typeof Qt_parent !== 'undefined'){
+                    return Qt_parent['get_app_data'](JSON.stringify(pass));
+                }else{
+                    return '{}';
+                }
+            },
+
+            storeAppData: function(data, pass) {
+                if(typeof Qt_parent !=='undefined'){
+                    return Qt_parent['store_app_data'](JSON.stringify(data), pass);
+                }else{
+                    return '';
+                }
             },
 
             push_offer : function(callback){

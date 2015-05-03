@@ -19,8 +19,21 @@
             return Math.floor(current*100/max);
         }
 
+        var appPass = '123'; // TODO
+
+        $scope.getAppData = function(){
+            console.log('get');
+            var data = backend.getAppData({pass: appPass});
+            console.log(data);
+            $rootScope.safes = JSON.parse(data);
+        };
+
+        $scope.storeAppData = function(){
+             console.log('store');
+             backend.storeAppData(appPass,$rootScope.safes);
+        };
+
         $rootScope.closeWallet = function(wallet_id){
-            console.log('sdfsdf');
             backend.closeWallet(wallet_id, function(data){
                 console.log(data);
                 for (var i in $rootScope.safes){
