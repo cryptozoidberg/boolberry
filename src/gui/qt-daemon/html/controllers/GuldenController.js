@@ -5,11 +5,12 @@
     module.controller('guldenSendCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location',
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location){
             $scope.transaction = {
-                //to: 'Hc51bpKjQRy1mMMF1zgHVkRbPExx2pwXFFXcaKS93LMmRZtbCVJGMmmRCtVSXz75hvJASHP5Yvu99aH5BjLapN223SDXv6y',
+                to: '',
                 push_payer: false,
                 is_delay : false,
                 lock_time: new Date(),
-                fee: '0.01'
+                fee: '0.01',
+                is_valid_address: false
             };
 
             if($routeParams.wallet_id){
@@ -31,6 +32,14 @@
 
                 });
             };
+
+            $scope.validate_address = function(){
+                if($scope.transaction.to.length == 95){
+                    $scope.transaction.is_valid_address = true;
+                }else{
+                    $scope.transaction.is_valid_address = false;
+                }
+            }
 
             $scope.disabled = function(date, mode) {
                 return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );

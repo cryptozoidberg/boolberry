@@ -6,8 +6,12 @@
             <div class="panel-body">
                     <div class="form-group">
                         <label class="control-label col-xs-4 col-sm-4">Со счета</label>
-                        <select class="col-xs-4 col-sm-4 selectpicker" ng-model="transaction.from" ng-options="safe.wallet_id as safe.name + '(' +safe.balance + ' G)' for safe in safes">
-                           
+
+                        <select 
+                            class="col-xs-4 col-sm-4" 
+                            selectpicker 
+                            ng-model="transaction.from" 
+                            ng-options="safe.wallet_id as safe.name + '(' +safe.balance + ' G)' for safe in safes">
                         </select>
 
                         <div class="col-xs-4 col-sm-4">
@@ -20,13 +24,38 @@
                     <div class="form-group has-success has-feedback">
                         <label class="control-label col-xs-4 col-sm-4">Получатель</label>
                         <div class="col-xs-6 col-sm-6">
-                            <input type="text" class="form-control" ng-model="transaction.to" value="HhTZP7Sy4FoDR1kJHbFjzd5gSnUPdpHWHj7Gaaeqjt52KS23rHGa1sN73yZYPt77TkN8VVmHrT5qmBJQGzDLYJGjQpxGRid" placeholder="счет или алиас">
-                            <span class="fa fa-lg fa-check form-control-feedback" aria-hidden="true"></span>
-                            <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                ng-model="transaction.to" 
+                                placeholder="счет или алиас"
+                                ng-change="validate_address()"
+                            >
+                            <span class="form-control-feedback"  style="padding: 0">
+                                <i 
+                                    class="fa fa-lg " 
+                                    ng-class="{
+                                        'text-success fa-check':transaction.is_valid_address,
+                                        'text-danger fa-question':!transaction.is_valid_address,
+                                    }"
+                                ></i>
+                            </span>
+                            
+                            <!-- <span id="inputSuccess2Status" class="sr-only">(success)</span> -->
                         </div>
                         <div class="col-xs-2 col-sm-2">
                             <div class="btn-group">
-                                <button type="button" class="btn btn-default popover-name" data-placement="left"  data-html="true" data-toggle="popover" title="История платежей по контакту" data-content="<div style='margin: -10px -14px 10px;'><table class='table table-condensed'><tbody><tr><td><a class='blocklink' href=''></a><a href=''>chelovek@domain.com</a><span class='account-text'><span class='text-muted'>2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class='moredots'>...</span></span>@onechelovekaccout </td><td><i class='fa fa-lg fa-arrow-circle-o-up text-danger'></i></td><td><span class='nowrap'>20.00 G </span></td></tr><tr><td><a class='blocklink' href=''></a><a href=''>chelovek@domain.com</a><span class='account-text'><span class='text-muted'>2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class='moredots'>...</span></span>@onechelovekaccout </td><td><i class='fa fa-lg fa-arrow-circle-o-up text-danger'></i></td><td><span class='nowrap'>20.00 G </span></td></tr></tbody></table></div>"> <i class="fa fa-lg fa-history"></i></button>
+                                <button 
+                                    type="button" 
+                                    class="btn btn-default popover-name" 
+                                    data-placement="left"  
+                                    data-html="true" 
+                                    data-toggle="popover" 
+                                    title="История платежей по контакту" 
+                                    data-content="<div style='margin: -10px -14px 10px;'><table class='table table-condensed'><tbody><tr><td><a class='blocklink' href=''></a><a href=''>chelovek@domain.com</a><span class='account-text'><span class='text-muted'>2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class='moredots'>...</span></span>@onechelovekaccout </td><td><i class='fa fa-lg fa-arrow-circle-o-up text-danger'></i></td><td><span class='nowrap'>20.00 G </span></td></tr><tr><td><a class='blocklink' href=''></a><a href=''>chelovek@domain.com</a><span class='account-text'><span class='text-muted'>2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class='moredots'>...</span></span>@onechelovekaccout </td><td><i class='fa fa-lg fa-arrow-circle-o-up text-danger'></i></td><td><span class='nowrap'>20.00 G </span></td></tr></tbody></table></div>"
+                                > 
+                                    <i class="fa fa-lg fa-history"></i>
+                                </button>
                             </div>
                             <div class="btn-group">
                                 <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
