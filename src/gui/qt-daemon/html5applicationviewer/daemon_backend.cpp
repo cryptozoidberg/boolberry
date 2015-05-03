@@ -266,7 +266,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   //go to monitoring view loop
   loop();
 
-  dsi.daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_storing_core;
+  dsi.daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_unloading_core;
   
 
   CRITICAL_REGION_BEGIN(m_wallets_lock);
