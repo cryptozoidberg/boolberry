@@ -600,9 +600,9 @@ QString Html5ApplicationViewer::get_app_data(const QString& param)
   const app_data_file_binary_header* phdr = reinterpret_cast<const app_data_file_binary_header*>(app_data_buff.data());
   if (phdr->m_signature != APP_DATA_FILE_BINARY_SIGNATURE)
   {
-    LOG_ERROR("app_data_buff.size() < sizeof(app_data_file_binary_header) check failed");
+    LOG_ERROR("password missmatch: provided pass: " << pwd.pass);
     view::api_response ar;
-    ar.error_code = API_RETURN_CODE_FAIL;
+    ar.error_code = API_RETURN_CODE_WRONG_PASSWORD;
     return epee::serialization::store_t_to_json(ar).c_str();
   }
 
@@ -620,8 +620,17 @@ QString Html5ApplicationViewer::store_app_data(const QString& param, const QStri
   buff.append(param.toStdString());
   crypto::chacha_encrypt(buff, pass.toStdString());
 
-  file_io_utils::save_string_to_file(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, buff);
-  return "";
+  bool r = file_io_utils::save_string_to_file(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, buff);
+  view::api_response ar;
+  if (r)
+    ar.error_code = API_RETURN_CODE_OK;
+  else
+    ar.error_code = API_RETURN_CODE_FAIL;
+  
+  //TODO: @#@ delete me!!
+  LOG_PRINT_L0("store app data pass:" << pass.toStdString());
+
+  return epee::serialization::store_t_to_json(ar).c_str();
 }
 
 QString Html5ApplicationViewer::have_app_data(const QString& param)

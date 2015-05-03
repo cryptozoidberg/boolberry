@@ -207,6 +207,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   if (!cond) \
   { \
     LOG_ERROR(mess); \
+    dsi.daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_internal_error; \
     m_pview->update_daemon_status(dsi); \
     m_pview->on_backend_stopped(); \
     return res; \
@@ -518,7 +519,7 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
     }
     catch (const std::exception& e)
     {
-      return std::string(API_RETURN_CODE_WALLET_WRONG_PASSWORD) + ":" + e.what();
+      return std::string(API_RETURN_CODE_WRONG_PASSWORD) + ":" + e.what();
     }
   }
 
