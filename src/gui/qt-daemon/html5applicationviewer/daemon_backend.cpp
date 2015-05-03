@@ -207,7 +207,6 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   if (!cond) \
   { \
     LOG_ERROR(mess); \
-    dsi.daemon_network_state = 4; \
     m_pview->update_daemon_status(dsi); \
     m_pview->on_backend_stopped(); \
     return res; \
@@ -215,6 +214,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
 
   view::daemon_status_info dsi = AUTO_VAL_INIT(dsi);
   dsi.pos_difficulty = dsi.pos_difficulty = "---";
+  dsi.daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_loading_core;
   m_pview->update_daemon_status(dsi);
 
   //initialize objects
@@ -265,7 +265,8 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   //go to monitoring view loop
   loop();
 
-  dsi.daemon_network_state = 3;
+  dsi.daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_storing_core;
+  
 
   CRITICAL_REGION_BEGIN(m_wallets_lock);
   for (auto& w : m_wallets)
@@ -424,7 +425,7 @@ bool daemon_backend::update_wallets()
 
   if (m_last_daemon_height != m_last_wallet_synch_height)
   {
-    for (auto& w : m_wallets)
+    for (auto& w : m_wallets) 
     {
       wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
       wsi.wallet_id = w.first;
@@ -512,6 +513,7 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
     catch (const tools::error::wallet_load_notice_wallet_restored& /**/)
     {
       return_code = API_RETURN_CODE_FILE_RESTORED;
+      m_last_wallet_mint_time = 0;
       break;
     }
     catch (const std::exception& e)

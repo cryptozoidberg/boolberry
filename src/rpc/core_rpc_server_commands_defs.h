@@ -303,7 +303,10 @@ namespace currency
     {
       daemon_network_state_connecting = 0,
       daemon_network_state_synchronizing = 1,
-      daemon_network_state_online = 2
+      daemon_network_state_online = 2,
+      daemon_network_state_loading_core = 3,
+      daemon_network_state_internal_error = 4,
+      daemon_network_state_unloading_core = 5
     };
 
     struct response
