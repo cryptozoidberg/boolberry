@@ -56,8 +56,9 @@
         });
         
         backend.subscribe('update_wallet_info', function(data){
-            return; //temporary
             angular.forEach(data.wallets,function (wallet){
+                console.log('update_wallet_info');
+                console.log(data);
                 var wallet_id = wallet.wallet_id;
                 var wallet_info = wallet.wi;
                 safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
@@ -67,10 +68,9 @@
                     return;
                 }
                 angular.forEach(wallet_info, function(value,property){
-                    if(angular.isDefined(safe[property])){
-                        safe[property] = value;
-                    }
+                    safe[property] = value;
                 });
+                safe.loaded = true;
             });
         });
 

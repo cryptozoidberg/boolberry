@@ -57,8 +57,8 @@
                             <td colspan="6">Нет записей</td>
                         </tr>
                         <tr ng-repeat="safe in safes">
-
                             <td>
+                                <i class="fa fa-spinner fa-pulse" ng-hide="safe.loaded"></i>
                                 <a class="btn btn-link" href="#safe/{{safe.wallet_id}}">
                                     <big>{{safe.name}}</big>
                                 </a>
