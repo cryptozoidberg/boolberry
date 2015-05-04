@@ -192,7 +192,8 @@
                     var wallet_id = data.wallet_id;
                     var new_safe = {
                         wallet_id : wallet_id,
-                        name : safe.name
+                        name : safe.name,
+                        pass : safe.pass
                     };
                     $modalInstance.close();
                     $timeout(function(){

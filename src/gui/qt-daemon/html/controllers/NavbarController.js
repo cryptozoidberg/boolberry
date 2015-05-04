@@ -23,14 +23,47 @@
 
         $scope.getAppData = function(){
             console.log('get');
-            var data = backend.getAppData({pass: appPass});
-            console.log(data);
-            $rootScope.safes = JSON.parse(data);
+            var appData = backend.getAppData({pass: appPass});
+            appData = JSON.parse(appData);
+            console.log(appData);
+
+            angular.forEach(appData,function(item){
+                backend.openWallet(item.path, item.pass,function(data){
+                    
+                    var wallet_id = data.wallet_id;
+                    var new_safe = {
+                        wallet_id : wallet_id,
+                        name : item.name,
+                        pass : item.pass
+                    };
+                    $timeout(function(){
+                        $rootScope.safes.push(new_safe);    
+                    });
+
+                });
+            });
+
+            
+
+
+
+            //$rootScope.safes = JSON.parse(data);
         };
 
         $scope.storeAppData = function(){
              console.log('store');
-             backend.storeAppData(appPass,$rootScope.safes);
+             var safePaths = [];
+             angular.forEach($rootScope.safes,function(item){
+                var safe = {
+                    pass: item.pass,
+                    path: item.path,
+                    name: item.name
+                };
+                safePaths.push(safe);
+             });
+
+             backend.storeAppData(safePaths, appPass);
+
         };
 
         $rootScope.closeWallet = function(wallet_id){
@@ -51,8 +84,8 @@
         }
 
         backend.subscribe('update_daemon_state', function(data){// move to run
-            console.log('update_daemon_state');
-            console.log(data);
+            // console.log('update_daemon_state');
+            // console.log(data);
             if(data.daemon_network_state == 2){
                 if(li && angular.isDefined(li)){
                     li.close();
