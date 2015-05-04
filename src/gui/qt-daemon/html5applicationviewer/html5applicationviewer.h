@@ -52,7 +52,6 @@ protected:
 
   private slots :
   bool do_close();
-  bool on_request_quit();
   public slots:
 
   // public API for javascript
@@ -74,6 +73,7 @@ protected:
   QString push_offer(const QString& param);
   QString get_all_aliases(const QString& param);
   QString validate_address(const QString& param);
+  QString on_request_quit();
 
 
   void message_box(const QString& msg);

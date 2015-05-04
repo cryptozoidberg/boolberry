@@ -40,7 +40,7 @@ public:
   void addToJavaScript();
 
 signals:
-  void quitRequested();
+  void quit_requested(const QString str);
   void update_daemon_state(const QString str);
   void update_wallet_status(const QString str);
   void update_wallet_info(const QString str);
@@ -118,7 +118,7 @@ QString Html5ApplicationViewerPrivate::adjustPath(const QString &path)
 
 void Html5ApplicationViewerPrivate::quit()
 {
-  emit quitRequested();
+  emit quit_requested("{}");
 }
 
 void Html5ApplicationViewerPrivate::addToJavaScript()
@@ -141,7 +141,7 @@ m_is_stop(false)
   m_dispatcher = std::thread([this](){
     dispatcher();
   });
-  connect(m_d, SIGNAL(quitRequested()), this, SLOT(on_request_quit()));
+  //connect(m_d, SIGNAL(quitRequested()), this, SLOT(on_request_quit()));
 
   QVBoxLayout *layout = new QVBoxLayout;
   layout->addWidget(m_d);
@@ -209,7 +209,7 @@ void Html5ApplicationViewer::closeEvent(QCloseEvent *event)
 {
   if (!m_deinitialize_done)
   {
-    on_request_quit();
+    m_d->quit();//  ();//on_request_quit();
     event->ignore();
   }
   else
@@ -252,7 +252,7 @@ void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
   connect(m_restoreAction.get(), SIGNAL(triggered()), this, SLOT(showNormal()));
 
   m_quitAction = std::unique_ptr<QAction>(new QAction(tr("&Quit"), this));
-  connect(m_quitAction.get(), SIGNAL(triggered()), this, SLOT(on_request_quit()));
+  connect(m_quitAction.get(), SIGNAL(triggered()), this, SIGNAL(quit_requested()));
 
   m_trayIconMenu = std::unique_ptr<QMenu>(new QMenu(this));
   m_trayIconMenu->addAction(m_restoreAction.get());
@@ -350,7 +350,7 @@ QGraphicsWebView *Html5ApplicationViewer::webView() const
   return m_d->m_webView;
 }
 
-bool Html5ApplicationViewer::on_request_quit()
+QString Html5ApplicationViewer::on_request_quit()
 {
   m_quit_requested = true;
   if (m_backend_stopped)
@@ -364,7 +364,7 @@ bool Html5ApplicationViewer::on_request_quit()
     m_is_stop = true;
     m_backend.send_stop_signal();
   }
-  return true;
+  return "OK";
 }
 
 bool Html5ApplicationViewer::do_close()

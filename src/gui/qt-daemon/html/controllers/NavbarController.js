@@ -79,6 +79,16 @@
             console.log(data);
         });
 
+
+        backend.subscribe('quit_requested', function(data){
+            console.log('!!!!before sleep quit_requested!!!!!!');
+            $timeout(function(){
+            	console.log('!!!!after sleep quit_requested!!!!!!');
+		Qt_parent["on_request_quit"]();
+		}, 1000);
+        });
+
+
         backend.subscribe('money_transfer', function(data){
             console.log('money_transfer');
             console.log(data);
