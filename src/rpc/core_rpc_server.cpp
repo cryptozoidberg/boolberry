@@ -96,7 +96,6 @@ namespace currency
     res.current_blocks_median = m_core.get_blockchain_storage().get_current_comulative_blocksize_limit()/2;
     res.current_network_hashrate_50 = m_core.get_blockchain_storage().get_current_hashrate(50);
     res.current_network_hashrate_350 = m_core.get_blockchain_storage().get_current_hashrate(350);
-    res.scratchpad_size = m_core.get_blockchain_storage().get_scratchpad_size();
     res.alias_count = m_core.get_blockchain_storage().get_aliases_count();
     m_core.get_blockchain_storage().get_transactions_daily_stat(res.transactions_cnt_per_day, res.transactions_volume_per_day);
     res.last_pos_timestamp = m_core.get_blockchain_storage().get_last_block_of_type(true).bl.timestamp;
@@ -734,45 +733,7 @@ namespace currency
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
-  //------------------------------------------------------------------------------------------------------------------------------
-  bool core_rpc_server::get_addendum_for_hi(const mining::height_info& hi, std::list<mining::addendum>& res)
-  {
-    if(!hi.height || hi.height + 1 == m_core.get_current_blockchain_height())
-      return true;//do not make addendum for whole blockchain
 
-    CHECK_AND_ASSERT_MES(hi.height < m_core.get_current_blockchain_height(), false, "wrong height parameter passed: " << hi.height);
-
-    crypto::hash h = null_hash;
-    bool r = string_tools::hex_to_pod(hi.block_id, h);
-    CHECK_AND_ASSERT_MES(r, false, "wrong block_id parameter passed: " << hi.block_id);
-        
-
-    crypto::hash block_chain_id = m_core.get_blockchain_storage().get_block_id_by_height(hi.height);
-    CHECK_AND_ASSERT_MES(block_chain_id != null_hash, false, "internal error: can't get block id by height: " << hi.height);
-    uint64_t height = hi.height;
-    if(block_chain_id != h)
-    {
-      //probably split
-      CHECK_AND_ASSERT_MES(hi.height > 0, false, "wrong height passed");
-      --height;
-    }
-
-    std::list<block> blocks;
-    r = m_core.get_blockchain_storage().get_blocks(height + 1, m_core.get_current_blockchain_height() - (height+1), blocks);
-    CHECK_AND_ASSERT_MES(r, false, "failed to get blocks");
-    for(auto it = blocks.begin(); it!= blocks.end(); it++)
-    {
-      res.push_back(mining::addendum());
-      res.back().hi.height = get_block_height(*it);
-      res.back().hi.block_id = string_tools::pod_to_hex(get_block_hash(*it));
-      res.back().prev_id = string_tools::pod_to_hex(it->prev_id);
-      std::vector<crypto::hash> ad;
-      r = get_block_scratchpad_addendum(*it, ad);
-      CHECK_AND_ASSERT_MES(r, false, "Failed to add block addendum");
-      addendum_to_hexstr(ad, res.back().addm);      
-    }
-    return true;
-  }
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::get_current_hi(mining::height_info& hi)
   {
@@ -842,11 +803,6 @@ namespace currency
     
     //TODO: add login information here
 
-    if(!get_addendum_for_hi(req.hi, res.job.addms))
-    {
-      res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
-      return true;
-    }
 
     res.id =  std::to_string(m_session_counter++); //session id
 
@@ -872,11 +828,7 @@ namespace currency
       return true;
     }
     
-    if(!get_addendum_for_hi(req.hi, res.jd.addms))
-    {
-      res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
-      return true;
-    }
+ 
 
     /*epee::json_rpc::error err = AUTO_VAL_INIT(err);
     if(!get_job(req.id, res.jd, err, cntx))
@@ -885,21 +837,6 @@ namespace currency
       return true;
     }*/
 
-    return true;
-  }
-  //------------------------------------------------------------------------------------------------------------------------------
-  bool core_rpc_server::on_getscratchpad(const mining::COMMAND_RPC_GET_FULLSCRATCHPAD::request& req, mining::COMMAND_RPC_GET_FULLSCRATCHPAD::response& res, connection_context& cntx)
-  {
-    if(!check_core_ready())
-    {
-      res.status = CORE_RPC_STATUS_BUSY;
-      return true;
-    }
-    std::vector<crypto::hash> scratchpad_local;
-    m_core.get_blockchain_storage().copy_scratchpad(scratchpad_local);
-    addendum_to_hexstr(scratchpad_local, res.scratchpad_hex); 
-    get_current_hi(res.hi);
-    res.status = CORE_RPC_STATUS_OK;
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
@@ -944,42 +881,6 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  bool core_rpc_server::on_store_scratchpad(const mining::COMMAND_RPC_STORE_SCRATCHPAD::request& req, mining::COMMAND_RPC_STORE_SCRATCHPAD::response& res, connection_context& cntx)
-  {
-    if(!check_core_ready())
-    {
-      res.status = CORE_RPC_STATUS_BUSY;
-      return true;
-    }
-
-    if(!m_core.get_blockchain_storage().extport_scratchpad_to_file(req.local_file_path))    
-      res.status = CORE_RPC_STATUS_BUSY;
-    else
-      res.status = CORE_RPC_STATUS_OK;
-
-    return true;
-  }
-  //------------------------------------------------------------------------------------------------------------------------------
-  bool core_rpc_server::on_getfullscratchpad2(const epee::net_utils::http::http_request_info& query_info, epee::net_utils::http::http_response_info& response_info, connection_context& cntx)
-  {
-    if (!check_core_ready())
-    {
-      return true;
-    }
-    mining::height_info hi = AUTO_VAL_INIT(hi);
-    get_current_hi(hi);
-    std::string json_hi;
-    epee::serialization::store_t_to_json(hi, json_hi);
-    uint32_t str_len = static_cast<uint32_t>(json_hi.size());
-    response_info.m_body.append(reinterpret_cast<const char*>(&str_len), sizeof(str_len));
-    response_info.m_body.append(json_hi.data(), json_hi.size());
-    m_core.get_blockchain_storage().copy_scratchpad(response_info.m_body);    
-
-    //TODO: remove this code
-    LOG_PRINT_L0("[getfullscratchpad2]: json prefix len: " << str_len << ", JSON: " << json_hi);
-    return true;
-  }
-  //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_addendums(const COMMAND_RPC_GET_ADDENDUMS::request& req, COMMAND_RPC_GET_ADDENDUMS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
   {
     if (!check_core_ready())
@@ -988,11 +889,7 @@ namespace currency
       return true;
     }
 
-    if (!get_addendum_for_hi(req, res.addms))
-    {
-      res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
-      return true;
-    }
+
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }

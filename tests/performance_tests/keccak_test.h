@@ -173,7 +173,7 @@ void measure_keccak_over_scratchpad()
     uint64_t ticks_b = epee::misc_utils::get_tick_count();
     for(size_t r = 0; r != measere_rounds; r++)
     {      
-      res_h = currency::get_blob_longhash_opt(has_str, scratchpad_vec);
+      res_h = currency::get_blob_longhash(has_str);
     } 
     uint64_t ticks_c = epee::misc_utils::get_tick_count();
     std::cout << std::setw(20) << std::left << scratchpad_vec.size()*sizeof(crypto::hash) << "\t" <<

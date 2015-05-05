@@ -120,12 +120,6 @@ namespace currency
   void get_blob_hash(const blobdata& blob, crypto::hash& res);
   crypto::hash get_blob_hash(const blobdata& blob);
   std::string short_hash_str(const crypto::hash& h);
-  bool get_block_scratchpad_addendum(const block& b, std::vector<crypto::hash>& res);
-  bool get_scratchpad_patch(size_t global_start_entry, size_t local_start_entry, size_t local_end_entry, const std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
-  bool push_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
-  bool push_block_scratchpad_data(size_t global_start_entry, const block& b, std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
-  bool pop_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
-  bool apply_scratchpad_patch(std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
   bool is_mixattr_applicable_for_fake_outs_counter(uint8_t mix_attr, uint64_t fake_attr_count);
   bool is_tx_spendtime_unlocked(uint64_t unlock_time, uint64_t current_blockchain_height);
 
@@ -144,6 +138,9 @@ namespace currency
   blobdata get_block_hashing_blob(const block& b);
   bool parse_amount(uint64_t& amount, const std::string& str_amount);
   bool parse_payment_id_from_hex_str(const std::string& payment_id_str, crypto::hash& payment_id);
+  void get_block_longhash(const block& b, crypto::hash& res);
+  crypto::hash get_block_longhash(const block& b);
+
 
   bool check_money_overflow(const transaction& tx);
   bool check_outs_overflow(const transaction& tx);
@@ -152,15 +149,12 @@ namespace currency
   std::vector<uint64_t> relative_output_offsets_to_absolute(const std::vector<uint64_t>& off);
   std::vector<uint64_t> absolute_output_offsets_to_relative(const std::vector<uint64_t>& off);
   std::string print_money(uint64_t amount);
-  std::string dump_scratchpad(const std::vector<crypto::hash>& scr);
-  std::string dump_patch(const std::map<uint64_t, crypto::hash>& patch);
   
   bool addendum_to_hexstr(const std::vector<crypto::hash>& add, std::string& hex_buff);
   bool hexstr_to_addendum(const std::string& hex_buff, std::vector<crypto::hash>& add);
   bool set_payment_id_to_tx_extra(std::vector<extra_v>& extra, const std::string& payment_id);
   bool get_payment_id_from_tx_extra(const transaction& tx, std::string& payment_id);
-  crypto::hash get_blob_longhash(const blobdata& bd, uint64_t height, const std::vector<crypto::hash>& scratchpad);
-  crypto::hash get_blob_longhash_opt(const blobdata& bd, const std::vector<crypto::hash>& scratchpad);
+  crypto::hash get_blob_longhash(const blobdata& bd);
   bool add_padding_to_tx(transaction& tx, size_t count);
   std::string get_comment_from_tx(const transaction& tx);
   std::string print_stake_kernel_info(const stake_kernel& sk);
@@ -220,74 +214,6 @@ namespace currency
      return true;
   }
   //---------------------------------------------------------------
-  bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector);
-  struct get_scratchpad_param
-  {
-    uint64_t selectors[4];
-  };
-  //---------------------------------------------------------------
-  template<typename callback_t>
-  bool make_scratchpad_from_selector(const get_scratchpad_param& prm, blobdata& bd, uint64_t height, callback_t get_blocks_accessor)
-  {
-    /*lets genesis block with mock scratchpad*/
-    if(!height)
-    {
-      bd = "GENESIS";
-      return true;
-    }
-    //lets get two transactions outs
-    uint64_t index_a = prm.selectors[0]%height;
-    uint64_t index_b = prm.selectors[1]%height;
-    
-    
-    block ba = AUTO_VAL_INIT(ba);
-    block bb = AUTO_VAL_INIT(bb);
-    bool r = get_blocks_accessor(index_a, ba);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to get block \"a\" from block accessor, index=" << index_a);
-    r = get_blocks_accessor(index_a, bb);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to get block \"b\" from block accessor, index=" << index_b);
-
-    r = get_block_scratchpad_data(ba, bd, prm.selectors[2]);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for a, index=" << index_a);
-    r = get_block_scratchpad_data(bb, bd, prm.selectors[3]);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for b, index=" << index_b);
-    return true;
-  }
-  //---------------------------------------------------------------
-  template<typename callback_t>
-  bool get_blob_longhash(const blobdata& bd, crypto::hash& res, uint64_t height, callback_t accessor)
-  {
-    crypto::wild_keccak_dbl<crypto::mul_f>(reinterpret_cast<const uint8_t*>(bd.data()), bd.size(), reinterpret_cast<uint8_t*>(&res), sizeof(res), [&](crypto::state_t_m& st, crypto::mixin_t& mix)
-    {
-      if(!height)
-      {
-        memset(&mix, 0, sizeof(mix));
-        return;
-      }
-#define GET_H(index) accessor(st[index])
-      for(size_t i = 0; i!=6; i++)
-      {
-        *(crypto::hash*)&mix[i*4]  = XOR_4(GET_H(i*4), GET_H(i*4+1), GET_H(i*4+2), GET_H(i*4+3));  
-      }
-    });
-    return true;
-  }
-  //---------------------------------------------------------------
-  template<typename callback_t>
-  bool get_block_longhash(const block& b, crypto::hash& res, uint64_t height, callback_t accessor)
-  {
-    blobdata bd = get_block_hashing_blob(b);
-    return get_blob_longhash(bd, res, height, accessor);
-  }
-  //---------------------------------------------------------------
-  template<typename callback_t>
-  crypto::hash get_block_longhash(const block& b, uint64_t height, callback_t cb)
-  {
-    crypto::hash p = null_hash;
-    get_block_longhash(b, p, height, cb);
-    return p;
-  }
-  //---------------------------------------------------------------  
   template<class t_object>
   bool t_serializable_object_to_blob(const t_object& to, blobdata& b_blob)
   {

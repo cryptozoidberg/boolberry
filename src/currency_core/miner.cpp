@@ -87,18 +87,11 @@ namespace currency
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
-  bool miner::update_scratchpad()
-  {
-    EXCLUSIVE_CRITICAL_REGION_LOCAL(m_scratchpad_access);
-    return m_bc.copy_scratchpad(m_scratchpad);
-  }
-  //-----------------------------------------------------------------------------------------------------
   bool miner::on_block_chain_update()
   {
     if(!is_mining())
       return true;
     
-    update_scratchpad();
     validate_alias_info();
     //here miner threads may work few rounds without 
     return request_block_template();
@@ -136,13 +129,6 @@ namespace currency
       return true;
     });
     
-    
-    m_update_scratchpad_interval.do_call([&](){
-        if(is_mining())
-          update_scratchpad();
-        return true;
-      });
-
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
@@ -250,7 +236,6 @@ namespace currency
 
     if(!m_template_no)
       request_block_template();//lets update block template
-    update_scratchpad();
 
     boost::interprocess::ipcdetail::atomic_write32(&m_stop, 0);
     boost::interprocess::ipcdetail::atomic_write32(&m_thread_index, 0);
@@ -344,9 +329,6 @@ namespace currency
     block b;
     blobdata block_blob;
 
-    //for now have a copy of scratchpad for every thread
-    //temporary solution(to avoid slow synchronization while mining), will be changed in few weeks to use one 
-    //std::vector<crypto::hash> local_scratch_pad;
     while(!m_stop)
     {
       if(m_pausers_count)//anti split workaround
@@ -375,18 +357,8 @@ namespace currency
       }
 
       *reinterpret_cast<uint64_t*>(&block_blob[1]) = nonce;
-      crypto::hash h;
-      SHARED_CRITICAL_REGION_BEGIN(m_scratchpad_access);
-#if defined(WIN32)
-      h = get_blob_longhash_opt(block_blob, m_scratchpad);
-#else
-      get_blob_longhash(block_blob, h, height, [&](uint64_t index) -> crypto::hash&
-      {
-        return m_scratchpad[index%m_scratchpad.size()];
-      });
-#endif
+      crypto::hash h = get_blob_longhash(block_blob);
 
-      CRITICAL_REGION_END();
 
       if(check_hash(h, local_diff))
       {

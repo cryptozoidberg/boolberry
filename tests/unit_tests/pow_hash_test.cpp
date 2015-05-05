@@ -155,7 +155,7 @@ TEST(pow_tests, test_reference_func)
 
   r = check_hash([](const std::string& blob, std::vector<crypto::hash>& scratchpad){
 
-    return get_blob_longhash_opt(blob, scratchpad);
+    return get_blob_longhash(blob, scratchpad);
   });
   ASSERT_TRUE(r);
 }

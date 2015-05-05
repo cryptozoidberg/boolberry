@@ -54,7 +54,6 @@ namespace currency
       wide_difficulty_type cumulative_diff_precise;
       wide_difficulty_type difficulty;
       uint64_t already_generated_coins;
-      uint64_t scratch_offset;
       crypto::hash stake_hash; //TODO: unused field for PoW blocks, subject for refactoring
     };
     typedef std::unordered_map<crypto::hash, block_extended_info> blocks_ext_by_hash;
@@ -119,7 +118,6 @@ namespace currency
     std::string get_alias_by_address(const account_public_address& addr);
     bool get_all_aliases(std::list<alias_info>& aliases);
     uint64_t get_aliases_count();
-    uint64_t get_scratchpad_size();
     bool store_blockchain();
     bool check_tx_input(const txin_to_key& txin, const crypto::hash& tx_prefix_hash, const std::vector<crypto::signature>& sig, uint64_t* pmax_related_block_height = NULL);
     bool check_tx_inputs(const transaction& tx, const crypto::hash& tx_prefix_hash, uint64_t* pmax_used_block_height = NULL);
@@ -127,14 +125,11 @@ namespace currency
     bool check_tx_inputs(const transaction& tx, uint64_t& pmax_used_block_height, crypto::hash& max_used_block_id);
     uint64_t get_current_comulative_blocksize_limit();
     uint64_t get_current_hashrate(size_t aprox_count);
-    bool extport_scratchpad_to_file(const std::string& path);
     bool print_transactions_statistics();
     bool update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent);
 
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     wide_difficulty_type block_difficulty(size_t i);
-    bool copy_scratchpad(std::vector<crypto::hash>& dst);//TODO: not the best way, add later update method instead of full copy
-    bool copy_scratchpad(std::string& dst);
     bool prune_aged_alt_blocks();
     bool get_transactions_daily_stat(uint64_t& daily_cnt, uint64_t& daily_volume);
     bool check_keyimages(const std::list<crypto::key_image>& images, std::list<bool>& images_stat);//true - unspent, false - spent
@@ -248,7 +243,6 @@ namespace currency
     outputs_container m_outputs;
     aliases_container m_aliases;
     address_to_aliases_container m_addr_to_alias;
-    std::vector<crypto::hash> m_scratchpad;
     uint64_t m_current_pruned_rs_height;
 
     std::string m_config_folder;
@@ -321,7 +315,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          38
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          39
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 
@@ -356,7 +350,7 @@ namespace currency
   template<class archive_t>
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
   {
-    if(version < 38)
+    if (version < CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER)
       return;
     CHECK_PROJECT_NAME();
     CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -368,7 +362,6 @@ namespace currency
     ar & m_invalid_blocks;
     ar & m_current_block_cumul_sz_limit;
     ar & m_aliases;
-    ar & m_scratchpad;
     ar & m_offers;
     
 

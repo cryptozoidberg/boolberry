@@ -74,7 +74,6 @@ namespace currency
     bool request_block_template();
     void  merge_hr();
     bool validate_alias_info();
-    bool update_scratchpad();
     
     struct miner_config
     {
@@ -106,7 +105,6 @@ namespace currency
     account_public_address m_mine_address;
     math_helper::once_a_time_seconds<5> m_update_block_template_interval;
     math_helper::once_a_time_seconds<2> m_update_merge_hr_interval;
-    math_helper::once_a_time_seconds<30, false> m_update_scratchpad_interval;//hotfix for network stopped to finding blocks
     std::vector<blobdata> m_extra_messages;
     miner_config m_config;
     std::string m_config_folder;    
@@ -118,8 +116,6 @@ namespace currency
     alias_info m_alias_to_apply_in_block;
     critical_section m_aliace_to_apply_in_block_lock;
     
-    boost::shared_mutex m_scratchpad_access;
-    std::vector<crypto::hash> m_scratchpad;
   };
 }
 

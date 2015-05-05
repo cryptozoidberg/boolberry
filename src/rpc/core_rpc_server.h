@@ -66,10 +66,7 @@ namespace currency
     //mining rpc
     bool on_login(const mining::COMMAND_RPC_LOGIN::request& req, mining::COMMAND_RPC_LOGIN::response& res, connection_context& cntx);
     bool on_getjob(const mining::COMMAND_RPC_GETJOB::request& req, mining::COMMAND_RPC_GETJOB::response& res, connection_context& cntx);
-    bool on_getscratchpad(const mining::COMMAND_RPC_GET_FULLSCRATCHPAD::request& req, mining::COMMAND_RPC_GET_FULLSCRATCHPAD::response& res, connection_context& cntx);
     bool on_submit(const mining::COMMAND_RPC_SUBMITSHARE::request& req, mining::COMMAND_RPC_SUBMITSHARE::response& res, connection_context& cntx);
-    bool on_store_scratchpad(const mining::COMMAND_RPC_STORE_SCRATCHPAD::request& req, mining::COMMAND_RPC_STORE_SCRATCHPAD::response& res, connection_context& cntx);
-    bool on_getfullscratchpad2(const epee::net_utils::http::http_request_info& query_info, epee::net_utils::http::http_response_info& response_info, connection_context& cntx);
     
     
 
@@ -93,7 +90,6 @@ namespace currency
       MAP_URI_AUTO_JON2("/getinfo", on_get_info, COMMAND_RPC_GET_INFO)
       MAP_URI_AUTO_BIN2("/get_pos_details.bin", on_get_pos_mining_details, COMMAND_RPC_GET_POS_MINING_DETAILS)
       MAP_URI_AUTO_BIN2("/get_all_offers.bin", on_rpc_get_all_offers, COMMAND_RPC_GET_ALL_OFFERS)
-      MAP_URI2("/getfullscratchpad2", on_getfullscratchpad2)
       BEGIN_JSON_RPC_MAP("/json_rpc")
         MAP_JON_RPC("getblockcount",             on_getblockcount,              COMMAND_RPC_GETBLOCKCOUNT)
         MAP_JON_RPC_WE("on_getblockhash",        on_getblockhash,               COMMAND_RPC_GETBLOCKHASH)
@@ -110,9 +106,7 @@ namespace currency
         //remote miner rpc
         MAP_JON_RPC_N(on_login,            mining::COMMAND_RPC_LOGIN)
         MAP_JON_RPC_N(on_getjob,           mining::COMMAND_RPC_GETJOB)
-        MAP_JON_RPC_N(on_getscratchpad,    mining::COMMAND_RPC_GET_FULLSCRATCHPAD)
         MAP_JON_RPC_N(on_submit,           mining::COMMAND_RPC_SUBMITSHARE)        
-        MAP_JON_RPC_N(on_store_scratchpad, mining::COMMAND_RPC_STORE_SCRATCHPAD)        
       END_JSON_RPC_MAP()
     END_URI_MAP2()
   
@@ -121,7 +115,6 @@ namespace currency
     //-----------------------
     bool handle_command_line(const boost::program_options::variables_map& vm);
     bool check_core_ready();
-    bool get_addendum_for_hi(const mining::height_info& hi, std::list<mining::addendum>& res);
     bool get_job(const std::string& job_id, mining::job_details& job, epee::json_rpc::error& err, connection_context& cntx);
     bool get_current_hi(mining::height_info& hi);
 

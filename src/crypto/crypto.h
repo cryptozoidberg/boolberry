@@ -12,6 +12,8 @@
 #include "generic-ops.h"
 #include "hash.h"
 #include "warnings.h"
+#include "x11/x11.h"
+
 
 PUSH_WARNINGS
 DISABLE_CLANG_WARNING(unused-private-field)
@@ -182,6 +184,20 @@ namespace crypto {
     const std::vector<const public_key *> &pubs,
     const signature *sig) {
     return check_ring_signature(prefix_hash, image, pubs.data(), pubs.size(), sig);
+  }
+
+  inline hash x11hash(const void* buff, size_t sz)
+  {
+    hash h;
+    x11_hash((const char*)buff, static_cast<unsigned int>(sz), (char*)&h);
+    return h;
+  }
+
+  inline hash x11hash(const std::string& buff)
+  {
+    hash h;
+    x11_hash(buff.data(), buff.size(), (char*)&h);
+    return h;
   }
 }
 

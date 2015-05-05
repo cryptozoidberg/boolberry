@@ -156,7 +156,6 @@ bool blockchain_storage::pop_block_from_blockchain()
   CHECK_AND_ASSERT_MES(m_blocks.size() > 1, false, "pop_block_from_blockchain: can't pop from blockchain with size = " << m_blocks.size());
   size_t h = m_blocks.size()-1;
   block_extended_info& bei = m_blocks[h];
-  pop_block_scratchpad_data(bei.bl, m_scratchpad);
   //crypto::hash id = get_block_hash(bei.bl);
   bool r = purge_block_data_from_blockchain(bei.bl, bei.bl.tx_hashes.size());
   CHECK_AND_ASSERT_MES(r, false, "Failed to purge_block_data_from_blockchain for block " << get_block_hash(bei.bl) << " on height " << h);
@@ -223,29 +222,10 @@ bool blockchain_storage::reset_and_set_genesis_block(const block& b)
   m_blocks_index.clear();
   m_alternative_chains.clear();
   m_outputs.clear();
-  m_scratchpad.clear();
 
   block_verification_context bvc = boost::value_initialized<block_verification_context>();
   add_new_block(b, bvc);
   return bvc.m_added_to_main_chain && !bvc.m_verifivation_failed;
-}
-//------------------------------------------------------------------
-//TODO: not the best way, add later update method instead of full copy
-bool blockchain_storage::copy_scratchpad(std::vector<crypto::hash>& scr)
-{
-  CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  scr = m_scratchpad;
-  return true;
-}
-//------------------------------------------------------------------
-bool blockchain_storage::copy_scratchpad(std::string& dst)
-{
-  CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  if (m_scratchpad.size())
-  {
-    dst.append(reinterpret_cast<const char*>(&m_scratchpad[0]), m_scratchpad.size() * 32);
-  }
-  return true;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::purge_transaction_keyimages_from_blockchain(const transaction& tx, bool strict_check)
@@ -965,8 +945,6 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     //build alternative subchain, front -> mainchain, back -> alternative head
     blocks_ext_by_hash::iterator alt_it = it_prev; //m_alternative_chains.find()
     alt_chain_type alt_chain;
-    std::vector<crypto::hash> alt_scratchppad;
-    std::map<uint64_t, crypto::hash> alt_scratchppad_patch;
     std::vector<uint64_t> timestamps;
     while(alt_it != m_alternative_chains.end())
     {
@@ -983,17 +961,6 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
       get_block_hash(m_blocks[alt_chain.front()->second.height - 1].bl, h);
       CHECK_AND_ASSERT_MES(h == alt_chain.front()->second.bl.prev_id, false, "alternative chain have wrong connection to main chain");
       complete_timestamps_vector(alt_chain.front()->second.height - 1, timestamps);
-      //build alternative scratchpad
-      for(auto& ach: alt_chain)
-      {
-        if(!push_block_scratchpad_data(ach->second.scratch_offset, ach->second.bl, alt_scratchppad, alt_scratchppad_patch))
-        {
-          LOG_PRINT_RED_L0("Block with id: " << id
-            << ENDL << " for alternative chain, have invalid data");
-          bvc.m_verifivation_failed = true;
-          return false;
-        }
-      }
     }else
     {
       CHECK_AND_ASSERT_MES(it_main_prev != m_blocks_index.end(), false, "internal error: broken imperative condition it_main_prev != m_blocks_index.end()");
@@ -1014,28 +981,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     bei.height = alt_chain.size() ? it_prev->second.height + 1 : it_main_prev->second + 1;
     uint64_t connection_height = alt_chain.size() ? alt_chain.front()->second.height:bei.height;
     CHECK_AND_ASSERT_MES(connection_height, false, "INTERNAL ERROR: Wrong connection_height==0 in handle_alternative_block");
-    bei.scratch_offset = m_blocks[connection_height].scratch_offset + alt_scratchppad.size();
-    CHECK_AND_ASSERT_MES(bei.scratch_offset, false, "INTERNAL ERROR: Wrong bei.scratch_offset==0 in handle_alternative_block");
-    
-    //lets collect patchs from main line
-    std::map<uint64_t, crypto::hash> main_line_patches;
-    for(uint64_t i = connection_height; i != m_blocks.size(); i++)
-    {
-      std::vector<crypto::hash> block_addendum;
-      bool res = get_block_scratchpad_addendum(m_blocks[i].bl, block_addendum);
-      CHECK_AND_ASSERT_MES(res, false, "Failed to get_block_scratchpad_addendum for alt block");
-      get_scratchpad_patch(m_blocks[i].scratch_offset, 
-                           0, 
-                           block_addendum.size(), 
-                           block_addendum, 
-                           main_line_patches);
-    }
-    //apply only that patches that lay under alternative scratchpad offset
-    for(auto ml: main_line_patches)
-    {
-      if(ml.first < m_blocks[connection_height].scratch_offset)
-        alt_scratchppad_patch[ml.first] = crypto::xor_pod(alt_scratchppad_patch[ml.first], ml.second);
-    }
+
     bool pos_block = is_pos_block(bei.bl);
     //check if PoS block allowed on this height
     CHECK_AND_ASSERT_MES(!(pos_block && bei.height < m_pos_config.pos_minimum_heigh), false, "PoS block is not allowed on this height");
@@ -1059,37 +1005,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     }
     else
     {
-      // POW
-#ifdef ENABLE_HASHING_DEBUG
-      size_t call_no = 0;
-      std::stringstream ss;
-#endif
-      get_block_longhash(bei.bl, proof_of_work, bei.height, [&](uint64_t index) -> crypto::hash
-      {
-        uint64_t offset = index%bei.scratch_offset;
-        crypto::hash res;
-        if (offset >= m_blocks[connection_height].scratch_offset)
-        {
-          res = alt_scratchppad[offset - m_blocks[connection_height].scratch_offset];
-        }
-        else
-        {
-          res = m_scratchpad[offset];
-        }
-        auto it = alt_scratchppad_patch.find(offset);
-        if (it != alt_scratchppad_patch.end())
-        {//apply patch
-          res = crypto::xor_pod(res, it->second);
-        }
-#ifdef ENABLE_HASHING_DEBUG
-        ss << "[" << call_no << "][" << index << "%" << bei.scratch_offset << "(" << index%bei.scratch_offset << ")]" << res << ENDL;
-        ++call_no;
-#endif
-        return res;
-      });
-#ifdef ENABLE_HASHING_DEBUG
-      LOG_PRINT_L3("ID: " << get_block_hash(bei.bl) << "[" << bei.height << "]" << ENDL << "POW:" << proof_of_work << ENDL << ss.str());
-#endif
+      proof_of_work = get_block_longhash(bei.bl);
       if (!check_hash(proof_of_work, current_diff))
       {
         LOG_PRINT_RED_L0("Block with id: " << id
@@ -1314,48 +1230,6 @@ uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
   return w_hr.convert_to<uint64_t>();
   
   return 0;
-}
-//------------------------------------------------------------------
-bool blockchain_storage::extport_scratchpad_to_file(const std::string& path)
-{
-  CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  export_scratchpad_file_header fh;
-  memset(&fh, 0, sizeof(fh));
-
-  fh.current_hi.prevhash = currency::get_block_hash(m_blocks.back().bl);
-  fh.current_hi.height = m_blocks.size()-1;
-  fh.scratchpad_size = m_scratchpad.size()*4;
-  
-  try
-  {
-
-    std::string tmp_path = path + ".tmp";
-    std::ofstream fstream;
-    fstream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fstream.open(tmp_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
-    fstream.write((const char*)&fh, sizeof(fh));
-    fstream.write((const char*)&m_scratchpad[0], m_scratchpad.size()*32);
-    fstream.close();
-
-    boost::filesystem::remove(path);
-    boost::filesystem::rename(tmp_path, path);
-
-    LOG_PRINT_L0("Scratchpad exported to " << path << ", " << (m_scratchpad.size()*32)/1024 << "kbytes" );
-    return true;
-  }
-  catch(const std::exception& e)
-  {
-    LOG_PRINT_L0("Failed to store scratchpad, error: " << e.what());
-    return false;
-  }
-
-  catch(...)
-  {
-    LOG_PRINT_L0("Failed to store scratchpad, unknown error" );
-    return false;
-  }
-
-  return true;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::get_alternative_blocks(std::list<block>& blocks)
@@ -1824,12 +1698,6 @@ uint64_t blockchain_storage::get_aliases_count()
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   return m_aliases.size();
-}
-//------------------------------------------------------------------
-uint64_t blockchain_storage::get_scratchpad_size()
-{
-  CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  return m_scratchpad.size()*32;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::get_all_aliases(std::list<alias_info>& aliases)
@@ -2521,10 +2389,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   }
   else
   {
-    proof_hash = get_block_longhash(bl, m_blocks.size(), [&](uint64_t index) -> crypto::hash&
-    {
-      return m_scratchpad[index%m_scratchpad.size()];
-    });
+    proof_hash = get_block_longhash(bl);
 
     if (!check_hash(proof_hash, current_diffic))
     {
@@ -2632,7 +2497,6 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   block_extended_info bei = boost::value_initialized<block_extended_info>();
   bei.bl = bl;
   bei.height = m_blocks.size();
-  bei.scratch_offset = m_scratchpad.size();
   bei.block_cumulative_size = cumulative_block_size;
   bei.difficulty = current_diffic;
   if (is_pos_bl)
@@ -2676,19 +2540,6 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     bvc.m_verifivation_failed = true;
     return false;
   }
-  //append to scratchpad
-  if(!push_block_scratchpad_data(bl, m_scratchpad))
-  {
-    LOG_ERROR("Internal error for block id: " << id << ": failed to put_block_scratchpad_data");
-    purge_block_data_from_blockchain(bl, tx_processed_count);
-    bvc.m_verifivation_failed = true;
-    return false;    
-  }
-
-#ifdef ENABLE_HASHING_DEBUG  
-  LOG_PRINT_L3("SCRATCHPAD_SHOT FOR H=" << bei.height+1 << ENDL << dump_scratchpad(m_scratchpad));
-#endif
-
 
   m_blocks.push_back(bei);
   update_next_comulative_size_limit();
