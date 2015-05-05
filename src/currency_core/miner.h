@@ -49,15 +49,15 @@ namespace currency
     void do_print_hashrate(bool do_hr);
     bool set_alias_info(const alias_info& ai);
 
-    template<typename callback_t>
-    static bool find_nonce_for_given_block(block& bl, const wide_difficulty_type& diffic, uint64_t height, callback_t scratch_accessor)
+    inline
+    static bool find_nonce_for_given_block(block& bl, const wide_difficulty_type& diffic, uint64_t height)
     {
       blobdata bd = get_block_hashing_blob(bl);
       for(; bl.nonce != std::numeric_limits<uint32_t>::max(); bl.nonce++)
       {
         crypto::hash h;
         *reinterpret_cast<uint64_t*>(&bd[1]) = bl.nonce;
-        get_blob_longhash(bd, h, height, scratch_accessor);
+        h = get_blob_longhash(bd);
 
         if(check_hash(h, diffic))
         {

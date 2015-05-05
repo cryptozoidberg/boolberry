@@ -588,33 +588,10 @@ bool test_generator::find_nounce(currency::block& blk, std::vector<const block_i
 {
   if(height != blocks.size())
     throw std::runtime_error("wrong height in find_nounce");
-  std::vector<crypto::hash> scratchpad_local;
-  size_t count = 1;
-  for(auto& i: blocks)
-  {
-    push_block_scratchpad_data(i->b, scratchpad_local);
-#ifdef ENABLE_HASHING_DEBUG
-    LOG_PRINT2("block_generation.log", "SCRATCHPAD_SHOT FOR H=" << count << ENDL << dump_scratchpad(scratchpad_local), LOG_LEVEL_3);
-#endif
-    ++count;
-  }
   
-  bool r = miner::find_nonce_for_given_block(blk, dif, height, [&](uint64_t index) -> crypto::hash&
-  {
-    return scratchpad_local[index%scratchpad_local.size()];
-  });
-#ifdef ENABLE_HASHING_DEBUG
-  size_t call_no = 0;
-  std::stringstream ss;
-  crypto::hash pow = get_block_longhash(blk, height, [&](uint64_t index) -> crypto::hash&
-  {
-    ss << "[" << call_no << "][" << index << "%" << scratchpad_local.size() <<"(" << index%scratchpad_local.size() << ")]" << scratchpad_local[index%scratchpad_local.size()] << ENDL;
-    ++call_no;
-    return scratchpad_local[index%scratchpad_local.size()];
-  });
-  LOG_PRINT2("block_generation.log", "ID: " << get_block_hash(blk) << "[" << height <<  "]" << ENDL << "POW:" << pow << ENDL << ss.str(), LOG_LEVEL_3);
-#endif
-  return r;
+  size_t count = 1;
+  
+  return miner::find_nonce_for_given_block(blk, dif, height);
 }
 
 bool test_generator::construct_genesis_block(currency::block& blk, const currency::account_base& miner_acc, uint64_t timestamp, const currency::alias_info& ai)
