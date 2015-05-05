@@ -842,7 +842,6 @@ bool wallet2::build_kernel(const pos_entry& pe, const stake_modifier_type& stake
   PROFILE_FUNC("build_kernel");
   coindays_weight = 0;
   kernel = stake_kernel();
-  kernel.tx_out_global_index = pe.index;
   kernel.kimage = pe.keyimage;
   kernel.stake_modifier = stake_modifier;
   kernel.block_timestamp = timestamp;

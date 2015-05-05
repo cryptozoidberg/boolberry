@@ -256,8 +256,7 @@ namespace currency
     ss << "block_timestampL " << sk.block_timestamp << ENDL
       << "kimage: " << sk.kimage << ENDL
       << "sk.stake_modifier.last_pos_kernel_id" << sk.stake_modifier.last_pos_kernel_id << ENDL
-      << "sk.stake_modifier.last_pow_id" << sk.stake_modifier.last_pow_id << ENDL
-      << "sk.tx_out_global_index" << sk.tx_out_global_index << ENDL;
+      << "sk.stake_modifier.last_pow_id" << sk.stake_modifier.last_pow_id << ENDL;
     return ss.str();
   }
 

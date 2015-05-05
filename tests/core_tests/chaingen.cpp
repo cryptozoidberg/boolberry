@@ -475,7 +475,7 @@ bool test_generator::get_output_details_by_global_index(const test_generator::bl
   size_t tx_index = std::get<1>(it->second[global_index]);
   tx_out_index = std::get<2>(it->second[global_index]);
 
-  CHECK_AND_ASSERT_THROW_MES(h < blck_chain.size(), "std::get<0>(it->second[kernel.tx_out_global_index]) < blck_chain.size()");
+  CHECK_AND_ASSERT_THROW_MES(h < blck_chain.size(), "std::get<0>(it->second[global_index]) < blck_chain.size()");
   CHECK_AND_ASSERT_THROW_MES(tx_index  < blck_chain[h]->m_transactions.size() + 1, "tx_index < blck_chain[h].m_transactions.size()");
   tx = tx_index ? &blck_chain[h]->m_transactions[tx_index - 1] : &blck_chain[h]->b.miner_tx;
 
@@ -503,7 +503,6 @@ bool test_generator::build_kernel(uint64_t amount,
 {
   coindays_weight = 0;
   kernel = stake_kernel();
-  kernel.tx_out_global_index = global_index;
   kernel.kimage = ki;
 
   //get block related with coinstake source transaction

@@ -434,7 +434,6 @@ namespace currency
     stake_modifier_type stake_modifier;
     uint64_t block_timestamp;             //this block timestamp
     crypto::key_image kimage;
-    uint64_t tx_out_global_index;         //global index of output in source transaction
   };
 #pragma pack(pop)
 

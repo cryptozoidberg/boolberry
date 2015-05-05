@@ -2769,7 +2769,7 @@ bool blockchain_storage::build_kernel(const block& bl, stake_kernel& kernel, uin
   CHECK_AND_ASSERT_MES(txin.key_offsets.size(), false, "wrong miner transaction");
   amount = txin.amount;
 
-  return build_kernel(txin.amount, txin.key_offsets[0], txin.k_image, kernel, stake_modifier, bl.timestamp);
+  return build_kernel(txin.amount, txin.k_image, kernel, stake_modifier, bl.timestamp);
 }
 //------------------------------------------------------------------
 bool blockchain_storage::build_stake_modifier(stake_modifier_type& sm, const alt_chain_type& alt_chain, uint64_t split_height)
@@ -2793,7 +2793,6 @@ bool blockchain_storage::build_stake_modifier(stake_modifier_type& sm, const alt
 }
 //------------------------------------------------------------------
 bool blockchain_storage::build_kernel(uint64_t amount,
-                                      uint64_t global_index, 
                                       const crypto::key_image& ki, 
                                       stake_kernel& kernel, 
                                       const stake_modifier_type& stake_modifier, 
@@ -2801,20 +2800,9 @@ bool blockchain_storage::build_kernel(uint64_t amount,
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   kernel = stake_kernel();
-  kernel.tx_out_global_index = global_index;
   kernel.kimage = ki;
   kernel.stake_modifier = stake_modifier;
   kernel.block_timestamp = timestamp;
-
-  //get block related with coinstake source transaction
-  auto it = m_outputs.find(amount);
-  CHECK_AND_ASSERT_MES(it != m_outputs.end(), false, "Failed to find amount in coin stake " << amount);
-
-  CHECK_AND_ASSERT_MES(it->second.size() > kernel.tx_out_global_index, false, "wrong key offset " << kernel.tx_out_global_index << " with amount kernel_in.amount");
-  
-  auto tx_it = m_transactions.find(it->second[kernel.tx_out_global_index].first);
-  CHECK_AND_ASSERT_MES(tx_it != m_transactions.end(), false, "internal error: transaction " << it->second[kernel.tx_out_global_index].first << " reffered in index not found");
-
   return true;
 }
 //------------------------------------------------------------------
@@ -2834,7 +2822,7 @@ bool blockchain_storage::scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMA
   for (size_t i = 0; i != sp.pos_entries.size(); i++)
   {
     stake_kernel sk = AUTO_VAL_INIT(sk);
-    build_kernel(sp.pos_entries[i].amount, sp.pos_entries[i].index, sp.pos_entries[i].keyimage, sk, sm, 0);
+    build_kernel(sp.pos_entries[i].amount, sp.pos_entries[i].keyimage, sk, sm, 0);
 
     for (uint64_t ts = timstamp_start; ts < timstamp_start + POS_SCAN_WINDOW; ts++)
     {
@@ -2846,7 +2834,7 @@ bool blockchain_storage::scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMA
       else
       {
         //found kernel
-        LOG_PRINT_GREEN("Found kernel: amount=" << sp.pos_entries[i].amount << ", index=" << sp.pos_entries[i].index << ", key_image" << sp.pos_entries[i].keyimage, LOG_LEVEL_0);
+        LOG_PRINT_GREEN("Found kernel: amount=" << sp.pos_entries[i].amount << ", key_image" << sp.pos_entries[i].keyimage, LOG_LEVEL_0);
         rsp.index = i;
         rsp.block_timestamp = ts;
         rsp.status = CORE_RPC_STATUS_OK;
