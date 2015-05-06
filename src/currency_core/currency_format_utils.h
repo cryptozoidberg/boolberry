@@ -156,6 +156,7 @@ namespace currency
   bool get_payment_id_from_tx_extra(const transaction& tx, std::string& payment_id);
   crypto::hash get_blob_longhash(const blobdata& bd);
   bool add_padding_to_tx(transaction& tx, size_t count);
+  bool is_service_tx(const transaction& tx);
   std::string get_comment_from_tx(const transaction& tx);
   std::string print_stake_kernel_info(const stake_kernel& sk);
   //PoS

@@ -1207,6 +1207,23 @@ namespace currency
     return get_tx_tree_hash(txs_ids);
   }
   //---------------------------------------------------------------
+  bool is_service_tx(const transaction& tx)
+  {
+    for (const auto& e : tx.extra)
+    {
+      if (e.type() == typeid(extra_alias_entry))
+        return true;
+    }
+
+    for (const auto& a: tx.attachment)
+    {
+      if (a.type() == typeid(offer_details))
+        return true;
+    }
+
+    return false;
+  }
+  //---------------------------------------------------------------
   bool is_pos_block(const block& b)
   {
     if (!b.flags&CURRENCY_BLOCK_FLAG_POS_BLOCK)

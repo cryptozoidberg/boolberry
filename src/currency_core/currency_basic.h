@@ -206,7 +206,7 @@ namespace currency
 
     BEGIN_SERIALIZE()
       FIELD(comment)
-      END_SERIALIZE()
+    END_SERIALIZE()
   };
 
   struct tx_payer

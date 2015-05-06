@@ -3,5 +3,4 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #pragma once 
-
-#define CURRENCY_BLOCK_FLAG_POS_BLOCK    0x01
+#define CURRENCY_BLOCK_FLAG_POS_BLOCK      0x01
