@@ -60,7 +60,13 @@ namespace currency
       tvc.m_verifivation_failed = true;
       return false;
     }
-
+    
+    if (!validate_alias_info(tx, kept_by_block))
+    {
+      LOG_PRINT_RED_L0("transaction use more money then it has: use " << outputs_amount << ", have " << inputs_amount);
+      tvc.m_verifivation_failed = true;
+      return false;
+    }
     //check key images for transaction if it is not kept by block
     if(!kept_by_block)
     {
@@ -142,6 +148,33 @@ namespace currency
     tvc.m_verifivation_failed = false;
     //succeed
     return true;
+  }
+  //---------------------------------------------------------------------------------
+  bool tx_memory_pool::validate_alias_info(const transaction& tx, bool is_in_block)
+  {
+    tx_extra_info ei = AUTO_VAL_INIT(ei);
+    bool r = parse_and_validate_tx_extra(tx, ei);
+    CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra on unprocess_blockchain_tx_extra");
+    if (ei.m_alias.m_alias.size())
+    {
+      //check in blockchain
+      if (m_blockchain.get_alias_info(ei.m_alias.m_alias, ei.m_alias))
+      {
+        LOG_PRINT_L0("Alias \"" << ei.m_alias.m_alias  << "\" already registered in blockchain, transaction rejected");
+        return false;
+      }
+      
+      //check in tx pool set
+      if (!is_in_block && m_aliases.count(ei.m_alias.m_alias))
+      {
+        LOG_PRINT_L0("Alias \"" << ei.m_alias.m_alias << "\" already in transaction pool, transaction rejected");
+        return false;
+      }
+      
+    }
+    
+    
+    
   }
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::add_tx(const transaction &tx, tx_verification_context& tvc, bool keeped_by_block)

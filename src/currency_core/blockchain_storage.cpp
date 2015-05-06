@@ -1791,16 +1791,13 @@ bool blockchain_storage::pop_transaction_from_global_index(const transaction& tx
 //------------------------------------------------------------------
 bool blockchain_storage::unprocess_blockchain_tx_extra(const transaction& tx)
 {
-  if(is_coinbase(tx))
+  tx_extra_info ei = AUTO_VAL_INIT(ei);
+  bool r = parse_and_validate_tx_extra(tx, ei);
+  CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra on unprocess_blockchain_tx_extra");
+  if(ei.m_alias.m_alias.size())
   {
-    tx_extra_info ei = AUTO_VAL_INIT(ei);
-    bool r = parse_and_validate_tx_extra(tx, ei);
-    CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra on unprocess_blockchain_tx_extra");
-    if(ei.m_alias.m_alias.size())
-    {
-      r = pop_alias_info(ei.m_alias);
-      CHECK_AND_ASSERT_MES(r, false, "failed to pop_alias_info");
-    }
+    r = pop_alias_info(ei.m_alias);
+    CHECK_AND_ASSERT_MES(r, false, "failed to pop_alias_info");
   }
   return true;
 }
@@ -1920,7 +1917,7 @@ bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
   tx_extra_info ei = AUTO_VAL_INIT(ei);
   bool r = parse_and_validate_tx_extra(tx, ei);
   CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra");
-  if(is_coinbase(tx) && ei.m_alias.m_alias.size())
+  if(ei.m_alias.m_alias.size())
   {
     r = put_alias_info(ei.m_alias);
     CHECK_AND_ASSERT_MES(r, false, "failed to put_alias_info");
