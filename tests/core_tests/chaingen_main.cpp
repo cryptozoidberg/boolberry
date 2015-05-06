@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
   }
   else //if (command_line::get_arg(vm, arg_generate_and_play_test_data))
   {    
-    epee::debug::get_set_enable_assert(true, false);
+    epee::debug::get_set_enable_assert(true, true);
 
     
     GENERATE_AND_PLAY(cumulative_difficulty_adjustment_test);

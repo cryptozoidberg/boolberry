@@ -330,12 +330,16 @@ bool construct_miner_tx_manually(size_t height, uint64_t already_generated_coins
                                  const currency::account_public_address& miner_address, currency::transaction& tx,
                                  uint64_t fee, currency::keypair* p_txkey = 0);
 
-bool construct_tx_to_key(const std::vector<test_event_entry>& events, currency::transaction& tx,
-                         const currency::block& blk_head, const currency::account_base& from, const currency::account_base& to,
+bool construct_tx_to_key(const std::vector<test_event_entry>& events, 
+                         currency::transaction& tx,
+                         const currency::block& blk_head, 
+                         const currency::account_base& from, 
+                         const currency::account_base& to,
                          uint64_t amount, 
                          uint64_t fee, 
                          size_t nmix, 
                          uint8_t mix_attr = CURRENCY_TO_KEY_OUT_RELAXED, 
+                         const std::vector<currency::extra_v>& extr = std::vector<currency::extra_v>(),
                          const std::vector<currency::attachment_v>& att = std::vector<currency::attachment_v>(),
                          bool check_for_spends = true);
 
@@ -739,12 +743,12 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
   txs_set.push_back(t);
   events.push_back(t);
   return r;
-}
+  }
 
-//--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
 #define GENERATE_ACCOUNT(account) \
-    currency::account_base account; \
-    account.generate();
+  currency::account_base account; \
+  account.generate();
 
 #define MAKE_ACCOUNT(VEC_EVENTS, account) \
   currency::account_base account; \
@@ -752,11 +756,11 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
   VEC_EVENTS.push_back(account);
 
 #define DO_CALLBACK(VEC_EVENTS, CB_NAME) \
-{ \
+  { \
   callback_entry CALLBACK_ENTRY; \
   CALLBACK_ENTRY.callback_name = CB_NAME; \
   VEC_EVENTS.push_back(CALLBACK_ENTRY); \
-}
+  }
 
 #define REGISTER_CALLBACK(CB_NAME, CLBACK) \
   register_callback(CB_NAME, boost::bind(&CLBACK, this, _1, _2, _3));
@@ -784,16 +788,16 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
 #define MAKE_NEXT_BLOCK_ALIAS(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, ALIAS)     \
   currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
   generator.construct_block(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, \
-                  std::list<currency::transaction>(), ALIAS);                         \
+  std::list<currency::transaction>(), ALIAS);                         \
   VEC_EVENTS.push_back(BLK_NAME);
 
 
 #define MAKE_NEXT_BLOCK_TX1(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, TX1)         \
   currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
   {                                                                                   \
-    std::list<currency::transaction> tx_list;                                         \
-    tx_list.push_back(TX1);                                                           \
-    generator.construct_block(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, tx_list);              \
+  std::list<currency::transaction> tx_list;                                         \
+  tx_list.push_back(TX1);                                                           \
+  generator.construct_block(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, tx_list);              \
   }                                                                                   \
   VEC_EVENTS.push_back(BLK_NAME);
 
@@ -805,22 +809,25 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
 #define REWIND_BLOCKS_N(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, COUNT)           \
   currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
   {                                                                                   \
-    currency::block blk_last = PREV_BLOCK;                                            \
-    for (size_t i = 0; i < COUNT; ++i)                                                \
-    {                                                                                 \
-      MAKE_NEXT_BLOCK(VEC_EVENTS, blk, blk_last, MINER_ACC);                          \
-      blk_last = blk;                                                                 \
-    }                                                                                 \
-    BLK_NAME = blk_last;                                                              \
+  currency::block blk_last = PREV_BLOCK;                                            \
+  for (size_t i = 0; i < COUNT; ++i)                                                \
+  {                                                                                 \
+  MAKE_NEXT_BLOCK(VEC_EVENTS, blk, blk_last, MINER_ACC);                          \
+  blk_last = blk;                                                                 \
+  }                                                                                 \
+  BLK_NAME = blk_last;                                                              \
   }
 
 #define REWIND_BLOCKS(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC) REWIND_BLOCKS_N(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC, CURRENCY_MINED_MONEY_UNLOCK_WINDOW)
 
 
-#define MAKE_TX_MIX_ATTR(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, CHECK_SPENDS)                   \
+#define MAKE_TX_MIX_ATTR_EXTRA(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, EXTRA, CHECK_SPENDS)                   \
   currency::transaction TX_NAME;                                                                                      \
-  construct_tx_to_key(VEC_EVENTS, TX_NAME, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR, std::vector<currency::attachment_v>(), CHECK_SPENDS);  \
+  construct_tx_to_key(VEC_EVENTS, TX_NAME, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR, EXTRA, std::vector<currency::attachment_v>(), CHECK_SPENDS);  \
   VEC_EVENTS.push_back(TX_NAME);
+
+#define MAKE_TX_MIX_ATTR(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, CHECK_SPENDS)                   \
+  MAKE_TX_MIX_ATTR_EXTRA(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, std::vector<currency::extra_v>(), CHECK_SPENDS);
 
 #define MAKE_TX_MIX(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD)   MAKE_TX_MIX_ATTR(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD, CURRENCY_TO_KEY_OUT_RELAXED, true)
 
@@ -831,13 +838,17 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
 #define MAKE_TX(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, HEAD) MAKE_TX_MIX(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, 0, HEAD)
 
 
-#define MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, ATTACH)    \
+#define MAKE_TX_MIX_LIST_EXTRA_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, EXTRA, ATTACH)    \
   {                                                                                                \
     currency::transaction t;                                                                       \
-    construct_tx_to_key(VEC_EVENTS, t, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR, ATTACH); \
+    construct_tx_to_key(VEC_EVENTS, t, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR, EXTRA, ATTACH); \
     SET_NAME.push_back(t);                                                                         \
     VEC_EVENTS.push_back(t);                                                                       \
   }
+
+#define MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, ATTACH)    \
+  MAKE_TX_MIX_LIST_EXTRA_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, std::vector<currency::extra_v>(), ATTACH)
+
 
 #define MAKE_TX_MIX_LIST(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, ATTACH) MAKE_TX_MIX_LIST_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, CURRENCY_TO_KEY_OUT_RELAXED, ATTACH)
 

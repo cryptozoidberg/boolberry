@@ -19,9 +19,11 @@ gen_alias_tests::gen_alias_tests()
   REGISTER_CALLBACK_METHOD(gen_alias_tests, check_splitted_back);
   REGISTER_CALLBACK_METHOD(gen_alias_tests, check_alias_changed);
   REGISTER_CALLBACK_METHOD(gen_alias_tests, check_alias_not_changed);
+  REGISTER_CALLBACK_METHOD(gen_alias_tests, check_alias_added_in_tx);
 }
 #define FIRST_ALIAS_NAME "first"
 #define SECOND_ALIAS_NAME "second"
+#define THIRD_ALIAS_NAME "test_alias_via_tx_1"
 
 bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
 {
@@ -33,7 +35,8 @@ bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
   MAKE_ACCOUNT(events, second_acc);
   MAKE_ACCOUNT(events, third_acc);
 
-  MAKE_NEXT_BLOCK(events, blk_1, blk_0, miner_account);
+  REWIND_BLOCKS_N(events, blk_01, blk_0, miner_account, 15);
+  MAKE_NEXT_BLOCK(events, blk_1, blk_01, miner_account);
   currency::alias_info ai = AUTO_VAL_INIT(ai);
   ai.m_alias = FIRST_ALIAS_NAME;
   ai.m_text_comment = "first@first.com blablabla";
@@ -47,7 +50,7 @@ bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
   MAKE_NEXT_BLOCK_ALIAS(events, blk_3, blk_2, miner_account, ai);
   DO_CALLBACK(events, "check_second_alias_added");
   
-  //check split with remove alias
+  //che§k split with remove alias
   MAKE_NEXT_BLOCK(events, blk_2_split, blk_1, miner_account);
   MAKE_NEXT_BLOCK(events, blk_3_split, blk_2_split, miner_account);
   MAKE_NEXT_BLOCK(events, blk_4_split, blk_3_split, miner_account);
@@ -78,6 +81,37 @@ bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
   ai_upd_fake.m_text_comment = "changed alias haha - fake"; // changed text, signature became wrong
   MAKE_NEXT_BLOCK_ALIAS(events, blk_7, blk_6, miner_account, ai_upd_fake);
   DO_CALLBACK(events, "check_alias_not_changed");
+
+
+  extra_alias_entry eae;
+  currency::alias_info ai2 = AUTO_VAL_INIT(ai_upd);
+  ai2.m_alias = THIRD_ALIAS_NAME;
+  ai2.m_address = second_acc.get_keys().m_account_address;
+  ai2.m_text_comment = "ssdss";
+  std::string buff_tmp;
+  currency::make_tx_extra_alias_entry(buff_tmp, ai2, false);
+
+  eae.buff.resize(buff_tmp.size());
+  std::memcpy(&eae.buff[0], buff_tmp.data(), buff_tmp.size());
+
+  std::vector<currency::extra_v> ex;
+  ex.push_back(eae);
+  MAKE_TX_LIST_START(events, txs_0, miner_account, miner_account, MK_COINS(1) + 1, blk_7);
+
+  MAKE_TX_MIX_LIST_EXTRA_MIX_ATTR(events, txs_0,
+    miner_account,
+    miner_account,
+    MK_COINS(1),
+    0,
+    blk_7,
+    CURRENCY_TO_KEY_OUT_RELAXED,
+    ex,
+    std::vector<currency::attachment_v>());
+  //check split with remove alias
+  MAKE_NEXT_BLOCK_TX_LIST(events, blk_8, blk_6, miner_account, txs_0);
+
+  MAKE_NEXT_BLOCK(events, blk_9, blk_8, miner_account);
+  DO_CALLBACK(events, "check_alias_added_in_tx");
 
 
   return true;
@@ -115,6 +149,13 @@ bool gen_alias_tests::check_aliases_removed(currency::core& c, size_t ev_index, 
   CHECK_AND_ASSERT_MES(!r, false, "first alias name check failed");
   r = c.get_blockchain_storage().get_alias_info(SECOND_ALIAS_NAME, ai);
   CHECK_AND_ASSERT_MES(!r, false, "second alias name check failed");
+  return true;
+}
+bool gen_alias_tests::check_alias_added_in_tx(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+{
+  currency::alias_info_base ai = AUTO_VAL_INIT(ai);
+  bool r = c.get_blockchain_storage().get_alias_info(THIRD_ALIAS_NAME, ai);
+  CHECK_AND_ASSERT_MES(r, false, "third alias name check failed");
   return true;
 }
 bool gen_alias_tests::check_splitted_back(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)

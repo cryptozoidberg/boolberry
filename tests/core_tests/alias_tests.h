@@ -21,5 +21,6 @@ struct gen_alias_tests : public test_chain_unit_base
   bool check_splitted_back(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
   bool check_alias_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
   bool check_alias_not_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
-
+  bool check_alias_added_in_tx(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
+  
 };

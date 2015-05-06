@@ -144,6 +144,8 @@ namespace currency
       auto ins_res = kei_image_set.insert(id);
       CHECK_AND_ASSERT_MES(ins_res.second, false, "internal error: try to insert tx id: " << *ins_res.first << " to key_image_set");
     }
+    if (tvc.m_added_to_pool)
+      push_alias_info(tx);
 
     tvc.m_verifivation_failed = false;
     //succeed
@@ -169,12 +171,34 @@ namespace currency
       {
         LOG_PRINT_L0("Alias \"" << ei.m_alias.m_alias << "\" already in transaction pool, transaction rejected");
         return false;
-      }
-      
+      }  
     }
-    
-    
-    
+    return true;
+  }
+  //---------------------------------------------------------------------------------
+  bool tx_memory_pool::push_alias_info(const transaction& tx)
+  {
+    tx_extra_info ei = AUTO_VAL_INIT(ei);
+    bool r = parse_and_validate_tx_extra(tx, ei);
+    CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra on unprocess_blockchain_tx_extra");
+    if (ei.m_alias.m_alias.size())
+      ++m_aliases[ei.m_alias.m_alias];
+    return true;
+  }
+  //---------------------------------------------------------------------------------
+  bool tx_memory_pool::pop_alias_info(const transaction& tx)
+  {
+    tx_extra_info ei = AUTO_VAL_INIT(ei);
+    bool r = parse_and_validate_tx_extra(tx, ei);
+    CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra on unprocess_blockchain_tx_extra");
+    if (ei.m_alias.m_alias.size())
+    {
+      auto it = m_aliases.find(ei.m_alias.m_alias);
+      CHECK_AND_ASSERT_MES(it != m_aliases.end(), false, "it == m_aliases.end() for tx with hash " << currency::get_transaction_hash(tx));
+      if(!--it->second)
+        m_aliases.erase(it);
+    }
+    return true;
   }
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::add_tx(const transaction &tx, tx_verification_context& tvc, bool keeped_by_block)
@@ -221,6 +245,10 @@ namespace currency
     blob_size = it->second.blob_size;
     fee = it->second.fee;
     remove_transaction_keyimages(it->second.tx);
+    if (!pop_alias_info(tx))
+    {
+      return false;
+    }
     m_transactions.erase(it);
     return true;
   }

@@ -100,6 +100,8 @@ namespace currency
     bool remove_stuck_transactions();
     bool is_transaction_ready_to_go(tx_details& txd);
     bool validate_alias_info(const transaction& tx, bool is_in_block);
+    bool push_alias_info(const transaction& tx);
+    bool pop_alias_info(const transaction& tx);
     typedef std::unordered_map<crypto::hash, tx_details > transactions_container;
     typedef std::unordered_map<crypto::key_image, std::unordered_set<crypto::hash> > key_images_container;
 
@@ -113,7 +115,7 @@ namespace currency
 
     std::string m_config_folder;
     blockchain_storage& m_blockchain;
-    std::set<std::string> m_aliases;
+    std::map<std::string, size_t> m_aliases;
     /************************************************************************/
     /*                                                                      */
     /************************************************************************/
