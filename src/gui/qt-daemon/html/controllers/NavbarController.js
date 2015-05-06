@@ -19,8 +19,54 @@
             return Math.floor(current*100/max);
         }
 
+        var appPass = '123'; // TODO
+
+        $scope.getAppData = function(){
+            console.log('get');
+            var appData = backend.getAppData({pass: appPass});
+            appData = JSON.parse(appData);
+            console.log(appData);
+
+            angular.forEach(appData,function(item){
+                backend.openWallet(item.path, item.pass,function(data){
+                    
+                    var wallet_id = data.wallet_id;
+                    var new_safe = {
+                        wallet_id : wallet_id,
+                        name : item.name,
+                        pass : item.pass
+                    };
+                    $timeout(function(){
+                        $rootScope.safes.push(new_safe);    
+                    });
+
+                });
+            });
+
+            
+
+
+
+            //$rootScope.safes = JSON.parse(data);
+        };
+
+        $scope.storeAppData = function(){
+             console.log('store');
+             var safePaths = [];
+             angular.forEach($rootScope.safes,function(item){
+                var safe = {
+                    pass: item.pass,
+                    path: item.path,
+                    name: item.name
+                };
+                safePaths.push(safe);
+             });
+
+             backend.storeAppData(safePaths, appPass);
+
+        };
+
         $rootScope.closeWallet = function(wallet_id){
-            console.log('sdfsdf');
             backend.closeWallet(wallet_id, function(data){
                 console.log(data);
                 for (var i in $rootScope.safes){
@@ -56,8 +102,9 @@
         });
         
         backend.subscribe('update_wallet_info', function(data){
-            return; //temporary
             angular.forEach(data.wallets,function (wallet){
+                console.log('update_wallet_info');
+                console.log(data);
                 var wallet_id = wallet.wallet_id;
                 var wallet_info = wallet.wi;
                 safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
@@ -67,10 +114,9 @@
                     return;
                 }
                 angular.forEach(wallet_info, function(value,property){
-                    if(angular.isDefined(safe[property])){
-                        safe[property] = value;
-                    }
+                    safe[property] = value;
                 });
+                safe.loaded = true;
             });
         });
 

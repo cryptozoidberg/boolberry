@@ -236,7 +236,7 @@ namespace currency
 
   struct extra_user_data
   {
-    std::vector<uint8_t> buff;
+    std::string buff;
     
     BEGIN_SERIALIZE()
       FIELD(buff)

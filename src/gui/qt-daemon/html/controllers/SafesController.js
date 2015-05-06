@@ -174,6 +174,7 @@
               smartSpeed: 100,
               autoplayHoverPause: true,
             };
+
             var filename = path.substr(path.lastIndexOf('/')+1, path.lastIndexOf('.')-1-path.lastIndexOf('/'));
 
             $scope.safe = {
@@ -187,17 +188,27 @@
 
             $scope.openSafe = function(safe){
                 backend.openWallet(safe.path, safe.pass,function(data){
-                    console.log(data);
+                    
                     var wallet_id = data.wallet_id;
-                    backend.getWalletInfo(wallet_id, function (safe_data){
-                        //var new_safe = safe_data.param
-                        safe_data.name = safe.name;
-                        safe_data.wallet_id = wallet_id;
-                        $timeout(function(){
-                            safes.unshift(safe_data);    
-                        });
-                        $modalInstance.close();
+                    var new_safe = {
+                        wallet_id : wallet_id,
+                        name : safe.name,
+                        pass : safe.pass
+                    };
+                    $modalInstance.close();
+                    $timeout(function(){
+                        safes.unshift(new_safe);    
                     });
+
+                    // backend.getWalletInfo(wallet_id, function (safe_data){
+                    //     //var new_safe = safe_data.param
+                    //     safe_data.name = safe.name;
+                    //     safe_data.wallet_id = wallet_id;
+                    //     $timeout(function(){
+                    //         safes.unshift(safe_data);    
+                    //     });
+                    //     $modalInstance.close();
+                    // });
                 });
             };
             

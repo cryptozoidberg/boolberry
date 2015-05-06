@@ -57,16 +57,21 @@
         if(angular.isDefined(scope.items)){
           count = angular.copy(items).length;
 
-          scope.$watch(function(){
-            if(count !== items.length){
-              console.log('new element');
+          scope.$watch('items',function(){
+            //if(count !== items.length){ //new element
               count = items.length;
               buildHtml(items).then(function(data){
                 $(element).html(data);
-                init();
+                $timeout(function(){
+                  init();
+                },500);
+                
               });
-            }
-          });
+            //}
+            console.log('items changed');
+            console.log(items);
+            
+          },true);
         }
           
         if(count){

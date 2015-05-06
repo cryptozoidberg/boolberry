@@ -44,22 +44,19 @@
     <script src="assets/js/angular/angular.min.js"></script>
     <script src="assets/js/angular/angular-bootstrap-select.js"></script>
     
-    
     <script src="assets/js/angular/angular-route.min.js"></script>
     <script src="assets/js/angular/angular-sanitize.min.js"></script>
     <script src="assets/js/angular/angular-input-match.min.js"></script>
     <script src="assets/js/angular/angular-ui-chart.js"></script>
 
-
-    
     <script src="assets/js/angular/angular-slidebles.js"></script>
 
     <script src="assets/js/angular/ui-bootstrap-0.12.1.min.js"></script>
     <script src="assets/js/angular/ui-bootstrap-tpls-0.12.1.min.js"></script>
 </head>
 
-<body data-turn-links>
-<div class="guilder-bar navbar navbar-default navbar-fixed-top" role="navigation" ng-controller="NavbarTopController">
+<body data-turn-links  ng-controller="NavbarTopController">
+<div class="guilder-bar navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="row">
         <div class="col-xs-4 col-sm-7 guilder-bar-logo">
             <span>
@@ -97,6 +94,7 @@
 <div class="container-fluid">
     <div class="row row-sidebar-collapse">
         <div class="col-xs-3 col-sm-3 col-md-2 sidebar">
+
             <div class="sidebar-bar sidebar-header"><a data-target=".menulabel" data-toggle="collapse" type="button" class="btn btn-lg btn-default" href="#" aria-expanded="true"><i class="fa fa-lg fa-bars"></i></a></div>
             <ul class="nav nav-sidebar">
                 <li><a href="#index"><i class="gu gu-3x gu-th"></i><span class="collapse in menulabel"> <em>Дашборд</em></span></a></li>
@@ -117,6 +115,10 @@
         </div>
         
         <div class="col-xs-9 col-sm-9 col-xs-offset-3 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <div>
+                <a ng-click="getAppData()">Get</a>
+                <a ng-click="storeAppData()">Store</a>
+            </div>
             <nav role="navigation" class="navbar btns">
                 <ul class="nav nav-pills nav-justified">
                     <li>
