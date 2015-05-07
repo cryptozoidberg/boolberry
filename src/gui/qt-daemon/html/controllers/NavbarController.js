@@ -103,17 +103,20 @@
             return Math.floor(current*100/max);
         }
 
-        if($rootScope.settings.is_use_app_pass){
-            $modal.open({
-                templateUrl: "views/app_pass.html",
-                controller: 'appPassCtrl',
-                size: 'md',
-                windowClass: 'modal fade in',
-                backdrop: false
-            });    
-        }
+        // if($rootScope.settings.is_use_app_pass){
+        //     $modal.open({
+        //         templateUrl: "views/app_pass.html",
+        //         controller: 'appPassCtrl',
+        //         size: 'md',
+        //         windowClass: 'modal fade in',
+        //         backdrop: false
+        //     });    
+        // }
         
-
+        var settings = backend.getAppData(); // get app settinngs
+        console.log(settings);
+        return;
+        appData = JSON.parse(appData);
         
 
         $scope.storeAppData = function(){

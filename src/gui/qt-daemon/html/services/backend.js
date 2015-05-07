@@ -23,8 +23,6 @@
                 return this.runCommand('show_openfile_dialog',params);
             },
 
-            
-
             saveFileDialog : function(caption, filemask) {
                 var params = {
                     caption: caption, 
@@ -39,9 +37,9 @@
                 return this.runCommand('get_all_offers', params, callback);
             },
 
-            haveAppData: function() {
+            haveSecureAppData: function() { // for safes
                 if(!this.shouldUseEmulator()){
-                    var result = JSON.parse(Qt_parent['have_app_data'](''));
+                    var result = JSON.parse(Qt_parent['have_secure_app_data'](''));
                     return result.error_code === "TRUE" ? true : false;
                 }else{
                     return true;
@@ -49,9 +47,25 @@
 
             },
 
+            getSecureAppData: function(pass) {
+                if(!this.shouldUseEmulator()){
+                    return Qt_parent['get_secure_app_data'](JSON.stringify(pass));
+                }else{
+                    return '{}';
+                }
+            },
+
+            storeSecureAppData: function(data, pass) {
+                if(!this.shouldUseEmulator()){
+                    return Qt_parent['store_secure_app_data'](JSON.stringify(data), pass);
+                }else{
+                    return '';
+                }
+            },
+
             getAppData: function(pass) {
                 if(!this.shouldUseEmulator()){
-                    return Qt_parent['get_app_data'](JSON.stringify(pass));
+                    return Qt_parent['get_app_data']();
                 }else{
                     return '{}';
                 }
@@ -59,7 +73,7 @@
 
             storeAppData: function(data, pass) {
                 if(!this.shouldUseEmulator()){
-                    return Qt_parent['store_app_data'](JSON.stringify(data), pass);
+                    return Qt_parent['store_app_data'](JSON.stringify(data));
                 }else{
                     return '';
                 }
