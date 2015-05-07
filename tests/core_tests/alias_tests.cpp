@@ -243,7 +243,7 @@ bool gen_alias_tests::check_height_changed(currency::core& c, size_t ev_index, c
   bool r = c.get_blockchain_storage().get_alias_info(FOURTH_NAME, ai);
   CHECK_AND_ASSERT_MES(r, false, "FOURTH_NAME alias name check failed");
 
-  bool r = c.get_blockchain_storage().get_alias_info(FIFTH_NAME, ai);
+  r = c.get_blockchain_storage().get_alias_info(FIFTH_NAME, ai);
   CHECK_AND_ASSERT_MES(r, false, "FIFTH_NAME alias name check failed");
   h = c.get_blockchain_storage().get_current_blockchain_height();
 
