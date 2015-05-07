@@ -2,29 +2,29 @@
 <form name="app_settings_form" ng-controller="settingsCtrl">
     <tabset>
         <tab heading="Безопасность">
-            <!-- <div class="panel">
+            <div class="panel">
                 <div class="panel-body">
-                    <h4><a data-target=".collapse-off3-1" data-toggle="collapse-off" type="button" href="#"><span>Пин-код</span></a></h4>
+                    <h4><a data-target=".collapse-off3-1" data-toggle="collapse-off" type="button" href="#"><span>Мастер-пароль</span></a></h4>
 
                     <div class="collapse-off in collapse-off3-1">
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <div class="btn-group pull-right">
-                                    <label class="btn btn-default" btn-radio="false" ng-model="settings.security.is_use_app_pass">
+                                    <label class="btn btn-default" btn-radio="true" ng-model="settings.security.is_use_app_pass">
                                         <i class="fa fa-lg fa-check"></i>
                                     </label>
-                                    <label class="btn btn-default" btn-radio="true" ng-model="settings.security.is_use_app_pass">
+                                    <label class="btn btn-default" btn-radio="false" ng-model="settings.security.is_use_app_pass">
                                         <i class="fa fa-lg fa-times"></i>
                                     </label>
                                 </div>
-                                <em>Использовать пинкод для входа в приложение</em> 
+                                <em>Использовать мастер-пароль для входа в приложение</em> 
                                 &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
                             </li>
 
                             <li class="list-group-item">
                                 <div class="btn-group pull-right foursteps">
                                     <div class="fslider">
-                                        <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="4"  data-slider-step="1" data-slider-value="2"/>
+                                        <slider ng-model="settings.security.password_required_interval" min="0" step="1" max="4"></slider>
                                     </div>
                                     <div class="scale"><span>5 мин</span><span>10 мин</span><span>15 мин</span><span>>30 мин</span></div>
                                 </div>
@@ -34,7 +34,7 @@
                         </ul>
                     </div>
                 </div>
-            </div> -->
+            </div>
             <div class="panel">
                 <div class="panel-body">
                     <h4><a data-target=".collapse-off3-2" data-toggle="collapse-off" type="button" href="#"><span>Безопасность сейфов</span></a></h4>

@@ -60,7 +60,7 @@
                 is_pass_required_on_transfer: false,
                 is_backup_reminder: false,
                 backup_reminder_interval: 0,
-                is_use_app_pass: true,
+                is_use_app_pass: false,
                 password_required_interval: 5    
             },
             mining: {
@@ -103,13 +103,16 @@
             return Math.floor(current*100/max);
         }
 
-        $modal.open({
-            templateUrl: "views/app_pass.html",
-            controller: 'appPassCtrl',
-            size: 'md',
-            windowClass: 'modal fade in',
-            backdrop: false
-        });
+        if($rootScope.settings.is_use_app_pass){
+            $modal.open({
+                templateUrl: "views/app_pass.html",
+                controller: 'appPassCtrl',
+                size: 'md',
+                windowClass: 'modal fade in',
+                backdrop: false
+            });    
+        }
+        
 
         
 
@@ -205,8 +208,8 @@
         backend.subscribe('quit_requested', function(data){
             if(angular.isDefined($rootScope.appPass)){
                 $scope.storeAppData();
-                backend.quitRequest();
             }
+            backend.quitRequest();
         });
 
         backend.subscribe('money_transfer', function(data){
