@@ -123,7 +123,7 @@ param: ignored
 
 response: 
 {
-  "error_code" : "TRUE", //"TRUE" or "FALSE"
+  "status" : "TRUE", //"TRUE" or "FALSE"
   "request_id": ""   //ignored
 }
 
