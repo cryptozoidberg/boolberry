@@ -453,17 +453,17 @@ void wallet2::refresh(size_t & blocks_fetched, bool& received_money)
       if(!added_blocks)
         break;
     }
-    catch (const std::exception&)
+    catch (const std::exception& e)
     {
       blocks_fetched += added_blocks;
       if(try_count < 3)
       {
-        LOG_PRINT_L1("Another try pull_blocks (try_count=" << try_count << ")...");
+        LOG_PRINT_L1("Another try pull_blocks (try_count=" << try_count << "), exception: " << e.what());
         ++try_count;
       }
       else
       {
-        LOG_ERROR("pull_blocks failed, try_count=" << try_count);
+        LOG_ERROR("pull_blocks failed, try_count=" << try_count << ", exception: " << e.what());
         throw;
       }
     }

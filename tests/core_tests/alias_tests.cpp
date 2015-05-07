@@ -20,6 +20,7 @@ gen_alias_tests::gen_alias_tests()
   REGISTER_CALLBACK_METHOD(gen_alias_tests, check_alias_changed);
   REGISTER_CALLBACK_METHOD(gen_alias_tests, check_alias_not_changed);
   REGISTER_CALLBACK_METHOD(gen_alias_tests, check_alias_added_in_tx);
+  REGISTER_CALLBACK_METHOD(gen_alias_tests, check_height_not_changed);
 }
 #define FIRST_ALIAS_NAME "first"
 #define SECOND_ALIAS_NAME "second"
@@ -134,7 +135,7 @@ bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
   
   // lets try to register same name
   MAKE_BLOCK_WITH_ALIAS_IN_TX(events, blk_10, blk_9, THIRD_ALIAS_NAME);
-
+  DO_CALLBACK(events, "check_height_not_changed");
 
   return true;
 }
@@ -178,8 +179,17 @@ bool gen_alias_tests::check_alias_added_in_tx(currency::core& c, size_t ev_index
   currency::alias_info_base ai = AUTO_VAL_INIT(ai);
   bool r = c.get_blockchain_storage().get_alias_info(THIRD_ALIAS_NAME, ai);
   CHECK_AND_ASSERT_MES(r, false, "third alias name check failed");
+  h = c.get_blockchain_storage().get_current_blockchain_height();
   return true;
 }
+
+bool gen_alias_tests::check_height_not_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+{
+  uint64_t new_h = c.get_blockchain_storage().get_current_blockchain_height();
+  CHECK_AND_ASSERT_MES(new_h == h, false, "third alias name check failed");
+  return true;
+}
+
 bool gen_alias_tests::check_splitted_back(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
   return check_first_alias_added(c, ev_index, events) && check_second_alias_added(c, ev_index, events);

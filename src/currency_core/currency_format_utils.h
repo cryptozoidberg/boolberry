@@ -180,7 +180,7 @@ namespace currency
     {
       if (ai.type() == typeid(attacment_t))
       {
-        a = boost::get<attacment_t&>(ai);
+        a = boost::get<attacment_t>(ai);
         return true;
       }
     }
@@ -193,10 +193,10 @@ namespace currency
     for (auto& ev : extra)
     {
       if (ev.type() == typeid(extra_t))
-        return boost::get<extra_t&>(ev);
+        return boost::get<extra_t>(ev);
     }
     extra.push_back(extra_t());
-    return boost::get<extra_t&>(extra.back());
+    return boost::get<extra_t>(extra.back());
   }
   //---------------------------------------------------------------
   template<class payment_id_type>
