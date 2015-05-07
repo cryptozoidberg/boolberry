@@ -56,6 +56,7 @@
             },
 
             storeSecureAppData: function(data, pass) {
+                console.log(pass);
                 if(!this.shouldUseEmulator()){
                     return Qt_parent['store_secure_app_data'](JSON.stringify(data), pass);
                 }else{
@@ -63,15 +64,21 @@
                 }
             },
 
-            getAppData: function(pass) {
+            getAppData: function() {
                 if(!this.shouldUseEmulator()){
-                    return Qt_parent['get_app_data']();
+                    var data = Qt_parent['get_app_data']();
+                    if(data){
+                        return JSON.parse(data);    
+                    }else{
+                        return false;
+                    }
+                    
                 }else{
-                    return '{}';
+                    return {};
                 }
             },
 
-            storeAppData: function(data, pass) {
+            storeAppData: function(data) {
                 if(!this.shouldUseEmulator()){
                     return Qt_parent['store_app_data'](JSON.stringify(data));
                 }else{
