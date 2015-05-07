@@ -63,7 +63,7 @@ namespace currency
     
     if (!validate_alias_info(tx, kept_by_block))
     {
-      LOG_PRINT_RED_L0("transaction use more money then it has: use " << outputs_amount << ", have " << inputs_amount);
+      LOG_PRINT_RED_L0("validate_alias_info failed");
       tvc.m_verifivation_failed = true;
       return false;
     }

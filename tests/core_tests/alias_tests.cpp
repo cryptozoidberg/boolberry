@@ -34,7 +34,7 @@ gen_alias_tests::gen_alias_tests()
 
 
 bool put_alias_via_tx_to_list(std::vector<test_event_entry>& events,
-  std::list<currency::transaction> tx_set,
+  std::list<currency::transaction>& tx_set,
   const block& head_block,
   const std::string& alias_name,
   const account_base& miner_acc,
