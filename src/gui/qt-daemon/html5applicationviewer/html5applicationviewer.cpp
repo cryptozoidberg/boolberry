@@ -570,7 +570,7 @@ void Html5ApplicationViewer::message_box(const QString& msg)
   show_msg_box(msg.toStdString());
 }
 
-QString Html5ApplicationViewer::get_app_data(const QString& param)
+QString Html5ApplicationViewer::get_secure_app_data(const QString& param)
 {
 
   view::password_data pwd = AUTO_VAL_INIT(pwd);
@@ -583,7 +583,7 @@ QString Html5ApplicationViewer::get_app_data(const QString& param)
   }
 
   std::string app_data_buff;
-  bool r = file_io_utils::load_file_to_string(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, app_data_buff);
+  bool r = file_io_utils::load_file_to_string(m_backend.get_config_folder() + "/" + GUI_SECURE_CONFIG_FILENAME, app_data_buff);
   if (!r)
     return "";
 
@@ -609,7 +609,25 @@ QString Html5ApplicationViewer::get_app_data(const QString& param)
   return app_data_buff.substr(sizeof(app_data_file_binary_header)).c_str();
 }
 
-QString Html5ApplicationViewer::store_app_data(const QString& param, const QString& pass)
+QString Html5ApplicationViewer::store_app_data(const QString& param)
+{
+  bool r = file_io_utils::save_string_to_file(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, param.toStdString());
+  view::api_response ar;
+  if (r)
+    ar.error_code = API_RETURN_CODE_OK;
+  else
+    ar.error_code = API_RETURN_CODE_ACCESS_DENIED;
+  return epee::serialization::store_t_to_json(ar).c_str();
+}
+QString Html5ApplicationViewer::get_app_data(const QString& param)
+{
+  std::string app_data_buff;
+  file_io_utils::load_file_to_string(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, app_data_buff);
+
+  return app_data_buff.c_str();
+}
+
+QString Html5ApplicationViewer::store_secure_app_data(const QString& param, const QString& pass)
 {
 
   std::string buff(sizeof(app_data_file_binary_header), 0);
@@ -620,7 +638,7 @@ QString Html5ApplicationViewer::store_app_data(const QString& param, const QStri
   buff.append(param.toStdString());
   crypto::chacha_encrypt(buff, pass.toStdString());
 
-  bool r = file_io_utils::save_string_to_file(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, buff);
+  bool r = file_io_utils::save_string_to_file(m_backend.get_config_folder() + "/" + GUI_SECURE_CONFIG_FILENAME, buff);
   view::api_response ar;
   if (r)
     ar.error_code = API_RETURN_CODE_OK;
@@ -633,12 +651,12 @@ QString Html5ApplicationViewer::store_app_data(const QString& param, const QStri
   return epee::serialization::store_t_to_json(ar).c_str();
 }
 
-QString Html5ApplicationViewer::have_app_data(const QString& param)
+QString Html5ApplicationViewer::have_secure_app_data(const QString& param)
 {
   view::api_response ar = AUTO_VAL_INIT(ar);
 
   boost::system::error_code ec;
-  if (boost::filesystem::exists(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, ec))
+  if (boost::filesystem::exists(m_backend.get_config_folder() + "/" + GUI_SECURE_CONFIG_FILENAME, ec))
     ar.error_code = API_RETURN_CODE_TRUE;
   else
     ar.error_code = API_RETURN_CODE_FALSE;

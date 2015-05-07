@@ -358,6 +358,7 @@ public:
 
 #define API_RETURN_CODE_OK                                      "OK"
 #define API_RETURN_CODE_FAIL                                    "FAIL"
+#define API_RETURN_CODE_ACCESS_DENIED                           "ACCESS_DENIED"
 #define API_RETURN_CODE_INTERNAL_ERROR                          "INTERNAL_ERROR"
 #define API_RETURN_CODE_INTERNAL_ERROR_QUE_FULL                 "INTERNAL_ERROR_QUE_FULL"
 #define API_RETURN_CODE_BAD_ARG                                 "BAD_ARG"
