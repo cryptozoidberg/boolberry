@@ -3,8 +3,8 @@
 
     var module = angular.module('app.backendServices', [])
 
-    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer',
-        function($interval, $timeout, emulator, loader, informer) {
+    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer','$rootScope',
+        function($interval, $timeout, emulator, loader, informer, $rootScope) {
         
         var callbacks = {};
 
@@ -40,11 +40,17 @@
             },
 
             haveAppData: function() {
-                return this.runCommand('have_app_data');
+                if(!this.shouldUseEmulator()){
+                    var result = JSON.parse(Qt_parent['have_app_data'](''));
+                    return result.error_code === "TRUE" ? true : false;
+                }else{
+                    return true;
+                }
+
             },
 
             getAppData: function(pass) {
-                if(typeof Qt_parent !== 'undefined'){
+                if(!this.shouldUseEmulator()){
                     return Qt_parent['get_app_data'](JSON.stringify(pass));
                 }else{
                     return '{}';
@@ -52,7 +58,7 @@
             },
 
             storeAppData: function(data, pass) {
-                if(typeof Qt_parent !=='undefined'){
+                if(!this.shouldUseEmulator()){
                     return Qt_parent['store_app_data'](JSON.stringify(data), pass);
                 }else{
                     return '';
@@ -80,7 +86,7 @@
                 return this.runCommand('push_offer', params, callback);
             },
 
-            transfer: function(from, to, ammount, fee, comment, push_payer, lock_time, callback) {
+            transfer: function(from, to, ammount, fee, comment, push_payer, lock_time, is_mixin, callback) {
                  var params = {
                     wallet_id : from,
                     destinations : [
@@ -89,7 +95,7 @@
                             amount : ammount
                         }
                     ],
-                    mixin_count : 0,
+                    mixin_count : is_mixin ? $rootScope.settings.security.mixin_count : 0,
                     lock_time : lock_time,
                     payment_id : "",
                     fee : fee,
@@ -98,6 +104,10 @@
                 };
                 console.log(params);
                 return this.runCommand('transfer', params, callback);
+            },
+
+            quitRequest : function() {
+                return this.runCommand('on_request_quit', {});
             },
 
             openWallet : function(file, pass, callback) {
@@ -175,6 +185,19 @@
                     }
                 }
                 
+            },
+
+            makeSend : function(tr) {
+                var TS = 0;
+                var mkTS = 0;
+                if(tr.is_delay){
+                    mkTS = tr.lock_time.getTime(); //miliseconds timestamp
+                    TS = Math.floor(mkTS/1000); // seconds timestamp    
+                }
+                
+                this.transfer(tr.from, tr.to, tr.ammount, tr.fee, tr.comment, tr.push_payer, TS, tr.is_mixin, function(data){
+                    informer.success('Транзакция поступила в обработку');
+                });
             },
 
             backendCallback: function (status, param) {
@@ -433,7 +456,16 @@
                 case 'get_wallet_info' : 
                     result = this.getWalletInfo();
                     break;
-                
+                case 'update_wallet_info' :
+                    result = {
+                        wallets  : [
+                            {
+                                wallet_id: "1",
+                                wi : this.getWalletInfo()
+                            }
+                        ]
+                    };
+                    break;
                 case 'update_daemon_state': 
                     result = {
                         "daemon_network_state": 2,

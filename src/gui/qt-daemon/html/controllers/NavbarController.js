@@ -2,16 +2,100 @@
     'use strict';
     var module = angular.module('app.navbar',[]);
 
-    module.controller('NavbarTopController', ['backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter',
-        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter) {
+    module.controller('appPassCtrl', ['$scope','backend', '$modalInstance','informer','$rootScope', '$timeout',
+        function($scope, backend, $modalInstance, informer, $rootScope, $timeout) {
+            $scope.close = function(){
+                $modalInstance.close();
+            }
+
+            $scope.getAppData = function(appPass){
+                if(backend.haveAppData()){
+                    var appData = backend.getAppData({pass: appPass});
+                    appData = JSON.parse(appData);
+                    if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
+                        informer.error('Неверный пароль');
+                    }else{
+                        $rootScope.appPass = appPass;
+                        $scope.close();
+
+                        if(angular.isDefined(appData.safes)){
+                            angular.forEach(appData.safes,function(item){
+                                backend.openWallet(item.path, item.pass,function(data){
+                                    
+                                    var wallet_id = data.wallet_id;
+                                    var new_safe = {
+                                        wallet_id : wallet_id,
+                                        name : item.name,
+                                        pass : item.pass
+                                    };
+                                    $timeout(function(){
+                                        $rootScope.safes.push(new_safe);    
+                                    });
+
+                                });
+                            });
+                        }
+                        if(angular.isDefined(appData.settings)){
+                            $rootScope.settings = appData.settings;
+                        }
+                    }
+                }else{
+                    $rootScope.appPass = appPass;
+                }
+            };
+        }
+    ]);
+
+    module.controller('NavbarTopController', ['backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer',
+        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer) {
         $rootScope.deamon_state = {
         	daemon_network_state: 0
+        };
+
+        $rootScope.settings = {
+            security: {
+                mixin_count: 4,
+                is_hide_sender: true,
+                is_mixin: false,
+                is_pass_required_on_transfer: false,
+                is_backup_reminder: false,
+                backup_reminder_interval: 0,
+                is_use_app_pass: true,
+                password_required_interval: 5    
+            },
+            mining: {
+                is_block_transfer_when_mining : true,
+                ask_confirm_on_transfer_when_mining : false,
+                auto_mining_when_no_transfers : false,
+                auto_mining_interval :  0
+            },
+            app_interface: {
+                general: {
+                    language : 'ru',
+                    font_size : 'medium',
+                    is_need_tooltips : false
+                },
+                on_transfer : {
+                    show_recipient_tx_history : false,
+                },
+                on_sell_buy_guildens : {
+                    show_rates : false,
+                    show_last_deals : false
+                }
+            },
+            system: {
+                app_autoload : false,
+                process_finish_remind_onclose : true,
+                app_autosave_interval : 0,
+                app_donation : false,
+                donation_amount : 0
+            }
         };
 
         $scope.wallet_info  = {};
 
         var loadingMessage = 'Cеть загружается, или оффлайн. Пожалуйста, подождите...';
-        var li = loader.open(loadingMessage);
+        //var li = loader.open(loadingMessage);
 
         $scope.progress_value = function(){
             var max = $scope.deamon_state.max_net_seen_height - $scope.deamon_state.synchronization_start_height;
@@ -19,36 +103,15 @@
             return Math.floor(current*100/max);
         }
 
-        var appPass = '123'; // TODO
+        $modal.open({
+            templateUrl: "views/app_pass.html",
+            controller: 'appPassCtrl',
+            size: 'md',
+            windowClass: 'modal fade in',
+            backdrop: false
+        });
 
-        $scope.getAppData = function(){
-            console.log('get');
-            var appData = backend.getAppData({pass: appPass});
-            appData = JSON.parse(appData);
-            console.log(appData);
-
-            angular.forEach(appData,function(item){
-                backend.openWallet(item.path, item.pass,function(data){
-                    
-                    var wallet_id = data.wallet_id;
-                    var new_safe = {
-                        wallet_id : wallet_id,
-                        name : item.name,
-                        pass : item.pass
-                    };
-                    $timeout(function(){
-                        $rootScope.safes.push(new_safe);    
-                    });
-
-                });
-            });
-
-            
-
-
-
-            //$rootScope.safes = JSON.parse(data);
-        };
+        
 
         $scope.storeAppData = function(){
              console.log('store');
@@ -61,9 +124,11 @@
                 };
                 safePaths.push(safe);
              });
-
-             backend.storeAppData(safePaths, appPass);
-
+             var appData = {
+                safes : safePaths,
+                settings: $rootScope.settings
+             };
+             backend.storeAppData(appData, $rootScope.appPass);
         };
 
         $rootScope.closeWallet = function(wallet_id){
@@ -83,18 +148,21 @@
 
         }
 
+        var loaded = false;
+
         backend.subscribe('update_daemon_state', function(data){// move to run
-            // console.log('update_daemon_state');
-            // console.log(data);
             if(data.daemon_network_state == 2){
-                if(li && angular.isDefined(li)){
-                    li.close();
-                    li = null;
-                }
+                loaded = true;
+                // if(li && angular.isDefined(li)){
+                //     li.close();
+                //     li = null;
+                // }
+            }else if(data.daemon_network_state == 4){
+                informer.error('Ошибка системы. Для устранения проблемы свяжитесь с разработчиками.');
             }else{
-                if(!li){
-                    li = loader.open(loadinMessage);
-                }
+                // if(!li && !loaded){
+                //     li = loader.open(loadinMessage);
+                // }
             }
             $timeout(function(){
             	$rootScope.deamon_state = data;	
@@ -107,7 +175,7 @@
                 console.log(data);
                 var wallet_id = wallet.wallet_id;
                 var wallet_info = wallet.wi;
-                safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+                var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
                 if(safe.length){
                     safe = safe[0];
                 }else{
@@ -117,6 +185,15 @@
                     safe[property] = value;
                 });
                 safe.loaded = true;
+
+                if(angular.isUndefined(safe.history)){
+                    backend.getRecentTransfers(wallet_id, function(data){
+                        if(angular.isDefined(data.unconfirmed)){
+                            data.history = data.unconfirmed.concat(data.history);
+                        }
+                        safe.history = data.history;
+                    });
+                }
             });
         });
 
@@ -125,15 +202,12 @@
             console.log(data);
         });
 
-
         backend.subscribe('quit_requested', function(data){
-            console.log('!!!!before sleep quit_requested!!!!!!');
-            $timeout(function(){
-            	console.log('!!!!after sleep quit_requested!!!!!!');
-		Qt_parent["on_request_quit"]();
-		}, 1000);
+            if(angular.isDefined($rootScope.appPass)){
+                $scope.storeAppData();
+                backend.quitRequest();
+            }
         });
-
 
         backend.subscribe('money_transfer', function(data){
             console.log('money_transfer');

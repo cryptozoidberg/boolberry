@@ -1654,3 +1654,7 @@ min-width: 96px;
   -ms-transform: translate(0, 0);
   transform: translate(0, 0);
 }
+
+li.list-group-item {
+	min-height: 55px;
+}
