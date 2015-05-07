@@ -619,11 +619,10 @@ QString Html5ApplicationViewer::store_app_data(const QString& param)
     ar.error_code = API_RETURN_CODE_ACCESS_DENIED;
   return epee::serialization::store_t_to_json(ar).c_str();
 }
-QString Html5ApplicationViewer::get_app_data(const QString& param)
+QString Html5ApplicationViewer::get_app_data()
 {
   std::string app_data_buff;
   file_io_utils::load_file_to_string(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, app_data_buff);
-
   return app_data_buff.c_str();
 }
 
