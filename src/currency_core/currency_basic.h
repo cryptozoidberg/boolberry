@@ -218,7 +218,16 @@ namespace currency
     END_SERIALIZE()
   };
 
-  typedef boost::variant<offer_details, tx_comment, tx_payer, std::string> attachment_v;
+  struct tx_crypto_checksum
+  {
+    uint32_t summ;
+
+    BEGIN_SERIALIZE()
+      FIELD(summ)
+    END_SERIALIZE()
+  };
+
+  typedef boost::variant<offer_details, tx_comment, tx_payer, tx_crypto_checksum, std::string> attachment_v;
 
   /************************************************************************/
   /* extra structures                                                     */
@@ -473,6 +482,8 @@ VARIANT_TAG(binary_archive, currency::offer_details, 0x0);
 VARIANT_TAG(binary_archive, currency::tx_comment, 0x1);
 VARIANT_TAG(binary_archive, currency::tx_payer, 0x2);
 VARIANT_TAG(binary_archive, std::string, 0x3);
+VARIANT_TAG(binary_archive, currency::tx_crypto_checksum, 0x4);
+
 
 
 VARIANT_TAG(binary_archive, currency::extra_attachment_info, 0x0);
@@ -480,10 +491,6 @@ VARIANT_TAG(binary_archive, currency::extra_user_data, 0x1);
 VARIANT_TAG(binary_archive, currency::extra_alias_entry, 0x2);
 VARIANT_TAG(binary_archive, currency::extra_padding, 0x3);
 VARIANT_TAG(binary_archive, crypto::public_key, 0x4);
-
-
-
-
 
 
 VARIANT_TAG(json_archive, currency::txin_gen, "gen");
@@ -501,6 +508,8 @@ VARIANT_TAG(json_archive, currency::tx_comment, "comment");
 VARIANT_TAG(json_archive, currency::tx_payer, "payer");
 VARIANT_TAG(json_archive, std::string, "string");
 VARIANT_TAG(json_archive, crypto::public_key, "pub_key");
+VARIANT_TAG(json_archive, currency::tx_crypto_checksum, "check_summ");
+
 
 
 VARIANT_TAG(json_archive, currency::extra_attachment_info, "attachment");

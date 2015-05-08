@@ -617,7 +617,7 @@ QString Html5ApplicationViewer::get_secure_app_data(const QString& param)
     return epee::serialization::store_t_to_json(ar).c_str();
   }
 
-  crypto::chacha_decrypt(app_data_buff, pwd.pass);
+  crypto::chacha_crypt(app_data_buff, pwd.pass);
 
   const app_data_file_binary_header* phdr = reinterpret_cast<const app_data_file_binary_header*>(app_data_buff.data());
   if (phdr->m_signature != APP_DATA_FILE_BINARY_SIGNATURE)
@@ -657,7 +657,7 @@ QString Html5ApplicationViewer::store_secure_app_data(const QString& param, cons
   phdr->m_cb_body = 0; // for future use
 
   buff.append(param.toStdString());
-  crypto::chacha_encrypt(buff, pass.toStdString());
+  crypto::chacha_crypt(buff, pass.toStdString());
 
   bool r = file_io_utils::save_string_to_file(m_backend.get_config_folder() + "/" + GUI_SECURE_CONFIG_FILENAME, buff);
   view::api_response ar;

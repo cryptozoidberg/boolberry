@@ -557,11 +557,44 @@ namespace currency
     return construct_tx(sender_account_keys, sources, destinations, std::vector<extra_v>(), attachments, tx, unlock_time, tx_outs_attr);
   }
   //---------------------------------------------------------------
-  void encrypt_attachments(const transaction& tx, const account_public_address& destination_add, const keypair& tx_random_key)
+  struct crypt_attach_visitor : public boost::static_visitor<void>
+  {
+    bool& m_was_crypted_entries;
+    const crypto::key_derivation& m_key;
+    crypt_attach_visitor(bool& was_crypted_entries, const crypto::key_derivation& key) :m_was_crypted_entries(was_crypted_entries), m_key(key)
+    {}
+    void operator()(tx_comment& comment)
+    {
+      crypto::chacha_crypt(comment.comment, m_key);
+      m_was_crypted_entries = true;
+    }
+    void operator()(tx_payer& pr)
+    {
+      crypto::chacha_crypt(pr.acc_addr, m_key);
+      m_was_crypted_entries = true;
+    }
+    template<typename attachment_t>
+    void operator()(attachment_t& comment)
+    {}
+  };
+  //---------------------------------------------------------------
+  void encrypt_attachments(transaction& tx, const account_public_address& destination_add, const keypair& tx_random_key)
   {
     crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
     bool r = crypto::generate_key_derivation(destination_add.m_view_public_key, tx_random_key.sec, derivation);
-    for ()
+    bool was_crypted_entries = false;
+    
+    crypt_attach_visitor v(was_crypted_entries, derivation);
+    for (auto& a : tx.attachment)
+      boost::apply_visitor(v, a);
+
+    if (was_crypted_entries)
+    {
+      crypto::hash hash_for_check_sum = crypto::cn_fast_hash(&derivation, sizeof(derivation));
+      tx_crypto_checksum chs;
+      chs.summ = *(uint32_t*)&hash_for_check_sum;
+      tx.attachment.push_back(chs);
+    }
   }
   //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
