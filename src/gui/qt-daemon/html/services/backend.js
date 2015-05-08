@@ -68,13 +68,13 @@
                 if(!this.shouldUseEmulator()){
                     var data = Qt_parent['get_app_data']();
                     if(data){
-                        return JSON.parse(data);    
+                        return JSON.parse(data);
                     }else{
                         return false;
                     }
                     
                 }else{
-                    return {};
+                    return false;
                 }
             },
 
