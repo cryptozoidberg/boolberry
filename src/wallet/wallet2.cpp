@@ -964,6 +964,7 @@ bool wallet2::reset_history()
   m_account = acc_tmp;
   m_password = pass;
   m_wallet_file = file_path;
+  return true;
 }
 //-------------------------------
 bool wallet2::build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& req, 
