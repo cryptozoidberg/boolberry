@@ -74,7 +74,7 @@ protected:
   QString get_recent_transfers(const QString& param);
   QString get_all_offers(const QString& param);
   QString push_offer(const QString& param);
-  QString get_all_aliases(const QString& param);
+  QString get_all_aliases();
   QString request_alias_registration(const QString& param);
   QString validate_address(const QString& param);
   QString on_request_quit();

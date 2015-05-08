@@ -695,11 +695,15 @@ QString Html5ApplicationViewer::drop_secure_app_data()
     ar.error_code = API_RETURN_CODE_FALSE;
   return epee::serialization::store_t_to_json(ar).c_str();
 }
-QString Html5ApplicationViewer::get_all_aliases(const QString& param)
+QString Html5ApplicationViewer::get_all_aliases()
 {
-  view::alias_set a;
-  m_backend.get_aliases(a);
-  return epee::serialization::store_t_to_json(a).c_str();
+  return que_call2<view::api_void>("get_all_aliases", "{}", [this](const view::api_void& owd, view::api_response& ar){
+
+    ar.error_code = API_RETURN_CODE_OK;
+    view::alias_set a;
+    m_backend.get_aliases(a);
+    dispatch(ar, a);
+  });
 }
 QString Html5ApplicationViewer::validate_address(const QString& param)
 {
