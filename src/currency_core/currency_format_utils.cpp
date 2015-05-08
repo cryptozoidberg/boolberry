@@ -556,6 +556,14 @@ namespace currency
   {
     return construct_tx(sender_account_keys, sources, destinations, std::vector<extra_v>(), attachments, tx, unlock_time, tx_outs_attr);
   }
+  //---------------------------------------------------------------
+  void encrypt_attachments(const transaction& tx, const account_public_address& destination_add, const keypair& tx_random_key)
+  {
+    crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
+    bool r = crypto::generate_key_derivation(destination_add.m_view_public_key, tx_random_key.sec, derivation);
+    for ()
+  }
+  //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
                                                              const std::vector<extra_v>& extra,
@@ -574,6 +582,8 @@ namespace currency
 
     keypair txkey = keypair::generate();
     add_tx_pub_key_to_extra(tx, txkey.pub);
+    
+    //encrypt attachments
 
     struct input_generation_context_data
     {
