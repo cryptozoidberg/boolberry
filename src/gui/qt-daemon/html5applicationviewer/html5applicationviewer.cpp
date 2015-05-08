@@ -803,7 +803,7 @@ QString Html5ApplicationViewer::resync_wallet(const QString& param)
   return que_call2<view::wallet_id_obj>("get_wallet_info", param, [this](const view::wallet_id_obj& a, view::api_response& ar){
 
     view::wallet_info wi = AUTO_VAL_INIT(wi);
-    ar.error_code = m_backend.get_wallet_info(a.wallet_id, wi);
+    ar.error_code = m_backend.resync_wallet(a.wallet_id);
     dispatch(ar, wi);
   });
 }
