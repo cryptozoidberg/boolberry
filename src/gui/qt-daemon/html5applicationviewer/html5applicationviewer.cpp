@@ -684,6 +684,17 @@ QString Html5ApplicationViewer::have_secure_app_data(const QString& param)
 
   return epee::serialization::store_t_to_json(ar).c_str();
 }
+QString Html5ApplicationViewer::drop_secure_app_data()
+{
+  view::api_response ar = AUTO_VAL_INIT(ar);
+
+  boost::system::error_code ec;
+  if (boost::filesystem::remove(m_backend.get_config_folder() + "/" + GUI_SECURE_CONFIG_FILENAME, ec))
+    ar.error_code = API_RETURN_CODE_TRUE;
+  else
+    ar.error_code = API_RETURN_CODE_FALSE;
+  return epee::serialization::store_t_to_json(ar).c_str();
+}
 QString Html5ApplicationViewer::get_all_aliases(const QString& param)
 {
   view::alias_set a;

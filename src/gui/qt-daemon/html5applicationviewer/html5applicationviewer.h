@@ -65,6 +65,7 @@ protected:
   QString get_version();
   QString transfer(const QString& json_transfer_object);
   QString have_secure_app_data(const QString& param);
+  QString drop_secure_app_data();
   QString get_secure_app_data(const QString& param);
   QString store_secure_app_data(const QString& param, const QString& pass);
   QString get_app_data();
