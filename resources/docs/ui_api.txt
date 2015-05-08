@@ -182,7 +182,13 @@ resposne:
   "tx_blob_size": 2124 
 }
 
+[sync] resync_wallet()
 
+param: 
+
+{
+   "wallet_id": 0
+}
 
 
 

@@ -78,6 +78,7 @@ protected:
   QString request_alias_registration(const QString& param);
   QString validate_address(const QString& param);
   QString on_request_quit();
+  QString resync_wallet(const QString& param);
 
 
   void message_box(const QString& msg);

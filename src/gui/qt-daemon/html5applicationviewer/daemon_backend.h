@@ -57,6 +57,7 @@ public:
   std::string get_aliases(view::alias_set& al_set);
   std::string request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, currency::transaction& res_tx);
   std::string validate_address(const std::string& addr);
+  std::string resync_wallet(uint64_t wallet_id);
 
 
   void toggle_pos_mining();
