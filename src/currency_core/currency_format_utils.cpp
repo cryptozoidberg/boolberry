@@ -580,34 +580,52 @@ namespace currency
 
   struct decrypt_attach_visitor : public boost::static_visitor<void>
   {
-    bool& m_was_crypted_entries;
-    const crypto::key_derivation& m_key;
-    decrypt_attach_visitor(bool& was_crypted_entries, const crypto::key_derivation& key) :m_was_crypted_entries(was_crypted_entries), m_key(key)
+    bool& rwas_crypted_entries;
+    bool& rcheck_summ_validated;
+    const crypto::key_derivation& rkey;
+    decrypt_attach_visitor(bool& check_summ_validated, bool& was_crypted_entries, const crypto::key_derivation& key) :
+      rwas_crypted_entries(was_crypted_entries),
+      rkey(key),
+      rcheck_summ_validated(check_summ_validated)
     {}
     void operator()(tx_comment& comment)
     {
-      crypto::chacha_crypt(comment.comment, m_key);
-      m_was_crypted_entries = true;
+      crypto::chacha_crypt(comment.comment, rkey);
+      rwas_crypted_entries = true;
     }
     void operator()(tx_payer& pr)
     {
-      crypto::chacha_crypt(pr.acc_addr, m_key);
-      m_was_crypted_entries = true;
+      crypto::chacha_crypt(pr.acc_addr, rkey);
+      rwas_crypted_entries = true;
+    }
+    void operator()(tx_crypto_checksum& chs)
+    {
+      crypto::hash hash_for_check_sum = crypto::cn_fast_hash(&rkey, sizeof(rkey));
+      uint32_t chsumm =  *(uint32_t*)&hash_for_check_sum;
+      if (chsumm != chs.summ)
+      {
+        LOG_ERROR("check summ missmatch in tx attachment decryption, checksumm_in_tx: " << chs.summ << ", expected: " << chsumm);
+      }
+      else
+      {
+        rcheck_summ_validated = true;
+      }
     }
     template<typename attachment_t>
     void operator()(attachment_t& comment)
     {}
   };
   //---------------------------------------------------------------
-  void decrypt_attachments(const transaction& tx, const account_keys& acc_keys, std::vector<attachment_v>& decrypted_att)
+  bool decrypt_attachments(const transaction& tx, const account_keys& acc_keys, std::vector<attachment_v>& decrypted_att)
   {
     crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
     crypto::public_key tx_pub_key = currency::get_tx_pub_key_from_extra(tx);
 
     bool r = crypto::generate_key_derivation(tx_pub_key, acc_keys.m_view_secret_key, derivation);
     bool was_crypted_entries = false;
-    
-    decrypt_attach_visitor v(was_crypted_entries, derivation);
+    bool check_summ_validated = false;
+
+    decrypt_attach_visitor v(check_summ_validated, was_crypted_entries, derivation);
     for (auto& a : tx.attachment)
       boost::apply_visitor(v, a);
 
