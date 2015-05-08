@@ -337,6 +337,17 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct request_alias_param
+  {
+    currency::alias_rpc_details alias;
+    uint64_t wallet_id;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(alias)
+      KV_SERIALIZE(wallet_id)
+    END_KV_SERIALIZE_MAP()
+  };
+
   struct api_response
   {
     std::string request_id;
@@ -370,7 +381,7 @@ public:
 #define API_RETURN_CODE_WRONG_PASSWORD                          "WRONG_PASSWORD"
 #define API_RETURN_CODE_WALLET_WRONG_ID                         "WALLET_WRONG_ID"
 #define API_RETURN_CODE_FILE_NOT_FOUND                          "FILE_NOT_FOUND"
-#define API_RETURN_CODE_FILE_ALREADY_EXISTS                     "FILE_ALREADY_EXISTS"
+#define API_RETURN_CODE_ALREADY_EXISTS                          "ALREADY_EXISTS"
 #define API_RETURN_CODE_CANCELED                                "CANCELED"
 #define API_RETURN_CODE_FILE_RESTORED                           "FILE_RESTORED"
 #define API_RETURN_CODE_TRUE                                    "TRUE"

@@ -157,6 +157,37 @@ or in case of failure:
 }
 
 
+//--------------------------
+[async] request_alias_registration()
+
+param:
+
+{
+  "wallet_id": 2,
+  "alias": {
+    "alias": "some_alias_name",
+    "details": {
+      "address": "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R",
+      "tracking_key": "",
+      "comment": "best ever service bla bla bla"
+    }
+  }
+}
+
+resposne:
+
+{
+  "success": true,
+  "tx_hash": "2fb43b50d0edf7824ba95c414832d324ff5e91287f28929677df3682e4c8bc0c",
+  "tx_blob_size": 2124 
+}
+
+
+
+
+
+
+
 
 
 

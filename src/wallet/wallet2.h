@@ -150,6 +150,8 @@ namespace tools
     bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok);
     
     void push_offer(const currency::offer_details& od);
+    void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx);
+
 
     bool set_core_proxy(const std::shared_ptr<i_core_proxy>& proxy);
     std::shared_ptr<i_core_proxy> get_core_proxy();

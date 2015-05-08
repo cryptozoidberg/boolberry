@@ -46,11 +46,7 @@ bool put_alias_via_tx_to_list(std::vector<test_event_entry>& events,
   ai2.m_alias = alias_name;
   ai2.m_address = alias_acc.get_keys().m_account_address;
   ai2.m_text_comment = "ssdss";
-  std::string buff_tmp;
-  currency::make_tx_extra_alias_entry(buff_tmp, ai2, false);
-
-  eae.buff.resize(buff_tmp.size());
-  std::memcpy(&eae.buff[0], buff_tmp.data(), buff_tmp.size());
+  currency::make_tx_extra_alias_entry(eae.buff, ai2, false);
 
   std::vector<currency::extra_v> ex;
   ex.push_back(eae);

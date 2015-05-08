@@ -339,6 +339,17 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
+  bool make_tx_extra_alias_entry(std::vector<uint8_t>& buff, const alias_info& alinfo, bool make_buff_to_sign)
+  {
+    std::string buff_str;
+    if (!make_tx_extra_alias_entry(buff_str, alinfo, make_buff_to_sign))
+      return false;
+    
+    buff.resize(buff_str.size());
+    memcpy(&buff[0], buff_str.data(), buff_str.size());
+    return true;
+  }
+  //---------------------------------------------------------------
   bool add_tx_extra_alias(transaction& tx, const alias_info& alinfo)
   {
     std::string buff;

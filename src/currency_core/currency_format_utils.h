@@ -104,6 +104,7 @@ namespace currency
     uint64_t unlock_time, 
     uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool sign_update_alias(alias_info& ai, const crypto::public_key& pkey, const crypto::secret_key& skey);
+  bool make_tx_extra_alias_entry(std::vector<uint8_t>& buff, const alias_info& alinfo, bool make_buff_to_sign = false);
   bool make_tx_extra_alias_entry(std::string& buff, const alias_info& alinfo, bool make_buff_to_sign = false);
   bool add_tx_extra_alias(transaction& tx, const alias_info& alinfo);
   bool parse_and_validate_tx_extra(const transaction& tx, tx_extra_info& extra);

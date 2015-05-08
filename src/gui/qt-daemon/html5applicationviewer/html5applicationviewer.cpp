@@ -533,6 +533,28 @@ QString Html5ApplicationViewer::request_uri(const QString& url_str, const QStrin
   return "";
 
 }
+QString Html5ApplicationViewer::request_alias_registration(const QString& param)
+{
+  return que_call2<view::request_alias_param>("request_alias_registration", param, [this](const view::request_alias_param& tp, view::api_response& ar){
+
+    view::transfer_response tr = AUTO_VAL_INIT(tr);
+    currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
+    std::string status = m_backend.request_alias_registration(tp.alias, tp.wallet_id, res_tx);
+    if (status != API_RETURN_CODE_OK)
+    {
+      view::api_void av;
+      ar.error_code = status;
+      dispatch(ar, av);
+      return;
+    }
+    tr.success = true;
+    tr.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(res_tx));
+    tr.tx_blob_size = currency::get_object_blobsize(res_tx);
+    dispatch(ar, tr);
+    return;
+  });
+
+}
 
 QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
 {
