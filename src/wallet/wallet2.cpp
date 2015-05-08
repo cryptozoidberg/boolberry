@@ -527,8 +527,12 @@ bool wallet2::deinit()
 //----------------------------------------------------------------------------------------------------
 bool wallet2::clear()
 {
-  this->~wallet2();
-  new(this) wallet2();
+  m_blockchain.clear();
+  m_transfers.clear();
+  m_key_images.clear();
+  m_unconfirmed_txs.clear();
+  m_payments.clear();
+  m_transfer_history.clear();
 
   currency::block b;
   currency::generate_genesis_block(b);
