@@ -64,14 +64,17 @@ protected:
   QString close_wallet(const QString& wallet_id);
   QString get_version();
   QString transfer(const QString& json_transfer_object);
-  QString have_app_data(const QString& param);
-  QString get_app_data(const QString& param);
-  QString store_app_data(const QString& param, const QString& pass);
+  QString have_secure_app_data(const QString& param);
+  QString get_secure_app_data(const QString& param);
+  QString store_secure_app_data(const QString& param, const QString& pass);
+  QString get_app_data();
+  QString store_app_data(const QString& param);
   QString get_default_user_dir(const QString& param);
   QString get_recent_transfers(const QString& param);
   QString get_all_offers(const QString& param);
   QString push_offer(const QString& param);
   QString get_all_aliases(const QString& param);
+  QString request_alias_registration(const QString& param);
   QString validate_address(const QString& param);
   QString on_request_quit();
 

@@ -569,7 +569,7 @@ std::string daemon_backend::generate_wallet(const std::string& path, const std::
   }
   catch (const tools::error::file_exists/*& e*/)
   {
-    return API_RETURN_CODE_FILE_ALREADY_EXISTS;
+    return API_RETURN_CODE_ALREADY_EXISTS;
   }
 
   catch (const std::exception& e)
@@ -617,6 +617,64 @@ std::string daemon_backend::get_aliases(view::alias_set& al_set)
   return API_RETURN_CODE_FAIL;
 }
 
+bool daemon_backend::alias_rpc_details_to_alias_info(const currency::alias_rpc_details& ard, currency::alias_info& ai)
+{
+  if (!currency::get_account_address_from_str(ai.m_address, ard.details.address))
+  {
+    LOG_ERROR("Failed to parse address: " << ard.details.address);
+    return false;
+  }
+  if (ard.details.tracking_key.size())
+  {
+    if (!string_tools::parse_tpod_from_hex_string(ard.details.tracking_key, ai.m_view_key))
+    {
+      LOG_ERROR("Failed to parse tracking_key: " << ard.details.tracking_key );
+      return false;
+    }
+  }
+  //ai.m_sign; atm alias updating disabled
+  ai.m_text_comment = ard.details.comment;
+  ai.m_alias = ard.alias;
+  return true;
+}
+
+std::string daemon_backend::request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, currency::transaction& res_tx)
+{
+  currency::alias_info ai = AUTO_VAL_INIT(ai);
+  if (!alias_rpc_details_to_alias_info(al, ai))
+    return API_RETURN_CODE_BAD_ARG;
+
+  currency::COMMAND_RPC_GET_ALIAS_DETAILS::request req;
+  currency::COMMAND_RPC_GET_ALIAS_DETAILS::response rsp = AUTO_VAL_INIT(rsp);
+  if (m_rpc_proxy->call_COMMAND_RPC_GET_ALIAS_DETAILS(req, rsp) && rsp.status == CORE_RPC_STATUS_OK)
+  {
+    CRITICAL_REGION_LOCAL(m_wallets_lock);
+    auto it = m_wallets.find(wallet_id);
+    if (it == m_wallets.end())
+      return API_RETURN_CODE_WALLET_WRONG_ID;
+
+    auto& w = it->second;
+    try
+    {
+      w->request_alias_registration(ai, res_tx);
+      return API_RETURN_CODE_OK;
+    }
+    catch (const std::exception& e)
+    {
+      LOG_ERROR("request_alias_registration error: " << e.what());
+      std::string err_code = API_RETURN_CODE_INTERNAL_ERROR;
+      err_code += std::string(":") + e.what();
+      return err_code;
+    }
+    catch (...)
+    {
+      LOG_ERROR("request_alias_registration error: unknown error");
+      return API_RETURN_CODE_INTERNAL_ERROR;
+    }
+  }
+
+  return API_RETURN_CODE_ALREADY_EXISTS;
+}
 
 std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_params& tp, currency::transaction& res_tx)
 {

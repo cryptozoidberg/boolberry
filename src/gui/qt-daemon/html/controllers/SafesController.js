@@ -20,14 +20,7 @@
                 return;
             }
             $scope.safe = safe;
-            if(angular.isUndefined(safe.history)){
-                backend.getRecentTransfers(wallet_id, function(data){
-                    if(angular.isDefined(data.unconfirmed)){
-                        data.history = data.unconfirmed.concat(data.history);
-                    }
-                    safe.history = data.history;
-                });
-            }
+            
             $scope.trDetails = function(item){
                 var modalInstance = $modal.open({
                     templateUrl: "views/tr_details.html",

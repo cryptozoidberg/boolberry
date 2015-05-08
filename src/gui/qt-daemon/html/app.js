@@ -4,6 +4,7 @@
         'ui.bootstrap',
         'ui.chart',
         'angular-bootstrap-select',
+        'ui.bootstrap-slider',
 
         'ngRoute', 
         'ngSanitize',
@@ -18,7 +19,8 @@
         'app.directives',
         'app.safes',
         'app.guldens',
-        'app.market'
+        'app.market' ,
+        'app.settings'
 
     ]);
 
@@ -34,10 +36,6 @@
             {route: '/history',          template: 'views/history.html'},
             {route: '/deposits',         template: 'views/deposits.html'},
             {route: '/settings',         template: 'views/settings.html'},
-            {route: '/safety',           template: 'views/safety.html'},
-            {route: '/maining',          template: 'views/maining.html'},
-            {route: '/interface',        template: 'views/interface.html'},
-            {route: '/common',           template: 'views/common.html'},
             {route: '/sendG',            template: 'views/sendG.html'},
             {route: '/sendG/:wallet_id', template: 'views/sendG.html'},
             {route: '/buyG',             template: 'views/buyG.html'},

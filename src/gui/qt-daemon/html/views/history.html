@@ -1,7 +1,7 @@
     <a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт истории платежей в файл</span></a>
     <h1>История платежей</h1>
     <h5>Здесь Вы можете просмотреть историю платежей по всем сейфам, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
-    <div class="tabs">
+    <div class="tabs" ng-controller="trHistoryCtrl">
         <div class="navbar" id="navbar-tabs">
 
             <form class="form-horizontal">
@@ -10,7 +10,7 @@
                         <div class="col-xs-5 col-sm-5">
                             <div class="form-group clearfix">
                                 <label class="control-label required col-xs-4 col-sm-4">Период</label>
-                                <select class="selectpicker col-xs-8 col-sm-8 history_period-selector" style="width:100%">
+                                <select class="col-xs-8 col-sm-8 history_period-selector" selectpicker style="width:100%">
                                     <option class="dateperiod" selected="">не важно</option>
                                     <option class="dateperiod">день</option>
                                     <option class="dateperiod">неделя</option>
@@ -23,8 +23,6 @@
                             <div class="form-group collapse in date-collapse history_period-datapicker-row">
                                 <label class="control-label col-xs-4 col-sm-4 required">Дата</label>
                                 <div class="col-xs-8 col-sm-8">
-
-
                                     <div class="hdatapicker">
                                         <div class="input-daterange input-group" id="datepicker">
                                             <span class="input-group-addon">от</span>
@@ -35,7 +33,6 @@
                                             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -43,18 +40,22 @@
                             <div class="form-group clearfix">
 
                                 <label class="control-label required col-xs-2 col-sm-2">Сейф</label>
-                                <select class="col-xs-8 col-sm-8 selectpicker nopadding">
-                                    <option>все сейфы</option>
-                                    <option selected="">Safelabel (@@safealias) 4.20 G</option>
+                                <select 
+                                    class="col-xs-8 col-sm-8 nopadding" 
+                                    selectpicker 
+                                    ng-model="wallet_id"
+                                    ng-change="changeWallet(wallet_id)"
+                                    ng-options="safe.wallet_id as safe.name for safe in safes"
+                                >
+                                    <!-- <option selected="">Safelabel (@@safealias) 4.20 G</option>
                                     <option>1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak 30.40 G</option>
                                     <option>Safelabel2 (@safealias2) 0.56 G</option>
-                                    <option>Safelabel-997398r (@safealias5) 0.56 G</option>
+                                    <option>Safelabel-997398r (@safealias5) 0.56 G</option> -->
                                 </select>
                             </div>
-
                             <div class="form-group">
                                 <label class="col-xs-2 col-sm-2 control-label required">Состояние</label>
-                                <select class="col-xs-4 col-sm-4 selectpicker nopadding">
+                                <select class="col-xs-4 col-sm-4 nopadding" selectpicker>
                                     <option selected="">любое</option>
                                     <option>анонимно</option>
                                     <option>неанонимно</option>
@@ -64,17 +65,15 @@
                                     <label class="checkbox"><input type="checkbox" value=""> <strong>Скрыть доход от добычи</strong></label>
                                 </div>
                             </div>
-
                             <div class="form-group">
                                 <label class="col-xs-2 col-sm-2 control-label required">Микшер</label>
-                                <select class="col-xs-4 col-sm-4 selectpicker nopadding">
+                                <select class="col-xs-4 col-sm-4 nopadding" selectpicker>
                                     <option selected="">не важно</option>
                                     <option>микшировано</option>
                                     <option>не микшировано</option>
                                 </select>
 
                             </div>
-
                             <div class="form-group">
                                 <div class="collapse in filter1">
                                     <div class="row">
@@ -85,19 +84,12 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
 
-
-
                 <div class="row">
-
                     <div class="col-xs-4 col-sm-4">
-
-
                         <div data-toggle="buttons" class="btn-group btn-group-justified">
                             <label class="btn btn-primary history_filterIngoingOutgoingButton active">
                                 <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Все
@@ -124,10 +116,11 @@
                     </div>
                 </div>
             </form>
-
-
+            
         </div>
-        <div class="table-responsive panel">
+
+
+        <div class="table-responsive panel" ng-if="filtered_history.length">
             <table class="table table-condensed  data-table history-table">
                 <thead>
                 <tr>
@@ -156,519 +149,140 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
+                <tr ng-repeat="item in filtered_history" class="transaction-item">
                     <td>
-	<span class="mix-label mix-label-up">
-	 <img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
-		<em><i style="color:#ddd" class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
-	</span>
-                    </td>
-                    <td>
-
-                        <small class="text-muted nowrap">12.12.14 22:56</small>
-                        <span class="chart send-timer" data-percent="86"></span>
-
-                    </td>
-                    <td>
-                        <small class="text-warning"><em>Отправление</em></small>
-                    </td>
-                    <td>
-                        &ndash;23,00
-                    </td>
-                    <td>
-                        &ndash;1,67
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                            <div role="menu" class="dropdown-menu dropdown-menu-left">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
-
-                                        <li><div class="contractor">
-                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div></li>
-                                        <li><a href="#contact">@onesafekaccout</a></li>
-                                        <li><a href="#contact">@twosafeaccout</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">B4QqkxudA7hJjwhPYFSc1HUWFZP3giGepi2foJocRhav7mSQ2RnYYTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                            <div role="menu" class="dropdown-menu dropdown-menu-left">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li><div class="contractor">
-                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="text-muted">текст комментария</span></td>
-                </tr>
-                <tr>
-                    <td><span class="mix-label mix-label-down">
-	 <img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
-		<em><i style="color:#ddd" class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
-	</span>
-                    </td>
-                    <td>
-
-                        <small class="text-muted nowrap">12.12.14 22:56</small><span class="chart receive-timer" data-percent="60"></span>
-
-                    </td>
-                    <td>
-                        <small class="text-info"><em>Получение</em></small>
-                    </td>
-                    <td>
-                        +3,00
-                    </td>
-                    <td>
-                        0
-                    </td>
-                    <td>
-                        <small style="color:#999"><em>неизвестно</em></small>
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                            <div class="dropdown-menu dropdown-menu-left" role="menu">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
-
-                                        <li><div class="contractor">
-                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div></li>
-                                        <li><a href="#contact">@onesafekaccout</a></li>
-                                        <li><a href="#contact">@twosafeaccout</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="text-muted">текст комментария</span></td>
-                </tr>
-                <tr>
-                    <td>
-	<span class="mix-label mix-label-up">
-	 <img src="assets/font/svg/sound8.svg" style="opacity: 0.75;">
-		<em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
-	</span>
-                    </td>
-                    <td>
-
-                        <small class="text-muted nowrap">12.12.14 22:56</small>
-
-
-                    </td>
-                    <td>
-                        <small class="text-muted">Отправлено</small>
-                    </td>
-                    <td>
-                        &ndash;6,00
-                    </td>
-                    <td>
-                        &ndash;1,67
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button aria-expanded="true" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                            <div class="dropdown-menu dropdown-menu-left" role="menu">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
-
-                                        <li><div class="contractor">
-                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
-							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div></li>
-                                        <li><a href="#contact">@onesafekaccout</a></li>
-                                        <li><a href="#contact">@twosafeaccout</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">@fjjhtyjlmnbg<span class="caret"></span></span>
-
-			</span></button>
-                            <div class="dropdown-menu dropdown-menu-left" role="menu">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li><div class="contractor">
-                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div>
-                                        </li>
-                                        <li><a href="#contact">@fjjhtyjlmnbg</a>
-                                        </li></ul>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="text-muted">текст комментария</span></td>
-
-                </tr>
-                <tr class="success">
-                    <td>
-		<span class="mix-label mix-label-up">
-	<img style="width:22px;" src="assets/img/pick5.svg">
-	<em><i class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
-		</span>
-                    </td>
-                    <td>
-                        <small class="text-muted nowrap">12.12.14 22:56</small>
-                    </td>
-                    <td><small class="text-muted">Добыча</small>
-                    </td>
-                    <td>
-                        +5,00
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                            <div role="menu" class="dropdown-menu dropdown-menu-left">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
-
-                                        <li><div class="contractor">
-                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div></li>
-                                        <li><a href="#contact">@onesafekaccout</a></li>
-                                        <li><a href="#contact">@twosafeaccout</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td><span class="text-muted">текст комментария</span></td>
-
-                </tr>
-                <tr>
-                    <td>
-	<span class="mix-label mix-label-up">
-	<img style="opacity: 0.75;" src="assets/font/svg/sound8.svg">
-		<em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
-	</span>
-                    </td>
-                    <td>
-                        <small class="text-muted nowrap">12.12.14 22:56</small>
-                    </td>
-                    <td>
-                        <small class="text-muted">Отправлено</small>
-
-                    </td>
-                    <td>
-                        &ndash;23,00
-                    </td>
-                    <td>
-                        &ndash;1,67
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999"><span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			</span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                            <div role="menu" class="dropdown-menu dropdown-menu-left">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
-
-                                        <li><div class="contractor">
-                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
-							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div></li>
-                                        <li><a href="#contact">@onesafekaccout</a></li>
-                                        <li><a href="#contact">@twosafeaccout</a></li>
-                                    </ul>
-
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Человек @onechelovekaccout <span class="caret"></span></span>
-
-			</span></button>
-                            <div role="menu" class="dropdown-menu dropdown-menu-left">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Имя: <a href="#contact">Человек</a></li>
-                                        <li>Email: <a href="#contact">chelovek@domain.com</a></li>
-                                        <li><div class="contractor">
-                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div></li>
-                                        <li><a href="#contact">@onechelovekaccout</a></li>
-                                        <li><a href="#contact">@twochelovekaccout</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="text-muted">текст комментария</span></td>
-                </tr>
-                <tr>
-                    <td>
-	<span class="mix-label mix-label-up">
-	<img style="opacity: 0.05;" src="assets/font/svg/sound8.svg">
-	<em><i class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
-	</span>
-                    </td>
-                    <td>
-                        <small class="text-muted nowrap">12.12.14 22:56</small>
-                    </td>
-                    <td>
-                        <small class="text-muted">Получено</small>
-                        <span style="color:red;font-size:25px;">
-                                !
+                        <span class="mix-label mix-label-up">
+                         <img src="assets/font/svg/sound8.svg">
+                            <em>
+                                <i 
+                                    class="fa fa-lg"
+                                    ng-class="{
+                                        'text-muted': !item.height,
+                                        'text-danger': item.height && !item.is_income,
+                                        'text-success': item.height && item.is_income,
+                                        'fa-arrow-circle-o-up' : !item.is_income,
+                                        'fa-arrow-circle-o-down' : item.is_income,
+                                    }"
+                                >
+                                </i>
+                            </em>
                         </span>
                     </td>
+                    
                     <td>
-                        &ndash;23,00
+                        <a ng-click="trDetails(item)"><small class="text-muted nowrap">{{item.timestamp | intToDate | date:'dd.MM.yy hh:mm'}}</small></a>
+                        <span class="chart send-timer" data-percent="86">
+                        </span>
                     </td>
+
                     <td>
-                        0
+                        <small class="text-muted" ng-if="!item.is_income && !item.height">
+                            <em>Отправление</em>
+                        </small>
+                        <small class="text-warning" ng-if="!item.is_income && item.height">
+                            <em>Отправлено</em>
+                        </small>
+                        <small class="text-muted" ng-if="item.is_income && !item.height">
+                            <em>Получение</em>
+                        </small>
+                        <small class="text-info" ng-if="item.is_income && item.height">
+                            <em>Получено</em>
+                        </small>
                     </td>
+
                     <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                            <div class="dropdown-menu dropdown-menu-left" role="menu">
+                        <span ng-if="!item.is_income">&ndash;</span>{{item.amount | gulden}}
+                    </td>
+
+                    <td>
+                        <span ng-if="!item.is_income">&ndash;</span>{{item.fee | gulden}}
+                    </td>
+
+                    <td>
+                        
+                        <div class="dropdown" ng-if="item.remote_address">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <span class="account-text">
+                                    <span class="text-muted">
+                                        Safelabel1 
+                                        <span style="color:#999">
+                                            {{item.remote_address}}
+                                        </span>
+                                    </span>
+                                    <span class="moredots">...<span class="caret"></span></span>
+                                </span>
+                            </button>
+                            
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>
+                                            <div class="contractor">
+                                                <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                    скопировать
+                                                </button> -->
+                                                <pre class="safe-number" style="height:60px">{{item.remote_address}}
+                                                </pre>
+                                            </div>
+                                        </li>
+                                        <li><a href="">@onesafekaccout</a></li>
+                                        <li><a href="">@twosafeaccout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <small class="text-muted" ng-if="!item.remote_address">
+                            <em>неизвестно</em>
+                        </small>
+                    </td>
+
+                    <td>
+                        
+                        <div class="dropdown" ng-if="item.remote_address">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <span class="account-text">
+                                    <span class="text-muted">{{item.remote_address}}</span>
+                                    <span class="moredots">...<span class="caret"></span></span>
+                                </span>
+                            </button>
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
                                         <li>
                                             <div class="contractor">
-                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
+                                                <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                    скопировать
+                                                </button> -->
+                                                <pre class="safe-number" style="height:60px">{{item.remote_address}}</pre>
                                             </div>
                                         </li>
-
                                     </ul>
                                 </div>
                             </div>
                         </div>
+                        <small class="text-muted" ng-if="!item.remote_address">
+                            <em>неизвестно</em>
+                        </small>
                     </td>
-                    <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                            <div class="dropdown-menu dropdown-menu-left" role="menu">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
 
-                                        <li><div class="contractor">
-                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
-							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div></li>
-                                        <li><a href="#contact">@onesafekaccout</a></li>
-                                        <li><a href="#contact">@twosafeaccout</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="text-muted">текст комментария</span></td>
-
+                    <td><span class="text-muted">{{item.comment}}</span></td>
                 </tr>
-                <tr>
-                    <td>
-	<span class="mix-label mix-label-up">
-	<img style="opacity: 0.05;" src="assets/font/svg/sound8.svg">
-		<em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
-	</span>
 
-                    </td>
-                    <td>
-                        <small class="text-muted nowrap">12.12.14 22:56</small>
-                    </td>
-                    <td>
-                        <small class="text-muted">Отправлено</small>
-                        <small class="label label-default"></small>
-                    </td>
-                    <td>
-                        &ndash;23,00
-                    </td>
-                    <td>
-                        &ndash;1,67
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                            <div class="dropdown-menu dropdown-menu-left" role="menu">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
-
-                                        <li><div class="contractor">
-                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
-							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div></li>
-                                        <li><a href="#contact">@onesafekaccout</a></li>
-                                        <li><a href="#contact">@twosafeaccout</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div><small><em class="text-danger"></em></small>
-                    </td>
-                    <td>
-
-                        <div class="dropdown">
-                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Вася @vasyaccount <span class="caret"></span></span>
-
-			</span></button>
-                            <div role="menu" class="dropdown-menu dropdown-menu-left">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Имя: <a href="#contact">Вася</a></li>
-                                        <li>Email: <a href="#contact">vasya@domain.com</a></li>
-                                        <li>skype: <a href="#contact">vasya</a></li>
-                                        <div class="contractor">
-                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div>
-
-                                        <li><a href="#contact">@vasyaccount</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                    </td>
-                    <td><span class="text-muted">текст комментария</span></td>
-
-                </tr>
-                <tr>
-                    <td>
-	<span class="mix-label mix-label-up">
-	<img style="opacity: 0.05;" src="assets/font/svg/sound8.svg">
-		<em><i class="fa fa-lg fa-arrow-circle-o-up text-danger"></i></em>
-	</span>
-                    </td>
-                    <td>
-                        <small class="text-muted nowrap">12.12.14 22:56</small>
-                    </td>
-                    <td>
-                        <small class="text-muted">Отправлено</small>
-                        <small class="label label-default"><em>неанонимно</em></small>
-                    </td>
-                    <td>
-                        &ndash;23,00
-                    </td>
-                    <td>
-                        &ndash;1,67
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="account-text"><span class="text-muted">Safelabel1 <span style="color:#999">1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak)</span></span>
-			<span class="moredots">...<span class="caret"></span></span>
-			</span></button>
-                            <div class="dropdown-menu dropdown-menu-left" role="menu">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Сейф: <a href="#safe">Safelabel1</a></li>
-
-                                        <li><div class="contractor">
-                                            <button class="btn btn-sm btn-default pull-right" style="position:absolute; bottom:0; right:0">скопировать</button>
-							<pre style="height:60px" class="safe-number">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div></li>
-                                        <li><a href="#contact">@onesafekaccout</a></li>
-                                        <li><a href="#contact">@twosafeaccout</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-
-                        <div class="dropdown">
-                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button"><span class="account-text"><span class="text-muted">Вася @vasyaccount <span class="caret"></span></span>
-			<span class="moredots">...</span>
-			</span></button>
-                            <div role="menu" class="dropdown-menu dropdown-menu-left">
-                                <div style="padding:10px">
-                                    <ul class="list-unstyled">
-                                        <li>Имя: <a href="#contact">Вася</a></li>
-                                        <li>Email: <a href="#contact">vasya@domain.com</a></li>
-                                        <li>skype: <a href="#contact">vasya</a></li>
-                                        <div class="contractor">
-                                            <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button>
-							<pre class="safe-number" style="height:60px">1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y1JYWzGRgYJuJhxSnsNSscrUe4xLwbnub4YJYWzGRgYJuJhxSnsNSscrUe4xLwbnub4Y
-							</pre>
-                                        </div>
-
-                                        <li><a href="#contact">@vasyaccount</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <small></small>
-                    </td>
-                    <td><span class="text-muted">текст комментария</span></td>
-
-                </tr>
                 </tbody>
+
             </table>
+
         </div>
+
 
         <div class="navbar">
             <button class="btn btn-block btn-default navbar-btn">Загрузить еще N</button>
 
             <div class="text-right"> <button class="btn btn-link text-muted"><span class="text-muted underlined">Показать все платежи</span></button></div>
         </div>
+
     </div>
     <hr>
     <div class="footer">
-
-
     </div>

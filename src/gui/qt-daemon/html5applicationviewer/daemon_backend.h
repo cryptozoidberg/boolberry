@@ -55,6 +55,7 @@ public:
   std::string push_offer(size_t wallet_id, const currency::offer_details& od);
   std::string get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS::response& od);
   std::string get_aliases(view::alias_set& al_set);
+  std::string request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, currency::transaction& res_tx);
   std::string validate_address(const std::string& addr);
 
 
@@ -69,7 +70,7 @@ private:
   bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
   bool get_last_blocks(view::daemon_status_info& dsi);
   void update_wallets_info();
-
+  bool alias_rpc_details_to_alias_info(const currency::alias_rpc_details& ard, currency::alias_info& ai);
 
   //----- i_backend_wallet_callback ------
   virtual void on_new_block(uint64_t height, const currency::block& block);

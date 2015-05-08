@@ -45,6 +45,7 @@
     <script src="assets/js/angular/angular-bootstrap-select.js"></script>
     
     <script src="assets/js/angular/angular-route.min.js"></script>
+    <script src="assets/js/angular/slider.js"></script>
     <script src="assets/js/angular/angular-sanitize.min.js"></script>
     <script src="assets/js/angular/angular-input-match.min.js"></script>
     <script src="assets/js/angular/angular-ui-chart.js"></script>
@@ -69,13 +70,15 @@
         </div>
         <div class="col-xs-3 col-sm-2 guilder-bar-state">
             <a class="pull-right" href="#market" ng-hide="deamon_state.daemon_network_state == 1">
-                <span ng-show="deamon_state.daemon_network_state == 0" class="ifOnlineText offline" style="color:#b85c5c"><i class="fa fa-2x fa-times-circle-o"></i> Оффлайн</span>
-                
-                <!-- <span ng-show="deamon_state.daemon_network_state == 1" class="ifOnlineText loading" style="color:#ec971f">
-                    <i class="fa fa-2x fa-circle-o-notch fa-spin"></i> Загружается...
-                </span> -->
+                <span ng-show="deamon_state.daemon_network_state == 0" class="ifOnlineText offline" style="color:#b85c5c"><i class="fa fa-2x fa-times-circle-o"></i> Cоединяется</span>
                 
                 <span ng-show="deamon_state.daemon_network_state == 2" class="ifOnlineText online" style="color:#5cb85c"><i class="fa fa-2x fa-check-circle-o"></i> Онлайн</span>
+
+                <span ng-show="deamon_state.daemon_network_state == 3" class="ifOnlineText loading" style="color:#b85c5c"><i class="fa fa-2x fa-circle-o-notch fa-spin"></i> Загрузка ядра</span>
+
+                <span ng-show="deamon_state.daemon_network_state == 4" class="ifOnlineText offline" style="color:#b85c5c"><i class="fa fa-2x fa-times-circle-o"></i> Ошибка системы</span>
+
+                <span ng-show="deamon_state.daemon_network_state == 5" class="ifOnlineText loading" style="color:#b85c5c"><i class="fa fa-2x fa-circle-o-notch fa-spin"></i> Выгрузка ядра</span>
             </a>
             <progressbar 
                 ng-if="deamon_state.daemon_network_state == 1" 
@@ -97,12 +100,59 @@
 
             <div class="sidebar-bar sidebar-header"><a data-target=".menulabel" data-toggle="collapse" type="button" class="btn btn-lg btn-default" href="#" aria-expanded="true"><i class="fa fa-lg fa-bars"></i></a></div>
             <ul class="nav nav-sidebar">
-                <li><a href="#index"><i class="gu gu-3x gu-th"></i><span class="collapse in menulabel"> <em>Дашборд</em></span></a></li>
-                <li><a href="#safes"><i class="gu gu-3x gu-safe"></i><span class="collapse in menulabel"> <em>Сейфы</em></span></a></li>
-                <li><a href="#market"><i class="gu gu-3x gu-market"></i><span class="collapse in menulabel"> <em>Рынок</em></span></a></li>
-                <li><a href="#contacts"><i class="gu gu-3x gu-adressbook"></i><span class="collapse in menulabel"> <em>Контакты</em></span></a></li>
-                <li><a href="#history"><i class="gu gu-3x gu-money"></i><span class="collapse in menulabel"> <em>История платежей</em></span></a></li>
-                <li><a href="#deposits"  id="maininglink"><i class="gu gu-3x gu-increasing"></i><span class="collapse in menulabel"> <em>Добыча</em></span></a></li>
+                <li>
+                    <a href="#index">
+                        <i class="gu gu-3x gu-th"></i>
+                        <span class="collapse in menulabel"> 
+                            <em>Дашборд</em>
+                        </span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#safes">
+                        <i class="gu gu-3x gu-safe"></i>
+                        <span class="collapse in menulabel"> 
+                            <em>Сейфы</em>
+                        </span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#market">
+                        <i class="gu gu-3x gu-market"></i>
+                        <span class="collapse in menulabel"> 
+                            <em>Рынок</em>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="#contacts">
+                        <i class="gu gu-3x gu-adressbook"></i>
+                        <span class="collapse in menulabel"> 
+                            <em>Контакты</em>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="#history">
+                        <i class="gu gu-3x gu-money"></i>
+                        <span class="collapse in menulabel"> 
+                            <em>История платежей</em>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="#deposits"  id="maininglink">
+                        <i class="gu gu-3x gu-increasing"></i>
+                        <span class="collapse in menulabel"> 
+                            <em>Добыча</em>
+                        </span>
+                    </a>
+                </li>
             </ul>
 
             <ul class="nav nav-sidebar">
@@ -115,24 +165,20 @@
         </div>
         
         <div class="col-xs-9 col-sm-9 col-xs-offset-3 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-            <div>
-                <a ng-click="getAppData()">Get</a>
-                <a ng-click="storeAppData()">Store</a>
-            </div>
             <nav role="navigation" class="navbar btns">
                 <ul class="nav nav-pills nav-justified">
                     <li>
-                        <a href="#sendG" class="btn btn-default"> Отправить гульдены</a>
+                        <a ng-disabled="deamon_state.daemon_network_state != 2" href="#sendG" class="btn btn-default"> Отправить гульдены</a>
 
                     </li>
                     <li>
-                        <a href="#buyG" class="btn btn-default">Купить гульдены</a>
+                        <a ng-disabled="deamon_state.daemon_network_state != 2" href="#buyG" class="btn btn-default">Купить гульдены</a>
                     </li>
                     <li>
-                        <a class="btn btn-default" href="#sellG">Продать гульдены</a>
+                        <a ng-disabled="deamon_state.daemon_network_state != 2" class="btn btn-default" href="#sellG">Продать гульдены</a>
                     </li>
                     <li>
-                        <a data-toggle="dropdown" class="btn btn-default dropdown" aria-expanded="false">Купить/Продать товар
+                        <a ng-disabled="deamon_state.daemon_network_state != 2" data-toggle="dropdown" class="btn btn-default dropdown" aria-expanded="false">Купить/Продать товар
                             <span class="caret"></span>
                             <span class="sr-only">Toggle Dropdown</span>
                         </a>
@@ -205,6 +251,7 @@
 <script src="controllers/SafesController.js"></script>
 <script src="controllers/GuldenController.js"></script>
 <script src="controllers/MarketController.js"></script>
+<script src="controllers/SettingsController.js"></script>
 
 <script src="services/filters.js"></script>
 <script src="services/backend.js"></script>

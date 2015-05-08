@@ -454,17 +454,17 @@ void wallet2::refresh(size_t & blocks_fetched, bool& received_money)
       if(!added_blocks)
         break;
     }
-    catch (const std::exception&)
+    catch (const std::exception& e)
     {
       blocks_fetched += added_blocks;
       if(try_count < 3)
       {
-        LOG_PRINT_L1("Another try pull_blocks (try_count=" << try_count << ")...");
+        LOG_PRINT_L1("Another try pull_blocks (try_count=" << try_count << "), exception: " << e.what());
         ++try_count;
       }
       else
       {
-        LOG_ERROR("pull_blocks failed, try_count=" << try_count);
+        LOG_ERROR("pull_blocks failed, try_count=" << try_count << ", exception: " << e.what());
         throw;
       }
     }
@@ -1103,6 +1103,21 @@ void wallet2::push_offer(const currency::offer_details& od)
   attachments.push_back(od);
   destinations.push_back(tx_dest);
   transfer(destinations, 0, 0, DEFAULT_FEE, extra, attachments);
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx)
+{
+  currency::tx_destination_entry tx_dest;
+  tx_dest.addr = m_account.get_keys().m_account_address;
+  tx_dest.amount = DEFAULT_FEE;
+  std::vector<currency::tx_destination_entry> destinations;
+  std::vector<currency::extra_v> extra;
+  std::vector<currency::attachment_v> attachments;
+  currency::extra_alias_entry eae;
+  currency::make_tx_extra_alias_entry(eae.buff, ai, false);
+
+  destinations.push_back(tx_dest);
+  transfer(destinations, 0, 0, DEFAULT_FEE, extra, attachments, res_tx);
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::select_indices_for_transfer(std::list<size_t>& selected_indexes, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money)

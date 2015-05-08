@@ -1758,6 +1758,7 @@ bool blockchain_storage::put_alias_info(const alias_info& ai)
     CHECK_AND_ASSERT_MES(!alias_history.size(), false, "alias " << ai.m_alias << " already in use");
     alias_history.push_back(ai);
     m_addr_to_alias[alias_history.back().m_address] = ai.m_alias;
+    LOG_PRINT_MAGENTA("[ALIAS_REGISTERED]: " << ai.m_alias << ": " << get_account_address_as_str(ai.m_address), LOG_LEVEL_0);
   }else
   {
     //update procedure
@@ -1775,6 +1776,8 @@ bool blockchain_storage::put_alias_info(const alias_info& ai)
 
     alias_history.push_back(ai);
     m_addr_to_alias[alias_history.back().m_address] = ai.m_alias;
+    LOG_PRINT_MAGENTA("[ALIAS_UPDATED]: " << ai.m_alias << ": " << get_account_address_as_str(ai.m_address), LOG_LEVEL_0);
+
   }
   return true;
 }

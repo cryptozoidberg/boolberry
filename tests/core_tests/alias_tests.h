@@ -13,6 +13,10 @@ struct gen_alias_tests : public test_chain_unit_base
   {
       return true;
   }
+  bool check_tx_verification_context(const currency::tx_verification_context& tvc, bool tx_added, size_t event_idx, const currency::transaction& /*tx*/)
+  {
+    return true;
+  }
 
   bool generate(std::vector<test_event_entry>& events) const;
   bool check_first_alias_added(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
@@ -22,5 +26,8 @@ struct gen_alias_tests : public test_chain_unit_base
   bool check_alias_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
   bool check_alias_not_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
   bool check_alias_added_in_tx(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
-  
+  bool check_height_not_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
+  bool check_height_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events);
+private:
+  uint64_t h;
 };
