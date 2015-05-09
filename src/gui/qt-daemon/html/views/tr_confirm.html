@@ -1,0 +1,141 @@
+<div class="modal-content">
+    <div class="modal-header btn btn-block btn-info">
+        <button type="button" class="close" ng-click="close()"><span aria-hidden="true">&times;</span><span class="sr-only">Закрыть</span></button>
+        <h4 class="modal-title" id="confirm_operation_label">Подтвердить операцию</h4>
+    </div>
+    <div class="modal-body">
+        <form name="tx_confirm_form">
+            <div class="form-group clearfix confirm-modal_screen">
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <td class="text-right text-strong">Тип операции</td>
+                        <td>Отправка гульденов</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-strong">Получатель</td>
+                        <td><pre style="width: 400px; overflow: auto;">{{tr.to}}</pre></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-strong">Сумма</td>
+                        <td>{{tr.ammount}} G</td>
+                    </tr>
+                    <tr class="confirm-modal_sendG-password-field" ng-show="need_pass">
+                        <td colspan="2">
+                            Введите пароль к сейфу (требуется настройками):<br/><br/>
+                            <input type="password" ng-model="app_pass" class="form-control">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+             <div class="form-group clearfix">
+                <div class="col-xs-6 col-sm-6"  style="padding-left:0">
+                    <button class="btn btn-lg btn-block" ng-click="close()">Отменить</button>
+                </div>
+                <div class="col-xs-6 col-sm-6" style="padding-left:0">
+                    <button class="btn btn-lg btn-block btn-success" ng-click="confirm(app_pass)">Подтвердить</button>
+                </div>
+            </div>
+        </form>
+
+
+        <!-- <div class="form-group clearfix first confirm-modal_screen confirm-modal_buyG">
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <td class="text-right text-strong">Тип операции</td>
+                    <td>Покупка гульденов</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Валюта расчета</td>
+                    <td>Австралийский доллар (AUD)</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Сумма покупки</td>
+                    <td>1000 G</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Курс</td>
+                    <td>5 USD</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Стоимость покупки</td>
+                    <td>5000 USD</td>
+                </tr>
+            </table>
+        </div>
+        <div class="form-group clearfix first confirm-modal_screen confirm-modal_sellG">
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <td class="text-right text-strong">Тип операции</td>
+                    <td>Продажа гульденов</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Валюта расчета</td>
+                    <td>Австралийский доллар (AUD)</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Сумма продажи</td>
+                    <td>1000 G</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Курс</td>
+                    <td>5 USD</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Стоимость продажи</td>
+                    <td>5000 USD</td>
+                </tr>
+            </table>
+        </div>
+        <div class="form-group clearfix first confirm-modal_screen confirm-modal_buyProduct">
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <td class="text-right text-strong">Тип операции</td>
+                    <td>Покупка товара</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Цена</td>
+                    <td>1000 G</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Текст объявления</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Комментарий к заявке</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">География видимости</td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <div class="form-group clearfix first confirm-modal_screen confirm-modal_sellProduct">
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <td class="text-right text-strong">Тип операции</td>
+                    <td>Продажа товара</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Цена</td>
+                    <td>1000 G</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Текст объявления</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">Комментарий к заявке</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="text-right text-strong">География видимости</td>
+                    <td></td>
+                </tr>
+            </table>
+        </div> -->
+    
+        
+    </div>
+</div>

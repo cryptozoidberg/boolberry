@@ -37,6 +37,13 @@
                 return this.runCommand('get_all_offers', params, callback);
             },
 
+            resync_wallet : function(wallet_id) {
+                var params = {
+                    wallet_id: wallet_id
+                }
+                return this.runCommand('resync_wallet', params);
+            },
+
             haveSecureAppData: function() { // for safes
                 if(!this.shouldUseEmulator()){
                     var result = JSON.parse(Qt_parent['have_secure_app_data'](''));
@@ -68,13 +75,13 @@
                 if(!this.shouldUseEmulator()){
                     var data = Qt_parent['get_app_data']();
                     if(data){
-                        return JSON.parse(data);    
+                        return JSON.parse(data);
                     }else{
                         return false;
                     }
                     
                 }else{
-                    return {};
+                    return false;
                 }
             },
 

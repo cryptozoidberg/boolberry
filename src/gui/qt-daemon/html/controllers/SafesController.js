@@ -4,7 +4,11 @@
 
     module.controller('safeListCtrl',['backend','$scope','$rootScope',
         function(backend, $rootScope ,$scope){
-            
+            $scope.resynch = function(wallet_id){
+                console.log('RESYNCH WALLET ::' + wallet_id);
+                var result = backend.resync_wallet(wallet_id);
+                console.log(result);
+            }
         }
     ]);
 

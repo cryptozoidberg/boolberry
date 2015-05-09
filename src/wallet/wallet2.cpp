@@ -530,6 +530,11 @@ bool wallet2::clear()
 {
   m_blockchain.clear();
   m_transfers.clear();
+  m_key_images.clear();
+  m_unconfirmed_txs.clear();
+  m_payments.clear();
+  m_transfer_history.clear();
+
   currency::block b;
   currency::generate_genesis_block(b);
   m_blockchain.push_back(get_block_hash(b));
@@ -951,6 +956,18 @@ bool wallet2::try_mint_pos()
   }
   LOG_PRINT_L0("PoS mint iteration finished(" << rsp.status << ")");
 
+  return true;
+}
+//-------------------------------
+bool wallet2::reset_history()
+{
+  std::string pass = m_password;
+  std::string file_path = m_wallet_file;
+  account_base acc_tmp = m_account;
+  clear();
+  m_account = acc_tmp;
+  m_password = pass;
+  m_wallet_file = file_path;
   return true;
 }
 //-------------------------------

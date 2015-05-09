@@ -5,19 +5,23 @@
     
     module.controller('appPassOnTransferCtrl', ['$scope','backend', '$modalInstance','informer','$rootScope', '$timeout', 'tr',
         function($scope, backend, $modalInstance, informer, $rootScope, $timeout, tr) {
-            $scope.getAppData = function(appPass){
-                var appData = backend.getAppData({pass: appPass});
-
-                appData = JSON.parse(appData);
-                if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
-                    informer.error('Неверный пароль');
-                }else{
-                    backend.makeSend(tr);
-                    $modalInstance.close();
+            $scope.tr = tr;
+            $scope.need_pass = $rootScope.settings.security.is_pass_required_on_transfer;
+            $scope.confirm = function(appPass){
+                console.log(appPass);
+                console.log($scope.app_path);
+                if($scope.need_pass){
+                    var appData = backend.getSecureAppData({pass: appPass});
+                    appData = JSON.parse(appData);
+                    if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
+                        informer.error('Неверный пароль');
+                        return;
+                    }
                 }
+                backend.makeSend(tr);
+                $modalInstance.close();
             };
 
-            $scope.can_cancel = true;
             $scope.close = function(){
                 $modalInstance.close();
             }
@@ -43,23 +47,21 @@
             }
 
             $scope.send = function(tr){
-                if($rootScope.settings.security.is_pass_required_on_transfer){
-                    $modal.open({
-                        templateUrl: "views/app_pass.html",
-                        controller: 'appPassOnTransferCtrl',
-                        size: 'md',
-                        windowClass: 'modal fade in',
-                        backdrop: false,
-                        resolve: {
-                            tr: function(){
-                                return tr;
-                            }
+                
+                $modal.open({
+                    templateUrl: "views/tr_confirm.html",
+                    controller: 'appPassOnTransferCtrl',
+                    size: 'md',
+                    windowClass: 'modal fade in',
+                    backdrop: false,
+                    resolve: {
+                        tr: function(){
+                            return tr;
                         }
+                    }
 
-                    });
-                }else{
-                    backend.makeSend(tr);
-                }
+                });
+                
             };
 
             

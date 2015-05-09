@@ -10,15 +10,28 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <div class="btn-group pull-right">
-                                    <label class="btn btn-default" btn-radio="true" ng-model="settings.security.is_use_app_pass">
+                                    <label class="btn btn-default" btn-radio="true" ng-change="checkPass()" ng-model="settings.security.is_use_app_pass">
                                         <i class="fa fa-lg fa-check"></i>
                                     </label>
-                                    <label class="btn btn-default" btn-radio="false" ng-model="settings.security.is_use_app_pass">
+                                    <label class="btn btn-default" btn-radio="false" ng-change="checkPass()" ng-model="settings.security.is_use_app_pass">
                                         <i class="fa fa-lg fa-times"></i>
                                     </label>
                                 </div>
                                 <em>Использовать мастер-пароль для входа в приложение</em> 
                                 &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
+                            </li>
+
+                            <li class="list-group-item">
+
+                                <div class="btn-group pull-right">
+                                    <label class="btn btn-default" ng-disabled="!settings.security.is_use_app_pass" btn-radio="true" ng-model="settings.security.is_pass_required_on_transfer">
+                                        <i class="fa fa-lg fa-check"></i>
+                                    </label>
+                                    <label class="btn btn-default" ng-disabled="!settings.security.is_use_app_pass" ng-change="requestPass()"  btn-radio="false" ng-model="settings.security.is_pass_required_on_transfer">
+                                        <i class="fa fa-lg fa-times"></i>
+                                    </label>
+                                </div>
+                                Требовать ввод мастер-пароля при отправке платежа  &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
                             </li>
 
                             <li class="list-group-item">
@@ -105,18 +118,7 @@
                                 <em>Уровень микширования</em>
                                 &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip='Уровень микширования - это количество транзакций, с которыми происходит "смешивание" при отправке платежа. Чем выше уровень, тем медленнее происходит обработка транзакции, но отследить такой кому приндлежит платеж практичесеки невозможно'></i>
                             </li>
-                            <li class="list-group-item">
-
-                                <div class="btn-group pull-right">
-                                    <label class="btn btn-default" btn-radio="true" ng-model="settings.security.is_pass_required_on_transfer">
-                                        <i class="fa fa-lg fa-check"></i>
-                                    </label>
-                                    <label class="btn btn-default" btn-radio="false" ng-model="settings.security.is_pass_required_on_transfer">
-                                        <i class="fa fa-lg fa-times"></i>
-                                    </label>
-                                </div>
-                                Требовать ввод мастер-пароля при отправке платежа  &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
-                            </li>
+                            
                         </ul>
                     </div>
                 </div>

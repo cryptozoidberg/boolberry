@@ -182,10 +182,31 @@ resposne:
   "tx_blob_size": 2124 
 }
 
+[sync] resync_wallet()
 
+param: 
 
+{
+   "wallet_id": 0
+}
+//--------------------------
+[sync] get_all_aliases()
 
-
+response:
+{
+  "aliases": [
+    {
+      "alias": {
+        "alias": "some_alias_name",
+        "details": {
+          "address": "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R",
+          "tracking_key": "",
+          "comment": "best ever service bla bla bla"
+        }
+      }
+    }
+  ]
+}
 
 
 

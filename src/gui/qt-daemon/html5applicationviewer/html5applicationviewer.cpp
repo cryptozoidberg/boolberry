@@ -695,11 +695,15 @@ QString Html5ApplicationViewer::drop_secure_app_data()
     ar.error_code = API_RETURN_CODE_FALSE;
   return epee::serialization::store_t_to_json(ar).c_str();
 }
-QString Html5ApplicationViewer::get_all_aliases(const QString& param)
+QString Html5ApplicationViewer::get_all_aliases()
 {
-  view::alias_set a;
-  m_backend.get_aliases(a);
-  return epee::serialization::store_t_to_json(a).c_str();
+  return que_call2<view::api_void>("get_all_aliases", "{}", [this](const view::api_void& owd, view::api_response& ar){
+
+    ar.error_code = API_RETURN_CODE_OK;
+    view::alias_set a;
+    m_backend.get_aliases(a);
+    dispatch(ar, a);
+  });
 }
 QString Html5ApplicationViewer::validate_address(const QString& param)
 {
@@ -794,6 +798,16 @@ QString Html5ApplicationViewer::get_wallet_info(const QString& param)
 
     view::wallet_info wi = AUTO_VAL_INIT(wi);
     ar.error_code = m_backend.get_wallet_info(a.wallet_id, wi);
+    dispatch(ar, wi);
+  });
+}
+
+QString Html5ApplicationViewer::resync_wallet(const QString& param)
+{
+  return que_call2<view::wallet_id_obj>("get_wallet_info", param, [this](const view::wallet_id_obj& a, view::api_response& ar){
+
+    view::wallet_info wi = AUTO_VAL_INIT(wi);
+    ar.error_code = m_backend.resync_wallet(a.wallet_id);
     dispatch(ar, wi);
   });
 }

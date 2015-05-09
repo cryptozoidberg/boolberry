@@ -782,6 +782,19 @@ std::string daemon_backend::get_wallet_info(size_t wallet_id, view::wallet_info&
   return get_wallet_info(*w, wi);
 }
 
+std::string daemon_backend::resync_wallet(uint64_t wallet_id)
+{
+  CRITICAL_REGION_LOCAL(m_wallets_lock);
+  auto it = m_wallets.find(wallet_id);
+  if (it == m_wallets.end())
+    return API_RETURN_CODE_WALLET_WRONG_ID;
+
+  auto& w = it->second;
+  w->reset_history();  
+  m_last_wallet_synch_height = 0;
+  return API_RETURN_CODE_OK;
+}
+
 std::string daemon_backend::get_wallet_info(tools::wallet2& w, view::wallet_info& wi)
 {
   wi = view::wallet_info();

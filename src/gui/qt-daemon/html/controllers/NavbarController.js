@@ -2,60 +2,108 @@
     'use strict';
     var module = angular.module('app.navbar',[]);
 
-    module.controller('appPassCtrl', ['$scope','backend', '$modalInstance','informer','$rootScope', '$timeout',
-        function($scope, backend, $modalInstance, informer, $rootScope, $timeout) {
-            $scope.close = function(){
-                $modalInstance.close(); // not use app pass
-            }
+    module.factory('PassDialogs',['$modal',
+        function($modal){
+            
+            this.generateMPDialog = function(){
+                $modal.open({
+                    templateUrl: "views/generate_pass.html",
+                    controller: 'appPassCtrl',
+                    size: 'md',
+                    windowClass: 'modal fade in',
+                    backdrop: false,
+                    resolve: {
+                        canReset : function(){
+                            return false;
+                        },
+                        onsuccess : function(){
+                            return false;
+                        }
+                    }
+                });
+            };
 
-            $scope.has_pass = backend.haveSecureAppData();
+            this.requestMPDialog = function(canReset, onsuccess){
+                if(angular.isUndefined(canReset)){
+                    canReset = true;
+                }
+                $modal.open({
+                    templateUrl: "views/request_pass.html",
+                    controller: 'appPassCtrl',
+                    size: 'md',
+                    windowClass: 'modal fade in',
+                    backdrop: false,
+                    resolve: {
+                        canReset : function(){
+                            return canReset;
+                        },
+                        onsuccess : function(){
+                            return onsuccess;
+                        }
+                    } 
+                });
+            };
 
-            $scope.pass_reset = false;
+            return this;
+        }
+    ]);
+
+
+    module.controller('appPassCtrl', ['$scope','backend', '$modalInstance','informer','$rootScope', '$timeout', 'PassDialogs', 'canReset', 'onsuccess',
+        function($scope, backend, $modalInstance, informer, $rootScope, $timeout, PassDialogs, canReset, onsuccess) {
+            
+            $scope.cancelRequest = function(){
+                $modalInstance.close(); 
+                $rootScope.settings.security.is_use_app_pass = true;
+                $rootScope.settings.security.is_pass_required_on_transfer = true;
+            };
+
+            $scope.cancelGenerate = function(){
+                $modalInstance.close(); 
+                $rootScope.settings.security.is_use_app_pass = false;
+            };
+
+            $scope.canReset = canReset;
+
+            // $scope.has_pass = backend.haveSecureAppData();
+
+            // $scope.pass_reset = false;
 
             $scope.getAppData = function(appPass){
                 console.log('getAppData');
-                if($scope.has_pass){
                     var appData = backend.getSecureAppData({pass: appPass});
                     appData = JSON.parse(appData);
                     if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
                         informer.error('Неверный пароль');
                     }else{
+                        
                         $rootScope.appPass = appPass;
-                        $scope.close();
-                        console.log(appData);
-                        // if(angular.isDefined(appData.safes)){
-                            angular.forEach(appData,function(item){
-                                backend.openWallet(item.path, item.pass,function(data){
-                                    
-                                    var wallet_id = data.wallet_id;
-                                    var new_safe = {
-                                        wallet_id : wallet_id,
-                                        name : item.name,
-                                        pass : item.pass
-                                    };
-                                    $timeout(function(){
-                                        $rootScope.safes.push(new_safe);    
-                                    });
+                        $modalInstance.close(); 
 
-                                });
-                            });
-                        // }
+                        if(angular.isFunction(onsuccess)){
+                            onsuccess(appData);
+                        }
+                            
                     }
-                }else{
-                    $rootScope.appPass = appPass;
-                    $scope.close();
-                }
             };
 
-            $scope.reset = function(appPass){
+            $scope.reset = function(){
+                $modalInstance.close(); 
+                PassDialogs.generateMPDialog();
+            }
+
+            $scope.setPass = function(appPass){
                 $rootScope.appPass = appPass;
-                $scope.close();
+                $modalInstance.close(); 
             }
         }
     ]);
 
-    module.controller('NavbarTopController', ['backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer',
-        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer) {
+    
+
+    module.controller('NavbarTopController', [
+        'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs',
+        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs) {
         
         $rootScope.appPass = false;
 
@@ -71,7 +119,7 @@
                 is_pass_required_on_transfer: false,
                 is_backup_reminder: false,
                 backup_reminder_interval: 0,
-                is_use_app_pass: false,
+                is_use_app_pass: true,
                 password_required_interval: 5    
             },
             mining: {
@@ -115,20 +163,35 @@
             console.log('SHOULD USE APP PASS ::');
             console.log($rootScope.settings.security.is_use_app_pass);
             if($rootScope.settings.security.is_use_app_pass){ // if setings contain "require password"
-                $modal.open({
-                    templateUrl: "views/app_pass.html",
-                    controller: 'appPassCtrl',
-                    size: 'md',
-                    windowClass: 'modal fade in',
-                    backdrop: false
-                });    
+                if(backend.haveSecureAppData()){
+                    PassDialogs.requestMPDialog(true, function(appData){
+                        angular.forEach(appData,function(item){
+                            backend.openWallet(item.path, item.pass,function(data){
+                                
+                                var wallet_id = data.wallet_id;
+                                var new_safe = {
+                                    wallet_id : wallet_id,
+                                    name : item.name,
+                                    pass : item.pass
+                                };
+                                $timeout(function(){
+                                    $rootScope.safes.push(new_safe);    
+                                });
+
+                            });
+                        });
+                    });
+                }else{
+                    PassDialogs.generateMPDialog();
+                }
             }
         };
+
+       
 
         init();
 
         var loadingMessage = 'Cеть загружается, или оффлайн. Пожалуйста, подождите...';
-        //var li = loader.open(loadingMessage);
 
         $scope.progress_value = function(){
             var max = $scope.deamon_state.max_net_seen_height - $scope.deamon_state.synchronization_start_height;
