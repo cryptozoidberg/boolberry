@@ -559,7 +559,7 @@ inline bool replay_events_through_core(currency::core& cr, const std::vector<tes
 }
 //--------------------------------------------------------------------------
 template<class t_test_class>
-inline bool do_replay_events(std::vector<test_event_entry>& events)
+inline bool do_replay_events(std::vector<test_event_entry>& events, t_test_class& validator)
 {
   boost::program_options::options_description desc("Allowed options");
   currency::core::init_options(desc);
@@ -581,7 +581,7 @@ inline bool do_replay_events(std::vector<test_event_entry>& events)
     std::cout << concolor::magenta << "Failed to init core" << concolor::normal << std::endl;
     return false;
   }
-  t_test_class validator;
+
   return replay_events_through_core<t_test_class>(c, events, validator);
 }
 //--------------------------------------------------------------------------
@@ -594,7 +594,8 @@ inline bool do_replay_file(const std::string& filename)
     std::cout << concolor::magenta << "Failed to deserialize data from file: " << filename << concolor::normal << std::endl;
     return false;
   }
-  return do_replay_events<t_test_class>(events);
+  t_test_class g;
+  return do_replay_events(events, g);
 }
 
 
@@ -902,10 +903,10 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
   {                                                                                                        \
     std::vector<test_event_entry> events;                                                                  \
     ++tests_count;                                                                                         \
-    bool generated = false;                                                                                \
+    bool generated = false;  \
+    genclass g; \
     try                                                                                                    \
     {                                                                                                      \
-      genclass g;                                                                                          \
       generated = g.generate(events);;                                                                     \
     }                                                                                                      \
     catch (const std::exception& ex)                                                                       \
@@ -916,7 +917,7 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
     {                                                                                                      \
       LOG_PRINT(#genclass << " generation failed: generic exception", 0);                                  \
     }                                                                                                      \
-    if (generated && do_replay_events< genclass >(events))                                                 \
+    if (generated && do_replay_events(events, g))                                                 \
     {                                                                                                      \
       std::cout << concolor::green << "#TEST# Succeeded " << #genclass << concolor::normal << '\n';        \
     }                                                                                                      \

@@ -142,3 +142,20 @@ struct gen_broken_attachments : get_tx_validation_base
 {
   bool generate(std::vector<test_event_entry>& events) const;
 };
+
+struct gen_crypted_attachments : get_tx_validation_base
+{
+  gen_crypted_attachments();
+  
+  bool generate(std::vector<test_event_entry>& events) const;
+  bool check_crypted_tx(currency::core& /*c*/, size_t ev_index, const std::vector<test_event_entry>& /*events*/);
+  bool set_blockchain_height(currency::core& /*c*/, size_t ev_index, const std::vector<test_event_entry>& /*events*/);
+  bool set_crypted_tx_height(currency::core& /*c*/, size_t ev_index, const std::vector<test_event_entry>& /*events*/);
+  
+
+  mutable size_t crypted_tx_height;
+  mutable uint64_t bc_height_before;
+  mutable currency::tx_payer pr;
+  mutable currency::tx_comment cm;
+  mutable currency::tx_message ms;
+};

@@ -803,3 +803,79 @@ bool gen_broken_attachments::generate(std::vector<test_event_entry>& events) con
 
   return true;
 }
+
+gen_crypted_attachments::gen_crypted_attachments()
+{
+  REGISTER_CALLBACK("check_crypted_tx", gen_crypted_attachments::check_crypted_tx);
+  REGISTER_CALLBACK("set_blockchain_height", gen_crypted_attachments::set_blockchain_height);
+  REGISTER_CALLBACK("set_crypted_tx_height", gen_crypted_attachments::set_crypted_tx_height);
+  
+}
+
+
+bool gen_crypted_attachments::generate(std::vector<test_event_entry>& events) const
+{
+  uint64_t ts_start = 1338224400;
+  GENERATE_ACCOUNT(miner_account);
+  //
+  MAKE_GENESIS_BLOCK(events, blk_0, miner_account, ts_start);
+  MAKE_ACCOUNT(events, bob_account);
+
+  MAKE_NEXT_BLOCK(events, blk_1, blk_0, miner_account);
+  MAKE_NEXT_BLOCK(events, blk_4, blk_1, miner_account);
+  REWIND_BLOCKS(events, blk_5, blk_4, miner_account);
+  DO_CALLBACK(events, "set_blockchain_height");
+
+  pr.acc_addr = miner_account.get_keys().m_account_address;
+  cm.comment = "Comandante Che Guevara";
+  ms.msg = "Hasta Siempre, Comandante";
+
+  std::vector<currency::attachment_v> attachments;
+  attachments.push_back(pr);
+  attachments.push_back(cm);
+  attachments.push_back(ms);
+
+  MAKE_TX_LIST_START(events, txs_list, miner_account, bob_account, MK_COINS(1), blk_5);
+  MAKE_TX_LIST_ATTACH(events, txs_list, miner_account, bob_account, MK_COINS(1), blk_5, attachments);
+  DO_CALLBACK(events, "set_crypted_tx_height");
+  MAKE_NEXT_BLOCK_TX_LIST(events, blk_6, blk_5, miner_account, txs_list);
+  DO_CALLBACK(events, "check_crypted_tx");
+  return true;
+}
+
+bool gen_crypted_attachments::set_blockchain_height(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& /*events*/)
+{
+  bc_height_before = c.get_current_blockchain_height();
+  return true;
+}
+bool gen_crypted_attachments::set_crypted_tx_height(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+{
+  crypted_tx_height = ev_index - 1;
+  return true;
+}
+
+bool gen_crypted_attachments::check_crypted_tx(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
+{
+  const currency::transaction& tx = boost::get<currency::transaction>(events[crypted_tx_height]);
+  const currency::account_base& bob_acc = boost::get<currency::account_base>(events[1]);
+
+  CHECK_EQ(c.get_current_blockchain_height(), bc_height_before+1);
+
+  currency::transaction* ptx_from_bc = c.get_blockchain_storage().get_tx(currency::get_transaction_hash(tx));
+  CHECK_TEST_CONDITION(ptx_from_bc != nullptr);
+
+  std::vector<attachment_v> at;
+  bool r = currency::decrypt_attachments(*ptx_from_bc, bob_acc.get_keys(), at);
+  CHECK_EQ(r, true);
+
+  if (pr.acc_addr != boost::get<currency::tx_payer>(at[0]).acc_addr)
+    return false;
+
+  if (cm.comment != boost::get<currency::tx_comment>(at[1]).comment)
+    return false;
+
+  if (ms.msg != boost::get<currency::tx_message>(at[2]).msg)
+    return false;
+
+  return true;
+}

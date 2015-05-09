@@ -573,6 +573,11 @@ namespace currency
       crypto::chacha_crypt(pr.acc_addr, m_key);
       m_was_crypted_entries = true;
     }
+    void operator()(tx_message& m)
+    {
+      crypto::chacha_crypt(m.msg, m_key);
+      m_was_crypted_entries = true;
+    }
     template<typename attachment_t>
     void operator()(attachment_t& comment)
     {}
@@ -596,8 +601,16 @@ namespace currency
     void operator()(const tx_comment& comment)
     {
       tx_comment local_comment = comment;
-      crypto::chacha_crypt(comment.comment, rkey);
-      rdecrypted_att.push_back(comment);
+      crypto::chacha_crypt(local_comment.comment, rkey);
+      rdecrypted_att.push_back(local_comment);
+      rwas_crypted_entries = true;
+    }
+
+    void operator()(const tx_message& m)
+    {
+      tx_message local_msg = m;
+      crypto::chacha_crypt(local_msg.msg, rkey);
+      rdecrypted_att.push_back(local_msg);
       rwas_crypted_entries = true;
     }
     void operator()(const tx_payer& pr)
@@ -634,17 +647,16 @@ namespace currency
     bool was_crypted_entries = false;
     bool check_summ_validated = false;
 
-    decrypt_attach_visitor v(check_summ_validated, was_crypted_entries, derivation);
+    decrypt_attach_visitor v(check_summ_validated, was_crypted_entries, derivation, decrypted_att);
     for (auto& a : tx.attachment)
       boost::apply_visitor(v, a);
 
-    if (was_crypted_entries)
+    if (was_crypted_entries && !check_summ_validated)
     {
-      crypto::hash hash_for_check_sum = crypto::cn_fast_hash(&derivation, sizeof(derivation));
-      tx_crypto_checksum chs;
-      chs.summ = *(uint32_t*)&hash_for_check_sum;
-      tx.attachment.push_back(chs);
+      LOG_PRINT_RED_L0("Failed to decrypt attachments");
+      return false;
     }
+    return true;
   }
   //---------------------------------------------------------------
   void encrypt_attachments(transaction& tx, const account_public_address& destination_add, const keypair& tx_random_key)
@@ -685,8 +697,29 @@ namespace currency
     keypair txkey = keypair::generate();
     add_tx_pub_key_to_extra(tx, txkey.pub);
     
+    //include offers if need
+    tx.attachment = attachments;
     //encrypt attachments
+    //find target account. for no we use just firs target account that is not sender, 
+    //in case if there is no real targets we use sender credentials to encrypt attachments
+    account_public_address crypt_destination_addr = AUTO_VAL_INIT(crypt_destination_addr);
+    auto& it = destinations.begin();
+    for (; it != destinations.end(); ++it)
+    {
+      if (sender_account_keys.m_account_address != it->addr)
+        break;
+    }
+    if (it == destinations.end())
+      crypt_destination_addr = sender_account_keys.m_account_address;
+    else
+      crypt_destination_addr = it->addr;
 
+    encrypt_attachments(tx, crypt_destination_addr, txkey);
+    if (tx.attachment.size())
+      add_attachments_info_to_extra(tx);
+
+
+    // prepare inputs
     struct input_generation_context_data
     {
       keypair in_ephemeral;
@@ -757,11 +790,6 @@ namespace currency
       return false;
     }
 
-    //include offers if need
-    tx.attachment = attachments;
-    
-    if (tx.attachment.size())
-      add_attachments_info_to_extra(tx);
 
     //generate ring signatures
     crypto::hash tx_prefix_hash;

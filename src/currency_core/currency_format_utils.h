@@ -123,6 +123,8 @@ namespace currency
   std::string short_hash_str(const crypto::hash& h);
   bool is_mixattr_applicable_for_fake_outs_counter(uint8_t mix_attr, uint64_t fake_attr_count);
   bool is_tx_spendtime_unlocked(uint64_t unlock_time, uint64_t current_blockchain_height);
+  bool decrypt_attachments(const transaction& tx, const account_keys& acc_keys, std::vector<attachment_v>& decrypted_att);
+  void encrypt_attachments(transaction& tx, const account_public_address& destination_add, const keypair& tx_random_key);
 
   crypto::hash get_transaction_hash(const transaction& t);
   bool get_transaction_hash(const transaction& t, crypto::hash& res);

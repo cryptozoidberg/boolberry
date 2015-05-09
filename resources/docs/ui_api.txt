@@ -190,7 +190,7 @@ param:
    "wallet_id": 0
 }
 //--------------------------
-[sync] get_all_aliases()
+[async] get_all_aliases()
 
 response:
 {

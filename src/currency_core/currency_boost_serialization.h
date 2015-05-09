@@ -123,6 +123,11 @@ namespace boost
   {
     a & x.summ;
   }
+  template <class Archive>
+  inline void serialize(Archive &a, currency::tx_message &x, const boost::serialization::version_type ver)
+  {
+    a & x.msg;
+  }
 
   template <class Archive>
   inline void serialize(Archive &a, currency::extra_attachment_info &x, const boost::serialization::version_type ver)
