@@ -5,6 +5,7 @@
         'ui.chart',
         'angular-bootstrap-select',
         'ui.bootstrap-slider',
+        "angucomplete-alt",
 
         'ngRoute', 
         'ngSanitize',

@@ -34,13 +34,25 @@
                     <div class="form-group has-success has-feedback">
                         <label class="control-label col-xs-4 col-sm-4">Получатель</label>
                         <div class="col-xs-6 col-sm-6">
-                            <input 
+                            <!-- <input 
                                 type="text" 
                                 class="form-control" 
                                 ng-model="transaction.to" 
                                 placeholder="счет или алиас"
                                 ng-change="validate_address()"
-                            >
+                            > -->
+
+                            <angucomplete-alt 
+                                placeholder="счет или алиас"
+                                pause="100"
+                                selected-object="selectAlias"
+                                local-data="aliases"
+                                search-fields="name"
+                                title-field="name"
+                                minlength="3"
+                                input-class="form-control"
+                            />
+
                             <span class="form-control-feedback"  style="padding: 0">
                                 <i 
                                     class="fa fa-lg " 

@@ -48,10 +48,7 @@
                 });
             };
 
-            $scope.getAllAliases = function(){
-                var result = backend.getAllAliases();
-                console.log(result);
-            };
+            
         }
     ]);
 

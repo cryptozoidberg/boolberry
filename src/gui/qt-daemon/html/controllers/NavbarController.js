@@ -2,8 +2,8 @@
     'use strict';
     var module = angular.module('app.navbar',[]);
 
-    module.factory('PassDialogs',['$modal',
-        function($modal){
+    module.factory('PassDialogs',['$modal','$rootScope','backend',
+        function($modal, $rootScope, backend){
             
             this.generateMPDialog = function(){
                 $modal.open({
@@ -44,6 +44,24 @@
                 });
             };
 
+            this.storeSecureAppData = function(){
+                 console.log('store secure');
+                 var safePaths = [];
+                 angular.forEach($rootScope.safes,function(item){
+                    var safe = {
+                        pass: item.pass,
+                        path: item.path,
+                        name: item.name
+                    };
+                    safePaths.push(safe);
+                 });
+
+                 console.log('Secure Data before save :: ');
+                 console.log(safePaths);
+                 var result = backend.storeSecureAppData(safePaths, $rootScope.appPass);
+                 console.log(result);
+            };
+
             return this;
         }
     ]);
@@ -70,7 +88,8 @@
             // $scope.pass_reset = false;
 
             $scope.getAppData = function(appPass){
-                console.log('getAppData');
+                console.log('getAppData with pass');
+                console.log(appPass);
                 var appData = backend.getSecureAppData({pass: appPass});
                 appData = JSON.parse(appData);
                 if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
@@ -94,6 +113,7 @@
 
             $scope.setPass = function(appPass){
                 $rootScope.appPass = appPass;
+                PassDialogs.storeSecureAppData();
                 $modalInstance.close(); 
             }
         }
@@ -102,8 +122,8 @@
     
 
     module.controller('NavbarTopController', [
-        'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs',
-        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs) {
+        'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs','$interval',
+        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs, $interval) {
         
         $rootScope.appPass = false;
 
@@ -111,17 +131,16 @@
         	daemon_network_state: 0
         };
 
-        $rootScope.aliases = [];
+        $rootScope.aliases = [
+            // {name: '@vasya', address: 'sdfhkgasdf$34345asdf'},
+            // {name: '@vasya1', address: 'sdfhkgas234345DFGddfasdf'},
+            // {name: '@vasya2', address: 'sdfhkgasd54DFGsfasdf'},
+            // {name: '@vasya3', address: 'sdfh234dfgGDkgasdfasdf'},
+            // {name: '@vasya4', address: 'sdfhkgSDFasdfasdf'}
+        ];
 
-        $timeout(function(){
-            backend.getAllAliases(function(data){
-                console.log('ALIASES :: ');
-                console.log(data);
-                // angular.forEach(aliases.aliases,function(alias){
-                //     $rootScope.aliases.push({alias: alias.alias, address: alias.details.address});
-                // });
-            });
-        },5000);
+
+
         
         
         
@@ -223,23 +242,23 @@
              backend.storeAppData($rootScope.settings);
         };
 
-        $scope.storeSecureAppData = function(){
-             console.log('store secure');
-             var safePaths = [];
-             angular.forEach($rootScope.safes,function(item){
-                var safe = {
-                    pass: item.pass,
-                    path: item.path,
-                    name: item.name
-                };
-                safePaths.push(safe);
-             });
+        // $scope.storeSecureAppData = function(){
+        //      console.log('store secure');
+        //      var safePaths = [];
+        //      angular.forEach($rootScope.safes,function(item){
+        //         var safe = {
+        //             pass: item.pass,
+        //             path: item.path,
+        //             name: item.name
+        //         };
+        //         safePaths.push(safe);
+        //      });
 
-             console.log('Secure Data before save :: ');
-             console.log(safePaths);
-             var result = backend.storeSecureAppData(safePaths, $rootScope.appPass);
-             console.log(result);
-        };
+        //      console.log('Secure Data before save :: ');
+        //      console.log(safePaths);
+        //      var result = backend.storeSecureAppData(safePaths, $rootScope.appPass);
+        //      console.log(result);
+        // };
 
         $rootScope.closeWallet = function(wallet_id){
             backend.closeWallet(wallet_id, function(data){
@@ -262,11 +281,33 @@
 
         backend.subscribe('update_daemon_state', function(data){// move to run
             if(data.daemon_network_state == 2){
-                loaded = true;
+                
                 // if(li && angular.isDefined(li)){
                 //     li.close();
                 //     li = null;
                 // }
+                var getAliases = function(){
+                    backend.getAllAliases(function(data){
+                        console.log('ALIASES :: ');
+                        console.log(data);
+                        if(angular.isDefined(data.aliases) && data.aliases.length){
+                            $rootScope.aliases = [];
+                            angular.forEach(data.aliases,function(alias){
+                                $rootScope.aliases.push({alias: alias.alias, name: '@'+alias.alias, address: alias.address});
+                            });    
+                        }
+                    });
+                };
+
+
+                if(!loaded){
+                    loaded = true;
+                    getAliases();
+                    $interval(function(){
+                        getAliases();
+                    },60000); // one minute
+                }
+                
             }else if(data.daemon_network_state == 4){
                 informer.error('Ошибка системы. Для устранения проблемы свяжитесь с разработчиками.');
             }else{
@@ -317,7 +358,7 @@
             console.log($rootScope.appPass);
             if($rootScope.appPass){
                 // secure save data
-                $scope.storeSecureAppData();
+                PassDialogs.storeSecureAppData();
             }
             $scope.storeAppData();
             backend.quitRequest();
