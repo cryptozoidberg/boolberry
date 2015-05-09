@@ -72,7 +72,7 @@
                 }else{
                     $scope.transaction.is_valid_address = false;
                 }
-            }
+            };
 
             $scope.disabled = function(date, mode) {
                 return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );

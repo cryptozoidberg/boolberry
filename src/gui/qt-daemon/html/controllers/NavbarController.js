@@ -71,20 +71,20 @@
 
             $scope.getAppData = function(appPass){
                 console.log('getAppData');
-                    var appData = backend.getSecureAppData({pass: appPass});
-                    appData = JSON.parse(appData);
-                    if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
-                        informer.error('Неверный пароль');
-                    }else{
-                        
-                        $rootScope.appPass = appPass;
-                        $modalInstance.close(); 
+                var appData = backend.getSecureAppData({pass: appPass});
+                appData = JSON.parse(appData);
+                if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
+                    informer.error('Неверный пароль');
+                }else{
+                    
+                    $rootScope.appPass = appPass;
+                    $modalInstance.close(); 
 
-                        if(angular.isFunction(onsuccess)){
-                            onsuccess(appData);
-                        }
-                            
+                    if(angular.isFunction(onsuccess)){
+                        onsuccess(appData);
                     }
+                        
+                }
             };
 
             $scope.reset = function(){
@@ -110,6 +110,22 @@
         $rootScope.deamon_state = {
         	daemon_network_state: 0
         };
+
+        $rootScope.aliases = [];
+
+        $timeout(function(){
+            backend.getAllAliases(function(data){
+                console.log('ALIASES :: ');
+                console.log(data);
+                // angular.forEach(aliases.aliases,function(alias){
+                //     $rootScope.aliases.push({alias: alias.alias, address: alias.details.address});
+                // });
+            });
+        },5000);
+        
+        
+        
+        console.log($rootScope.aliases);
 
         $rootScope.settings = {
             security: {

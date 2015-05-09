@@ -70,7 +70,9 @@
                 return this.runCommand('request_alias_registration', params, callback);
             },
 
-
+            getAllAliases: function(callback){
+                return this.runCommand('get_all_aliases', {}, callback); 
+            },
 
             getSecureAppData: function(pass) {
                 if(!this.shouldUseEmulator()){
