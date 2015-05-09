@@ -701,7 +701,10 @@ QString Html5ApplicationViewer::get_all_aliases()
 
     ar.error_code = API_RETURN_CODE_OK;
     view::alias_set a;
-    m_backend.get_aliases(a);
+    if (API_RETURN_CODE_OK != m_backend.get_aliases(a))
+    {
+      ar.error_code = API_RETURN_CODE_CORE_BUSY;
+    }
     dispatch(ar, a);
   });
 }

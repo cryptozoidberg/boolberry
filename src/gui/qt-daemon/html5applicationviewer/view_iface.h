@@ -386,7 +386,7 @@ public:
 #define API_RETURN_CODE_FILE_RESTORED                           "FILE_RESTORED"
 #define API_RETURN_CODE_TRUE                                    "TRUE"
 #define API_RETURN_CODE_FALSE                                   "FALSE"
-
+#define API_RETURN_CODE_CORE_BUSY                               "CORE_BUSY"
 
 
 
