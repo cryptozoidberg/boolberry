@@ -1,0 +1,50 @@
+
+<div class="modal-header btn btn-block btn-primary">
+    <button type="button" class="close" ><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+    <h4 class="modal-title" id="aliasLabel">Создание нового алиаса для счета сейфа</h4>
+</div>
+<div class="modal-body">
+
+    <form name="create_alias_form">
+
+        <div class="form-group has-success has-feedback">
+            <label class="requred">Уникальное имя</label>
+            <div style="color: rgb(115, 115, 115);" class="help-block">
+                Алиас может состоять только из латинской букв, цифр, начинается всегда с символа "@".
+            </div>
+            <input type="text" class="form-control input-lg" placeholder="@alias" ng-model="alias.name">
+            <span style="top:auto; bottom:25px" class="fa fa-lg fa-check form-control-feedback" aria-hidden="true"></span>
+            <span id="inputSuccess2Status" class="sr-only">(success)</span>
+            <div class="help-block">
+                <em>это имя свободно</em>
+            </div>
+        </div>
+
+        <div class="form-group clearfix">
+            <label class="requred col-xs-4 col-sm-4" style="padding-left:0; padding-top:5px">Цена создания алиса</label>
+
+            <div class="col-xs-4 col-sm-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-model="alias.fee">
+                    <span class="input-group-addon">G</span>
+                </div>
+            </div>
+
+        </div>
+        <div class="form-group">
+            <div style="margin-top:0" class="help-block">
+                Каждое создание и передача алиаса &ndash; платная услуга, стоимость и создания и передачи одинаковая
+            </div>
+        </div>
+        <div class="form-group clearfix">
+            <div class="col-xs-6 col-sm-6" style="padding-left:0">
+                <button class="btn btn-lg btn-block" type="button" ng-click="close()">Отменить</button>
+            </div>
+            <div class="col-xs-6 col-sm-6" style="padding-right:0">
+                <button class="btn btn-lg btn-block btn-primary" type="button" ng-click="register(alias)">Создать</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+        <
