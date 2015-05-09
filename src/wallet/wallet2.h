@@ -88,6 +88,7 @@ namespace tools
       size_t m_internal_output_index;
       uint64_t m_global_output_index;
       bool m_spent;
+      std::vector<attachment_v> decrypted_att;
       crypto::key_image m_key_image; //TODO: key_image stored twice :(
 
       uint64_t amount() const { return m_tx.vout[m_internal_output_index].amount; }
@@ -271,6 +272,7 @@ namespace boost
       a & x.m_block_timestamp;
       a & x.m_global_output_index;
       a & x.m_internal_output_index;
+      a & x.decrypted_att;
       a & x.m_tx;
       a & x.m_spent;
       a & x.m_key_image;

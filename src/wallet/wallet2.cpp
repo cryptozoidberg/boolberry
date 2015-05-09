@@ -101,6 +101,9 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       td.m_global_output_index = res.o_indexes[o];
       td.m_tx = tx;
       td.m_spent = false;
+      if (!currency::decrypt_attachments(td.m_tx, m_account.get_keys(), td.decrypted_att))
+        td.decrypted_att.clear;
+      
       currency::keypair in_ephemeral;
       currency::generate_key_image_helper(m_account.get_keys(), tx_pub_key, o, in_ephemeral, td.m_key_image);
       CHECK_AND_THROW_WALLET_EX(in_ephemeral.pub != boost::get<currency::txout_to_key>(tx.vout[o].target).key,
