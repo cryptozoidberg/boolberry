@@ -583,22 +583,31 @@ namespace currency
     bool& rwas_crypted_entries;
     bool& rcheck_summ_validated;
     const crypto::key_derivation& rkey;
-    decrypt_attach_visitor(bool& check_summ_validated, bool& was_crypted_entries, const crypto::key_derivation& key) :
+    std::vector<attachment_v>& rdecrypted_att;
+    decrypt_attach_visitor(bool& check_summ_validated, 
+                           bool& was_crypted_entries, 
+                           const crypto::key_derivation& key, 
+                           std::vector<attachment_v>& decrypted_att) :
       rwas_crypted_entries(was_crypted_entries),
       rkey(key),
-      rcheck_summ_validated(check_summ_validated)
+      rcheck_summ_validated(check_summ_validated), 
+      rdecrypted_att(decrypted_att)
     {}
-    void operator()(tx_comment& comment)
+    void operator()(const tx_comment& comment)
     {
+      tx_comment local_comment = comment;
       crypto::chacha_crypt(comment.comment, rkey);
+      rdecrypted_att.push_back(comment);
       rwas_crypted_entries = true;
     }
-    void operator()(tx_payer& pr)
+    void operator()(const tx_payer& pr)
     {
-      crypto::chacha_crypt(pr.acc_addr, rkey);
+      tx_payer payer_local = pr;
+      crypto::chacha_crypt(payer_local.acc_addr, rkey);
+      rdecrypted_att.push_back(payer_local);
       rwas_crypted_entries = true;
     }
-    void operator()(tx_crypto_checksum& chs)
+    void operator()(const tx_crypto_checksum& chs)
     {
       crypto::hash hash_for_check_sum = crypto::cn_fast_hash(&rkey, sizeof(rkey));
       uint32_t chsumm =  *(uint32_t*)&hash_for_check_sum;
@@ -612,7 +621,7 @@ namespace currency
       }
     }
     template<typename attachment_t>
-    void operator()(attachment_t& comment)
+    void operator()(const attachment_t& comment)
     {}
   };
   //---------------------------------------------------------------

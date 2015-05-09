@@ -227,7 +227,16 @@ namespace currency
     END_SERIALIZE()
   };
 
-  typedef boost::variant<offer_details, tx_comment, tx_payer, tx_crypto_checksum, std::string> attachment_v;
+  struct tx_message
+  {
+    std::string msg;
+
+    BEGIN_SERIALIZE()
+      FIELD(msg)
+      END_SERIALIZE()
+  };
+
+  typedef boost::variant<offer_details, tx_comment, tx_payer, tx_crypto_checksum, tx_message, std::string> attachment_v;
 
   /************************************************************************/
   /* extra structures                                                     */
@@ -483,6 +492,8 @@ VARIANT_TAG(binary_archive, currency::tx_comment, 0x1);
 VARIANT_TAG(binary_archive, currency::tx_payer, 0x2);
 VARIANT_TAG(binary_archive, std::string, 0x3);
 VARIANT_TAG(binary_archive, currency::tx_crypto_checksum, 0x4);
+VARIANT_TAG(binary_archive, currency::tx_message, 0x5);
+
 
 
 
@@ -509,6 +520,8 @@ VARIANT_TAG(json_archive, currency::tx_payer, "payer");
 VARIANT_TAG(json_archive, std::string, "string");
 VARIANT_TAG(json_archive, crypto::public_key, "pub_key");
 VARIANT_TAG(json_archive, currency::tx_crypto_checksum, "check_summ");
+VARIANT_TAG(json_archive, currency::tx_message, "message");
+
 
 
 
