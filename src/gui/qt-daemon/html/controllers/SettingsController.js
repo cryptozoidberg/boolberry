@@ -9,16 +9,26 @@
 
             $scope.checkPass = function(){
                 if($rootScope.settings.security.is_use_app_pass){ // if want to use
-                    PassDialogs.generateMPDialog();
-                }else{ //if dont want to use
-                    PassDialogs.requestMPDialog(false, function(){
+                    PassDialogs.generateMPDialog(function(){
+                        $rootScope.settings.security.is_use_app_pass = false;
                         $rootScope.settings.security.is_pass_required_on_transfer = false;
                     });
+                }else{ //if dont want to use
+                    PassDialogs.requestMPDialog(
+                        function(){
+                            $rootScope.settings.security.is_use_app_pass = true;
+                        }, function(){
+                            $rootScope.settings.security.is_pass_required_on_transfer = false;
+                        },
+                        false
+                    );
                 }
             };
 
-            $scope.requestPass = function(){ //TODO merge with checkPass
-                PassDialogs.requestMPDialog(false);
+            $scope.requestPass = function(){
+                PassDialogs.requestMPDialog(function(){
+                    $rootScope.settings.security.is_pass_required_on_transfer = true;
+                },false,false);
             };
 
         }
