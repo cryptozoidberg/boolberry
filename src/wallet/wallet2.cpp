@@ -883,6 +883,16 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
     bool go_past = true;
     for (uint64_t step = 0; step <= POS_SCAN_WINDOW; )
     {
+
+      if (time(nullptr) - timstamp_start > WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL)
+      {
+        size_t blocks_fetched;
+        refresh(blocks_fetched);
+        if (blocks_fetched)
+          LOG_PRINT_L0("Detected new block, minting interrupted");
+          break;
+      }
+
       uint64_t ts = go_past ? adjusted_starter_timestamp - step : adjusted_starter_timestamp + step;
       PROFILE_FUNC("general_mining_iteration");
       if (!keep_mining)
@@ -1063,7 +1073,7 @@ bool wallet2::is_transfer_unlocked(const transfer_details& td) const
   if(!is_tx_spendtime_unlocked(td.m_tx.unlock_time))
     return false;
 
-  if(td.m_block_height + DEFAULT_TX_SPENDABLE_AGE > m_blockchain.size())
+  if(td.m_block_height + WALLET_DEFAULT_TX_SPENDABLE_AGE > m_blockchain.size())
     return false;
 
   return true;
