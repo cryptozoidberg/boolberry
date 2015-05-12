@@ -1148,6 +1148,7 @@ void wallet2::request_alias_registration(const currency::alias_info& ai, currenc
   std::vector<currency::attachment_v> attachments;
   currency::extra_alias_entry eae;
   currency::make_tx_extra_alias_entry(eae.buff, ai, false);
+  extra.push_back(eae);
 
   destinations.push_back(tx_dest);
   transfer(destinations, 0, 0, DEFAULT_FEE, extra, attachments, res_tx);
