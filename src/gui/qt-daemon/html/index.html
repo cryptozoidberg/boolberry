@@ -29,7 +29,7 @@
     <link href="assets/css/bootstrap-select.css" rel="stylesheet">
     <link href="assets/css/angucomplete-alt.css" rel="stylesheet">
     
-    <!-- <link href="assets/css/datepicker3.css" rel="stylesheet"> -->
+    <link href="assets/css/jquery-ui.min.css" rel="stylesheet">
 
     <link href="assets/css/app.css" rel="stylesheet">
 
@@ -92,6 +92,7 @@
             >
                 <i>{{progress_value()}} %</i>
             </progressbar>
+            <div ng-if="deamon_state.daemon_network_state == 1" class="text-warning">Синхронизируется..</div>
             <div class="clearfix"></div>
         </div>
     </div>
@@ -208,10 +209,10 @@
 <!--script src="assets/js/docs.min.js"></script--><!-- do not switch on - throws errors! -->
 
 <script src="assets/js/owl-carousel/owl.carousel.min.js"></script>
-<script src="assets/js/bootstrap-slider.js"></script>
+<!-- <script src="assets/js/bootstrap-slider.js"></script> -->
 <script src="assets/js/sidebar-collapse.js"></script>
 <script src="assets/js/bootstrap-tour.js"></script>
-
+<script src="assets/js/jquery-ui.min.js"></script>
 <script src="assets/js/jquery.smoothscroll.js"></script>
 <script src="assets/js/jquery.browser.js"></script>
 <script src="assets/js/jquery.ba-hashchange.js"></script>

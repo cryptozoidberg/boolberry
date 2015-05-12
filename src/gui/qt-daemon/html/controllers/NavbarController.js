@@ -35,6 +35,7 @@
                     canReset = true;
                 }
                 dialog("views/request_pass.html", oncancel, onsuccess, canReset);
+                $rootScope.settings.security.app_block = true;
             };
 
             this.storeSecureAppData = function(){
@@ -69,8 +70,6 @@
                 if(angular.isFunction(oncancel)){
                     oncancel();
                 }
-                // $rootScope.settings.security.is_use_app_pass = true;
-                // $rootScope.settings.security.is_pass_required_on_transfer = true;
             };
 
             // On request password cancel when app open:
@@ -103,7 +102,7 @@
                 if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
                     informer.error('Неверный пароль');
                 }else{
-                    
+                    $rootScope.settings.security.app_block = false;
                     $rootScope.appPass = appPass;
                     $modalInstance.close(); 
 
@@ -141,20 +140,17 @@
         	daemon_network_state: 0
         };
 
-        $rootScope.aliases = [
-            // {name: '@vasya', address: 'sdfhkgasdf$34345asdf'},
-            // {name: '@vasya1', address: 'sdfhkgas234345DFGddfasdf'},
-            // {name: '@vasya2', address: 'sdfhkgasd54DFGsfasdf'},
-            // {name: '@vasya3', address: 'sdfh234dfgGDkgasdfasdf'},
-            // {name: '@vasya4', address: 'sdfhkgSDFasdfasdf'}
-        ];
-
-
-
-        
-        
+        $rootScope.aliases = [];
         
         console.log($rootScope.aliases);
+
+        $rootScope.pass_required_intervals = [
+            0,
+            30000, //5 minutes
+            60000, //10 minutes
+            90000, //15 minutes
+            180000 //30 minutes
+        ];
 
         $rootScope.settings = {
             security: {
@@ -165,12 +161,12 @@
                 is_backup_reminder: false,
                 backup_reminder_interval: 0,
                 is_use_app_pass: true,
-                password_required_interval: 5    
+                password_required_interval: $rootScope.pass_required_intervals[0]
             },
             mining: {
                 is_block_transfer_when_mining : true,
                 ask_confirm_on_transfer_when_mining : false,
-                auto_mining_when_no_transfers : false,
+                auto_mining : false,
                 auto_mining_interval :  0
             },
             app_interface: {
@@ -195,6 +191,26 @@
                 donation_amount : 0
             }
         };
+
+        // $rootScope.watch(function(){
+        //     console.log('WATCH ROOT SCOPE');
+        //     return $rootScope.settings.security.is_use_app_pass;
+        // },function($v){
+        //     if($v === true){
+        //         console.log('APP PASS TRUE');
+        //     }else{
+        //          console.log('APP PASS FALSE');
+        //     }
+        // });
+       
+        // if($rootScope.settings.security.password_required_interval && $rootScope.settings.is_use_app_pass){
+        //     console.log('ask pass');
+            $interval(function(){
+                if(!$rootScope.settings.security.app_block){
+                    PassDialogs.requestMPDialog(false,false,false);
+                }
+            },$rootScope.settings.password_required_interval);
+        // }
 
         $scope.wallet_info  = {};
 
@@ -335,6 +351,7 @@
                     safe[property] = value;
                 });
                 safe.loaded = true;
+                safe.balance_formated = $filter('gulden')(safe.balance);
 
                 if(angular.isUndefined(safe.history)){
                     backend.getRecentTransfers(wallet_id, function(data){

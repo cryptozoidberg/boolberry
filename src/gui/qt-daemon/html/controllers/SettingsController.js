@@ -4,7 +4,7 @@
 
     module.controller('settingsCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','PassDialogs',
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,PassDialogs){
-            console.log('settings');
+
             $scope.settings = $rootScope.settings;
 
             $scope.checkPass = function(){
@@ -29,6 +29,13 @@
                 PassDialogs.requestMPDialog(function(){
                     $rootScope.settings.security.is_pass_required_on_transfer = true;
                 },false,false);
+            };
+
+            $scope.passReqIntervalIndex = $rootScope.pass_required_intervals.indexOf($rootScope.settings.security.password_required_interval);
+
+            $scope.changePassReqInterval = function(index){
+                $rootScope.settings.security.password_required_interval = $rootScope.pass_required_intervals[index];
+                //console.log($rootScope.settings.security.password_required_interval);
             };
 
         }

@@ -43,9 +43,9 @@
             };
 
             if($routeParams.wallet_id){
-                $scope.transaction.from = $routeParams.wallet_id+'';
+                $scope.transaction.from = parseInt($routeParams.wallet_id);
             }
-
+            
             $scope.selectalias = function(obj){
                 console.log('SELECT ALIAS');
                 console.log(obj);

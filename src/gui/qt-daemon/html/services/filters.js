@@ -12,7 +12,7 @@
 			if(angular.isDefined(input)){
 				input = input.toString();
 
-				var CDDP = 12; //CURRENCY_DISPLAY_DECIMAL_POINT
+				var CDDP = 6; //CURRENCY_DISPLAY_DECIMAL_POINT
 				var result = '';
 				if(input.length ){
 					result = angular.copy(input);
