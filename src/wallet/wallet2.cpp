@@ -858,9 +858,10 @@ bool wallet2::build_kernel(const pos_entry& pe, const stake_modifier_type& stake
 //----------------------------------------------------------------------------------------------------
 bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, currency::COMMAND_RPC_SCAN_POS::response& rsp, std::atomic<bool>& keep_mining)
 {
-  uint64_t timstamp_start = 0;
+  uint64_t timstamp_start = time(nullptr);
+  uint64_t timstamp_last_refresh = time(nullptr);
   wide_difficulty_type basic_diff = 0;
-  timstamp_start = time(nullptr);
+
   
   currency::COMMAND_RPC_GET_POS_MINING_DETAILS::request pos_details_req = AUTO_VAL_INIT(pos_details_req);
   currency::COMMAND_RPC_GET_POS_MINING_DETAILS::response pos_details_resp = AUTO_VAL_INIT(pos_details_resp);
@@ -884,13 +885,16 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
     for (uint64_t step = 0; step <= POS_SCAN_WINDOW; )
     {
 
-      if (time(nullptr) - timstamp_start > WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL)
+      if (time(nullptr) - timstamp_last_refresh > WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL)
       {
         size_t blocks_fetched;
         refresh(blocks_fetched);
         if (blocks_fetched)
+        {
           LOG_PRINT_L0("Detected new block, minting interrupted");
           break;
+        }
+        timstamp_last_refresh = time(nullptr);
       }
 
       uint64_t ts = go_past ? adjusted_starter_timestamp - step : adjusted_starter_timestamp + step;
