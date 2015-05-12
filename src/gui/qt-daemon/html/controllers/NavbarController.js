@@ -137,7 +137,7 @@
         $rootScope.appPass = false;
 
         $rootScope.deamon_state = {
-        	daemon_network_state: 0
+        	daemon_network_state: 3
         };
 
         $rootScope.aliases = [];
