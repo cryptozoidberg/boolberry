@@ -313,7 +313,7 @@ namespace currency
     {
       std::string status;
       uint64_t height;
-      uint64_t pos_difficulty;
+      std::string pos_difficulty;
       uint64_t pow_difficulty;
       uint64_t tx_count;
       uint64_t tx_pool_size;
