@@ -343,7 +343,7 @@ bool daemon_backend::update_state_info()
     return false;
   }
   dsi.pow_difficulty = std::to_string(inf.pow_difficulty);
-  dsi.pos_difficulty = std::to_string(inf.pos_difficulty);
+  dsi.pos_difficulty = inf.pos_difficulty;
   dsi.hashrate = inf.current_network_hashrate_350;
   dsi.inc_connections_count = inf.incoming_connections_count;
   dsi.out_connections_count = inf.outgoing_connections_count;
@@ -644,9 +644,14 @@ std::string daemon_backend::request_alias_registration(const currency::alias_rpc
   if (!alias_rpc_details_to_alias_info(al, ai))
     return API_RETURN_CODE_BAD_ARG;
 
+  if (!currency::validate_alias_name(ai.m_alias))
+  {
+    return API_RETURN_CODE_BAD_ARG;
+  }
+
   currency::COMMAND_RPC_GET_ALIAS_DETAILS::request req;
   currency::COMMAND_RPC_GET_ALIAS_DETAILS::response rsp = AUTO_VAL_INIT(rsp);
-  if (m_rpc_proxy->call_COMMAND_RPC_GET_ALIAS_DETAILS(req, rsp) && rsp.status == CORE_RPC_STATUS_OK)
+  if (m_rpc_proxy->call_COMMAND_RPC_GET_ALIAS_DETAILS(req, rsp) && rsp.status != CORE_RPC_STATUS_OK)
   {
     CRITICAL_REGION_LOCAL(m_wallets_lock);
     auto it = m_wallets.find(wallet_id);

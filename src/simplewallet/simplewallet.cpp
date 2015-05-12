@@ -982,19 +982,44 @@ int main(int argc, char* argv[])
       daemon_address = std::string("http://") + daemon_host + ":" + std::to_string(daemon_port);
 
     tools::wallet2 wal;
-    try
+    //try to open it
+    while (true)
     {
-      LOG_PRINT_L0("Loading wallet...");
-      wal.load(wallet_file, wallet_password);
-      wal.init(daemon_address);
-      wal.refresh();
-      LOG_PRINT_GREEN("Loaded ok", LOG_LEVEL_0);
+      try
+      {
+        LOG_PRINT_L0("Loading wallet...");
+        wal.load(wallet_file, wallet_password);
+      }
+      catch (const tools::error::wallet_load_notice_wallet_restored& e)
+      {
+        LOG_ERROR("Wallet initialize was with problems, but still worked : " << e.what());
+      }
+      catch (const std::exception& e)
+      {
+        LOG_ERROR("Wallet initialize failed: " << e.what());
+        return 1;
+      }
+      break;
     }
-    catch (const std::exception& e)
+    //try to sync it
+    while (true)
     {
-      LOG_ERROR("Wallet initialize failed: " << e.what());
-      return 1;
+      try
+      {
+        LOG_PRINT_L0("Initializing wallet...");
+        wal.init(daemon_address);
+        wal.refresh();
+        LOG_PRINT_GREEN("Loaded ok", LOG_LEVEL_0);
+      }
+      catch (const std::exception& e)
+      {
+        LOG_ERROR("Wallet initialize failed: " << e.what());
+        return 1;
+      }
+      break;
     }
+
+
     tools::wallet_rpc_server wrpc(wal);
     bool r = wrpc.init(vm);
     CHECK_AND_ASSERT_MES(r, 1, "Failed to initialize wallet rpc server");

@@ -2,46 +2,58 @@
     'use strict';
     var module = angular.module('app.navbar',[]);
 
-    module.factory('PassDialogs',['$modal',
-        function($modal){
+    module.factory('PassDialogs',['$modal','$rootScope','backend',
+        function($modal, $rootScope, backend){
             
-            this.generateMPDialog = function(){
+            var dialog = function(template, oncancel, onsuccess, canReset){
                 $modal.open({
-                    templateUrl: "views/generate_pass.html",
+                    templateUrl: template,
                     controller: 'appPassCtrl',
                     size: 'md',
                     windowClass: 'modal fade in',
                     backdrop: false,
                     resolve: {
-                        canReset : function(){
-                            return false;
+                        oncancel : function(){
+                            return oncancel;
                         },
                         onsuccess : function(){
-                            return false;
+                            return onsuccess;
+                        },
+                        canReset : function(){
+                            return canReset;
                         }
                     }
                 });
             };
 
-            this.requestMPDialog = function(canReset, onsuccess){
+            this.generateMPDialog = function(oncancel){
+                dialog("views/generate_pass.html", oncancel, false, false);
+            };
+
+            this.requestMPDialog = function(oncancel, onsuccess, canReset){
                 if(angular.isUndefined(canReset)){
                     canReset = true;
                 }
-                $modal.open({
-                    templateUrl: "views/request_pass.html",
-                    controller: 'appPassCtrl',
-                    size: 'md',
-                    windowClass: 'modal fade in',
-                    backdrop: false,
-                    resolve: {
-                        canReset : function(){
-                            return canReset;
-                        },
-                        onsuccess : function(){
-                            return onsuccess;
-                        }
-                    } 
-                });
+                dialog("views/request_pass.html", oncancel, onsuccess, canReset);
+                $rootScope.settings.security.app_block = true;
+            };
+
+            this.storeSecureAppData = function(){
+                 console.log('store secure');
+                 var safePaths = [];
+                 angular.forEach($rootScope.safes,function(item){
+                    var safe = {
+                        pass: item.pass,
+                        path: item.path,
+                        name: item.name
+                    };
+                    safePaths.push(safe);
+                 });
+
+                 console.log('Secure Data before save :: ');
+                 console.log(safePaths);
+                 var result = backend.storeSecureAppData(safePaths, $rootScope.appPass);
+                 console.log(result);
             };
 
             return this;
@@ -49,51 +61,68 @@
     ]);
 
 
-    module.controller('appPassCtrl', ['$scope','backend', '$modalInstance','informer','$rootScope', '$timeout', 'PassDialogs', 'canReset', 'onsuccess',
-        function($scope, backend, $modalInstance, informer, $rootScope, $timeout, PassDialogs, canReset, onsuccess) {
+    module.controller('appPassCtrl', ['$scope','backend', '$modalInstance','informer','$rootScope', '$timeout', 'PassDialogs', 'oncancel', 'onsuccess', 'canReset',
+        function($scope, backend, $modalInstance, informer, $rootScope, $timeout, PassDialogs, oncancel, onsuccess, canReset) {
             
-            $scope.cancelRequest = function(){
-                $modalInstance.close(); 
-                $rootScope.settings.security.is_use_app_pass = true;
-                $rootScope.settings.security.is_pass_required_on_transfer = true;
+            $scope.cancel = function(){
+                $modalInstance.close();
+                console.log('cancel');
+                if(angular.isFunction(oncancel)){
+                    oncancel();
+                }
             };
 
-            $scope.cancelGenerate = function(){
-                $modalInstance.close(); 
-                $rootScope.settings.security.is_use_app_pass = false;
-            };
+            // On request password cancel when app open:
+            // -use master password: false
+            // -use master password on money transfer: false
+
+            // On request password cancel when try to remove tick "request password on money transfer"
+            // -use master password: true
+            // -use master password on money transfer: true
+
+            // On generate password cancel when app open:
+            // -use master password: false
+            // -use master password on money transfer: false
+
+            // On generate password cancel when try to put tick "use master password":
+            // -use master password: false
+            // -use master password on money transfer: false
+
+            // $scope.cancelGenerate = function(){
+            //     $modalInstance.close(); 
+            //     $rootScope.settings.security.is_use_app_pass = false;
+            // };
 
             $scope.canReset = canReset;
 
-            // $scope.has_pass = backend.haveSecureAppData();
 
-            // $scope.pass_reset = false;
+            $scope.submit = function(appPass){
+                var appData = backend.getSecureAppData({pass: appPass});
+                appData = JSON.parse(appData);
+                if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
+                    informer.error('Неверный пароль');
+                }else{
+                    $rootScope.settings.security.app_block = false;
+                    $rootScope.appPass = appPass;
+                    $modalInstance.close(); 
 
-            $scope.getAppData = function(appPass){
-                console.log('getAppData');
-                    var appData = backend.getSecureAppData({pass: appPass});
-                    appData = JSON.parse(appData);
-                    if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
-                        informer.error('Неверный пароль');
-                    }else{
-                        
-                        $rootScope.appPass = appPass;
-                        $modalInstance.close(); 
-
-                        if(angular.isFunction(onsuccess)){
-                            onsuccess(appData);
-                        }
-                            
+                    if(angular.isFunction(onsuccess)){
+                        onsuccess(appData);
                     }
+                        
+                }
             };
 
             $scope.reset = function(){
                 $modalInstance.close(); 
-                PassDialogs.generateMPDialog();
+                PassDialogs.generateMPDialog(function(){
+                    $rootScope.settings.security.is_use_app_pass = false;
+                });
             }
 
             $scope.setPass = function(appPass){
                 $rootScope.appPass = appPass;
+                PassDialogs.storeSecureAppData();
                 $modalInstance.close(); 
             }
         }
@@ -102,14 +131,26 @@
     
 
     module.controller('NavbarTopController', [
-        'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs',
-        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs) {
+        'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs','$interval',
+        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs, $interval) {
         
         $rootScope.appPass = false;
 
         $rootScope.deamon_state = {
-        	daemon_network_state: 0
+        	daemon_network_state: 3
         };
+
+        $rootScope.aliases = [];
+        
+        console.log($rootScope.aliases);
+
+        $rootScope.pass_required_intervals = [
+            0,
+            30000, //5 minutes
+            60000, //10 minutes
+            90000, //15 minutes
+            180000 //30 minutes
+        ];
 
         $rootScope.settings = {
             security: {
@@ -120,12 +161,12 @@
                 is_backup_reminder: false,
                 backup_reminder_interval: 0,
                 is_use_app_pass: true,
-                password_required_interval: 5    
+                password_required_interval: $rootScope.pass_required_intervals[0]
             },
             mining: {
                 is_block_transfer_when_mining : true,
                 ask_confirm_on_transfer_when_mining : false,
-                auto_mining_when_no_transfers : false,
+                auto_mining : false,
                 auto_mining_interval :  0
             },
             app_interface: {
@@ -151,6 +192,26 @@
             }
         };
 
+        // $rootScope.watch(function(){
+        //     console.log('WATCH ROOT SCOPE');
+        //     return $rootScope.settings.security.is_use_app_pass;
+        // },function($v){
+        //     if($v === true){
+        //         console.log('APP PASS TRUE');
+        //     }else{
+        //          console.log('APP PASS FALSE');
+        //     }
+        // });
+       
+        // if($rootScope.settings.security.password_required_interval && $rootScope.settings.is_use_app_pass){
+        //     console.log('ask pass');
+            // $interval(function(){
+            //     if(!$rootScope.settings.security.app_block){
+            //         PassDialogs.requestMPDialog(false,false,false);
+            //     }
+            // },$rootScope.settings.password_required_interval);
+        // }
+
         $scope.wallet_info  = {};
 
         var init = function(){ // app work initialization
@@ -164,25 +225,34 @@
             console.log($rootScope.settings.security.is_use_app_pass);
             if($rootScope.settings.security.is_use_app_pass){ // if setings contain "require password"
                 if(backend.haveSecureAppData()){
-                    PassDialogs.requestMPDialog(true, function(appData){
-                        angular.forEach(appData,function(item){
-                            backend.openWallet(item.path, item.pass,function(data){
-                                
-                                var wallet_id = data.wallet_id;
-                                var new_safe = {
-                                    wallet_id : wallet_id,
-                                    name : item.name,
-                                    pass : item.pass
-                                };
-                                $timeout(function(){
-                                    $rootScope.safes.push(new_safe);    
-                                });
+                    PassDialogs.requestMPDialog(
+                        function(){
+                            $rootScope.settings.security.is_use_app_pass = false;
+                            $rootScope.settings.security.is_pass_required_on_transfer = false;
+                        }, 
+                        function(appData){
+                        
+                            angular.forEach(appData,function(item){
+                                backend.openWallet(item.path, item.pass,function(data){
+                                    
+                                    var wallet_id = data.wallet_id;
+                                    var new_safe = {
+                                        wallet_id : wallet_id,
+                                        name : item.name,
+                                        pass : item.pass
+                                    };
+                                    $timeout(function(){
+                                        $rootScope.safes.push(new_safe);    
+                                    });
 
+                                });
                             });
-                        });
-                    });
+                        }
+                    );
                 }else{
-                    PassDialogs.generateMPDialog();
+                    PassDialogs.generateMPDialog(function(){
+                        $rootScope.settings.security.is_use_app_pass = false;
+                    });
                 }
             }
         };
@@ -198,31 +268,11 @@
             var current = $scope.deamon_state.height - $scope.deamon_state.synchronization_start_height;
             return Math.floor(current*100/max);
         }
-
-        
         
         $scope.storeAppData = function(){
              console.log('Settings before save :: ');
              console.log($rootScope.settings);
              backend.storeAppData($rootScope.settings);
-        };
-
-        $scope.storeSecureAppData = function(){
-             console.log('store secure');
-             var safePaths = [];
-             angular.forEach($rootScope.safes,function(item){
-                var safe = {
-                    pass: item.pass,
-                    path: item.path,
-                    name: item.name
-                };
-                safePaths.push(safe);
-             });
-
-             console.log('Secure Data before save :: ');
-             console.log(safePaths);
-             var result = backend.storeSecureAppData(safePaths, $rootScope.appPass);
-             console.log(result);
         };
 
         $rootScope.closeWallet = function(wallet_id){
@@ -246,11 +296,33 @@
 
         backend.subscribe('update_daemon_state', function(data){// move to run
             if(data.daemon_network_state == 2){
-                loaded = true;
+                
                 // if(li && angular.isDefined(li)){
                 //     li.close();
                 //     li = null;
                 // }
+                var getAliases = function(){
+                    backend.getAllAliases(function(data){
+                        console.log('ALIASES :: ');
+                        console.log(data);
+                        if(angular.isDefined(data.aliases) && data.aliases.length){
+                            $rootScope.aliases = [];
+                            angular.forEach(data.aliases,function(alias){
+                                $rootScope.aliases.push({alias: alias.alias, name: '@'+alias.alias, address: alias.address});
+                            });    
+                        }
+                    });
+                };
+
+
+                if(!loaded){
+                    loaded = true;
+                    getAliases();
+                    $interval(function(){
+                        getAliases();
+                    },60000); // one minute
+                }
+                
             }else if(data.daemon_network_state == 4){
                 informer.error('Ошибка системы. Для устранения проблемы свяжитесь с разработчиками.');
             }else{
@@ -279,6 +351,7 @@
                     safe[property] = value;
                 });
                 safe.loaded = true;
+                safe.balance_formated = $filter('gulden')(safe.balance);
 
                 if(angular.isUndefined(safe.history)){
                     backend.getRecentTransfers(wallet_id, function(data){
@@ -301,7 +374,7 @@
             console.log($rootScope.appPass);
             if($rootScope.appPass){
                 // secure save data
-                $scope.storeSecureAppData();
+                PassDialogs.storeSecureAppData();
             }
             $scope.storeAppData();
             backend.quitRequest();

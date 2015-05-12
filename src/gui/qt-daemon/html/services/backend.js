@@ -56,21 +56,22 @@
 
             registerAlias: function(wallet_id, alias, address, fee, comment, callback) {
                 var params = {
-                  "wallet_id": wallet_id,
-                  "alias": {
-                    "alias": alias,
-                    "details": {
-                      "address": address,
-                      "tracking_key": "",
-                      "comment": comment
-                    }
-                  },
-                  "fee": fee
+                    "wallet_id": wallet_id,
+                    "alias": {
+                        "alias": alias,
+                        "address": address,
+                        "tracking_key": "",
+                        "comment": comment
+                    },
+                    "fee": fee
                 };
+
                 return this.runCommand('request_alias_registration', params, callback);
             },
 
-
+            getAllAliases: function(callback){
+                return this.runCommand('get_all_aliases', {}, callback); 
+            },
 
             getSecureAppData: function(pass) {
                 if(!this.shouldUseEmulator()){

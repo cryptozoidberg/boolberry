@@ -861,9 +861,10 @@ bool wallet2::build_kernel(const pos_entry& pe, const stake_modifier_type& stake
 //----------------------------------------------------------------------------------------------------
 bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, currency::COMMAND_RPC_SCAN_POS::response& rsp, std::atomic<bool>& keep_mining)
 {
-  uint64_t timstamp_start = 0;
+  uint64_t timstamp_start = time(nullptr);
+  uint64_t timstamp_last_refresh = time(nullptr);
   wide_difficulty_type basic_diff = 0;
-  timstamp_start = time(nullptr);
+
   
   currency::COMMAND_RPC_GET_POS_MINING_DETAILS::request pos_details_req = AUTO_VAL_INIT(pos_details_req);
   currency::COMMAND_RPC_GET_POS_MINING_DETAILS::response pos_details_resp = AUTO_VAL_INIT(pos_details_resp);
@@ -876,7 +877,7 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
     return false;
   }
 
-  basic_diff = pos_details_resp.pos_basic_difficulty;
+  basic_diff.assign(pos_details_resp.pos_basic_difficulty);
 
   for (size_t i = 0; i != sp.pos_entries.size(); i++)
   {
@@ -886,6 +887,19 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
     bool go_past = true;
     for (uint64_t step = 0; step <= POS_SCAN_WINDOW; )
     {
+
+      if (time(nullptr) - timstamp_last_refresh > WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL)
+      {
+        size_t blocks_fetched;
+        refresh(blocks_fetched);
+        if (blocks_fetched)
+        {
+          LOG_PRINT_L0("Detected new block, minting interrupted");
+          break;
+        }
+        timstamp_last_refresh = time(nullptr);
+      }
+
       uint64_t ts = go_past ? adjusted_starter_timestamp - step : adjusted_starter_timestamp + step;
       PROFILE_FUNC("general_mining_iteration");
       if (!keep_mining)
@@ -949,6 +963,8 @@ bool wallet2::try_mint_pos()
   currency::COMMAND_RPC_SCAN_POS::request req;
   bool r = get_pos_entries(req);
   CHECK_AND_ASSERT_MES(r, false, "Failed to get_pos_entries()");
+
+  LOG_PRINT_L0("POS_ENTRIES: " << req.pos_entries.size());
 
   currency::COMMAND_RPC_SCAN_POS::response rsp = AUTO_VAL_INIT(rsp);
   std::atomic<bool> keep_going(true);
@@ -1066,7 +1082,7 @@ bool wallet2::is_transfer_unlocked(const transfer_details& td) const
   if(!is_tx_spendtime_unlocked(td.m_tx.unlock_time))
     return false;
 
-  if(td.m_block_height + DEFAULT_TX_SPENDABLE_AGE > m_blockchain.size())
+  if(td.m_block_height + WALLET_DEFAULT_TX_SPENDABLE_AGE > m_blockchain.size())
     return false;
 
   return true;
@@ -1135,6 +1151,7 @@ void wallet2::request_alias_registration(const currency::alias_info& ai, currenc
   std::vector<currency::attachment_v> attachments;
   currency::extra_alias_entry eae;
   currency::make_tx_extra_alias_entry(eae.buff, ai, false);
+  extra.push_back(eae);
 
   destinations.push_back(tx_dest);
   transfer(destinations, 0, 0, DEFAULT_FEE, extra, attachments, res_tx);

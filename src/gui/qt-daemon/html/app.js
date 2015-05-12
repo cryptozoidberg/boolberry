@@ -4,7 +4,8 @@
         'ui.bootstrap',
         'ui.chart',
         'angular-bootstrap-select',
-        'ui.bootstrap-slider',
+        'ui.slider',
+        "angucomplete-alt",
 
         'ngRoute', 
         'ngSanitize',

@@ -82,7 +82,7 @@ namespace currency
     }
 
     res.height = m_core.get_current_blockchain_height();
-    res.pos_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(true).convert_to<uint64_t>();
+    res.pos_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(true).convert_to<std::string>();
     res.pow_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(false).convert_to<uint64_t>();
     res.tx_count = m_core.get_blockchain_storage().get_total_transactions() - res.height; //without coinbase
     res.tx_pool_size = m_core.get_pool_transactions_count();
@@ -285,7 +285,7 @@ namespace currency
       res.status = CORE_RPC_STATUS_DISCONNECTED;
       return true;
     }
-    res.pos_basic_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(true).convert_to<uint64_t>();
+    res.pos_basic_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(true).convert_to<std::string>();
     m_core.get_blockchain_storage().build_stake_modifier(res.sm);
     
     //TODO: need atomic operation with  build_stake_modifier()
@@ -688,13 +688,13 @@ namespace currency
     {
       error_resp.code = CORE_RPC_ERROR_CODE_CORE_BUSY;
       error_resp.message = "Core is busy.";
-      return false;
+      return true;
     }
     alias_info_base aib = AUTO_VAL_INIT(aib);
     if(!validate_alias_name(req.alias))
     {      
       res.status = "Alias have wrong name";
-      return false;
+      return true;
     }
     if(!m_core.get_blockchain_storage().get_alias_info(req.alias, aib))
     {

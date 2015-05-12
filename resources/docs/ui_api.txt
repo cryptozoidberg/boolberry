@@ -163,15 +163,14 @@ or in case of failure:
 param:
 
 {
-  "wallet_id": 2,
+  "wallet_id": 0,
   "alias": {
-    "alias": "some_alias_name",
-    "details": {
-      "address": "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R",
-      "tracking_key": "",
-      "comment": "best ever service bla bla bla"
-    }
-  }
+    "alias": "@zina",
+    "address": "HexegKDFxJo6w5tFwPHWmnEfQoqoKpopT78UNjD518NEMMbJdx9TCVwXcu9Yo1nTPyHQsuvRaPA6MNU3DTNyA2WcRfxxQUy",
+    "tracking_key": "",
+    "comment": ""
+  },
+  "fee": "1.76"
 }
 
 resposne:

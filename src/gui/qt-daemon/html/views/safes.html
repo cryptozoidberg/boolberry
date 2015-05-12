@@ -4,14 +4,14 @@
     <div class="navbar">
         <div class="row">
             <div class="col-xs-5 col-sm-5" ng-controller="safeModals">
-                <div class="btn-group"><button class="btn btn-primary safes_create-safe-button" ng-click="openSafeForm();" type="button">Создать сейф</button></div>
+                <div class="btn-group"><button  ng-disabled="deamon_state.daemon_network_state != 2" class="btn btn-primary safes_create-safe-button" ng-click="openSafeForm();" type="button">Создать сейф</button></div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <button type="button" class="btn btn-info dropdown-toggle"  ng-disabled="deamon_state.daemon_network_state != 2" data-toggle="dropdown" aria-expanded="false">
                         Восстановить сейф <span class="caret"></span>
                     </button>
                     <ul role="menu" class="dropdown-menu dropdown-menu-right">
                         <li><a class="safes_open-safe-button" ng-click="openFileDialog();" type="button">Открыть файл-сейф</a></li>
-                        <li><a data-target="#onensmartSafe" data-toggle="modal" type="button">Восстановить из smartsafe</a></li>
+                        <li><a type="button">Восстановить из smartsafe</a></li>
 
                     </ul>
                 </div>
@@ -65,8 +65,8 @@
                                 <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован">
                                     <i class="fa fa-1x fa-lock text-primary"></i>
                                 </button>
-                                <span class="label label-info">@safealias</span> 
-                                <span class="label label-info">@safealias</span>
+                                <!-- <span class="label label-info">@safealias</span> 
+                                <span class="label label-info">@safealias</span> -->
                             </td>
 
                             <td>
@@ -99,11 +99,11 @@
                             </td>
 
                             <td>
-                                <ul class="list-unstyled">
+                                <!-- <ul class="list-unstyled">
                                     <li class="text-info">
                                         Ожидается:  <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">
                                     </li>
-                                </ul>
+                                </ul> -->
                             </td>
 
                             <td>

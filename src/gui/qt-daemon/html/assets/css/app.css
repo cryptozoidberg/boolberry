@@ -1658,3 +1658,9 @@ min-width: 96px;
 li.list-group-item {
 	min-height: 55px;
 }
+
+.guilder-bar-state .progress {
+	margin-bottom: 0;
+}
+
+

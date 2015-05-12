@@ -16,8 +16,10 @@
             };
 
             $scope.register = function(alias){
+                console.log(alias.comment);
                 backend.registerAlias(safe.wallet_id, alias.name, safe.address, alias.fee, alias.comment, function(data){
-                    console.log(data);
+                    console.log(data); //TODO add to rootscope aliases
+                    $modalInstance.close();
                 });
             };
             
@@ -47,6 +49,8 @@
                     }
                 });
             };
+
+            
         }
     ]);
 

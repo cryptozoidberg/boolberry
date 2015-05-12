@@ -42,19 +42,19 @@
                 </div>
             </div>
             <div>
-                <a class="label label-info" href="">@safealias</a> 
-                <a class="label label-info" href="">@safealias</a>
+                <!-- a class="label label-info" href="">@safealias</a> 
+                <a class="label label-info" href="">@safealias</a -->
             </div>
         </div>
 
         <div class="panel-body">
             <div class="row">
                 <div class="col-xs-9 col-sm-9">
-                    <ul class="list-unstyled">
+                    <!--ul class="list-unstyled">
                         <li class="text-info">
                             Ожидается:  <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">               
                         </li>
-                    </ul>
+                    </ul-->
                     <div class="balance">Баланс: {{balance | gulden }} </div>
                     <div class="balance">Доступно: {{unlocked_balance | gulden }}</div>
                 </div>
@@ -100,20 +100,20 @@
     </div>
     <div class="btn-toolbar" ng-controller="safeModals">
         <div class="btn-group">
-            <button class="btn btn-primary navbar-btn index_create-safe-button" ng-click="openSafeForm();" type="button">
+            <button class="btn btn-primary navbar-btn index_create-safe-button" ng-disabled="deamon_state.daemon_network_state != 2" ng-click="openSafeForm();" type="button">
                 Создать сейф
             </button>
         </div>
         <div class="btn-group">
-            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-info navbar-btn dropdown-toggle"
+            <button aria-expanded="false" ng-disabled="deamon_state.daemon_network_state != 2" data-toggle="dropdown" class="btn btn-info navbar-btn dropdown-toggle"
                     type="button">
                 Восстановить сейф <span class="caret"></span>
             </button>
             <ul class="dropdown-menu dropdown-menu-right" role="menu">
                 <li>
-                    <a type="button" class="index_open-safe-button" ng-click="openFileDialog()">Открыть файл-сейф</a>
+                    <a type="button" class="index_open-safe-button" ng-click="openFileDialog()" ng-disabled="deamon_state.daemon_network_state != 2">Открыть файл-сейф</a>
                 </li>
-                <li><a type="button" data-toggle="modal" data-target="#onensmartSafe">Восстановить из smartsafe</a></li>
+                <li><a type="button" ng-disabled="deamon_state.daemon_network_state != 2">Восстановить из smartsafe</a></li>
             </ul>
         </div>
     </div>

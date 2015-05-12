@@ -43,7 +43,12 @@
             };
 
             if($routeParams.wallet_id){
-                $scope.transaction.from = $routeParams.wallet_id+'';
+                $scope.transaction.from = parseInt($routeParams.wallet_id);
+            }
+            
+            $scope.selectalias = function(obj){
+                console.log('SELECT ALIAS');
+                console.log(obj);
             }
 
             $scope.send = function(tr){
@@ -72,7 +77,7 @@
                 }else{
                     $scope.transaction.is_valid_address = false;
                 }
-            }
+            };
 
             $scope.disabled = function(date, mode) {
                 return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );

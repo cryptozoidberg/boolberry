@@ -37,18 +37,19 @@
                             <li class="list-group-item">
                                 <div class="btn-group pull-right foursteps">
                                     <div class="fslider">
-                                        <slider ng-model="settings.security.password_required_interval" min="0" step="1" max="4"></slider>
+                                        <!-- <slider ng-model="settings.security.password_required_interval" min="0" step="1" max="4"></slider> -->
+                                        <div class="lui-slider" ui-slider  ng-change="changePassReqInterval(passReqIntervalIndex)" min="0" max="4" step="1" ng-model="passReqIntervalIndex"></div>
                                     </div>
                                     <div class="scale"><span>5 мин</span><span>10 мин</span><span>15 мин</span><span>>30 мин</span></div>
                                 </div>
-                                Блокировать интерфейс приложения при отсутствии действий в течении 
+                                Блокировать интерфейс приложения при отсутствии действий в течении
                                 &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
-            <div class="panel">
+            <!-- <div class="panel">
                 <div class="panel-body">
                     <h4><a data-target=".collapse-off3-2" data-toggle="collapse-off" type="button" href="#"><span>Безопасность сейфов</span></a></h4>
 
@@ -78,7 +79,7 @@
                         </ul>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div class="panel">
                 <div class="panel-body">
                     <h4><a data-target=".collapse-off3_3" data-toggle="collapse-off" type="button" href="#"><span>Безопасность платежей</span></a></h4>
@@ -111,7 +112,7 @@
                             <li class="list-group-item">
                                 <div class="btn-group pull-right foursteps">
                                     <div class="fslider">
-                                        <slider ng-model="settings.security.mixin_count" min="0" step="1" max="4"></slider>
+                                        <!-- <slider ng-model="settings.security.mixin_count" min="0" step="1" max="4"></slider> -->
                                     </div>
                                     <div class="scale"><span>легкий</span><span>стандартный</span><span>средний</span><span>высокий</span></div>
                                 </div>
@@ -129,7 +130,7 @@
         <div class="panel">
                 <div class="panel-body">
                     <ul class="list-group">
-                        <li class="list-group-item">
+                        <!-- <li class="list-group-item">
                             <div class="btn-group pull-right" data-toggle="buttons">
                                 <label class="btn btn-default active"><input type="radio" name="options5_1" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
                                 <label class="btn btn-danger"><i class="fa fa-lg fa-times"></i><input type="radio" name="options5_1" id="option2" autocomplete="off"></label>
@@ -143,15 +144,20 @@
                                 <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options5_2" id="option2" autocomplete="off"></label>
                             </div>
                             <em>Требовать подтверждения при попытке совершения транзакции со счета с добычей</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
-                        </li>
+                        </li> -->
                         <li class="list-group-item">
-                            <div class="btn-group pull-right" data-toggle="buttons">
-                                <label class="btn btn-default active"><input type="radio" name="options5_3" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
-                                <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options5_3" id="option2" autocomplete="off"></label>
+                        {{settings.mining.auto_mining}}
+                            <div class="btn-group pull-right">
+                                <label class="btn btn-default" btn-radio="true" ng-model="settings.mining.auto_mining">
+                                    <i class="fa fa-lg fa-check"></i>
+                                </label>
+                                <label class="btn btn-default" btn-radio="false" ng-model="settings.mining.auto_mining">
+                                    <i class="fa fa-lg fa-times"></i>
+                                </label>
                             </div>
-                            <em>Разрешить начало добычи в сейфах автоматически при отсутствии платежей</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
+                            <em>Разрешить начало добычи в сейфах автоматически</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
                         </li>
-                        <li class="list-group-item">
+                        <!-- <li class="list-group-item">
                             <div class="btn-group pull-right foursteps">
                                 <div class="fslider">
                                     <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="4"  data-slider-step="1" data-slider-value="2"/>
@@ -159,7 +165,7 @@
                                 <div class="scale"><span>3 дня</span><span>неделю</span><span>2 недели</span><span>месяц</span></div>
                             </div>
                             <em>Заупукать добычу в сейфе автоматически через</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
-                        </li>
+                        </li> -->
                     </ul>
                 </div>
             </div>
@@ -263,7 +269,7 @@
                                 <em>Автоматически запускать приложение при включении компьютера</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
                             </li>
 
-                            <li class="list-group-item">
+                            <!-- <li class="list-group-item">
                                 <div class="btn-group pull-right" data-toggle="buttons">
                                     <label class="btn btn-default active"><input type="radio" name="options1_1_2" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
                                     <label class="btn btn-default"><i class="fa fa-lg fa-times"></i><input type="radio" name="options1_1_2" id="option2" autocomplete="off"></label>
@@ -278,7 +284,7 @@
                                     <div class="scale"><span>5 мин</span><span>15 мин</span><span>30 мин</span><span>час</span></div>
                                 </div>
                                 <em>Сохранять данные приложения автоматически через</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
-                            </li>
+                            </li> -->
                         </ul>
                     </div>
                 </div>

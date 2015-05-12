@@ -25,7 +25,8 @@
 #include "wallet_errors.h"
 #include "eos/portable_archive.hpp"
 
-#define DEFAULT_TX_SPENDABLE_AGE                               10
+#define WALLET_DEFAULT_TX_SPENDABLE_AGE                               10
+#define WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL                         10
 
 namespace tools
 {

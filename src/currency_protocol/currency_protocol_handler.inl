@@ -117,7 +117,7 @@ namespace currency
       << (0 <= diff ? std::string("behind") : std::string("ahead"))
       << "] " << ENDL << "SYNCHRONIZATION started", (is_inital ? LOG_LEVEL_0:LOG_LEVEL_1));
     LOG_PRINT_L1("Remote top block height: " << hshd.current_height << ", id: " << hshd.top_id);
-
+    m_synchronized = false;
     /*check if current height is in remote's checkpoints zone*/
     if(hshd.last_checkpoint_height 
       && m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() < hshd.last_checkpoint_height 
