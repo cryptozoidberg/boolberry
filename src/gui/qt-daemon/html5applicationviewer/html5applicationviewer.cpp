@@ -550,6 +550,7 @@ QString Html5ApplicationViewer::request_alias_registration(const QString& param)
     tr.success = true;
     tr.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(res_tx));
     tr.tx_blob_size = currency::get_object_blobsize(res_tx);
+    ar.error_code = API_RETURN_CODE_OK;
     dispatch(ar, tr);
     return;
   });
