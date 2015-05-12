@@ -515,7 +515,7 @@
                     break;
                 case 'update_daemon_state': 
                     result = {
-                        "daemon_network_state": 1,
+                        "daemon_network_state": 2,
                         "hashrate": 0,
                         "max_net_seen_height": 9800,
                         "synchronization_start_height": 9700,
