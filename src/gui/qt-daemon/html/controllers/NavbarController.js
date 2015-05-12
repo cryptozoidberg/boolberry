@@ -205,11 +205,11 @@
        
         // if($rootScope.settings.security.password_required_interval && $rootScope.settings.is_use_app_pass){
         //     console.log('ask pass');
-            $interval(function(){
-                if(!$rootScope.settings.security.app_block){
-                    PassDialogs.requestMPDialog(false,false,false);
-                }
-            },$rootScope.settings.password_required_interval);
+            // $interval(function(){
+            //     if(!$rootScope.settings.security.app_block){
+            //         PassDialogs.requestMPDialog(false,false,false);
+            //     }
+            // },$rootScope.settings.password_required_interval);
         // }
 
         $scope.wallet_info  = {};
