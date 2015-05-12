@@ -286,7 +286,7 @@ namespace currency
       res.status = CORE_RPC_STATUS_DISCONNECTED;
       return true;
     }
-    res.pos_basic_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(true).convert_to<uint64_t>();
+    res.pos_basic_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(true).convert_to<std::string>();
     m_core.get_blockchain_storage().build_stake_modifier(res.sm);
     
     //TODO: need atomic operation with  build_stake_modifier()

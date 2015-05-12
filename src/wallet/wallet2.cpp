@@ -874,7 +874,7 @@ bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, curren
     return false;
   }
 
-  basic_diff = pos_details_resp.pos_basic_difficulty;
+  basic_diff.assign(pos_details_resp.pos_basic_difficulty);
 
   for (size_t i = 0; i != sp.pos_entries.size(); i++)
   {

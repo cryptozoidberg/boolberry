@@ -2349,7 +2349,7 @@ bool blockchain_storage::validate_pos_block(const block& b,
   proof_hash = crypto::cn_fast_hash(&sk, sizeof(sk));
 
   LOG_PRINT_L2("STAKE KERNEL for bl ID: " << get_block_hash(b) << ENDL
-    << print_stake_kernel_info(sk) << ENDL
+    << print_stake_kernel_info(sk)
     << "kernel_hash: " << proof_hash);
 
 

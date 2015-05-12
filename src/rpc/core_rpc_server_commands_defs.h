@@ -703,7 +703,7 @@ namespace currency
     struct response
     {
       stake_modifier_type sm;
-      uint64_t pos_basic_difficulty;
+      std::string pos_basic_difficulty;
       uint64_t height;
       std::string status;
 
