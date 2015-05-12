@@ -961,6 +961,8 @@ bool wallet2::try_mint_pos()
   bool r = get_pos_entries(req);
   CHECK_AND_ASSERT_MES(r, false, "Failed to get_pos_entries()");
 
+  LOG_PRINT_L0("POS_ENTRIES: " << req.pos_entries.size());
+
   currency::COMMAND_RPC_SCAN_POS::response rsp = AUTO_VAL_INIT(rsp);
   std::atomic<bool> keep_going(true);
   scan_pos(req, rsp, keep_going);
