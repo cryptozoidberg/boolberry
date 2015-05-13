@@ -207,9 +207,13 @@ response:
   ]
 }
 
+[sync] validate_address(str address)
 
-
-
+response: 
+{
+  "error_code" : "TRUE", //"TRUE" or "FALSE"
+  "request_id": ""   //ignored
+}
 
 
 
