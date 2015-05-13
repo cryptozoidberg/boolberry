@@ -70,7 +70,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
   CHECK_AND_THROW_WALLET_EX(!r, error::acc_outs_lookup_error, tx, tx_pub_key, m_account.get_keys());
 
   money_transfer2_details mtd;
-  std::vector<attachment_v> decrypted_att;
+  std::vector<currency::attachment_v> decrypted_att;
   if(!outs.empty() && tx_money_got_in_outs)
   {
     //decrypt attachments
@@ -175,11 +175,11 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
     else
     {
       if(tx_money_got_in_outs)
-        handle_money_received2(b, tx, tx_money_got_in_outs, mtd, decrypted_att, decrypted_att);
+        handle_money_received2(b, tx, tx_money_got_in_outs, mtd, decrypted_att);
     }
 }
 //----------------------------------------------------------------------------------------------------
-void prepare_wti_decrypted_attachments(wallet_rpc::wallet_transfer_info& wti, const std::vector<attachment_v>& decrypted_att)
+void prepare_wti_decrypted_attachments(wallet_rpc::wallet_transfer_info& wti, const std::vector<currency::attachment_v>& decrypted_att)
 {
   if (wti.is_income)
   {
@@ -209,7 +209,7 @@ void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height
   wti.is_service = currency::is_service_tx(tx);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td, const std::vector<attachment_v>& decrypted_att)
+void wallet2::handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td, const std::vector<currency::attachment_v>& decrypted_att)
 {
   m_transfer_history.push_back(wallet_rpc::wallet_transfer_info());
   wallet_rpc::wallet_transfer_info& wti = m_transfer_history.back();
@@ -434,7 +434,7 @@ void wallet2::scan_tx_pool()
     if (!tx_money_spent_in_ins && tx_money_got_in_outs)
     {
       
-      std::vector<attachment_v> decrypted_att;
+      std::vector<currency::attachment_v> decrypted_att;
       decrypt_attachments(tx, m_account.get_keys(), decrypted_att);
 
       //prepare notification about pending transaction
@@ -742,7 +742,8 @@ uint64_t wallet2::balance()
 
 
   BOOST_FOREACH(auto& utx, m_unconfirmed_txs)
-    amount+= utx.second.m_change;
+  if (utx.second.is_income)
+      amount+= utx.second.amount;
 
   return amount;
 }
@@ -1071,7 +1072,8 @@ bool wallet2::build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& 
 //----------------------------------------------------------------------------------------------------
 void wallet2::get_unconfirmed_transfers(std::vector<wallet_rpc::wallet_transfer_info>& trs)
 {
-  trs = m_unconfirmed_txs;
+  for (auto& u : m_unconfirmed_txs)
+    trs.push_back(u.second);
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::is_transfer_unlocked(const transfer_details& td) const

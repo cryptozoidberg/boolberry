@@ -94,15 +94,6 @@ namespace tools
       uint64_t amount() const { return m_tx.vout[m_internal_output_index].amount; }
     };
 
-    struct unconfirmed_transfer_details
-    {
-      currency::transaction m_tx;
-      uint64_t      m_change;
-      time_t        m_sent_time; 
-      std::string   m_recipient;
-      std::string   m_recipient_alias;
-      bool          m_is_income;
-    };
 
     struct payment_details
     {
@@ -219,11 +210,18 @@ namespace tools
     uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
     bool prepare_file_names(const std::string& file_path);
     void process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias, std::string& comment);
-    void add_sent_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient);
+    void add_sent_unconfirmed_tx(const currency::transaction& tx, 
+                                 uint64_t change_amount, 
+                                 const std::string& recipient,
+                                 const std::string& comment);
     void update_current_tx_limit();
     void prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height, uint64_t timestamp, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
-    void prepare_wti_decrypted_attachments(wallet_rpc::wallet_transfer_info& wti, const std::vector<attachment_v>& decrypted_att);
-    void handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td, const std::vector<attachment_v>& decrypted_att);
+    void prepare_wti_decrypted_attachments(wallet_rpc::wallet_transfer_info& wti, const std::vector<currency::attachment_v>& decrypted_att);
+    void handle_money_received2(const currency::block& b,
+                                const currency::transaction& tx, 
+                                uint64_t amount, 
+                                const money_transfer2_details& td, 
+                                const std::vector<currency::attachment_v>& decrypted_att);
     void handle_money_spent2(const currency::block& b,  
                              const currency::transaction& in_tx, 
                              uint64_t amount, 
@@ -262,9 +260,8 @@ namespace tools
 }
 
 
-BOOST_CLASS_VERSION(tools::wallet2, 9)
-BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 3)
-BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 3)
+BOOST_CLASS_VERSION(tools::wallet2, 10)
+BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 4)
 
 
 namespace boost
@@ -278,21 +275,9 @@ namespace boost
       a & x.m_block_timestamp;
       a & x.m_global_output_index;
       a & x.m_internal_output_index;
-      a & x.decrypted_att;
       a & x.m_tx;
       a & x.m_spent;
       a & x.m_key_image;
-    }
-
-    template <class Archive>
-    inline void serialize(Archive &a, tools::wallet2::unconfirmed_transfer_details &x, const boost::serialization::version_type ver)
-    {
-      a & x.m_change;
-      a & x.m_sent_time;
-      a & x.m_tx;
-      a & x.m_recipient;
-      a & x.m_recipient_alias;
-      a & x.m_is_income;
     }
 
     template <class Archive>
@@ -326,11 +311,8 @@ namespace boost
       a & x.is_income;
       a & x.td;
       a & x.tx;
-      if (ver < 2)
-        return;
       a & x.recipient_alias;
-      if (ver < 3)
-        return;
+      a & x.comment;
       a & x.fee;
 
       //do not store unlock_time
@@ -565,7 +547,9 @@ namespace tools
         recipient += ", ";
       recipient += get_account_address_as_str(d.addr);
     }
-    add_sent_unconfirmed_tx(tx, change_dts.amount, recipient);
+    currency::tx_comment cm;
+    get_attachment(attachments, cm);
+    add_sent_unconfirmed_tx(tx, change_dts.amount, recipient, cm.comment);
 
     LOG_PRINT_L2("transaction " << get_transaction_hash(tx) << " generated ok and sent to daemon, key_images: [" << key_images << "]");
 
