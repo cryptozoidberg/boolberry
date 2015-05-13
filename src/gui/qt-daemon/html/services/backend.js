@@ -112,24 +112,26 @@
                 }
             },
 
-            push_offer : function(callback){
-                // wallet_id, offer_type, amount_lui, amount_etc, target, 
-                // location, contacts, comment, payment_types, expiration_time
+            pushOffer : function(wallet_id, offer_type, amount_lui, target, location, contacts, comment, expiration_time, fee, callback){
+                // , amount_etc
+                // , payment_types
 
                 var params = {
-                    "wallet_id" : 0,
+                    "wallet_id" : wallet_id,
                     "od": {
-                        "offer_type": 0, //0 buy, 1 sell
-                        "amount_lui": 2300000000,
-                        "amount_etc": 2,
-                        "target": "EUR",
-                        "location": "USA, NYC",
-                        "contacts": "+89876782342",
-                        "comment": "Best ever service",
+                        "offer_type": offer_type, //0 buy, 1 sell
+                        "amount_lui": amount_lui,
+                        "amount_etc": 1,
+                        "target": target,
+                        "location": location,
+                        "contacts": contacts,
+                        "comment": comment,
                         "payment_types": "cash",
-                        "expiration_time":3
+                        "expiration_time": expiration_time,
+                        "fee" : fee
                     }
                 };
+                console.log(params);
                 return this.runCommand('push_offer', params, callback);
             },
 
@@ -204,7 +206,9 @@
             // system functions
 
             runCommand : function(command, params, callback) {
-                
+                var commandsNoLoading = [
+                    'get_all_aliases'
+                ];
                 if(this.shouldUseEmulator()){
                     return emulator.runCommand(command, params, callback);
                 }else{
@@ -221,7 +225,9 @@
                         if(result.error_code == 'OK'){
                             if(angular.isDefined(callback)){
                                 var request_id = result.request_id;
-                                loaders[request_id] = loader.open();
+                                if(commandsNoLoading.indexOf(command) < 0){
+                                    loaders[request_id] = loader.open();
+                                }
                                 callbacks[request_id] = callback;
                             }else{
                                 return result; // If we didn't pass callback, its mean the function is synch
@@ -367,15 +373,23 @@
             return object;
         };
         this.runCommand = function(command, params, callback) {
+            var commandsNoLoading = [
+                'get_all_aliases'
+            ];
+            var isShowLoader = commandsNoLoading.indexOf(command) < 0;
             var data = {};
             var commandData = false;
             if(commandData = this.getData(command)){
                 data = commandData;
             }
             if(angular.isDefined(callback)){
-                var loaderInst = loader.open('Run command ' + command + ' params = ' + JSON.stringify(params));
+                
+                if(isShowLoader){
+                    var loaderInst = loader.open('Run command ' + command + ' params = ' + JSON.stringify(params));
+                }
+
                 $timeout(function(){
-                    loaderInst.close();
+                    if(isShowLoader) loaderInst.close();
                     callback(data);
                 },3000);
                 
