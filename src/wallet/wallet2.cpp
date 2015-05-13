@@ -179,7 +179,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
     }
 }
 //----------------------------------------------------------------------------------------------------
-void prepare_wti_decrypted_attachments(wallet_rpc::wallet_transfer_info& wti, const std::vector<currency::attachment_v>& decrypted_att)
+void wallet2::prepare_wti_decrypted_attachments(wallet_rpc::wallet_transfer_info& wti, const std::vector<currency::attachment_v>& decrypted_att)
 {
   if (wti.is_income)
   {
