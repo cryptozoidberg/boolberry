@@ -12,9 +12,15 @@
             <div style="color: rgb(115, 115, 115);" class="help-block">
                 Алиас может состоять только из латинской букв, цифр, начинается всегда с символа "@".
             </div>
-            <input type="text" class="form-control input-lg" placeholder="@alias" ng-model="alias.name">
-            <span style="top:auto; bottom:25px" class="fa fa-lg fa-check form-control-feedback" aria-hidden="true"></span>
-            <span id="inputSuccess2Status" class="sr-only">(success)</span>
+
+             <div class="input-group">
+                <span class="input-group-addon">@</span>
+                <input type="text" class="form-control input-lg" ng-model="alias.name">
+                
+            </div>
+            
+            <span style="top:auto; bottom:20px" class="fa fa-lg fa-check form-control-feedback"></span>
+            
             <div class="help-block">
                 <em>это имя свободно</em>
             </div>
