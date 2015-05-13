@@ -308,7 +308,13 @@
                         if(angular.isDefined(data.aliases) && data.aliases.length){
                             $rootScope.aliases = [];
                             angular.forEach(data.aliases,function(alias){
-                                $rootScope.aliases.push({alias: alias.alias, name: '@'+alias.alias, address: alias.address});
+                                var new_alias = {
+                                    alias: alias.alias, 
+                                    name: '@'+alias.alias, 
+                                    address: alias.address,
+                                    comment: alias.comment
+                                };
+                                $rootScope.aliases.push(new_alias);
                             });    
                         }
                     });

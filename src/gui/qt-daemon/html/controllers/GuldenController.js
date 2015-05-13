@@ -46,13 +46,23 @@
                 $scope.transaction.from = parseInt($routeParams.wallet_id);
             }
             
-            $scope.selectalias = function(obj){
-                console.log('SELECT ALIAS');
-                console.log(obj);
+            $scope.selectAlias = function(obj){
+                var alias = obj.originalObject;
+                $scope.transaction.to = alias.address;
+                $scope.transaction.alias = alias.alias;
+            }
+
+            $scope.inputChanged = function(str){
+                delete $scope.transaction.alias;
+                if(str.indexOf('@') != 0){
+                    $scope.transaction.to = str;    
+                }else{
+                    $scope.transaction.to = '';
+                }
             }
 
             $scope.send = function(tr){
-                
+                console.log(tr);
                 $modal.open({
                     templateUrl: "views/tr_confirm.html",
                     controller: 'appPassOnTransferCtrl',
@@ -68,8 +78,6 @@
                 });
                 
             };
-
-            
 
             $scope.validate_address = function(){
                 if($scope.transaction.to.length == 95){

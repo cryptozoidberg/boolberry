@@ -13,7 +13,10 @@
                     </tr>
                     <tr>
                         <td class="text-right text-strong">Получатель</td>
-                        <td><pre style="width: 400px; overflow: auto;">{{tr.to}}</pre></td>
+                        <td>
+                            <span ng-if="tr.alias">@{{tr.alias}}</span>
+                            <pre style="width: 400px; overflow: auto;">{{tr.to}}</pre>
+                        </td>
                     </tr>
                     <tr>
                         <td class="text-right text-strong">Сумма</td>
