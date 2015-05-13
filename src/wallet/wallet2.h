@@ -89,7 +89,6 @@ namespace tools
       size_t m_internal_output_index;
       uint64_t m_global_output_index;
       bool m_spent;
-      std::vector<attachment_v> decrypted_att;
       crypto::key_image m_key_image; //TODO: key_image stored twice :(
 
       uint64_t amount() const { return m_tx.vout[m_internal_output_index].amount; }
@@ -219,14 +218,20 @@ namespace tools
     void pull_blocks(size_t& blocks_added);
     uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
     bool prepare_file_names(const std::string& file_path);
-    void process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias);
+    void process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias, std::string& comment);
     void add_sent_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient);
     void update_current_tx_limit();
     void prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height, uint64_t timestamp, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
-    void handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td);
-    void handle_money_spent2(const currency::block& b, const currency::transaction& in_tx, uint64_t amount, const money_transfer2_details& td, const std::string& recipient, const std::string& recipient_alias);
+    void prepare_wti_decrypted_attachments(wallet_rpc::wallet_transfer_info& wti, const std::vector<attachment_v>& decrypted_att);
+    void handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td, const std::vector<attachment_v>& decrypted_att);
+    void handle_money_spent2(const currency::block& b,  
+                             const currency::transaction& in_tx, 
+                             uint64_t amount, 
+                             const money_transfer2_details& td, 
+                             const std::string& recipient, 
+                             const std::string& recipient_alias,
+                             const std::string& comment);
     std::string get_alias_for_address(const std::string& addr);
-    void wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& utd, wallet_rpc::wallet_transfer_info& wti);
     bool is_coin_age_okay(const transfer_details& tr);
     bool build_kernel(const currency::pos_entry& pe, const currency::stake_modifier_type& stake_modifier, currency::stake_kernel& kernel, uint64_t& coindays_weight, uint64_t timestamp);
     bool is_connected_to_net();
@@ -248,7 +253,7 @@ namespace tools
     std::atomic<bool> m_run;
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
     std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
-    std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;
+    std::unordered_map<crypto::hash, tools::wallet_rpc::wallet_transfer_info> m_unconfirmed_txs;
 
     std::shared_ptr<i_core_proxy> m_core_proxy;
     std::shared_ptr<i_wallet2_callback> m_callback_holder;

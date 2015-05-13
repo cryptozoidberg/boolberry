@@ -43,6 +43,7 @@ namespace wallet_rpc
     uint64_t      fee;
     bool          is_service;
     wallet_transfer_info_details td;
+
     
     //not included in serialization map
     currency::transaction tx;

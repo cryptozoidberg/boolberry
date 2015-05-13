@@ -654,6 +654,7 @@ namespace currency
     if (was_crypted_entries && !check_summ_validated)
     {
       LOG_PRINT_RED_L0("Failed to decrypt attachments");
+      decrypted_att.clear();
       return false;
     }
     return true;
@@ -1019,16 +1020,6 @@ namespace currency
 
     payment_id = user_data.substr(2, static_cast<size_t>(user_data[1]));
     return true;
-  }
-  //---------------------------------------------------------------
-  std::string get_comment_from_tx(const transaction& tx)
-  {
-    for (auto& a : tx.attachment)
-    {
-      if (a.type() == typeid(tx_comment))
-        return boost::get<tx_comment>(a).comment;
-    }
-    return "";
   }
   //---------------------------------------------------------------
   bool get_payment_id_from_tx_extra(const transaction& tx, std::string& payment_id)
