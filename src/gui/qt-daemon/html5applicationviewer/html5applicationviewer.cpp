@@ -252,7 +252,7 @@ void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
   connect(m_restoreAction.get(), SIGNAL(triggered()), this, SLOT(showNormal()));
 
   m_quitAction = std::unique_ptr<QAction>(new QAction(tr("&Quit"), this));
-  connect(m_quitAction.get(), SIGNAL(triggered()), this, SIGNAL(quit_requested()));
+  //connect(m_quitAction.get(), SIGNAL(triggered()), this, SIGNAL(quit_requested()));
 
   m_trayIconMenu = std::unique_ptr<QMenu>(new QMenu(this));
   m_trayIconMenu->addAction(m_restoreAction.get());

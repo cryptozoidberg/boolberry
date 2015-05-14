@@ -32,7 +32,7 @@
 #define CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE       500000 //size of block (bytes) after which reward for block calculated using block size
 #define CURRENCY_COINBASE_BLOB_RESERVED_SIZE          600
 #define CURRENCY_MAX_TRANSACTION_BLOB_SIZE            (CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE - CURRENCY_COINBASE_BLOB_RESERVED_SIZE*2) 
-#define CURRENCY_DISPLAY_DECIMAL_POINT                12
+#define CURRENCY_DISPLAY_DECIMAL_POINT                6
 
 // COIN - number of smallest units in one coin
 #define COIN                                            ((uint64_t)100000000) // pow(10, 8)

@@ -170,6 +170,7 @@ namespace currency
     std::string payment_types; //[max 20 characters ]money accept type(bank transaction, internet money, cash, etc)
     uint8_t expiration_time;   //n-days
     uint64_t timestamp;        //this is not kept by transaction, info filled by corresponding transaction
+    uint64_t fee;              //value of fee to pay(or paid in case of existing offers) to rank it
 
 
     BEGIN_SERIALIZE_OBJECT()
