@@ -3,8 +3,8 @@
 
     var module = angular.module('app.backendServices', [])
 
-    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer','$rootScope',
-        function($interval, $timeout, emulator, loader, informer, $rootScope) {
+    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer','$rootScope', '$filter',
+        function($interval, $timeout, emulator, loader, informer, $rootScope, $filter) {
         
         var callbacks = {};
 
@@ -120,7 +120,7 @@
                     "wallet_id" : wallet_id,
                     "od": {
                         "offer_type": offer_type, //0 buy, 1 sell
-                        "amount_lui": amount_lui,
+                        "amount_lui": $filter('gulden_to_int')(amount_lui),
                         "amount_etc": 1,
                         "target": target,
                         "location": location,
@@ -128,7 +128,7 @@
                         "comment": comment,
                         "payment_types": "cash",
                         "expiration_time": expiration_time,
-                        "fee" : fee
+                        "fee" : $filter('gulden_to_int')(fee)
                     }
                 };
                 console.log(params);
