@@ -1,7 +1,6 @@
 (function() {
     'use strict';
     var module = angular.module('app.safes',[]);
-
     
     module.controller('createAliasCtrl',['$scope', '$modalInstance', 'backend', 'safe',
         function($scope, $modalInstance, backend, safe){
@@ -16,8 +15,8 @@
             };
 
             $scope.register = function(alias){
-                console.log(alias.comment);
                 backend.registerAlias(safe.wallet_id, alias.name, safe.address, alias.fee, alias.comment, function(data){
+                    console.log('ALIAS CREATED ::');
                     console.log(data); //TODO add to rootscope aliases
                     $modalInstance.close();
                 });
@@ -28,27 +27,6 @@
 
     module.controller('safeListCtrl',['backend','$scope','$rootScope', '$modal',
         function(backend, $scope, $rootScope, $modal){
-            
-            $scope.resynch = function(wallet_id){
-                console.log('RESYNCH WALLET ::' + wallet_id);
-                var result = backend.resync_wallet(wallet_id);
-                console.log(result);
-            };
-
-            $scope.registerAlias = function(safe){ //TODO check safe data
-                
-                var modalInstance = $modal.open({
-                    templateUrl: "views/create_alias.html",
-                    controller: 'createAliasCtrl',
-                    size: 'md',
-                    windowClass: 'modal fade in',
-                    resolve: {
-                        safe: function(){
-                            return safe;
-                        }
-                    }
-                });
-            };
 
             
         }

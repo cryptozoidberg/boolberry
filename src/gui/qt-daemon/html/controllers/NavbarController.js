@@ -292,6 +292,27 @@
 
         }
 
+        $scope.resynch = function(wallet_id){
+            console.log('RESYNCH WALLET ::' + wallet_id);
+            var result = backend.resync_wallet(wallet_id);
+            console.log(result);
+        };
+
+        $scope.registerAlias = function(safe){ //TODO check safe data
+            
+            var modalInstance = $modal.open({
+                templateUrl: "views/create_alias.html",
+                controller: 'createAliasCtrl',
+                size: 'md',
+                windowClass: 'modal fade in',
+                resolve: {
+                    safe: function(){
+                        return safe;
+                    }
+                }
+            });
+        };
+
         var loaded = false;
 
         backend.subscribe('update_daemon_state', function(data){// move to run
@@ -371,8 +392,18 @@
         });
 
         backend.subscribe('update_wallet_status', function(data){
-            console.log('update_wallet_status');
-            console.log(data);
+            var wallet_id = data.wallet_id;
+            var wallet_state = data.wallet_state;
+            var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            
+            safe.loaded = false;
+            
+            if(wallet_state == 2){
+                safe.loaded = true;
+            }
+
+            // console.log('update_wallet_status');
+            // console.log(data);
         });
 
         backend.subscribe('quit_requested', function(data){
@@ -424,7 +455,7 @@
                     if(tr_exists){
                         console.log(tr_info.tx_hash+' tr exists');
                     }else{
-                        console.log(tr_info.tx_hash+' does not tr exist');
+                        console.log(tr_info.tx_hash+' tr does not exist');
                         safe.history.unshift(tr_info); // insert new
                     }
                     
