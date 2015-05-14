@@ -37,11 +37,11 @@
                 return this.runCommand('get_all_offers', params, callback);
             },
 
-            resync_wallet : function(wallet_id) {
+            resync_wallet : function(wallet_id, callback) {
                 var params = {
                     wallet_id: wallet_id
                 }
-                return this.runCommand('resync_wallet', params);
+                return this.runCommand('resync_wallet', params, callback);
             },
 
             haveSecureAppData: function() { // for safes
@@ -63,7 +63,7 @@
                         "tracking_key": "",
                         "comment": comment
                     },
-                    "fee": fee
+                    "fee": $filter('gulden_to_int')(fee)
                 };
 
                 return this.runCommand('request_alias_registration', params, callback);
@@ -74,6 +74,7 @@
             },
 
             getSecureAppData: function(pass) {
+                console.log(pass);
                 if(!this.shouldUseEmulator()){
                     return Qt_parent['get_secure_app_data'](JSON.stringify(pass));
                 }else{
@@ -266,8 +267,9 @@
 
                 var request_id = status.request_id;
                 var error_code = result.status.error_code;
+
+                if(angular.isDefined(loaders[request_id])) loaders[request_id].close();
                 
-                loaders[request_id].close();
                 console.log('DISPATCH: got result from backend request id = '+request_id);
                 console.log(result);
 

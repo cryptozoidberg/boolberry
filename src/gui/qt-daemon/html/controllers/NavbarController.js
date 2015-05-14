@@ -97,6 +97,7 @@
 
 
             $scope.submit = function(appPass){
+                console.log(appPass);
                 var appData = backend.getSecureAppData({pass: appPass});
                 appData = JSON.parse(appData);
                 if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
@@ -294,8 +295,9 @@
 
         $scope.resynch = function(wallet_id){
             console.log('RESYNCH WALLET ::' + wallet_id);
-            var result = backend.resync_wallet(wallet_id);
-            console.log(result);
+            backend.resync_wallet(wallet_id, function(result){
+                console.log(result);
+            });
         };
 
         $scope.registerAlias = function(safe){ //TODO check safe data
@@ -395,13 +397,16 @@
             var wallet_id = data.wallet_id;
             var wallet_state = data.wallet_state;
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-            
-            safe.loaded = false;
-            
-            if(wallet_state == 2){
-                safe.loaded = true;
+            if(safe.length){
+                safe = safe[0];
+                if(wallet_state == 2){
+                    safe.loaded = true;
+                    // informer.info('Сейф загрузился');
+                }else{
+                    safe.loaded = false;
+                    // informer.info('Сейф загружается');
+                }
             }
-
             // console.log('update_wallet_status');
             // console.log(data);
         });
@@ -425,8 +430,17 @@
             }
             var wallet_id = data.wallet_id;
             var tr_info   = data.ti;
+
+            // alias = $filter('filter')($rootScope.aliases,{tx_hash : data.ti.tx_hash});
+
+            // if(alias.length){ // alias transaction
+            //     alias = alias[0];
+            //     alias = {}
+
+            // }
+
             safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-            if(safe.length){
+            if(safe.length){ // safe transaction
                 safe = safe[0];
                 safe.balance = data.balance;
                 safe.unlocked_balance = data.unlocked_balance;

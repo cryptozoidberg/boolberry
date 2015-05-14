@@ -18,6 +18,9 @@
                 backend.registerAlias(safe.wallet_id, alias.name, safe.address, alias.fee, alias.comment, function(data){
                     console.log('ALIAS CREATED ::');
                     console.log(data); //TODO add to rootscope aliases
+                    //var tr_key = data.tx_hash;
+                    //$rootscope.aliases.push({tx_hash : data.tx_hash});
+                    
                     $modalInstance.close();
                 });
             };
