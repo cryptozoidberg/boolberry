@@ -85,7 +85,13 @@ private:
   view::i_view* m_pview;
   std::shared_ptr<tools::i_core_proxy> m_rpc_proxy;
   critical_section m_wallets_lock;
-  std::map<size_t, std::shared_ptr<tools::wallet2>> m_wallets;
+
+  struct wallet_vs_options
+  {
+    std::shared_ptr<tools::wallet2> w;
+    bool do_mining;
+  };
+  std::map<size_t, wallet_vs_options> m_wallets;
   std::atomic<uint64_t> m_last_daemon_height;
   std::atomic<uint64_t> m_last_wallet_synch_height;
   std::atomic<uint64_t> m_last_wallet_mint_time;

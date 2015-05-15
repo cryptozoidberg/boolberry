@@ -161,12 +161,15 @@ public:
       wallet_state_ready = 2
     };
 
+
     uint64_t wallet_id;
     uint64_t wallet_state;
+    bool is_mining;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_id)
       KV_SERIALIZE(wallet_state)
+      KV_SERIALIZE(is_mining)
     END_KV_SERIALIZE_MAP()
   };  
   
