@@ -129,6 +129,7 @@ public:
     std::string pow_difficulty;
     uint64_t hashrate;
     uint64_t last_build_displaymode;
+    uint64_t alias_count;
     std::string last_build_available;
     std::list<block_info> last_blocks;
 
@@ -145,6 +146,7 @@ public:
       KV_SERIALIZE(last_build_displaymode)
       KV_SERIALIZE(last_build_available)
       KV_SERIALIZE(last_blocks)
+      KV_SERIALIZE(alias_count)
     END_KV_SERIALIZE_MAP()
   };
 

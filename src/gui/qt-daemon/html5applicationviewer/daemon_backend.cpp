@@ -342,6 +342,7 @@ bool daemon_backend::update_state_info()
     LOG_ERROR("Failed to call get_info");
     return false;
   }
+  dsi.alias_count = inf.alias_count;
   dsi.pow_difficulty = std::to_string(inf.pow_difficulty);
   dsi.pos_difficulty = inf.pos_difficulty;
   dsi.hashrate = inf.current_network_hashrate_350;

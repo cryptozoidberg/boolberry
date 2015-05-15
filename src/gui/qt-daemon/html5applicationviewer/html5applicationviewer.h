@@ -131,6 +131,7 @@ private:
   std::unique_ptr<QAction> m_restoreAction;
   std::unique_ptr<QAction> m_quitAction;
   
+  std::string m_last_update_daemon_status_json;
 
   struct dispatch_entry
   {
