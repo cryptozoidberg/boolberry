@@ -391,8 +391,11 @@ bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info
   //m_d->update_daemon_state(info);
   std::string json_str;
   epee::serialization::store_t_to_json(info, json_str);
+  
+  //lifehack
   if (m_last_update_daemon_status_json == json_str)
     return true;
+  
   LOG_PRINT_L0("SENDING SIGNAL -> [update_daemon_state]");
   m_d->update_daemon_state(json_str.c_str());
   m_last_update_daemon_status_json = json_str;

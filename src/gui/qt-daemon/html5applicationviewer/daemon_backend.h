@@ -88,8 +88,9 @@ private:
 
   struct wallet_vs_options
   {
-    std::shared_ptr<tools::wallet2> w;
-    bool do_mining;
+    epee::locked_object<std::shared_ptr<tools::wallet2>> w;
+    std::atomic<bool> do_mining;
+    boost::thread miner_thread;
   };
   std::map<size_t, wallet_vs_options> m_wallets;
   std::atomic<uint64_t> m_last_daemon_height;
@@ -106,5 +107,5 @@ private:
   currency::t_currency_protocol_handler<currency::core> m_cprotocol;
   nodetool::node_server<currency::t_currency_protocol_handler<currency::core> > m_p2psrv;
   currency::core_rpc_server m_rpc_server;
-  std::thread m_miner_thread;
+
 };

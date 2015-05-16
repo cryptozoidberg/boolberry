@@ -141,6 +141,57 @@ namespace epee
   };
 
 
+  /************************************************************************/
+  /*                                                                      */
+  /************************************************************************/
+  template<typename t_object>
+  class locked_object
+  {
+
+    t_object t;
+    std::recursive_mutex m;
+    template<typename t_object>
+    friend class locked_object_proxy;
+  public:
+    locked_object_proxy<t_object> operator->()
+    {
+      return locked_object_proxy<t_object>(t, m);
+    }
+    locked_object_proxy<t_object> operator*()
+    {
+      return locked_object_proxy<t_object>(t, m);
+    }
+
+    locked_object_proxy<t_object> operator()()
+    {
+      return locked_object_proxy<t_object>(t, m);
+    }
+  };
+
+  template<typename t_object>
+  class locked_object_proxy
+  {
+    t_object& rt;
+    std::unique_lock<std::recursive_mutex> lock;
+  public:
+    locked_object_proxy(t_object& t, std::recursive_mutex& m) :rt(t), lock(m)
+    {}
+    locked_object_proxy(const locked_object_proxy& lop) :rt(lop.rt), lock(lop.lock.mutex())
+    {}
+    t_object& operator()()
+    {
+      return rt;
+    }
+    t_object* operator ->()
+    {
+      return &rt;
+    }
+    t_object& operator *()
+    {
+      return rt;
+    }
+  };
+
 #if defined(WINDWOS_PLATFORM)
   class shared_critical_section
   {
@@ -211,6 +262,7 @@ namespace epee
   private:
     shared_critical_section& m_ref_sec;
   };
+
 #endif
 
 #define  SHARED_CRITICAL_REGION_LOCAL(x) boost::shared_lock< boost::shared_mutex > critical_region_var(x)
