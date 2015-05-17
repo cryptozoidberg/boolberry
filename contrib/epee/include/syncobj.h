@@ -177,7 +177,7 @@ namespace epee
 
     t_object t;
     std::recursive_mutex m;
-    template<typename t_object>
+    template<typename t_proxy_object>
     friend class locked_object_proxy;
   public:
     locked_object_proxy<t_object> operator->()
