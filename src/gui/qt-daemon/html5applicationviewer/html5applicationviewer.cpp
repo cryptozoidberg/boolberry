@@ -23,6 +23,16 @@
 #include "warnings.h"
 #include "net/http_client.h"
 
+#define PREPARE_ARG_FROM_JSON(arg_type, var_name)   \
+  arg_type var_name = AUTO_VAL_INIT(var_name); \
+  view::api_response ar;  \
+if (!epee::serialization::load_t_from_json(var_name, param.toStdString())) \
+{                                                          \
+  ar.error_code = API_RETURN_CODE_BAD_ARG;                 \
+  return epee::serialization::store_t_to_json(ar).c_str(); \
+}
+
+
 class Html5ApplicationViewerPrivate : public QGraphicsView
 {
   Q_OBJECT
@@ -747,16 +757,11 @@ QString Html5ApplicationViewer::show_openfile_dialog(const QString& param)
   return epee::serialization::store_t_to_json(ofdres).c_str();
 }
 
+
 QString Html5ApplicationViewer::show_savefile_dialog(const QString& param)
 {
-
-  view::system_filedialog_request ofdr = AUTO_VAL_INIT(ofdr);
+  PREPARE_ARG_FROM_JSON(view::system_filedialog_request, ofdr);
   view::system_filedialog_response ofdres = AUTO_VAL_INIT(ofdres);
-  if (!epee::serialization::load_t_from_json(ofdr, param.toStdString()))
-  {
-    ofdres.error_code = API_RETURN_CODE_BAD_ARG;
-    return epee::serialization::store_t_to_json(ofdres).c_str();
-  }
 
   QString path = QFileDialog::getSaveFileName(this, ofdr.caption.c_str(),
     ofdr.default_dir.c_str(),
@@ -846,11 +851,23 @@ QString Html5ApplicationViewer::get_all_offers(const QString& param)
 QString Html5ApplicationViewer::push_offer(const QString& param)
 {
   return que_call2<view::push_offer_param>("get_recent_transfers", param, [this](const view::push_offer_param& a, view::api_response& ar){
-
     view::transfers_array ta = AUTO_VAL_INIT(ta);
     ar.error_code = m_backend.push_offer(a.wallet_id, a.od);
     dispatch(ar, ta);
   });
+}
+
+QString Html5ApplicationViewer::start_pos_mining(const QString& param)
+{
+  PREPARE_ARG_FROM_JSON(view::wallet_id_obj, wo);
+  ar.error_code = m_backend.start_pos_mining(wo.wallet_id);
+  return store_t_to_json(ar);
+}
+QString Html5ApplicationViewer::stop_pos_mining(const QString& param)
+{
+  PREPARE_ARG_FROM_JSON(view::wallet_id_obj, wo);
+  ar.error_code = m_backend.stop_pos_mining(wo.wallet_id);
+  return store_t_to_json(ar);
 }
 
 

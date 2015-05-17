@@ -215,5 +215,28 @@ response:
   "request_id": ""   //ignored
 }
 
+[sync] start_pos_mining(param)
+param:
+
+{
+  "wallet_id" : 0
+}
+response: 
+{
+  "error_code" : "OK",
+  "request_id": ""   
+}
+
+[sync] stop_pos_mining(param)
+param:
+
+{
+  "wallet_id" : 0
+}
+response: 
+{
+  "error_code" : "OK",
+  "request_id": ""   
+}
 
 

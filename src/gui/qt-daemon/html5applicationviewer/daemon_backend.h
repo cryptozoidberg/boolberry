@@ -47,6 +47,7 @@ public:
     epee::locked_object<std::shared_ptr<tools::wallet2>> w;
     std::atomic<bool> do_mining;
     std::atomic<bool> stop;
+    std::atomic<bool> break_mining_loop;
 
     std::thread miner_thread;
     void miner_func();
@@ -70,6 +71,8 @@ public:
   std::string request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, currency::transaction& res_tx);
   std::string validate_address(const std::string& addr);
   std::string resync_wallet(uint64_t wallet_id);
+  std::string start_pos_mining(uint64_t wallet_id);
+  std::string stop_pos_mining(uint64_t wallet_id);
 
 
   void toggle_pos_mining();

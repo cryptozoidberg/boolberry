@@ -7,6 +7,22 @@
 #include "currency_core/alias_helper.h"
 #include "core_fast_rpc_proxy.h"
 
+#define GET_WALLET_OPT_BY_ID(wallet_id, name)       \
+  CRITICAL_REGION_LOCAL(m_wallets_lock);    \
+  auto it = m_wallets.find(wallet_id);      \
+if (it == m_wallets.end())                \
+  return API_RETURN_CODE_WALLET_WRONG_ID; \
+  auto& name = it->second;
+
+#define GET_WALLET_BY_ID(wallet_id, name)       \
+CRITICAL_REGION_LOCAL(m_wallets_lock);    \
+auto it = m_wallets.find(wallet_id);      \
+if (it == m_wallets.end())                \
+  return API_RETURN_CODE_WALLET_WRONG_ID; \
+auto& name = it->second.w;
+
+
+
 daemon_backend::daemon_backend():m_pview(&m_view_stub),
                                  m_stop_singal_sent(false),
                                  m_ccore(&m_cprotocol),
@@ -428,9 +444,12 @@ bool daemon_backend::update_wallets()
       m_pview->update_wallet_status(wsi);
       try
       {
+        w.second.break_mining_loop = true;
         w.second.w->get()->refresh();
         w.second.w->get()->scan_tx_pool();
         wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
+        wsi.is_mining = w.second.do_mining;
+        w.second.break_mining_loop = false;
         m_pview->update_wallet_status(wsi);
       }
 
@@ -528,12 +547,7 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
 
 std::string daemon_backend::get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist)
 {
-  CRITICAL_REGION_LOCAL(m_wallets_lock);
-  auto it = m_wallets.find(wallet_id);
-  if (it == m_wallets.end())
-    return API_RETURN_CODE_WALLET_WRONG_ID;
-
-  auto& w = it->second.w;
+  GET_WALLET_BY_ID(wallet_id, w);
 
   w->get()->get_recent_transfers_history(tr_hist.history, 0, 1000);
   w->get()->get_unconfirmed_transfers(tr_hist.unconfirmed);
@@ -648,12 +662,7 @@ std::string daemon_backend::request_alias_registration(const currency::alias_rpc
   currency::COMMAND_RPC_GET_ALIAS_DETAILS::response rsp = AUTO_VAL_INIT(rsp);
   if (m_rpc_proxy->call_COMMAND_RPC_GET_ALIAS_DETAILS(req, rsp) && rsp.status != CORE_RPC_STATUS_OK)
   {
-    CRITICAL_REGION_LOCAL(m_wallets_lock);
-    auto it = m_wallets.find(wallet_id);
-    if (it == m_wallets.end())
-      return API_RETURN_CODE_WALLET_WRONG_ID;
-
-    auto& w = it->second.w;
+    GET_WALLET_BY_ID(wallet_id, w);
     try
     {
       w->get()->request_alias_registration(ai, res_tx);
@@ -715,12 +724,7 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
     }
   }
 
-  CRITICAL_REGION_LOCAL(m_wallets_lock);
-  auto it = m_wallets.find(wallet_id);
-  if (it == m_wallets.end())
-    return API_RETURN_CODE_WALLET_WRONG_ID;
-
-  auto& w = it->second.w;
+  GET_WALLET_BY_ID(wallet_id, w);
 
 
 
@@ -773,28 +777,37 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
 
 std::string daemon_backend::get_wallet_info(size_t wallet_id, view::wallet_info& wi)
 {
-  CRITICAL_REGION_LOCAL(m_wallets_lock);
-  auto it = m_wallets.find(wallet_id);
-  if (it == m_wallets.end())
-    return API_RETURN_CODE_WALLET_WRONG_ID;
-
-  auto& w = it->second;
+  GET_WALLET_OPT_BY_ID(wallet_id, w);
   return get_wallet_info(w, wi);
 }
 
 std::string daemon_backend::resync_wallet(uint64_t wallet_id)
 {
-  CRITICAL_REGION_LOCAL(m_wallets_lock);
-  auto it = m_wallets.find(wallet_id);
-  if (it == m_wallets.end())
-    return API_RETURN_CODE_WALLET_WRONG_ID;
-
-  auto& w = it->second.w;
+  GET_WALLET_BY_ID(wallet_id, w);
   w->get()->reset_history();
   m_last_wallet_synch_height = 0;
   return API_RETURN_CODE_OK;
 }
-
+std::string daemon_backend::start_pos_mining(uint64_t wallet_id)
+{
+  GET_WALLET_OPT_BY_ID(wallet_id, wo);
+  wo.do_mining = false;
+  view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
+  wsi.is_mining = false;
+  wsi.wallet_id = wallet_id;
+  wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
+  m_pview->update_wallet_status(wsi);
+}
+std::string daemon_backend::stop_pos_mining(uint64_t wallet_id)
+{
+  GET_WALLET_OPT_BY_ID(wallet_id, wo);
+  wo.do_mining = true;
+  view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
+  wsi.is_mining = true;
+  wsi.wallet_id = wallet_id;
+  wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
+  m_pview->update_wallet_status(wsi);
+}
 std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_info& wi)
 {
   wi = view::wallet_info();
@@ -810,12 +823,7 @@ std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_
 
 std::string daemon_backend::push_offer(size_t wallet_id, const currency::offer_details& od)
 {
-  CRITICAL_REGION_LOCAL(m_wallets_lock);
-  auto it = m_wallets.find(wallet_id);
-  if (it == m_wallets.end())
-    return API_RETURN_CODE_WALLET_WRONG_ID;
-
-  auto& w = it->second.w;
+  GET_WALLET_BY_ID(wallet_id, w);
 
   try
   {
@@ -890,7 +898,19 @@ void daemon_backend::wallet_vs_options::miner_func()
       boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
       continue;
     }
-    w->get()->get
+    tools::wallet2::mining_context ctx = AUTO_VAL_INIT(ctx);
+    LOG_PRINT_L0("Starting PoS mint iteration");
+    w->get()->fill_mining_context(ctx);
+    LOG_PRINT_L0("POS_ENTRIES: " << ctx.sp.pos_entries.size());
+    tools::wallet2::scan_pos(ctx, break_mining_loop, [](){});
+    
+    if (ctx.rsp.status == CORE_RPC_STATUS_OK)
+    {
+      w->get()->build_minted_block(ctx.sp, ctx.rsp);
+    }
+    LOG_PRINT_L0("PoS mint iteration finished(" << ctx.rsp.status << ")");
+
+
   }
   LOG_PRINT_GREEN("[POS_MINER] Wallet miner thread stopped", LOG_LEVEL_0);
 }
@@ -898,6 +918,7 @@ daemon_backend::wallet_vs_options::~wallet_vs_options()
 {
   do_mining = false;
   stop = true;
+  break_mining_loop = true;
   if (miner_thread.joinable())
     miner_thread.join();
 }

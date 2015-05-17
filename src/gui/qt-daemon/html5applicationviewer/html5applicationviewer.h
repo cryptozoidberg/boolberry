@@ -79,6 +79,8 @@ protected:
   QString validate_address(const QString& param);
   QString on_request_quit();
   QString resync_wallet(const QString& param);
+  QString start_pos_mining(const QString& param);
+  QString stop_pos_mining(const QString& param);
 
 
   void message_box(const QString& msg);
