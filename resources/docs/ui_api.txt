@@ -48,6 +48,16 @@ possible "daemon_network_state" codes:
       daemon_network_state_unloading_core = 5
 
 
+update_wallet_status()
+
+param: 
+{
+  "wallet_id": 0,
+  "wallet_state": 1,
+  "is_mining": true
+}
+
+
 //----------------------------------
     API
 //----------------------------------
