@@ -791,9 +791,9 @@ std::string daemon_backend::resync_wallet(uint64_t wallet_id)
 std::string daemon_backend::start_pos_mining(uint64_t wallet_id)
 {
   GET_WALLET_OPT_BY_ID(wallet_id, wo);
-  wo.do_mining = false;
+  wo.do_mining = true;
   view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
-  wsi.is_mining = false;
+  wsi.is_mining = true;
   wsi.wallet_id = wallet_id;
   wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
   m_pview->update_wallet_status(wsi);
@@ -802,9 +802,9 @@ std::string daemon_backend::start_pos_mining(uint64_t wallet_id)
 std::string daemon_backend::stop_pos_mining(uint64_t wallet_id)
 {
   GET_WALLET_OPT_BY_ID(wallet_id, wo);
-  wo.do_mining = true;
+  wo.do_mining = false;
   view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
-  wsi.is_mining = true;
+  wsi.is_mining = false;
   wsi.wallet_id = wallet_id;
   wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
   m_pview->update_wallet_status(wsi);
@@ -893,9 +893,10 @@ void daemon_backend::on_pos_block_found(const currency::block& b)
 void daemon_backend::wallet_vs_options::miner_func()
 {
   LOG_PRINT_GREEN("[POS_MINER] Wallet miner thread started", LOG_LEVEL_0);
+  time_t last_mining_timestamp = 0;
   while (!stop)
   {
-    if (!do_mining)
+    if (!do_mining || time(nullptr) - last_mining_timestamp < POS_WALLET_MINING_SCAN_INTERVAL)
     {
       boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
       continue;
@@ -911,7 +912,7 @@ void daemon_backend::wallet_vs_options::miner_func()
       w->get()->build_minted_block(ctx.sp, ctx.rsp);
     }
     LOG_PRINT_L0("PoS mint iteration finished(" << ctx.rsp.status << ")");
-
+    last_mining_timestamp = time(nullptr);
 
   }
   LOG_PRINT_GREEN("[POS_MINER] Wallet miner thread stopped", LOG_LEVEL_0);
