@@ -2,8 +2,8 @@
 
         <h1>
             Заявка на 
-            <span class="collapse in selltext">покупка</span>
-            <span class="collapse selltext">продажу</span> 
+            <span ng-if="offer.offer_type == 2">покупку</span>
+            <span ng-if="offer.offer_type == 3">продажу</span> 
             гульденов
         </h1>
         
@@ -23,11 +23,30 @@
             <div class="panel">
                 <div class="panel-body">
                     <h4>
-                        <a href="#" type="button" data-toggle="collapse" data-target=".collapse00">  
+                        <a type="button" data-toggle="collapse" data-target=".collapse1">  
+                            <span>Выбор сейфа</span>
+                        </a>
+                    </h4>
+                    <div class="collapse in collapse1">
+                        <div class="form-group">
+                            <label class="col-xs-4 col-sm-4">Сейф, за счет которого будет осуществлена заявка</label>
+                            <select class="col-xs-4 col-sm-4" selectpicker ng-model="offer.wallet_id" ng-options="safe.wallet_id as safe.name + ' (' +safe.balance_formated + ')' for safe in safes"></select>
+                            <!-- <div class="col-xs-4 col-sm-4">
+                                <label class="checkbox"><input type="checkbox"> Не показывать номер счета в предложении</label>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-body">
+                    <h4>
+                        <a href="" type="button" data-toggle="collapse" data-target=".collapse00">  
                             <span>
                                 Детали 
-                                <span class="collapse in selltext">покупки</span>
-                                <span class="collapse selltext">продажи</span>
+                                <span ng-if="offer.offer_type == 2">покупки</span>
+                                <span ng-if="offer.offer_type == 3">продажи</span>
                             </span>
                         </a>
                     </h4>
@@ -35,7 +54,7 @@
                     <div class="there-are-more-deals-like-this-panel buyG_sticker">
                         <div class="panel-content">
                             В данный момент на рынке есть<br>
-                            <a href="#market">
+                            <a href="">
                                 <strong>5</strong> заявок, соответствующих вашей
                             </a>
                         </div>
@@ -43,7 +62,7 @@
 
                     <div class="form-group">
                         <label class="col-xs-4 col-sm-4 control-label">
-                            Тип объявления <!-- <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Вы можете поменять здесь тип обьявления и опубликовать обьявление другого типа"><i class="fa fa-lg fa-question-circle"></i></button> -->
+                            Тип объявления 
                         </label>
                         <select class="col-xs-4 col-sm-4" selectpicker ng-model="offer.offer_type" ng-options="type.key as type.value for type in offer_types"></select>
                     </div>
@@ -59,8 +78,8 @@
                                 <div class="form-group">
                                     <label class="control-label col-xs-4 col-sm-4">
                                         Сумма 
-                                        <span ng-if="offer.offer_type == 1">покупки</span>
-                                        <span ng-if="offer.offer_type == 0">продажи</span>
+                                        <span ng-if="offer.offer_type == 2">покупки</span>
+                                        <span ng-if="offer.offer_type == 3">продажи</span>
                                          в G
                                     </label>
                                     <div class="col-xs-4 col-sm-4">
@@ -86,8 +105,8 @@
                                 <div class="form-group">
                                     <label class="control-label col-xs-4 col-sm-4">
                                         Сумма 
-                                        <span ng-if="offer.offer_type == 1">покупки</span>
-                                        <span ng-if="offer.offer_type == 0">продажи</span>
+                                        <span ng-if="offer.offer_type == 2">покупки</span>
+                                        <span ng-if="offer.offer_type == 3">продажи</span>
                                          в {{offer.currency}}
                                     </label>
                                     <div class="col-xs-4 col-sm-4">
@@ -133,11 +152,7 @@
                                         <span ng-if="offer.offer_type == 1">покупки</span>
                                         <span ng-if="offer.offer_type == 0">продажи</span>
                                     </label>
-
-                                    <select selectpicker class="col-xs-4 col-sm-4">
-                                        <option>всю сумму целиком</option>
-                                        <option>возможно частями</option>
-                                    </select>
+                                    <select selectpicker class="col-xs-4 col-sm-4" ng-options="item for item in deal_details" ng-model="offer.deal_details"></select>
                                 </div>
 
                                 <div class="form-group">
@@ -148,7 +163,7 @@
                                     </div>
                                 </div>
 
-                                <a href="#" type="button" data-toggle="collapse" data-target=".collapse01" class="btn btn-block btn-light" >Курс и котировки USD/G <i class="fa fa-chevron-down"></i></a>
+                                <a href="" type="button" data-toggle="collapse" data-target=".collapse01" class="btn btn-block btn-light" >Курс и котировки USD/G <i class="fa fa-chevron-down"></i></a>
 
 
                                 <div class="collapse collapse01">
@@ -258,7 +273,7 @@
             <div class="panel">
                 <div class="panel-body">
 
-                    <h4><a href="#" type="button" data-toggle="collapse" data-target=".collapse2">  <span>Cпособы связи</span></a></h4>
+                    <h4><a href="" type="button" data-toggle="collapse" data-target=".collapse2">  <span>Cпособы связи</span></a></h4>
                     <div class="collapse in collapse2">
                         <div class="form-group">
                             <label  class="control-label col-xs-4 col-sm-4">Email</label>
@@ -309,7 +324,7 @@
             </div>
             <div class="panel">
                 <div class="panel-body">
-                    <h4><a href="#" type="button" data-toggle="collapse" data-target=".collapse1">  <span>Способы расчета</span></a></h4>
+                    <h4><a href="" type="button" data-toggle="collapse" data-target=".collapse1">  <span>Способы расчета</span></a></h4>
                     <div class="collapse in collapse1">
                         <div class="form-group">
 
@@ -317,7 +332,6 @@
                                 <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Выберите наиболее удобный вам способ перевода средств"></i>
                             </label>
 
-                            {{offer.payment_types}}
                             <select selectpicker class="show-tick col-xs-4 col-sm-4" multiple title='выбрать' ng-options="key as value for (key , value) in payment_types" ng-model="offer.payment_types">
                                 
                             </select>
@@ -332,7 +346,7 @@
                             </label>
 
                             <div class="col-xs-4 col-sm-4">
-                                <input type="text" class="form-control" placeholder="название">
+                                <input type="text" ng-model="offer.payment_type_other" class="form-control" placeholder="название">
                             </div>
 
                         </div>
@@ -342,7 +356,7 @@
             <div class="panel">
                 <div class="panel-body">
 
-                    <h4><a href="#" type="button" data-toggle="collapse" data-target=".collapse3"><span>Условия размещения заявки</span></a></h4>
+                    <h4><a href="" type="button" data-toggle="collapse" data-target=".collapse3"><span>Условия размещения заявки</span></a></h4>
 
                     <div class="collapse in collapse3">
                         

@@ -14,8 +14,7 @@
                                 <button data-content="Сейф зашифрован" data-toggle="popover" data-trigger="hover" class="btn btn-link popover-name" type="button" data-original-title="" title=""><i class="fa fa-1x fa-lock text-primary"></i></button>
                             </h2>
 
-                            <span class="label label-info">@safealias</span> 
-                            <span class="label label-info">@safealias</span>
+                            <span  ng-repeat="alias in aliases | filter : {address: safe.address}"><span class="label label-info">@{{alias.alias}}</span><span>
 
                             <div style="position: relative; margin: 15px 0px 0px;" class="rel">
                                 <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button> -->

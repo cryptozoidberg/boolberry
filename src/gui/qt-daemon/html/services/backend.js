@@ -227,7 +227,7 @@
                             if(angular.isDefined(callback)){
                                 var request_id = result.request_id;
                                 if(commandsNoLoading.indexOf(command) < 0){
-                                    loaders[request_id] = loader.open();
+                                    loaders[request_id] = loader.open(command);
                                 }
                                 callbacks[request_id] = callback;
                             }else{

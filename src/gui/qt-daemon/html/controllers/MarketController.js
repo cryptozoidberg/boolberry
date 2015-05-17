@@ -19,8 +19,6 @@
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location){
             $scope.intervals = [1,3,5,14];
 
-            console.log($location.path());
-
             $scope.offer_types = [
                 {key : 0, value: 'Купить товар'},
                 {key : 1, value: 'Продать товар'}
@@ -36,6 +34,10 @@
                 contacts: {phone : '', email : ''},
                 comment: ''
             };
+
+            if($rootScope.safes.length){
+                $scope.offer.wallet_id = $rootScope.safes[0].wallet_id;
+            }
 
             if($location.path() == '/addOfferSell'){
                 $scope.offer.offer_type = 1;
@@ -239,8 +241,8 @@
             ];
 
             $scope.offer_types = [
-                {key : 1, value: 'Покупка гульденов'},
-                {key : 0, value: 'Продажа гульденов'}
+                {key : 2, value: 'Покупка гульденов'},
+                {key : 3, value: 'Продажа гульденов'}
             ];
 
             $scope.payment_types = {
@@ -249,6 +251,12 @@
                 'BT'  : 'Банковский перевод',
                 'CSH' : 'Наличные'
             };
+
+            $scope.deal_details = [
+                "всю сумму целиком",
+                "возможно частями"
+            ];
+
 
             $scope.offer = {
                 expiration_time : $scope.intervals[3],
@@ -260,13 +268,18 @@
                 contacts: {phone : '', email : ''},
                 comment: '',
                 currency: $scope.currencies[0].code,
-                payment_types: []
+                payment_types: [],
+                deal_details: $scope.deal_details[0]
             };
 
+            if($rootScope.safes.length){
+                $scope.offer.wallet_id = $rootScope.safes[0].wallet_id;
+            }
+
             if($location.path() == '/addGOfferSell'){
-                $scope.offer.offer_type = 1;
+                $scope.offer.offer_type = 3;
             }else{
-                $scope.offer.offer_type = 0;
+                $scope.offer.offer_type = 2;
             }
 
             $scope.changePackage = function(is_premium){
@@ -341,13 +354,12 @@
                 o.fee = o.is_premium ? o.fee_premium : o.fee_standart;
                 o.location = o.location.country + ', ' + o.location.city;
                 o.contacts = o.contacts.email + ', ' + o.contacts.phone;
-
+                if(o.payment_type_other) o.payment_types.push(o.payment_type_other);
                 o.payment_types = o.payment_types.join(",");
+                o.comment = o.comment + (o.comment?' ':'') + o.deal_details;
+                o.target = o.currency;
                 informer.info(JSON.stringify(o));
-
-                //o.offer_type = 1; //TODO
                 
-                // 
                 backend.pushOffer(
                     o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location, o.contacts, 
                     o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types,
