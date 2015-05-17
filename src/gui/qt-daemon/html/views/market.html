@@ -189,17 +189,18 @@
 
                         <div class="col-xs-4 col-sm-4">
 
-                            <div class="btn-group btn-group-justified" data-toggle="buttons">
-                                <label class="btn btn-primary market_filterCurrencyAllButton active">
-                                    <input type="radio" name="options" id="option0" autocomplete="off" checked=""> Все
+                            <div class="btn-group btn-group-justified">
+                                <label class="btn btn btn-primary" btn-radio="'all'" ng-model="currency_filter.offer_type">
+                                    Все
                                 </label>
-                                <label class="btn btn-primary market_filterCurrencyAskButton">
-                                    <input type="radio" name="options" id="option1" autocomplete="off"> Предложение
+                                <label class="btn btn btn-primary" btn-radio="'sell'" ng-model="currency_filter.offer_type">
+                                    Предложение
                                 </label>
-                                <label class="btn btn-primary market_filterCurrencyBidButton">
-                                    <input type="radio" name="options" id="option2" autocomplete="off"> Спрос
+                                <label class="btn btn btn-primary" btn-radio="'buy'" ng-model="currency_filter.offer_type">
+                                    Спрос
                                 </label>
                             </div>
+
                         </div>
                         <div class="col-xs-4 col-sm-4">
                             <div class="collapse filter11 close-filter">

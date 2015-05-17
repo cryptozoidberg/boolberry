@@ -418,6 +418,7 @@
         backend.subscribe('update_wallet_status', function(data){
             var wallet_id = data.wallet_id;
             var wallet_state = data.wallet_state;
+            var is_mining = data.is_mining;
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             if(safe.length){
                 safe = safe[0];
@@ -428,6 +429,7 @@
                     safe.loaded = false;
                     // informer.info('Сейф загружается');
                 }
+                safe.is_mining = is_mining;
             }
             // console.log('update_wallet_status');
             // console.log(data);

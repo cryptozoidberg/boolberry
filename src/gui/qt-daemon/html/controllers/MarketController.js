@@ -27,6 +27,10 @@
                     return false;
                 }
             }
+
+            $scope.currency_filter = {
+                offer_type: 'all'
+            };
         }
     ]);
 
