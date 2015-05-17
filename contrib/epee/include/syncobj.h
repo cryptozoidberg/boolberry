@@ -184,7 +184,7 @@ namespace epee
     {
       return locked_object_proxy<t_object>(t, m);
     }
-    locked_object_proxy<typename t_object> operator*()
+    locked_object_proxy<t_object> operator*()
     {
       return locked_object_proxy<t_object>(t, m);
     }
