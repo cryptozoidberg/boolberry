@@ -180,11 +180,17 @@
                     </td>
 
                     <td>
-                        <!-- <ul class="list-unstyled">
-                            <li class="text-info">
+                        <ul class="list-unstyled">
+                            <!-- <li class="text-info">
                                 Ожидается:  <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">
+                            </li> -->
+                            <li class="label-icon" ng-if="safe.is_mining">
+                                <em>Добыча</em> 
+                                <span class="label label-success">
+                                    <i class="gu gu-2x gu-pick"></i>
+                                </span>
                             </li>
-                        </ul> -->
+                        </ul>
                     </td>
 
                     <td>
@@ -204,7 +210,10 @@
                                 <li><a href="#sendG/{{safe.wallet_id}}">Отправить гульдены</a></li>
 
                                 <li><a href="">Продать гульдены</a></li>
-                                <li><a href="">Купить гульдены</a></li><li><a href="#">Начать добычу</a></li>
+                                <li><a href="">Купить гульдены</a></li>
+
+                                <li ng-if="!safe.is_mining"><a href="" ng-click="startMining(safe.wallet_id)">Начать добычу</a></li>
+                                <li ng-if="safe.is_mining"><a href="" ng-click="stopMining(safe.wallet_id)">Остановить добычу</a></li>
 
                                 <li class="divider"></li>
                                 <li><a href="" ng-click="registerAlias(safe)">Присвоить алиас</a></li>

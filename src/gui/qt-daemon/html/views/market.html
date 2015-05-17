@@ -238,9 +238,9 @@
                         <th>
                             Контакт
                         </th>
-                        <th>
+                        <!-- <th>
                             <span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
-                        </th>
+                        </th> -->
                         <!-- <th>
                             <span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
                         </th> -->
@@ -256,7 +256,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers">
+                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers | filter:is_currency_offer">
                             <td>
                                 3 часа назад
                             </td>
@@ -277,9 +277,9 @@
                                     </span> -->
                                 </ul>
                             </td>
-                            <td>
+                            <!-- <td>
                                 <span class="label label-success">4.5</span>
-                            </td>
+                            </td> -->
                             <!-- <td>
                                 вся сумма
                             </td> -->
@@ -440,9 +440,9 @@
                         <th>
                             Контакт
                         </th>
-                        <th>
+                        <!-- <th>
                             <span class="nowrap">Рейтинг <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
-                        </th>
+                        </th> -->
                         <th>
                             <span class="nowrap">Место-е <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
                         </th>
@@ -456,7 +456,7 @@
 
                     <tbody>
 
-                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers">
+                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers | filter:is_good_offer">
                             <td>
                                 3 часа назад
                             </td>
@@ -469,9 +469,9 @@
                             <td>
                                 {{offer.contacts}}
                             </td>
-                            <td>
+                            <!-- <td>
                                 <span class="label label-success">4.5</span>
-                            </td>
+                            </td> -->
                             <td>
                                 {{offer.location}}
                             </td>
@@ -543,7 +543,7 @@
                         <th><span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
                         <th><span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th>Контакт</th>
-                        <th><span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                       <!--  <th><span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th> -->
                         <th><span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th><span class="nowrap">Рассчет<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th><span class="nowrap">Местор-е<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
@@ -552,56 +552,34 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr class="success">
+                        <tr class="success">
 
-                        <td>3 мин назад</td>
-                        <td>Покупка</td>
-                        <td><span class="nowrap">420,34 </span></td>
-                        <td>23,00 <span class="label label-danger">+ 2%</span></td>
-                        <td><ul class="list-unstyled">
+                            <td>3 мин назад</td>
+                            <td>Покупка</td>
+                            <td><span class="nowrap">420,34 </span></td>
+                            <td>23,00 <span class="label label-danger">+ 2%</span></td>
+                            <td><ul class="list-unstyled">
 
-                            <li><a class="nowrap" href="" mailto:bicoing@yahoo.com=""> bicoinG@yahoo.com</a></li>
-                            <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
-                        </ul></td>
-                        <td><span class="label label-success">4.5</span></td>
-                        <td>вся сумма</td>
-                        <td>наличные</td>
+                                <li><a class="nowrap" href="" mailto:bicoing@yahoo.com=""> bicoinG@yahoo.com</a></li>
+                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
+                            </ul></td>
+                            <!-- <td><span class="label label-success">4.5</span></td> -->
+                            <td>вся сумма</td>
+                            <td>наличные</td>
 
-                        <td>Рим, Италия</td>
-                        <td>передам в городе</td>
-                        <td><div class="btn-group nowrapbtns">
-                            <button type="button" class="btn btn-link" data-target="#toptoupCurr" data-toggle="modal"><i class="fa fa-lg fa-arrow-circle-up text-muted"></i></button><button type="button" data-target="#orderCurr" data-toggle="modal" class="btn btn-link"><i class="fa fa-lg fa-edit text-muted"></i></button>
-                        </div></td>
-                    </tr>
-                    <tr class="">
-
-                        <td>3 мин назад</td>
-                        <td>Покупка</td>
-                        <td><span class="nowrap">420,45</span></td>
-                        <td><span class="nowrap">100,00</span></td>
-                        <td><ul class="list-unstyled">
-
-                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
-                        </ul></td>
-                        <td><span class="label label-success">4.3</span></td>
-                        <td>можно частями</td>
-                        <td>наличные</td>
-                        <td>Милан, Италия</td>
-                        <td>торг.центр на площади</td>
-                        <td>
-                            <div data-toggle="buttons" class="btn-group">
+                            <td>Рим, Италия</td>
+                            <td>передам в городе</td>
+                            <td>
+                                <!-- <div class="btn-group nowrapbtns">
                                 <button type="button" class="btn btn-link" data-target="#toptoupCurr" data-toggle="modal"><i class="fa fa-lg fa-arrow-circle-up text-muted"></i></button><button type="button" data-target="#orderCurr" data-toggle="modal" class="btn btn-link"><i class="fa fa-lg fa-edit text-muted"></i></button>
-                            </div>
-
-
-                        </td>
-
-                    </tr>
+                                </div> -->
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
 
-            <div class="table-responsive panel market-table-responsive" id="myBarter">
+            <div class="table-responsive panel market-table-responsive" id="myBarter"  ng-hide="true">
 
                 <table class="table table-condensed data-table table-hover">
                     <thead>
@@ -612,7 +590,7 @@
                         <th>Текст предложения</th>
                         <th><span class="nowrap">Цена, G</span></th>
                         <th>Контакт</th>
-                        <th><span class="nowrap">Рейтинг <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <!-- <th><span class="nowrap">Рейтинг <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th> -->
                         <th><span class="nowrap">Место-е <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
                         <th><span class="nowrap">Комментарий</span></th>
                         <th></th>
@@ -631,15 +609,21 @@
                             <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
                             <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
                         </ul></td>
-                        <td><span class="label label-success">4.5</span></td>
+                        <!-- <td><span class="label label-success">4.5</span></td> -->
 
                         <td>Бразилия</td><td>короткий текст</td>
 
-                        <td><div class="btn-group nowrapbtns">
-                            <button type="button" class="btn btn-link" data-target="#toptoupBarter" data-toggle="modal"><i class="fa fa-lg fa-arrow-circle-up text-muted"></i></button>
-                            <button type="button" data-target="#orderBarter" data-toggle="modal" class="btn btn-link"><i class="fa fa-lg fa-edit text-muted"></i></button>
+                        <td>
 
-                        </div>
+                           <!--  <div class="btn-group nowrapbtns">
+                                <button type="button" class="btn btn-link" data-target="#toptoupBarter" data-toggle="modal">
+                                    <i class="fa fa-lg fa-arrow-circle-up text-muted"></i>
+                                </button>
+                                <button type="button" data-target="#orderBarter" data-toggle="modal" class="btn btn-link">
+                                    <i class="fa fa-lg fa-edit text-muted"></i>
+                                </button>
+                            </div> -->
+
                         </td>
 
                     </tr>
@@ -698,7 +682,7 @@
                         <th><span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
                         <th><span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th>Контакт</th>
-                        <th><span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <!-- <th><span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th> -->
                         <th><span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th><span class="nowrap">Рассчет<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th><span class="nowrap">Местор-е<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
@@ -718,42 +702,23 @@
                             <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
                             <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
                         </ul></td>
-                        <td><span class="label label-success">4.5</span></td>
+                        <!-- <td><span class="label label-success">4.5</span></td> -->
                         <td>вся сумма</td>
                         <td>наличные</td>
 
                         <td>Рим, Италия</td>
                         <td>передам в городе</td>
-                        <td><div class="btn-group nowrapbtns" data-toggle="buttons">
+                        <td>
+                            <!-- <div class="btn-group nowrapbtns" data-toggle="buttons">
                             <button type="button" class="btn btn-link"><i class="fa fa-lg fa-times text-muted"></i></button><button type="button" class="btn btn-link"><i class="fa fa-lg fa-save text-muted"></i></button>
-                        </div></td>
-                    </tr>
-                    <tr class="">
-
-                        <td>3 мин назад</td>
-                        <td>Покупка</td>
-                        <td><span class="nowrap">420,45</span></td>
-                        <td><span class="nowrap">100,00</span></td>
-                        <td><ul class="list-unstyled">
-
-                            <li><span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> jsdfljsf</span></li>
-                        </ul></td>
-                        <td><span class="label label-success">4.3</span></td>
-                        <td>можно частями</td>
-                        <td>наличные</td>
-                        <td>Милан, Италия</td>
-                        <td>торг.центр на площади
-
+                            </div> -->
                         </td>
-                        <td><div class="btn-group nowrapbtns" data-toggle="buttons">
-                            <button type="button" class="btn btn-link"><i class="fa fa-lg fa-times text-muted"></i></button><button type="button" class="btn btn-link"><i class="fa fa-lg fa-save text-muted"></i></button>
-                        </div></td>
                     </tr>
                     </tbody>
                 </table>
             </div>
 
-            <div class="table-responsive panel market-table-responsive" id="favBarter">
+            <div class="table-responsive panel market-table-responsive" id="favBarter" ng-hide="true">
 
                 <table class="table table-condensed data-table table-hover">
                     <thead>
@@ -773,12 +738,12 @@
                         <th>Текст предложения</th>
                         <th><span class="nowrap">Цена, G</span></th>
                         <th>Контакт</th>
-                        <th>
+                       <!--  <th>
                             <span class="nowrap">
                                 Рейтинг 
                                 <i style="opacity:0.3" class="fa fa-chevron-down"></i>
                             </span>
-                        </th>
+                        </th> -->
                         <th>
                             <span class="nowrap">
                                 Место-е 
@@ -811,20 +776,20 @@
                                     </span>
                                 </ul>
                             </td>
-                            <td>
+                            <!-- <td>
                                 <span class="label label-success">4.5</span>
-                            </td>
+                            </td> -->
                             <td>Бразилия</td>
                             <td>короткий текст</td>
                             <td>
-                                <div class="btn-group nowrapbtns" data-toggle="buttons">
+                                <!-- <div class="btn-group nowrapbtns" data-toggle="buttons">
                                     <button type="button" class="btn btn-link">
                                         <i class="fa fa-lg fa-times text-muted"></i>
                                     </button>
                                     <button type="button" class="btn btn-link">
                                         <i class="fa fa-lg fa-save text-muted"></i>
                                     </button>
-                                </div>
+                                </div> -->
                             </td>
                         </tr>
                     </tbody>

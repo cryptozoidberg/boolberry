@@ -37,6 +37,20 @@
                 return this.runCommand('get_all_offers', params, callback);
             },
 
+            startPosMining : function(wallet_id) {
+                var params = {
+                    wallet_id : wallet_id
+                };
+                return this.runCommand('start_pos_mining', params);
+            },
+
+            stopPosMining : function(wallet_id) {
+                var params = {
+                    wallet_id : wallet_id
+                };
+                return this.runCommand('stop_pos_mining', params);
+            },
+
             resync_wallet : function(wallet_id, callback) {
                 var params = {
                     wallet_id: wallet_id
@@ -446,7 +460,7 @@
                             "offer_type": 0,
                             "amount_lui": 2300000000,
                             "amount_etc": 2,
-                            "target": "EUR",
+                            "target": "Шкаф деревяный",
                             "location": "USA, NYC",
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
@@ -454,7 +468,7 @@
                             "expiration_time":3
                         }, 
                         {
-                            "offer_type": 0,
+                            "offer_type": 3,
                             "amount_lui": 4300000000,
                             "amount_etc": 2,
                             "target": "EUR",
