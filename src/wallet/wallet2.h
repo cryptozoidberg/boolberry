@@ -9,6 +9,7 @@
 #include <atomic>
 
 #include "include_base_utils.h"
+#include "profile_tools.h"
 
 #include "currency_core/currency_basic_impl.h"
 #include "currency_core/currency_boost_serialization.h"
@@ -111,7 +112,17 @@ namespace tools
       uint64_t m_block_height;
       uint64_t m_unlock_time;
     };
-    
+
+    struct mining_context
+    {
+      currency::COMMAND_RPC_SCAN_POS::request sp;
+      currency::COMMAND_RPC_SCAN_POS::response rsp;
+      currency::wide_difficulty_type basic_diff;
+      currency::stake_modifier_type sm;
+      uint64_t height;
+    };
+
+
     typedef std::unordered_multimap<crypto::hash, payment_details> payment_container;
 
     typedef std::vector<transfer_details> transfer_container;
@@ -165,6 +176,7 @@ namespace tools
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, const std::vector<currency::attachment_v> attachments);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, const std::vector<currency::attachment_v> attachments, currency::transaction& tx);
     bool check_connection();
+    bool fill_mining_context(mining_context& ctx);
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
     void get_payments(const crypto::hash& payment_id, std::list<payment_details>& payments) const;
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
@@ -227,7 +239,7 @@ namespace tools
     std::string get_alias_for_address(const std::string& addr);
     void wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& utd, wallet_rpc::wallet_transfer_info& wti);
     bool is_coin_age_okay(const transfer_details& tr);
-    bool build_kernel(const currency::pos_entry& pe, const currency::stake_modifier_type& stake_modifier, currency::stake_kernel& kernel, uint64_t& coindays_weight, uint64_t timestamp);
+    static bool build_kernel(const currency::pos_entry& pe, const currency::stake_modifier_type& stake_modifier, currency::stake_kernel& kernel, uint64_t& coindays_weight, uint64_t timestamp);
     bool is_connected_to_net();
 
 
@@ -252,7 +264,95 @@ namespace tools
     std::shared_ptr<i_core_proxy> m_core_proxy;
     std::shared_ptr<i_wallet2_callback> m_callback_holder;
     i_wallet2_callback* m_callback;
+
+
+    
+     template<typename idle_condition_cb_t> //do refresh as external callback
+     static bool scan_pos(mining_context& cxt,
+                          std::atomic<bool>& keep_mining, 
+                          idle_condition_cb_t idle_condition_cb)
+    {
+      uint64_t timstamp_start = time(nullptr);
+      uint64_t timstamp_last_idle_call = time(nullptr);
+
+
+      for (size_t i = 0; i != cxt.sp.pos_entries.size(); i++)
+      {
+        //set timestamp starting from timestamp%POS_SCAN_STEP = 0
+        uint64_t adjusted_starter_timestamp = timstamp_start - POS_SCAN_STEP;
+        adjusted_starter_timestamp = POS_SCAN_STEP * 2 - (adjusted_starter_timestamp%POS_SCAN_STEP) + adjusted_starter_timestamp;
+        bool go_past = true;
+        for (uint64_t step = 0; step <= POS_SCAN_WINDOW;)
+        {
+
+          if (time(nullptr) - timstamp_last_idle_call > WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL)
+          {
+            if (!idle_condition_cb())
+            {
+              LOG_PRINT_L0("Detected new block, minting interrupted");
+              break;
+            }
+            timstamp_last_idle_call = time(nullptr);
+          }
+
+          uint64_t ts = go_past ? adjusted_starter_timestamp - step : adjusted_starter_timestamp + step;
+          PROFILE_FUNC("general_mining_iteration");
+          if (!keep_mining)
+            return false;
+          stake_kernel sk = AUTO_VAL_INIT(sk);
+          uint64_t coindays_weight = 0;
+          build_kernel(cxt.sp.pos_entries[i], cxt.sm, sk, coindays_weight, ts);
+          crypto::hash kernel_hash;
+          {
+            PROFILE_FUNC("calc_hash");
+            kernel_hash = crypto::cn_fast_hash(&sk, sizeof(sk));
+          }
+
+          wide_difficulty_type this_coin_diff = cxt.basic_diff / coindays_weight;
+          bool check_hash_res;
+          {
+            PROFILE_FUNC("check_hash");
+            check_hash_res = check_hash(kernel_hash, this_coin_diff);
+          }
+          if (!check_hash_res)
+          {
+            if (!step)
+            {
+              step += POS_SCAN_STEP;
+              continue;
+            }
+            else if (go_past)
+            {
+              go_past = false;
+            }
+            else
+            {
+              go_past = true;
+              step += POS_SCAN_STEP;
+            }
+          }
+          else
+          {
+            //found kernel
+            LOG_PRINT_GREEN("Found kernel: amount=" << cxt.sp.pos_entries[i].amount << ENDL
+              << ", difficulty_basic=" << cxt.basic_diff << ", diff for this coin: " << this_coin_diff << ENDL
+              << ", index=" << cxt.sp.pos_entries[i].index << ENDL
+              << ", kernel info: " << ENDL
+              << print_stake_kernel_info(sk),
+              LOG_LEVEL_0);
+            cxt.rsp.index = i;
+            cxt.rsp.block_timestamp = ts;
+            cxt.rsp.height = cxt.height;
+            cxt.rsp.status = CORE_RPC_STATUS_OK;
+            return true;
+          }
+        }
+      }
+      cxt.rsp.status = CORE_RPC_STATUS_NOT_FOUND;
+      return false;
+    }
   };
+
 }
 
 

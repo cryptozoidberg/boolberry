@@ -16,7 +16,6 @@ using namespace epee;
 #include "misc_language.h"
 #include "currency_core/currency_basic_impl.h"
 #include "common/boost_serialization_helper.h"
-#include "profile_tools.h"
 #include "crypto/crypto.h"
 #include "serialization/binary_utils.h"
 using namespace currency;
@@ -856,121 +855,45 @@ bool wallet2::build_kernel(const pos_entry& pe, const stake_modifier_type& stake
   return true;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::scan_pos(const currency::COMMAND_RPC_SCAN_POS::request& sp, currency::COMMAND_RPC_SCAN_POS::response& rsp, std::atomic<bool>& keep_mining)
+bool wallet2::fill_mining_context(mining_context& ctx)
 {
-  uint64_t timstamp_start = time(nullptr);
-  uint64_t timstamp_last_refresh = time(nullptr);
-  wide_difficulty_type basic_diff = 0;
+  bool r = get_pos_entries(ctx.sp);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to get_pos_entries()");
 
-  
   currency::COMMAND_RPC_GET_POS_MINING_DETAILS::request pos_details_req = AUTO_VAL_INIT(pos_details_req);
   currency::COMMAND_RPC_GET_POS_MINING_DETAILS::response pos_details_resp = AUTO_VAL_INIT(pos_details_resp);
-  rsp.status = CORE_RPC_STATUS_NOT_FOUND;
-
+  ctx.rsp.status = CORE_RPC_STATUS_NOT_FOUND;
   m_core_proxy->call_COMMAND_RPC_GET_POS_MINING_DETAILS(pos_details_req, pos_details_resp);
   if (pos_details_resp.status != CORE_RPC_STATUS_OK)
-  {
-    rsp.status = pos_details_resp.status;
     return false;
-  }
-
-  basic_diff.assign(pos_details_resp.pos_basic_difficulty);
-
-  for (size_t i = 0; i != sp.pos_entries.size(); i++)
-  {
-    //set timestamp starting from timestamp%POS_SCAN_STEP = 0
-    uint64_t adjusted_starter_timestamp = timstamp_start - POS_SCAN_STEP;
-    adjusted_starter_timestamp = POS_SCAN_STEP*2 - (adjusted_starter_timestamp%POS_SCAN_STEP) + adjusted_starter_timestamp;
-    bool go_past = true;
-    for (uint64_t step = 0; step <= POS_SCAN_WINDOW; )
-    {
-
-      if (time(nullptr) - timstamp_last_refresh > WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL)
-      {
-        size_t blocks_fetched;
-        refresh(blocks_fetched);
-        if (blocks_fetched)
-        {
-          LOG_PRINT_L0("Detected new block, minting interrupted");
-          break;
-        }
-        timstamp_last_refresh = time(nullptr);
-      }
-
-      uint64_t ts = go_past ? adjusted_starter_timestamp - step : adjusted_starter_timestamp + step;
-      PROFILE_FUNC("general_mining_iteration");
-      if (!keep_mining)
-        return false;
-      stake_kernel sk = AUTO_VAL_INIT(sk);
-      uint64_t coindays_weight = 0;
-      build_kernel(sp.pos_entries[i], pos_details_resp.sm, sk, coindays_weight, ts);
-      crypto::hash kernel_hash;
-      {
-        PROFILE_FUNC("calc_hash");
-        kernel_hash = crypto::cn_fast_hash(&sk, sizeof(sk));
-      }
-      
-      wide_difficulty_type this_coin_diff = basic_diff / coindays_weight;
-      bool check_hash_res;
-      {
-        PROFILE_FUNC("check_hash");
-        check_hash_res = check_hash(kernel_hash, this_coin_diff);
-      }
-      if (!check_hash_res)
-      {
-        if (!step)
-        {
-          step += POS_SCAN_STEP;
-          continue;
-        }
-        else if (go_past)
-        {
-          go_past = false;
-        }
-        else
-        {
-          go_past = true;
-          step += POS_SCAN_STEP;
-        } 
-      }
-      else
-      {
-        //found kernel
-        LOG_PRINT_GREEN("Found kernel: amount=" << sp.pos_entries[i].amount << ENDL
-          << ", difficulty_basic=" << basic_diff << ", diff for this coin: " << this_coin_diff << ENDL
-          << ", index=" << sp.pos_entries[i].index << ENDL
-          << ", kernel info: " << ENDL
-          << print_stake_kernel_info(sk),
-          LOG_LEVEL_0);
-        rsp.index = i;
-        rsp.block_timestamp = ts;
-        rsp.height = pos_details_resp.height;
-        rsp.status = CORE_RPC_STATUS_OK;
-        return true;
-      }
-    }
-  }
-  rsp.status = CORE_RPC_STATUS_NOT_FOUND;
-  return false;
+  ctx.basic_diff.assign(pos_details_resp.pos_basic_difficulty);
+  ctx.height = pos_details_resp.height;
+  return true;
 }
 //------------------------------------------------------------------
 bool wallet2::try_mint_pos()
 {
+  mining_context ctx = AUTO_VAL_INIT(ctx);
   LOG_PRINT_L0("Starting PoS mint iteration");
-  currency::COMMAND_RPC_SCAN_POS::request req;
-  bool r = get_pos_entries(req);
-  CHECK_AND_ASSERT_MES(r, false, "Failed to get_pos_entries()");
+  fill_mining_context(ctx);
+  LOG_PRINT_L0("POS_ENTRIES: " << ctx.sp.pos_entries.size());
 
-  LOG_PRINT_L0("POS_ENTRIES: " << req.pos_entries.size());
-
-  currency::COMMAND_RPC_SCAN_POS::response rsp = AUTO_VAL_INIT(rsp);
   std::atomic<bool> keep_going(true);
-  scan_pos(req, rsp, keep_going);
-  if (rsp.status == CORE_RPC_STATUS_OK)
+  scan_pos(ctx, keep_going, [this](){
+    size_t blocks_fetched;
+    refresh(blocks_fetched);
+    if (blocks_fetched)
+    {
+      LOG_PRINT_L0("Detected new block, minting interrupted");
+      return false;
+    }
+    return true;
+  });
+  if (ctx.rsp.status == CORE_RPC_STATUS_OK)
   {
-      build_minted_block(req, rsp);
+    build_minted_block(ctx.sp, ctx.rsp);
   }
-  LOG_PRINT_L0("PoS mint iteration finished(" << rsp.status << ")");
+  LOG_PRINT_L0("PoS mint iteration finished(" << ctx.rsp.status << ")");
 
   return true;
 }

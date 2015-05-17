@@ -162,10 +162,10 @@ namespace epee
       return locked_object_proxy<t_object>(t, m);
     }
 
-    locked_object_proxy<t_object> operator()()
+    /*locked_object_proxy<t_object> operator()()
     {
       return locked_object_proxy<t_object>(t, m);
-    }
+    }*/
   };
 
   template<typename t_object>
@@ -178,10 +178,11 @@ namespace epee
     {}
     locked_object_proxy(const locked_object_proxy& lop) :rt(lop.rt), lock(lop.lock.mutex())
     {}
+    /*
     t_object& operator()()
     {
       return rt;
-    }
+    }*/
     t_object* operator ->()
     {
       return &rt;

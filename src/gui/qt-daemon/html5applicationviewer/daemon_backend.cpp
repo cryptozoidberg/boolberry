@@ -16,8 +16,6 @@ daemon_backend::daemon_backend():m_pview(&m_view_stub),
                                  m_rpc_proxy(new tools::core_fast_rpc_proxy(m_rpc_server)),
                                  m_last_daemon_height(0),
                                  m_last_wallet_synch_height(0),
-                                 m_do_mint(true), 
-                                 m_mint_is_running(false), 
                                  m_wallet_id_counter(0)
 {}
 
@@ -179,7 +177,6 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
 bool daemon_backend::send_stop_signal()
 {
   m_stop_singal_sent = true;
-  m_do_mint = false;
   return true;
 }
 
@@ -384,7 +381,7 @@ void daemon_backend::update_wallets_info()
   {
     wsi.wallets.push_back(view::wallet_entry_info());
     view::wallet_entry_info& l = wsi.wallets.back();
-    get_wallet_info(*w.second.w->get(), l.wi);
+    get_wallet_info(w.second, l.wi);
     l.wallet_id = w.first;
   }
   m_pview->update_wallets_info(wsi);
@@ -500,7 +497,6 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
     try
     {
       w->load(path, password);
-      m_last_wallet_mint_time = 0;
       break;
     }
     catch (const tools::error::file_not_found& /**/)
@@ -510,7 +506,6 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
     catch (const tools::error::wallet_load_notice_wallet_restored& /**/)
     {
       return_code = API_RETURN_CODE_FILE_RESTORED;
-      m_last_wallet_mint_time = 0;
       break;
     }
     catch (const std::exception& e)
@@ -521,6 +516,8 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
 
   **m_wallets[wallet_id].w = w;
   m_wallets[wallet_id].do_mining = false;
+  m_wallets[wallet_id].stop = false;
+  m_wallets[wallet_id].miner_thread = std::thread(boost::bind(&daemon_backend::wallet_vs_options::miner_func, &m_wallets[wallet_id]));
 
 
   update_wallets_info();
@@ -564,7 +561,6 @@ std::string daemon_backend::generate_wallet(const std::string& path, const std::
   try
   {
     w->generate(path, password);
-    m_last_wallet_mint_time = 0;
   }
   catch (const tools::error::file_exists/*& e*/)
   {
@@ -782,8 +778,8 @@ std::string daemon_backend::get_wallet_info(size_t wallet_id, view::wallet_info&
   if (it == m_wallets.end())
     return API_RETURN_CODE_WALLET_WRONG_ID;
 
-  auto& w = it->second.w;
-  return get_wallet_info(*w->get(), wi);
+  auto& w = it->second;
+  return get_wallet_info(w, wi);
 }
 
 std::string daemon_backend::resync_wallet(uint64_t wallet_id)
@@ -799,16 +795,16 @@ std::string daemon_backend::resync_wallet(uint64_t wallet_id)
   return API_RETURN_CODE_OK;
 }
 
-std::string daemon_backend::get_wallet_info(tools::wallet2& w, view::wallet_info& wi)
+std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_info& wi)
 {
   wi = view::wallet_info();
-  wi.address = w.get_account().get_public_address_str();
-  wi.tracking_hey = string_tools::pod_to_hex(w.get_account().get_keys().m_view_secret_key);
-  wi.balance = w.balance();
-  wi.unlocked_balance = w.unlocked_balance();
-  wi.path = w.get_wallet_path();
-  wi.do_mint = m_do_mint;
-  wi.mint_is_in_progress = m_mint_is_running;
+  wi.address = wo.w->get()->get_account().get_public_address_str();
+  wi.tracking_hey = string_tools::pod_to_hex(wo.w->get()->get_account().get_keys().m_view_secret_key);
+  wi.balance = wo.w->get()->balance();
+  wi.unlocked_balance = wo.w->get()->unlocked_balance();
+  wi.path = wo.w->get()->get_wallet_path();
+  wi.do_mint = wo.do_mining;
+  wi.mint_is_in_progress = false;//m_mint_is_running;
   return API_RETURN_CODE_OK;
 }
 
@@ -884,3 +880,24 @@ void daemon_backend::on_pos_block_found(const currency::block& b)
   m_pview->pos_block_found(b);
 }
 
+void daemon_backend::wallet_vs_options::miner_func()
+{
+  LOG_PRINT_GREEN("[POS_MINER] Wallet miner thread started", LOG_LEVEL_0);
+  while (!stop)
+  {
+    if (!do_mining)
+    {
+      boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+      continue;
+    }
+    w->get()->get
+  }
+  LOG_PRINT_GREEN("[POS_MINER] Wallet miner thread stopped", LOG_LEVEL_0);
+}
+daemon_backend::wallet_vs_options::~wallet_vs_options()
+{
+  do_mining = false;
+  stop = true;
+  if (miner_thread.joinable())
+    miner_thread.join();
+}

@@ -40,7 +40,19 @@ BOOST_CLASS_VERSION(nodetool::node_server<currency::t_currency_protocol_handler<
 
 class daemon_backend : public i_backend_wallet_callback
 {
+
 public:
+  struct wallet_vs_options
+  {
+    epee::locked_object<std::shared_ptr<tools::wallet2>> w;
+    std::atomic<bool> do_mining;
+    std::atomic<bool> stop;
+
+    std::thread miner_thread;
+    void miner_func();
+    ~wallet_vs_options();
+  };
+
   daemon_backend();
   ~daemon_backend();
   bool start(int argc, char* argv[], view::i_view* pview_handler);
@@ -50,7 +62,7 @@ public:
   std::string generate_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id);
   std::string get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist);
   std::string get_wallet_info(size_t wallet_id, view::wallet_info& wi);
-  std::string get_wallet_info(tools::wallet2& w, view::wallet_info& wi);
+  std::string get_wallet_info(wallet_vs_options& w, view::wallet_info& wi);
   std::string close_wallet(size_t wallet_id);
   std::string push_offer(size_t wallet_id, const currency::offer_details& od);
   std::string get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS::response& od);
@@ -86,18 +98,10 @@ private:
   std::shared_ptr<tools::i_core_proxy> m_rpc_proxy;
   critical_section m_wallets_lock;
 
-  struct wallet_vs_options
-  {
-    epee::locked_object<std::shared_ptr<tools::wallet2>> w;
-    std::atomic<bool> do_mining;
-    boost::thread miner_thread;
-  };
+
   std::map<size_t, wallet_vs_options> m_wallets;
   std::atomic<uint64_t> m_last_daemon_height;
   std::atomic<uint64_t> m_last_wallet_synch_height;
-  std::atomic<uint64_t> m_last_wallet_mint_time;
-  std::atomic<bool> m_do_mint;
-  std::atomic<bool> m_mint_is_running;
   std::atomic<uint64_t> m_wallet_id_counter;
 
   std::string m_data_dir;
