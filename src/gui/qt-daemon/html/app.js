@@ -39,10 +39,12 @@
             {route: '/settings',         template: 'views/settings.html'},
             {route: '/sendG',            template: 'views/sendG.html'},
             {route: '/sendG/:wallet_id', template: 'views/sendG.html'},
-            {route: '/buyG',             template: 'views/buyG.html'},
-            {route: '/sellG',            template: 'views/sellG.html'},
-            {route: '/buyProduct',       template: 'views/buyProduct.html'},
-            {route: '/sellProduct',      template: 'views/sellProduct.html'},
+
+            {route: '/addGOfferBuy',     template: 'views/addGOffer.html'},
+            {route: '/addGOfferSell',    template: 'views/addGOffer.html'},
+
+            {route: '/addOfferBuy',      template: 'views/addOffer.html'},
+            {route: '/addOfferSell',     template: 'views/addOffer.html'},
         ];
 
         for (var i in routes){

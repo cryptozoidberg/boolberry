@@ -113,9 +113,9 @@
                 }
             },
 
-            pushOffer : function(wallet_id, offer_type, amount_lui, target, location, contacts, comment, expiration_time, fee, callback){
-                // , amount_etc
-                // , payment_types
+            pushOffer : function(
+                wallet_id, offer_type, amount_lui, target, location, contacts, 
+                comment, expiration_time, fee, amount_etc, payment_types, callback){
 
                 var params = {
                     "wallet_id" : wallet_id,

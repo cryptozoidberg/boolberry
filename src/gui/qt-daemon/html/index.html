@@ -176,19 +176,18 @@
 
                     </li>
                     <li>
-                        <a ng-disabled="deamon_state.daemon_network_state != 2" href="#buyG" class="btn btn-default">Купить гульдены</a>
+                        <a ng-disabled="deamon_state.daemon_network_state != 2" href="#addGOfferBuy" class="btn btn-default">Купить гульдены</a>
                     </li>
                     <li>
-                        <a ng-disabled="deamon_state.daemon_network_state != 2" class="btn btn-default" href="#sellG">Продать гульдены</a>
+                        <a ng-disabled="deamon_state.daemon_network_state != 2" href="#addGOfferSell" class="btn btn-default">Продать гульдены</a>
                     </li>
-                    <li>
-                        <a ng-disabled="deamon_state.daemon_network_state != 2" data-toggle="dropdown" class="btn btn-default dropdown" aria-expanded="false">Купить/Продать товар
+                    <li dropdown>
+                        <a ng-disabled="deamon_state.daemon_network_state != 2" dropdown-toggle class="btn btn-default dropdown">Купить/Продать товар
                             <span class="caret"></span>
-                            <span class="sr-only">Toggle Dropdown</span>
                         </a>
                         <ul class="dropdown-menu" role="menu">
-                            <li><a href="#buyProduct">Купить товар за гульдены</a></li>
-                            <li><a href="#sellProduct">Продать товар за гульдены</a></li>
+                            <li><a href="#addOfferBuy">Купить товар за гульдены</a></li>
+                            <li><a href="#addOfferSell">Продать товар за гульдены</a></li>
                         </ul>
                     </li>
                 </ul>
