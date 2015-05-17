@@ -797,6 +797,7 @@ std::string daemon_backend::start_pos_mining(uint64_t wallet_id)
   wsi.wallet_id = wallet_id;
   wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
   m_pview->update_wallet_status(wsi);
+  return API_RETURN_CODE_OK;
 }
 std::string daemon_backend::stop_pos_mining(uint64_t wallet_id)
 {
@@ -807,6 +808,7 @@ std::string daemon_backend::stop_pos_mining(uint64_t wallet_id)
   wsi.wallet_id = wallet_id;
   wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
   m_pview->update_wallet_status(wsi);
+  return API_RETURN_CODE_OK;
 }
 std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_info& wi)
 {
@@ -902,7 +904,7 @@ void daemon_backend::wallet_vs_options::miner_func()
     LOG_PRINT_L0("Starting PoS mint iteration");
     w->get()->fill_mining_context(ctx);
     LOG_PRINT_L0("POS_ENTRIES: " << ctx.sp.pos_entries.size());
-    tools::wallet2::scan_pos(ctx, break_mining_loop, [](){});
+    tools::wallet2::scan_pos(ctx, break_mining_loop, [](){return true;});
     
     if (ctx.rsp.status == CORE_RPC_STATUS_OK)
     {

@@ -861,13 +861,13 @@ QString Html5ApplicationViewer::start_pos_mining(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::wallet_id_obj, wo);
   ar.error_code = m_backend.start_pos_mining(wo.wallet_id);
-  return store_t_to_json(ar);
+  return epee::serialization::store_t_to_json(ar).c_str();
 }
 QString Html5ApplicationViewer::stop_pos_mining(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::wallet_id_obj, wo);
   ar.error_code = m_backend.stop_pos_mining(wo.wallet_id);
-  return store_t_to_json(ar);
+  return epee::serialization::store_t_to_json(ar).c_str();
 }
 
 
