@@ -144,29 +144,7 @@ namespace epee
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
-  template<typename t_object>
-  class locked_object
-  {
 
-    t_object t;
-    std::recursive_mutex m;
-    template<typename t_object>
-    friend class locked_object_proxy;
-  public:
-    locked_object_proxy<t_object> operator->()
-    {
-      return locked_object_proxy<t_object>(t, m);
-    }
-    locked_object_proxy<typename t_object> operator*()
-    {
-      return locked_object_proxy<t_object>(t, m);
-    }
-
-    /*locked_object_proxy<t_object> operator()()
-    {
-      return locked_object_proxy<t_object>(t, m);
-    }*/
-  };
 
   template<typename t_object>
   class locked_object_proxy
@@ -191,6 +169,30 @@ namespace epee
     {
       return rt;
     }
+  };
+
+  template<typename t_object>
+  class locked_object
+  {
+
+    t_object t;
+    std::recursive_mutex m;
+    template<typename t_object>
+    friend class locked_object_proxy;
+  public:
+    locked_object_proxy<t_object> operator->()
+    {
+      return locked_object_proxy<t_object>(t, m);
+    }
+    locked_object_proxy<typename t_object> operator*()
+    {
+      return locked_object_proxy<t_object>(t, m);
+    }
+
+    /*locked_object_proxy<t_object> operator()()
+    {
+    return locked_object_proxy<t_object>(t, m);
+    }*/
   };
 
 #if defined(WINDWOS_PLATFORM)
