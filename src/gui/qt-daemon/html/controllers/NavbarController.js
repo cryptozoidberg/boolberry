@@ -295,24 +295,24 @@
 
         $scope.startMining = function(wallet_id){
             backend.startPosMining(wallet_id);
-            var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-            if(safe.length){
-                safe = safe[0];
-                safe.is_mining = true;
-            }else{
-                return;
-            }
+            // var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            // if(safe.length){
+            //     safe = safe[0];
+            //     safe.is_mining = true;
+            // }else{
+            //     return;
+            // }
         }
 
         $scope.stopMining = function(wallet_id){
             backend.stopPosMining(wallet_id);
-            var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-            if(safe.length){
-                safe = safe[0];
-                safe.is_mining = false;
-            }else{
-                return;
-            }
+            // var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            // if(safe.length){
+            //     safe = safe[0];
+            //     safe.is_mining = false;
+            // }else{
+            //     return;
+            // }
         }
 
         $scope.resynch = function(wallet_id){
