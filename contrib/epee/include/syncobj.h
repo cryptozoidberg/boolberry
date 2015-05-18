@@ -154,7 +154,7 @@ namespace epee
   public:
     locked_object_proxy(t_object& t, std::recursive_mutex& m) :rt(t), lock(m)
     {}
-    locked_object_proxy(const locked_object_proxy& lop) :rt(lop.rt), lock(&lop.lock.mutex())
+    locked_object_proxy(const locked_object_proxy& lop) :rt(lop.rt), lock(*lop.lock.mutex())
     {}
     /*
     t_object& operator()()
