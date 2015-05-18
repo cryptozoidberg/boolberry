@@ -170,6 +170,23 @@
                 return this.runCommand('transfer', params, callback);
             },
 
+            validateAddress: function(address){
+                if(!this.shouldUseEmulator()){
+                    var result =  JSON.parse(Qt_parent['validate_address'](address));
+                    if(angular.isDefined(result.error_code)){
+                        return result.error_code === 'TRUE' ? true : false;
+                    }else{
+                        return false;
+                    }
+                }else{
+                    if(address.length == 95){
+                        return true;
+                    }else{
+                        return false;    
+                    }
+                }
+            },
+
             quitRequest : function() {
                 return this.runCommand('on_request_quit', {});
             },

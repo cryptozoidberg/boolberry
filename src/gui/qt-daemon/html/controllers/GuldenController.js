@@ -49,15 +49,23 @@
             $scope.selectAlias = function(obj){
                 var alias = obj.originalObject;
                 $scope.transaction.to = alias.address;
+                $scope.transaction.is_valid_address = true;
                 $scope.transaction.alias = alias.alias;
             }
 
             $scope.inputChanged = function(str){
                 delete $scope.transaction.alias;
                 if(str.indexOf('@') != 0){
-                    $scope.transaction.to = str;    
+                    if(backend.validateAddress(str)){
+                        $scope.transaction.is_valid_address = true;
+                        $scope.transaction.to = str;
+                    }else{
+                        $scope.transaction.is_valid_address = false;
+                        $scope.transaction.to = '';
+                    }
                 }else{
                     $scope.transaction.to = '';
+                    $scope.transaction.is_valid_address = false;
                 }
             }
 

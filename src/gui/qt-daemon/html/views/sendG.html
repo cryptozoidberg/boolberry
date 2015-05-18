@@ -32,7 +32,16 @@
                     </div>
 
                     <div class="form-group has-success has-feedback">
-                        <label class="control-label col-xs-4 col-sm-4">Получатель</label>
+                        <label class="control-label col-xs-4 col-sm-4">
+                            Получатель
+                            <i 
+                                class="fa fa-lg " 
+                                ng-class="{
+                                    'text-success fa-check':transaction.is_valid_address,
+                                    'text-danger fa-question':!transaction.is_valid_address,
+                                }"
+                            ></i>
+                        </label>
                         <div class="col-xs-6 col-sm-6">
                             <!-- <input 
                                 type="text" 
@@ -56,15 +65,7 @@
                                 text-no-results="Aliases not found"
                             />
 
-                            <span class="form-control-feedback"  style="padding: 0">
-                                <i 
-                                    class="fa fa-lg " 
-                                    ng-class="{
-                                        'text-success fa-check':transaction.is_valid_address,
-                                        'text-danger fa-question':!transaction.is_valid_address,
-                                    }"
-                                ></i>
-                            </span>
+                            
                             
                             <!-- <span id="inputSuccess2Status" class="sr-only">(success)</span> -->
                         </div>
@@ -87,8 +88,8 @@
                                     <i class="fa fa-lg fa-save"></i> <span class="caret"></span>
                                 </button>
                                 <ul role="menu" class="dropdown-menu dropdown-menu-right">
-                                    <li><a href="#">Добавить новый контакт</a></li>
-                                    <li><a href="#">Добавить в существующий контакт</a></li>
+                                    <li><a href="">Добавить новый контакт</a></li>
+                                    <li><a href="">Добавить в существующий контакт</a></li>
                                 </ul>
                             </div>
                         </div>
