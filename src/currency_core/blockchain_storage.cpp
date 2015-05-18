@@ -1931,12 +1931,15 @@ bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
 bool blockchain_storage::process_blockchain_tx_offers(const transaction& tx, uint64_t timestamp)
 {
   //check transaction extra
+  uint64_t count = 0;
   for (const auto& at : tx.attachment)
   {
     if (at.type() == typeid(offer_details))
     {
       m_offers.push_back(boost::get<offer_details>(at));
       m_offers.back().timestamp = timestamp;
+      m_offers.back().tx_hash = string_tools::pod_to_hex(get_transaction_hash(tx));
+      m_offers.back().index_in_tx = count++;
     }
   }
 

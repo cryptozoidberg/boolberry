@@ -172,6 +172,10 @@ namespace currency
     uint64_t timestamp;        //this is not kept by transaction, info filled by corresponding transaction
     uint64_t fee;              //value of fee to pay(or paid in case of existing offers) to rank it
 
+    //extra information for wallet use
+    //DO NOT INCLUDE IT INTO TX SERIALIZATON
+    std::string tx_hash;
+    uint64_t index_in_tx;
 
     BEGIN_SERIALIZE_OBJECT()
       VALUE(offer_type)
@@ -195,6 +199,8 @@ namespace currency
       KV_SERIALIZE(comment)
       KV_SERIALIZE(payment_types)
       KV_SERIALIZE(expiration_time)
+      KV_SERIALIZE(tx_hash)
+      KV_SERIALIZE(index_in_tx)
       END_KV_SERIALIZE_MAP()
 
   };
