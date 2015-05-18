@@ -469,6 +469,7 @@
                             data.history = data.unconfirmed.concat(data.history);
                         }
                         safe.history = data.history;
+                        $rootScope.tr_count++;
                         safe.history.unshift(tr_info);
                     });
                 }else{
@@ -487,6 +488,7 @@
                         console.log(tr_info.tx_hash+' tr exists');
                     }else{
                         console.log(tr_info.tx_hash+' tr does not exist');
+                        $rootScope.tr_count++;
                         safe.history.unshift(tr_info); // insert new
                     }
                     
