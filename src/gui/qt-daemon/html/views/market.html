@@ -231,7 +231,8 @@
                             <span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
                         </th>
                         <th>
-                            <span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                            <!-- <span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span> -->
+                            <span class="nowrap">Предложение <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
                         </th>
                         <th>
                             <span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
@@ -262,7 +263,7 @@
                                 3 часа назад
                             </td>
                             <td>
-                                <span class="nowrap">420,34 </span>
+                                <span class="nowrap">{{offer.amount_etc}} {{offer.target}}</span>
                             </td>
                             <td>
                                 {{offer.amount_lui | gulden:false}} <span class="label label-danger">+ 2%</span>
@@ -284,8 +285,12 @@
                             <!-- <td>
                                 вся сумма
                             </td> -->
-                            <td>
-                                наличные
+                            <td width="20%">
+                                <span ng-repeat="type in offer.payment_types.split(',')">
+                                    <span class="label label-info" ng-if="payment_types[type]">{{payment_types[type]}}</span>
+                                    <span class="label label-info" ng-if="!payment_types[type]">{{type}}</span>
+
+                                </span>
                             </td>
                             <td>
                                 {{offer.location}}
@@ -346,8 +351,19 @@
 
                                         <div class="form-group clearfix">
                                             <label style="padding-left: 0" class="col-xs-6 col-sm-6 required text-right">
-                                                Возраст заявки</label>
-                                            <select style="" class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding market_barter_order-age-selector"><option selected="">не важно</option><option>час</option><option>3 часа</option><option>день</option><option>два дня</option><option>три дня</option><option>неделя</option><option>больше недели</option><option>другой период</option></select>
+                                                Возраст заявки
+                                            </label>
+                                            <select style="" class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding market_barter_order-age-selector">
+                                                <option selected="">не важно</option>
+                                                <option>час</option>
+                                                <option>3 часа</option>
+                                                <option>день</option>
+                                                <option>два дня</option>
+                                                <option>три дня</option>
+                                                <option>неделя</option>
+                                                <option>больше недели</option>
+                                                <option>другой период</option>
+                                            </select>
                                         </div>
 
                                         <div class="form-group clearfix market_barter_order-age-datapicker-row">
@@ -393,17 +409,18 @@
 
                         <div class="col-xs-4 col-sm-4">
 
-                            <div class="btn-group btn-group-justified" data-toggle="buttons">
-                                <label class="btn btn-primary market_filterBarterAllButton active">
-                                    <input type="radio" name="options" id="option0" autocomplete="off" checked=""> Все
+                            <div class="btn-group btn-group-justified">
+                                <label class="btn btn btn-primary" btn-radio="'all'" ng-model="goods_filter.offer_type">
+                                    Все
                                 </label>
-                                <label class="btn btn-primary market_filterBarterAskButton">
-                                    <input type="radio" name="options" id="option1" autocomplete="off"> Предложение
+                                <label class="btn btn btn-primary" btn-radio="'sell'" ng-model="goods_filter.offer_type">
+                                    Предложение
                                 </label>
-                                <label class="btn btn-primary market_filterBarterBidButton">
-                                    <input type="radio" name="options" id="option2" autocomplete="off"> Спрос
+                                <label class="btn btn btn-primary" btn-radio="'buy'" ng-model="goods_filter.offer_type">
+                                    Спрос
                                 </label>
                             </div>
+
                         </div>
                         <div class="col-xs-4 col-sm-4">
                             <div class="collapse filter22 close-filter">
@@ -457,7 +474,7 @@
 
                     <tbody>
 
-                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers | filter:is_good_offer">
+                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers | filter:is_goods_offer">
                             <td>
                                 3 часа назад
                             </td>

@@ -2,8 +2,8 @@
     'use strict';
     var module = angular.module('app.market',[]);
 
-    module.controller('marketCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location){
+    module.controller('marketCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','market',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market){
             console.log('market');
             backend.get_all_offers(function(data){
                 if(angular.isDefined(data.offers)){
@@ -13,15 +13,25 @@
                 console.log(data);
             });
 
+            $scope.payment_types = market.paymentTypes;
+
             $scope.is_currency_offer = function(offer){
-                if(offer.offer_type == 2 || offer.offer_type == 3){
+                if($scope.currency_filter.offer_type == 'all' && (offer.offer_type == 2 || offer.offer_type == 3)){
+                    return true;
+                }else if($scope.currency_filter.offer_type == 'buy' && offer.offer_type == 2){
+                    return true;
+                }else if($scope.currency_filter.offer_type == 'sell' && offer.offer_type == 3){
                     return true;
                 }else{
                     return false;
                 }
             }
-            $scope.is_good_offer = function(offer){
-                if(offer.offer_type == 0 || offer.offer_type == 1){
+            $scope.is_goods_offer = function(offer){
+                if($scope.goods_filter.offer_type == 'all' && (offer.offer_type == 0 || offer.offer_type == 1)){
+                    return true;
+                }else if($scope.goods_filter.offer_type == 'buy' && offer.offer_type == 0){
+                    return true;
+                }else if($scope.goods_filter.offer_type == 'sell' && offer.offer_type == 1){
                     return true;
                 }else{
                     return false;
@@ -29,6 +39,10 @@
             }
 
             $scope.currency_filter = {
+                offer_type: 'all'
+            };
+
+            $scope.goods_filter = {
                 offer_type: 'all'
             };
         }
@@ -205,7 +219,6 @@
             $scope.addOffer = function(offer){
                 
                 var o = angular.copy(offer);
-
                 
                 o.fee = o.is_premium ? o.fee_premium : o.fee_standart;
                 o.location = o.location.country + ', ' + o.location.city;

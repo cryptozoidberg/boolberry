@@ -1663,4 +1663,8 @@ li.list-group-item {
 	margin-bottom: 0;
 }
 
+ul.nav-tabs {
+	margin-bottom: 5px;
+}
+
 

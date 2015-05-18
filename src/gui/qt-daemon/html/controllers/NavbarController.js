@@ -338,14 +338,11 @@
         };
 
         var loaded = false;
+        var alias_count = 0;
 
         backend.subscribe('update_daemon_state', function(data){// move to run
             if(data.daemon_network_state == 2){
                 
-                // if(li && angular.isDefined(li)){
-                //     li.close();
-                //     li = null;
-                // }
                 var getAliases = function(){
                     backend.getAllAliases(function(data){
                         console.log('ALIASES :: ');
@@ -365,13 +362,9 @@
                     });
                 };
 
-
-                if(!loaded){
-                    loaded = true;
+                if(alias_count != data.alias_count){
+                    alias_count = data.alias_count;
                     getAliases();
-                    $interval(function(){
-                        getAliases();
-                    },60000); // one minute
                 }
                 
             }else if(data.daemon_network_state == 4){
