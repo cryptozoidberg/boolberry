@@ -9,6 +9,7 @@
                 if(angular.isDefined(data.offers)){
                     console.log(data.offers[0]);
                     $scope.offers = data.offers;
+                    $rootScope.offers_count = data.offers.length;
                 }
                 console.log(data);
             });

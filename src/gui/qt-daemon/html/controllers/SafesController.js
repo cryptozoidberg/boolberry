@@ -2,8 +2,8 @@
     'use strict';
     var module = angular.module('app.safes',[]);
     
-    module.controller('createAliasCtrl',['$scope', '$modalInstance', 'backend', 'safe',
-        function($scope, $modalInstance, backend, safe){
+    module.controller('createAliasCtrl',['$scope', '$modalInstance', 'backend', 'safe', '$rootScope',
+        function($scope, $modalInstance, backend, safe, $rootScope){
             $scope.alias = {
                 name : '',
                 fee : '1.76',
@@ -17,9 +17,12 @@
             $scope.register = function(alias){
                 backend.registerAlias(safe.wallet_id, alias.name, safe.address, alias.fee, alias.comment, function(data){
                     console.log('ALIAS CREATED ::');
-                    console.log(data); //TODO add to rootscope aliases
-                    //var tr_key = data.tx_hash;
-                    //$rootscope.aliases.push({tx_hash : data.tx_hash});
+                    $rootScope.unconfirmed_aliases.push(
+                        {
+                            tx_hash : data.tx_hash,
+                            name : alias.name
+                        }
+                    );
                     
                     $modalInstance.close();
                 });

@@ -138,13 +138,25 @@
         $rootScope.appPass = false;
 
         $rootScope.deamon_state = {
-        	daemon_network_state: 3
+        	daemon_network_state: 3 // by default "loading core"
         };
 
         $rootScope.aliases = [];
-        
-        console.log($rootScope.aliases);
 
+        $rootScope.unconfirmed_aliases = []; 
+
+        $rootScope.tr_count = 0;
+
+        $rootScope.total_balance = 0;
+
+        $rootScope.offers_count = 0;
+
+        backend.get_all_offers(function(data){
+            if(angular.isDefined(data.offers)){
+                $rootScope.offers_count = data.offers.length;
+            }
+        });
+        
         $rootScope.pass_required_intervals = [
             0,
             30000, //5 minutes
@@ -380,6 +392,14 @@
         });
         
         backend.subscribe('update_wallet_info', function(data){
+            
+            var recountTotalBalance = function(){
+                $rootScope.total_balance = 0;
+                angular.forEach($rootScope.safes,function(safe){
+                    $rootScope.total_balance += safe.unlocked_balance;
+                });
+            };
+
             angular.forEach(data.wallets,function (wallet){
                 console.log('update_wallet_info');
                 console.log(data);
@@ -394,6 +414,9 @@
                 angular.forEach(wallet_info, function(value,property){
                     safe[property] = value;
                 });
+
+
+
                 safe.loaded = true;
                 safe.balance_formated = $filter('gulden')(safe.balance);
 
@@ -403,9 +426,13 @@
                             data.history = data.unconfirmed.concat(data.history);
                         }
                         safe.history = data.history;
+                        //informer.info('tr count before wallet update '+$rootScope.tr_count);
+                        $rootScope.tr_count = $rootScope.tr_count + safe.history.length;
+                        //informer.info('tr count after wallet update '+$rootScope.tr_count);
                     });
                 }
             });
+            recountTotalBalance();
         });
 
         backend.subscribe('update_wallet_status', function(data){
@@ -448,13 +475,13 @@
             var wallet_id = data.wallet_id;
             var tr_info   = data.ti;
 
-            // alias = $filter('filter')($rootScope.aliases,{tx_hash : data.ti.tx_hash});
+            alias = $filter('filter')($rootScope.unconfirmed_aliases,{tx_hash : data.ti.tx_hash});
 
-            // if(alias.length){ // alias transaction
-            //     alias = alias[0];
-            //     alias = {}
-
-            // }
+            if(alias.length){ // alias transaction
+                alias = alias[0];
+                informer.info('Алиас "'+alias.name+'" зарегистрирован');
+                return;
+            }
 
             safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             if(safe.length){ // safe transaction
@@ -470,6 +497,7 @@
                         }
                         safe.history = data.history;
                         $rootScope.tr_count++;
+                        //informer.info('tr count after on money transfer (no history) ' + $rootScope.tr_count);
                         safe.history.unshift(tr_info);
                     });
                 }else{
@@ -489,6 +517,7 @@
                     }else{
                         console.log(tr_info.tx_hash+' tr does not exist');
                         $rootScope.tr_count++;
+                        //informer.info('tr count after on money transfer (history) ' + $rootScope.tr_count);
                         safe.history.unshift(tr_info); // insert new
                     }
                     
