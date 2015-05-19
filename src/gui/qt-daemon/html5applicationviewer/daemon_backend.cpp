@@ -780,7 +780,7 @@ std::string daemon_backend::run_wallet(uint64_t wallet_id)
 {
   GET_WALLET_OPT_BY_ID(wallet_id, wo);
   wo.miner_thread = std::thread(boost::bind(&daemon_backend::wallet_vs_options::worker_func, &wo));
-  m_pview->update_wallet_status(wsi);
+  return API_RETURN_CODE_OK;
 }
 std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_info& wi)
 {
