@@ -65,8 +65,7 @@
                                 <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован">
                                     <i class="fa fa-1x fa-lock text-primary"></i>
                                 </button>
-                                <!-- <span class="label label-info">@safealias</span> 
-                                <span class="label label-info">@safealias</span> -->
+                                <span  ng-repeat="alias in aliases | filter : {address: safe.address}"><span class="label label-info">@{{alias.alias}}</span><span>
                             </td>
 
                             <td>
@@ -116,14 +115,15 @@
 
                             <td>
                                 <div class="btn-group navbar-btn">
-                                    <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                    <button aria-expanded="false" ng-disabled="!safe.loaded" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
                                         <i class="fa fa-gear"></i> <span class="caret"></span>
                                     </button>
                                     <ul role="menu" class="dropdown-menu dropdown-menu-right">
                                         <li><a href="#sendG/{{safe.wallet_id}}">Отправить гульдены</a></li>
 
                                         <li><a href="market.html">Продать гульдены</a></li>
-                                        <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Начать добычу</a></li>
+                                        <li><a href="market.html">Купить гульдены</a></li>
+                                        <li><a href="startMining(safe.wallet_id)">Начать добычу</a></li>
 
                                         <li class="divider"></li>
                                         <li><a href="" ng-click="registerAlias(safe)">Присвоить алиас</a></li>
@@ -195,18 +195,20 @@
                                     </div>
                                 </div>
                             </div>
-                            <div><span class="label label-info">@safealias</span> <span class="label label-info">@safealias</span></div>
+                            <div>
+                                <span  ng-repeat="alias in aliases | filter : {address: safe.address}"><span class="label label-info">@{{alias.alias}}</span> <span>
+                            </div>
                         </div>
 
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-xs-9 col-sm-9">
-                                    <ul class="list-unstyled">
+                                   <!--  <ul class="list-unstyled">
 
                                         <li class="text-info">
                                             Ожидается:  <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">
                                         </li>
-                                    </ul>
+                                    </ul> -->
                                     <div class="balance">Баланс: {{safe.balance | gulden}} </div>
                                     <div class="balance">Доступно: {{safe.unlocked_balance | gulden}} </div>
                                 </div>

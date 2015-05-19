@@ -48,6 +48,16 @@ possible "daemon_network_state" codes:
       daemon_network_state_unloading_core = 5
 
 
+update_wallet_status()
+
+param: 
+{
+  "wallet_id": 0,
+  "wallet_state": 1,
+  "is_mining": true
+}
+
+
 //----------------------------------
     API
 //----------------------------------
@@ -69,25 +79,28 @@ response:
       "amount_etc": 2,
       "target": "EUR",
       "location": "USA, NYC",
-    "contacts": "+89876782342",
-    "comment": "Best ever service",
-    "payment_types": "cash",
-    "expiration_time":"two days"
-    }, 
+      "contacts": "+89876782342",
+      "comment": "Best ever service",
+      "payment_types": "cash",
+      "expiration_time": "two days",
+      "tx_hash": "2fb43b50d0edf7824ba95c414832d324ff5e91287f28929677df3682e4c8bc0c",
+      "index_in_tx": 0
+    },
     {
       "offer_type": 0,
       "amount_lui": 4300000000,
       "amount_etc": 2,
       "target": "EUR",
       "location": "USA, Washington",
-    "contacts": "+89876782342",
-    "comment": "Best ever service",
-    "payment_types": "cash",
-    "expiration_time":"two days"
+      "contacts": "+89876782342",
+      "comment": "Best ever service",
+      "payment_types": "cash",
+      "expiration_time": "two days",
+      "tx_hash": "2fb43b50d0edf7824ba95c414832d324ff5e91287f28929677df3682e4c8bc0c",
+      "index_in_tx": 1
     }
   ]
 }
-
 
 push_offer() send offer to network
 
@@ -207,9 +220,36 @@ response:
   ]
 }
 
+[sync] validate_address(str address)
 
+response: 
+{
+  "error_code" : "TRUE", //"TRUE" or "FALSE"
+  "request_id": ""   //ignored
+}
 
+[sync] start_pos_mining(param)
+param:
 
+{
+  "wallet_id" : 0
+}
+response: 
+{
+  "error_code" : "OK",
+  "request_id": ""   
+}
 
+[sync] stop_pos_mining(param)
+param:
+
+{
+  "wallet_id" : 0
+}
+response: 
+{
+  "error_code" : "OK",
+  "request_id": ""   
+}
 
 

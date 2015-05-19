@@ -103,6 +103,7 @@ namespace boost
     a & x.payment_types; 
     a & x.expiration_time;
     a & x.timestamp;
+    a & x.tx_hash;
   }
 
 

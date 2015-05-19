@@ -3,8 +3,8 @@
 
     var module = angular.module('app.backendServices', [])
 
-    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer','$rootScope',
-        function($interval, $timeout, emulator, loader, informer, $rootScope) {
+    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer','$rootScope', '$filter',
+        function($interval, $timeout, emulator, loader, informer, $rootScope, $filter) {
         
         var callbacks = {};
 
@@ -37,11 +37,25 @@
                 return this.runCommand('get_all_offers', params, callback);
             },
 
-            resync_wallet : function(wallet_id) {
+            startPosMining : function(wallet_id) {
+                var params = {
+                    wallet_id : wallet_id
+                };
+                return this.runCommand('start_pos_mining', params);
+            },
+
+            stopPosMining : function(wallet_id) {
+                var params = {
+                    wallet_id : wallet_id
+                };
+                return this.runCommand('stop_pos_mining', params);
+            },
+
+            resync_wallet : function(wallet_id, callback) {
                 var params = {
                     wallet_id: wallet_id
                 }
-                return this.runCommand('resync_wallet', params);
+                return this.runCommand('resync_wallet', params, callback);
             },
 
             haveSecureAppData: function() { // for safes
@@ -63,7 +77,7 @@
                         "tracking_key": "",
                         "comment": comment
                     },
-                    "fee": fee
+                    "fee": $filter('gulden_to_int')(fee)
                 };
 
                 return this.runCommand('request_alias_registration', params, callback);
@@ -74,6 +88,7 @@
             },
 
             getSecureAppData: function(pass) {
+                console.log(pass);
                 if(!this.shouldUseEmulator()){
                     return Qt_parent['get_secure_app_data'](JSON.stringify(pass));
                 }else{
@@ -112,24 +127,26 @@
                 }
             },
 
-            push_offer : function(callback){
-                // wallet_id, offer_type, amount_lui, amount_etc, target, 
-                // location, contacts, comment, payment_types, expiration_time
+            pushOffer : function(
+                wallet_id, offer_type, amount_lui, target, location, contacts, 
+                comment, expiration_time, fee, amount_etc, payment_types, callback){
 
                 var params = {
-                    "wallet_id" : 0,
+                    "wallet_id" : wallet_id,
                     "od": {
-                        "offer_type": 0, //0 buy, 1 sell
-                        "amount_lui": 2300000000,
-                        "amount_etc": 2,
-                        "target": "EUR",
-                        "location": "USA, NYC",
-                        "contacts": "+89876782342",
-                        "comment": "Best ever service",
+                        "offer_type": offer_type, //0 buy, 1 sell
+                        "amount_lui": $filter('gulden_to_int')(amount_lui),
+                        "amount_etc": 1,
+                        "target": target,
+                        "location": location,
+                        "contacts": contacts,
+                        "comment": comment,
                         "payment_types": "cash",
-                        "expiration_time":3
+                        "expiration_time": expiration_time,
+                        "fee" : $filter('gulden_to_int')(fee)
                     }
                 };
+                console.log(params);
                 return this.runCommand('push_offer', params, callback);
             },
 
@@ -151,6 +168,23 @@
                 };
                 console.log(params);
                 return this.runCommand('transfer', params, callback);
+            },
+
+            validateAddress: function(address){
+                if(!this.shouldUseEmulator()){
+                    var result =  JSON.parse(Qt_parent['validate_address'](address));
+                    if(angular.isDefined(result.error_code)){
+                        return result.error_code === 'TRUE' ? true : false;
+                    }else{
+                        return false;
+                    }
+                }else{
+                    if(address.length == 95){
+                        return true;
+                    }else{
+                        return false;    
+                    }
+                }
             },
 
             quitRequest : function() {
@@ -204,7 +238,9 @@
             // system functions
 
             runCommand : function(command, params, callback) {
-                
+                var commandsNoLoading = [
+                    'get_all_aliases'
+                ];
                 if(this.shouldUseEmulator()){
                     return emulator.runCommand(command, params, callback);
                 }else{
@@ -221,7 +257,9 @@
                         if(result.error_code == 'OK'){
                             if(angular.isDefined(callback)){
                                 var request_id = result.request_id;
-                                loaders[request_id] = loader.open();
+                                if(commandsNoLoading.indexOf(command) < 0){
+                                    loaders[request_id] = loader.open(command);
+                                }
                                 callbacks[request_id] = callback;
                             }else{
                                 return result; // If we didn't pass callback, its mean the function is synch
@@ -260,8 +298,9 @@
 
                 var request_id = status.request_id;
                 var error_code = result.status.error_code;
+
+                if(angular.isDefined(loaders[request_id])) loaders[request_id].close();
                 
-                loaders[request_id].close();
                 console.log('DISPATCH: got result from backend request id = '+request_id);
                 console.log(result);
 
@@ -367,15 +406,23 @@
             return object;
         };
         this.runCommand = function(command, params, callback) {
+            var commandsNoLoading = [
+                'get_all_aliases'
+            ];
+            var isShowLoader = commandsNoLoading.indexOf(command) < 0;
             var data = {};
             var commandData = false;
             if(commandData = this.getData(command)){
                 data = commandData;
             }
             if(angular.isDefined(callback)){
-                var loaderInst = loader.open('Run command ' + command + ' params = ' + JSON.stringify(params));
+                
+                if(isShowLoader){
+                    var loaderInst = loader.open('Run command ' + command + ' params = ' + JSON.stringify(params));
+                }
+
                 $timeout(function(){
-                    loaderInst.close();
+                    if(isShowLoader) loaderInst.close();
                     callback(data);
                 },3000);
                 
@@ -430,7 +477,7 @@
                             "offer_type": 0,
                             "amount_lui": 2300000000,
                             "amount_etc": 2,
-                            "target": "EUR",
+                            "target": "Шкаф деревяный",
                             "location": "USA, NYC",
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
@@ -438,14 +485,25 @@
                             "expiration_time":3
                         }, 
                         {
-                            "offer_type": 0,
+                            "offer_type": 3,
                             "amount_lui": 4300000000,
                             "amount_etc": 2,
                             "target": "EUR",
                             "location": "USA, Washington",
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
-                            "payment_types": "cash",
+                            "payment_types": "EPS,BC,Qiwi",
+                            "expiration_time":5
+                        },
+                        {
+                            "offer_type": 1,
+                            "amount_lui": 4300000000,
+                            "amount_etc": 2,
+                            "target": "Лошадка",
+                            "location": "USA, Washington",
+                            "contacts": "+89876782342",
+                            "comment": "Best ever service",
+                            "payment_types": "CSH,BT",
                             "expiration_time":5
                         }
                       ]
@@ -516,6 +574,7 @@
                 case 'update_daemon_state': 
                     result = {
                         "daemon_network_state": 2,
+                        "alias_count" : Math.floor(Math.random()*10),
                         "hashrate": 0,
                         "max_net_seen_height": 9800,
                         "synchronization_start_height": 9700,

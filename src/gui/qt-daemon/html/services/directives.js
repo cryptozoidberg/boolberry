@@ -131,5 +131,25 @@
         }
   });
 
+  // module.directive('currencyParser', function (){
+  //   return {
+  //       restrict: 'A',
+  //       link: function(scope, element, attr) {
+  //             //remove the default formatter from the input directive to prevent conflict
+  //             //controller.$formatters.shift();
+  //             var currencies = [];
+  //             element.children().each(function(){
+  //               var item = {
+  //                 code: $(this).attr('data-value'),
+  //                 title: $(this).html()
+  //               };
+  //               currencies.push(item);
+                
+  //             });
+  //             console.log(JSON.stringify(currencies));
+  //         }
+  //       }
+  // });
+
 
 }).call(this);

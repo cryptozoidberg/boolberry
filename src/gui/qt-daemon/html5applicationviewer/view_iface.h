@@ -129,6 +129,7 @@ public:
     std::string pow_difficulty;
     uint64_t hashrate;
     uint64_t last_build_displaymode;
+    uint64_t alias_count;
     std::string last_build_available;
     std::list<block_info> last_blocks;
 
@@ -145,6 +146,7 @@ public:
       KV_SERIALIZE(last_build_displaymode)
       KV_SERIALIZE(last_build_available)
       KV_SERIALIZE(last_blocks)
+      KV_SERIALIZE(alias_count)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -156,15 +158,19 @@ public:
     enum state
     {
       wallet_state_synchronizing = 1,
-      wallet_state_ready = 2
+      wallet_state_ready = 2, 
+      wallet_state_error = 3
     };
+
 
     uint64_t wallet_id;
     uint64_t wallet_state;
+    bool is_mining;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_id)
       KV_SERIALIZE(wallet_state)
+      KV_SERIALIZE(is_mining)
     END_KV_SERIALIZE_MAP()
   };  
   
@@ -234,6 +240,7 @@ public:
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(caption)
       KV_SERIALIZE(filemask)
+      KV_SERIALIZE(default_dir)
     END_KV_SERIALIZE_MAP()
   };
 

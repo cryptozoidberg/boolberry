@@ -75,13 +75,13 @@
             <a href="#safes"><h4><span>Сейфов</span><em class="index_safeCount">{{safes.length}}</em></h4></a>
         </div>
         <div class="col-xs-3 col-sm-3">
-            <a href="#history"><h4><span>Платежей</span><em class="index_paymentsCount">0</em></h4></a>
+            <a href="#history"><h4><span>Платежей</span><em class="index_paymentsCount">{{tr_count}}</em></h4></a>
         </div>
         <div class="col-xs-3 col-sm-3">
-            <a href="#safes"><h4><span>Весь баланс</span><em><em class="index_totalBalance">0,00</em> <strong>G</strong></em></h4></a>
+            <a href="#safes"><h4><span>Весь баланс</span><em><em class="index_totalBalance">{{total_balance | gulden}}</em></em></h4></a>
         </div>
         <div class="col-xs-3 col-sm-3">
-            <a href="#market/my/currency"><h4><span>Заявок</span><em class="index_orderCount">0</em></h4></a>
+            <a href="#market/my/currency"><h4><span>Заявок</span><em class="index_orderCount">{{offers_count}}</em></h4></a>
         </div>
     </div>
 </div>
@@ -94,7 +94,7 @@
                 <span style="border-bottom: dashed 1px">Кнопки</span>
             </button>
             <h3 class="inline-block">
-                <a href="safes.html">Cейфы</a>
+                <a href="#/safes">Cейфы</a>
             </h3>
         </div>
     </div>
@@ -118,7 +118,114 @@
         </div>
     </div>
 
-    <div class="safes owl-carousel" data-owl-carousel data-options="safes_owl_options" data-items="safes" data-template-id="safeItem">
+<!--     <div class="safes owl-carousel" data-owl-carousel data-options="safes_owl_options" data-items="safes" data-template-id="safeItem">
+    </div> -->
+
+    <div class="table-responsive panel">
+        <table class="table table-condensed table-hover data-table safes-table">
+            <thead>
+                <tr>
+                    <th><span class="nowrap">Сейф <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                    <th><span class="nowrap">Счет сейфа <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                    <th><span class="nowrap">Состояние <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                    <th><span class="nowrap">Доступно<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                    <th><span class="nowrap">Баланс <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr ng-if="!safes.length">
+                    <td colspan="6">Нет записей</td>
+                </tr>
+                <tr ng-repeat="safe in safes">
+                    <td>
+                        <i class="fa fa-spinner fa-pulse" ng-hide="safe.loaded"></i>
+                        <a class="btn btn-link" href="#safe/{{safe.wallet_id}}">
+                            <big>{{safe.name}}</big>
+                        </a>
+                        <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован">
+                            <i class="fa fa-1x fa-lock text-primary"></i>
+                        </button>
+                        <span  ng-repeat="alias in aliases | filter : {address: safe.address}"><span class="label label-info">@{{alias.alias}}</span><span>
+                    </td>
+
+                    <td>
+                        <div class="dropdown">
+                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button">
+                                <span class="account-text">
+                                    <span class="text-muted"> 
+                                        <span style="color:#999">
+                                            {{safe.address}}
+                                        </span>
+                                    </span>
+                                    <span class="moredots">...<span class="caret"></span></span>
+                                </span>
+                            </button>
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>
+                                            <div class="contractor">
+                                                <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                    скопировать
+                                                </button> -->
+                                                <pre class="safe-number" style="height:60px">{{safe.address}}</pre>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <ul class="list-unstyled">
+                            <!-- <li class="text-info">
+                                Ожидается:  <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">
+                            </li> -->
+                            <li class="label-icon" ng-if="safe.is_mining">
+                                <em>Добыча</em> 
+                                <span class="label label-success">
+                                    <i class="gu gu-2x gu-pick"></i>
+                                </span>
+                            </li>
+                        </ul>
+                    </td>
+
+                    <td>
+                        <strong><big>{{safe.unlocked_balance | gulden}}<big></big></big></strong>
+                    </td>
+
+                    <td>
+                        <strong><big>{{safe.balance | gulden}}<big></big></big></strong>
+                    </td>
+
+                    <td>
+                        <div class="btn-group navbar-btn">
+                            <button aria-expanded="false" ng-disabled="!safe.loaded" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                                <i class="fa fa-gear"></i> <span class="caret"></span>
+                            </button>
+                            <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                                <li><a href="#sendG/{{safe.wallet_id}}">Отправить гульдены</a></li>
+
+                                <li><a href="">Продать гульдены</a></li>
+                                <li><a href="">Купить гульдены</a></li>
+
+                                <li ng-if="!safe.is_mining"><a href="" ng-click="startMining(safe.wallet_id)">Начать добычу</a></li>
+                                <li ng-if="safe.is_mining"><a href="" ng-click="stopMining(safe.wallet_id)">Остановить добычу</a></li>
+
+                                <li class="divider"></li>
+                                <li><a href="" ng-click="registerAlias(safe)">Присвоить алиас</a></li>
+                                <li><a href="" ng-click="closeWallet(safe.wallet_id)">Отключить сейф</a></li>
+                                <li><a href="" ng-click="">Сделать бекап</a></li>
+                                <li><a href="" ng-click="resynch(safe.wallet_id)">Синхронизировать</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <div class="row widgets">

@@ -1,91 +1,77 @@
-
+<div  ng-controller="addOfferCtrl">
 <h1>
     Заявка на 
-    <span class="collapse selltext">покупка</span>
-    <span class="collapse in selltext">продажу</span> 
+    <span ng-if="offer.offer_type == '0'">покупку</span>
+    <span ng-if="offer.offer_type == '1'">продажу</span> 
     товаров за гульденов
 </h1>
 
 <h5>
     Здесь Вы можете создать заявку на 
-    <span class="collapse selltext">покупка</span>
-    <span class="collapse in selltext">продажу</span> 
+    <span ng-if="offer.offer_type == '0'">покупку</span>
+    <span ng-if="offer.offer_type == '1'">продажу</span> 
     гульденов в сети, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню
     <br>
     Сообщение о том, что сначала лучше бы поискать, есть ли что-то похожее на рынке, и только потом создавать заявку
 </h5>
 
-<form class="form-horizontal" ng-controller="addOfferCtrl">
+<form class="form-horizontal" name="offer_form">
     <div class="tabs">
+        
+        <div class="panel">
+            <div class="panel-body">
+                <h4>
+                    <a type="button" data-toggle="collapse" data-target=".collapse1">  
+                        <span>Выбор сейфа</span>
+                    </a>
+                </h4>
+                <div class="collapse in collapse1">
+                    <div class="form-group">
+                        <label class="col-xs-4 col-sm-4">Сейф, за счет которого будет осуществлена заявка</label>
+                        <select class="col-xs-4 col-sm-4" selectpicker ng-model="offer.wallet_id" ng-options="safe.wallet_id as safe.name + ' (' +safe.balance_formated + ')' for safe in safes"></select>
+                        <!-- <div class="col-xs-4 col-sm-4">
+                            <label class="checkbox"><input type="checkbox"> Не показывать номер счета в предложении</label>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="panel">
             
             <div class="panel-body">
                 <h4>
-                    <a href="#" type="button" data-toggle="collapse" data-target=".collapse00">  
+                    <a type="button" data-toggle="collapse" data-target=".collapse00">  
                         <span>
-                            Детали <span class="collapse selltext">покупки</span>
-                            <span class="collapse in selltext">продажи</span>
+                            Детали 
+                            <span ng-if="offer.offer_type == '0'" class="selltext">покупки</span>
+                            <span ng-if="offer.offer_type == '1'" class="selltext">продажи</span>
                         </span>
                     </a>
                 </h4>
+                
                 <div class="form-group">
                     <label class="col-xs-4 col-sm-4 control-label">
                         Тип объявления 
-                        <button 
-                            type="button" 
-                            class="btn btn-link popover-name" 
-                            data-trigger="hover" 
-                            data-toggle="popover"  
-                            data-content="Вы можете поменять здесь тип обьявления и опубликовать обьявление другого типа"
-                        >
-                            <i class="fa fa-lg fa-question-circle"></i>
-                        </button>
+                        <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Вы можете поменять здесь тип обьявления и опубликовать обьявление другого типа"></i>
                     </label>
-                    <div class="col-xs-4 col-sm-4">
-                        <div class="">
-                            <a class="btn btn-success btn-block dropdown" data-toggle="dropdown">
-                                <span class="collapse selltext">Купить</span>
-                                <span class="collapse in selltext">Продать</span> товар
-                                <span class="caret"></span>
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </a>
-                            <ul role="menu" class="dropdown-menu">
-                                <li><a href="#" data-toggle="collapse" data-target=".selltext">Купить товар за гульдены</a></li>
-                                <li><a href="#" data-toggle="collapse" data-target=".selltext">Продать товар за гульдены</a></li>
-                            </ul>
-                        </div>
-                    </div>
+                    <select class="col-xs-4 col-sm-4" selectpicker ng-model="offer.offer_type" ng-options="type.key as type.value for type in offer_types"></select>
                 </div>
                 <div class="collapse in collapse00">
+                   
                     <div class="form-group">
                         <label class="col-xs-4 col-sm-4 control-label">
                             Текст объявления 
-                            <button 
-                                type="button" 
-                                class="btn btn-link popover-name" 
-                                data-trigger="hover" 
-                                data-toggle="popover"  
-                                data-content="Опишите детали товар или услуги, которая требуется"
-                            >
-                                <i class="fa fa-lg fa-question-circle"></i>
-                            </button>
+                            <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Опишите детали товар или услуги, которая требуется"></i>
                         </label>
                         <div class="col-xs-4 col-sm-4">
-                            <textarea class="form-control" ng-model="offer.comment" placeholder="текст до 512 символов"></textarea>
+                            <textarea class="form-control" ng-model="offer.target" placeholder="текст до 512 символов"></textarea>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-xs-4 col-sm-4 control-label">
                             Цена 
-                            <button 
-                                type="button" 
-                                class="btn btn-link popover-name" 
-                                data-trigger="hover" 
-                                data-toggle="popover"  
-                                data-content="Стоимость единицы товара или услуги"
-                            >
-                                <i class="fa fa-lg fa-question-circle"></i>
-                            </button>
+                            <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Стоимость единицы товара или услуги"></i>
                         </label>
                         <div class="col-xs-4 col-sm-4">
                             <div class="input-group">
@@ -103,34 +89,14 @@
                 </div>
             </div>
         </div>
+                
 
-        <div class="collapse in buytext">
-            <div class="collapse in selltext">
-                <div class="panel">
-                    <div class="panel-body">
-                        <h4>
-                            <a href="#" type="button" data-toggle="collapse" data-target=".collapse1">  
-                                <span>Счет для перевода средств за товар</span>
-                            </a>
-                        </h4>
-                        <div class="collapse in collapse1">
-                            <div class="form-group">
-                                <label class="col-xs-4 col-sm-4">Ваш счет, на который перечислят G</label>
-                                <select class="selectpicker col-xs-4 col-sm-4" ng-model="offer.wallet_id" ng-options="safe.wallet_id as safe.name + '(' +safe.balance + ' G)' for safe in safes"></select>
-                                <div class="col-xs-4 col-sm-4">
-                                    <label class="checkbox"><input type="checkbox"> Не показывать номер счета в предложении</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         <div class="panel">
             <div class="panel-body">
                 <h4>
-                    <a href="#" type="button" data-toggle="collapse" data-target=".collapse2">  
+                    <a type="button" data-toggle="collapse" data-target=".collapse2">  
                         <span>Cпособы связи</span>
                     </a>
                 </h4>
@@ -138,16 +104,16 @@
                     <div class="form-group">
                         <label  class="control-label col-xs-4 col-sm-4">Email</label>
                         <div class="col-xs-4 col-sm-4">
-                            <input type="text" class="form-control" ng-model="offer.contact.email" placeholder="username@domain.com">
+                            <input type="text" class="form-control" ng-model="offer.contacts.email" placeholder="username@domain.com">
                         </div>
                     </div>
                     <div class="form-group">
                         <label  class="control-label col-xs-4 col-sm-4">Телефон</label>
                         <div class="col-xs-4 col-sm-4">
-                            <input type="text" class="form-control" ng-model="offer.contact.phone" placeholder="username@domain.com">
+                            <input type="text" class="form-control" ng-model="offer.contacts.phone" placeholder="0897654321">
                         </div>
                     </div>
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label  class="control-label col-xs-4 col-sm-4">Мессенджер и ник в нем</label>
                         <div class="col-xs-8 col-sm-8">
                             <div class="row">
@@ -201,12 +167,12 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
+                    </div> -->
+                    <!-- <div class="form-group">
                         <div class="col-xs-4 col-sm-4 ">
 
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -214,7 +180,7 @@
         <div class="panel">
             <div class="panel-body">
                 <h4>
-                    <a href="#" type="button" data-toggle="collapse" data-target=".collapse3">
+                    <a type="button" data-toggle="collapse" data-target=".collapse3">
                         <span>Условия размещения заявки</span>
                     </a>
                 </h4>
@@ -223,18 +189,10 @@
                     <div class="form-group">
                         <label  class="control-label col-xs-4 col-sm-4">
                             Количество дней размещения 
-                            <button 
-                                type="button" 
-                                class="btn btn-link popover-name" 
-                                data-trigger="hover" 
-                                data-toggle="popover"  
-                                data-content="Максимальное количество дней - 14. Оставьте без изменений или установите меньшее значение"
-                            >
-                                <i class="fa fa-lg fa-question-circle"></i>
-                            </button>
+                            <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Максимальное количество дней - 14. Оставьте без изменений или установите меньшее значение"></i>
                         </label>
 
-                        <select class="selectpicker col-xs-2 col-sm-2" ng-model="expiration_time" ng-options="interval for interval in intervals"></select>
+                        <select class="col-xs-2 col-sm-2" selectpicker ng-model="offer.expiration_time" ng-options="interval for interval in intervals"></select>
 
                         <div class="col-xs-4 col-sm-4">
                             <div class="help-block">После указанного срока заявка автоматически удалится.</div>
@@ -242,56 +200,40 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="col-xs-4 col-sm-4 control-label required">
+                        <label class="col-xs-4 col-sm-4 control-label">
                             География видимости 
-                            <button 
-                                type="button" 
-                                class="btn btn-link popover-name" 
-                                data-trigger="hover" 
-                                data-toggle="popover"  
-                                data-content="Ваша заявка будет вверху списка в указанной стране"
-                            >
-                                <i class="fa fa-lg fa-question-circle"></i>
-                            </button>
+                            <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Ваша заявка будет вверху списка в указанной стране"></i>
                         </label>
                         <div class="col-xs-3 col-sm-3 nopadding-right">
-                            <input type="text" ng-model="offer.target.country" class="form-control autocomplete-country buyG_autocomplete-country" placeholder="страна">
+                            <input type="text" ng-model="offer.location.country" class="form-control" placeholder="страна">
                         </div>
                         <div class="col-xs-3 col-sm-3 nopadding-right">
-                            <input type="text" ng-model="offer.target.city" class="form-control" placeholder="город">
+                            <input type="text" ng-model="offer.location.city" class="form-control" placeholder="город">
                         </div>
                     </div>
 
                     <div class="form-group  unlock-block">
 
                         <label class="btn btn-success label-heading">
-                            <input type="checkbox" ng-model="offer.is_premium" id="sellProduct_premiumPlacement_checkbox"> Премиум размещение
+                            <input type="checkbox" ng-model="offer.is_premium" ng-change="changePackage(true)"> Премиум размещение
                         </label>
 
                         <div class="rounded-block">
-                            <!-- <div class="cover"></div> -->
+                             <div class="cover"></div> 
                             <h5>
                                 Поднимите заявку вверх списка всех предложений в сети. 
                                 Цена размещений в топе формируется ставками самих участников платежной системы
                             </h5>
-                            
                             <div class="form-group">
                                 <label class="control-label col-xs-4 col-sm-4">
                                     Рекомендуемая сумма для оплаты премиум размещения
-                                    <button 
-                                        type="button" 
-                                        class="btn btn-link popover-name" 
-                                        data-trigger="hover" 
-                                        data-toggle="popover"  
-                                        data-content="В стоимость входит стандартная комиссия и сумма поднятия вверху списка в указанной стране"
-                                    >
-                                        <i class="fa fa-lg fa-question-circle"></i>
-                                    </button>
+                                    
+                                    <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="В стоимость входит стандартная комиссия и сумма поднятия вверху списка в указанной стране"></i>
                                 </label>
 
                                 <div class="col-xs-2 col-sm-2">
                                     <div class="input-group">
-                                        <input type="text" value="8.67" placeholder="число" class="form-control">
+                                        <input type="text" ng-model="offer.fee_premium" placeholder="число" class="form-control">
                                         <span class="input-group-addon">G</span>
                                     </div>
                                 </div>
@@ -307,15 +249,15 @@
 
                     <div class="form-group unlock-block">
                         <label class="btn label-heading" style="background:#eee;">
-                            <input type="checkbox" checked="" id="sellProduct_standardPlacement_checkbox"> Стандартное размещение
+                            <input type="checkbox" ng-model="offer.is_standart"  ng-change="changePackage(false)" id="sellProduct_standardPlacement_checkbox"> Стандартное размещение
                         </label>
                         <div class="rounded-block">
-                            <!-- <div class="cover"></div> -->
+                            
                             <div class="form-group">
                                 <label  class="control-label col-xs-4 col-sm-4">Комиссия за размещение</label>
                                 <div class="col-xs-2 col-sm-2">
                                     <div class="input-group">
-                                        <input disabled="disabled" type="text" class="form-control" placeholder="" value="1.75" >
+                                        <input ng-disabled="true" ng-model="offer.fee_standart" type="text" class="form-control" placeholder="" >
                                         <span class="input-group-addon">G</span>
                                     </div>
                                 </div>
@@ -328,18 +270,9 @@
 
         <div class="form-group">
             <div class="col-xs-1 col-xs-12 col-sm-12">
-                <button 
-                    type="button" 
-                    class="btn btn-link  i-check collapsed" 
-                    data-toggle="collapse" 
-                    data-target="#empty" 
-                    id="submbtnOpen"
-                >
-                    <span class="text-muted">
-                        <i class="fa fa-lg fa-square-o"></i> 
-                        Подтвержаю, что ознакомился с условиями использования системы
-                    </span>
-                </button>
+                <label class="btn label-heading">
+                    <input type="checkbox" ng-model="is_agree"> Подтвержаю, что ознакомился с условиями использования системы
+                </label>
             </div>
         </div>
 
@@ -350,8 +283,9 @@
                 <a class="btn btn-block btn-lg btn-default">Отмена</a>
             </div>
             <div class="col-xs-6 col-sm-6">
-                <button type="button" ng-click="addOffer(offer)" class="sellProduct_submitButton btn btn-block btn-lg btn-primary" id="submibtn">Отправить</button>
+                <button type="button" ng-click="addOffer(offer)" ng-disabled="!is_agree" class="btn btn-block btn-lg btn-primary">Отправить</button>
             </div> 
         </div>
     </div>
 </form>
+</div>

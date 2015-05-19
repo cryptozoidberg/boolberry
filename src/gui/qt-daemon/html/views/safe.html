@@ -14,8 +14,7 @@
                                 <button data-content="Сейф зашифрован" data-toggle="popover" data-trigger="hover" class="btn btn-link popover-name" type="button" data-original-title="" title=""><i class="fa fa-1x fa-lock text-primary"></i></button>
                             </h2>
 
-                            <span class="label label-info">@safealias</span> 
-                            <span class="label label-info">@safealias</span>
+                            <span  ng-repeat="alias in aliases | filter : {address: safe.address}"><span class="label label-info">@{{alias.alias}}</span>&nbsp;</span>
 
                             <div style="position: relative; margin: 15px 0px 0px;" class="rel">
                                 <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button> -->
@@ -161,7 +160,7 @@
 
                                         <div class="form-group clearfix">
                                             <label class="control-label required col-xs-4 col-sm-4">Период</label>
-                                            <select class="selectpicker col-xs-6 col-sm-6" style="width:100%">
+                                            <select selectpicker class="col-xs-6 col-sm-6" style="width:100%">
                                                 <option class="dateperiod" selected="">выбрать</option>
                                                 <option class="dateperiod">день</option>
                                                 <option class="dateperiod">неделя</option>
@@ -195,7 +194,7 @@
                                     <div class="col-xs-6 col-sm-6">
                                         <div class="form-group">
                                             <label class="col-xs-4 col-sm-4 control-label required">Состояние</label>
-                                            <select class="col-xs-4 col-sm-4 selectpicker nopadding">
+                                            <select selectpicker class="col-xs-4 col-sm-4 nopadding">
                                                 <option selected="">любое</option>
                                                 <option>анонимно</option>
                                                 <option>неанонимно</option>

@@ -32,7 +32,7 @@
 #define CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE       500000 //size of block (bytes) after which reward for block calculated using block size
 #define CURRENCY_COINBASE_BLOB_RESERVED_SIZE          600
 #define CURRENCY_MAX_TRANSACTION_BLOB_SIZE            (CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE - CURRENCY_COINBASE_BLOB_RESERVED_SIZE*2) 
-#define CURRENCY_DISPLAY_DECIMAL_POINT                12
+#define CURRENCY_DISPLAY_DECIMAL_POINT                6
 
 // COIN - number of smallest units in one coin
 #define COIN                                            ((uint64_t)100000000) // pow(10, 8)
@@ -108,7 +108,7 @@
 #define POS_MAX_COINAGE                                 (60*60*24*90) // 90 days
 #define POS_STARTER_KERNEL_HASH                         "bd82e18d42a7ad239588b24fd356d63cc82717e1fae8f6a492cd25d62fda263f"
 #define POS_MODFIFIER_INTERVAL                          10
-#define POS_WALLET_MINING_SCAN_INTERVAL                 20  //seconds
+#define POS_WALLET_MINING_SCAN_INTERVAL                 POS_SCAN_STEP  //seconds
 
 #define WALLET_FILE_SIGNATURE                           0x1111011101101011LL  //Bender's nightmare
 #define WALLET_FILE_MAX_BODY_SIZE                       0x88888888L //2GB

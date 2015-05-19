@@ -19,13 +19,6 @@
               responsive: false
             };
             
-            // backend.openWallet('/home/master/Lui/test_wallet.lui', '12345',function(data){
-            //     $scope.safes.push(data);
-            //     informer.info('Ура!!!');
-            // });
-            
-            
-
             setUpWidgets();
 
             function setUpWidgets() {

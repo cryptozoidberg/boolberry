@@ -79,6 +79,8 @@ protected:
   QString validate_address(const QString& param);
   QString on_request_quit();
   QString resync_wallet(const QString& param);
+  QString start_pos_mining(const QString& param);
+  QString stop_pos_mining(const QString& param);
 
 
   void message_box(const QString& msg);
@@ -131,6 +133,7 @@ private:
   std::unique_ptr<QAction> m_restoreAction;
   std::unique_ptr<QAction> m_quitAction;
   
+  std::string m_last_update_daemon_status_json;
 
   struct dispatch_entry
   {

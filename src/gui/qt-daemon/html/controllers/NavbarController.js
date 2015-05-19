@@ -97,6 +97,7 @@
 
 
             $scope.submit = function(appPass){
+                console.log(appPass);
                 var appData = backend.getSecureAppData({pass: appPass});
                 appData = JSON.parse(appData);
                 if(angular.isDefined(appData.error_code) && appData.error_code === "WRONG_PASSWORD"){
@@ -137,13 +138,25 @@
         $rootScope.appPass = false;
 
         $rootScope.deamon_state = {
-        	daemon_network_state: 3
+        	daemon_network_state: 3 // by default "loading core"
         };
 
         $rootScope.aliases = [];
-        
-        console.log($rootScope.aliases);
 
+        $rootScope.unconfirmed_aliases = []; 
+
+        $rootScope.tr_count = 0;
+
+        $rootScope.total_balance = 0;
+
+        $rootScope.offers_count = 0;
+
+        backend.get_all_offers(function(data){
+            if(angular.isDefined(data.offers)){
+                $rootScope.offers_count = data.offers.length;
+            }
+        });
+        
         $rootScope.pass_required_intervals = [
             0,
             30000, //5 minutes
@@ -290,17 +303,58 @@
                 }
             });
 
+        };
+
+        $scope.startMining = function(wallet_id){
+            backend.startPosMining(wallet_id);
+            // var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            // if(safe.length){
+            //     safe = safe[0];
+            //     safe.is_mining = true;
+            // }else{
+            //     return;
+            // }
         }
 
+        $scope.stopMining = function(wallet_id){
+            backend.stopPosMining(wallet_id);
+            // var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            // if(safe.length){
+            //     safe = safe[0];
+            //     safe.is_mining = false;
+            // }else{
+            //     return;
+            // }
+        }
+
+        $scope.resynch = function(wallet_id){
+            console.log('RESYNCH WALLET ::' + wallet_id);
+            backend.resync_wallet(wallet_id, function(result){
+                console.log(result);
+            });
+        };
+
+        $scope.registerAlias = function(safe){ //TODO check safe data
+            
+            var modalInstance = $modal.open({
+                templateUrl: "views/create_alias.html",
+                controller: 'createAliasCtrl',
+                size: 'md',
+                windowClass: 'modal fade in',
+                resolve: {
+                    safe: function(){
+                        return safe;
+                    }
+                }
+            });
+        };
+
         var loaded = false;
+        var alias_count = 0;
 
         backend.subscribe('update_daemon_state', function(data){// move to run
             if(data.daemon_network_state == 2){
                 
-                // if(li && angular.isDefined(li)){
-                //     li.close();
-                //     li = null;
-                // }
                 var getAliases = function(){
                     backend.getAllAliases(function(data){
                         console.log('ALIASES :: ');
@@ -308,19 +362,21 @@
                         if(angular.isDefined(data.aliases) && data.aliases.length){
                             $rootScope.aliases = [];
                             angular.forEach(data.aliases,function(alias){
-                                $rootScope.aliases.push({alias: alias.alias, name: '@'+alias.alias, address: alias.address});
+                                var new_alias = {
+                                    alias: alias.alias, 
+                                    name: '@'+alias.alias, 
+                                    address: alias.address,
+                                    comment: alias.comment
+                                };
+                                $rootScope.aliases.push(new_alias);
                             });    
                         }
                     });
                 };
 
-
-                if(!loaded){
-                    loaded = true;
+                if(alias_count != data.alias_count){
+                    alias_count = data.alias_count;
                     getAliases();
-                    $interval(function(){
-                        getAliases();
-                    },60000); // one minute
                 }
                 
             }else if(data.daemon_network_state == 4){
@@ -336,6 +392,14 @@
         });
         
         backend.subscribe('update_wallet_info', function(data){
+            
+            var recountTotalBalance = function(){
+                $rootScope.total_balance = 0;
+                angular.forEach($rootScope.safes,function(safe){
+                    $rootScope.total_balance += safe.unlocked_balance;
+                });
+            };
+
             angular.forEach(data.wallets,function (wallet){
                 console.log('update_wallet_info');
                 console.log(data);
@@ -350,6 +414,9 @@
                 angular.forEach(wallet_info, function(value,property){
                     safe[property] = value;
                 });
+
+
+
                 safe.loaded = true;
                 safe.balance_formated = $filter('gulden')(safe.balance);
 
@@ -359,14 +426,33 @@
                             data.history = data.unconfirmed.concat(data.history);
                         }
                         safe.history = data.history;
+                        //informer.info('tr count before wallet update '+$rootScope.tr_count);
+                        $rootScope.tr_count = $rootScope.tr_count + safe.history.length;
+                        //informer.info('tr count after wallet update '+$rootScope.tr_count);
                     });
                 }
             });
+            recountTotalBalance();
         });
 
         backend.subscribe('update_wallet_status', function(data){
-            console.log('update_wallet_status');
-            console.log(data);
+            var wallet_id = data.wallet_id;
+            var wallet_state = data.wallet_state;
+            var is_mining = data.is_mining;
+            var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            if(safe.length){
+                safe = safe[0];
+                if(wallet_state == 2){
+                    safe.loaded = true;
+                    // informer.info('Сейф загрузился');
+                }else{
+                    safe.loaded = false;
+                    // informer.info('Сейф загружается');
+                }
+                safe.is_mining = is_mining;
+            }
+            // console.log('update_wallet_status');
+            // console.log(data);
         });
 
         backend.subscribe('quit_requested', function(data){
@@ -388,8 +474,17 @@
             }
             var wallet_id = data.wallet_id;
             var tr_info   = data.ti;
+
+            alias = $filter('filter')($rootScope.unconfirmed_aliases,{tx_hash : data.ti.tx_hash});
+
+            if(alias.length){ // alias transaction
+                alias = alias[0];
+                informer.info('Алиас "'+alias.name+'" зарегистрирован');
+                return;
+            }
+
             safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-            if(safe.length){
+            if(safe.length){ // safe transaction
                 safe = safe[0];
                 safe.balance = data.balance;
                 safe.unlocked_balance = data.unlocked_balance;
@@ -401,6 +496,8 @@
                             data.history = data.unconfirmed.concat(data.history);
                         }
                         safe.history = data.history;
+                        $rootScope.tr_count++;
+                        //informer.info('tr count after on money transfer (no history) ' + $rootScope.tr_count);
                         safe.history.unshift(tr_info);
                     });
                 }else{
@@ -418,7 +515,9 @@
                     if(tr_exists){
                         console.log(tr_info.tx_hash+' tr exists');
                     }else{
-                        console.log(tr_info.tx_hash+' does not tr exist');
+                        console.log(tr_info.tx_hash+' tr does not exist');
+                        $rootScope.tr_count++;
+                        //informer.info('tr count after on money transfer (history) ' + $rootScope.tr_count);
                         safe.history.unshift(tr_info); // insert new
                     }
                     
