@@ -812,6 +812,14 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
     dispatch(ar, owr);
   });
 }
+QString Html5ApplicationViewer::run_wallet(const QString& param)
+{
+  PREPARE_ARG_FROM_JSON(view::wallet_id_obj, wio);
+
+  ar.error_code = m_backend.run_wallet(wio.wallet_id);
+  return epee::serialization::store_t_to_json(ar).c_str();
+
+}
 
 QString Html5ApplicationViewer::get_wallet_info(const QString& param)
 {

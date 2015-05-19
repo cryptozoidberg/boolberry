@@ -452,9 +452,7 @@ void daemon_backend::init_wallet_entry(wallet_vs_options& wo, uint64_t id)
   wo.do_mining = false;
   wo.stop = false;
   wo.plast_daemon_height = &m_last_daemon_height;
-  wo.pview = m_pview;
-  wo.miner_thread = std::thread(boost::bind(&daemon_backend::wallet_vs_options::worker_func, &wo));
-  
+  wo.pview = m_pview;  
 }
 
 std::string daemon_backend::open_wallet(const std::string& path, const std::string& password, view::open_wallet_response& owr)
@@ -777,6 +775,12 @@ std::string daemon_backend::stop_pos_mining(uint64_t wallet_id)
   wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
   m_pview->update_wallet_status(wsi);
   return API_RETURN_CODE_OK;
+}
+std::string daemon_backend::run_wallet(uint64_t wallet_id)
+{
+  GET_WALLET_OPT_BY_ID(wallet_id, wo);
+  wo.miner_thread = std::thread(boost::bind(&daemon_backend::wallet_vs_options::worker_func, &wo));
+  m_pview->update_wallet_status(wsi);
 }
 std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_info& wi)
 {

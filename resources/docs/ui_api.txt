@@ -285,3 +285,19 @@ response:
     "unlocked_balance": 0
   }
 }
+
+
+[sync]run_wallet()
+
+param:
+
+{
+  "wallet_id" : 0
+}
+response: 
+{
+  "error_code" : "OK",
+  "request_id": ""   
+}
+
+

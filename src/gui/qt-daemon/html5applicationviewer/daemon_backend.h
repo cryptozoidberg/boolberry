@@ -65,6 +65,7 @@ public:
   bool send_stop_signal();
   std::string open_wallet(const std::string& path, const std::string& password, view::open_wallet_response& owr);
   std::string generate_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id);
+  std::string run_wallet(uint64_t wallet_id);
   std::string get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist);
   std::string get_wallet_info(size_t wallet_id, view::wallet_info& wi);
   std::string get_wallet_info(wallet_vs_options& w, view::wallet_info& wi);
