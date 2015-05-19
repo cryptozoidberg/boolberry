@@ -388,19 +388,19 @@ bool daemon_backend::update_state_info()
   return true;
 }
 
-void daemon_backend::update_wallets_info()
-{
-  CRITICAL_REGION_LOCAL(m_wallets_lock);
-  view::wallets_summary_info wsi;
-  for (auto& w : m_wallets)
-  {
-    wsi.wallets.push_back(view::wallet_entry_info());
-    view::wallet_entry_info& l = wsi.wallets.back();
-    get_wallet_info(w.second, l.wi);
-    l.wallet_id = w.first;
-  }
-  m_pview->update_wallets_info(wsi);
-}
+// void daemon_backend::update_wallets_info()
+// {
+//   CRITICAL_REGION_LOCAL(m_wallets_lock);
+//   view::wallets_summary_info wsi;
+//   for (auto& w : m_wallets)
+//   {
+//     wsi.wallets.push_back(view::wallet_entry_info());
+//     view::wallet_entry_info& l = wsi.wallets.back();
+//     get_wallet_info(w.second, l.wi);
+//     l.wallet_id = w.first;
+//   }
+//   m_pview->update_wallets_info(wsi);
+// }
 
 bool daemon_backend::get_last_blocks(view::daemon_status_info& dsi)
 {
@@ -725,7 +725,7 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
     }
     
     w->get()->transfer(dsts, tp.mixin_count, unlock_time ? unlock_time + 1 : 0, fee, extra, attachments, res_tx);
-    update_wallets_info();
+    //update_wallets_info();
   }
   catch (const std::exception& e)
   {

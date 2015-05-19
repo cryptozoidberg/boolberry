@@ -273,11 +273,15 @@ param:
 }
 response:
 {
-  "wallet_id": 1,
-  "recent_history":
-	{
-	 ..same as get_recent transfers
-	}
-
+  "recent_history": {
+	... the same as get recent history
+   },
+  "wallet_id": 0,
+  "wi": {
+    "address": "HexegKDFxJo6w5tFwPHWmnEfQoqoKpopT78UNjD518NEMMbJdx9TCVwXcu9Yo1nTPyHQsuvRaPA6MNU3DTNyA2WcRfxxQUy",
+    "balance": 0,
+    "path": "C:/tmp/vasya-2.lui",
+    "tracking_hey": "28696b9e505f1666daf5989ee4b677d694c97b055f029f48f0f5a57f25a68503",
+    "unlocked_balance": 0
+  }
 }
-
