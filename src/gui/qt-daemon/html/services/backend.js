@@ -291,10 +291,12 @@
 
             backendCallback: function (status, param) {
                 console.log('DISPATCH: got result from backend');
-                console.log(status);
-                console.log(param);
+                
                 status = (status) ? JSON.parse(status) : null;
                 param  = (param)  ? JSON.parse(param)  : null;
+
+                console.log(status);
+                console.log(param);
                 
                 var result = {};
                 result.status = status;

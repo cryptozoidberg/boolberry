@@ -217,13 +217,20 @@
             $scope.openSafe = function(safe){
                 backend.openWallet(safe.path, safe.pass,function(data){
                     
-                    var wallet_id = data.wallet_id;
-                    var new_safe = {
-                        wallet_id : wallet_id,
-                        name : safe.name,
-                        pass : safe.pass,
-                        hisory: []
-                    };
+                    var new_safe = data.wi;
+                    new_safe.wallet_id = data.wallet_id;
+                    new_safe.name = safe.name;
+                    new_safe.pass = safe.pass;
+                    new_safe.history = [];
+
+
+                    // var wallet_id = data.wallet_id;
+                    // var new_safe = {
+                    //     wallet_id : wallet_id,
+                    //     name : safe.name,
+                    //     pass : safe.pass,
+                    //     hisory: []
+                    // };
 
                     if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
                         new_safe.history = data.recent_history.history;

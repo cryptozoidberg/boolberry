@@ -228,15 +228,20 @@
                         
                             angular.forEach(appData,function(item){
                                 backend.openWallet(item.path, item.pass,function(data){
-                                    //informer.info(JSON.stringify(data));
-                                    var wallet_id = data.wallet_id;
+                                    informer.info(JSON.stringify(data));
+                                    // var wallet_id = data.wallet_id;
+                                    var new_safe = data.wi;
+                                    new_safe.wallet_id = data.wallet_id;
+                                    new_safe.name = item.name;
+                                    new_safe.pass = item.pass;
+                                    new_safe.history = [];
 
-                                    var new_safe = {
-                                        wallet_id : wallet_id,
-                                        name : item.name,
-                                        pass : item.pass,
-                                        history: []
-                                    };
+                                    // var new_safe = {
+                                    //     wallet_id : wallet_id,
+                                    //     name : item.name,
+                                    //     pass : item.pass,
+                                    //     history: []
+                                    // };
 
                                     if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
                                         new_safe.history = data.recent_history.history;
@@ -425,25 +430,28 @@
 
         backend.subscribe('update_wallet_status', function(data){
             var wallet_id = data.wallet_id;
+            console.log('UPDATE WALLET STATUS :: ');
+            console.log(data);
             var wallet_state = data.wallet_state;
             var is_mining = data.is_mining;
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             if(safe.length){
-                safe = safe[0];
+                $timeout(function(){
+                    safe = safe[0];
 
-                safe.loaded = false;
-                safe.error  = false;
-                safe.is_mining = is_mining;
+                    safe.loaded = false;
+                    safe.error  = false;
+                    safe.is_mining = is_mining;
 
 
-                if(wallet_state == 2){
-                    safe.loaded = true;
-                }
+                    if(wallet_state == 2){
+                        safe.loaded = true;
+                    }
 
-                if(wallet_state == 3){
-                    safe.error = true;
-                }
-
+                    if(wallet_state == 3){
+                        safe.error = true;
+                    }    
+                });
                 
             }
         });
