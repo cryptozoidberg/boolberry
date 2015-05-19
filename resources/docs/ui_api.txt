@@ -264,3 +264,20 @@ response:
   "request_id": ""   
 }
 
+
+[async]open_wallet()
+
+param:
+{
+
+}
+response:
+{
+  "wallet_id": 1,
+  "recent_history":
+	{
+	 ..same as get_recent transfers
+	}
+
+}
+
