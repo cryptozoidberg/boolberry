@@ -472,7 +472,7 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
     {
       w->load(path, password);  
       w->get_recent_transfers_history(owr.recent_history.history, 0, 1000);
-      w->get_unconfirmed_transfers(owr.recent_history.unconfirmed);
+      w->get_unconfirmed_transfers(owr.recent_history.unconfirmed);      
       //workaround for missed fee
       for (auto & he : owr.recent_history.history)
       if (!he.fee && !currency::is_coinbase(he.tx))
@@ -501,9 +501,9 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
 
   wallet_vs_options& wo = m_wallets[owr.wallet_id];
   **wo.w = w;
+  get_wallet_info(wo, owr.wi);
   init_wallet_entry(wo, owr.wallet_id);
-
-  update_wallets_info();
+  //update_wallets_info();
   return return_code;
 }
 /*
@@ -786,8 +786,6 @@ std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_
   wi.balance = wo.w->get()->balance();
   wi.unlocked_balance = wo.w->get()->unlocked_balance();
   wi.path = wo.w->get()->get_wallet_path();
-  wi.do_mint = wo.do_mining;
-  wi.mint_is_in_progress = false;//m_mint_is_running;
   return API_RETURN_CODE_OK;
 }
 
@@ -899,7 +897,7 @@ void daemon_backend::wallet_vs_options::worker_func()
         pview->update_wallet_status(wsi);
         return;
       }
-      wsi.wallet_state = view::wallet_status_info::wallet_state_error;
+      wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
       pview->update_wallet_status(wsi);
       //do refresh
       last_wallet_synch_height = static_cast<uint64_t>(*plast_daemon_height);

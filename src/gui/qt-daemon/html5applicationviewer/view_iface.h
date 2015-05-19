@@ -181,8 +181,6 @@ public:
     std::string address;
     std::string tracking_hey;
     std::string path;
-    uint64_t do_mint;
-    uint64_t mint_is_in_progress;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(unlocked_balance)
@@ -190,8 +188,6 @@ public:
       KV_SERIALIZE(address)
       KV_SERIALIZE(tracking_hey)
       KV_SERIALIZE(path)
-      KV_SERIALIZE(do_mint)
-      KV_SERIALIZE(mint_is_in_progress)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -298,10 +294,12 @@ public:
   {
     uint64_t wallet_id;
     transfers_array recent_history;
+    wallet_info wi;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_id)
       KV_SERIALIZE(recent_history)
+      KV_SERIALIZE(wi)
     END_KV_SERIALIZE_MAP()
   };
 

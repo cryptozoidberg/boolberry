@@ -590,7 +590,7 @@ namespace tools
                   << "Unlocked: " << print_money(unlocked_balance()) << ENDL
                   << "Please, wait for confirmation for your balance to be unlocked.");
   }
-
+  //--------------------------------------------------------------------------------
   template<typename idle_condition_cb_t> //do refresh as external callback
   bool wallet2::scan_pos(mining_context& cxt,
     std::atomic<bool>& keep_mining,
