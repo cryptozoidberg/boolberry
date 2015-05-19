@@ -206,26 +206,6 @@
             }
         };
 
-        // $rootScope.watch(function(){
-        //     console.log('WATCH ROOT SCOPE');
-        //     return $rootScope.settings.security.is_use_app_pass;
-        // },function($v){
-        //     if($v === true){
-        //         console.log('APP PASS TRUE');
-        //     }else{
-        //          console.log('APP PASS FALSE');
-        //     }
-        // });
-       
-        // if($rootScope.settings.security.password_required_interval && $rootScope.settings.is_use_app_pass){
-        //     console.log('ask pass');
-            // $interval(function(){
-            //     if(!$rootScope.settings.security.app_block){
-            //         PassDialogs.requestMPDialog(false,false,false);
-            //     }
-            // },$rootScope.settings.password_required_interval);
-        // }
-
         $scope.wallet_info  = {};
 
         var init = function(){ // app work initialization
@@ -248,13 +228,20 @@
                         
                             angular.forEach(appData,function(item){
                                 backend.openWallet(item.path, item.pass,function(data){
-                                    
+                                    //informer.info(JSON.stringify(data));
                                     var wallet_id = data.wallet_id;
+
                                     var new_safe = {
                                         wallet_id : wallet_id,
                                         name : item.name,
-                                        pass : item.pass
+                                        pass : item.pass,
+                                        history: []
                                     };
+
+                                    if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
+                                        new_safe.history = data.recent_history.history;
+                                    }
+
                                     $timeout(function(){
                                         $rootScope.safes.push(new_safe);    
                                     });

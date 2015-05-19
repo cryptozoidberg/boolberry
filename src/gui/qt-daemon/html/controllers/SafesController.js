@@ -221,22 +221,19 @@
                     var new_safe = {
                         wallet_id : wallet_id,
                         name : safe.name,
-                        pass : safe.pass
+                        pass : safe.pass,
+                        hisory: []
                     };
+
+                    if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
+                        new_safe.history = data.recent_history.history;
+                    }
+                    
                     $modalInstance.close();
                     $timeout(function(){
                         safes.unshift(new_safe);    
                     });
 
-                    // backend.getWalletInfo(wallet_id, function (safe_data){
-                    //     //var new_safe = safe_data.param
-                    //     safe_data.name = safe.name;
-                    //     safe_data.wallet_id = wallet_id;
-                    //     $timeout(function(){
-                    //         safes.unshift(safe_data);    
-                    //     });
-                    //     $modalInstance.close();
-                    // });
                 });
             };
             
