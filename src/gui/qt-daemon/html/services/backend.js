@@ -15,11 +15,15 @@
             // user functions
 
             openFileDialog : function(caption, filemask) {
+                var dir = '/';
+                if(angular.isDefined($rootScope.settings.system.default_user_path)){
+                    dir = $rootScope.settings.system.default_user_path;
+                }
                 var params = {
                     caption: caption, 
-                    filemask: filemask
+                    filemask: filemask,
+                    default_dir: dir
                 };
-
                 return this.runCommand('show_openfile_dialog',params);
             },
 

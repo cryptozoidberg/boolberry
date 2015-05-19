@@ -183,8 +183,8 @@
         }
     ]);
 
-    module.controller('safeRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes',
-        function($scope, backend, $modalInstance, $modal, $timeout, path, safes) {
+    module.controller('safeRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes', '$rootScope',
+        function($scope, backend, $modalInstance, $modal, $timeout, path, safes, $rootScope) {
             $scope.owl_options  = {
               singleItem: true,
               autoHeight: false,
@@ -199,6 +199,11 @@
             };
 
             var filename = path.substr(path.lastIndexOf('/')+1, path.lastIndexOf('.')-1-path.lastIndexOf('/'));
+            var folder = path.substr(0,path.lastIndexOf('/'));
+
+            $rootScope.settings.system.default_user_path = folder;
+
+            backend.storeAppData($rootScope.settings);
 
             $scope.safe = {
                 path: path,

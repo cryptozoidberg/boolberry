@@ -1,4 +1,4 @@
-    <a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт истории платежей в файл</span></a>
+<!--     <a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт истории платежей в файл</span></a> -->
     <h1>История платежей</h1>
     <h5>Здесь Вы можете просмотреть историю платежей по всем сейфам, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
     <div class="tabs" ng-controller="trHistoryCtrl">
@@ -43,14 +43,10 @@
                                 <select 
                                     class="col-xs-8 col-sm-8 nopadding" 
                                     selectpicker 
-                                    ng-model="wallet_id"
-                                    ng-change="changeWallet(wallet_id)"
+                                    ng-model="filter.wallet_id"
+                                    ng-change="filterChange()"
                                     ng-options="safe.wallet_id as safe.name for safe in safes"
                                 >
-                                    <!-- <option selected="">Safelabel (@@safealias) 4.20 G</option>
-                                    <option>1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak 30.40 G</option>
-                                    <option>Safelabel2 (@safealias2) 0.56 G</option>
-                                    <option>Safelabel-997398r (@safealias5) 0.56 G</option> -->
                                 </select>
                             </div>
                             <div class="form-group">
@@ -90,15 +86,15 @@
 
                 <div class="row">
                     <div class="col-xs-4 col-sm-4">
-                        <div data-toggle="buttons" class="btn-group btn-group-justified">
-                            <label class="btn btn-primary history_filterIngoingOutgoingButton active">
-                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Все
+                        <div class="btn-group btn-group-justified">
+                            <label class="btn btn btn-primary" btn-radio="'all'" ng-model="filter.tr_type"  ng-change="filterChange()">
+                                Все
                             </label>
-                            <label class="btn btn-primary history_filterIngoingButton">
-                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Входящие
+                            <label class="btn btn btn-primary" btn-radio="'in'" ng-model="filter.tr_type"  ng-change="filterChange()">
+                                Входящие
                             </label>
-                            <label class="btn btn-primary ">
-                                <input type="radio" autocomplete="off" id="option2" name="options"> Исходящие
+                            <label class="btn btn btn-primary" btn-radio="'out'" ng-model="filter.tr_type"  ng-change="filterChange()">
+                                Исходящие
                             </label>
                         </div>
                     </div>
@@ -112,7 +108,7 @@
                         </div>
                     </div>
                     <div class="col-xs-4 col-sm-4 pull-right">
-                        <input type="text" class="form-control" placeholder="найти текст">
+                        <input type="text" ng-model="filter.keywords" class="form-control" ng-change="filterChange()" placeholder="найти текст">
                     </div>
                 </div>
             </form>
@@ -276,11 +272,11 @@
         </div>
 
 
-        <div class="navbar">
+<!--         <div class="navbar">
             <button class="btn btn-block btn-default navbar-btn">Загрузить еще N</button>
 
             <div class="text-right"> <button class="btn btn-link text-muted"><span class="text-muted underlined">Показать все платежи</span></button></div>
-        </div>
+        </div> -->
 
     </div>
     <hr>

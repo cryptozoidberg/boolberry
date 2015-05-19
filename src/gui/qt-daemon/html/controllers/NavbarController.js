@@ -201,7 +201,8 @@
                 process_finish_remind_onclose : true,
                 app_autosave_interval : 0,
                 app_donation : false,
-                donation_amount : 0
+                donation_amount : 0,
+                default_user_path: '/'
             }
         };
 
@@ -442,17 +443,22 @@
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             if(safe.length){
                 safe = safe[0];
+
+                safe.loaded = false;
+                safe.error  = false;
+                safe.is_mining = is_mining;
+
+
                 if(wallet_state == 2){
                     safe.loaded = true;
-                    // informer.info('Сейф загрузился');
-                }else{
-                    safe.loaded = false;
-                    // informer.info('Сейф загружается');
                 }
-                safe.is_mining = is_mining;
+
+                if(wallet_state == 3){
+                    safe.error = true;
+                }
+
+                
             }
-            // console.log('update_wallet_status');
-            // console.log(data);
         });
 
         backend.subscribe('quit_requested', function(data){

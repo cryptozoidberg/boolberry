@@ -56,8 +56,8 @@
                         <tr ng-if="!safes.length">
                             <td colspan="6">Нет записей</td>
                         </tr>
-                        <tr ng-repeat="safe in safes">
-                            <td>
+                        <tr ng-repeat="safe in safes" class="danger">
+                            <td width="20%">
                                 <i class="fa fa-spinner fa-pulse" ng-hide="safe.loaded"></i>
                                 <a class="btn btn-link" href="#safe/{{safe.wallet_id}}">
                                     <big>{{safe.name}}</big>
@@ -68,7 +68,7 @@
                                 <span  ng-repeat="alias in aliases | filter : {address: safe.address}"><span class="label label-info">@{{alias.alias}}</span><span>
                             </td>
 
-                            <td>
+                            <td width="20%">
                                 <div class="dropdown">
                                     <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button">
                                         <span class="account-text">
@@ -97,23 +97,24 @@
                                 </div>
                             </td>
 
-                            <td>
-                                <!-- <ul class="list-unstyled">
-                                    <li class="text-info">
-                                        Ожидается:  <em>0,20 G</em>  <span class="chart receive-timer" data-percent="86">
-                                    </li>
-                                </ul> -->
+                            <td width="20%">
+                                <li class="label-icon" ng-if="safe.is_mining">
+                                    <em>Добыча</em> 
+                                    <span class="label label-success">
+                                        <i class="gu gu-2x gu-pick"></i>
+                                    </span>
+                                </li>
                             </td>
 
-                            <td>
+                            <td width="15%">
                                 <strong><big>{{safe.unlocked_balance | gulden}}<big></big></big></strong>
                             </td>
 
-                            <td>
+                            <td width="15%">
                                 <strong><big>{{safe.balance | gulden}}<big></big></big></strong>
                             </td>
 
-                            <td>
+                            <td width="10%">
                                 <div class="btn-group navbar-btn">
                                     <button aria-expanded="false" ng-disabled="!safe.loaded" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
                                         <i class="fa fa-gear"></i> <span class="caret"></span>
