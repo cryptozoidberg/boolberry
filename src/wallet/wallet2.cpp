@@ -297,7 +297,7 @@ void wallet2::get_short_chain_history(std::list<crypto::hash>& ids)
     ids.push_back(m_blockchain[0]);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::pull_blocks(size_t& blocks_added)
+void wallet2::pull_blocks(size_t& blocks_added, std::atomic<bool>& stop)
 {
   blocks_added = 0;
   currency::COMMAND_RPC_GET_BLOCKS_FAST::request req = AUTO_VAL_INIT(req);
@@ -314,6 +314,9 @@ void wallet2::pull_blocks(size_t& blocks_added)
   size_t current_index = res.start_height;
   BOOST_FOREACH(auto& bl_entry, res.blocks)
   {
+    if (!stop)
+      break;
+
     currency::block bl;
     r = currency::parse_and_validate_block_from_blob(bl_entry.block, bl);
     CHECK_AND_THROW_WALLET_EX(!r, error::block_parse_error, bl_entry.block);
@@ -353,7 +356,14 @@ void wallet2::refresh()
 void wallet2::refresh(size_t & blocks_fetched)
 {
   bool received_money = false;
-  refresh(blocks_fetched, received_money);
+  refresh(blocks_fetched, received_money, m_stop);
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::refresh(std::atomic<bool>& stop)
+{
+  bool f;
+  size_t n;
+  refresh(n, f, stop);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::update_current_tx_limit()
@@ -435,7 +445,7 @@ void wallet2::scan_tx_pool()
   }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::refresh(size_t & blocks_fetched, bool& received_money)
+void wallet2::refresh(size_t & blocks_fetched, bool& received_money, std::atomic<bool>& stop)
 {
   received_money = false;
   blocks_fetched = 0;
@@ -443,11 +453,11 @@ void wallet2::refresh(size_t & blocks_fetched, bool& received_money)
   size_t try_count = 0;
   crypto::hash last_tx_hash_id = m_transfers.size() ? get_transaction_hash(m_transfers.back().m_tx) : null_hash;
 
-  while(m_run.load(std::memory_order_relaxed))
+  while (!stop.load(std::memory_order_relaxed))
   {
     try
     {
-      pull_blocks(added_blocks);
+      pull_blocks(added_blocks, stop);
       blocks_fetched += added_blocks;
       if(!added_blocks)
         break;
@@ -473,11 +483,11 @@ void wallet2::refresh(size_t & blocks_fetched, bool& received_money)
   LOG_PRINT_L1("Refresh done, blocks received: " << blocks_fetched << ", balance: " << print_money(balance()) << ", unlocked: " << print_money(unlocked_balance()));
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::refresh(size_t & blocks_fetched, bool& received_money, bool& ok)
+bool wallet2::refresh(size_t & blocks_fetched, bool& received_money, bool& ok, std::atomic<bool>& stop)
 {
   try
   {
-    refresh(blocks_fetched, received_money);
+    refresh(blocks_fetched, received_money, stop);
     ok = true;
   }
   catch (...)
@@ -878,8 +888,8 @@ bool wallet2::try_mint_pos()
   fill_mining_context(ctx);
   LOG_PRINT_L0("POS_ENTRIES: " << ctx.sp.pos_entries.size());
 
-  std::atomic<bool> keep_going(true);
-  scan_pos(ctx, keep_going, [this](){
+  std::atomic<bool> stop(true);
+  scan_pos(ctx, stop, [this](){
     size_t blocks_fetched;
     refresh(blocks_fetched);
     if (blocks_fetched)

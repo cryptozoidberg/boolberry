@@ -78,9 +78,9 @@ namespace tools
 
   class wallet2
   {
-    wallet2(const wallet2&) : m_run(true), m_callback(0) {};
+    wallet2(const wallet2&) : m_stop(false), m_callback(0) {};
   public:
-    wallet2() : m_run(true), m_callback(0), m_core_proxy(new default_http_core_proxy()), m_upper_transaction_size_limit(0)
+    wallet2() : m_stop(false), m_callback(0), m_core_proxy(new default_http_core_proxy()), m_upper_transaction_size_limit(0)
     {};
     struct transfer_details
     {
@@ -149,7 +149,7 @@ namespace tools
     void init(const std::string& daemon_address = "http://localhost:8080");
     bool deinit();
 
-    void stop() { m_run.store(false, std::memory_order_relaxed); }
+    void stop() { m_stop.store(true, std::memory_order_relaxed); }
 
     i_wallet2_callback* callback() const { return m_callback; }
     void callback(i_wallet2_callback* callback) { m_callback = callback; }
@@ -158,8 +158,9 @@ namespace tools
     void scan_tx_pool();
     void refresh();
     void refresh(size_t & blocks_fetched);
-    void refresh(size_t & blocks_fetched, bool& received_money);
-    bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok);
+    void refresh(size_t & blocks_fetched, bool& received_money, std::atomic<bool>& stop);
+    bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok, std::atomic<bool>& stop);
+    void refresh(std::atomic<bool>& stop);
     
     void push_offer(const currency::offer_details& od);
     void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx);
@@ -228,7 +229,7 @@ namespace tools
     bool is_tx_spendtime_unlocked(uint64_t unlock_time) const;
     bool is_transfer_unlocked(const transfer_details& td) const;
     bool clear();
-    void pull_blocks(size_t& blocks_added);
+    void pull_blocks(size_t& blocks_added, std::atomic<bool>& stop);
     uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
     bool prepare_file_names(const std::string& file_path);
     void process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias);
@@ -257,7 +258,7 @@ namespace tools
     currency::account_public_address m_account_public_address;
     uint64_t m_upper_transaction_size_limit; //TODO: auto-calc this value or request from daemon, now use some fixed value
 
-    std::atomic<bool> m_run;
+    std::atomic<bool> m_stop;
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
     std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
     std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;

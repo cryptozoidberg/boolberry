@@ -31,7 +31,6 @@ daemon_backend::daemon_backend():m_pview(&m_view_stub),
                                  m_rpc_server(m_ccore, m_p2psrv),
                                  m_rpc_proxy(new tools::core_fast_rpc_proxy(m_rpc_server)),
                                  m_last_daemon_height(0),
-                                 m_last_wallet_synch_height(0),
                                  m_wallet_id_counter(0)
 {}
 
@@ -430,60 +429,6 @@ bool daemon_backend::get_last_blocks(view::daemon_status_info& dsi)
   return true;
 }
 
-bool daemon_backend::update_wallets()
-{
-  view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
-  CRITICAL_REGION_LOCAL(m_wallets_lock);
-
-  if (m_last_daemon_height != m_last_wallet_synch_height)
-  {
-    for (auto& w : m_wallets) 
-    {
-      wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
-      wsi.wallet_id = w.first;
-      m_pview->update_wallet_status(wsi);
-      try
-      {
-        w.second.break_mining_loop = true;
-        w.second.w->get()->refresh();
-        w.second.w->get()->scan_tx_pool();
-        wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
-        wsi.is_mining = w.second.do_mining;
-        w.second.break_mining_loop = false;
-        m_pview->update_wallet_status(wsi);
-      }
-
-
-      catch (const tools::error::daemon_busy& /*e*/)
-      {
-        LOG_PRINT_L0("Daemon busy while wallet refresh");
-        return true;
-      }
-
-      catch (const std::exception& e)
-      {
-        LOG_PRINT_L0("Failed to refresh wallet: " << e.what());
-        return false;
-      }
-
-      catch (...)
-      {
-        LOG_PRINT_L0("Failed to refresh wallet, unknownk exception");
-        return false;
-      }
-    }
-    m_last_wallet_synch_height = m_ccore.get_current_blockchain_height();
-    update_wallets_info();
-  }
-  else
-  {
-    for (auto& w : m_wallets)
-      w.second.w->get()->scan_tx_pool();
-  }
-
-
-  return true;
-}
 
 
 void daemon_backend::toggle_pos_mining()
@@ -497,9 +442,19 @@ void daemon_backend::loop()
   while(!m_stop_singal_sent)
   {
     update_state_info();
-    update_wallets();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
+}
+
+void daemon_backend::init_wallet_entry(wallet_vs_options& wo, uint64_t id)
+{
+  wo.wallet_id = id;
+  wo.do_mining = false;
+  wo.stop = false;
+  wo.plast_daemon_height = &m_last_daemon_height;
+  wo.pview = m_pview;
+  wo.miner_thread = std::thread(boost::bind(&daemon_backend::wallet_vs_options::worker_func, &wo));
+  
 }
 
 std::string daemon_backend::open_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id)
@@ -533,15 +488,11 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
     }
   }
 
-  **m_wallets[wallet_id].w = w;
-  m_wallets[wallet_id].do_mining = false;
-  m_wallets[wallet_id].stop = false;
-  m_wallets[wallet_id].miner_thread = std::thread(boost::bind(&daemon_backend::wallet_vs_options::miner_func, &m_wallets[wallet_id]));
-
+  wallet_vs_options& wo = m_wallets[wallet_id];
+  **wo.w = w;
+  init_wallet_entry(wo, wallet_id);
 
   update_wallets_info();
-  //m_pview->show_wallet();
-  m_last_wallet_synch_height = 0;  
   return return_code;
 }
 
@@ -585,9 +536,10 @@ std::string daemon_backend::generate_wallet(const std::string& path, const std::
   {
     return std::string(API_RETURN_CODE_FAIL) + ":" + e.what();
   }
-
-  update_wallets_info();
-  m_last_wallet_synch_height = 0;
+  wallet_vs_options& wo = m_wallets[wallet_id];
+  **wo.w = w;
+  init_wallet_entry(wo, wallet_id);
+  //update_wallets_info();
   return API_RETURN_CODE_OK;
 }
 
@@ -783,9 +735,9 @@ std::string daemon_backend::get_wallet_info(size_t wallet_id, view::wallet_info&
 
 std::string daemon_backend::resync_wallet(uint64_t wallet_id)
 {
-  GET_WALLET_BY_ID(wallet_id, w);
-  w->get()->reset_history();
-  m_last_wallet_synch_height = 0;
+  GET_WALLET_OPT_BY_ID(wallet_id, w);
+  w.w->get()->reset_history();
+  w.last_wallet_synch_height = 0;
   return API_RETURN_CODE_OK;
 }
 std::string daemon_backend::start_pos_mining(uint64_t wallet_id)
@@ -890,12 +842,56 @@ void daemon_backend::on_pos_block_found(const currency::block& b)
   m_pview->pos_block_found(b);
 }
 
-void daemon_backend::wallet_vs_options::miner_func()
+void daemon_backend::wallet_vs_options::worker_func()
 {
   LOG_PRINT_GREEN("[POS_MINER] Wallet miner thread started", LOG_LEVEL_0);
   time_t last_mining_timestamp = 0;
   while (!stop)
   {
+    //******************************************************************************************
+    //sync zone
+    if (*plast_daemon_height != last_wallet_synch_height)
+    {
+      view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
+      wsi.is_mining = do_mining;
+      wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
+      wsi.wallet_id = wallet_id;
+      pview->update_wallet_status(wsi);
+      try
+      {
+        w->get()->refresh(stop);
+        w->get()->scan_tx_pool();
+      }
+      catch (const tools::error::daemon_busy& /*e*/)
+      {
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        continue;
+      }
+
+      catch (const std::exception& e)
+      {
+        LOG_PRINT_L0("Failed to refresh wallet: " << e.what());
+        wsi.wallet_state = view::wallet_status_info::wallet_state_error;
+        pview->update_wallet_status(wsi);
+        return;
+      }
+
+      catch (...)
+      {
+        LOG_PRINT_L0("Failed to refresh wallet, unknownk exception");
+        wsi.wallet_state = view::wallet_status_info::wallet_state_error;
+        pview->update_wallet_status(wsi);
+        return;
+      }
+      wsi.wallet_state = view::wallet_status_info::wallet_state_error;
+      pview->update_wallet_status(wsi);
+      //do refresh
+      last_wallet_synch_height = static_cast<uint64_t>(*plast_daemon_height);
+    }
+    if (stop)
+      break;
+    //******************************************************************************************
+    //mining zone
     if (!do_mining || time(nullptr) - last_mining_timestamp < POS_WALLET_MINING_SCAN_INTERVAL)
     {
       boost::this_thread::sleep_for(boost::chrono::milliseconds(100));

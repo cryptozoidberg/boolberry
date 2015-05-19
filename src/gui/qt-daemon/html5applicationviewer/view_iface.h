@@ -158,7 +158,8 @@ public:
     enum state
     {
       wallet_state_synchronizing = 1,
-      wallet_state_ready = 2
+      wallet_state_ready = 2, 
+      wallet_state_error = 3
     };
 
 
@@ -239,6 +240,7 @@ public:
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(caption)
       KV_SERIALIZE(filemask)
+      KV_SERIALIZE(default_dir)
     END_KV_SERIALIZE_MAP()
   };
 

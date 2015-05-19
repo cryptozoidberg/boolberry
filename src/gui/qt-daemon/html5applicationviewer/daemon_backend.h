@@ -48,9 +48,13 @@ public:
     std::atomic<bool> do_mining;
     std::atomic<bool> stop;
     std::atomic<bool> break_mining_loop;
+    std::atomic<uint64_t> last_wallet_synch_height;
+    std::atomic<uint64_t>* plast_daemon_height;
+    view::i_view* pview;
+    uint64_t wallet_id;
 
     std::thread miner_thread;
-    void miner_func();
+    void worker_func();
     ~wallet_vs_options();
   };
 
@@ -87,6 +91,7 @@ private:
   bool get_last_blocks(view::daemon_status_info& dsi);
   void update_wallets_info();
   bool alias_rpc_details_to_alias_info(const currency::alias_rpc_details& ard, currency::alias_info& ai);
+  void init_wallet_entry(wallet_vs_options& wo, uint64_t id);
 
   //----- i_backend_wallet_callback ------
   virtual void on_new_block(uint64_t height, const currency::block& block);
@@ -104,7 +109,7 @@ private:
 
   std::map<size_t, wallet_vs_options> m_wallets;
   std::atomic<uint64_t> m_last_daemon_height;
-  std::atomic<uint64_t> m_last_wallet_synch_height;
+//  std::atomic<uint64_t> m_last_wallet_synch_height;
   std::atomic<uint64_t> m_wallet_id_counter;
 
   std::string m_data_dir;
