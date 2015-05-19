@@ -209,27 +209,7 @@ public:
 
   };
 
-  struct open_wallet_request
-  {
-    std::string pass;
-    std::string path;
 
-    BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(pass)
-      KV_SERIALIZE(path)
-    END_KV_SERIALIZE_MAP()
-  };
-
-  struct open_wallet_response
-  {
-    uint64_t wallet_id;
-    transfers_array recent_history;
-
-    BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(wallet_id)
-      KV_SERIALIZE(recent_history)
-    END_KV_SERIALIZE_MAP()
-  };
 
   struct wallet_id_obj
   {
@@ -301,6 +281,28 @@ public:
       KV_SERIALIZE(history)
     END_KV_SERIALIZE_MAP()
 
+  };
+
+  struct open_wallet_request
+  {
+    std::string pass;
+    std::string path;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(pass)
+      KV_SERIALIZE(path)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct open_wallet_response
+  {
+    uint64_t wallet_id;
+    transfers_array recent_history;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
+      KV_SERIALIZE(recent_history)
+    END_KV_SERIALIZE_MAP()
   };
 
   struct wallets_summary_info

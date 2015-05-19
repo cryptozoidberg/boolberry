@@ -833,7 +833,7 @@ QString Html5ApplicationViewer::resync_wallet(const QString& param)
   });
 }
 
-QString Html5ApplicationViewer::get_recent_transfers(const QString& param)
+/*QString Html5ApplicationViewer::get_recent_transfers(const QString& param)
 {
   return que_call2<view::wallet_id_obj>("get_recent_transfers", param, [this](const view::wallet_id_obj& a, view::api_response& ar){
 
@@ -842,7 +842,7 @@ QString Html5ApplicationViewer::get_recent_transfers(const QString& param)
     dispatch(ar, ta);
   });
 }
-
+*/
 QString Html5ApplicationViewer::get_all_offers(const QString& param)
 {
   return que_call2<view::api_void>("get_recent_transfers", param, [this](const view::api_void& a, view::api_response& ar){
