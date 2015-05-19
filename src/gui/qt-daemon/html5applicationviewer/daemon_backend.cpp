@@ -457,10 +457,10 @@ void daemon_backend::init_wallet_entry(wallet_vs_options& wo, uint64_t id)
   
 }
 
-std::string daemon_backend::open_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id)
+std::string daemon_backend::open_wallet(const std::string& path, const std::string& password, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
-  wallet_id = m_wallet_id_counter++;
+  owr.wallet_id = m_wallet_id_counter++;
 
   w->callback(std::shared_ptr<tools::i_wallet2_callback>(new i_wallet_to_i_backend_adapter(this, wallet_id)));
   w->set_core_proxy(std::shared_ptr<tools::i_core_proxy>(new tools::core_fast_rpc_proxy(m_rpc_server)));
@@ -470,7 +470,18 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
   {
     try
     {
-      w->load(path, password);
+      w->load(path, password);  
+      w->get_recent_transfers_history(owr.recent_history.history, 0, 1000);
+      w->get_unconfirmed_transfers(owr.recent_history.unconfirmed);
+      //workaround for missed fee
+      for (auto & he : owr.recent_history.history)
+      if (!he.fee && !currency::is_coinbase(he.tx))
+        he.fee = currency::get_tx_fee(he.tx);
+
+      for (auto & he : owr.recent_history.unconfirmed)
+      if (!he.fee && !currency::is_coinbase(he.tx))
+        he.fee = currency::get_tx_fee(he.tx);
+
       break;
     }
     catch (const tools::error::file_not_found& /**/)
@@ -488,17 +499,22 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
     }
   }
 
-  wallet_vs_options& wo = m_wallets[wallet_id];
+  wallet_vs_options& wo = m_wallets[owr.wallet_id];
   **wo.w = w;
-  init_wallet_entry(wo, wallet_id);
+  init_wallet_entry(wo, owr.wallet_id);
 
   update_wallets_info();
   return return_code;
 }
-
+/*
 std::string daemon_backend::get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist)
 {
   GET_WALLET_BY_ID(wallet_id, w);
+  auto wallet_locked = w.try_lock();
+  if (!wallet_locked.get())
+  {
+    return API_RETURN_CODE_CORE_BUSY;
+  }
 
   w->get()->get_recent_transfers_history(tr_hist.history, 0, 1000);
   w->get()->get_unconfirmed_transfers(tr_hist.unconfirmed);
@@ -513,7 +529,7 @@ std::string daemon_backend::get_recent_transfers(size_t wallet_id, view::transfe
 
   return API_RETURN_CODE_OK;
 }
-
+*/
 std::string daemon_backend::generate_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());

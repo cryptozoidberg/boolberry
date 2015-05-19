@@ -180,6 +180,17 @@ namespace epee
     template<typename t_proxy_object>
     friend class locked_object_proxy;
   public:
+    std::shared_ptr<locked_object_proxy<t_object>> try_lock()
+    {
+      std::shared_ptr<locked_object_proxy<t_object>> res;
+      if (m.try_lock())
+      {
+        res.reset(new locked_object_proxy<t_object>(t, m));
+        m.unlock();
+      }
+      return res;
+    }
+
     locked_object_proxy<t_object> operator->()
     {
       return locked_object_proxy<t_object>(t, m);

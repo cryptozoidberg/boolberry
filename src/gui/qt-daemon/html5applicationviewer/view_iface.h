@@ -220,6 +220,16 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct open_wallet_response
+  {
+    uint64_t wallet_id;
+    transfers_array recent_history;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
+      KV_SERIALIZE(recent_history)
+    END_KV_SERIALIZE_MAP()
+  };
 
   struct wallet_id_obj
   {
@@ -370,6 +380,16 @@ public:
   struct api_void
   {
     BEGIN_KV_SERIALIZE_MAP()
+    END_KV_SERIALIZE_MAP()
+  };
+  
+  template<typename t_type>
+  struct struct_with_one_t_type
+  {
+    t_type v;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(v)
     END_KV_SERIALIZE_MAP()
   };
 

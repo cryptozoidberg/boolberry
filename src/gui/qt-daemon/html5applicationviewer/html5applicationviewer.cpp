@@ -730,7 +730,13 @@ QString Html5ApplicationViewer::validate_address(const QString& param)
   view::api_response ar = AUTO_VAL_INIT(ar);
   ar.error_code = m_backend.validate_address(param.toStdString());
   return epee::serialization::store_t_to_json(ar).c_str();
-
+}
+QString Html5ApplicationViewer::set_log_level(const QString& param)
+{
+  PREPARE_ARG_FROM_JSON(view::struct_with_one_t_type<uint64_t>, lvl);
+  epee::log_space::get_set_log_detalisation_level(true, lvl.v);
+  ar.error_code = API_RETURN_CODE_OK;
+  return epee::serialization::store_t_to_json(ar).c_str();
 }
 QString Html5ApplicationViewer::show_openfile_dialog(const QString& param)
 {
@@ -801,8 +807,8 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
 {
   return que_call2<view::open_wallet_request>("open_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
 
-    view::wallet_id_obj owr = AUTO_VAL_INIT(owr);
-    ar.error_code = m_backend.open_wallet(owd.path, owd.pass, owr.wallet_id);
+    view::open_wallet_response owr = AUTO_VAL_INIT(owr);
+    ar.error_code = m_backend.open_wallet(owd.path, owd.pass, owr);
     dispatch(ar, owr);
   });
 }

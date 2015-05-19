@@ -252,4 +252,15 @@ response:
   "request_id": ""   
 }
 
+[sync] set_log_level(param)
+param:
+
+{
+  "v" : 0
+}
+response: 
+{
+  "error_code" : "OK",
+  "request_id": ""   
+}
 
