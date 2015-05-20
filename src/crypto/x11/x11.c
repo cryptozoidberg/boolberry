@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <stddef.h>
 
 #include "sph_blake.h"
 #include "sph_bmw.h"
