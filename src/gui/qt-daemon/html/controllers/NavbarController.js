@@ -135,6 +135,8 @@
         'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs','$interval',
         function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs, $interval) {
         
+        backend.webkitLaunchedScript(); // webkit ready signal to backend
+
         $rootScope.appPass = false;
 
         $rootScope.deamon_state = {
@@ -454,14 +456,18 @@
             var progress = data.progress;
 
             // $timeout(function(){
-                safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-                if(safe.length){
-                    safe = safe[0];
-                        safe.progress = progress;
-                        if(safe.progress == 100){
-                            safe.loaded = true;
-                        }
+                if($rootScope.safes.length){
+                    $scope.result = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+                    // informer.info(JSON.stringify($rootScope.safes));
+                    if($scope.result.length){
+                        var safe = $scope.result[0];
+                            safe.progress = progress;
+                            if(safe.progress == 100){
+                                safe.loaded = true;
+                            }
+                    }    
                 }
+                
             // },wait);
             // wait+=100;
             

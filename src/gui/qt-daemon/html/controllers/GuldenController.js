@@ -217,22 +217,9 @@
             };
 
             $scope.filterReset();
-
-            // $scope.is_goods_offer = function(offer){
-            //     if($scope.goods_filter.offer_type == 'all' && (offer.offer_type == 0 || offer.offer_type == 1)){
-            //         return true;
-            //     }else if($scope.goods_filter.offer_type == 'buy' && offer.offer_type == 0){
-            //         return true;
-            //     }else if($scope.goods_filter.offer_type == 'sell' && offer.offer_type == 1){
-            //         return true;
-            //     }else{
-            //         return false;
-            //     }
-            // }
-
             
 
-            console.log($scope.filtered_history);
+            //console.log($scope.filtered_history);
        }
     ]);
 

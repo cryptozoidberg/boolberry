@@ -27,6 +27,10 @@
                 return this.runCommand('show_openfile_dialog',params);
             },
 
+            webkitLaunchedScript : function(){
+                this.runCommand('webkit_launched_script',{});
+            },
+
             saveFileDialog : function(caption, filemask) {
                 var params = {
                     caption: caption, 
@@ -599,10 +603,16 @@
                 case 'update_wallet_status' : 
                     result = {
                         'wallet_id' : '1',
-                        'wallet_state' : '1',
+                        'wallet_state' : '2',
                         'is_mining' : false
                     };
-                    break;    
+                    break; 
+                case 'wallet_sync_progress' :
+                    result = {
+                        'wallet_id' : '1',
+                        'progress' : '50'
+                    }
+                    break;
                 case 'update_daemon_state': 
                     result = {
                         "daemon_network_state": 2,
