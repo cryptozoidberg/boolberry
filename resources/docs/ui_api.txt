@@ -66,6 +66,10 @@ param:
   "is_mining": true
 }
 
+wallet_state_synchronizing = 1,
+wallet_state_ready = 2, 
+wallet_state_error = 3
+
 
 //----------------------------------
     API
