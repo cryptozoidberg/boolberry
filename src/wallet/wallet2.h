@@ -79,9 +79,18 @@ namespace tools
 
   class wallet2
   {
-    wallet2(const wallet2&) : m_stop(false), m_callback(0) {};
+    wallet2(const wallet2&) : m_stop(false),
+                              m_callback(0), 
+                              height_of_start_sync(0), 
+                              last_sync_percent(0)
+    {};
   public:
-    wallet2() : m_stop(false), m_callback(0), m_core_proxy(new default_http_core_proxy()), m_upper_transaction_size_limit(0)
+    wallet2() : m_stop(false), 
+                m_callback(0), 
+                m_core_proxy(new default_http_core_proxy()), 
+                m_upper_transaction_size_limit(0), 
+                height_of_start_sync(0), 
+                last_sync_percent(0)
     {};
     struct transfer_details
     {
@@ -271,7 +280,8 @@ namespace tools
     std::shared_ptr<i_core_proxy> m_core_proxy;
     std::shared_ptr<i_wallet2_callback> m_callback_holder;
     i_wallet2_callback* m_callback;
-
+    uint64_t height_of_start_sync;
+    uint64_t last_sync_percent;
 
     
  
