@@ -399,6 +399,12 @@
         function($interval, $timeout, loader, informer){
         var callbacks = {};
 
+        var wallet_id = 0;
+
+        this.getWalletId = function(){
+            return wallet_id.toString();
+        };
+
         this.getAMData = function() { //generate one year of mining data
             var data = [];
             var avarageValue = Math.random()*100;
@@ -437,7 +443,7 @@
             var isShowLoader = commandsNoLoading.indexOf(command) < 0;
             var data = {};
             var commandData = false;
-            if(commandData = this.getData(command)){
+            if(commandData = this.getData(command,params)){
                 data = commandData;
             }
             if(angular.isDefined(callback)){
@@ -469,7 +475,7 @@
                 callback(data);
             },3000);
         };
-        this.getData = function(command){
+        this.getData = function(command,params){
             var result = false;
 
             switch (command){
@@ -487,12 +493,11 @@
                     break;
                 case 'open_wallet' : 
                     result = {
-                        "wallet_id" : "1",
+                        "wallet_id" : this.getWalletId(),
                         "wi" : this.getWalletInfo(),
                         "recent_history" : {
                             'history': [
                                 {
-                                    '$$hashKey': "object:45",
                                     'amount': 1000000000000,
                                     'fee': 1000000000000,
                                     'height': 2616,
@@ -512,10 +517,10 @@
                                     'timestamp': 1429715920,
                                     'tx_blob_size': 311,
                                     'tx_hash': "62b4f42bcff74c05199a4961ed226b542db38ea2bffbb4c2c384ee3b84f34e59",
-                                    'unlock_time': 0
+                                    'unlock_time': 0,
+                                    'wid' : params.wallet_id
                                 },
                                 {
-                                    '$$hashKey': "object:46",
                                     'amount': 200000000000000,
                                     'fee': 1000000000,
                                     'height': 1734,
@@ -530,16 +535,19 @@
                                     'timestamp': 1429608249,
                                     'tx_blob_size': 669,
                                     'tx_hash': "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b9",
-                                    'unlock_time': 0
+                                    'unlock_time': 0,
+                                    'wid' : params.wallet_id
                                 }
 
                             ]
                         },
                     }
+                    wallet_id++;
+                    informer.info(wallet_id);
                     break;
                 case 'generate_wallet' : 
                     result = {
-                        param: {"wallet_id" : "1"}
+                        param: {"wallet_id" : this.getWalletId()}
                     }
                     break;
                 case 'get_all_offers':
@@ -592,24 +600,26 @@
                     break;
                 case 'update_wallet_info' :
                     result = {
-                        wallets  : [
-                            {
-                                wallet_id: "1",
-                                wi : this.getWalletInfo()
-                            }
-                        ]
+                        wallets  : []
                     };
+                    for(var i = 0; i < wallet_id; i++){
+                        var wallet = {
+                            wallet_id: i.toString(),
+                            wi : this.getWalletInfo()
+                        }
+                        result.wallets.push(wallet);
+                    }
                     break;
                 case 'update_wallet_status' : 
                     result = {
-                        'wallet_id' : '1',
+                        'wallet_id' :this.getWalletId(),
                         'wallet_state' : '2',
                         'is_mining' : false
                     };
                     break; 
                 case 'wallet_sync_progress' :
                     result = {
-                        'wallet_id' : '1',
+                        'wallet_id' : this.getWalletId(),
                         'progress' : '50'
                     }
                     break;

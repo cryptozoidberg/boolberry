@@ -482,18 +482,18 @@
             if(angular.isUndefined(data.ti)){
                 return;
             }
+
             var wallet_id = data.wallet_id;
             var tr_info   = data.ti;
-
-            alias = $filter('filter')($rootScope.unconfirmed_aliases,{tx_hash : data.ti.tx_hash});
-
+            var alias = $filter('filter')($rootScope.unconfirmed_aliases,{tx_hash : data.ti.tx_hash});
+            
             if(alias.length){ // alias transaction
                 alias = alias[0];
                 informer.info('Алиас "'+alias.name+'" зарегистрирован');
                 return;
             }
 
-            safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             if(safe.length){ // safe transaction
                 safe = safe[0];
                 safe.balance = data.balance;

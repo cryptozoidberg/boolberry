@@ -172,16 +172,14 @@
 
             $scope.filterChange = function(){
                 var f = $scope.filter;
+                //informer.info('filtre!');
                 $scope.prefiltered_history = angular.copy($scope.history);
-
-                
 
                 var  message = '<br> filter object = ';
                 message += JSON.stringify(f);
 
                 console.log('HISTORY');
                 console.log($scope.prefiltered_history);
-                return;
                 //wallet filter
                 if(f.wallet_id != -1){
                     var condition = {wi : { wallet_id: parseInt(f.wallet_id)}};
