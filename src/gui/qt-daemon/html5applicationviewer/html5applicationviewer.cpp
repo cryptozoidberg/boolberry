@@ -56,10 +56,6 @@ signals:
   void update_wallet_info(const QString str);
   void money_transfer(const QString str);
   void wallet_sync_progress(const QString str);
-//  void show_wallet();
-//  void hide_wallet();
-//  void switch_view(const QString str);
-  //void set_recent_transfers(const QString str);
   void handle_internal_callback(const QString str, const QString callback_name);
   void update_pos_mining_text(const QString str);
   void do_dispatch(const QString status, const QString params);  //general function

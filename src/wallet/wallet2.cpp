@@ -366,7 +366,8 @@ void wallet2::pull_blocks(size_t& blocks_added, std::atomic<bool>& stop)
       uint64_t next_percent = (100 * (current_index - height_of_start_sync)) / (res.current_height - height_of_start_sync);
       if (next_percent != last_sync_percent)
       {
-        m_callback->on_sync_progress(last_sync_percent);
+        m_callback->on_sync_progress(next_percent);
+        last_sync_percent = next_percent;
       }
     }
   }
