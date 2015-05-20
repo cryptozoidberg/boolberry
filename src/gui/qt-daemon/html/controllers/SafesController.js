@@ -183,8 +183,8 @@
         }
     ]);
 
-    module.controller('safeRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes',
-        function($scope, backend, $modalInstance, $modal, $timeout, path, safes) {
+    module.controller('safeRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes', '$rootScope',
+        function($scope, backend, $modalInstance, $modal, $timeout, path, safes, $rootScope) {
             $scope.owl_options  = {
               singleItem: true,
               autoHeight: false,
@@ -199,6 +199,11 @@
             };
 
             var filename = path.substr(path.lastIndexOf('/')+1, path.lastIndexOf('.')-1-path.lastIndexOf('/'));
+            var folder = path.substr(0,path.lastIndexOf('/'));
+
+            $rootScope.settings.system.default_user_path = folder;
+
+            backend.storeAppData($rootScope.settings);
 
             $scope.safe = {
                 path: path,
@@ -212,26 +217,30 @@
             $scope.openSafe = function(safe){
                 backend.openWallet(safe.path, safe.pass,function(data){
                     
-                    var wallet_id = data.wallet_id;
-                    var new_safe = {
-                        wallet_id : wallet_id,
-                        name : safe.name,
-                        pass : safe.pass
-                    };
+                    var new_safe = data.wi;
+                    new_safe.wallet_id = data.wallet_id;
+                    new_safe.name = safe.name;
+                    new_safe.pass = safe.pass;
+                    new_safe.history = [];
+
+
+                    // var wallet_id = data.wallet_id;
+                    // var new_safe = {
+                    //     wallet_id : wallet_id,
+                    //     name : safe.name,
+                    //     pass : safe.pass,
+                    //     hisory: []
+                    // };
+
+                    if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
+                        new_safe.history = data.recent_history.history;
+                    }
+                    
                     $modalInstance.close();
                     $timeout(function(){
                         safes.unshift(new_safe);    
                     });
 
-                    // backend.getWalletInfo(wallet_id, function (safe_data){
-                    //     //var new_safe = safe_data.param
-                    //     safe_data.name = safe.name;
-                    //     safe_data.wallet_id = wallet_id;
-                    //     $timeout(function(){
-                    //         safes.unshift(safe_data);    
-                    //     });
-                    //     $modalInstance.close();
-                    // });
                 });
             };
             

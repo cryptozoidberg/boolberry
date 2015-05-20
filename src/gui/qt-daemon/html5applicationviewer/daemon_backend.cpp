@@ -388,19 +388,19 @@ bool daemon_backend::update_state_info()
   return true;
 }
 
-void daemon_backend::update_wallets_info()
-{
-  CRITICAL_REGION_LOCAL(m_wallets_lock);
-  view::wallets_summary_info wsi;
-  for (auto& w : m_wallets)
-  {
-    wsi.wallets.push_back(view::wallet_entry_info());
-    view::wallet_entry_info& l = wsi.wallets.back();
-    get_wallet_info(w.second, l.wi);
-    l.wallet_id = w.first;
-  }
-  m_pview->update_wallets_info(wsi);
-}
+// void daemon_backend::update_wallets_info()
+// {
+//   CRITICAL_REGION_LOCAL(m_wallets_lock);
+//   view::wallets_summary_info wsi;
+//   for (auto& w : m_wallets)
+//   {
+//     wsi.wallets.push_back(view::wallet_entry_info());
+//     view::wallet_entry_info& l = wsi.wallets.back();
+//     get_wallet_info(w.second, l.wi);
+//     l.wallet_id = w.first;
+//   }
+//   m_pview->update_wallets_info(wsi);
+// }
 
 bool daemon_backend::get_last_blocks(view::daemon_status_info& dsi)
 {
@@ -452,17 +452,15 @@ void daemon_backend::init_wallet_entry(wallet_vs_options& wo, uint64_t id)
   wo.do_mining = false;
   wo.stop = false;
   wo.plast_daemon_height = &m_last_daemon_height;
-  wo.pview = m_pview;
-  wo.miner_thread = std::thread(boost::bind(&daemon_backend::wallet_vs_options::worker_func, &wo));
-  
+  wo.pview = m_pview;  
 }
 
-std::string daemon_backend::open_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id)
+std::string daemon_backend::open_wallet(const std::string& path, const std::string& password, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
-  wallet_id = m_wallet_id_counter++;
+  owr.wallet_id = m_wallet_id_counter++;
 
-  w->callback(std::shared_ptr<tools::i_wallet2_callback>(new i_wallet_to_i_backend_adapter(this, wallet_id)));
+  w->callback(std::shared_ptr<tools::i_wallet2_callback>(new i_wallet_to_i_backend_adapter(this, owr.wallet_id)));
   w->set_core_proxy(std::shared_ptr<tools::i_core_proxy>(new tools::core_fast_rpc_proxy(m_rpc_server)));
   std::string return_code = API_RETURN_CODE_OK;
   CRITICAL_REGION_LOCAL(m_wallets_lock);
@@ -470,7 +468,18 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
   {
     try
     {
-      w->load(path, password);
+      w->load(path, password);  
+      w->get_recent_transfers_history(owr.recent_history.history, 0, 1000);
+      w->get_unconfirmed_transfers(owr.recent_history.unconfirmed);      
+      //workaround for missed fee
+      for (auto & he : owr.recent_history.history)
+      if (!he.fee && !currency::is_coinbase(he.tx))
+        he.fee = currency::get_tx_fee(he.tx);
+
+      for (auto & he : owr.recent_history.unconfirmed)
+      if (!he.fee && !currency::is_coinbase(he.tx))
+        he.fee = currency::get_tx_fee(he.tx);
+
       break;
     }
     catch (const tools::error::file_not_found& /**/)
@@ -488,17 +497,22 @@ std::string daemon_backend::open_wallet(const std::string& path, const std::stri
     }
   }
 
-  wallet_vs_options& wo = m_wallets[wallet_id];
+  wallet_vs_options& wo = m_wallets[owr.wallet_id];
   **wo.w = w;
-  init_wallet_entry(wo, wallet_id);
-
-  update_wallets_info();
+  get_wallet_info(wo, owr.wi);
+  init_wallet_entry(wo, owr.wallet_id);
+  //update_wallets_info();
   return return_code;
 }
-
+/*
 std::string daemon_backend::get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist)
 {
   GET_WALLET_BY_ID(wallet_id, w);
+  auto wallet_locked = w.try_lock();
+  if (!wallet_locked.get())
+  {
+    return API_RETURN_CODE_CORE_BUSY;
+  }
 
   w->get()->get_recent_transfers_history(tr_hist.history, 0, 1000);
   w->get()->get_unconfirmed_transfers(tr_hist.unconfirmed);
@@ -513,7 +527,7 @@ std::string daemon_backend::get_recent_transfers(size_t wallet_id, view::transfe
 
   return API_RETURN_CODE_OK;
 }
-
+*/
 std::string daemon_backend::generate_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
@@ -709,7 +723,7 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
     }
     
     w->get()->transfer(dsts, tp.mixin_count, unlock_time ? unlock_time + 1 : 0, fee, extra, attachments, res_tx);
-    update_wallets_info();
+    //update_wallets_info();
   }
   catch (const std::exception& e)
   {
@@ -762,6 +776,12 @@ std::string daemon_backend::stop_pos_mining(uint64_t wallet_id)
   m_pview->update_wallet_status(wsi);
   return API_RETURN_CODE_OK;
 }
+std::string daemon_backend::run_wallet(uint64_t wallet_id)
+{
+  GET_WALLET_OPT_BY_ID(wallet_id, wo);
+  wo.miner_thread = std::thread(boost::bind(&daemon_backend::wallet_vs_options::worker_func, &wo));
+  return API_RETURN_CODE_OK;
+}
 std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_info& wi)
 {
   wi = view::wallet_info();
@@ -770,8 +790,6 @@ std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_
   wi.balance = wo.w->get()->balance();
   wi.unlocked_balance = wo.w->get()->unlocked_balance();
   wi.path = wo.w->get()->get_wallet_path();
-  wi.do_mint = wo.do_mining;
-  wi.mint_is_in_progress = false;//m_mint_is_running;
   return API_RETURN_CODE_OK;
 }
 
@@ -883,7 +901,7 @@ void daemon_backend::wallet_vs_options::worker_func()
         pview->update_wallet_status(wsi);
         return;
       }
-      wsi.wallet_state = view::wallet_status_info::wallet_state_error;
+      wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
       pview->update_wallet_status(wsi);
       //do refresh
       last_wallet_synch_height = static_cast<uint64_t>(*plast_daemon_height);

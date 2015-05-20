@@ -201,29 +201,10 @@
                 process_finish_remind_onclose : true,
                 app_autosave_interval : 0,
                 app_donation : false,
-                donation_amount : 0
+                donation_amount : 0,
+                default_user_path: '/'
             }
         };
-
-        // $rootScope.watch(function(){
-        //     console.log('WATCH ROOT SCOPE');
-        //     return $rootScope.settings.security.is_use_app_pass;
-        // },function($v){
-        //     if($v === true){
-        //         console.log('APP PASS TRUE');
-        //     }else{
-        //          console.log('APP PASS FALSE');
-        //     }
-        // });
-       
-        // if($rootScope.settings.security.password_required_interval && $rootScope.settings.is_use_app_pass){
-        //     console.log('ask pass');
-            // $interval(function(){
-            //     if(!$rootScope.settings.security.app_block){
-            //         PassDialogs.requestMPDialog(false,false,false);
-            //     }
-            // },$rootScope.settings.password_required_interval);
-        // }
 
         $scope.wallet_info  = {};
 
@@ -247,13 +228,25 @@
                         
                             angular.forEach(appData,function(item){
                                 backend.openWallet(item.path, item.pass,function(data){
-                                    
-                                    var wallet_id = data.wallet_id;
-                                    var new_safe = {
-                                        wallet_id : wallet_id,
-                                        name : item.name,
-                                        pass : item.pass
-                                    };
+                                    informer.info(JSON.stringify(data));
+                                    // var wallet_id = data.wallet_id;
+                                    var new_safe = data.wi;
+                                    new_safe.wallet_id = data.wallet_id;
+                                    new_safe.name = item.name;
+                                    new_safe.pass = item.pass;
+                                    new_safe.history = [];
+
+                                    // var new_safe = {
+                                    //     wallet_id : wallet_id,
+                                    //     name : item.name,
+                                    //     pass : item.pass,
+                                    //     history: []
+                                    // };
+
+                                    if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
+                                        new_safe.history = data.recent_history.history;
+                                    }
+
                                     $timeout(function(){
                                         $rootScope.safes.push(new_safe);    
                                     });
@@ -437,22 +430,30 @@
 
         backend.subscribe('update_wallet_status', function(data){
             var wallet_id = data.wallet_id;
+            console.log('UPDATE WALLET STATUS :: ');
+            console.log(data);
             var wallet_state = data.wallet_state;
             var is_mining = data.is_mining;
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             if(safe.length){
-                safe = safe[0];
-                if(wallet_state == 2){
-                    safe.loaded = true;
-                    // informer.info('Сейф загрузился');
-                }else{
+                $timeout(function(){
+                    safe = safe[0];
+
                     safe.loaded = false;
-                    // informer.info('Сейф загружается');
-                }
-                safe.is_mining = is_mining;
+                    safe.error  = false;
+                    safe.is_mining = is_mining;
+
+
+                    if(wallet_state == 2){
+                        safe.loaded = true;
+                    }
+
+                    if(wallet_state == 3){
+                        safe.error = true;
+                    }    
+                });
+                
             }
-            // console.log('update_wallet_status');
-            // console.log(data);
         });
 
         backend.subscribe('quit_requested', function(data){

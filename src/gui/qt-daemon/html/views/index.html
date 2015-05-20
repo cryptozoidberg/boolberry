@@ -138,7 +138,7 @@
                 <tr ng-if="!safes.length">
                     <td colspan="6">Нет записей</td>
                 </tr>
-                <tr ng-repeat="safe in safes">
+                <tr ng-repeat="safe in safes" ng-class="{'danger' : safe.error}">
                     <td>
                         <i class="fa fa-spinner fa-pulse" ng-hide="safe.loaded"></i>
                         <a class="btn btn-link" href="#safe/{{safe.wallet_id}}">

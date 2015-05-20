@@ -56,6 +56,7 @@ namespace tools
     virtual void on_transfer2(const wallet_rpc::wallet_transfer_info& wti) {}
     virtual void on_money_sent(const wallet_rpc::wallet_transfer_info& wti) {}
     virtual void on_pos_block_found(const currency::block& /*block*/) {}
+    virtual void on_sync_progress(const currency::block& /*block*/) {}
   };
 
     
@@ -581,7 +582,7 @@ namespace tools
                   << "Unlocked: " << print_money(unlocked_balance()) << ENDL
                   << "Please, wait for confirmation for your balance to be unlocked.");
   }
-
+  //--------------------------------------------------------------------------------
   template<typename idle_condition_cb_t> //do refresh as external callback
   bool wallet2::scan_pos(mining_context& cxt,
     std::atomic<bool>& keep_mining,

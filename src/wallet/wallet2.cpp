@@ -331,7 +331,7 @@ void wallet2::pull_blocks(size_t& blocks_added, std::atomic<bool>& stop)
   size_t current_index = res.start_height;
   BOOST_FOREACH(auto& bl_entry, res.blocks)
   {
-    if (!stop)
+    if (stop)
       break;
 
     currency::block bl;
@@ -691,11 +691,9 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
 //     m_account_public_address.m_view_public_key  != m_account.get_keys().m_account_address.m_view_public_key,
 //     error::wallet_files_doesnt_correspond, m_wallet_file);
 
-  if(m_blockchain.empty())
+  if (!r)
   {
-    currency::block b;
-    currency::generate_genesis_block(b);
-    m_blockchain.push_back(get_block_hash(b));
+    reset_history();
   }
   m_local_bc_height = m_blockchain.size();
   CHECK_AND_THROW_WALLET_EX(!r, error::wallet_load_notice_wallet_restored, m_wallet_file);

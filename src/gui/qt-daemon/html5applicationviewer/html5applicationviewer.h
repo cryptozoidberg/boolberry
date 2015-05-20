@@ -60,7 +60,9 @@ protected:
 
   QString open_wallet(const QString& param);
   QString generate_wallet(const QString& param);
-  QString get_wallet_info(const QString& param);
+  QString run_wallet(const QString& param);
+
+//  QString get_wallet_info(const QString& param);
   QString close_wallet(const QString& wallet_id);
   QString get_version();
   QString transfer(const QString& json_transfer_object);
@@ -71,7 +73,7 @@ protected:
   QString get_app_data();
   QString store_app_data(const QString& param);
   QString get_default_user_dir(const QString& param);
-  QString get_recent_transfers(const QString& param);
+  //QString get_recent_transfers(const QString& param);
   QString get_all_offers(const QString& param);
   QString push_offer(const QString& param);
   QString get_all_aliases();
@@ -81,6 +83,8 @@ protected:
   QString resync_wallet(const QString& param);
   QString start_pos_mining(const QString& param);
   QString stop_pos_mining(const QString& param);
+  QString set_log_level(const QString& param);
+
 
 
   void message_box(const QString& msg);

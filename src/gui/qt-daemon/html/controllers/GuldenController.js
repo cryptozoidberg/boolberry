@@ -130,9 +130,11 @@
             
             $scope.safes = angular.copy($rootScope.safes);
             $scope.safes.push({name: 'Все сейфы', wallet_id : -1});
-            $scope.wallet_id = -1;
+            //$scope.wallet_id = -1;
             
             $scope.history = [];
+
+            console.log($scope.history);
 
             angular.forEach($rootScope.safes, function(safe){
                 if(angular.isDefined(safe.history)){
@@ -143,21 +145,92 @@
                 }
             });
 
+            console.log($scope.history);
+
             $scope.order = function(key){
                 $scope.filtered_history = $filter('orderBy')($scope.filtered_history,key);
             };
 
-            $scope.filtered_history = $scope.history;
-            $scope.order('timestamp');
+            
+            // $scope.order('timestamp');
 
-            $scope.changeWallet = function(wallet_id){
-                if(wallet_id === -1){
-                    $scope.filtered_history = $scope.history;
-                }else{
-                    var condition = {wi : { wallet_id: parseInt(wallet_id)}};
-                    $scope.filtered_history = $filter('filter')($scope.history,condition);
-                }
+            // $scope.changeWallet = function(wallet_id){
+            //     if(wallet_id === -1){
+            //         $scope.filtered_history = $scope.history;
+            //     }else{
+            //         var condition = {wi : { wallet_id: parseInt(wallet_id)}};
+            //         $scope.filtered_history = $filter('filter')($scope.history,condition);
+            //     }
+            // };
+
+            //default filter values
+            $scope.filter = {
+                tr_type: 'all', //all, in, out
+                wallet_id: -1,
+                keywords: ''
             };
+
+            $scope.filterChange = function(){
+                var f = $scope.filter;
+                $scope.prefiltered_history = angular.copy($scope.history);
+
+                
+
+                var  message = '<br> filter object = ';
+                message += JSON.stringify(f);
+
+                console.log('HISTORY');
+                console.log($scope.prefiltered_history);
+                return;
+                //wallet filter
+                if(f.wallet_id != -1){
+                    var condition = {wi : { wallet_id: parseInt(f.wallet_id)}};
+                    $scope.pre_filtered_history = $filter('filter')($scope.pre_filtered_history,condition);
+                }
+
+                message += '<br> wallet filter = ';
+                message += JSON.stringify($scope.pre_filtered_history);
+                //type filter
+                if(f.tr_type != 'all'){
+                    var is_income = (f.tr_type == 'in') ? true : false;
+                    var condition = {wi : { is_income: is_income}};
+                    $scope.pre_filtered_history = $filter('filter')($scope.pre_filtered_history,condition);
+                }
+
+                message += '<br> type filter = ';
+                message += JSON.stringify($scope.pre_filtered_history);
+                //keywords
+                if(f.keywords != ''){
+                    $scope.pre_filtered_history = $filter('filter')($scope.pre_filtered_history,f.keywords);
+                }
+
+                message += '<br> keyword filter = ';
+                message += JSON.stringify($scope.pre_filtered_history);
+
+                informer.info(message);
+
+                $scope.filtered_history = $scope.pre_filtered_history;
+            };
+
+            $scope.filterReset = function(){
+                $scope.filtered_history = $scope.history;
+            };
+
+            $scope.filterReset();
+
+            // $scope.is_goods_offer = function(offer){
+            //     if($scope.goods_filter.offer_type == 'all' && (offer.offer_type == 0 || offer.offer_type == 1)){
+            //         return true;
+            //     }else if($scope.goods_filter.offer_type == 'buy' && offer.offer_type == 0){
+            //         return true;
+            //     }else if($scope.goods_filter.offer_type == 'sell' && offer.offer_type == 1){
+            //         return true;
+            //     }else{
+            //         return false;
+            //     }
+            // }
+
+            
 
             console.log($scope.filtered_history);
        }

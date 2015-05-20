@@ -15,11 +15,15 @@
             // user functions
 
             openFileDialog : function(caption, filemask) {
+                var dir = '/';
+                if(angular.isDefined($rootScope.settings.system.default_user_path)){
+                    dir = $rootScope.settings.system.default_user_path;
+                }
                 var params = {
                     caption: caption, 
-                    filemask: filemask
+                    filemask: filemask,
+                    default_dir: dir
                 };
-
                 return this.runCommand('show_openfile_dialog',params);
             },
 
@@ -287,10 +291,12 @@
 
             backendCallback: function (status, param) {
                 console.log('DISPATCH: got result from backend');
-                console.log(status);
-                console.log(param);
+                
                 status = (status) ? JSON.parse(status) : null;
                 param  = (param)  ? JSON.parse(param)  : null;
+
+                console.log(status);
+                console.log(param);
                 
                 var result = {};
                 result.status = status;
