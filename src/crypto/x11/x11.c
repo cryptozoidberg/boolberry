@@ -1,12 +1,11 @@
 
 
-
+#include <stddef.h>
 #include "x11.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
-#include <stddef.h>
 
 #include "sph_blake.h"
 #include "sph_bmw.h"
@@ -20,7 +19,7 @@
 #include "sph_simd.h"
 #include "sph_echo.h"
 
-void x11_hash(const char* input, unsigned long len, char* output)
+void x11_hash(const char* input, size_t len, char* output)
 {
     sph_blake512_context     ctx_blake;
     sph_bmw512_context       ctx_bmw;

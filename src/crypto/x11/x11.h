@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 // input is 80 bytes long, output is 32 bytes
-  void x11_hash(const char* input, unsigned long sz, char* output);
+  void x11_hash(const char* input, size_t sz, char* output);
 
 #ifdef __cplusplus
 }
