@@ -461,7 +461,10 @@
                     // informer.info(JSON.stringify($rootScope.safes));
                     if($scope.result.length){
                         var safe = $scope.result[0];
-                        safe.progress = progress;
+                        $timeout(function(){
+                            safe.progress = progress;    
+                        });
+                        
                             // if(safe.progress == 100){
                             //     safe.loaded = true;
                             // }
