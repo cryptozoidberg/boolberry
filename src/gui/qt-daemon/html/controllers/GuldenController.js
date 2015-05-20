@@ -134,18 +134,18 @@
             
             $scope.history = [];
 
-            console.log($scope.history);
+            //console.log($scope.history);
 
             angular.forEach($rootScope.safes, function(safe){
                 if(angular.isDefined(safe.history)){
                     angular.forEach(safe.history, function(item){
-                        item.wi = safe;
+                        item.wi = angular.copy(safe);
                         $scope.history.push(item);    
                     });
                 }
             });
 
-            console.log($scope.history);
+            //console.log($scope.history);
 
             $scope.order = function(key){
                 $scope.filtered_history = $filter('orderBy')($scope.filtered_history,key);
