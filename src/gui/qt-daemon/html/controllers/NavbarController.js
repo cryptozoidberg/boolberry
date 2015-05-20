@@ -250,8 +250,6 @@
             }
         };
 
-        init();
-
         var loadingMessage = 'Cеть загружается, или оффлайн. Пожалуйста, подождите...';
 
         $scope.progress_value = function(){
@@ -321,6 +319,11 @@
         backend.subscribe('update_daemon_state', function(data){// move to run
             if(data.daemon_network_state == 2){
                 
+                if(!loaded){
+                    init();
+                    loaded = true;
+                }
+
                 var getAliases = function(){
                     backend.getAllAliases(function(data){
                         console.log('ALIASES :: ');
@@ -405,20 +408,23 @@
             var is_mining = data.is_mining;
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             // informer.info('UPDATE WALLET STATUS' + wallet_state);
+            
+            // 1-synch, 2-ready, 3 - error
+
             if(safe.length){
                 $timeout(function(){
                     safe = safe[0];
 
-                    safe.loaded = true;
+                    safe.loaded = false;
                     safe.error  = false;
                     safe.is_mining = is_mining;
 
 
-                    if(wallet_state == 2){
-                        safe.loaded = false;
+                    if(wallet_state == 2){ // ready
+                        safe.loaded = true;
                     }
 
-                    if(wallet_state == 3){
+                    if(wallet_state == 3){ // error
                         safe.error = true;
                     }   
                     
@@ -438,9 +444,27 @@
             backend.quitRequest();
         });
 
+        var wait = 0;
+
         backend.subscribe('wallet_sync_progress', function(data){
             console.log('wallet_sync_progress');
             console.log(data);
+
+            var wallet_id = data.wallet_id;
+            var progress = data.progress;
+
+            // $timeout(function(){
+                safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+                if(safe.length){
+                    safe = safe[0];
+                        safe.progress = progress;
+                        if(safe.progress == 100){
+                            safe.loaded = true;
+                        }
+                }
+            // },wait);
+            // wait+=100;
+            
         });
 
         backend.subscribe('money_transfer', function(data){

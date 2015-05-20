@@ -55,16 +55,16 @@
             };
 
             //$scope.initLoading = function(){
-            $scope.percent = 0;
+            // $scope.percent = 0;
 
-            var loadProcess = $interval(function(){
+            // var loadProcess = $interval(function(){
                 
-                if ($scope.percent == 100) {
-                    $scope.percent = 0;
-                }
+            //     if ($scope.percent == 100) {
+            //         $scope.percent = 0;
+            //     }
 
-                $scope.percent += 5;
-            },500);
+            //     $scope.percent += 5;
+            // },500);
 
                 //return $scope.percent;
             //};

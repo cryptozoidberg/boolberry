@@ -13,6 +13,26 @@
                 }
             };
 
+            $scope.pieStates = {
+                danger: '#D9534F',
+                warning: '#F0AD4E',
+                info: '#5BC0DE',
+                success: '#5CB85C',
+            };
+
+            $scope.pieChartoptions = {
+                barColor: $scope.pieStates.info, // #5BC0DE info,  #F0AD4E warning,  danger
+                trackColor: '#f2f2f2',
+                // scaleColor: '#f2f2f2',
+                scaleLength: 5,
+                lineCap: 'butt',
+                lineWidth: 9,
+                size: 32,
+                rotate: 0,
+                animate: {},
+                // easing: {}
+            };
+
             $scope.safes_owl_options  = {
               items: 2,
               navText: '',
