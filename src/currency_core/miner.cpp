@@ -342,7 +342,6 @@ namespace currency
         b = m_template;
         block_blob = get_block_hashing_blob(b);
         local_diff = m_diffic;
-        height = m_height;
         CRITICAL_REGION_END();
         local_template_ver = m_template_no;
         nonce = m_starter_nonce + th_local_index;
