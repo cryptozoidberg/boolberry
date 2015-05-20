@@ -62,7 +62,6 @@ extern "C"{
  */
 
 #define AES_BIG_ENDIAN   0
-#include "aes_helper.c"
 
 static const sph_u32 IV224[] = {
 	C32(0x6774F31C), C32(0x990AE210), C32(0xC87D4274), C32(0xC9546371),
