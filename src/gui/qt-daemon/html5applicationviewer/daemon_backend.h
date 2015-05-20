@@ -98,11 +98,12 @@ private:
   virtual void on_new_block(uint64_t height, const currency::block& block);
   virtual void on_transfer2(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti);
   virtual void on_pos_block_found(const currency::block& /*block*/);
+  virtual void on_sync_progress(size_t wallet_id, const uint64_t& /*percents*/);
 
 
   std::thread m_main_worker_thread;
   std::atomic<bool> m_stop_singal_sent;
-  view::view_stub m_view_stub;
+  view::i_view m_view_stub;
   view::i_view* m_pview;
   std::shared_ptr<tools::i_core_proxy> m_rpc_proxy;
   critical_section m_wallets_lock;

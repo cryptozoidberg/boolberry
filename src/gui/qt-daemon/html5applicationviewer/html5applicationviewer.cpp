@@ -55,6 +55,7 @@ signals:
   void update_wallet_status(const QString str);
   void update_wallet_info(const QString str);
   void money_transfer(const QString str);
+  void wallet_sync_progress(const QString str);
 //  void show_wallet();
 //  void hide_wallet();
 //  void switch_view(const QString str);
@@ -406,7 +407,7 @@ bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info
   if (m_last_update_daemon_status_json == json_str)
     return true;
   
-  LOG_PRINT_L0("SENDING SIGNAL -> [update_daemon_state]");
+  LOG_PRINT_L0("SENDING SIGNAL -> [update_daemon_state] " << info.daemon_network_state);
   m_d->update_daemon_state(json_str.c_str());
   m_last_update_daemon_status_json = json_str;
   return true;
@@ -428,7 +429,7 @@ bool Html5ApplicationViewer::update_wallet_status(const view::wallet_status_info
 {
   std::string json_str;
   epee::serialization::store_t_to_json(wsi, json_str);
-  LOG_PRINT_L0("SENDING SIGNAL -> [update_wallet_status]");
+  LOG_PRINT_L0("SENDING SIGNAL -> [update_wallet_status]: wallet_id: " << wsi.wallet_id << ", state: " << wsi.wallet_state);
   m_d->update_wallet_status(json_str.c_str());
   return true;
 }
@@ -458,6 +459,12 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
   return true;
 }
 
+bool Html5ApplicationViewer::wallet_sync_progress(const view::wallet_sync_progres_param& p)
+{
+  LOG_PRINT_L0("SENDING SIGNAL -> [wallet_sync_progress]" << " wallet_id: " << p.wallet_id << ": " << p.progress << "%");
+  m_d->wallet_sync_progress(epee::serialization::store_t_to_json(p).c_str());
+  return true;
+}
 
 // bool Html5ApplicationViewer::hide_wallet()
 // {

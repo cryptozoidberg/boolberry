@@ -15,6 +15,8 @@ public:
   virtual void on_transfer2(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti) {}
   virtual void on_money_sent(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti) {}
   virtual void on_pos_block_found(size_t wallet_id, const currency::block& /*block*/) {}
+  virtual void on_sync_progress(size_t wallet_id, const uint64_t& /*percents*/) {}
+
 };
 
 struct i_wallet_to_i_backend_adapter: public tools::i_wallet2_callback
@@ -40,6 +42,9 @@ struct i_wallet_to_i_backend_adapter: public tools::i_wallet2_callback
   }
   virtual void on_pos_block_found(const currency::block& wti) {
     m_pbackend->on_pos_block_found(m_wallet_id, wti);
+  }
+  virtual void on_sync_progress(const uint64_t& progress) {
+    m_pbackend->on_sync_progress(m_wallet_id, progress);
   }
 private:
   i_backend_wallet_callback* m_pbackend;

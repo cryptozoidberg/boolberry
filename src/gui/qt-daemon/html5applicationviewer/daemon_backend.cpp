@@ -859,7 +859,13 @@ void daemon_backend::on_pos_block_found(const currency::block& b)
 {
   m_pview->pos_block_found(b);
 }
-
+void daemon_backend::on_sync_progress(size_t wallet_id, const uint64_t& percents)
+{
+  view::wallet_sync_progres_param wspp = AUTO_VAL_INIT(wspp);
+  wspp.progress = percents;
+  wspp.wallet_id = wallet_id;
+  m_pview->wallet_sync_progress(wspp);
+}
 void daemon_backend::wallet_vs_options::worker_func()
 {
   LOG_PRINT_GREEN("[POS_MINER] Wallet miner thread started", LOG_LEVEL_0);

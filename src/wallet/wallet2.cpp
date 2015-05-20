@@ -361,6 +361,14 @@ void wallet2::pull_blocks(size_t& blocks_added, std::atomic<bool>& stop)
     }
 
     ++current_index;
+    if (res.current_height > height_of_start_sync)
+    {
+      uint64_t next_percent = (100 * (current_index - height_of_start_sync)) / (res.current_height - height_of_start_sync);
+      if (next_percent != last_sync_percent)
+      {
+        m_callback->on_sync_progress(last_sync_percent);
+      }
+    }
   }
 }
 //----------------------------------------------------------------------------------------------------
@@ -468,7 +476,8 @@ void wallet2::refresh(size_t & blocks_fetched, bool& received_money, std::atomic
   size_t added_blocks = 0;
   size_t try_count = 0;
   crypto::hash last_tx_hash_id = m_transfers.size() ? get_transaction_hash(m_transfers.back().m_tx) : null_hash;
-
+  height_of_start_sync = m_blockchain.size();
+  last_sync_percent = 0;
   while (!stop.load(std::memory_order_relaxed))
   {
     try

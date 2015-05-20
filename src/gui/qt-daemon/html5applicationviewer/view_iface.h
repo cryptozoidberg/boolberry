@@ -365,6 +365,18 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct wallet_sync_progres_param
+  {
+    uint64_t wallet_id;
+    uint64_t progress;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
+      KV_SERIALIZE(progress)
+    END_KV_SERIALIZE_MAP()
+  };
+
+
   struct api_response
   {
     std::string request_id;
@@ -419,33 +431,15 @@ public:
 
   struct i_view
   {
-    virtual bool update_daemon_status(const daemon_status_info& info)=0;
-    virtual bool on_backend_stopped()=0;
-    virtual bool show_msg_box(const std::string& message)=0;
-    virtual bool update_wallet_status(const wallet_status_info& wsi)=0;
-    virtual bool update_wallets_info(const wallets_summary_info& wsi) = 0;
-    virtual bool money_transfer(const transfer_event_info& wsi) = 0;
-//     virtual bool show_wallet()=0;
-//     virtual bool hide_wallet()= 0;
-//     virtual bool switch_view(int view_no)=0;
-//     virtual bool set_recent_transfers(const transfers_array& ta) = 0;
-    virtual bool set_html_path(const std::string& path)=0;
-    virtual bool pos_block_found(const currency::block& block_found)=0;
+    virtual bool update_daemon_status(const daemon_status_info& info){ return true; }
+    virtual bool on_backend_stopped(){ return true; }
+    virtual bool show_msg_box(const std::string& message){ return true; }
+    virtual bool update_wallet_status(const wallet_status_info& wsi){ return true; }
+    virtual bool update_wallets_info(const wallets_summary_info& wsi){ return true; }
+    virtual bool money_transfer(const transfer_event_info& wsi){ return true; }
+    virtual bool wallet_sync_progress(const view::wallet_sync_progres_param& p){ return true; }
+    virtual bool set_html_path(const std::string& path){ return true; }
+    virtual bool pos_block_found(const currency::block& block_found){ return true; }
   };
 
-  struct view_stub: public i_view
-  {
-    virtual bool update_daemon_status(const daemon_status_info& /*info*/){return true;}
-    virtual bool on_backend_stopped(){return true;}
-    virtual bool show_msg_box(const std::string& /*message*/){return true;}
-    virtual bool update_wallet_status(const wallet_status_info& /*wsi*/){return true;}
-    virtual bool update_wallets_info(const wallets_summary_info& /*lwi*/){ return true; }
-    virtual bool money_transfer(const transfer_event_info& /*wsi*/){ return true; }
-//     virtual bool show_wallet(){return true;}
-//     virtual bool hide_wallet(){ return true; }
-//     virtual bool switch_view(int /*view_no*/){ return true; }
-//     virtual bool set_recent_transfers(const transfers_array& /*ta*/){ return true; }
-    virtual bool set_html_path(const std::string& path){ return true; };
-    virtual bool pos_block_found(const currency::block& block_found){ return true; };
-  };
 }

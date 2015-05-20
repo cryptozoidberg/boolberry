@@ -112,6 +112,8 @@ private:
   virtual bool update_wallet_status(const view::wallet_status_info& wsi);
   virtual bool update_wallets_info(const view::wallets_summary_info& wsi);
   virtual bool money_transfer(const view::transfer_event_info& tei);
+  virtual bool wallet_sync_progress(const view::wallet_sync_progres_param& p);
+
 //   virtual bool show_wallet();
 //   virtual bool hide_wallet();
 //   virtual bool switch_view(int view_no);

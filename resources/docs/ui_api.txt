@@ -5,6 +5,15 @@
 
 
 
+wallet_sync_progress()
+
+param = 
+{
+  "wallet_id": 0,
+  "progress": 10
+}
+
+
 upate_daemon_state()
 
 param = 
