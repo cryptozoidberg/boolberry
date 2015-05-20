@@ -195,6 +195,13 @@
                 return this.runCommand('on_request_quit', {});
             },
 
+            recountTotalBalance : function(){
+                $rootScope.total_balance = 0;
+                angular.forEach($rootScope.safes,function(safe){
+                    $rootScope.total_balance += safe.unlocked_balance;
+                });
+            },
+
             openWallet : function(file, pass, callback) {
                 var params = {
                     path: file,
@@ -210,6 +217,13 @@
                 };
                 
                 return this.runCommand('close_wallet', params, callback);
+            },
+
+            runWallet : function(wallet_id) {
+                var params = {
+                    wallet_id : wallet_id
+                };
+                return this.runCommand('run_wallet', params);
             },
 
             getWalletInfo : function(wallet_id, callback) {
@@ -468,7 +482,54 @@
                     break;
                 case 'open_wallet' : 
                     result = {
-                        "wallet_id" : "1"
+                        "wallet_id" : "1",
+                        "wi" : this.getWalletInfo(),
+                        "recent_history" : {
+                            'history': [
+                                {
+                                    '$$hashKey': "object:45",
+                                    'amount': 1000000000000,
+                                    'fee': 1000000000000,
+                                    'height': 2616,
+                                    'is_income': false,
+                                    'payment_id': "",
+                                    'remote_address': "HhTZP7Sy4FoDR1kJHbFjzd5gSnUPdpHWHj7Gaaeqjt52KS23rHGa1sN73yZYPt77TkN8VVmHrT5qmBJQGzDLYJGjQpxGRid",
+                                    'recipient_alias': "",
+                                    'td': {
+                                        'rcv': [
+                                            9000000000000,
+                                            10000000000000,
+                                            80000000000000,
+                                            100000000000000,
+                                        ],
+                                        'spn': [200000000000000]
+                                    },
+                                    'timestamp': 1429715920,
+                                    'tx_blob_size': 311,
+                                    'tx_hash': "62b4f42bcff74c05199a4961ed226b542db38ea2bffbb4c2c384ee3b84f34e59",
+                                    'unlock_time': 0
+                                },
+                                {
+                                    '$$hashKey': "object:46",
+                                    'amount': 200000000000000,
+                                    'fee': 1000000000,
+                                    'height': 1734,
+                                    'is_income': true,
+                                    'payment_id': "",
+                                    'remote_address': "",
+                                    'recipient_alias': "",
+                                    'td': {
+                                        'rcv': [200000000000000]
+                                    },
+                                    'length': 1,
+                                    'timestamp': 1429608249,
+                                    'tx_blob_size': 669,
+                                    'tx_hash': "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b9",
+                                    'unlock_time': 0
+                                }
+
+                            ]
+                        },
                     }
                     break;
                 case 'generate_wallet' : 
@@ -517,50 +578,7 @@
                     break;
                 case 'get_recent_transfers' :
                     result = {
-                        'history': [
-                            {
-                                '$$hashKey': "object:45",
-                                'amount': 1000000000000,
-                                'fee': 1000000000000,
-                                'height': 2616,
-                                'is_income': false,
-                                'payment_id': "",
-                                'remote_address': "HhTZP7Sy4FoDR1kJHbFjzd5gSnUPdpHWHj7Gaaeqjt52KS23rHGa1sN73yZYPt77TkN8VVmHrT5qmBJQGzDLYJGjQpxGRid",
-                                'recipient_alias': "",
-                                'td': {
-                                    'rcv': [
-                                        9000000000000,
-                                        10000000000000,
-                                        80000000000000,
-                                        100000000000000,
-                                    ],
-                                    'spn': [200000000000000]
-                                },
-                                'timestamp': 1429715920,
-                                'tx_blob_size': 311,
-                                'tx_hash': "62b4f42bcff74c05199a4961ed226b542db38ea2bffbb4c2c384ee3b84f34e59",
-                                'unlock_time': 0
-                            },
-                            {
-                                '$$hashKey': "object:46",
-                                'amount': 200000000000000,
-                                'fee': 1000000000,
-                                'height': 1734,
-                                'is_income': true,
-                                'payment_id': "",
-                                'remote_address': "",
-                                'recipient_alias': "",
-                                'td': {
-                                    'rcv': [200000000000000]
-                                },
-                                'length': 1,
-                                'timestamp': 1429608249,
-                                'tx_blob_size': 669,
-                                'tx_hash': "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b9",
-                                'unlock_time': 0
-                            }
-
-                        ]
+                        'history' : []
 
                     }
                     break;
@@ -577,6 +595,13 @@
                         ]
                     };
                     break;
+                case 'update_wallet_status' : 
+                    result = {
+                        'wallet_id' : '1',
+                        'wallet_state' : '1',
+                        'is_mining' : false
+                    };
+                    break;    
                 case 'update_daemon_state': 
                     result = {
                         "daemon_network_state": 2,

@@ -31,9 +31,45 @@
         }
     ]);
 
-    module.controller('safeListCtrl',['backend','$scope','$rootScope', '$modal',
-        function(backend, $scope, $rootScope, $modal){
+    module.controller('safeListCtrl',['backend','$scope','$rootScope', '$modal','$interval',
+        function(backend, $scope, $rootScope, $modal,$interval){
+            
+            $scope.pieStates = {
+                danger: '#D9534F',
+                warning: '#F0AD4E',
+                info: '#5BC0DE',
+                success: '#5CB85C',
+            };
 
+            $scope.pieChartoptions = {
+                barColor: $scope.pieStates.info, // #5BC0DE info,  #F0AD4E warning,  danger
+                trackColor: '#f2f2f2',
+                // scaleColor: '#f2f2f2',
+                scaleLength: 5,
+                lineCap: 'butt',
+                lineWidth: 9,
+                size: 32,
+                rotate: 0,
+                animate: {},
+                // easing: {}
+            };
+
+            //$scope.initLoading = function(){
+            $scope.percent = 0;
+
+            var loadProcess = $interval(function(){
+                
+                if ($scope.percent == 100) {
+                    $scope.percent = 0;
+                }
+
+                $scope.percent += 5;
+            },500);
+
+                //return $scope.percent;
+            //};
+
+            
             
         }
     ]);
@@ -216,7 +252,7 @@
 
             $scope.openSafe = function(safe){
                 backend.openWallet(safe.path, safe.pass,function(data){
-                    
+                    backend.runWallet(data.wallet_id);
                     var new_safe = data.wi;
                     new_safe.wallet_id = data.wallet_id;
                     new_safe.name = safe.name;

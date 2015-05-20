@@ -1,6 +1,8 @@
 <h1>Сейфы</h1>
 <h5>Здесь Вы можете просмотреть список всех сейфов</h5>
+
 <div class="tabs" ng-controller="safeListCtrl">
+    
     <div class="navbar">
         <div class="row">
             <div class="col-xs-5 col-sm-5" ng-controller="safeModals">
@@ -43,12 +45,12 @@
                 <table class="table table-condensed table-hover data-table safes-table">
                     <thead>
                         <tr>
-                            <th><span class="nowrap">Сейф <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                            <th><span class="nowrap">Счет сейфа <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                            <th><span class="nowrap">Состояние <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                            <th><span class="nowrap">Доступно<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                            <th><span class="nowrap">Баланс <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                            <th></th>
+                            <th class="col-sm-3"><span class="nowrap">Сейф <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                            <th class="col-sm-2"><span class="nowrap">Счет сейфа <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                            <th class="col-sm-2"><span class="nowrap">Состояние <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                            <th class="col-sm-2"><span class="nowrap">Доступно<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                            <th class="col-sm-2"><span class="nowrap">Баланс <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                            <th class="col-sm-1"></th>
                         </tr>
                     </thead>
 
@@ -56,8 +58,8 @@
                         <tr ng-if="!safes.length">
                             <td colspan="6">Нет записей</td>
                         </tr>
-                        <tr ng-repeat="safe in safes" class="danger">
-                            <td width="20%">
+                        <tr ng-repeat="safe in safes" ng-class="{'danger' : safe.error}">
+                            <td>
                                 <i class="fa fa-spinner fa-pulse" ng-hide="safe.loaded"></i>
                                 <a class="btn btn-link" href="#safe/{{safe.wallet_id}}">
                                     <big>{{safe.name}}</big>
@@ -68,7 +70,7 @@
                                 <span  ng-repeat="alias in aliases | filter : {address: safe.address}"><span class="label label-info">@{{alias.alias}}</span><span>
                             </td>
 
-                            <td width="20%">
+                            <td>
                                 <div class="dropdown">
                                     <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button">
                                         <span class="account-text">
@@ -97,24 +99,29 @@
                                 </div>
                             </td>
 
-                            <td width="20%">
-                                <li class="label-icon" ng-if="safe.is_mining">
-                                    <em>Добыча</em> 
-                                    <span class="label label-success">
-                                        <i class="gu gu-2x gu-pick"></i>
-                                    </span>
-                                </li>
+                            <td>
+                                <ul class="list-unstyled">
+                                    <li class="label-icon" ng-if="safe.is_mining">
+                                        <em>Добыча</em> 
+                                        <span class="label label-success">
+                                            <i class="gu gu-2x gu-pick"></i>
+                                        </span>
+                                    </li>
+                                    <li class="text-warning">
+                                        <div easypiechart options="pieChartoptions" class="chart send-timer" percent="percent"></div>
+                                    </li>
+                                </ul>
                             </td>
 
-                            <td width="15%">
+                            <td>
                                 <strong><big>{{safe.unlocked_balance | gulden}}<big></big></big></strong>
                             </td>
 
-                            <td width="15%">
+                            <td>
                                 <strong><big>{{safe.balance | gulden}}<big></big></big></strong>
                             </td>
 
-                            <td width="10%">
+                            <td>
                                 <div class="btn-group navbar-btn">
                                     <button aria-expanded="false" ng-disabled="!safe.loaded" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
                                         <i class="fa fa-gear"></i> <span class="caret"></span>
@@ -122,9 +129,9 @@
                                     <ul role="menu" class="dropdown-menu dropdown-menu-right">
                                         <li><a href="#sendG/{{safe.wallet_id}}">Отправить гульдены</a></li>
 
-                                        <li><a href="market.html">Продать гульдены</a></li>
-                                        <li><a href="market.html">Купить гульдены</a></li>
-                                        <li><a href="startMining(safe.wallet_id)">Начать добычу</a></li>
+                                        <li><a href="">Продать гульдены</a></li>
+                                        <li><a href="">Купить гульдены</a></li>
+                                        <li><a href="" ng-click="startMining(safe.wallet_id)">Начать добычу</a></li>
 
                                         <li class="divider"></li>
                                         <li><a href="" ng-click="registerAlias(safe)">Присвоить алиас</a></li>

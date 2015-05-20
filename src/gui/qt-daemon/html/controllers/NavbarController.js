@@ -228,27 +228,20 @@
                         
                             angular.forEach(appData,function(item){
                                 backend.openWallet(item.path, item.pass,function(data){
-                                    informer.info(JSON.stringify(data));
-                                    // var wallet_id = data.wallet_id;
+                                    backend.runWallet(data.wallet_id);
                                     var new_safe = data.wi;
                                     new_safe.wallet_id = data.wallet_id;
                                     new_safe.name = item.name;
                                     new_safe.pass = item.pass;
                                     new_safe.history = [];
 
-                                    // var new_safe = {
-                                    //     wallet_id : wallet_id,
-                                    //     name : item.name,
-                                    //     pass : item.pass,
-                                    //     history: []
-                                    // };
-
                                     if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
                                         new_safe.history = data.recent_history.history;
                                     }
 
                                     $timeout(function(){
-                                        $rootScope.safes.push(new_safe);    
+                                        $rootScope.safes.push(new_safe);   
+                                        backend.recountTotalBalance(); 
                                     });
 
                                 });
@@ -300,24 +293,12 @@
 
         $scope.startMining = function(wallet_id){
             backend.startPosMining(wallet_id);
-            // var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-            // if(safe.length){
-            //     safe = safe[0];
-            //     safe.is_mining = true;
-            // }else{
-            //     return;
-            // }
+            
         }
 
         $scope.stopMining = function(wallet_id){
             backend.stopPosMining(wallet_id);
-            // var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-            // if(safe.length){
-            //     safe = safe[0];
-            //     safe.is_mining = false;
-            // }else{
-            //     return;
-            // }
+            
         }
 
         $scope.resynch = function(wallet_id){
@@ -385,13 +366,8 @@
         });
         
         backend.subscribe('update_wallet_info', function(data){
+            return;
             
-            var recountTotalBalance = function(){
-                $rootScope.total_balance = 0;
-                angular.forEach($rootScope.safes,function(safe){
-                    $rootScope.total_balance += safe.unlocked_balance;
-                });
-            };
 
             angular.forEach(data.wallets,function (wallet){
                 console.log('update_wallet_info');
@@ -413,20 +389,21 @@
                 safe.loaded = true;
                 safe.balance_formated = $filter('gulden')(safe.balance);
 
-                if(angular.isUndefined(safe.history)){
-                    backend.getRecentTransfers(wallet_id, function(data){
-                        if(angular.isDefined(data.unconfirmed)){
-                            data.history = data.unconfirmed.concat(data.history);
-                        }
-                        safe.history = data.history;
-                        //informer.info('tr count before wallet update '+$rootScope.tr_count);
-                        $rootScope.tr_count = $rootScope.tr_count + safe.history.length;
-                        //informer.info('tr count after wallet update '+$rootScope.tr_count);
-                    });
-                }
+                // if(angular.isUndefined(safe.history)){
+                //     backend.getRecentTransfers(wallet_id, function(data){
+                //         if(angular.isDefined(data.unconfirmed)){
+                //             data.history = data.unconfirmed.concat(data.history);
+                //         }
+                //         safe.history = data.history;
+                //         //informer.info('tr count before wallet update '+$rootScope.tr_count);
+                //         $rootScope.tr_count = $rootScope.tr_count + safe.history.length;
+                //         //informer.info('tr count after wallet update '+$rootScope.tr_count);
+                //     });
+                // }
             });
-            recountTotalBalance();
+            // recountTotalBalance();
         });
+
 
         backend.subscribe('update_wallet_status', function(data){
             var wallet_id = data.wallet_id;
@@ -435,22 +412,24 @@
             var wallet_state = data.wallet_state;
             var is_mining = data.is_mining;
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            // informer.info('UPDATE WALLET STATUS' + wallet_state);
             if(safe.length){
                 $timeout(function(){
                     safe = safe[0];
 
-                    safe.loaded = false;
+                    safe.loaded = true;
                     safe.error  = false;
                     safe.is_mining = is_mining;
 
 
                     if(wallet_state == 2){
-                        safe.loaded = true;
+                        safe.loaded = false;
                     }
 
                     if(wallet_state == 3){
                         safe.error = true;
-                    }    
+                    }   
+                    
                 });
                 
             }
@@ -466,6 +445,8 @@
             $scope.storeAppData();
             backend.quitRequest();
         });
+
+        
 
         backend.subscribe('money_transfer', function(data){
             console.log('money_transfer');
@@ -490,20 +471,20 @@
                 safe.balance = data.balance;
                 safe.unlocked_balance = data.unlocked_balance;
 
-                if(angular.isUndefined(safe.history)){
-                    console.log('no tr history');
-                    backend.getRecentTransfers(wallet_id, function(data){
-                        if(angular.isDefined(data.unconfirmed)){
-                            data.history = data.unconfirmed.concat(data.history);
-                        }
-                        safe.history = data.history;
-                        $rootScope.tr_count++;
-                        //informer.info('tr count after on money transfer (no history) ' + $rootScope.tr_count);
-                        safe.history.unshift(tr_info);
-                    });
-                }else{
+                // if(angular.isUndefined(safe.history)){
+                //     console.log('no tr history');
+                //     backend.getRecentTransfers(wallet_id, function(data){
+                //         if(angular.isDefined(data.unconfirmed)){
+                //             data.history = data.unconfirmed.concat(data.history);
+                //         }
+                //         safe.history = data.history;
+                //         $rootScope.tr_count++;
+                        
+                //         safe.history.unshift(tr_info);
+                //     });
+                // }else{
                     console.log('history exists');
-                    //transaction = $filter('filter')(safe.history,{tx_hash : tr_info.tx_hash}); // check if transaction has already in list
+
                     var tr_exists = false;
                     angular.forEach(safe.history,function(tr_item, key){
                         if(tr_item.tx_hash == tr_info.tx_hash){
@@ -522,16 +503,13 @@
                         safe.history.unshift(tr_info); // insert new
                     }
                     
-                }
+                // }
+                // backend.recountTotalBalance();
                 
             }else{
                 return;
             }
-            // angular.forEach(wallet_info, function(value,property){
-            //     if(angular.isDefined(safe[property])){
-            //         safe[property] = value;
-            //     }
-            // });
+            
         });
 
 
