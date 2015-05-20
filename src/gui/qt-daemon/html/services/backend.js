@@ -195,10 +195,22 @@
                 return this.runCommand('on_request_quit', {});
             },
 
-            recountTotalBalance : function(){
+            reloadCounters : function(){
                 $rootScope.total_balance = 0;
+                var txCount = 0;
                 angular.forEach($rootScope.safes,function(safe){
                     $rootScope.total_balance += safe.unlocked_balance;
+                    if(safe.history.length){
+                        txCount += safe.history.length;
+                    }
+                });
+
+                $rootScope.tx_count = txCount; 
+
+                this.get_all_offers(function(data){
+                    if(angular.isDefined(data.offers)){
+                        $rootScope.offers_count = data.offers.length;
+                    }
                 });
             },
 
@@ -358,24 +370,13 @@
             },
             // need to link some repeating function from backend to our system
             subscribe : function(command, callback) {
-                // var actualBackend = [
-                //     'update_daemon_state', 'update_wallet_info'];
-
-                // if (actualBackend.indexOf(command) >= 0) {
-                    // *Deep backend layer* fires the event
-
-                    if (this.shouldUseEmulator()) {
-                        emulator.subscribe(command,callback);
-                    } else {
-                        console.log(command);
-                        Qt[command].connect(this.callbackStrToObj.bind({callback: callback}));
-                    }
-                // } 
-                // else {
-                //     // *This service* fires the event
-                //     console.log('Subscribe:: command is not supported '+command);
-                //     this.backendEventSubscribers[command] = callback;
-                // }
+                if (this.shouldUseEmulator()) {
+                    emulator.subscribe(command,callback);
+                } else {
+                    console.log(command);
+                    Qt[command].connect(this.callbackStrToObj.bind({callback: callback}));
+                }
+                
             },
 
         }

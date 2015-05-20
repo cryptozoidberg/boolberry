@@ -145,18 +145,12 @@
 
         $rootScope.unconfirmed_aliases = []; 
 
-        $rootScope.tr_count = 0;
+        $rootScope.tx_count = 0;
 
         $rootScope.total_balance = 0;
 
         $rootScope.offers_count = 0;
 
-        backend.get_all_offers(function(data){
-            if(angular.isDefined(data.offers)){
-                $rootScope.offers_count = data.offers.length;
-            }
-        });
-        
         $rootScope.pass_required_intervals = [
             0,
             30000, //5 minutes
@@ -241,7 +235,7 @@
 
                                     $timeout(function(){
                                         $rootScope.safes.push(new_safe);   
-                                        backend.recountTotalBalance(); 
+                                        backend.reloadCounters(); 
                                     });
 
                                 });
@@ -255,8 +249,6 @@
                 }
             }
         };
-
-       
 
         init();
 
@@ -446,7 +438,10 @@
             backend.quitRequest();
         });
 
-        
+        backend.subscribe('wallet_sync_progress', function(data){
+            console.log('wallet_sync_progress');
+            console.log(data);
+        });
 
         backend.subscribe('money_transfer', function(data){
             console.log('money_transfer');

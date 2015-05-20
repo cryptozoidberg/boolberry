@@ -107,7 +107,8 @@
                                             <i class="gu gu-2x gu-pick"></i>
                                         </span>
                                     </li>
-                                    <li class="text-warning">
+                                    <li class="text-warning" ng-hide="safe.loaded">
+                                        <em>Загружается</em>
                                         <div easypiechart options="pieChartoptions" class="chart send-timer" percent="percent"></div>
                                     </li>
                                 </ul>
