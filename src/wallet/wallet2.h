@@ -28,7 +28,7 @@
 
 #define WALLET_DEFAULT_TX_SPENDABLE_AGE                               10
 #define WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL                         10
-
+#define WALLET_FILE_SERIALIZATION_VERSION                             20
 namespace tools
 {
 #pragma pack(push, 1)
@@ -179,7 +179,7 @@ namespace tools
     template <class t_archive>
     inline void serialize(t_archive &a, const unsigned int ver)
     {
-      if(ver < 9)
+      if (ver < WALLET_FILE_SERIALIZATION_VERSION)
         return;
       a & m_blockchain;
       a & m_transfers;
