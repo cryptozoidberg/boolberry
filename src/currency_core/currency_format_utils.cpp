@@ -704,7 +704,7 @@ namespace currency
     //find target account. for no we use just firs target account that is not sender, 
     //in case if there is no real targets we use sender credentials to encrypt attachments
     account_public_address crypt_destination_addr = AUTO_VAL_INIT(crypt_destination_addr);
-    auto& it = destinations.begin();
+    auto it = destinations.begin();
     for (; it != destinations.end(); ++it)
     {
       if (sender_account_keys.m_account_address != it->addr)
