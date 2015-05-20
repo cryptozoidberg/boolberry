@@ -194,11 +194,20 @@
                     });
                     console.log(data);
                     $modalInstance.close();
-                    // backend.getWalletInfo(wallet_id,function(data){
-                    //     data.name = $scope.safe.name;
-                    //     $rootScope.safes.unshift(data);
-                    //     $modalInstance.close();
-                    // });
+
+                    backend.openWallet(result.path,safe.password,function(data){
+                        backend.runWallet(data.wallet_id);
+                        var new_safe = data.wi;
+                        new_safe.wallet_id = data.wallet_id;
+                        new_safe.name = safe.name;
+                        new_safe.pass = safe.password;
+                        new_safe.history = [];
+                        
+                        $timeout(function(){
+                            $rootScope.safes.unshift(new_safe);    
+                        });
+
+                    });
                     
                 });    
             };

@@ -496,43 +496,36 @@
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             if(safe.length){ // safe transaction
                 safe = safe[0];
-                safe.balance = data.balance;
-                safe.unlocked_balance = data.unlocked_balance;
 
-                // if(angular.isUndefined(safe.history)){
-                //     console.log('no tr history');
-                //     backend.getRecentTransfers(wallet_id, function(data){
-                //         if(angular.isDefined(data.unconfirmed)){
-                //             data.history = data.unconfirmed.concat(data.history);
-                //         }
-                //         safe.history = data.history;
-                //         $rootScope.tr_count++;
-                        
-                //         safe.history.unshift(tr_info);
-                //     });
-                // }else{
-                    console.log('history exists');
+                $timeout(function(){
+                    safe.balance = data.balance;
+                    safe.unlocked_balance = data.unlocked_balance;
+                });
+                
 
-                    var tr_exists = false;
-                    angular.forEach(safe.history,function(tr_item, key){
-                        if(tr_item.tx_hash == tr_info.tx_hash){
-                            // tr_item = tr_info;
-                            safe.history[key] = tr_info;
-                            tr_exists = true;
+                var tr_exists = false;
 
-                        }
-                    });
-                    if(tr_exists){
-                        console.log(tr_info.tx_hash+' tr exists');
-                    }else{
-                        console.log(tr_info.tx_hash+' tr does not exist');
-                        $rootScope.tr_count++;
-                        //informer.info('tr count after on money transfer (history) ' + $rootScope.tr_count);
-                        safe.history.unshift(tr_info); // insert new
+                angular.forEach(safe.history,function(tr_item, key){
+                    if(tr_item.tx_hash == tr_info.tx_hash){
+                        // tr_item = tr_info;
+                        safe.history[key] = tr_info;
+                        tr_exists = true;
+
                     }
+                });
+
+                if(tr_exists){
+                    console.log(tr_info.tx_hash+' tr exists');
+                }else{
+                    console.log(tr_info.tx_hash+' tr does not exist');
+
+                    $timeout(function(){
+                        $rootScope.tr_count++;
+                        safe.history.unshift(tr_info); // insert new
+                    });
                     
-                // }
-                // backend.recountTotalBalance();
+                }
+                    
                 
             }else{
                 return;
