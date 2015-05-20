@@ -20,7 +20,7 @@
 #include "sph_simd.h"
 #include "sph_echo.h"
 
-void x11_hash(const char* input, size_t len, char* output)
+void x11_hash(const char* input, unsigned long len, char* output)
 {
     sph_blake512_context     ctx_blake;
     sph_bmw512_context       ctx_bmw;
