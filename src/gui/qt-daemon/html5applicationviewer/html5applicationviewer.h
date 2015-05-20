@@ -84,6 +84,7 @@ protected:
   QString start_pos_mining(const QString& param);
   QString stop_pos_mining(const QString& param);
   QString set_log_level(const QString& param);
+  QString webkit_launched_script();
 
 
 

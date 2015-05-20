@@ -284,7 +284,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   {
     LOG_PRINT_L0("Storing wallet data...");
     //dsi.text_state = "Storing wallets data...";
-    m_pview->update_daemon_status(dsi);
+    //m_pview->update_daemon_status(dsi);
     wo.second.w->get()->store();
   }
   CRITICAL_REGION_END();
@@ -293,7 +293,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   //dsi.text_state = "Stopping p2p network server";
   m_pview->update_daemon_status(dsi);
   m_p2psrv.send_stop_signal();
-  m_p2psrv.timed_wait_server_stop(10);
+  m_p2psrv.timed_wait_server_stop(1000);
 
   //stop components
   LOG_PRINT_L0("Stopping core rpc server...");
@@ -869,71 +869,78 @@ void daemon_backend::on_sync_progress(size_t wallet_id, const uint64_t& percents
 void daemon_backend::wallet_vs_options::worker_func()
 {
   LOG_PRINT_GREEN("[POS_MINER] Wallet miner thread started", LOG_LEVEL_0);
-  time_t last_mining_timestamp = 0;
+  epee::math_helper::once_a_time_seconds<1000> scan_pool_interval;
+  epee::math_helper::once_a_time_seconds<POS_WALLET_MINING_SCAN_INTERVAL*1000> pos_minin_interval;
+  view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
+
   while (!stop)
   {
-    //******************************************************************************************
-    //sync zone
-    if (*plast_daemon_height != last_wallet_synch_height)
+    try
     {
-      view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
-      wsi.is_mining = do_mining;
-      wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
-      wsi.wallet_id = wallet_id;
-      pview->update_wallet_status(wsi);
-      try
+      //******************************************************************************************
+      //sync zone
+      if (*plast_daemon_height != last_wallet_synch_height)
       {
+        wsi.is_mining = do_mining;
+        wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
+        wsi.wallet_id = wallet_id;
+        pview->update_wallet_status(wsi);
         w->get()->refresh(stop);
+
+        wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
+        pview->update_wallet_status(wsi);
+        //do refresh
+        last_wallet_synch_height = static_cast<uint64_t>(*plast_daemon_height);
+      }
+
+      scan_pool_interval.do_call([this](){
         w->get()->scan_tx_pool();
-      }
-      catch (const tools::error::daemon_busy& /*e*/)
-      {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-        continue;
-      }
+        return true;
+      });
 
-      catch (const std::exception& e)
-      {
-        LOG_PRINT_L0("Failed to refresh wallet: " << e.what());
-        wsi.wallet_state = view::wallet_status_info::wallet_state_error;
-        pview->update_wallet_status(wsi);
-        return;
-      }
+      if (stop)
+        break;
+      //******************************************************************************************
+      //mining zone
+      pos_minin_interval.do_call([this](){
+        tools::wallet2::mining_context ctx = AUTO_VAL_INIT(ctx);
+        LOG_PRINT_L0("Starting PoS mint iteration");
+        w->get()->fill_mining_context(ctx);
+        LOG_PRINT_L0("POS_ENTRIES: " << ctx.sp.pos_entries.size());
+        tools::wallet2::scan_pos(ctx, break_mining_loop, [this](){          
+          return *plast_daemon_height == last_wallet_synch_height;
+        });
 
-      catch (...)
-      {
-        LOG_PRINT_L0("Failed to refresh wallet, unknownk exception");
-        wsi.wallet_state = view::wallet_status_info::wallet_state_error;
-        pview->update_wallet_status(wsi);
-        return;
-      }
-      wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
-      pview->update_wallet_status(wsi);
-      //do refresh
-      last_wallet_synch_height = static_cast<uint64_t>(*plast_daemon_height);
+        if (ctx.rsp.status == CORE_RPC_STATUS_OK)
+        {
+          w->get()->build_minted_block(ctx.sp, ctx.rsp);
+        }
+        LOG_PRINT_L0("PoS mint iteration finished(" << ctx.rsp.status << ")");
+        return true;
+      });
     }
-    if (stop)
-      break;
-    //******************************************************************************************
-    //mining zone
-    if (!do_mining || time(nullptr) - last_mining_timestamp < POS_WALLET_MINING_SCAN_INTERVAL)
+    catch (const tools::error::daemon_busy& /*e*/)
     {
       boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
       continue;
     }
-    tools::wallet2::mining_context ctx = AUTO_VAL_INIT(ctx);
-    LOG_PRINT_L0("Starting PoS mint iteration");
-    w->get()->fill_mining_context(ctx);
-    LOG_PRINT_L0("POS_ENTRIES: " << ctx.sp.pos_entries.size());
-    tools::wallet2::scan_pos(ctx, break_mining_loop, [](){return true;});
-    
-    if (ctx.rsp.status == CORE_RPC_STATUS_OK)
-    {
-      w->get()->build_minted_block(ctx.sp, ctx.rsp);
-    }
-    LOG_PRINT_L0("PoS mint iteration finished(" << ctx.rsp.status << ")");
-    last_mining_timestamp = time(nullptr);
 
+    catch (const std::exception& e)
+    {
+      LOG_PRINT_L0("Failed to refresh wallet: " << e.what());
+      wsi.wallet_state = view::wallet_status_info::wallet_state_error;
+      pview->update_wallet_status(wsi);
+      return;
+    }
+
+    catch (...)
+    {
+      LOG_PRINT_L0("Failed to refresh wallet, unknownk exception");
+      wsi.wallet_state = view::wallet_status_info::wallet_state_error;
+      pview->update_wallet_status(wsi);
+      return;
+    }
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
   }
   LOG_PRINT_GREEN("[POS_MINER] Wallet miner thread stopped", LOG_LEVEL_0);
 }

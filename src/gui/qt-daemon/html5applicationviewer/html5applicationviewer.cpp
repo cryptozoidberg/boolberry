@@ -741,6 +741,11 @@ QString Html5ApplicationViewer::set_log_level(const QString& param)
   ar.error_code = API_RETURN_CODE_OK;
   return epee::serialization::store_t_to_json(ar).c_str();
 }
+QString Html5ApplicationViewer::webkit_launched_script()
+{
+  m_last_update_daemon_status_json.clear();
+  return "";
+}
 QString Html5ApplicationViewer::show_openfile_dialog(const QString& param)
 {
   view::system_filedialog_request ofdr = AUTO_VAL_INIT(ofdr);
