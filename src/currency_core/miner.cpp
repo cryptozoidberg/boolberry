@@ -323,7 +323,6 @@ namespace currency
     LOG_PRINT_L0("Miner thread was started ["<< th_local_index << "]");
     log_space::log_singletone::set_thread_log_prefix(std::string("[miner ") + std::to_string(th_local_index) + "]");
     uint64_t nonce = m_starter_nonce + th_local_index;
-    uint64_t height = 0;
     wide_difficulty_type local_diff = 0;
     uint32_t local_template_ver = 0;
     block b;
