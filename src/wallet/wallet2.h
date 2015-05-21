@@ -596,7 +596,7 @@ namespace tools
     std::atomic<bool>& stop,
     idle_condition_cb_t idle_condition_cb)
   {
-   cxt.rsp.status == CORE_RPC_STATUS_NOT_FOUND;
+    cxt.rsp.status = CORE_RPC_STATUS_NOT_FOUND;
     uint64_t timstamp_start = time(nullptr);
     uint64_t timstamp_last_idle_call = time(nullptr);
 
