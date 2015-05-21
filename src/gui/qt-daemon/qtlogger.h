@@ -112,9 +112,6 @@ public:
     {
       if (buf[i] == 7 || buf[i] == -107)
         buf[i] = '^';
-      //remove \n
-      //if (i == buf.size()-1)
-      //  buf[i] = ' ';
     }
 
     QT_CONSOLE_STREAM(buf.c_str());
