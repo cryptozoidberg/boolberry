@@ -17,7 +17,7 @@ fi
 
 
 
-make qt-lui
+make -j qt-lui
 if [ $? -ne 0 ]; then
     echo "Failed to make qt-lui"
     exit $?
