@@ -410,6 +410,8 @@ void wallet2::scan_tx_pool()
   currency::COMMAND_RPC_GET_TX_POOL::request req = AUTO_VAL_INIT(req);
   currency::COMMAND_RPC_GET_TX_POOL::response res = AUTO_VAL_INIT(res);
   bool r = m_core_proxy->call_COMMAND_RPC_GET_TX_POOL(req, res);
+  if (res.status == CORE_RPC_STATUS_BUSY)
+    throw error::daemon_busy("", "get_tx_pool");
   CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "get_tx_pool");
   CHECK_AND_THROW_WALLET_EX(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_tx_pool");
   CHECK_AND_THROW_WALLET_EX(res.status != CORE_RPC_STATUS_OK, error::get_blocks_error, res.status);
@@ -902,6 +904,7 @@ bool wallet2::fill_mining_context(mining_context& ctx)
     return false;
   ctx.basic_diff.assign(pos_details_resp.pos_basic_difficulty);
   ctx.height = pos_details_resp.height;
+  ctx.rsp.status = CORE_RPC_STATUS_OK;
   return true;
 }
 //------------------------------------------------------------------

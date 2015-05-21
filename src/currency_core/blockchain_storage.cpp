@@ -2555,7 +2555,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   stringstream powpos_str_entry;
   if (is_pos_bl)
   {//write pos data:
-    powpos_str_entry << "coin_age: " << coin_age << ", final_difficluty: " << this_coin_diff
+    powpos_str_entry << "coin_age: " << coin_age << ", final_difficluty: " << this_coin_diff << "(basic_diff: " << current_diffic << ")"
       << ENDL << "PoS kernel hash:" << proof_hash;
   }
   else

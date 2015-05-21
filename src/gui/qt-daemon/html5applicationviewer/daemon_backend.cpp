@@ -869,8 +869,8 @@ void daemon_backend::on_sync_progress(size_t wallet_id, const uint64_t& percents
 void daemon_backend::wallet_vs_options::worker_func()
 {
   LOG_PRINT_GREEN("[POS_MINER] Wallet miner thread started", LOG_LEVEL_0);
-  epee::math_helper::once_a_time_seconds<1000> scan_pool_interval;
-  epee::math_helper::once_a_time_seconds<POS_WALLET_MINING_SCAN_INTERVAL*1000> pos_minin_interval;
+  epee::math_helper::once_a_time_seconds<1> scan_pool_interval;
+  epee::math_helper::once_a_time_seconds<POS_WALLET_MINING_SCAN_INTERVAL> pos_minin_interval;
   view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
 
   while (!stop)
@@ -902,22 +902,26 @@ void daemon_backend::wallet_vs_options::worker_func()
         break;
       //******************************************************************************************
       //mining zone
-      pos_minin_interval.do_call([this](){
-        tools::wallet2::mining_context ctx = AUTO_VAL_INIT(ctx);
-        LOG_PRINT_L0("Starting PoS mint iteration");
-        w->get()->fill_mining_context(ctx);
-        LOG_PRINT_L0("POS_ENTRIES: " << ctx.sp.pos_entries.size());
-        tools::wallet2::scan_pos(ctx, break_mining_loop, [this](){          
-          return *plast_daemon_height == last_wallet_synch_height;
-        });
+      if (do_mining)
+      {
+        pos_minin_interval.do_call([this](){
+          tools::wallet2::mining_context ctx = AUTO_VAL_INIT(ctx);
+          LOG_PRINT_L0("Starting PoS mint iteration");
+          if (!w->get()->fill_mining_context(ctx) || ctx.rsp.status != CORE_RPC_STATUS_OK)
+            return true;
+          LOG_PRINT_L0("POS_ENTRIES: " << ctx.sp.pos_entries.size());
+          tools::wallet2::scan_pos(ctx, break_mining_loop, [this](){
+            return *plast_daemon_height == last_wallet_synch_height;
+          });
 
-        if (ctx.rsp.status == CORE_RPC_STATUS_OK)
-        {
-          w->get()->build_minted_block(ctx.sp, ctx.rsp);
-        }
-        LOG_PRINT_L0("PoS mint iteration finished(" << ctx.rsp.status << ")");
-        return true;
-      });
+          if (ctx.rsp.status == CORE_RPC_STATUS_OK)
+          {
+            w->get()->build_minted_block(ctx.sp, ctx.rsp);
+          }
+          LOG_PRINT_L0("PoS mint iteration finished(" << ctx.rsp.status << ")");
+          return true;
+        });
+      }
     }
     catch (const tools::error::daemon_busy& /*e*/)
     {

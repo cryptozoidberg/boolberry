@@ -179,7 +179,7 @@ namespace tools
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, const std::vector<currency::attachment_v> attachments, currency::transaction& tx);
     bool check_connection();
     template<typename idle_condition_cb_t> //do refresh as external callback
-    static bool scan_pos(mining_context& cxt, std::atomic<bool>& keep_mining, idle_condition_cb_t idle_condition_cb);
+    static bool scan_pos(mining_context& cxt, std::atomic<bool>& stop, idle_condition_cb_t idle_condition_cb);
     bool fill_mining_context(mining_context& ctx);
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
     void get_payments(const crypto::hash& payment_id, std::list<payment_details>& payments) const;
@@ -290,7 +290,7 @@ namespace tools
 }
 
 
-BOOST_CLASS_VERSION(tools::wallet2, 10)
+BOOST_CLASS_VERSION(tools::wallet2, WALLET_FILE_SERIALIZATION_VERSION)
 BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 4)
 
 
@@ -595,9 +595,10 @@ namespace tools
   //--------------------------------------------------------------------------------
   template<typename idle_condition_cb_t> //do refresh as external callback
   bool wallet2::scan_pos(mining_context& cxt,
-    std::atomic<bool>& keep_mining,
+    std::atomic<bool>& stop,
     idle_condition_cb_t idle_condition_cb)
   {
+   cxt.rsp.status == CORE_RPC_STATUS_NOT_FOUND;
     uint64_t timstamp_start = time(nullptr);
     uint64_t timstamp_last_idle_call = time(nullptr);
 
@@ -623,7 +624,7 @@ namespace tools
 
         uint64_t ts = go_past ? adjusted_starter_timestamp - step : adjusted_starter_timestamp + step;
         PROFILE_FUNC("general_mining_iteration");
-        if (!keep_mining)
+        if (stop)
           return false;
         currency::stake_kernel sk = AUTO_VAL_INIT(sk);
         uint64_t coindays_weight = 0;
