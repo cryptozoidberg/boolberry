@@ -35,7 +35,7 @@ namespace tools
       bool received_money = false;
       bool ok;
       std::atomic<bool> stop = false;
-      m_wallet.refresh(blocks_fetched, received_money, ok);
+      m_wallet.refresh(blocks_fetched, received_money, ok, stop);
       m_wallet.try_mint_pos();
       return true;
     }, 20000);
