@@ -898,7 +898,7 @@ bool wallet2::fill_mining_context(mining_context& ctx)
     return false;
   ctx.basic_diff.assign(pos_details_resp.pos_basic_difficulty);
   ctx.sm = pos_details_resp.sm;
-  ctx.height = pos_details_resp.height;
+  ctx.rsp.height = pos_details_resp.height;
   ctx.rsp.status = CORE_RPC_STATUS_OK;
   return true;
 }
@@ -910,7 +910,7 @@ bool wallet2::try_mint_pos()
   fill_mining_context(ctx);
   LOG_PRINT_L0("POS_ENTRIES: " << ctx.sp.pos_entries.size());
 
-  std::atomic<bool> stop(true);
+  std::atomic<bool> stop(false);
   scan_pos(ctx, stop, [this](){
     size_t blocks_fetched;
     refresh(blocks_fetched);

@@ -120,7 +120,6 @@ namespace tools
       currency::COMMAND_RPC_SCAN_POS::response rsp;
       currency::wide_difficulty_type basic_diff;
       currency::stake_modifier_type sm;
-      uint64_t height;
     };
 
 
@@ -668,7 +667,6 @@ namespace tools
             LOG_LEVEL_0);
           cxt.rsp.index = i;
           cxt.rsp.block_timestamp = ts;
-          cxt.rsp.height = cxt.height;
           cxt.rsp.status = CORE_RPC_STATUS_OK;
           return true;
         }
