@@ -95,9 +95,9 @@ private:
   void init_wallet_entry(wallet_vs_options& wo, uint64_t id);
 
   //----- i_backend_wallet_callback ------
-  virtual void on_new_block(uint64_t height, const currency::block& block);
+  virtual void on_new_block(size_t wallet_id, uint64_t height, const currency::block& block);
   virtual void on_transfer2(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti);
-  virtual void on_pos_block_found(const currency::block& /*block*/);
+  virtual void on_pos_block_found(size_t wallet_id, const currency::block& /*block*/);
   virtual void on_sync_progress(size_t wallet_id, const uint64_t& /*percents*/);
 
 
