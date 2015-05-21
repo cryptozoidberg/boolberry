@@ -63,7 +63,7 @@ namespace crypto {
   {
     crypto::chacha8_key key;
     crypto::chacha8_iv iv;
-
+    memset(&iv, 0, sizeof(iv));
     crypto::generate_chacha8_key(key_buff, key_buff_size, key);
     crypto::chacha8(src_buff, sz, key, iv, (char*)target_buff);
     return true;

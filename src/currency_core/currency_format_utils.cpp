@@ -646,6 +646,7 @@ namespace currency
     bool r = crypto::generate_key_derivation(tx_pub_key, acc_keys.m_view_secret_key, derivation);
     bool was_crypted_entries = false;
     bool check_summ_validated = false;
+    LOG_PRINT_GREEN("DECRYPTING ON KEY: " << epee::string_tools::pod_to_hex(derivation), LOG_LEVEL_0);
 
     decrypt_attach_visitor v(check_summ_validated, was_crypted_entries, derivation, decrypted_att);
     for (auto& a : tx.attachment)
@@ -665,6 +666,8 @@ namespace currency
     crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
     bool r = crypto::generate_key_derivation(destination_add.m_view_public_key, tx_random_key.sec, derivation);
     bool was_crypted_entries = false;
+    LOG_PRINT_GREEN("ENCRYPTING ON KEY: " << epee::string_tools::pod_to_hex(derivation), LOG_LEVEL_0);
+
 
     encrypt_attach_visitor v(was_crypted_entries, derivation);
     for (auto& a : tx.attachment)

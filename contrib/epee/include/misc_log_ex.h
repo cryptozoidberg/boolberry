@@ -175,7 +175,7 @@ namespace log_space
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
-#define CONSOLE_DEFAULT_STREAM  std::cerr
+#define CONSOLE_DEFAULT_STREAM  std::cout
 
 
   struct delete_ptr

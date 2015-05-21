@@ -243,8 +243,7 @@ namespace tools
     void handle_money_received2(const currency::block& b,
                                 const currency::transaction& tx, 
                                 uint64_t amount, 
-                                const money_transfer2_details& td, 
-                                const std::vector<currency::attachment_v>& decrypted_att);
+                                const money_transfer2_details& td);
     void handle_money_spent2(const currency::block& b,  
                              const currency::transaction& in_tx, 
                              uint64_t amount, 

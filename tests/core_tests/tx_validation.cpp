@@ -856,6 +856,31 @@ bool gen_crypted_attachments::set_crypted_tx_height(currency::core& c, size_t ev
 
 bool gen_crypted_attachments::check_crypted_tx(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
+
+  //// check cha cha
+  std::string test_key = "ssssss";
+  std::vector<std::string> test_array;
+  test_array.push_back("qweqweqwqw");
+  test_array.push_back("4g45");
+  test_array.push_back("qweqwe56575qwqw");
+  test_array.push_back("q3f34f4");
+  std::vector<std::string> test_array2 = test_array;
+
+  for (auto& v : test_array2)
+    chacha_crypt(v, test_key);
+
+  for (auto& v : test_array2)
+    chacha_crypt(v, test_key);
+
+  if (test_array2 != test_array)
+  {
+    LOG_ERROR("cha cha broken");
+    return false;
+  }
+
+  //
+
+
   const currency::transaction& tx = boost::get<currency::transaction>(events[crypted_tx_height]);
   const currency::account_base& bob_acc = boost::get<currency::account_base>(events[1]);
 
@@ -869,13 +894,28 @@ bool gen_crypted_attachments::check_crypted_tx(currency::core& c, size_t ev_inde
   CHECK_EQ(r, true);
 
   if (pr.acc_addr != boost::get<currency::tx_payer>(at[0]).acc_addr)
+  {
+    LOG_ERROR("decrypted wrong data: " 
+      << epee::string_tools::pod_to_hex(boost::get<currency::tx_payer>(at[0]).acc_addr) 
+      << "expected:" << epee::string_tools::pod_to_hex(pr.acc_addr));
     return false;
+  }
 
   if (cm.comment != boost::get<currency::tx_comment>(at[1]).comment)
+  {
+    LOG_ERROR("decrypted wrong data: "
+      << boost::get<currency::tx_comment>(at[1]).comment
+      << "expected:" << cm.comment);
     return false;
+  }
 
   if (ms.msg != boost::get<currency::tx_message>(at[2]).msg)
+  {
+    LOG_ERROR("decrypted wrong data: "
+      << boost::get<currency::tx_message>(at[2]).msg
+      << "expected:" << ms.msg);
     return false;
+  }
 
   return true;
 }

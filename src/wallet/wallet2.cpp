@@ -69,11 +69,8 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
   CHECK_AND_THROW_WALLET_EX(!r, error::acc_outs_lookup_error, tx, tx_pub_key, m_account.get_keys());
 
   money_transfer2_details mtd;
-  std::vector<currency::attachment_v> decrypted_att;
   if(!outs.empty() && tx_money_got_in_outs)
   {
-    //decrypt attachments
-    currency::decrypt_attachments(tx, m_account.get_keys(), decrypted_att);
 
     //good news - got money! take care about it
     //usually we have only one transfer for user in transaction
@@ -206,8 +203,12 @@ void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height
   wti.is_service = currency::is_service_tx(tx);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td, const std::vector<currency::attachment_v>& decrypted_att)
+void wallet2::handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td)
 {
+  //decrypt attachments
+  std::vector<currency::attachment_v> decrypted_att;
+  currency::decrypt_attachments(tx, m_account.get_keys(), decrypted_att);
+
   m_transfer_history.push_back(wallet_rpc::wallet_transfer_info());
   wallet_rpc::wallet_transfer_info& wti = m_transfer_history.back();
   wti.is_income = true;
