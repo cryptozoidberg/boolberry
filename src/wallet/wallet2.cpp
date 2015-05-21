@@ -903,6 +903,7 @@ bool wallet2::fill_mining_context(mining_context& ctx)
   if (pos_details_resp.status != CORE_RPC_STATUS_OK)
     return false;
   ctx.basic_diff.assign(pos_details_resp.pos_basic_difficulty);
+  ctx.sm = pos_details_resp.sm;
   ctx.height = pos_details_resp.height;
   ctx.rsp.status = CORE_RPC_STATUS_OK;
   return true;
