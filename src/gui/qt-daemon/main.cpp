@@ -12,7 +12,10 @@
 int main(int argc, char *argv[])
 {
     string_tools::set_module_name_and_folder(argv[0]);
+
+#ifndef _MSC_VER
     epee::log_space::log_singletone::add_logger(new qt_console_stream());
+#endif
     QApplication app(argc, argv);
 
     Html5ApplicationViewer viewer;
