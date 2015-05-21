@@ -269,6 +269,18 @@
                                 <em>Автоматически запускать приложение при включении компьютера</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
                             </li>
 
+                            <li class="list-group-item">
+                                <div class="btn-group pull-right foursteps">
+                                    <div class="fslider">
+                                        <!-- <slider ng-model="settings.security.password_required_interval" min="0" step="1" max="4"></slider> -->
+                                        <div class="lui-slider" ui-slider  ng-change="changelogLevel(logLevel)" min="0" max="4" step="1" ng-model="logLevel"></div>
+                                    </div>
+                                    <div class="scale"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+                                </div>
+                                Уровень логирования
+                                &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
+                            </li>
+
                             <!-- <li class="list-group-item">
                                 <div class="btn-group pull-right" data-toggle="buttons">
                                     <label class="btn btn-default active"><input type="radio" name="options1_1_2" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>

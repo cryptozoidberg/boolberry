@@ -198,7 +198,8 @@
                 app_autosave_interval : 0,
                 app_donation : false,
                 donation_amount : 0,
-                default_user_path: '/'
+                default_user_path: '/',
+                log_level : 0
             }
         };
 

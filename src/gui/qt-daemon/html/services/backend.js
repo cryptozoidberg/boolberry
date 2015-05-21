@@ -40,6 +40,13 @@
                 return this.runCommand('show_savefile_dialog',params);
             },
 
+            setLogLevel : function(level){
+                var params = {
+                    v: level
+                };
+                this.runCommand('set_log_level',params);
+            },
+
             get_all_offers : function(callback) {
                 var params = {};
                 return this.runCommand('get_all_offers', params, callback);
@@ -213,7 +220,7 @@
 
                     $rootScope.tx_count = txCount; 
 
-                    this.get_all_offers(function(data){
+                    returnObject.get_all_offers(function(data){
                         if(angular.isDefined(data.offers)){
                             $rootScope.offers_count = data.offers.length;
                         }

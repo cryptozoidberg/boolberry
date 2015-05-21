@@ -38,6 +38,13 @@
                 //console.log($rootScope.settings.security.password_required_interval);
             };
 
+            $scope.logLevel = $rootScope.settings.system.log_level;
+
+            $scope.changelogLevel = function(level){
+                backend.setLogLevel(level);
+                $rootScope.settings.system.log_level = level;
+            };
+
         }
     ]);
 
