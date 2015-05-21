@@ -6,20 +6,20 @@
 #include "html5applicationviewer/html5applicationviewer.h"
 #include "qdebug.h"
 #include <thread>
-
+#include "qtlogger.h"
 
 
 int main(int argc, char *argv[])
 {
     string_tools::set_module_name_and_folder(argv[0]);
-
+    epee::log_space::log_singletone::add_logger(new qt_console_stream());
     QApplication app(argc, argv);
 
     Html5ApplicationViewer viewer;
     viewer.setOrientation(Html5ApplicationViewer::ScreenOrientationAuto);
     viewer.showExpanded();
     viewer.setWindowTitle("Luidor");
-    qDebug() << "My text\r\n";
+   
     if(!viewer.start_backend(argc, argv))
       return false;
     viewer.init_config();
