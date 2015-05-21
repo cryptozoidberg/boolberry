@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <mutex>
 #include <vector>
+#include <string>
 
 #include "common/pod-class.h"
 #include "generic-ops.h"
