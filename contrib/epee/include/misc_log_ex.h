@@ -421,7 +421,7 @@ namespace log_space
 
       //uint32_t b = 0;
       //::WriteConsoleA(::GetStdHandle(STD_OUTPUT_HANDLE), ptarget_buf, buffer_len, (DWORD*)&b, 0);
-      std::cout << ptarget_buf;
+      std::cerr << ptarget_buf;
       if(pallocated_buf) delete [] pallocated_buf;
 #else
       std::string buf(buffer, buffer_len);
