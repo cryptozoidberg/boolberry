@@ -175,14 +175,7 @@ namespace log_space
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
-
-
-#define CONSOLE_DEFAULT_STREAM_  std::cerr
-
-
-
-
-
+#define CONSOLE_DEFAULT_STREAM  std::cerr
 
 
   struct delete_ptr
@@ -235,11 +228,6 @@ namespace log_space
     return is_a_tty.load(std::memory_order_relaxed);
   }
 
-  inline void write_console(const char* msg)
-  {
-    fputs(msg, stderr);
-  }
-
   inline void set_console_color(int color, bool bright)
   {
     if (!is_stdout_a_tty())
@@ -254,9 +242,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE| (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          write_console("\033[1;37m");
+          CONSOLE_DEFAULT_STREAM << "\033[1;37m";
         else
-          write_console("\033[0m");
+          CONSOLE_DEFAULT_STREAM << "\033[0m";
 #endif
       }
       break;
@@ -267,9 +255,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          write_console("\033[1;37m");
+          CONSOLE_DEFAULT_STREAM << "\033[1;37m";
         else
-          write_console("\033[0;37m");
+          CONSOLE_DEFAULT_STREAM << "\033[0;37m";
 #endif
       }
       break;
@@ -280,9 +268,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_RED | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          write_console("\033[1;31m");
+          CONSOLE_DEFAULT_STREAM << "\033[1;31m";
         else
-          write_console("\033[0;31m");
+          CONSOLE_DEFAULT_STREAM << "\033[0;31m";
 #endif
       }
       break;
@@ -293,9 +281,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_GREEN | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          write_console("\033[1;32m");
+          CONSOLE_DEFAULT_STREAM << "\033[1;32m";
         else
-          write_console("\033[0;32m");
+          CONSOLE_DEFAULT_STREAM << "\033[0;32m";
 #endif
       }
       break;
@@ -307,9 +295,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_BLUE | FOREGROUND_INTENSITY);//(bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          write_console("\033[1;34m");
+          CONSOLE_DEFAULT_STREAM << "\033[1;34m";
         else
-          write_console("\033[0;34m");
+          CONSOLE_DEFAULT_STREAM << "\033[0;34m";
 #endif
       }
       break;
@@ -321,9 +309,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_GREEN | FOREGROUND_BLUE | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          write_console("\033[1;36m");
+          CONSOLE_DEFAULT_STREAM << "\033[1;36m";
         else
-          write_console("\033[0;36m");
+          CONSOLE_DEFAULT_STREAM << "\033[0;36m";
 #endif
       }
       break;
@@ -335,9 +323,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_BLUE | FOREGROUND_RED | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          write_console("\033[1;35m");
+          CONSOLE_DEFAULT_STREAM << "\033[1;35m";
         else
-          write_console("\033[0;35m");
+          CONSOLE_DEFAULT_STREAM << "\033[0;35m";
 #endif
       }
       break;
@@ -349,9 +337,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_RED | FOREGROUND_GREEN | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          write_console("\033[1;33m");
+          CONSOLE_DEFAULT_STREAM << "\033[1;33m";
         else
-          write_console("\033[0;33m");
+          CONSOLE_DEFAULT_STREAM << "\033[0;33m";
 #endif
       }
       break;
@@ -367,7 +355,8 @@ namespace log_space
     HANDLE h_stdout = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(h_stdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 #else
-    write_console("\033[0m");
+    CONSOLE_DEFAULT_STREAM << "\033[0m";
+    CONSOLE_DEFAULT_STREAM.flush();
 #endif
   }
 
@@ -435,7 +424,7 @@ namespace log_space
 
       //uint32_t b = 0;
       //::WriteConsoleA(::GetStdHandle(STD_OUTPUT_HANDLE), ptarget_buf, buffer_len, (DWORD*)&b, 0);
-      write_console(ptarget_buf);
+      CONSOLE_DEFAULT_STREAM << ptarget_buf;
       if(pallocated_buf) delete [] pallocated_buf;
 #else
       std::string buf(buffer, buffer_len);
@@ -444,8 +433,8 @@ namespace log_space
         if(buf[i] == 7 || buf[i] == -107)
           buf[i] = '^';
       }
-      write_console(buf.c_str());
-      fflush(stderr);
+
+      CONSOLE_DEFAULT_STREAM << buf;
 #endif
       reset_console_color();
       return  true;
@@ -560,7 +549,7 @@ namespace log_space
         uint64_t current_sz = pt;
         if(current_sz > m_max_logfile_size)
         {
-          CONSOLE_DEFAULT_STREAM_ << "current_sz= " << current_sz << " m_max_logfile_size= " << m_max_logfile_size << std::endl;
+          CONSOLE_DEFAULT_STREAM << "current_sz= " << current_sz << " m_max_logfile_size= " << m_max_logfile_size << std::endl;
           std::string log_file_name;
           if(!plog_name)
             log_file_name = m_default_log_filename;
@@ -590,7 +579,7 @@ namespace log_space
           boost::filesystem::rename(m_default_log_path + "/" + log_file_name, new_log_file_path, ec);
           if(ec)
           {
-            CONSOLE_DEFAULT_STREAM_ << "Filed to rename, ec = " << ec.message() << std::endl;
+            CONSOLE_DEFAULT_STREAM << "Filed to rename, ec = " << ec.message() << std::endl;
           }
 
           if(m_log_rotate_cmd.size())
