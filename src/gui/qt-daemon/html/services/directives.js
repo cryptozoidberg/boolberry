@@ -131,6 +131,31 @@
         }
   });
 
+  // module.directive('selectText', ['$window',function ($window){
+  //   return {
+  //     restrict: 'A',
+  //     link: function(scope, element, attr, controller) {
+  //       var selectElement;
+
+  //       if ($window.document.selection) {
+  //         selectElement = function(element) {
+  //           var range = $window.document.body.createTextRange();
+  //           range.moveToElementText(element[0]);
+  //           range.select();
+  //         };
+  //       } else if ($window.getSelection) {
+  //         selectElement = function(element) {
+  //           var range = $window.document.createRange();
+  //           range.selectNode(element[0]);
+  //           $window.getSelection().addRange(range);
+  //         };
+  //       }
+
+  //       selectElement(element);
+  //     }
+  //   }
+  // }]);
+
   // module.directive('currencyParser', function (){
   //   return {
   //       restrict: 'A',

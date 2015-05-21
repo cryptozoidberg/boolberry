@@ -274,6 +274,7 @@
                         $rootScope.safes.splice(i,1);
                     }
                 }
+                backend.reloadCounters();
                 var path = $location.path();
                 
                 if(path.indexOf('/safe/') > -1){
@@ -490,7 +491,6 @@
             if(alias.length){ // alias transaction
                 alias = alias[0];
                 informer.info('Алиас "'+alias.name+'" зарегистрирован');
-                return;
             }
 
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
@@ -508,8 +508,11 @@
                 angular.forEach(safe.history,function(tr_item, key){
                     if(tr_item.tx_hash == tr_info.tx_hash){
                         // tr_item = tr_info;
-                        safe.history[key] = tr_info;
-                        tr_exists = true;
+                        $timeout(function(){
+                            safe.history[key] = tr_info;
+                            tr_exists = true;
+                        });
+                        
 
                     }
                 });
@@ -525,11 +528,13 @@
                     });
                     
                 }
+                backend.reloadCounters();
                     
                 
             }else{
                 return;
             }
+
             
         });
 

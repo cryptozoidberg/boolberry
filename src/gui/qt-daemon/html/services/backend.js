@@ -200,22 +200,26 @@
             },
 
             reloadCounters : function(){
-                $rootScope.total_balance = 0;
-                var txCount = 0;
-                angular.forEach($rootScope.safes,function(safe){
-                    $rootScope.total_balance += safe.unlocked_balance;
-                    if(safe.history.length){
-                        txCount += safe.history.length;
-                    }
-                });
+                $timeout(function(){
+                    $rootScope.total_balance = 0;
+                    var txCount = 0;
+                    angular.forEach($rootScope.safes,function(safe){
+                        $rootScope.total_balance += safe.unlocked_balance;
+                        safe.balance_formated = $filter('gulden')(safe.balance);
+                        if(safe.history.length){
+                            txCount += safe.history.length;
+                        }
+                    });
 
-                $rootScope.tx_count = txCount; 
+                    $rootScope.tx_count = txCount; 
 
-                this.get_all_offers(function(data){
-                    if(angular.isDefined(data.offers)){
-                        $rootScope.offers_count = data.offers.length;
-                    }
+                    this.get_all_offers(function(data){
+                        if(angular.isDefined(data.offers)){
+                            $rootScope.offers_count = data.offers.length;
+                        }
+                    });
                 });
+                
             },
 
             openWallet : function(file, pass, callback) {
@@ -402,6 +406,7 @@
         var wallet_id = 0;
 
         this.getWalletId = function(){
+            wallet_id 
             return wallet_id.toString();
         };
 
@@ -543,7 +548,6 @@
                         },
                     }
                     wallet_id++;
-                    informer.info(wallet_id);
                     break;
                 case 'generate_wallet' : 
                     result = {

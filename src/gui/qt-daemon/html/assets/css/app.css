@@ -182,7 +182,7 @@ padding: 0 3px;
 }
 .safe-number {
 display: block;
-overflow: auto;
+overflow: none;
 clear: left;
 }
 .navbar h4 {
@@ -776,7 +776,7 @@ table.data-table tr td:last-child .popover {
 min-width: 60px;
 }
 table.history-table > tbody > tr td {
-text-align: center;
+text-align: left;
 width: 1%;
 vertical-align: middle;
 }

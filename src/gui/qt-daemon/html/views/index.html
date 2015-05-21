@@ -104,16 +104,16 @@
                 Создать сейф
             </button>
         </div>
-        <div class="btn-group">
-            <button aria-expanded="false" ng-disabled="deamon_state.daemon_network_state != 2" data-toggle="dropdown" class="btn btn-info navbar-btn dropdown-toggle"
+        <div class="btn-group" dropdown>
+            <button  ng-disabled="deamon_state.daemon_network_state != 2" dropdown-toggle class="btn btn-info navbar-btn dropdown-toggle"
                     type="button">
                 Восстановить сейф <span class="caret"></span>
             </button>
             <ul class="dropdown-menu dropdown-menu-right" role="menu">
                 <li>
-                    <a type="button" class="index_open-safe-button" ng-click="openFileDialog()" ng-disabled="deamon_state.daemon_network_state != 2">Открыть файл-сейф</a>
+                    <a type="button" ng-click="openFileDialog()">Открыть файл-сейф</a>
                 </li>
-                <li><a type="button" ng-disabled="deamon_state.daemon_network_state != 2">Восстановить из smartsafe</a></li>
+                <li><a type="button" >Восстановить из smartsafe</a></li>
             </ul>
         </div>
     </div>
@@ -151,8 +151,8 @@
                     </td>
 
                     <td>
-                        <div class="dropdown">
-                            <button aria-expanded="false" data-toggle="dropdown" class="btn btn-link dropdown-toggle" type="button">
+                        <div class="dropdown" dropdown  auto-close="outsideClick">
+                            <button dropdown-toggle class="btn btn-link dropdown-toggle" type="button">
                                 <span class="account-text">
                                     <span class="text-muted"> 
                                         <span style="color:#999">
@@ -170,7 +170,7 @@
                                                 <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
                                                     скопировать
                                                 </button> -->
-                                                <pre class="safe-number" style="height:60px">{{safe.address}}</pre>
+                                                <pre class="safe-number" select-text style="height:80px">{{safe.address}}</pre>
                                             </div>
                                         </li>
                                     </ul>
@@ -206,8 +206,8 @@
                     </td>
 
                     <td>
-                        <div class="btn-group navbar-btn">
-                            <button aria-expanded="false" ng-disabled="!safe.loaded" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                        <div class="btn-group navbar-btn" dropdown>
+                            <button aria-expanded="false" ng-disabled="!safe.loaded" dropdown-toggle class="btn btn-default dropdown-toggle" type="button">
                                 <i class="fa fa-gear"></i> <span class="caret"></span>
                             </button>
                             <ul role="menu" class="dropdown-menu dropdown-menu-right">

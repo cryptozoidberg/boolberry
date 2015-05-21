@@ -204,7 +204,8 @@
                         new_safe.history = [];
                         
                         $timeout(function(){
-                            $rootScope.safes.unshift(new_safe);    
+                            $rootScope.safes.unshift(new_safe);
+                            backend.reloadCounters();
                         });
 
                     });
@@ -283,7 +284,8 @@
                     
                     $modalInstance.close();
                     $timeout(function(){
-                        safes.unshift(new_safe);    
+                        safes.unshift(new_safe); 
+                        backend.reloadCounters();   
                     });
 
                 });

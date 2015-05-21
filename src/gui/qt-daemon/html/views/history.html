@@ -119,26 +119,26 @@
             <table class="table table-condensed  data-table history-table">
                 <thead>
                 <tr>
-                    <th></th>
-                    <th>
+                    <th class="col-sm-1"></th>
+                    <th class="col-sm-1">
                         <span class="nowrap">Дата операции <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
                     </th>
-                    <th>
+                    <th class="col-sm-2">
                         <span class="nowrap">Состояние <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
                     </th>
-                    <th>
+                    <th class="col-sm-2">
                         <span class="nowrap">Сумма, G <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
                     </th>
-                    <th>
+                    <th class="col-sm-2">
                         <span class="nowrap">Комиссия, G</span>
                     </th>
-                    <th>
+                    <th class="col-sm-2">
                         <span class="nowrap">Отправитель <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
                     </th>
-                    <th>
+                    <th class="col-sm-2">
                         <span class="nowrap">Получатель <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
                     </th>
-                    <th>
+                    <th class="col-sm-2">
                         <span class="nowrap">Комментарий</span>
                     </th>
                 </tr>
@@ -199,7 +199,6 @@
                             <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <span class="account-text">
                                     <span class="text-muted">
-                                        Safelabel1 
                                         <span style="color:#999">
                                             {{item.remote_address}}
                                         </span>
@@ -207,16 +206,31 @@
                                     <span class="moredots">...<span class="caret"></span></span>
                                 </span>
                             </button>
-                            
+
                             <div role="menu" class="dropdown-menu dropdown-menu-left">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Сейф: <a href="">Safelabel1</a></li>
                                         <li>
                                             <div class="contractor">
                                                 <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
                                                     скопировать
                                                 </button> -->
+                                                <pre class="safe-number" style="height:60px">{{item.remote_address}}</pre>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>
+                                            <div class="contractor">
+                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                    скопировать
+                                                </button>
                                                 <pre class="safe-number" style="height:60px">{{item.remote_address}}
                                                 </pre>
                                             </div>
@@ -225,7 +239,7 @@
                                         <li><a href="">@twosafeaccout</a></li>
                                     </ul>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                         <small class="text-muted" ng-if="!item.remote_address">
                             <em>неизвестно</em>
