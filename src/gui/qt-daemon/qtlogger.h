@@ -4,8 +4,9 @@
 
 class qt_console_stream : public epee::log_space::ibase_log_stream
 {
+  QDebug db;
 public:
-  qt_console_stream()
+  qt_console_stream() : db(qDebug())
   {
   }
 
@@ -92,9 +93,12 @@ public:
     {
       if (buf[i] == 7 || buf[i] == -107)
         buf[i] = '^';
+      //remove \n
+      //if (i == buf.size()-1)
+      //  buf[i] = ' ';
     }
 
-    qDebug() << buf.c_str();
+    db << buf.c_str();
     reset_console_color();
     return  true;
   }
