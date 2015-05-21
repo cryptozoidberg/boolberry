@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     viewer.setOrientation(Html5ApplicationViewer::ScreenOrientationAuto);
     viewer.showExpanded();
     viewer.setWindowTitle("Luidor");
-        
+    qDebug() << "My text\r\n";
     if(!viewer.start_backend(argc, argv))
       return false;
     viewer.init_config();
