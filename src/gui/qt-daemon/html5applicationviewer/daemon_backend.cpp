@@ -832,7 +832,7 @@ std::string daemon_backend::validate_address(const std::string& path)
     return API_RETURN_CODE_FALSE;
 }
 
-void daemon_backend::on_new_block(uint64_t /*height*/, const currency::block& /*block*/)
+void daemon_backend::on_new_block(size_t wallet_id, uint64_t /*height*/, const currency::block& /*block*/)
 {
 
 }
@@ -855,7 +855,7 @@ void daemon_backend::on_transfer2(size_t wallet_id, const tools::wallet_rpc::wal
   }
   m_pview->money_transfer(tei);
 }
-void daemon_backend::on_pos_block_found(const currency::block& b)
+void daemon_backend::on_pos_block_found(size_t wallet_id, const currency::block& b)
 {
   m_pview->pos_block_found(b);
 }
