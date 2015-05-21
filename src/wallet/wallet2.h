@@ -80,13 +80,13 @@ namespace tools
   class wallet2
   {
     wallet2(const wallet2&) : m_stop(false),
-                              m_callback(0), 
+                              m_wcallback(new i_wallet2_callback()), 
                               height_of_start_sync(0), 
                               last_sync_percent(0)
     {};
   public:
     wallet2() : m_stop(false), 
-                m_callback(0), 
+                m_wcallback(new i_wallet2_callback()), //stub
                 m_core_proxy(new default_http_core_proxy()), 
                 m_upper_transaction_size_limit(0), 
                 height_of_start_sync(0), 
@@ -152,9 +152,9 @@ namespace tools
 
     void stop() { m_stop.store(true, std::memory_order_relaxed); }
 
-    i_wallet2_callback* callback() const { return m_callback; }
-    void callback(i_wallet2_callback* callback) { m_callback = callback; }
-    void callback(std::shared_ptr<i_wallet2_callback> callback){ m_callback_holder = callback; m_callback = m_callback_holder.get();}
+    //i_wallet2_callback* callback() const { return m_wcallback; }
+    //void callback(i_wallet2_callback* callback) { m_callback = callback; }
+    void callback(std::shared_ptr<i_wallet2_callback> callback){ m_wcallback = callback;}
 
     void scan_tx_pool();
     void refresh();
@@ -278,8 +278,7 @@ namespace tools
     std::unordered_map<crypto::hash, tools::wallet_rpc::wallet_transfer_info> m_unconfirmed_txs;
 
     std::shared_ptr<i_core_proxy> m_core_proxy;
-    std::shared_ptr<i_wallet2_callback> m_callback_holder;
-    i_wallet2_callback* m_callback;
+    std::shared_ptr<i_wallet2_callback> m_wcallback;
     uint64_t height_of_start_sync;
     uint64_t last_sync_percent;
 

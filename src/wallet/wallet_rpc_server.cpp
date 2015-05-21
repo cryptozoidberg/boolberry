@@ -31,7 +31,11 @@ namespace tools
   bool wallet_rpc_server::run()
   {
     m_net_server.add_idle_handler([this](){
-      m_wallet.refresh();
+      size_t blocks_fetched = 0;
+      bool received_money = false;
+      bool ok;
+      std::atomic<bool> stop = false;
+      m_wallet.refresh(blocks_fetched, received_money, ok);
       m_wallet.try_mint_pos();
       return true;
     }, 20000);

@@ -111,8 +111,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
 
       m_key_images[td.m_key_image] = m_transfers.size()-1;
       LOG_PRINT_L0("Received money: " << print_money(td.amount()) << ", with tx: " << get_transaction_hash(tx));
-      if (0 != m_callback)
-        m_callback->on_money_received(height, td.m_tx, td.m_internal_output_index);
+      m_wcallback->on_money_received(height, td.m_tx, td.m_internal_output_index);
     }
   }
   
@@ -136,8 +135,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       
       mtd.spent_indices.push_back(i);
 
-      if (m_callback)
-        m_callback->on_money_spent(height, td.m_tx, td.m_internal_output_index, tx);
+      m_wcallback->on_money_spent(height, td.m_tx, td.m_internal_output_index, tx);
     }
     i++;
   }
@@ -216,8 +214,7 @@ void wallet2::handle_money_received2(const currency::block& b, const currency::t
   prepare_wti(wti, get_block_height(b), b.timestamp, tx, amount, td);
   prepare_wti_decrypted_attachments(wti, decrypted_att);
 
-  if (m_callback)
-    m_callback->on_transfer2(wti);
+  m_wcallback->on_transfer2(wti);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::handle_money_spent2(const currency::block& b, 
@@ -236,8 +233,7 @@ void wallet2::handle_money_spent2(const currency::block& b,
   wti.comment = comment;
   prepare_wti(wti, get_block_height(b), b.timestamp, in_tx, amount, td);
 
-  if (m_callback)
-    m_callback->on_transfer2(wti);
+  m_wcallback->on_transfer2(wti);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias, std::string& comment)
@@ -283,8 +279,7 @@ void wallet2::process_new_blockchain_entry(const currency::block& b, currency::b
   ++m_local_bc_height;
   m_last_bc_timestamp = b.timestamp;
 
-  if (0 != m_callback)
-    m_callback->on_new_block(height, b);
+  m_wcallback->on_new_block(height, b);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::get_short_chain_history(std::list<crypto::hash>& ids)
@@ -366,7 +361,7 @@ void wallet2::pull_blocks(size_t& blocks_added, std::atomic<bool>& stop)
       uint64_t next_percent = (100 * (current_index - height_of_start_sync)) / (res.current_height - height_of_start_sync);
       if (next_percent != last_sync_percent)
       {
-        m_callback->on_sync_progress(next_percent);
+        m_wcallback->on_sync_progress(next_percent);
         last_sync_percent = next_percent;
       }
     }
@@ -466,8 +461,7 @@ void wallet2::scan_tx_pool()
       prepare_wti(unconfirmed_wti, 0, time(NULL), tx, tx_money_got_in_outs, money_transfer2_details());
       prepare_wti_decrypted_attachments(unconfirmed_wti, decrypted_att);
 
-      if (m_callback)
-        m_callback->on_transfer2(unconfirmed_wti);
+      m_wcallback->on_transfer2(unconfirmed_wti);
     }
   }
 }
@@ -1009,8 +1003,7 @@ bool wallet2::build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& 
       return false;
     }    
     LOG_PRINT_GREEN("POS block generated and accepted, congrats!", LOG_LEVEL_0);
-    if (m_callback)
-      m_callback->on_pos_block_found(b);
+    m_wcallback->on_pos_block_found(b);
     return true;
 }
 
@@ -1199,20 +1192,12 @@ void wallet2::add_sent_unconfirmed_tx(const currency::transaction& tx,
   unconfirmed_wti.recipient_alias = get_alias_for_address(recipient);
   unconfirmed_wti.is_income = false;
   
-//  unconfirmed_transfer_details& utd = 
-//  utd.m_change = change_amount;
-  //utd.m_sent_time = time(NULL);
-  //utd.m_tx = tx;
-  //utd.m_recipient = recipient;
-  //utd.m_recipient_alias = get_alias_for_address(recipient);
-  //utd.m_is_income = false;
   uint64_t inputs_amount = 0;
   bool r = get_inputs_money_amount(tx, inputs_amount);
   CHECK_AND_ASSERT_THROW_MES(r, "internal error in getting amounts from tx: " << get_transaction_hash(tx));
   prepare_wti(unconfirmed_wti, 0, time(NULL), tx, inputs_amount - change_amount, money_transfer2_details());
 
-  if (m_callback)
-    m_callback->on_transfer2(unconfirmed_wti);
+  m_wcallback->on_transfer2(unconfirmed_wti);
 }
 //----------------------------------------------------------------------------------------------------
 std::string wallet2::get_alias_for_address(const std::string& addr)

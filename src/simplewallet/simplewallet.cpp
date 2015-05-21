@@ -292,7 +292,7 @@ bool simple_wallet::new_wallet(const string &wallet_file, const std::string& pas
   m_wallet_file = wallet_file;
 
   m_wallet.reset(new tools::wallet2());
-  m_wallet->callback(this);
+  m_wallet->callback(this->shared_from_this());
   try
   {
     m_wallet->generate(wallet_file, password);
@@ -322,7 +322,7 @@ bool simple_wallet::open_wallet(const string &wallet_file, const std::string& pa
 {
   m_wallet_file = wallet_file;
   m_wallet.reset(new tools::wallet2());
-  m_wallet->callback(this);
+  m_wallet->callback(this->shared_from_this());
 
   try
   {
