@@ -222,6 +222,7 @@
 
                     returnObject.get_all_offers(function(data){
                         if(angular.isDefined(data.offers)){
+                            $rootScope.offers = data.offers;
                             $rootScope.offers_count = data.offers.length;
                         }
                     });

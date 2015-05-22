@@ -319,7 +319,7 @@
 
                                     <td>
                                         
-                                        <div class="dropdown" ng-if="item.remote_address">
+                                        <div class="dropdown" ng-if="item.remote_address && item.is_income">
                                             <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                                 <span class="account-text">
                                                     <span class="text-muted">
@@ -372,7 +372,7 @@
 
                                     <td>
                                         
-                                        <div class="dropdown" ng-if="item.remote_address">
+                                        <div class="dropdown" ng-if="item.remote_address && !item.is_income">
                                             <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                                 <span class="account-text">
                                                     <span class="text-muted">{{item.remote_address}}</span>
