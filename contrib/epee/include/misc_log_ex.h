@@ -998,7 +998,6 @@ DISABLE_GCC_WARNING(maybe-uninitialized)
       if (is_need_set)
       {
         log_detalisation_level = log_level_to_set;
-        LOG_PRINT_L0("[LOG LEVEL]: set to " << log_level_to_set);
       }
       return log_detalisation_level;
     }

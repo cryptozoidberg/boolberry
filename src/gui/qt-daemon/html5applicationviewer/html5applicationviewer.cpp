@@ -739,6 +739,7 @@ QString Html5ApplicationViewer::set_log_level(const QString& param)
   PREPARE_ARG_FROM_JSON(view::struct_with_one_t_type<uint64_t>, lvl);
   epee::log_space::get_set_log_detalisation_level(true, lvl.v);
   ar.error_code = API_RETURN_CODE_OK;
+  LOG_PRINT_L0("[LOG LEVEL]: set to " << lvl.v);
   return epee::serialization::store_t_to_json(ar).c_str();
 }
 QString Html5ApplicationViewer::webkit_launched_script()
@@ -872,7 +873,7 @@ QString Html5ApplicationViewer::get_all_offers(const QString& param)
 
 QString Html5ApplicationViewer::push_offer(const QString& param)
 {
-  return que_call2<view::push_offer_param>("get_recent_transfers", param, [this](const view::push_offer_param& a, view::api_response& ar){
+  return que_call2<view::push_offer_param>("push_offer", param, [this](const view::push_offer_param& a, view::api_response& ar){
     view::transfers_array ta = AUTO_VAL_INIT(ta);
     ar.error_code = m_backend.push_offer(a.wallet_id, a.od);
     dispatch(ar, ta);
