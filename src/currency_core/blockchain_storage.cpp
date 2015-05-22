@@ -1225,11 +1225,13 @@ uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
   }
 
 
-  wide_difficulty_type w_hr = (m_blocks[nearest_front_pow_block_i].cumulative_diff_precise - m_blocks[nearest_back_pow_block_i].cumulative_diff_precise) /
-    (m_blocks[nearest_front_pow_block_i].bl.timestamp - m_blocks[nearest_back_pow_block_i].bl.timestamp);
-  return w_hr.convert_to<uint64_t>();
+  uint64_t ts_delta = (m_blocks[nearest_front_pow_block_i].bl.timestamp - m_blocks[nearest_back_pow_block_i].bl.timestamp);
+  if (!ts_delta)
+    ts_delta = 1;
+
+  wide_difficulty_type w_hr = (m_blocks[nearest_front_pow_block_i].cumulative_diff_precise - m_blocks[nearest_back_pow_block_i].cumulative_diff_precise)/ts_delta;
   
-  return 0;
+  return w_hr.convert_to<uint64_t>();
 }
 //------------------------------------------------------------------
 bool blockchain_storage::get_alternative_blocks(std::list<block>& blocks)
