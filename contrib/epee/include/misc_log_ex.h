@@ -993,9 +993,13 @@ PUSH_WARNINGS
 DISABLE_GCC_WARNING(maybe-uninitialized)
     static int get_set_log_detalisation_level(bool is_need_set = false, int log_level_to_set = LOG_LEVEL_1)
     {
+
       static int log_detalisation_level = LOG_LEVEL_1;
-      if(is_need_set)
+      if (is_need_set)
+      {
         log_detalisation_level = log_level_to_set;
+        LOG_PRINT_L0("[LOG LEVEL]: set to " << log_level_to_set);
+      }
       return log_detalisation_level;
     }
 POP_WARNINGS

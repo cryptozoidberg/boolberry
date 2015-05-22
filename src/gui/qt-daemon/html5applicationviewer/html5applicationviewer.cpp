@@ -861,7 +861,7 @@ QString Html5ApplicationViewer::resync_wallet(const QString& param)
 */
 QString Html5ApplicationViewer::get_all_offers(const QString& param)
 {
-  return que_call2<view::api_void>("get_recent_transfers", param, [this](const view::api_void& a, view::api_response& ar){
+  return que_call2<view::api_void>("get_all_offers", param, [this](const view::api_void& a, view::api_response& ar){
 
     view::transfers_array ta = AUTO_VAL_INIT(ta);
     currency::COMMAND_RPC_GET_ALL_OFFERS::response rp = AUTO_VAL_INIT(rp);
