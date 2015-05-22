@@ -351,7 +351,10 @@ namespace currency
   void blockchain_storage::serialize(archive_t & ar, const unsigned int version)
   {
     if (version < CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER)
+    {
+      LOG_PRINT_BLUE("[BLOCKCHAIN STORAGE] data truncated cz new version", LOG_LEVEL_0);
       return;
+    }
     CHECK_PROJECT_NAME();
     CRITICAL_REGION_LOCAL(m_blockchain_lock);
     ar & m_blocks;

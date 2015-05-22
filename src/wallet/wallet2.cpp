@@ -1066,7 +1066,7 @@ namespace
   }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::push_offer(const currency::offer_details& od)
+void wallet2::push_offer(const currency::offer_details& od, currency::transaction& res_tx)
 {
   currency::tx_destination_entry tx_dest;
   tx_dest.addr = m_account.get_keys().m_account_address;
@@ -1076,7 +1076,7 @@ void wallet2::push_offer(const currency::offer_details& od)
   std::vector<currency::attachment_v> attachments;
   attachments.push_back(od);
   destinations.push_back(tx_dest);
-  transfer(destinations, 0, 0, DEFAULT_FEE, extra, attachments);
+  transfer(destinations, 0, 0, DEFAULT_FEE, extra, attachments, res_tx);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx)
@@ -1186,7 +1186,7 @@ void wallet2::add_sent_unconfirmed_tx(const currency::transaction& tx,
                                       const std::string& recipient, 
                                       const std::string& comment)
 {
-  wallet_rpc::wallet_transfer_info unconfirmed_wti = m_unconfirmed_txs[currency::get_transaction_hash(tx)];
+  wallet_rpc::wallet_transfer_info& unconfirmed_wti = m_unconfirmed_txs[currency::get_transaction_hash(tx)];
 
   //unconfirmed_wti.tx = tx;
   unconfirmed_wti.remote_address = recipient;

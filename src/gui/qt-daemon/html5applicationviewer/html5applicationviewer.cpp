@@ -874,9 +874,22 @@ QString Html5ApplicationViewer::get_all_offers(const QString& param)
 QString Html5ApplicationViewer::push_offer(const QString& param)
 {
   return que_call2<view::push_offer_param>("push_offer", param, [this](const view::push_offer_param& a, view::api_response& ar){
-    view::transfers_array ta = AUTO_VAL_INIT(ta);
-    ar.error_code = m_backend.push_offer(a.wallet_id, a.od);
-    dispatch(ar, ta);
+
+    view::transfer_response tr = AUTO_VAL_INIT(tr);
+    currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
+
+    ar.error_code = m_backend.push_offer(a.wallet_id, a.od, res_tx);
+    if (ar.error_code != API_RETURN_CODE_OK)
+    {
+      view::api_void av;
+      dispatch(ar, av);
+      return;
+    }
+    tr.success = true;
+    tr.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(res_tx));
+    tr.tx_blob_size = currency::get_object_blobsize(res_tx);
+    ar.error_code = API_RETURN_CODE_OK;
+    dispatch(ar, tr);
   });
 }
 

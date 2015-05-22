@@ -13,7 +13,7 @@ public:
   virtual void on_money_received(size_t wallet_id, uint64_t /*height*/, const currency::transaction& /*tx*/, size_t /*out_index*/) {}
   virtual void on_money_spent(size_t wallet_id, uint64_t /*height*/, const currency::transaction& /*in_tx*/, size_t /*out_index*/, const currency::transaction& /*spend_tx*/) {}
   virtual void on_transfer2(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti) {}
-  virtual void on_money_sent(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti) {}
+//  virtual void on_money_sent(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti) {}
   virtual void on_pos_block_found(size_t wallet_id, const currency::block& /*block*/) {}
   virtual void on_sync_progress(size_t wallet_id, const uint64_t& /*percents*/) {}
 
@@ -37,9 +37,9 @@ struct i_wallet_to_i_backend_adapter: public tools::i_wallet2_callback
   virtual void on_transfer2(const tools::wallet_rpc::wallet_transfer_info& wti) {
     m_pbackend->on_transfer2(m_wallet_id, wti);
   }
-  virtual void on_money_sent(const tools::wallet_rpc::wallet_transfer_info& wti) {
-    m_pbackend->on_money_sent(m_wallet_id, wti);
-  }
+//  virtual void on_money_sent(const tools::wallet_rpc::wallet_transfer_info& wti) {
+//    m_pbackend->on_money_sent(m_wallet_id, wti);
+//  }
   virtual void on_pos_block_found(const currency::block& wti) {
     m_pbackend->on_pos_block_found(m_wallet_id, wti);
   }

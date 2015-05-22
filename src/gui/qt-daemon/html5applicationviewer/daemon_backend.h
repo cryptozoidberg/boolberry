@@ -70,7 +70,7 @@ public:
   std::string get_wallet_info(size_t wallet_id, view::wallet_info& wi);
   std::string get_wallet_info(wallet_vs_options& w, view::wallet_info& wi);
   std::string close_wallet(size_t wallet_id);
-  std::string push_offer(size_t wallet_id, const currency::offer_details& od);
+  std::string push_offer(size_t wallet_id, const currency::offer_details& od, currency::transaction& res_tx);
   std::string get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS::response& od);
   std::string get_aliases(view::alias_set& al_set);
   std::string request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, currency::transaction& res_tx);

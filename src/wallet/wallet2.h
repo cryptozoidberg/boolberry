@@ -54,7 +54,7 @@ namespace tools
     virtual void on_money_received(uint64_t /*height*/, const currency::transaction& /*tx*/, size_t /*out_index*/) {}
     virtual void on_money_spent(uint64_t /*height*/, const currency::transaction& /*in_tx*/, size_t /*out_index*/, const currency::transaction& /*spend_tx*/) {}
     virtual void on_transfer2(const wallet_rpc::wallet_transfer_info& wti) {}
-    virtual void on_money_sent(const wallet_rpc::wallet_transfer_info& wti) {}
+//    virtual void on_money_sent(const wallet_rpc::wallet_transfer_info& wti) {}
     virtual void on_pos_block_found(const currency::block& /*block*/) {}
     virtual void on_sync_progress(const uint64_t& /*percents*/) {}
   };
@@ -162,7 +162,7 @@ namespace tools
     bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok, std::atomic<bool>& stop);
     void refresh(std::atomic<bool>& stop);
     
-    void push_offer(const currency::offer_details& od);
+    void push_offer(const currency::offer_details& od, currency::transaction& res_tx);
     void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx);
 
 
@@ -188,7 +188,10 @@ namespace tools
     inline void serialize(t_archive &a, const unsigned int ver)
     {
       if (ver < WALLET_FILE_SERIALIZATION_VERSION)
+      {
+        LOG_PRINT_BLUE("[WALLET STORAGE] data truncated cz new version", LOG_LEVEL_0);
         return;
+      } 
       a & m_blockchain;
       a & m_transfers;
       a & m_account_public_address;
