@@ -113,8 +113,9 @@
                                 <div class="btn-group pull-right foursteps">
                                     <div class="fslider">
                                         <!-- <slider ng-model="settings.security.mixin_count" min="0" step="1" max="4"></slider> -->
+                                        <div class="lui-slider" ui-slider  min="0" max="4" step="1" ng-model="settings.security.mixin_count"></div>
                                     </div>
-                                    <div class="scale"><span>легкий</span><span>стандартный</span><span>средний</span><span>высокий</span></div>
+                                    <div class="scale"><span>легкий</span><span>станд-ый</span><span>средний</span><span>высокий</span></div>
                                 </div>
                                 <em>Уровень микширования</em>
                                 &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip='Уровень микширования - это количество транзакций, с которыми происходит "смешивание" при отправке платежа. Чем выше уровень, тем медленнее происходит обработка транзакции, но отследить такой кому приндлежит платеж практичесеки невозможно'></i>
@@ -146,7 +147,6 @@
                             <em>Требовать подтверждения при попытке совершения транзакции со счета с добычей</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
                         </li> -->
                         <li class="list-group-item">
-                        {{settings.mining.auto_mining}}
                             <div class="btn-group pull-right">
                                 <label class="btn btn-default" btn-radio="true" ng-model="settings.mining.auto_mining">
                                     <i class="fa fa-lg fa-check"></i>
@@ -180,21 +180,21 @@
                         <ul class="list-group">
                             <li class="list-group-item clearfix">
                                 <div class="pull-right selesct-holder">
-                                    <select class="selectpicker">
+                                    <select class="selectpicker" selectpicker>
+                                        
+                                        <option>Русский</option>
                                         <option>Английский</option>
                                         <option>Немецкий</option>
                                         <option>Французский</option>
                                         <option>Испанский</option>
-                                        <option>Русский</option>
+                                        
                                     </select>
                                 </div>
                                 <em>Язык интерфейса</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
                             </li>
                             <li class="list-group-item clearfix">
                                 <div class="btn-group pull-right foursteps">
-                                    <div class="fslider">
-                                        <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="4"  data-slider-step="1" data-slider-value="2"/>
-                                    </div>
+                                    <div class="lui-slider" ui-slider  min="0" max="4" step="1" ng-model="fontSize"></div>
                                     <div class="scale"><span>мелкий</span><span>стандартный</span><span>крупный</span><span>огромный</span></div>
                                 </div>
                                 <em>Размер шрифта</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i></li>
@@ -301,7 +301,7 @@
                     </div>
                 </div>
             </div>
-            <div class="panel">
+            <!-- <div class="panel">
                 <div class="panel-body">
                     <h4><a data-target=".collapse-off1-1" data-toggle="collapse-off" type="button" href="#"><span>Платежная система</span></a></h4>
                     <div class="collapse-off in collapse-off31-1">
@@ -333,7 +333,7 @@
                         </ul>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </tab>
     </tabset>
 </form>

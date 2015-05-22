@@ -139,6 +139,8 @@
 
         $rootScope.appPass = false;
 
+        
+
         $rootScope.deamon_state = {
         	daemon_network_state: 3 // by default "loading core"
         };
@@ -509,9 +511,9 @@
                 angular.forEach(safe.history,function(tr_item, key){
                     if(tr_item.tx_hash == tr_info.tx_hash){
                         // tr_item = tr_info;
+                        tr_exists = true;
                         $timeout(function(){
                             safe.history[key] = tr_info;
-                            tr_exists = true;
                         });
                         
 

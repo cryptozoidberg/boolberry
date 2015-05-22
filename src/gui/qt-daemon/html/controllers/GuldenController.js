@@ -132,15 +132,15 @@
             $scope.safes.push({name: 'Все сейфы', wallet_id : -1});
             //$scope.wallet_id = -1;
             
-            $scope.history = [];
+            $scope.tx_history = [];
 
             //console.log($scope.history);
 
             angular.forEach($rootScope.safes, function(safe){
                 if(angular.isDefined(safe.history)){
                     angular.forEach(safe.history, function(item){
-                        item.wi = angular.copy(safe);
-                        $scope.history.push(item);    
+                        //item.wi = angular.copy(safe);
+                        $scope.tx_history.push(item);    
                     });
                 }
             });
@@ -152,7 +152,7 @@
             };
 
             
-            // $scope.order('timestamp');
+            
 
             // $scope.changeWallet = function(wallet_id){
             //     if(wallet_id === -1){
@@ -171,9 +171,10 @@
             };
 
             $scope.filterChange = function(){
+                return;
                 var f = $scope.filter;
                 //informer.info('filtre!');
-                $scope.prefiltered_history = angular.copy($scope.history);
+                $scope.prefiltered_history = angular.copy($scope.tx_history);
 
                 var  message = '<br> filter object = ';
                 message += JSON.stringify(f);
@@ -211,7 +212,8 @@
             };
 
             $scope.filterReset = function(){
-                $scope.filtered_history = $scope.history;
+                $scope.filtered_history = $scope.tx_history;
+                $scope.order('-timestamp');
             };
 
             $scope.filterReset();
@@ -222,3 +224,51 @@
     ]);
 
 }).call(this);
+
+
+
+[
+{"amount":50000000,
+"comment":"",
+"fee":16000000,
+"height":3698,
+"is_income":false,
+"is_service":false,
+"payment_id":"",
+"recipient_alias":"",
+"remote_address":"",
+"td":{
+    "rcv":[50000000,700000000],
+    "spn":[800000000]},
+    "timestamp":1432280805,
+    "tx_blob_size":409,
+    "tx_hash":"60b883b946e00557bd905e1f2cbe937b23661efcb659653c44aaf1f76e7a2439",
+    "unlock_time":0
+},{
+    "amount":50000000,
+    "comment":"",
+    "fee":16000000,
+    "height":3698,
+    "is_income":false,
+    "is_service":false,"payment_id":"","recipient_alias":"","remote_address":"",
+    "td":{"rcv":[50000000,700000000],"spn":[800000000]},"timestamp":1432280805,
+    "tx_blob_size":409,"tx_hash":"60b883b946e00557bd905e1f2cbe937b23661efcb659653c44aaf1f76e7a2439",
+    "unlock_time":0},{"amount":60000000,"comment":"","fee":10000000,"height":3690,"is_income":false,
+    "is_service":false,"payment_id":"","recipient_alias":"","remote_address":"","td":{"spn":[60000000]},
+    "timestamp":1432280910,"tx_blob_size":297,"tx_hash":"b74bcfc1a98c23bf7112a7e05ac449f48521c55be250a00ee645f760612332cf",
+    "unlock_time":0},{"amount":140000000,"comment":"","fee":17000000,"height":3640,"is_income":false,
+    "is_service":false,"payment_id":"","recipient_alias":"","remote_address":"",
+    "td":{"rcv":[60000000,800000000],"spn":[1000000000]},"timestamp":1432279384,
+    "tx_blob_size":449,"tx_hash":"1b620914c685ac3be98db9730b649759357a25ac6b0077aca4b69cd380c7ff9a",
+    "unlock_time":0},{"amount":40000000,"comment":"","fee":15000000,
+    "height":3629,"is_income":false,"is_service":false,"payment_id":"",
+    "recipient_alias":"","remote_address":"","td":{"rcv":[40000000],"spn":[80000000]},
+    "timestamp":1432279425,"tx_blob_size":374,"tx_hash":"a5444e6a403ab1a30c898dcb335ef3efc9202111a806c55fb2ac0b0692d64624",
+    "unlock_time":0},{"amount":31000000,"comment":"","fee":11000000,"height":3610,"is_income":false,
+    "is_service":false,"payment_id":"","recipient_alias":"","remote_address":"","td":{"rcv":[80000000],
+    "spn":[111000000]},"timestamp":1432278586,"tx_blob_size":325,
+    "tx_hash":"be2256435840940e0710e058beb1cf22863c8ab6111b12b5995bda192cc0ec2f","unlock_time":0},
+    {"amount":11111111000000,"comment":"","fee":1889000000,"height":115,"is_income":true,"is_service":false,
+    "payment_id":"","recipient_alias":"","remote_address":"",
+    "td":{"rcv":[111000000,1000000000,10000000000,100000000000,1000000000000,10000000000000]},"timestamp":1432128947,
+    "tx_blob_size":651,"tx_hash":"89b8ca25a41093a8276dc4aac11a9f3406a68b80e81f9c508e36e430288db17e","unlock_time":0}]

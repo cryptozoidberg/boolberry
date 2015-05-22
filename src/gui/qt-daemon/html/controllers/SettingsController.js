@@ -45,6 +45,13 @@
                 $rootScope.settings.system.log_level = level;
             };
 
+            // $scope.mixCount = $rootScope.settings.security.mixin_count;
+
+            // $scope.mixCount = function(count){
+            //     //backend.setLogLevel(level);
+            //     $rootScope.settings.security.mixin_count = count;
+            // };
+
         }
     ]);
 

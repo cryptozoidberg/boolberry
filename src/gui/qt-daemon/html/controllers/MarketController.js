@@ -228,7 +228,7 @@
                 o.payment_types = o.payment_types.join(",");
                 o.comment = o.comment + (o.comment?' ':'') + o.deal_details;
                 o.target = o.currency;
-                informer.info(JSON.stringify(o));
+                //informer.info(JSON.stringify(o));
                 
                 backend.pushOffer(
                     o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location, o.contacts, 
