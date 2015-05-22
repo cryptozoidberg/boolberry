@@ -704,7 +704,17 @@ POP_WARNINGS
     sock_.async_connect(remote_endpoint, boost::bind<void>(connect_callback, _1, local_shared_context));
     while(local_shared_context->ec == boost::asio::error::would_block)
     {
-      bool r = local_shared_context->cond.timed_wait(lock, boost::get_system_time() + boost::posix_time::milliseconds(conn_timeout));
+      bool r = false;
+      try{
+         r = local_shared_context->cond.timed_wait(lock, boost::get_system_time() + boost::posix_time::milliseconds(conn_timeout));
+      }
+      catch (...)
+      {
+        //timeout
+        sock_.close();
+        LOG_PRINT_L3("timed_wait throwed, " << adr << ":" << port << ", because of timeout (" << conn_timeout << ")");
+        return false;
+      }
       if(local_shared_context->ec == boost::asio::error::would_block && !r)
       {
         //timeout
