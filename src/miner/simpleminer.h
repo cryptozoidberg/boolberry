@@ -14,7 +14,7 @@
 #define LOCAL_SCRATCHPAD_CACHE_EXPIRATION_INTERVAL 60*60*24*3   //3 days
 #define LOCAL_SCRATCHPAD_CACHE_STORE_INTERVAL      60*60*12     //12 hours
 
-
+/*
 namespace mining
 {
   class  simpleminer
@@ -94,3 +94,4 @@ namespace mining
     epee::net_utils::http::http_simple_client m_http_client;
   };
 }
+*/
