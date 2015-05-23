@@ -196,7 +196,7 @@
                     $modalInstance.close();
 
                     backend.openWallet(result.path,safe.password,function(data){
-                        backend.runWallet(data.wallet_id);
+                        
                         var new_safe = data.wi;
                         new_safe.wallet_id = data.wallet_id;
                         new_safe.name = safe.name;
@@ -205,6 +205,7 @@
                         
                         $timeout(function(){
                             $rootScope.safes.unshift(new_safe);
+                            backend.runWallet(data.wallet_id);
                             backend.reloadCounters();
                         });
 
@@ -262,7 +263,7 @@
 
             $scope.openSafe = function(safe){
                 backend.openWallet(safe.path, safe.pass,function(data){
-                    backend.runWallet(data.wallet_id);
+                    
                     var new_safe = data.wi;
                     new_safe.wallet_id = data.wallet_id;
                     new_safe.name = safe.name;
@@ -285,6 +286,7 @@
                     $modalInstance.close();
                     $timeout(function(){
                         safes.unshift(new_safe); 
+                        backend.runWallet(data.wallet_id);
                         backend.reloadCounters();   
                     });
 

@@ -227,7 +227,7 @@
                         
                             angular.forEach(appData,function(item){
                                 backend.openWallet(item.path, item.pass,function(data){
-                                    backend.runWallet(data.wallet_id);
+                                    
                                     var new_safe = data.wi;
                                     new_safe.wallet_id = data.wallet_id;
                                     new_safe.name = item.name;
@@ -239,7 +239,8 @@
                                     }
 
                                     $timeout(function(){
-                                        $rootScope.safes.push(new_safe);   
+                                        $rootScope.safes.push(new_safe); 
+                                        backend.runWallet(data.wallet_id);  
                                         backend.reloadCounters(); 
                                     });
 
