@@ -1191,6 +1191,7 @@ void wallet2::add_sent_unconfirmed_tx(const currency::transaction& tx,
   //unconfirmed_wti.tx = tx;
   unconfirmed_wti.remote_address = recipient;
   unconfirmed_wti.recipient_alias = get_alias_for_address(recipient);
+  unconfirmed_wti.comment = comment;
   unconfirmed_wti.is_income = false;
   
   uint64_t inputs_amount = 0;

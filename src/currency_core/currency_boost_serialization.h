@@ -104,6 +104,7 @@ namespace boost
     a & x.expiration_time;
     a & x.timestamp;
     a & x.tx_hash;
+    a & x.index_in_tx;
   }
 
 
