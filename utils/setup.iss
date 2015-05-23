@@ -39,13 +39,12 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Registry]
-Root: HKCR; Subkey: ".bbr"; ValueType: string; ValueName: ""; ValueData: "BoolberryWalletDataFile"; Flags: uninsdeletevalue
-Root: HKCR; Subkey: ".bbr.keys"; ValueType: string; ValueName: ""; ValueData: "BoolberryWalletDataKyesFile"; Flags: uninsdeletevalue
-Root: HKCR; Subkey: "BoolberryWalletDataFile"; ValueType: string; ValueName: ""; ValueData: "Boolberry Wallet's Data File"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "BoolberryWalletDataKyesFile"; ValueType: string; ValueName: ""; ValueData: "Boolberry Wallet's Keys File"; Flags: uninsdeletekey
+Root: HKCR; Subkey: ".lui"; ValueType: string; ValueName: ""; ValueData: "LuiWalletDataFile"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "LuiWalletDataFile"; ValueType: string; ValueName: ""; ValueData: "Lui Wallet's Data File"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "LuiWalletDataKyesFile"; ValueType: string; ValueName: ""; ValueData: "Lui Wallet's Keys File"; Flags: uninsdeletekey
 
-Root: HKCR; Subkey: "BoolberryWalletDataFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\qt-boolb.exe,0"
-Root: HKCR; Subkey: "BoolberryWalletDataKyesFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\qt-boolb.exe,0"
+Root: HKCR; Subkey: "LuiWalletDataFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\qt-lui.exe,0"
+Root: HKCR; Subkey: "LuiWalletDataKyesFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\qt-lui.exe,0"
 
 
 [Files]
@@ -100,8 +99,7 @@ Source: "{#BinariesPath}\simplewallet.exe"; DestDir: "{app}"; Flags: ignoreversi
 Source: "{#BinariesPath}\platforms\qminimal.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qoffscreen.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qwindows.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\index.html"; DestDir: "{app}\html"; Flags: ignoreversion
-Source: "..\src\gui\qt-daemon\html\files\*"; DestDir: "{app}\html\files"; Flags: ignoreversion recursesubdirs
+Source: "..\src\gui\qt-daemon\html\*"; DestDir: "{app}\html\files"; Flags: ignoreversion recursesubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
