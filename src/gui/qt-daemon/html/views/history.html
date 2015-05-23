@@ -45,7 +45,7 @@
                                     selectpicker 
                                     ng-model="filter.wallet_id"
                                     ng-change="filterChange()"
-                                    ng-options="safe.wallet_id as safe.name for safe in safes"
+                                    ng-options="safe.wallet_id as safe.name for safe in my_safes"
                                 >
                                 </select>
                             </div>
@@ -133,10 +133,10 @@
                         <span class="nowrap">Комиссия, G</span>
                     </th>
                     <th class="col-sm-2">
-                        <span class="nowrap">Отправитель <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                        <span class="nowrap">Кошелек <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
                     </th>
                     <th class="col-sm-2">
-                        <span class="nowrap">Получатель <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                        <span class="nowrap">Адрес <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
                     </th>
                     <th class="col-sm-2">
                         <span class="nowrap">Комментарий</span>
@@ -194,8 +194,8 @@
                     </td>
 
                     <td>
-                        
-                        <div class="dropdown" ng-if="item.remote_address">
+                        <a ng-repeat="safe in safes | filter : { wallet_id : item.wallet_id}" ng-if="item.wallet_id > -1" href="#safe/{{item.wallet_id}}">{{safe.name}}</a>
+                        <!-- <div class="dropdown" ng-if="item.remote_address">
                             <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <span class="account-text">
                                     <span class="text-muted">
@@ -212,20 +212,22 @@
                                     <ul class="list-unstyled">
                                         <li>
                                             <div class="contractor">
-                                                <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
                                                     скопировать
-                                                </button> -->
+                                                </button>
                                                 <pre class="safe-number" style="height:60px">{{item.remote_address}}</pre>
                                             </div>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
+
+
                             
-                            <!-- <div role="menu" class="dropdown-menu dropdown-menu-left">
+                            <div role="menu" class="dropdown-menu dropdown-menu-left" ng-repeat="safe in safes | filter : { address : item.remote_address}">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
-                                        <li>Сейф: <a href="">Safelabel1</a></li>
+                                        <li>Сейф: <a  href="#safe/{{safe.wallet_id}}">{{safe.name}}</a></li>
                                         <li>
                                             <div class="contractor">
                                                 <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
@@ -235,41 +237,66 @@
                                                 </pre>
                                             </div>
                                         </li>
-                                        <li><a href="">@onesafekaccout</a></li>
-                                        <li><a href="">@twosafeaccout</a></li>
+                                        <li  ng-repeat="alias in aliases | filter : {address: safe.address}"><a  href="#safe/{{safe.wallet_id}}">@{{alias.alias}}</a></li>
+                                        
                                     </ul>
                                 </div>
-                            </div> -->
+                            </div>
                         </div>
                         <small class="text-muted" ng-if="!item.remote_address">
                             <em>неизвестно</em>
-                        </small>
+                        </small> -->
                     </td>
 
                     <td>
                         
-                        <div class="dropdown" ng-if="item.remote_address">
-                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <div class="dropdown" ng-if="item.remote_address" dropdown  auto-close="outsideClick">
+                            <button type="button" class="btn btn-link dropdown-toggle" dropdown-toggle >
                                 <span class="account-text">
                                     <span class="text-muted">{{item.remote_address}}</span>
                                     <span class="moredots">...<span class="caret"></span></span>
                                 </span>
                             </button>
-                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+
+                            <!-- <div role="menu" class="dropdown-menu dropdown-menu-left">
                                 <div style="padding:10px">
                                     <ul class="list-unstyled">
                                         <li>
                                             <div class="contractor">
-                                                <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
                                                     скопировать
-                                                </button> -->
+                                                </button>
                                                 <pre class="safe-number" style="height:60px">{{item.remote_address}}</pre>
                                             </div>
                                         </li>
                                     </ul>
                                 </div>
+                            </div> -->
+
+                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                <div style="padding:10px">
+                                    <ul class="list-unstyled">
+                                        <!-- <li>Сейф: <a  href="">{{safe.name}}</a></li> -->
+                                        <li>
+                                            <div class="contractor">
+                                                <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                    скопировать
+                                                </button> -->
+                                                <pre class="safe-number" style="height:60px">{{item.remote_address}}
+                                                </pre>
+                                            </div>
+                                        </li>
+                                        <li  ng-repeat="alias in aliases | filter : {address: item.remote_address}"><a  href="#safe/{{safe.wallet_id}}">@{{alias.alias}}</a></li>
+                                        
+                                    </ul>
+                                </div>
                             </div>
+
                         </div>
+
+                        
+
+
                         <small class="text-muted" ng-if="!item.remote_address">
                             <em>неизвестно</em>
                         </small>

@@ -256,11 +256,11 @@
                                     <th class="col-sm-2">
                                         <span class="nowrap">Комиссия, G</span>
                                     </th>
-                                    <th class="col-sm-2">
+                                   <!--  <th class="col-sm-2">
                                         <span class="nowrap">Отправитель <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
-                                    </th>
+                                    </th> -->
                                     <th class="col-sm-2">
-                                        <span class="nowrap">Получатель <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                                        <span class="nowrap">Адрес <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
                                     </th>
                                     <th class="col-sm-2">
                                         <span class="nowrap">Комментарий</span>
@@ -317,7 +317,7 @@
                                         <span ng-if="!item.is_income">&ndash;</span>{{item.fee | gulden}}
                                     </td>
 
-                                    <td>
+                                    <!-- <td>
                                         
                                         <div class="dropdown" ng-if="item.remote_address && item.is_income">
                                             <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -336,9 +336,9 @@
                                                     <ul class="list-unstyled">
                                                         <li>
                                                             <div class="contractor">
-                                                                <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
+                                                                <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">
                                                                     скопировать
-                                                                </button> -->
+                                                                </button>
                                                                 <pre class="safe-number" style="height:60px">{{item.remote_address}}</pre>
                                                             </div>
                                                         </li>
@@ -346,7 +346,7 @@
                                                 </div>
                                             </div>
                                             
-                                            <!-- <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                            <div role="menu" class="dropdown-menu dropdown-menu-left">
                                                 <div style="padding:10px">
                                                     <ul class="list-unstyled">
                                                         <li>Сейф: <a href="">Safelabel1</a></li>
@@ -363,12 +363,12 @@
                                                         <li><a href="">@twosafeaccout</a></li>
                                                     </ul>
                                                 </div>
-                                            </div> -->
+                                            </div>
                                         </div>
                                         <small class="text-muted" ng-if="!item.remote_address">
                                             <em>неизвестно</em>
                                         </small>
-                                    </td>
+                                    </td> -->
 
                                     <td>
                                         
