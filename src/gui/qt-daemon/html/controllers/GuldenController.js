@@ -164,50 +164,75 @@
             // };
 
             //default filter values
+            $scope.is_anonim_values = [
+                {key : -1 , value: 'любое'},
+                {key : 0 , value: 'анонимно'},
+                {key : 1 , value: 'неанонимно'},
+            ]
+            
+
             $scope.filter = {
                 tr_type: 'all', //all, in, out
                 wallet_id: -1,
-                keywords: ''
+                keywords: '',
+                is_anonim : $scope.is_anonim_values[0].key
             };
 
             $scope.filterChange = function(){
                 var f = $scope.filter;
                 //informer.info('filtre!');
                 $scope.prefiltered_history = angular.copy($scope.tx_history);
+                // informer.info('HISTORY '+JSON.stringify($scope.prefiltered_history));
 
-                var  message = '<br> filter object = ';
-                message += JSON.stringify(f);
+                var  message = '';
+                // message += JSON.stringify(f);
 
                 console.log('HISTORY');
                 console.log($scope.prefiltered_history);
                 //wallet filter
                 if(f.wallet_id != -1){
-                    var condition = {wi : { wallet_id: parseInt(f.wallet_id)}};
-                    $scope.pre_filtered_history = $filter('filter')($scope.pre_filtered_history,condition);
+                    message += 'wallet filter';
+                    var condition = {wallet_id: parseInt(f.wallet_id)};
+                    $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,condition);
                 }
 
-                message += '<br> wallet filter = ';
-                message += JSON.stringify($scope.pre_filtered_history);
+                // message += '<br> wallet filter = ';
+                // message += JSON.stringify($scope.pre_filtered_history);
                 //type filter
-                if(f.tr_type != 'all'){
-                    var is_income = (f.tr_type == 'in') ? true : false;
-                    var condition = {wi : { is_income: is_income}};
-                    $scope.pre_filtered_history = $filter('filter')($scope.pre_filtered_history,condition);
+
+                if(f.is_anonim != -1){
+                    var condition = f.is_anonim ? { remote_address: ""} : { remote_address: !""};
+                    $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,condition);
                 }
 
-                message += '<br> type filter = ';
-                message += JSON.stringify($scope.pre_filtered_history);
+                if(f.tr_type != 'all'){
+                    message += 'offer tr_type filter';
+
+                    var is_income = (f.tr_type == 'in') ? true : false;
+                    var condition = { is_income: is_income};
+                    message += 'CONDITION '+JSON.stringify(condition);
+                    $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,condition);
+                    message += 'HISTORY '+JSON.stringify($scope.prefiltered_history);
+                }
+
+                // message += '<br> type filter = ';
+                // message += JSON.stringify($scope.pre_filtered_history);
                 //keywords
                 if(f.keywords != ''){
-                    $scope.pre_filtered_history = $filter('filter')($scope.pre_filtered_history,f.keywords);
+                    message += 'keywords filter';
+                    $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,f.keywords);
                 }
 
-                message += '<br> keyword filter = ';
-                message += JSON.stringify($scope.pre_filtered_history);
+                // message += '<br> keyword filter = ';
+                // message += JSON.stringify($scope.pre_filtered_history);
 
-                informer.info(message);
+                
 
-                $scope.filtered_history = $scope.pre_filtered_history;
+                $scope.filtered_history = $scope.prefiltered_history;
+
+                message += 'finaly '+JSON.stringify($scope.filtered_history);
+
+                // informer.info(message);
             };
 
             $scope.filterReset = function(){
@@ -223,3 +248,5 @@
     ]);
 
 }).call(this);
+
+

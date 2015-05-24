@@ -3,7 +3,7 @@
     <h5>Здесь Вы можете просмотреть историю платежей по всем сейфам, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
     <div class="tabs" ng-controller="trHistoryCtrl">
         <div class="navbar" id="navbar-tabs">
-
+        {{filter}}
             <form class="form-horizontal">
                 <div class="collapse filter1" >
                     <div class="row" style="margin-top:20px; margin-bottom:20px;">
@@ -51,10 +51,14 @@
                             </div>
                             <div class="form-group">
                                 <label class="col-xs-2 col-sm-2 control-label required">Состояние</label>
-                                <select class="col-xs-4 col-sm-4 nopadding" selectpicker>
-                                    <option selected="">любое</option>
-                                    <option>анонимно</option>
-                                    <option>неанонимно</option>
+                                <select 
+                                    class="col-xs-4 col-sm-4 nopadding" 
+                                    selectpicker 
+                                    ng-model="filter.is_anonim"
+                                    ng-change="filterChange()"
+                                    ng-options="item.key as item.value for item in is_anonim_values"
+                                >
+                                    
                                 </select>
 
                                 <div class="col-xs-5 col-sm-5 col-sm-offset-1">
