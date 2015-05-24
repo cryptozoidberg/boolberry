@@ -145,7 +145,6 @@
             pushOffer : function(
                 wallet_id, offer_type, amount_lui, target, location, contacts, 
                 comment, expiration_time, fee, amount_etc, payment_types, callback){
-
                 var params = {
                     "wallet_id" : wallet_id,
                     "od": {
@@ -156,7 +155,7 @@
                         "location": location,
                         "contacts": contacts,
                         "comment": comment,
-                        "payment_types": "cash",
+                        "payment_types": payment_types,
                         "expiration_time": expiration_time,
                         "fee" : $filter('gulden_to_int')(fee)
                     }
