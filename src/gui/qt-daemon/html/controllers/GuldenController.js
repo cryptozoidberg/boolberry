@@ -168,14 +168,21 @@
                 {key : -1 , value: 'любое'},
                 {key : 0 , value: 'анонимно'},
                 {key : 1 , value: 'неанонимно'},
-            ]
+            ];
+
+            $scope.is_mixin_values = [
+                {key : -1 , value: 'не важно'},
+                {key : 0 , value: 'микшировано'},
+                {key : 1 , value: 'не микшировано'},
+            ];
             
 
             $scope.filter = {
                 tr_type: 'all', //all, in, out
                 wallet_id: -1,
                 keywords: '',
-                is_anonim : $scope.is_anonim_values[0].key
+                is_anonim : $scope.is_anonim_values[0].key,
+                is_mixin : -1
             };
 
             $scope.filterChange = function(){
@@ -185,7 +192,6 @@
                 // informer.info('HISTORY '+JSON.stringify($scope.prefiltered_history));
 
                 var  message = '';
-                // message += JSON.stringify(f);
 
                 console.log('HISTORY');
                 console.log($scope.prefiltered_history);
@@ -196,43 +202,45 @@
                     $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,condition);
                 }
 
-                // message += '<br> wallet filter = ';
-                // message += JSON.stringify($scope.pre_filtered_history);
-                //type filter
-
                 if(f.is_anonim != -1){
-                    var condition = f.is_anonim ? { remote_address: ""} : { remote_address: !""};
+                    //var condition = f.is_anonim ? { remote_address: } : { remote_address: 'HhTZP7Sy4FoDR1kJHbFjzd5gSnUPdpHWHj7Gaaeqjt52KS23rHGa1sN73yZYPt77TkN8VVmHrT5qmBJQGzDLYJGjQpxGRid'};
+                    var is_anonymous = function(item){
+                        if(item.remote_address == ''){
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    var is_not_anonymous = function(item){
+                        return !is_anonymous(item);
+                    }
+
+                    if(!f.is_anonim){
+                        $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,is_anonymous);
+                    }else{
+                        $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,is_not_anonymous);
+                    }
+                    
+                }
+
+                if(f.is_mixin != -1){
+                    var condition = f.is_mixin ? { is_anonymous: true} : { is_anonymous: false}; // is_anonymous its actualy is_mixin 
                     $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,condition);
                 }
 
                 if(f.tr_type != 'all'){
-                    message += 'offer tr_type filter';
-
                     var is_income = (f.tr_type == 'in') ? true : false;
                     var condition = { is_income: is_income};
-                    message += 'CONDITION '+JSON.stringify(condition);
                     $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,condition);
-                    message += 'HISTORY '+JSON.stringify($scope.prefiltered_history);
                 }
 
-                // message += '<br> type filter = ';
-                // message += JSON.stringify($scope.pre_filtered_history);
-                //keywords
                 if(f.keywords != ''){
-                    message += 'keywords filter';
                     $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,f.keywords);
                 }
 
-                // message += '<br> keyword filter = ';
-                // message += JSON.stringify($scope.pre_filtered_history);
-
-                
 
                 $scope.filtered_history = $scope.prefiltered_history;
 
-                message += 'finaly '+JSON.stringify($scope.filtered_history);
-
-                // informer.info(message);
             };
 
             $scope.filterReset = function(){

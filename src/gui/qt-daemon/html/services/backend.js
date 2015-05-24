@@ -530,7 +530,8 @@
                                     'tx_blob_size': 311,
                                     'tx_hash': "62b4f42bcff74c05199a4961ed226b542db38ea2bffbb4c2c384ee3b84f34e59",
                                     'unlock_time': 0,
-                                    'wid' : params.wallet_id
+                                    'wid' : params.wallet_id,
+                                    'is_anonimous' : true
                                 },
                                 {
                                     'amount': 200000000000000,
@@ -548,7 +549,8 @@
                                     'tx_blob_size': 669,
                                     'tx_hash': "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b9",
                                     'unlock_time': 0,
-                                    'wid' : params.wallet_id
+                                    'wid' : params.wallet_id,
+                                    'is_anonimous' : false
                                 }
 
                             ]
