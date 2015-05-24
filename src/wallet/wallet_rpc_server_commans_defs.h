@@ -42,6 +42,7 @@ namespace wallet_rpc
     bool          is_income;
     uint64_t      fee;
     bool          is_service;
+    bool          is_anonymous;
     wallet_transfer_info_details td;
 
     
@@ -63,6 +64,7 @@ namespace wallet_rpc
       KV_SERIALIZE(td)
       KV_SERIALIZE(fee)
       KV_SERIALIZE(is_service)
+      KV_SERIALIZE(is_anonymous)
     END_KV_SERIALIZE_MAP()
   };
 

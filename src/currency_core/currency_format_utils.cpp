@@ -1369,6 +1369,19 @@ namespace currency
     return false;
   }
   //---------------------------------------------------------------
+  bool is_anonymous_tx(const transaction& tx)
+  {
+    for (const auto& e : tx.vin)
+    {
+      if (e.type() != typeid(txin_to_key))
+        return false;
+      if (boost::get<txin_to_key>(e).key_offsets.size() < 2)
+        return false;
+    }
+
+    return true;
+  }
+  //---------------------------------------------------------------
   bool is_pos_block(const block& b)
   {
     if (!b.flags&CURRENCY_BLOCK_FLAG_POS_BLOCK)

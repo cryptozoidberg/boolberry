@@ -28,7 +28,7 @@
 
 #define WALLET_DEFAULT_TX_SPENDABLE_AGE                               10
 #define WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL                         10
-#define WALLET_FILE_SERIALIZATION_VERSION                             20
+#define WALLET_FILE_SERIALIZATION_VERSION                             21
 namespace tools
 {
 #pragma pack(push, 1)
@@ -163,7 +163,7 @@ namespace tools
     void refresh(std::atomic<bool>& stop);
     
     void push_offer(const currency::offer_details& od, currency::transaction& res_tx);
-    void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx);
+    void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee);
 
 
     bool set_core_proxy(const std::shared_ptr<i_core_proxy>& proxy);
@@ -344,6 +344,8 @@ namespace boost
       a & x.recipient_alias;
       a & x.comment;
       a & x.fee;
+      a & x.is_service;
+      a & x.is_anonymous;
 
       //do not store unlock_time
       if (Archive::is_loading::value)

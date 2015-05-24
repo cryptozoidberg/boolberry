@@ -201,6 +201,8 @@ void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height
   wti.tx_blob_size = static_cast<uint32_t>(currency::get_object_blobsize(wti.tx));
   wti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
   wti.is_service = currency::is_service_tx(tx);
+  wti.is_service = currency::is_service_tx(tx);
+  wti.is_anonymous = currency::is_anonymous_tx(tx);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::handle_money_received2(const currency::block& b, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td)
@@ -1079,7 +1081,7 @@ void wallet2::push_offer(const currency::offer_details& od, currency::transactio
   transfer(destinations, 0, 0, od.fee, extra, attachments, res_tx);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx)
+void wallet2::request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee)
 {
   currency::tx_destination_entry tx_dest;
   tx_dest.addr = m_account.get_keys().m_account_address;
@@ -1092,7 +1094,7 @@ void wallet2::request_alias_registration(const currency::alias_info& ai, currenc
   extra.push_back(eae);
 
   destinations.push_back(tx_dest);
-  transfer(destinations, 0, 0, od.fee, extra, attachments, res_tx);
+  transfer(destinations, 0, 0, fee, extra, attachments, res_tx);
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::select_indices_for_transfer(std::list<size_t>& selected_indexes, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money)

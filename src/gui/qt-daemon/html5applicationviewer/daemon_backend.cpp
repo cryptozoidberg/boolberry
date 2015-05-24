@@ -613,7 +613,7 @@ bool daemon_backend::alias_rpc_details_to_alias_info(const currency::alias_rpc_d
   return true;
 }
 
-std::string daemon_backend::request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, currency::transaction& res_tx)
+std::string daemon_backend::request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, uint64_t fee, currency::transaction& res_tx)
 {
   currency::alias_info ai = AUTO_VAL_INIT(ai);
   if (!alias_rpc_details_to_alias_info(al, ai))
@@ -631,7 +631,7 @@ std::string daemon_backend::request_alias_registration(const currency::alias_rpc
     GET_WALLET_BY_ID(wallet_id, w);
     try
     {
-      w->get()->request_alias_registration(ai, res_tx);
+      w->get()->request_alias_registration(ai, res_tx, fee);
       return API_RETURN_CODE_OK;
     }
     catch (const std::exception& e)

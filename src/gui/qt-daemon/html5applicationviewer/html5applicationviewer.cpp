@@ -558,7 +558,7 @@ QString Html5ApplicationViewer::request_alias_registration(const QString& param)
 
     view::transfer_response tr = AUTO_VAL_INIT(tr);
     currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
-    std::string status = m_backend.request_alias_registration(tp.alias, tp.wallet_id, res_tx);
+    std::string status = m_backend.request_alias_registration(tp.alias, tp.wallet_id, tp.fee, res_tx);
     if (status != API_RETURN_CODE_OK)
     {
       view::api_void av;

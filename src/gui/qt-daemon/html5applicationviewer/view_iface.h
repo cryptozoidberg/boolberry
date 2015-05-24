@@ -358,10 +358,12 @@ public:
   {
     currency::alias_rpc_details alias;
     uint64_t wallet_id;
+    uint64_t fee;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(alias)
       KV_SERIALIZE(wallet_id)
+      KV_SERIALIZE(fee)
     END_KV_SERIALIZE_MAP()
   };
 
