@@ -171,7 +171,6 @@
             };
 
             $scope.filterChange = function(){
-                return;
                 var f = $scope.filter;
                 //informer.info('filtre!');
                 $scope.prefiltered_history = angular.copy($scope.tx_history);

@@ -176,7 +176,7 @@
                     mixin_count : is_mixin ? $rootScope.settings.security.mixin_count : 0,
                     lock_time : lock_time,
                     payment_id : "",
-                    fee : fee,
+                    fee : $filter('gulden_to_int')(fee),
                     comment: comment,
                     push_payer: push_payer 
                 };
