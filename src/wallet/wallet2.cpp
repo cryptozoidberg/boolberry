@@ -644,8 +644,8 @@ void wallet2::generate(const std::string& wallet_, const std::string& password)
   m_account.generate();
   m_account_public_address = m_account.get_keys().m_account_address;
 
-  bool r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str() );
-  if(!r) LOG_PRINT_RED_L0("String with address text not saved");
+  //bool r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str() );
+  //if(!r) LOG_PRINT_RED_L0("String with address text not saved");
 
   store();
 }
@@ -1076,7 +1076,7 @@ void wallet2::push_offer(const currency::offer_details& od, currency::transactio
   std::vector<currency::attachment_v> attachments;
   attachments.push_back(od);
   destinations.push_back(tx_dest);
-  transfer(destinations, 0, 0, DEFAULT_FEE, extra, attachments, res_tx);
+  transfer(destinations, 0, 0, od.fee, extra, attachments, res_tx);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx)
@@ -1092,7 +1092,7 @@ void wallet2::request_alias_registration(const currency::alias_info& ai, currenc
   extra.push_back(eae);
 
   destinations.push_back(tx_dest);
-  transfer(destinations, 0, 0, DEFAULT_FEE, extra, attachments, res_tx);
+  transfer(destinations, 0, 0, od.fee, extra, attachments, res_tx);
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::select_indices_for_transfer(std::list<size_t>& selected_indexes, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money)

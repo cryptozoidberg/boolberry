@@ -658,9 +658,9 @@ std::string daemon_backend::transfer(size_t wallet_id, const view::transfer_para
   if(!tp.destinations.size())
     return API_RETURN_CODE_BAD_ARG_EMPTY_DESTINATIONS;
 
-  uint64_t fee = 0;
-  if (!currency::parse_amount(fee, tp.fee))
-    return API_RETURN_CODE_BAD_ARG_WRONG_FEE;
+  uint64_t fee = tp.fee;
+//  if (!currency::parse_amount(fee, tp.fee))
+//    return API_RETURN_CODE_BAD_ARG_WRONG_FEE;
 
   for(auto& d: tp.destinations)
   {

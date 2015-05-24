@@ -43,7 +43,7 @@ namespace view
     uint64_t lock_time;
     std::string payment_id;
     std::string comment;
-    std::string fee;
+    uint64_t fee;
     bool push_payer;
 
     BEGIN_KV_SERIALIZE_MAP()
