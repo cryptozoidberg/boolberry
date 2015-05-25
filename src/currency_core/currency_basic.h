@@ -169,13 +169,14 @@ namespace currency
     std::string comment;       //[max 160 characters]
     std::string payment_types; //[max 20 characters ]money accept type(bank transaction, internet money, cash, etc)
     uint8_t expiration_time;   //n-days
-    uint64_t fee;              //value of fee to pay(or paid in case of existing offers) to rank it
 
     //extra information for wallet use
     //DO NOT INCLUDE IT INTO TX SERIALIZATON
     std::string tx_hash;
     uint64_t index_in_tx;
     uint64_t timestamp;        //this is not kept by transaction, info filled by corresponding transaction
+    uint64_t fee;              //value of fee to pay(or paid in case of existing offers) to rank it
+
 
 
     BEGIN_SERIALIZE_OBJECT()
@@ -203,6 +204,7 @@ namespace currency
       KV_SERIALIZE(tx_hash)
       KV_SERIALIZE(index_in_tx)
       KV_SERIALIZE(timestamp)
+      KV_SERIALIZE(fee)
     END_KV_SERIALIZE_MAP()
 
   };
