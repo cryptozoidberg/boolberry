@@ -201,7 +201,6 @@ void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height
   wti.tx_blob_size = static_cast<uint32_t>(currency::get_object_blobsize(wti.tx));
   wti.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
   wti.is_service = currency::is_service_tx(tx);
-  wti.is_service = currency::is_service_tx(tx);
   wti.is_anonymous = currency::is_anonymous_tx(tx);
 }
 //----------------------------------------------------------------------------------------------------
