@@ -322,7 +322,7 @@ bool simple_wallet::open_wallet(const string &wallet_file, const std::string& pa
 {
   m_wallet_file = wallet_file;
   m_wallet.reset(new tools::wallet2());
-  m_wallet->callback(this->shared_from_this());
+  m_wallet->callback(shared_from_this());
 
   try
   {
@@ -908,7 +908,6 @@ int main(int argc, char* argv[])
 
   po::options_description desc_all;
   desc_all.add(desc_general).add(desc_params);
-  currency::simple_wallet w;
   po::variables_map vm;
   bool r = command_line::handle_error_helper(desc_all, [&]()
   {
@@ -916,6 +915,7 @@ int main(int argc, char* argv[])
 
     if (command_line::get_arg(vm, command_line::arg_help))
     {
+      simple_wallet w;
       success_msg_writer() << "Usage: simplewallet [--wallet-file=<file>|--generate-new-wallet=<file>] [--daemon-address=<host>:<port>] [<COMMAND>]";
       success_msg_writer() << desc_all << '\n' << w.get_commands_str();
       return false;
@@ -1044,25 +1044,26 @@ int main(int argc, char* argv[])
     }
   }else
   {
+    shared_ptr<currency::simple_wallet> sw(new currency::simple_wallet);
     //runs wallet with console interface 
-    r = w.init(vm);
+    r = sw->init(vm);
     CHECK_AND_ASSERT_MES(r, 1, "Failed to initialize wallet");
 
     std::vector<std::string> command = command_line::get_arg(vm, arg_command);
     if (!command.empty())
     {
-      w.process_command(command);
-      w.stop();
-      w.deinit();
+      sw->process_command(command);
+      sw->stop();
+      sw->deinit();
     }
     else
     {
-      tools::signal_handler::install([&w] {
-        w.stop();
+      tools::signal_handler::install([sw] {
+        sw->stop();
       });
-      w.run();
+      sw->run();
 
-      w.deinit();
+      sw->deinit();
     }
   }
   return 1;
