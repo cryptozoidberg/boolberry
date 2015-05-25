@@ -290,12 +290,10 @@
 
         $scope.startMining = function(wallet_id){
             backend.startPosMining(wallet_id);
-            
         }
 
         $scope.stopMining = function(wallet_id){
             backend.stopPosMining(wallet_id);
-            
         }
 
         $scope.resynch = function(wallet_id){

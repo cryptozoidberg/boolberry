@@ -205,6 +205,8 @@
                 return this.runCommand('on_request_quit', {});
             },
 
+            
+
             reloadCounters : function(){
                 $timeout(function(){
                     $rootScope.total_balance = 0;
@@ -222,7 +224,15 @@
                     returnObject.get_all_offers(function(data){
                         if(angular.isDefined(data.offers)){
                             $rootScope.offers = data.offers;
-                            $rootScope.offers_count = data.offers.length;
+                            var my_offers = [];
+                            angular.forEach($rootScope.offers,function(item){
+                                var result = $filter('filter')($rootScope.safes, item.tx_hash);
+                                if(result.length){
+                                    my_offers.push(result[0]);
+                                }
+                            });
+
+                            $rootScope.offers_count = my_offers.length;
                         }
                     });
                 });
@@ -547,7 +557,7 @@
                                     'length': 1,
                                     'timestamp': 1429608249,
                                     'tx_blob_size': 669,
-                                    'tx_hash': "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b9",
+                                    'tx_hash': "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b1",
                                     'unlock_time': 0,
                                     'wid' : params.wallet_id,
                                     'is_anonimous' : false
@@ -576,7 +586,8 @@
                             "comment": "Best ever service",
                             "payment_types": "cash",
                             "expiration_time":3,
-                            'timestamp': 1429715920
+                            'timestamp': 1429715920,
+                            'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b1"
                         }, 
                         {
                             "offer_type": 3,
@@ -588,7 +599,8 @@
                             "comment": "Best ever service",
                             "payment_types": "EPS,BC,Qiwi",
                             "expiration_time":5,
-                            'timestamp': 1429715920
+                            'timestamp': 1429715920,
+                            'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b2"
                         },
                         {
                             "offer_type": 1,
@@ -600,7 +612,8 @@
                             "comment": "Best ever service",
                             "payment_types": "CSH,BT",
                             "expiration_time":5,
-                            'timestamp': 1429715920
+                            'timestamp': 1429715920,
+                            'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b9"
                         }
                       ]
                     };
