@@ -150,7 +150,7 @@
                     "od": {
                         "offer_type": offer_type, //0 buy, 1 sell
                         "amount_lui": $filter('gulden_to_int')(amount_lui),
-                        "amount_etc": amount_etc,
+                        "amount_etc": $filter('gulden_to_int')(amount_etc),
                         "target": target,
                         "location": location,
                         "contacts": contacts,
