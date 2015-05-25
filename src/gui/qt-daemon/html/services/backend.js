@@ -210,7 +210,7 @@
                     $rootScope.total_balance = 0;
                     var txCount = 0;
                     angular.forEach($rootScope.safes,function(safe){
-                        $rootScope.total_balance += safe.unlocked_balance;
+                        $rootScope.total_balance += safe.balance;
                         safe.balance_formated = $filter('gulden')(safe.balance);
                         if(safe.history.length){
                             txCount += safe.history.length;
