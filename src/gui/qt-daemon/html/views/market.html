@@ -262,7 +262,7 @@
                     <tbody>
                         <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers | filter:is_currency_offer">
                             <td>
-                                3 часа назад
+                                {{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}
                             </td>
                             <td>
                                 <span class="nowrap">{{offer.amount_etc}} {{offer.target}}</span>
@@ -478,7 +478,7 @@
 
                         <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers | filter:is_goods_offer">
                             <td>
-                                3 часа назад
+                                {{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}
                             </td>
                             <td>
                                 {{offer.target}}

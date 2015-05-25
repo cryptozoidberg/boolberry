@@ -129,21 +129,35 @@
        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location){
             
             $scope.my_safes = angular.copy($rootScope.safes);
-            $scope.my_safes.push({name: 'Все сейфы', wallet_id : -1});
-            //$scope.wallet_id = -1;
+            $scope.my_safes.unshift({name: 'Все сейфы', wallet_id : -1});
             
             $scope.tx_history = [];
 
-            //console.log($scope.history);
+            var reloadHistory = function(){
+                var temp = [];
+                angular.forEach($rootScope.safes, function(safe){ // TODO WATCH?
+                    if(angular.isDefined(safe.history)){
+                        angular.forEach(safe.history, function(item){
+                            item.wallet_id = angular.copy(safe.wallet_id);
+                            temp.push(item);    
+                        });
+                    }
+                },true); 
+                $scope.tx_history = temp;   
+            };
 
-            angular.forEach($rootScope.safes, function(safe){
-                if(angular.isDefined(safe.history)){
-                    angular.forEach(safe.history, function(item){
-                        item.wallet_id = angular.copy(safe.wallet_id);
-                        $scope.tx_history.push(item);    
-                    });
+            reloadHistory();
+
+            $scope.$watch(
+                function(){
+                    return $rootScope.safes;
+                },
+                function(){
+                    reloadHistory();    
                 }
-            });
+            );
+
+            
 
             //console.log($scope.history);
 

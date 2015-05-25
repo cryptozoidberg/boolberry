@@ -8,7 +8,7 @@
             backend.get_all_offers(function(data){
                 if(angular.isDefined(data.offers)){
                     console.log(data.offers[0]);
-                    $rootScope.offers = data.offers;
+                    $rootScope.offers = $filter('orderBy')(data.offers,'-timestamp');
                     $rootScope.offers_count = data.offers.length;
                 }
                 console.log(data);

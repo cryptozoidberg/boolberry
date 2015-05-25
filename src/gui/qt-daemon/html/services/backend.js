@@ -150,7 +150,7 @@
                     "od": {
                         "offer_type": offer_type, //0 buy, 1 sell
                         "amount_lui": $filter('gulden_to_int')(amount_lui),
-                        "amount_etc": 1,
+                        "amount_etc": amount_etc,
                         "target": target,
                         "location": location,
                         "contacts": contacts,
@@ -575,7 +575,8 @@
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "cash",
-                            "expiration_time":3
+                            "expiration_time":3,
+                            'timestamp': 1429715920
                         }, 
                         {
                             "offer_type": 3,
@@ -586,7 +587,8 @@
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "EPS,BC,Qiwi",
-                            "expiration_time":5
+                            "expiration_time":5,
+                            'timestamp': 1429715920
                         },
                         {
                             "offer_type": 1,
@@ -597,7 +599,8 @@
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "CSH,BT",
-                            "expiration_time":5
+                            "expiration_time":5,
+                            'timestamp': 1429715920
                         }
                       ]
                     };
