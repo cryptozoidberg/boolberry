@@ -223,6 +223,8 @@ namespace tools
     bool get_pos_entries(currency::COMMAND_RPC_SCAN_POS::request& req);
     bool build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& req, const currency::COMMAND_RPC_SCAN_POS::response& rsp);
     bool reset_history();
+    bool is_transfer_unlocked(const transfer_details& td) const;
+
   private:
     bool store_keys(std::string& buff, const std::string& password);
     void load_keys(const std::string& keys_file_name, const std::string& password);
@@ -230,7 +232,6 @@ namespace tools
     void detach_blockchain(uint64_t height);
     void get_short_chain_history(std::list<crypto::hash>& ids);
     bool is_tx_spendtime_unlocked(uint64_t unlock_time) const;
-    bool is_transfer_unlocked(const transfer_details& td) const;
     bool clear();
     void pull_blocks(size_t& blocks_added, std::atomic<bool>& stop);
     uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
