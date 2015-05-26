@@ -1,6 +1,6 @@
 #!/bin/bash
 
-QT_PREFIX_PATH="$HOME/Qt/5.4/gcc_64"
+QT_PREFIX_PATH="$HOME/Qt/5.4.1/gcc_64"
 QT_BINARIES_PATH="$HOME/lui_binaries"
 
 
