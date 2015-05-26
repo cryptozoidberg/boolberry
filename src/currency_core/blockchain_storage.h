@@ -125,6 +125,7 @@ namespace currency
     bool check_tx_inputs(const transaction& tx, uint64_t& pmax_used_block_height, crypto::hash& max_used_block_id);
     uint64_t get_current_comulative_blocksize_limit();
     uint64_t get_current_hashrate(size_t aprox_count);
+    uint64_t get_seconds_between_last_n_block(size_t n);
     bool print_transactions_statistics();
     bool update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent);
 

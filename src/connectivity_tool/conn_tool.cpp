@@ -215,6 +215,8 @@ bool handle_get_daemon_info(po::variables_map& vm)
   << "grey_peerlist_size: " << res.grey_peerlist_size << ENDL
   << "current_network_hashrate_50: " << res.current_network_hashrate_50 << ENDL
   << "current_network_hashrate_350: " << res.current_network_hashrate_350 << ENDL
+  << "seconds_between_10_blocks: " << res.seconds_for_10_blocks << ENDL
+  << "seconds_between_30_blocks: " << res.seconds_for_30_blocks << ENDL
   << "alias_count: " << res.alias_count << ENDL
   << "transactions_cnt_per_day: " << res.transactions_cnt_per_day << ENDL
   << "transactions_volume_per_day: " << res.transactions_volume_per_day << ENDL

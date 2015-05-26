@@ -96,6 +96,8 @@ namespace currency
     res.current_blocks_median = m_core.get_blockchain_storage().get_current_comulative_blocksize_limit()/2;
     res.current_network_hashrate_50 = m_core.get_blockchain_storage().get_current_hashrate(50);
     res.current_network_hashrate_350 = m_core.get_blockchain_storage().get_current_hashrate(350);
+    res.seconds_for_10_blocks = m_core.get_blockchain_storage().get_seconds_between_last_n_block(10);
+    res.seconds_for_30_blocks = m_core.get_blockchain_storage().get_seconds_between_last_n_block(30);
     res.alias_count = m_core.get_blockchain_storage().get_aliases_count();
     m_core.get_blockchain_storage().get_transactions_daily_stat(res.transactions_cnt_per_day, res.transactions_volume_per_day);
     res.last_pos_timestamp = m_core.get_blockchain_storage().get_last_block_of_type(true).bl.timestamp;

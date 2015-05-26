@@ -326,6 +326,8 @@ namespace currency
       uint64_t current_blocks_median;
       uint64_t current_network_hashrate_50;
       uint64_t current_network_hashrate_350;
+      uint64_t seconds_for_10_blocks;
+      uint64_t seconds_for_30_blocks;
       uint64_t alias_count;
       uint64_t daemon_network_state;
       uint64_t synchronization_start_height;
@@ -365,6 +367,8 @@ namespace currency
         KV_SERIALIZE(pow_sequense_factor)
         KV_SERIALIZE(last_pow_timestamp)
         KV_SERIALIZE(last_pos_timestamp)
+        KV_SERIALIZE(seconds_for_10_blocks)
+        KV_SERIALIZE(seconds_for_30_blocks)
       END_KV_SERIALIZE_MAP()
     };
   };    

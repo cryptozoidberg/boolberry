@@ -1202,6 +1202,16 @@ bool blockchain_storage::check_keyimages(const std::list<crypto::key_image>& ima
   return true;
 }
 //------------------------------------------------------------------
+uint64_t blockchain_storage::get_seconds_between_last_n_block(size_t n)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  if (m_blocks.size() <= n)
+    return 0;
+
+  return m_blocks[m_blocks.size() - 1].bl.timestamp > m_blocks[m_blocks.size() - 1 - n].bl.timestamp ?
+    m_blocks[m_blocks.size() - 1].bl.timestamp - m_blocks[m_blocks.size() - 1 - n].bl.timestamp : 0;
+}
+//------------------------------------------------------------------
 uint64_t blockchain_storage::get_current_hashrate(size_t aprox_count)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -1488,7 +1498,7 @@ void blockchain_storage::print_blockchain(uint64_t start_index, uint64_t end_ind
 
   for(size_t i = start_index; i != m_blocks.size() && i != end_index; i++)
   {
-    ss << (is_pos_block(m_blocks[i].bl) ? "[PoS]" : "[PoW]") << "h: " << i << ", timestamp: " << m_blocks[i].bl.timestamp
+    ss << (is_pos_block(m_blocks[i].bl) ? "[PoS]" : "[PoW]") << "h: " << i << ", timestamp: " << m_blocks[i].bl.timestamp << "(" << epee::misc_utils::get_time_str_v2(m_blocks[i].bl.timestamp) << ")"
       << ", cumul_diff_adj: " << m_blocks[i].cumulative_diff_adjusted
       << ", cumul_diff_pcs: " << m_blocks[i].cumulative_diff_precise
       << ", cumul_diff_adj_delta: " << m_blocks[i].cumulative_diff_adjusted - m_blocks[i ? i - 1 : 0].cumulative_diff_adjusted
