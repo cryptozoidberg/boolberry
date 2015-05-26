@@ -212,6 +212,7 @@ std::string daemon_backend::get_config_folder()
 
 void daemon_backend::main_worker(const po::variables_map& vm)
 {
+  TRY_ENTRY();
 
 #define CHECK_AND_ASSERT_AND_SET_GUI(cond, res, mess) \
   if (!cond) \
@@ -285,7 +286,21 @@ void daemon_backend::main_worker(const po::variables_map& vm)
     LOG_PRINT_L0("Storing wallet data...");
     //dsi.text_state = "Storing wallets data...";
     //m_pview->update_daemon_status(dsi);
-    wo.second.w->get()->store();
+    try
+    {
+      wo.second.w->get()->store();
+    }
+    catch (const std::exception& e)
+    {
+      LOG_ERROR("Exception rised at storing wallet: " << e.what());
+      continue;
+    }
+    catch (...)
+    {
+      LOG_ERROR("Exception rised at storing wallet");
+      continue;
+    }
+
   }
   CRITICAL_REGION_END();
 
@@ -337,6 +352,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   m_pview->update_daemon_status(dsi);
 
   m_pview->on_backend_stopped();
+  CATCH_ENTRY_L0("daemon_backend::main_worker", void());
 }
 
 bool daemon_backend::update_state_info()
