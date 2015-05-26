@@ -157,25 +157,33 @@
                 }
             );
 
-            
-
-            //console.log($scope.history);
+            $scope.row = '-timestramp'; //sort by default
 
             $scope.order = function(key){
+                $scope.row = key;
                 $scope.filtered_history = $filter('orderBy')($scope.filtered_history,key);
             };
 
-            
-            
-
-            // $scope.changeWallet = function(wallet_id){
-            //     if(wallet_id === -1){
-            //         $scope.filtered_history = $scope.history;
-            //     }else{
-            //         var condition = {wi : { wallet_id: parseInt(wallet_id)}};
-            //         $scope.filtered_history = $filter('filter')($scope.history,condition);
-            //     }
+            // scope.disabled = function(date, mode) {
+            //     return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
             // };
+
+            $scope.open = function($event,name) {
+                $event.preventDefault();
+                $event.stopPropagation();
+                if(name == 'start'){
+                    $scope.opened_start = !$scope.opened_start;
+                }else if(name = 'end'){
+                    $scope.opened_end = !$scope.opened_end;
+                }
+            };
+
+            $scope.dateOptions = {
+                formatYear: 'yy',
+                startingDay: 1
+            };
+
+            $scope.format = 'dd/MMMM/yyyy';
 
             //default filter values
             $scope.is_anonim_values = [
@@ -191,43 +199,80 @@
             ];
 
             $scope.interval_values = [
-                "не важно",
-                "день",
-                "неделя",
-                "месяц",
-                "два месяца",
-                "весь период",
-                "другой период"
+                { key: -1, value : "весь период"},
+                { key: 86400, value : "день"},
+                { key: 604800, value : "неделя"},
+                { key: 2592000, value : "месяц"},
+                { key: 5184000, value : "два месяца"},
+                { key: -2, value : "другой период"}
             ];
-            
+
+            $scope.hide_calendar = true;
 
             $scope.filter = {
                 tr_type: 'all', //all, in, out
                 wallet_id: -1,
                 keywords: '',
                 is_anonim : $scope.is_anonim_values[0].key,
-                is_mixin : -1
+                is_mixin : -1,
+                interval : $scope.is_anonim_values[0].key
+            };
+
+            $scope.tx_date = {
+                // start : new Date(),
+                // end: new Date(new Date().getTime() + 604800)
             };
 
             $scope.filterChange = function(){
                 var f = $scope.filter;
-                //informer.info('filtre!');
                 $scope.prefiltered_history = angular.copy($scope.tx_history);
-                // informer.info('HISTORY '+JSON.stringify($scope.prefiltered_history));
 
                 var  message = '';
 
-                console.log('HISTORY');
-                console.log($scope.prefiltered_history);
-                //wallet filter
                 if(f.wallet_id != -1){
                     message += 'wallet filter';
                     var condition = {wallet_id: parseInt(f.wallet_id)};
                     $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,condition);
                 }
 
+                if(f.interval == -2){
+                    $scope.hide_calendar = false;
+
+                    if(angular.isDefined($scope.tx_date.start) && angular.isDefined($scope.tx_date.end)){
+                        var start = $scope.tx_date.start.getTime()/1000;
+                        var end   = $scope.tx_date.end.getTime()/1000 + 60*60*24;
+
+                        var in_range = function(item){
+                            console.log(item.timestamp);
+                            console.log((start < item.timestamp) && (item.timestamp < end));
+                            if((start < item.timestamp) && (item.timestamp < end)){
+                                return true;
+                            }
+                            return false;
+                        }
+
+                        if(start < end){
+                            $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,in_range);
+                        }
+                    }
+                }else{
+                    $scope.hide_calendar = true;
+
+                }
+
+                if(f.interval > 0){
+                    var now = new Date().getTime();
+                    now = now/1000;
+                    var in_interval = function(item){
+                        if(item.timestamp > (now - f.interval)){
+                            return true;
+                        }
+                        return false;
+                    }
+                    $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,in_interval);
+                }
+
                 if(f.is_anonim != -1){
-                    //var condition = f.is_anonim ? { remote_address: } : { remote_address: 'HhTZP7Sy4FoDR1kJHbFjzd5gSnUPdpHWHj7Gaaeqjt52KS23rHGa1sN73yZYPt77TkN8VVmHrT5qmBJQGzDLYJGjQpxGRid'};
                     var is_anonymous = function(item){
                         if(item.remote_address == ''){
                             return true;
@@ -244,7 +289,6 @@
                     }else{
                         $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,is_not_anonymous);
                     }
-                    
                 }
 
                 if(f.is_mixin != -1){
@@ -264,18 +308,17 @@
 
 
                 $scope.filtered_history = $scope.prefiltered_history;
+                $scope.order($scope.row);
 
             };
 
             $scope.filterReset = function(){
                 $scope.filtered_history = $scope.tx_history;
-                $scope.order('-timestamp');
+                $scope.order($scope.row);
             };
 
             $scope.filterReset();
-            
 
-            //console.log($scope.filtered_history);
        }
     ]);
 
