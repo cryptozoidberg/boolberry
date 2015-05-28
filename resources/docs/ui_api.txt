@@ -63,7 +63,9 @@ param:
 {
   "wallet_id": 0,
   "wallet_state": 1,
-  "is_mining": true
+  "is_mining": true,
+  "balance": 123123,
+  "unlocked_balance": 234234242
 }
 
 wallet_state_synchronizing = 1,
