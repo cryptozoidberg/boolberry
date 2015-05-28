@@ -93,7 +93,7 @@ private:
   void update_wallets_info();
   bool alias_rpc_details_to_alias_info(const currency::alias_rpc_details& ard, currency::alias_info& ai);
   void init_wallet_entry(wallet_vs_options& wo, uint64_t id);
-
+  static void prepare_wallet_status_info(wallet_vs_options& wo, view::wallet_status_info& wsi);
   //----- i_backend_wallet_callback ------
   virtual void on_new_block(size_t wallet_id, uint64_t height, const currency::block& block);
   virtual void on_transfer2(size_t wallet_id, const tools::wallet_rpc::wallet_transfer_info& wti);

@@ -166,11 +166,15 @@ public:
     uint64_t wallet_id;
     uint64_t wallet_state;
     bool is_mining;
+    uint64_t balance;
+    uint64_t unlocked_balance;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_id)
       KV_SERIALIZE(wallet_state)
       KV_SERIALIZE(is_mining)
+      KV_SERIALIZE(balance)
+      KV_SERIALIZE(unlocked_balance)
     END_KV_SERIALIZE_MAP()
   };  
   

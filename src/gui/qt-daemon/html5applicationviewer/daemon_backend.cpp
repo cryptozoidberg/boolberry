@@ -775,19 +775,23 @@ std::string daemon_backend::start_pos_mining(uint64_t wallet_id)
   GET_WALLET_OPT_BY_ID(wallet_id, wo);
   wo.do_mining = true;
   view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
-  wsi.is_mining = true;
-  wsi.wallet_id = wallet_id;
+  prepare_wallet_status_info(wo, wsi);
   wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
   m_pview->update_wallet_status(wsi);
   return API_RETURN_CODE_OK;
+}
+void daemon_backend::prepare_wallet_status_info(wallet_vs_options& wo, view::wallet_status_info& wsi)
+{
+  wsi.is_mining = wo.do_mining;
+  wsi.wallet_id = wo.wallet_id;
+  wsi.balance = wo.w->get()->balance(wsi.unlocked_balance);
 }
 std::string daemon_backend::stop_pos_mining(uint64_t wallet_id)
 {
   GET_WALLET_OPT_BY_ID(wallet_id, wo);
   wo.do_mining = false;
   view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
-  wsi.is_mining = false;
-  wsi.wallet_id = wallet_id;
+  prepare_wallet_status_info(wo, wsi);
   wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
   m_pview->update_wallet_status(wsi);
   return API_RETURN_CODE_OK;
@@ -899,11 +903,12 @@ void daemon_backend::wallet_vs_options::worker_func()
       {
         wsi.is_mining = do_mining;
         wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
-        wsi.wallet_id = wallet_id;
+        prepare_wallet_status_info(*this, wsi);
         pview->update_wallet_status(wsi);
         w->get()->refresh(stop);
 
         wsi.wallet_state = view::wallet_status_info::wallet_state_ready;
+        prepare_wallet_status_info(*this, wsi);
         pview->update_wallet_status(wsi);
         //do refresh
         last_wallet_synch_height = static_cast<uint64_t>(*plast_daemon_height);

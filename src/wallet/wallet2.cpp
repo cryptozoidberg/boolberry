@@ -748,6 +748,24 @@ uint64_t wallet2::unlocked_balance()
   return amount;
 }
 //----------------------------------------------------------------------------------------------------
+uint64_t wallet2::balance(uint64_t& unloked)
+{
+  uint64_t balance_total = 0;
+  BOOST_FOREACH(auto& td, m_transfers)
+  if (!td.m_spent)
+  {
+    balance_total += td.amount();
+    if (is_transfer_unlocked(td))
+      unloked += td.amount();
+  }
+
+
+  BOOST_FOREACH(auto& utx, m_unconfirmed_txs)
+  if (utx.second.is_income)
+    balance_total += utx.second.amount;
+  return balance_total;
+}
+//----------------------------------------------------------------------------------------------------
 uint64_t wallet2::balance()
 {
   uint64_t amount = 0;
