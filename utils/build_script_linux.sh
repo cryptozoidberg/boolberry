@@ -26,7 +26,19 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-make daemon qt-lui simplewallet simpleminer connectivity_tool;
+make daemon -j qt-lui;
+if [ $? -ne 0 ]; then
+    echo "Failed to make!"
+    exit 1
+fi
+
+make daemon -j simplewallet;
+if [ $? -ne 0 ]; then
+    echo "Failed to make!"
+    exit 1
+fi
+
+make daemon -j connectivity_tool;
 if [ $? -ne 0 ]; then
     echo "Failed to make!"
     exit 1
