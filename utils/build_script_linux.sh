@@ -1,7 +1,7 @@
 #!/bin/bash
 
 QT_PREFIX_PATH="$HOME/Qt5.4.1/5.4/gcc_64"
-QT_BINARIES_PATH="$HOME/lui_binaries"
+QT_BINARIES_PATH="$HOME/qt_binaries"
 
 
 prj_root=$(pwd)
