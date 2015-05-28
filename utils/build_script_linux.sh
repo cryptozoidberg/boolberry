@@ -54,8 +54,7 @@ mkdir -p lui;
 cp -Rv ../../src/gui/qt-daemon/html ./lui
 cp -Rv ../../utils/qt-lui.sh ./lui
 cp -Rv $QT_BINARIES_PATH/libs ./lui
-cp -Rv $QT_BINARIES_PATH/libs ./lui
-cp -Rv src/luid src/qt-lui src/simplewallet src/simpleminer src/connectivity_tool ./lui
+cp -Rv src/luid src/qt-lui src/simplewallet  src/connectivity_tool ./lui
 
 
 tar -cjvf lui-linux-x64-$version_str.tar.bz2 lui
