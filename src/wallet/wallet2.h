@@ -172,11 +172,39 @@ namespace tools
     uint64_t balance(uint64_t& unloked);
     uint64_t unlocked_balance();
     template<typename T>
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, const std::vector<currency::attachment_v> attachments, T destination_split_strategy, const tx_dust_policy& dust_policy);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts,
+                  size_t fake_outputs_count, 
+                  uint64_t unlock_time, 
+                  uint64_t fee, 
+                  const std::vector<currency::extra_v>& extra, 
+                  const std::vector<currency::attachment_v> attachments, 
+                  T destination_split_strategy, 
+                  const tx_dust_policy& dust_policy);
     template<typename T>
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, const std::vector<currency::attachment_v> attachments, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, const std::vector<currency::attachment_v> attachments);
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, const std::vector<currency::attachment_v> attachments, currency::transaction& tx);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts,
+                  size_t fake_outputs_count, 
+                  uint64_t unlock_time, 
+                  uint64_t fee, 
+                  const std::vector<currency::extra_v>& extra, 
+                  const std::vector<currency::attachment_v> attachments, 
+                  T destination_split_strategy, 
+                  const tx_dust_policy& dust_policy, 
+                  currency::transaction &tx,
+                  crypto::secret_key& one_time_tx_secrete_key,
+                  uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, 
+                  size_t fake_outputs_count, 
+                  uint64_t unlock_time, 
+                  uint64_t fee, 
+                  const std::vector<currency::extra_v>& extra, 
+                  const std::vector<currency::attachment_v> attachments);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, 
+                  size_t fake_outputs_count, 
+                  uint64_t unlock_time, 
+                  uint64_t fee, 
+                  const std::vector<currency::extra_v>& extra, 
+                  const std::vector<currency::attachment_v> attachments, 
+                  currency::transaction& tx);
     bool check_connection();
     template<typename idle_condition_cb_t> //do refresh as external callback
     static bool scan_pos(mining_context& cxt, std::atomic<bool>& stop, idle_condition_cb_t idle_condition_cb);
@@ -431,8 +459,17 @@ namespace tools
   }
 
   template<typename T>
-  void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-    uint64_t unlock_time, uint64_t fee, const std::vector<currency::extra_v>& extra, const std::vector<currency::attachment_v> attachments, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr)
+  void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, 
+                         size_t fake_outputs_count,
+                         uint64_t unlock_time, 
+                         uint64_t fee, 
+                         const std::vector<currency::extra_v>& extra, 
+                         const std::vector<currency::attachment_v> attachments, 
+                         T destination_split_strategy, 
+                         const tx_dust_policy& dust_policy, 
+                         currency::transaction &tx,
+                         crypto::secret_key& one_time_tx_secrete_key,
+                         uint8_t tx_outs_attr)
   {
     if (!is_connected_to_net())
     {
