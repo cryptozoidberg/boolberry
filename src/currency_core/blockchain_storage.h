@@ -224,6 +224,7 @@ namespace currency
     typedef std::map<std::string, std::list<alias_info_base>> aliases_container; //alias can be address address address + view key
     typedef std::unordered_map<account_public_address, std::string> address_to_aliases_container;
     typedef std::list<blockchain_storage::blocks_ext_by_hash::iterator> alt_chain_list;
+    typedef std::unordered_map<crypto::hash, std::vector<offer_details>> offers_container;
     
     tx_memory_pool& m_tx_pool;
     critical_section m_blockchain_lock; // TODO: add here reader/writer lock
@@ -256,7 +257,7 @@ namespace currency
     block_extended_info m_bei_stub;
 
     //offers
-    std::unordered_map<crypto::hash, std::vector<offer_details>> m_offers; //offers indexed by 
+    offers_container m_offers; //offers indexed by 
 
 
     bool switch_to_alternative_blockchain(alt_chain_type& alt_chain);
@@ -300,8 +301,9 @@ namespace currency
 //    bool build_stake_modifier_for_alt(const alt_chain_type& alt_chain, stake_modifier_type& sm);
     template<class visitor_t>
     bool enum_blockchain(visitor_t& v, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
-
-
+    bool validate_cancel_order(const cancel_offer& co, offers_container::iterator& oit);
+    bool process_cancel_offer(const cancel_offer& co);
+    bool unprocess_cancel_offer(const cancel_offer& co);
 
     //POS
     wide_difficulty_type get_adjusted_cumulative_difficulty_for_next_pos(wide_difficulty_type next_diff);

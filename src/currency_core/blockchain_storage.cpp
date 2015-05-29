@@ -1854,27 +1854,53 @@ size_t get_offers_count_in_attachments(const transaction& tx)
 //------------------------------------------------------------------
 
 //------------------------------------------------------------------
-bool blockchain_storage::validate_cancel_order(const cancel_offer& co)
+bool blockchain_storage::validate_cancel_order(const cancel_offer& co, offers_container::iterator& oit)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   auto it = m_transactions.find(co.tx_id);
   CHECK_AND_ASSERT_MES(it != m_transactions.end(), false, "Cancel offer command: tx " << co.tx_id << " not found");
   crypto::public_key tx_pub_key = get_tx_pub_key_from_extra(it->second.tx);
   CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Cancel offer command: tx " << co.tx_id << " don't have pubkey");
-  blobdata buff_to_check_sig = make_cancel_offer_sig_blob();
+  blobdata buff_to_check_sig = make_cancel_offer_sig_blob(co);
   bool res = crypto::check_signature(crypto::cn_fast_hash(buff_to_check_sig.data(), buff_to_check_sig.size()), tx_pub_key, co.sig);
   CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Signature check failed offer command: tx " << co.tx_id << " don't have pubkey");
 
+  oit = m_offers.find(co.tx_id);
+  CHECK_AND_ASSERT_MES(oit != m_offers.end(), false, "Cancel offer command: tx " << co.tx_id << " not found in offers");
+
+  CHECK_AND_ASSERT_MES(oit->second.size() > co.offer_index, false, "Cancel offer command: tx "
+    << co.tx_id << ": co.offer_index " << co.offer_index << " more then vector size = " << oit->second.size());
+
+  CHECK_AND_ASSERT_MES(!oit->second[co.offer_index].stopped, false, "Cancel offer command: tx "
+    << co.tx_id << ": co.offer_index " << co.offer_index << ": offer already stopped");
+
+  return true;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::process_cancel_offer(const cancel_offer& co)
 {
+  offers_container::iterator it = m_offers.end();
+  bool r = validate_cancel_order(co, it);
+  CHECK_AND_ASSERT_MES(r, false, "failed to validate order");
+  it->second[co.offer_index].stopped = true;
+  LOG_PRINT_MAGENTA("Offer " << co.tx_id << ":" << co.offer_index << " cancelled", LOG_LEVEL_0);
+  return true;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::unprocess_cancel_offer(const cancel_offer& co)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  auto oit = m_offers.find(co.tx_id);
+  CHECK_AND_ASSERT_MES(oit != m_offers.end(), false, "Cancel offer command: tx " << co.tx_id << " not found in offers");
 
+  CHECK_AND_ASSERT_MES(oit->second.size() > co.offer_index, false, "Cancel offer command: tx "
+    << co.tx_id << ": co.offer_index " << co.offer_index << " more then vector size = " << oit->second.size());
+
+  CHECK_AND_ASSERT_MES(oit->second[co.offer_index].stopped, false, "Cancel offer command unprocess: tx "
+    << co.tx_id << ": co.offer_index " << co.offer_index << ": not stopped yet");
+  oit->second[co.offer_index].stopped = false;
+  
+  return true;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::unprocess_blockchain_tx_attachments(const transaction& tx)
