@@ -114,7 +114,7 @@
 #define WALLET_FILE_MAX_BODY_SIZE                       0x88888888L //2GB
 #define WALLET_FILE_MAX_KEYS_SIZE                       10000 //2GB
 
-
+#define OFFER_MAXIMUM_LIFE_TIME                         (60*60*24*14)  // 2 weeks       
 
 #define GUI_BLOCKS_DISPLAY_COUNT                        40
 #define GUI_DISPATCH_QUE_MAXSIZE                        100

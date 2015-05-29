@@ -228,6 +228,7 @@ namespace tools
       a & m_unconfirmed_txs;
       a & m_payments;
       a & m_transfer_history;
+      a & m_offers_secret_keys;
 
     }
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
@@ -307,6 +308,7 @@ namespace tools
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
     std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
     std::unordered_map<crypto::hash, tools::wallet_rpc::wallet_transfer_info> m_unconfirmed_txs;
+    std::unordered_map<crypto::hash, std::pair<crypto::secret_key, uint64_t> > m_offers_secret_keys;
 
     std::shared_ptr<i_core_proxy> m_core_proxy;
     std::shared_ptr<i_wallet2_callback> m_wcallback;
@@ -468,7 +470,6 @@ namespace tools
                          T destination_split_strategy, 
                          const tx_dust_policy& dust_policy, 
                          currency::transaction &tx,
-                         crypto::secret_key& one_time_tx_secrete_key,
                          uint8_t tx_outs_attr)
   {
     if (!is_connected_to_net())
@@ -588,8 +589,8 @@ namespace tools
       splitted_dsts.push_back(currency::tx_destination_entry(dust, dust_policy.addr_for_dust));
     }
 
-
-    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, attachments, tx, unlock_time);
+    crypto::secret_key one_time_secrete_key = AUTO_VAL_INIT(one_time_secrete_key);
+    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, attachments, tx, one_time_secrete_key, unlock_time);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
     //update_current_tx_limit();
     CHECK_AND_THROW_WALLET_EX(CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
@@ -621,6 +622,11 @@ namespace tools
     currency::tx_comment cm;
     get_attachment(attachments, cm);
     add_sent_unconfirmed_tx(tx, change_dts.amount, recipient, cm.comment);
+    if (currency::have_attachment<currency::offer_details>(tx.attachment))
+    {
+      //store private tx key
+      m_offers_secret_keys[currency::get_transaction_hash(tx)] = std::make_pair(one_time_secrete_key, static_cast<uint64_t>(time(nullptr)));
+    }
 
     LOG_PRINT_L2("transaction " << get_transaction_hash(tx) << " generated ok and sent to daemon, key_images: [" << key_images << "]");
 

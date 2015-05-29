@@ -554,7 +554,8 @@ namespace currency
                                                              uint64_t unlock_time, 
                                                              uint8_t tx_outs_attr)
   {
-    return construct_tx(sender_account_keys, sources, destinations, std::vector<extra_v>(), attachments, tx, unlock_time, tx_outs_attr);
+    crypto::secret_key one_time_secrete_key = AUTO_VAL_INIT(one_time_secrete_key);
+    return construct_tx(sender_account_keys, sources, destinations, std::vector<extra_v>(), attachments, tx, one_time_secrete_key, unlock_time, tx_outs_attr);
   }
   //---------------------------------------------------------------
   struct encrypt_attach_visitor : public boost::static_visitor<void>
@@ -682,11 +683,20 @@ namespace currency
     }
   }
   //---------------------------------------------------------------
+  blobdata make_cancel_offer_sig_blob(const cancel_offer& co)
+  {
+    blobdata bd;
+    string_tools::apped_pod_to_strbuff(co.tx_id);
+    string_tools::apped_pod_to_strbuff(co.offer_index);
+    return bd;
+  }
+  //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
                                                              const std::vector<extra_v>& extra,
                                                              const std::vector<attachment_v>& attachments,
                                                              transaction& tx, 
+                                                             crypto::secret_key& one_time_secrete_key,
                                                              uint64_t unlock_time,
                                                              uint8_t tx_outs_attr)
   {
@@ -700,6 +710,7 @@ namespace currency
 
     keypair txkey = keypair::generate();
     add_tx_pub_key_to_extra(tx, txkey.pub);
+    one_time_secrete_key = txkey.sec;
     
     //include offers if need
     tx.attachment = attachments;

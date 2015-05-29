@@ -707,8 +707,20 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
   CHECK_AND_THROW_WALLET_EX(!r, error::wallet_load_notice_wallet_restored, m_wallet_file);
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::drop_offer_keys()
+{
+  for (auto it = m_offers_secret_keys.begin(); it != m_offers_secret_keys.end();)
+  {
+    if (time(nullptr) > it->second.second && time(nullptr) - it->second.second > OFFER_MAXIMUM_LIFE_TIME)
+      m_offers_secret_keys.erase(it++);
+    else
+      it++;
+  }  
+}
+//-------------------------
 void wallet2::store()
 {
+  drop_offer_keys();
   //prepare data
   std::string keys_buff;
   bool r = store_keys(keys_buff, m_password);

@@ -101,7 +101,8 @@ namespace currency
     const std::vector<extra_v>& extra,
     const std::vector<attachment_v>& attachments,
     transaction& tx, 
-    uint64_t unlock_time, 
+    crypto::secret_key& one_time_secrete_key,
+    uint64_t unlock_time,
     uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool sign_update_alias(alias_info& ai, const crypto::public_key& pkey, const crypto::secret_key& skey);
   bool make_tx_extra_alias_entry(std::vector<uint8_t>& buff, const alias_info& alinfo, bool make_buff_to_sign = false);
@@ -168,7 +169,7 @@ namespace currency
   bool is_pos_block(const transaction& tx);
   uint64_t get_coinday_weight(uint64_t amount);
   wide_difficulty_type correct_difficulty_with_sequence_factor(size_t sequence_factor, wide_difficulty_type diff);
-
+  blobdata make_cancel_offer_sig_blob(const cancel_offer& co);
   void print_currency_details();
     
   //---------------------------------------------------------------
@@ -186,6 +187,18 @@ namespace currency
     return false;
   }
   //---------------------------------------------------------------
+  template<typename attacment_t>
+  bool have_attachment(const std::vector<attachment_v>& av)
+  {
+    for (auto& ai : av)
+    {
+      if (ai.type() == typeid(attacment_t))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
   template<class extra_t>
   extra_t& get_or_add_field_to_extra(std::vector<extra_v>& extra)
   {

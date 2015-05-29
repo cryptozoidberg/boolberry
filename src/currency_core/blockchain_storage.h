@@ -256,7 +256,7 @@ namespace currency
     block_extended_info m_bei_stub;
 
     //offers
-    std::list<offer_details> m_offers;
+    std::unordered_map<crypto::hash, std::vector<offer_details>> m_offers; //offers indexed by 
 
 
     bool switch_to_alternative_blockchain(alt_chain_type& alt_chain);
@@ -289,8 +289,8 @@ namespace currency
     bool get_block_for_scratchpad_alt(uint64_t connection_height, uint64_t block_index, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain, block & b);
     bool process_blockchain_tx_extra(const transaction& tx);
     bool unprocess_blockchain_tx_extra(const transaction& tx);
-    bool process_blockchain_tx_offers(const transaction& tx, uint64_t timestamp);
-    bool unprocess_blockchain_tx_offers(const transaction& tx);
+    bool process_blockchain_tx_attachments(const transaction& tx, uint64_t timestamp);
+    bool unprocess_blockchain_tx_attachments(const transaction& tx);
     bool pop_alias_info(const alias_info& ai);
     bool put_alias_info(const alias_info& ai);
     void fill_addr_to_alias_dict();
@@ -316,7 +316,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          51
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          52
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 

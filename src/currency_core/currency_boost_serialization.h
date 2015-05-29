@@ -105,9 +105,16 @@ namespace boost
     a & x.timestamp;
     a & x.tx_hash;
     a & x.index_in_tx;
+    a & x.stopped;
   }
-
-
+  
+    template <class Archive>
+    inline void serialize(Archive &a, currency::cancel_offer &x, const boost::serialization::version_type ver)
+  {
+    a & x.offer_index;
+    a & x.sig;
+    a & x.tx_id;
+  }
   template <class Archive>
   inline void serialize(Archive &a, currency::tx_comment &x, const boost::serialization::version_type ver)
   {
