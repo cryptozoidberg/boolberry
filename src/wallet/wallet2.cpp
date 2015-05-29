@@ -750,6 +750,7 @@ uint64_t wallet2::unlocked_balance()
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::balance(uint64_t& unloked)
 {
+  unloked = 0;
   uint64_t balance_total = 0;
   BOOST_FOREACH(auto& td, m_transfers)
   if (!td.m_spent)
