@@ -325,13 +325,11 @@
                                 {{offer.comment}}
                             </td>
                             <td>
-                                <div data-toggle="buttons" class="btn-group">
+                                <div class="btn-group">
                                     <label 
                                         class="btn btn-sm btn-link popover-name favbtn" 
-                                        data-trigger="hover" 
-                                        data-toggle="popover"  
-                                        data-content="Избранное" 
-                                        data-placement="left"
+                                        ng-class="{active : is_fav(offer)}"
+                                        ng-click="toggleFav(offer)"
                                     >
                                         <i class="fa fa-lg fa-star-o text-muted"></i>
                                     </label>
@@ -537,9 +535,15 @@
                                 {{offer.comment}}
                             </td>
                             <td>
-                                <!-- <div data-toggle="buttons" class="btn-group">
-                                    <label class="btn btn-sm btn-link popover-name favbtn" data-trigger="hover" data-toggle="popover" data-content=" Избранное" data-placement="left"><i class="fa fa-lg fa-star-o text-muted"></i></label>
-                                </div> -->
+                                <div class="btn-group">
+                                    <label 
+                                        class="btn btn-sm btn-link popover-name favbtn" 
+                                        ng-class="{active : is_fav(offer)}"
+                                        ng-click="toggleFav(offer)"
+                                    >
+                                        <i class="fa fa-lg fa-star-o text-muted"></i>
+                                    </label>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -723,39 +727,42 @@
         </div></div></tab>
 
 
-        <tab heading="Избранное"  disabled="true"><div class="panel"><div class="panel-body">
+        <tab heading="Избранное" ><div class="panel"><div class="panel-body">
             <div class="navbar">
-
                 <div class="row margin-bottom-small">
                     <div class="col-xs-4 col-sm-4">
-                        <div data-toggle="buttons" class="btn-group btn-group-justified">
-                            <label class="btn btn-primary market_filterMyFavoritesCurrencyButton active">
-                                <input type="radio" name="marketMyFavoritesRadio" checked="" autocomplete="off" value="currency"> Валюта
+                        <div class="btn-group btn-group-justified">
+                            <label class="btn btn-primary" ng-model="favOffersView" btn-radio="'currency'">
+                                Валюта
                             </label>
-                            <label class="btn btn-primary market_filterMyFavoritesBarterButton">
-                                <input type="radio" name="marketMyFavoritesRadio" autocomplete="off" value="barter"> Товары
+                            <label class="btn btn-primary" ng-model="favOffersView" btn-radio="'barter'">
+                                Товары
                             </label>
                         </div>
                     </div>
+
+
+                    <div class="col-xs-4 col-sm-4"></div>
+
                     <div class="col-xs-4 col-sm-4 pull-right">
-                        <input type="text" placeholder="найти текст" class="form-control">
+                        <input type="text" placeholder="найти текст" ng-model="fav_offers_filter.keywords" ng-change="favOffersFilterChange()" class="form-control">
                     </div>
-                    <div class="col-xs-4 col-sm-4 pull-right"></div>
+
                 </div>
+
 
                 <div class="row">
 
                     <div class="col-xs-4 col-sm-4">
-
-                        <div data-toggle="buttons" class="btn-group btn-group-justified">
-                            <label class="btn btn-primary market_filterMyFavoritesAllButton active">
-                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Все
+                        <div class="btn-group btn-group-justified">
+                            <label class="btn btn-primary active" ng-model="fav_offers_filter.offer_type" ng-change="favOffersFilterChange()" btn-radio="'all'">
+                                Все
                             </label>
-                            <label class="btn btn-primary market_filterMyFavoritesAskButton">
-                                <input type="radio" checked="" autocomplete="off" id="option2" name="options"> Предложение
+                            <label class="btn btn-primary" ng-model="fav_offers_filter.offer_type" ng-change="favOffersFilterChange()" btn-radio="'buy'">
+                                Предложение
                             </label>
-                            <label class="btn btn-primary market_filterMyFavoritesBidButton">
-                                <input type="radio" autocomplete="off" id="option3" name="options"> Спрос
+                            <label class="btn btn-primary" ng-model="fav_offers_filter.offer_type" ng-change="favOffersFilterChange()" btn-radio="'sell'">
+                                Спрос
                             </label>
                         </div>
                     </div>
@@ -763,19 +770,17 @@
                 </div>
             </div>
 
-            <div class="table-responsive panel market-table-responsive" id="favCurrency">
+
+            <div class="table-responsive panel market-table-responsive" ng-show="favOffersView == 'currency'">
                 <table class="table table-condensed data-table table-hover">
                     <thead>
                     <tr>
 
                         <th><span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
                         <th><span class="nowrap">Тип <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-
                         <th><span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
                         <th><span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th>Контакт</th>
-                        <!-- <th><span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th> -->
-                        <th><span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th><span class="nowrap">Рассчет<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th><span class="nowrap">Местор-е<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th><span class="nowrap">Комментарий<span></span></span></th>
@@ -783,107 +788,86 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr class="success">
+                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_fav_currency_offers">
 
-                        <td>3 мин назад</td>
-                        <td>Покупка</td>
-                        <td><span class="nowrap">420,34 </span></td>
-                        <td>23,00 <span class="label label-danger">+ 2%</span></td>
-                        <td><ul class="list-unstyled">
+                            <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
+                            <td>
+                                <span ng-if="offer.offer_type == 2">Покупка</span>
+                                <span ng-if="offer.offer_type == 3">Продажа</span>
+                            </td>
 
-                            <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
-                            <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
-                        </ul></td>
-                        <!-- <td><span class="label label-success">4.5</span></td> -->
-                        <td>вся сумма</td>
-                        <td>наличные</td>
+                            <td>
+                                <span class="nowrap">{{offer.amount_etc}} {{offer.target}}</span>
+                            </td>
+                            <td>
+                                {{offer.amount_lui | gulden:false}} <span class="label label-danger">+ 2%</span>
+                            </td>
 
-                        <td>Рим, Италия</td>
-                        <td>передам в городе</td>
-                        <td>
-                            <!-- <div class="btn-group nowrapbtns" data-toggle="buttons">
-                            <button type="button" class="btn btn-link"><i class="fa fa-lg fa-times text-muted"></i></button><button type="button" class="btn btn-link"><i class="fa fa-lg fa-save text-muted"></i></button>
-                            </div> -->
-                        </td>
-                    </tr>
+                            <td>{{offer.contacts}}</td>
+                            
+                            <td width="20%">
+                                <span ng-repeat="type in offer.payment_types.split(',')">
+                                    <span class="label label-info" ng-if="payment_types[type]">{{payment_types[type]}}</span>
+                                    <span class="label label-info" ng-if="!payment_types[type]">{{type}}</span>
+
+                                </span>
+                            </td>
+
+                            <td>{{offer.location}}</td>
+                            <td>{{offer.comment}}</td>
+                            <td>
+                                
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
 
-            <div class="table-responsive panel market-table-responsive" id="favBarter" ng-hide="true">
+            <div class="table-responsive panel market-table-responsive" ng-show="favOffersView == 'barter'">
 
                 <table class="table table-condensed data-table table-hover">
                     <thead>
                     <tr>
-                        <th>
-                            <span class="nowrap">
-                                Возраст 
-                                <i style="opacity:0.3" class="fa fa-chevron-down"></i>
-                            </span>
-                        </th>
-                        <th>
-                            <span class="nowrap">
-                                Тип 
-                                <i style="opacity:0.3" class="fa fa-chevron-down"></i>
-                            </span>
-                        </th>
+
+                        <th><span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Тип <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
                         <th>Текст предложения</th>
                         <th><span class="nowrap">Цена, G</span></th>
                         <th>Контакт</th>
-                       <!--  <th>
-                            <span class="nowrap">
-                                Рейтинг 
-                                <i style="opacity:0.3" class="fa fa-chevron-down"></i>
-                            </span>
-                        </th> -->
-                        <th>
-                            <span class="nowrap">
-                                Место-е 
-                                <i style="opacity:0.3" class="fa fa-chevron-down"></i>
-                            </span>
-                        </th>
-                        <th>
-                            <span class="nowrap">
-                                Комментарий
-                                <span></span>
-                            </span>
-                        </th>
+                        <th><span class="nowrap">Место-е <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
+                        <th><span class="nowrap">Комментарий</span></th>
                         <th></th>
                     </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>2 часа назад</td>
-                            <td>Продажа</td>
-                            <td><a href="">Фотосъемка на вершине горы
-                                <span class="text-muted">...</span></a></td>
-                            <td>30 G</td>
-                            <td>
-                                <ul class="list-unstyled">
-                                    <li>
-                                        <a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a>
-                                    </li>
-                                    <span class="nowrap">
-                                        <i class="fa fa-lg fa-skype text-primary"></i> 40324309d
-                                    </span>
-                                </ul>
-                            </td>
-                            <!-- <td>
-                                <span class="label label-success">4.5</span>
-                            </td> -->
-                            <td>Бразилия</td>
-                            <td>короткий текст</td>
-                            <td>
-                                <!-- <div class="btn-group nowrapbtns" data-toggle="buttons">
-                                    <button type="button" class="btn btn-link">
-                                        <i class="fa fa-lg fa-times text-muted"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-link">
-                                        <i class="fa fa-lg fa-save text-muted"></i>
-                                    </button>
-                                </div> -->
-                            </td>
-                        </tr>
+                    <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_fav_goods_offers">
+
+                        <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
+                        <td>
+                            <span ng-if="offer.offer_type == 0">Покупка</span>
+                            <span ng-if="offer.offer_type == 1">Продажа</span>
+                        </td>
+
+                        <td>
+                            {{offer.target}}
+                        </td>
+
+                        <td>{{offer.amount_lui | gulden}}</td>
+
+                        <td>
+                            {{offer.contacts}}
+                        </td>
+
+
+                        <td>{{offer.location}}</td>
+
+                        <td>{{offer.comment}}</td>
+
+                        <td>
+
+                        </td>
+
+                    </tr>
                     </tbody>
                 </table>
             </div>

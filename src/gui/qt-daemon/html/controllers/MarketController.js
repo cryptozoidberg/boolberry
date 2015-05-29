@@ -5,7 +5,7 @@
     module.controller('marketCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','market','$timeout',
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market, $timeout){
             
-
+            // TODO refactor code with using services ex. offer.isFav(), offer.getFav(), etc 
             var is_currency_offer = function(offer){
                 if(offer.offer_type == 2 || offer.offer_type == 3){
                     return true;
@@ -20,6 +20,38 @@
                 return false;
             };
 
+            $scope.fav_offers_hash = [];
+
+            var is_fav = function(offer){
+                if($scope.fav_offers_hash.indexOf(offer.tx_hash) > -1){
+                    return true;
+                }
+                return false;
+            };
+
+            $scope.is_fav = is_fav;
+
+            $scope.toggleFav = function(offer){
+                var index = $scope.fav_offers_hash.indexOf(offer.tx_hash);
+                if(index > -1){
+                    $scope.fav_offers_hash.splice(index,1);
+                }else{
+                    $scope.fav_offers_hash.push(offer.tx_hash);
+                }
+                loadFavorites();
+                $scope.favOffersFilterChange();
+            };
+
+            var loadFavorites = function(){
+                $scope.fav_offers = $filter('filter')($rootScope.offers, is_fav);
+                $scope.fav_currency_offers = $filter('filter')($scope.fav_offers, is_currency_offer);
+                $scope.fav_goods_offers    = $filter('filter')($scope.fav_offers, is_goods_offer);
+                $scope.f_fav_currency_offers = $scope.fav_currency_offers;
+                $scope.f_fav_goods_offers = $scope.fav_goods_offers;
+            };
+
+            
+
             // GET LIST OF OFFERS
             backend.get_all_offers(function(data){
                 if(angular.isDefined(data.offers)){
@@ -28,6 +60,7 @@
 
                     $scope.currency_offers = $filter('filter')($rootScope.offers, is_currency_offer);
                     $scope.goods_offers = $filter('filter')($rootScope.offers, is_goods_offer);
+                    
 
                     $scope.f_currency_offers = $scope.currency_offers; // filtered currency offers by default
                     $scope.f_goods_offers    = $scope.goods_offers; // filtered goods offers by default
@@ -46,13 +79,12 @@
 
                     $rootScope.offers_count = $scope.my_offers.length;
 
-
                     $scope.my_currency_offers = $filter('filter')($scope.my_offers, is_currency_offer);
                     $scope.my_goods_offers    = $filter('filter')($scope.my_offers, is_goods_offer);
                     $scope.f_my_currency_offers = $scope.my_currency_offers;
                     $scope.f_my_goods_offers = $scope.my_goods_offers;
 
-
+                    loadFavorites();
                 }
             });
 
@@ -305,6 +337,38 @@
 
                 $scope.f_my_goods_offers = $scope.pf_my_goods_offers;
                 $scope.f_my_currency_offers = $scope.pf_my_currency_offers;
+            };
+
+            //FAVORITE OFFERS FILTER
+
+            $scope.favOffersView = 'currency'; // tab by default
+
+            $scope.fav_offers_filter = {
+                offer_type: 'all', //all, in, out
+                keywords: ''
+            };
+
+            $scope.favOffersFilterChange = function(){
+                $scope.pf_fav_currency_offers = angular.copy($scope.fav_currency_offers);
+                $scope.pf_fav_goods_offers    = angular.copy($scope.fav_goods_offers);
+
+                var fof = $scope.fav_offers_filter; 
+
+                if(fof.keywords != ''){
+                    $scope.pf_fav_currency_offers = $filter('filter')($scope.pf_fav_currency_offers,fof.keywords);
+                    $scope.pf_fav_goods_offers = $filter('filter')($scope.pf_fav_goods_offers,fof.keywords);
+                }
+
+                if(fof.offer_type != 'all'){
+                    var condition = { offer_type: (fof.offer_type == 'sell') ? 1 : 0};
+                    $scope.pf_fav_goods_offers = $filter('filter')($scope.pf_fav_goods_offers,condition);
+
+                    var condition = { offer_type: (fof.offer_type == 'sell') ? 2 : 3};
+                    $scope.pf_fav_currency_offers = $filter('filter')($scope.pf_fav_currency_offers,condition);
+                }
+
+                $scope.f_fav_goods_offers = $scope.pf_fav_goods_offers;
+                $scope.f_fav_currency_offers = $scope.pf_fav_currency_offers;
             };
 
             

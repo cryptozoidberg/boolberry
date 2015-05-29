@@ -411,8 +411,10 @@
             console.log(data);
             var wallet_state = data.wallet_state;
             var is_mining = data.is_mining;
+            var balance = data.balance;
+            var unlocked_balance = data.unlocked_balance;
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-            // informer.info('UPDATE WALLET STATUS' + wallet_state);
+            // informer.info(JSON.stringify(data));
             
             // 1-synch, 2-ready, 3 - error
 
@@ -422,8 +424,8 @@
 
                     safe.loaded = false;
                     safe.error  = false;
-                    safe.is_mining = is_mining;
 
+                    safe.is_mining = is_mining;
 
                     if(wallet_state == 2){ // ready
                         safe.loaded = true;
@@ -432,6 +434,10 @@
                     if(wallet_state == 3){ // error
                         safe.error = true;
                     }   
+
+                    safe.balance = balance;
+                    safe.unlocked_balance = unlocked_balance;
+                    backend.reloadCounters();
                     
                 });
                 

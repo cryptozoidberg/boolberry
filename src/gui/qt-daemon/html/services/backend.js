@@ -613,7 +613,7 @@
                             "payment_types": "EPS,BC,Qiwi",
                             "expiration_time":5,
                             'timestamp': 1430715920,
-                            'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b2"
+                            'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b3"
                         },
                         {
                             "offer_type": 1,
