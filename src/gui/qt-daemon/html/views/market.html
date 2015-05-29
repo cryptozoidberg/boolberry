@@ -17,9 +17,16 @@
                             <div class="col-xs-5 col-sm-5">
                                 <div class="form-group clearfix">
                                     <label class="col-xs-4 col-sm-4 control-label required" style="">Валюта расчета</label>
-                                    <select class="selectpicker col-xs-3 col-sm-3 nopadding btn-sm" style=""><option selected="">USD</option><option>EURO</option><option>RUR</option></select>
+                                    <select 
+                                        selectpicker 
+                                        class="col-xs-3 col-sm-3 nopadding btn-sm"
+                                        ng-model="currency_filter.currency"
+                                        ng-change="currencyFilterChange()"
+                                        ng-options="item.code as item.code for item in currencies"
+                                    >
+                                    </select>
                                 </div>
-                                <div class="form-group clearfix">
+                                <!-- <div class="form-group clearfix">
                                     <label class="col-xs-4 col-sm-4 control-label required" style="">
                                         Сумма <span class="collapse in">покупки</span><span class="collapse">продажи</span>
                                     </label>
@@ -79,7 +86,7 @@
                                         <label class="checkbox"><input type="checkbox" value=""> <strong>Бонус</strong></label>
                                     </div>
 
-                                </div>
+                                </div> -->
                             </div>
                             <div class="col-xs-7 col-sm-7">
                                 <div class="row">
@@ -87,73 +94,78 @@
                                         <div class="form-group clearfix">
                                             <label class="col-xs-6 col-sm-6 required text-right" style="padding-left: 0">
                                                 Возраст заявки</label>
-                                            <select class="selectpicker market_currency_order-age-selector btn-sm col-xs-6 col-sm-6 nopadding" style="">
-                                                <option selected="">не важно</option><option>час</option><option>3 часа</option><option>день</option><option>два дня</option><option>три дня</option><option>неделя</option><option>больше недели</option><option>другой период</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="form-group clearfix market_currency_order-age-datapicker-row">
-                                            <label class="col-xs-6 col-sm-6 required text-right"></label>
-                                            <div class="col-xs-6 col-sm-6 nopadding">
-                                                <div class="hdatapicker">
-                                                    <div class="input-daterange input-group" id="datepicker2">
-                                                        <span class="input-group-addon">от</span>
-                                                        <input type="text" class="input-sm form-control input-date" name="start" />
-                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group clearfix">
-                                            <label style="padding-left: 0" class="col-xs-6 col-sm-6 required text-right">
-                                                Условия
-                                            </label>
-                                            <select class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding" style="">
-                                                <option selected="">
-                                                    не важно
-                                                </option>
-                                                <option>
-                                                    всю сумму
-                                                </option>
-                                                <option>
-                                                    можно частями
-                                                </option>
+                                            <select 
+                                                selectpicker 
+                                                class="btn-sm col-xs-6 col-sm-6 nopadding"
+                                                ng-model="currency_filter.interval"
+                                                ng-options="item.key as item.value for item in goods_interval_values"
+                                                ng-change="currencyFilterChange()"
+                                            >
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-xs-6 col-sm-6">
-                                        <div class="form-group clearfix" style="height: 32px;">
-                                            <label class="col-xs-6 col-sm-6 nopadding required" style="">Рейтинг</label>
-                                            <div class="fslider col-xs-6 col-sm-6 nopadding">
-                                                <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="5"  data-slider-step=".25" data-slider-value="[3,5]"/>
-                                            </div>
-                                        </div>
 
-                                        <div class="form-group clearfix market_currency_order-age-datapicker-row" style="position:relative; left: -20px;">
-                                            <div class="col-xs-6 col-sm-6 nopadding">
+                                        <div class="form-group clearfix market_currency_order-age-datapicker-row" ng-hide="cf_hide_calendar">
+                                            <div class="nopadding">
                                                 <div class="hdatapicker">
-                                                    <div class="input-daterange input-group" id="datepicker">
+                                                    <div class="input-daterange input-group">
+                                                        <span class="input-group-addon">от</span>
+                                                        <input 
+                                                            type="text" 
+                                                            class="input-sm form-control input-date" 
+                                                            datepicker-popup="{{format}}" 
+                                                            show-button-bar="false"
+                                                            ng-model="currency_offer_date.start" 
+                                                            is-open="gf_opened.cur_start" 
+                                                            datepicker-options="dateOptions" 
+                                                            ng-required="true" 
+                                                            ng-change="currencyFilterChange()"
+                                                            close-text="Close" 
+                                                            
+                                                        />
+                                                        <span class="input-group-addon" ng-click="gf_open($event,'cur_start')"><i class="fa fa-calendar"></i></span>
                                                         <span class="input-group-addon">до</span>
-                                                        <input type="text" class="input-sm form-control input-date" name="end" />
-                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                        <input 
+                                                            type="text" 
+                                                            class="input-sm form-control input-date" 
+                                                            datepicker-popup="{{format}}" 
+                                                            show-button-bar="false"
+                                                            ng-model="currency_offer_date.end" 
+                                                            is-open="gf_opened.cur_end" 
+                                                            datepicker-options="dateOptions" 
+                                                            ng-required="true" 
+                                                            ng-change="currencyFilterChange()"
+                                                            close-text="Close" 
+                                                        />
+                                                        <span class="input-group-addon" ng-click="gf_open($event,'cur_end')"><i class="fa fa-calendar"></i></span>
+                                        
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="form-group clearfix">
-                                            <label style="padding-left: 0" class=" col-xs-6 col-sm-6 required nopadding">
-                                                Способ расчета
-                                            </label>
-                                            <select class="selectpicker show-tick btn-sm col-xs-6 col-sm-6 nopadding market_currency_payMethodsSelector" multiple style="">
-                                                <option>Электронные платежные системы</option>
-                                                <option>Банковская карта</option>
-                                                <option>Банковский перевод</option>
-                                                <option>Наличные</option>
-                                            </select>
 
-                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class = "row">
+                                    <div class="form-group clearfix">
+                                        <label class="text-right col-xs-3 col-sm-3 required">
+                                            Способ расчета
+                                        </label>
+                                        <select 
+                                            selectpicker 
+                                            class="show-tick btn-sm col-xs-8 col-sm-8 nopadding" 
+                                            multiple
+                                            title='выбрать'
+                                            ng-model="currency_filter.payment_types"
+                                            ng-change="currencyFilterChange()"
+                                            ng-options="key as value for (key,value) in payment_types"
+                                        >
+                                            
+                                        </select>
 
                                     </div>
                                 </div>
@@ -162,14 +174,26 @@
                                     <div class="form-group clearfix">
                                         <label class="col-xs-3 col-sm-3 required text-right" style="">География</label>
                                         <div class="col-xs-4 col-sm-4 nopadding">
-                                            <input type="text" class="form-control autocomplete-countries" placeholder="страны" value="">
+                                            <input 
+                                                type="text" 
+                                                class="form-control autocomplete-countries" 
+                                                placeholder="страны" 
+                                                ng-model="currency_filter.country_keywords"
+                                                ng-change="currencyFilterChange()"
+                                            >
                                         </div>
                                         <div class="col-xs-5 col-sm-5">
-                                            <input type="text" class="form-control autocomplete-cities" placeholder="города в странах" value="">
+                                            <input 
+                                                type="text" 
+                                                class="form-control autocomplete-cities" 
+                                                placeholder="города в странах" 
+                                                ng-model="currency_filter.city_keywords"
+                                                ng-change="currencyFilterChange()"
+                                            >
                                         </div>
                                     </div>
 
-                                    <div class="form-group text-right">
+                                    <!-- <div class="form-group text-right">
                                         <div class="collapse filter11">
                                             <div class="col-xs-6 col-sm-6"></div>
                                             <div style="padding-right:5px" class="col-xs-3 col-sm-3">
@@ -178,7 +202,7 @@
                                                 <button type="button" class="btn btn-block btn-default">Очистить фильтр</button>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
 
                                 </div>
 
@@ -192,13 +216,13 @@
                         <div class="col-xs-4 col-sm-4">
 
                             <div class="btn-group btn-group-justified">
-                                <label class="btn btn btn-primary" btn-radio="'all'" ng-model="currency_filter.offer_type">
+                                <label class="btn btn btn-primary" btn-radio="'all'" ng-model="currency_filter.offer_type" ng-change="currencyFilterChange()">
                                     Все
                                 </label>
-                                <label class="btn btn btn-primary" btn-radio="'sell'" ng-model="currency_filter.offer_type">
+                                <label class="btn btn btn-primary" btn-radio="'sell'" ng-model="currency_filter.offer_type"  ng-change="currencyFilterChange()">
                                     Предложение
                                 </label>
-                                <label class="btn btn btn-primary" btn-radio="'buy'" ng-model="currency_filter.offer_type">
+                                <label class="btn btn btn-primary" btn-radio="'buy'" ng-model="currency_filter.offer_type"  ng-change="currencyFilterChange()">
                                     Спрос
                                 </label>
                             </div>
@@ -211,7 +235,7 @@
                             </div>
                         </div>
                         <div class="col-xs-4 col-sm-4 pull-right">
-                            <input type="text" class="form-control" placeholder="найти текст">
+                            <input type="text" class="form-control" placeholder="найти текст" ng-model="currency_filter.keywords" ng-change="currencyFilterChange()">
                         </div>
                         <div class="col-xs-4 col-sm-4">
                             <div class="collapse in filter11">
@@ -260,7 +284,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers | filter:is_currency_offer">
+                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_currency_offers">
                             <td>
                                 {{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}
                             </td>
@@ -332,17 +356,10 @@
                                 <div class="form-group clearfix">
                                     <label class="col-xs-2 col-sm-2 required nopadding">География</label>
                                     <div class="col-xs-5 col-sm-5 nopadding">
-                                        <input type="text" value="" placeholder="страны" class="form-control">
+                                        <input type="text" class="form-control" placeholder="страны" ng-model="goods_filter.country_keywords" ng-change="goodsFilterChange()">
                                     </div>
                                     <div class="col-xs-5 col-sm-5 nopadding" style="padding-left:5px">
-                                        <input type="text" class="form-control" placeholder="города в странах" value="">
-                                    </div>
-                                </div>
-
-                                <div class="form-group clearfix">
-                                    <label style="" class="col-xs-2 col-sm-2 required">Рейтинг</label>
-                                    <div class="fslider col-xs-10 col-sm-10 nopadding">
-                                        <input type="text" class="bs-ui-slider" value="" data-slider-min="0" data-slider-max="5"  data-slider-step=".25" data-slider-value="[3,5]"/>
+                                        <input type="text" class="form-control" placeholder="города в странах" ng-model="goods_filter.city_keywords" ng-change="goodsFilterChange()">
                                     </div>
                                 </div>
                             </div>
@@ -355,37 +372,58 @@
                                             <label style="padding-left: 0" class="col-xs-6 col-sm-6 required text-right">
                                                 Возраст заявки
                                             </label>
-                                            <select style="" class="selectpicker btn-sm col-xs-6 col-sm-6 nopadding market_barter_order-age-selector">
-                                                <option selected="">не важно</option>
-                                                <option>час</option>
-                                                <option>3 часа</option>
-                                                <option>день</option>
-                                                <option>два дня</option>
-                                                <option>три дня</option>
-                                                <option>неделя</option>
-                                                <option>больше недели</option>
-                                                <option>другой период</option>
+                                            <select 
+                                                selectpicker 
+                                                class="btn-sm col-xs-6 col-sm-6 nopadding"
+                                                ng-model="goods_filter.interval"
+                                                ng-options="item.key as item.value for item in goods_interval_values"
+                                                ng-change="goodsFilterChange()"
+                                            >
+                                                
                                             </select>
                                         </div>
 
-                                        <div class="form-group clearfix market_barter_order-age-datapicker-row">
-                                            <label class="col-xs-3 col-sm-3 required text-right"></label>
+                                        <div class="form-group clearfix" ng-hide="hide_calendar">
+                                            <label class="col-xs-3 col-sm-3 required text-right">Date</label>
                                             <div class="col-xs-9 col-sm-9 nopadding">
                                                 <div class="hdatapicker">
-                                                    <div class="input-daterange input-group" id="datepicker3">
+                                                    <div class="input-daterange input-group">
                                                         <span class="input-group-addon">от</span>
-                                                        <input type="text" class="input-sm form-control input-date" name="start" />
-                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-
+                                                        <input 
+                                                            type="text" 
+                                                            class="input-sm form-control input-date" 
+                                                            datepicker-popup="{{format}}" 
+                                                            show-button-bar="false"
+                                                            ng-model="goods_offer_date.start" 
+                                                            is-open="gf_opened.start" 
+                                                            datepicker-options="dateOptions" 
+                                                            ng-required="true" 
+                                                            ng-change="goodsFilterChange()"
+                                                            close-text="Close" 
+                                                            
+                                                        />
+                                                        <span class="input-group-addon" ng-click="gf_open($event,'start')"><i class="fa fa-calendar"></i></span>
                                                         <span class="input-group-addon">до</span>
-                                                        <input type="text" class="input-sm form-control input-date" name="end" />
-                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                        <input 
+                                                            type="text" 
+                                                            class="input-sm form-control input-date" 
+                                                            datepicker-popup="{{format}}" 
+                                                            show-button-bar="false"
+                                                            ng-model="goods_offer_date.end" 
+                                                            is-open="gf_opened.end" 
+                                                            datepicker-options="dateOptions" 
+                                                            ng-required="true" 
+                                                            ng-change="goodsFilterChange()"
+                                                            close-text="Close" 
+                                                        />
+                                                        <span class="input-group-addon" ng-click="gf_open($event,'end')"><i class="fa fa-calendar"></i></span>
+                                        
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="form-group clearfix" style="margin-top: 30px;">
+                                        <!-- <div class="form-group clearfix" style="margin-top: 30px;">
                                             <div class="collapse filter22">
                                                     <div class="col-xs-2 col-sm-2 nopadding"></div>
                                                     <div style="padding-right: 5px;" class="col-xs-5 col-sm-5">
@@ -393,7 +431,7 @@
                                                     <div class="col-xs-5 col-sm-5 nopadding"><button type="button" class="btn btn-block btn-default">Очистить фильтр</button></div>
                                             </div>
 
-                                        </div>
+                                        </div> -->
 
 
                                     </div>
@@ -412,13 +450,13 @@
                         <div class="col-xs-4 col-sm-4">
 
                             <div class="btn-group btn-group-justified">
-                                <label class="btn btn btn-primary" btn-radio="'all'" ng-model="goods_filter.offer_type">
+                                <label class="btn btn btn-primary" btn-radio="'all'" ng-model="goods_filter.offer_type" ng-change="goodsFilterChange()">
                                     Все
                                 </label>
-                                <label class="btn btn btn-primary" btn-radio="'sell'" ng-model="goods_filter.offer_type">
+                                <label class="btn btn btn-primary" btn-radio="'sell'" ng-model="goods_filter.offer_type" ng-change="goodsFilterChange()">
                                     Предложение
                                 </label>
-                                <label class="btn btn btn-primary" btn-radio="'buy'" ng-model="goods_filter.offer_type">
+                                <label class="btn btn btn-primary" btn-radio="'buy'" ng-model="goods_filter.offer_type" ng-change="goodsFilterChange()">
                                     Спрос
                                 </label>
                             </div>
@@ -431,7 +469,7 @@
                             </div>
                         </div>
                         <div class="col-xs-4 col-sm-4 pull-right">
-                            <input type="text" class="form-control" placeholder="найти текст">
+                            <input type="text" class="form-control" ng-model="goods_filter.keywords" ng-change="goodsFilterChange()" placeholder="найти текст">
                         </div>
                         <div class="col-xs-4 col-sm-4">
                             <div class="collapse in filter22">
@@ -476,7 +514,7 @@
 
                     <tbody>
 
-                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in offers | filter:is_goods_offer">
+                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_goods_offers">
                             <td>
                                 {{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}
                             </td>
@@ -511,24 +549,36 @@
                 <button class="btn btn-block btn-default navbar-btn">Загрузить еще 20</button>
             </div> -->
         </div></div></tab>
-        <tab heading="Мои заявки" disabled="true"><div class="panel"><div class="panel-body">
+        <tab heading="Мои заявки"><div class="panel"><div class="panel-body">
             <div class="navbar">
                 <div class="row margin-bottom-small">
                     <div class="col-xs-4 col-sm-4">
-                        <div data-toggle="buttons" class="btn-group btn-group-justified">
-                            <label class="btn btn-primary active">
-                                <input type="radio" name="marketMyOrdersRadio" checked="" autocomplete="off" value="currency"> Валюта
+                        <div class="btn-group btn-group-justified">
+                            <label class="btn btn-primary" ng-model="myOffersView" btn-radio="'currency'">
+                                Валюта
                             </label>
-                            <label class="btn btn-primary">
-                                <input type="radio" name="marketMyOrdersRadio" autocomplete="off" value="barter"> Товары
+                            <label class="btn btn-primary" ng-model="myOffersView" btn-radio="'barter'">
+                                Товары
                             </label>
                         </div>
                     </div>
 
+                    <!-- <div class="btn-group btn-group-justified">
+                        <label class="btn btn btn-primary" btn-radio="'all'" ng-model="goods_filter.offer_type" ng-change="goodsFilterChange()">
+                            Все
+                        </label>
+                        <label class="btn btn btn-primary" btn-radio="'sell'" ng-model="goods_filter.offer_type" ng-change="goodsFilterChange()">
+                            Предложение
+                        </label>
+                        <label class="btn btn btn-primary" btn-radio="'buy'" ng-model="goods_filter.offer_type" ng-change="goodsFilterChange()">
+                            Спрос
+                        </label>
+                    </div> -->
+
                     <div class="col-xs-4 col-sm-4"></div>
 
                     <div class="col-xs-4 col-sm-4 pull-right">
-                        <input type="text" placeholder="найти текст" class="form-control">
+                        <input type="text" placeholder="найти текст" ng-model="my_offers_filter.keywords" ng-change="myOffersFilterChange()" class="form-control">
                     </div>
 
                 </div>
@@ -537,15 +587,15 @@
                 <div class="row">
 
                     <div class="col-xs-4 col-sm-4">
-                        <div data-toggle="buttons" class="btn-group btn-group-justified">
-                            <label class="btn btn-primary active">
-                                <input type="radio" checked="" autocomplete="off" id="option1" name="options"> Все
+                        <div class="btn-group btn-group-justified">
+                            <label class="btn btn-primary active" ng-model="my_offers_filter.offer_type" ng-change="myOffersFilterChange()" btn-radio="'all'">
+                                Все
                             </label>
-                            <label class="btn btn-primary">
-                                <input type="radio" checked="" autocomplete="off" id="option2" name="options"> Предложение
+                            <label class="btn btn-primary" ng-model="my_offers_filter.offer_type" ng-change="myOffersFilterChange()" btn-radio="'buy'">
+                                Предложение
                             </label>
-                            <label class="btn btn-primary">
-                                <input type="radio" autocomplete="off" id="option3" name="options"> Спрос
+                            <label class="btn btn-primary" ng-model="my_offers_filter.offer_type" ng-change="myOffersFilterChange()" btn-radio="'sell'">
+                                Спрос
                             </label>
                         </div>
                     </div>
@@ -553,7 +603,8 @@
                 </div>
             </div>
 
-            <div class="table-responsive panel market-table-responsive" id="myCurrency">
+
+            <div class="table-responsive panel market-table-responsive" id="myCurrency" ng-show="myOffersView == 'currency'">
                 <table class="table table-condensed data-table table-hover">
                     <thead>
                     <tr>
@@ -564,7 +615,7 @@
                         <th><span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th>Контакт</th>
                        <!--  <th><span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th> -->
-                        <th><span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <!-- <th><span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th> -->
                         <th><span class="nowrap">Рассчет<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th><span class="nowrap">Местор-е<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
                         <th><span class="nowrap">Комментарий<span></span></span></th>
@@ -572,23 +623,31 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <tr class="success">
+                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_my_currency_offers">
 
-                            <td>3 мин назад</td>
-                            <td>Покупка</td>
-                            <td><span class="nowrap">420,34 </span></td>
-                            <td>23,00 <span class="label label-danger">+ 2%</span></td>
-                            <td><ul class="list-unstyled">
+                            <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
+                            <td>
+                                <span ng-if="offer.offer_type == 2">Покупка</span>
+                                <span ng-if="offer.offer_type == 3">Продажа</span>
+                            </td>
 
-                                <li><a class="nowrap" href="" mailto:bicoing@yahoo.com=""> bicoinG@yahoo.com</a></li>
-                                <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
-                            </ul></td>
+                            <td><span class="nowrap"></span></td>
+
+                            <td>{{amount_lui | gulden : false }} <span class="label label-danger">+ 2%</span></td>
+
+                            <td>{{offer.contacts}}</td>
                             <!-- <td><span class="label label-success">4.5</span></td> -->
-                            <td>вся сумма</td>
-                            <td>наличные</td>
+                            <!-- <td>вся сумма</td> -->
+                            <td width="20%">
+                                <span ng-repeat="type in offer.payment_types.split(',')">
+                                    <span class="label label-info" ng-if="payment_types[type]">{{payment_types[type]}}</span>
+                                    <span class="label label-info" ng-if="!payment_types[type]">{{type}}</span>
 
-                            <td>Рим, Италия</td>
-                            <td>передам в городе</td>
+                                </span>
+                            </td>
+
+                            <td>{{offer.location}}</td>
+                            <td>{{offer.comment}}</td>
                             <td>
                                 <!-- <div class="btn-group nowrapbtns">
                                 <button type="button" class="btn btn-link" data-target="#toptoupCurr" data-toggle="modal"><i class="fa fa-lg fa-arrow-circle-up text-muted"></i></button><button type="button" data-target="#orderCurr" data-toggle="modal" class="btn btn-link"><i class="fa fa-lg fa-edit text-muted"></i></button>
@@ -599,7 +658,7 @@
                 </table>
             </div>
 
-            <div class="table-responsive panel market-table-responsive" id="myBarter"  ng-hide="true">
+            <div class="table-responsive panel market-table-responsive" id="myBarter" ng-show="myOffersView == 'barter'">
 
                 <table class="table table-condensed data-table table-hover">
                     <thead>
@@ -617,21 +676,32 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
+                    <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_my_goods_offers">
 
-                        <td>3 мин назад</td>
-                        <td>Продажа</td>
-                        <td><a href="">Фотосъемка на вершине горы
-                            <span class="text-muted">...</span></a></td>
-                        <td>30 G</td>
-                        <td><ul class="list-unstyled">
+                        <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
+                        <td>
+                            <span ng-if="offer.offer_type == 0">Покупка</span>
+                            <span ng-if="offer.offer_type == 1">Продажа</span>
+                        </td>
 
-                            <li><a mailto:bicoing@yahoo.com="" href="" class="nowrap"> bicoinG@yahoo.com</a></li>
-                            <span class="nowrap"><i class="fa fa-lg fa-skype text-primary"></i> 40324309d</span>
-                        </ul></td>
+                        <td>
+                            <!-- <a href=""> -->
+                                {{offer.target}}
+                                <!-- <span class="text-muted">...</span> -->
+                            <!-- </a> -->
+                        </td>
+
+                        <td>{{offer.amount_lui | gulden}}</td>
+
+                        <td>
+                            {{offer.contacts}}
+                        </td>
+
                         <!-- <td><span class="label label-success">4.5</span></td> -->
 
-                        <td>Бразилия</td><td>короткий текст</td>
+                        <td>{{offer.location}}</td>
+
+                        <td>{{offer.comment}}</td>
 
                         <td>
 
@@ -651,6 +721,8 @@
                 </table>
             </div>
         </div></div></tab>
+
+
         <tab heading="Избранное"  disabled="true"><div class="panel"><div class="panel-body">
             <div class="navbar">
 

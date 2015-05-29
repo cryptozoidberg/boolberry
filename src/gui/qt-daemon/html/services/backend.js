@@ -228,7 +228,7 @@
                             angular.forEach($rootScope.offers,function(item){
                                 var result = $filter('filter')($rootScope.safes, item.tx_hash);
                                 if(result.length){
-                                    my_offers.push(result[0]);
+                                    my_offers.push(item);
                                 }
                             });
 
@@ -600,6 +600,19 @@
                             "payment_types": "EPS,BC,Qiwi",
                             "expiration_time":5,
                             'timestamp': 1429715920,
+                            'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b2"
+                        }, 
+                        {
+                            "offer_type": 2,
+                            "amount_lui": 1230000000,
+                            "amount_etc": 2,
+                            "target": "IDR",
+                            "location": "Indonesia, Bali",
+                            "contacts": "+89876782342",
+                            "comment": "We will rock you",
+                            "payment_types": "EPS,BC,Qiwi",
+                            "expiration_time":5,
+                            'timestamp': 1430715920,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b2"
                         },
                         {

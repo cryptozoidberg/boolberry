@@ -215,7 +215,7 @@
                 keywords: '',
                 is_anonim : $scope.is_anonim_values[0].key,
                 is_mixin : -1,
-                interval : $scope.is_anonim_values[0].key
+                interval : $scope.interval_values[0].key
             };
 
             $scope.tx_date = {
