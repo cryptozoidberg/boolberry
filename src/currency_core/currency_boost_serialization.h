@@ -174,6 +174,14 @@ namespace boost
     a & x.signatures;
     a & x.attachment;
   }
+
+  template <class Archive>
+  inline void serialize(Archive &a, currency::keypair &kp, const boost::serialization::version_type ver)
+  {
+    a & kp.pub;
+    a & kp.sec;
+  }
+  
   template <class Archive>
   inline void serialize(Archive &a, currency::block &b, const boost::serialization::version_type ver)
   {

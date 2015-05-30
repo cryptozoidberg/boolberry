@@ -58,6 +58,8 @@ namespace currency
     };
     typedef std::unordered_map<crypto::hash, block_extended_info> blocks_ext_by_hash;
     typedef std::list<blocks_ext_by_hash::iterator> alt_chain_type;
+    typedef std::unordered_map<crypto::hash, std::vector<offer_details>> offers_container;
+
 
     blockchain_storage(tx_memory_pool& tx_pool);
 
@@ -159,6 +161,7 @@ namespace currency
     void set_pos_config(const pos_config& pc);
     size_t get_current_sequence_factor(bool pos);
     const block_extended_info&  get_last_block_of_type(bool looking_for_pos, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
+    bool validate_cancel_order(const cancel_offer& co, offers_container::iterator& oit);
 
 
     //exchange access functions
@@ -224,7 +227,6 @@ namespace currency
     typedef std::map<std::string, std::list<alias_info_base>> aliases_container; //alias can be address address address + view key
     typedef std::unordered_map<account_public_address, std::string> address_to_aliases_container;
     typedef std::list<blockchain_storage::blocks_ext_by_hash::iterator> alt_chain_list;
-    typedef std::unordered_map<crypto::hash, std::vector<offer_details>> offers_container;
     
     tx_memory_pool& m_tx_pool;
     critical_section m_blockchain_lock; // TODO: add here reader/writer lock
@@ -301,7 +303,6 @@ namespace currency
 //    bool build_stake_modifier_for_alt(const alt_chain_type& alt_chain, stake_modifier_type& sm);
     template<class visitor_t>
     bool enum_blockchain(visitor_t& v, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
-    bool validate_cancel_order(const cancel_offer& co, offers_container::iterator& oit);
     bool process_cancel_offer(const cancel_offer& co);
     bool unprocess_cancel_offer(const cancel_offer& co);
 

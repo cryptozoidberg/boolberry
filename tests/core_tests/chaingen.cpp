@@ -1056,8 +1056,8 @@ bool construct_tx_to_key(const std::vector<test_event_entry>& events,
   vector<tx_source_entry> sources;
   vector<tx_destination_entry> destinations;
   fill_tx_sources_and_destinations(events, blk_head, from, to, amount, fee, nmix, sources, destinations, check_for_spends);
-
-  return construct_tx(from.get_keys(), sources, destinations, extr, att, tx, 0, mix_attr);
+  crypto::secret_key sk = AUTO_VAL_INIT(sk);
+  return construct_tx(from.get_keys(), sources, destinations, extr, att, tx, sk, 0, mix_attr);
 }
 
 transaction construct_tx_with_fee(std::vector<test_event_entry>& events, const block& blk_head,

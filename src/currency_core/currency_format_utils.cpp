@@ -686,8 +686,8 @@ namespace currency
   blobdata make_cancel_offer_sig_blob(const cancel_offer& co)
   {
     blobdata bd;
-    string_tools::apped_pod_to_strbuff(co.tx_id);
-    string_tools::apped_pod_to_strbuff(co.offer_index);
+    string_tools::apped_pod_to_strbuff(bd, co.tx_id);
+    string_tools::apped_pod_to_strbuff(bd, co.offer_index);
     return bd;
   }
   //---------------------------------------------------------------

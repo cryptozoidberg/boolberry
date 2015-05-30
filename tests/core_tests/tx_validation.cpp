@@ -917,5 +917,7 @@ bool gen_crypted_attachments::check_crypted_tx(currency::core& c, size_t ev_inde
     return false;
   }
 
+  // now cancel attachment
+
   return true;
 }

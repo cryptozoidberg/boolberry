@@ -162,7 +162,8 @@ namespace currency
     if (!get_attachment(tx.attachment, co))
       return false;
 
-    if (!m_blockchain.validate_cancel_order(co))
+    blockchain_storage::offers_container::iterator oit;
+    if (!m_blockchain.validate_cancel_order(co, oit))
       return false;
 
     if (m_cancel_offer_hash.count(co.tx_id))

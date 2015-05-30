@@ -191,7 +191,6 @@ namespace tools
                   T destination_split_strategy, 
                   const tx_dust_policy& dust_policy, 
                   currency::transaction &tx,
-                  crypto::secret_key& one_time_tx_secrete_key,
                   uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, 
                   size_t fake_outputs_count, 
@@ -290,6 +289,7 @@ namespace tools
     bool is_coin_age_okay(const transfer_details& tr);
     static bool build_kernel(const currency::pos_entry& pe, const currency::stake_modifier_type& stake_modifier, currency::stake_kernel& kernel, uint64_t& coindays_weight, uint64_t timestamp);
     bool is_connected_to_net();
+    void drop_offer_keys();
 
 
     currency::account_base m_account;
@@ -590,11 +590,12 @@ namespace tools
       splitted_dsts.push_back(currency::tx_destination_entry(dust, dust_policy.addr_for_dust));
     }
 
-    crypto::secret_key one_time_secrete_key = AUTO_VAL_INIT(one_time_secrete_key);
-    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, attachments, tx, one_time_secrete_key, unlock_time);
+    currency::keypair one_time_key = AUTO_VAL_INIT(one_time_key);
+    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, attachments, tx, one_time_key.sec, unlock_time);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
     //update_current_tx_limit();
     CHECK_AND_THROW_WALLET_EX(CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
+    one_time_key.pub = get_tx_pub_key_from_extra(tx);
 
     std::string key_images;
     bool all_are_txin_to_key = std::all_of(tx.vin.begin(), tx.vin.end(), [&](const txin_v& s_e) -> bool
@@ -626,7 +627,7 @@ namespace tools
     if (currency::have_attachment<currency::offer_details>(tx.attachment))
     {
       //store private tx key
-      m_offers_secret_keys[currency::get_transaction_hash(tx)] = std::make_pair(one_time_secrete_key, static_cast<uint64_t>(time(nullptr)));
+      m_offers_secret_keys[currency::get_transaction_hash(tx)] = std::make_pair(one_time_key, static_cast<uint64_t>(time(nullptr)));
     }
 
     LOG_PRINT_L2("transaction " << get_transaction_hash(tx) << " generated ok and sent to daemon, key_images: [" << key_images << "]");

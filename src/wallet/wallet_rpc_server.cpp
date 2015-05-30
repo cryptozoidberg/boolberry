@@ -332,8 +332,8 @@ namespace tools
     //generate transaction
     const std::vector<currency::extra_v> extra;
     const std::vector<currency::attachment_v> attachments;
-
-    bool r = currency::construct_tx(acc.get_keys(), sources, dsts, extra, attachments, tx2, 0);
+    crypto::secret_key sk;
+    bool r = currency::construct_tx(acc.get_keys(), sources, dsts, extra, attachments, tx2, sk, 0);
     if (!r)
     {
       LOG_ERROR("Problem with construct_tx(....) ");
