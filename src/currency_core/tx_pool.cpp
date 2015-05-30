@@ -80,9 +80,13 @@ namespace currency
       //transaction spam protection, soft rule
       if (inputs_amount - outputs_amount < TX_POOL_MINIMUM_FEE)
       {
-        LOG_ERROR("Transaction with id= " << id << " has to small fee: " << inputs_amount - outputs_amount << ", expected fee: " << DEFAULT_FEE);
-        tvc.m_verifivation_failed = true;
-        return false;
+        //exception for cancel offer transactions
+        if (!process_cancel_offer_rules(tx))
+        {
+          LOG_ERROR("Transaction with id= " << id << " has to small fee: " << inputs_amount - outputs_amount << ", expected fee: " << DEFAULT_FEE);
+          tvc.m_verifivation_failed = true;
+          return false;
+        }
       }
     }
 
@@ -149,6 +153,36 @@ namespace currency
 
     tvc.m_verifivation_failed = false;
     //succeed
+    return true;
+  }
+  //---------------------------------------------------------------------------------
+  bool tx_memory_pool::process_cancel_offer_rules(const transaction& tx)
+  {
+    cancel_offer co = AUTO_VAL_INIT(co);
+    if (!get_attachment(tx.attachment, co))
+      return false;
+
+    if (!m_blockchain.validate_cancel_order(co))
+      return false;
+
+    if (m_cancel_offer_hash.count(co.tx_id))
+      return false;
+
+    m_cancel_offer_hash.insert(co.tx_id);
+    return true;
+  }
+  //---------------------------------------------------------------------------------
+  bool tx_memory_pool::unprocess_cancel_offer_rules(const transaction& tx)
+  {
+    cancel_offer co = AUTO_VAL_INIT(co);
+    if (!get_attachment(tx.attachment, co))
+      return false;
+
+    auto it = m_cancel_offer_hash.find(co.tx_id);
+    if (it == m_cancel_offer_hash.end())
+      return false;
+    
+    m_cancel_offer_hash.erase(it);
     return true;
   }
   //---------------------------------------------------------------------------------
@@ -245,6 +279,7 @@ namespace currency
     blob_size = it->second.blob_size;
     fee = it->second.fee;
     remove_transaction_keyimages(it->second.tx);
+    unprocess_cancel_offer_rules(it->second.tx);
     if (!pop_alias_info(tx))
     {
       return false;

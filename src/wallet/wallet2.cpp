@@ -1111,6 +1111,27 @@ void wallet2::push_offer(const currency::offer_details& od, currency::transactio
   transfer(destinations, 0, 0, od.fee, extra, attachments, res_tx);
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::cancel_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, currency::transaction& res_tx)
+{
+  currency::tx_destination_entry tx_dest;
+  tx_dest.addr = m_account.get_keys().m_account_address;
+  tx_dest.amount = DEFAULT_FEE;
+  std::vector<currency::tx_destination_entry> destinations;
+  std::vector<currency::extra_v> extra;
+  std::vector<currency::attachment_v> attachments;
+  currency::cancel_offer co = AUTO_VAL_INIT(co);
+  co.offer_index = of_ind;
+  co.tx_id = tx_id;
+  auto it = m_offers_secret_keys.find(tx_id);
+  CHECK_AND_ASSERT_THROW_MES(it != m_offers_secret_keys.end(), "scerete key not found for tx " << tx_id);
+  blobdata sig_blob = currency::make_cancel_offer_sig_blob(co);
+  crypto::generate_signature(crypto::cn_fast_hash(sig_blob.data(), sig_blob.size()), it->first.pub, it->first.sec, co.sig);  
+  attachments.push_back(co);
+  destinations.push_back(tx_dest);
+  //use minimum amount for cancel
+  transfer(destinations, 0, 0, 1, extra, attachments, res_tx);
+}
+//----------------------------------------------------------------------------------------------------
 void wallet2::request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee)
 {
   currency::tx_destination_entry tx_dest;

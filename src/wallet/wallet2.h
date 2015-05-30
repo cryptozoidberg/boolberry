@@ -163,6 +163,7 @@ namespace tools
     void refresh(std::atomic<bool>& stop);
     
     void push_offer(const currency::offer_details& od, currency::transaction& res_tx);
+    void cancel_offer_by_id(const crypto::hash& tx_id, uint64_t sz, currency::transaction& tx);
     void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee);
 
 
@@ -308,7 +309,7 @@ namespace tools
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
     std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
     std::unordered_map<crypto::hash, tools::wallet_rpc::wallet_transfer_info> m_unconfirmed_txs;
-    std::unordered_map<crypto::hash, std::pair<crypto::secret_key, uint64_t> > m_offers_secret_keys;
+    std::unordered_map<crypto::hash, std::pair<currency::keypair, uint64_t> > m_offers_secret_keys;
 
     std::shared_ptr<i_core_proxy> m_core_proxy;
     std::shared_ptr<i_wallet2_callback> m_wcallback;

@@ -102,13 +102,16 @@ namespace currency
     bool validate_alias_info(const transaction& tx, bool is_in_block);
     bool push_alias_info(const transaction& tx);
     bool pop_alias_info(const transaction& tx);
+    bool process_cancel_offer_rules(const transaction& tx);
     typedef std::unordered_map<crypto::hash, tx_details > transactions_container;
     typedef std::unordered_map<crypto::key_image, std::unordered_set<crypto::hash> > key_images_container;
+
 
     epee::critical_section m_transactions_lock;
     transactions_container m_transactions;
     key_images_container m_spent_key_images;
-    
+    std::set<crypto::hash> m_cancel_offer_hash;
+
     epee::math_helper::once_a_time_seconds<30> m_remove_stuck_tx_interval;
 
     //transactions_container m_alternative_transactions;

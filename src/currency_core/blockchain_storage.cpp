@@ -1852,8 +1852,6 @@ size_t get_offers_count_in_attachments(const transaction& tx)
   return cnt;
 }
 //------------------------------------------------------------------
-
-//------------------------------------------------------------------
 bool blockchain_storage::validate_cancel_order(const cancel_offer& co, offers_container::iterator& oit)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
