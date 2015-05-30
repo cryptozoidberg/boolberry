@@ -20,7 +20,12 @@
                 return false;
             };
 
-            $scope.fav_offers_hash = [];
+            if(angular.isDefined($rootScope.settings.system.fav_offers_hash)){
+                $scope.fav_offers_hash = $rootScope.settings.system.fav_offers_hash;
+            }else{
+                $scope.fav_offers_hash = [];
+            }
+            
 
             var is_fav = function(offer){
                 if($scope.fav_offers_hash.indexOf(offer.tx_hash) > -1){
@@ -32,12 +37,15 @@
             $scope.is_fav = is_fav;
 
             $scope.toggleFav = function(offer){
+                
                 var index = $scope.fav_offers_hash.indexOf(offer.tx_hash);
+                // alert(index);
                 if(index > -1){
                     $scope.fav_offers_hash.splice(index,1);
                 }else{
                     $scope.fav_offers_hash.push(offer.tx_hash);
                 }
+                $rootScope.settings.system.fav_offers_hash = $scope.fav_offers_hash;
                 loadFavorites();
                 $scope.favOffersFilterChange();
             };

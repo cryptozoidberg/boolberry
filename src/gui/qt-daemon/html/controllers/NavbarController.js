@@ -201,7 +201,8 @@
                 app_donation : false,
                 donation_amount : 0,
                 default_user_path: '/',
-                log_level : 0
+                log_level : 0,
+                fav_offers_hash: []
             }
         };
 
@@ -211,6 +212,7 @@
             var settings = backend.getAppData(); // get app settinngs
             console.log('GET APP SETTINGS ::');
             console.log(settings);
+            // informer.info(JSON.stringify(settings.system.fav_offers_hash));
             if(settings){
                 $rootScope.settings = settings;
             } 
