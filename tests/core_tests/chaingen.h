@@ -337,7 +337,22 @@ bool construct_tx_to_key(const std::vector<test_event_entry>& events,
                          const currency::account_base& to,
                          uint64_t amount, 
                          uint64_t fee, 
+                         size_t nmix,
+                         uint8_t mix_attr = CURRENCY_TO_KEY_OUT_RELAXED, 
+                         const std::vector<currency::extra_v>& extr = std::vector<currency::extra_v>(),
+                         const std::vector<currency::attachment_v>& att = std::vector<currency::attachment_v>(),
+                         bool check_for_spends = true);
+
+
+bool construct_tx_to_key(const std::vector<test_event_entry>& events, 
+                         currency::transaction& tx,
+                         const currency::block& blk_head, 
+                         const currency::account_base& from, 
+                         const currency::account_base& to,
+                         uint64_t amount, 
+                         uint64_t fee, 
                          size_t nmix, 
+                         crypto::secret_key& sk,
                          uint8_t mix_attr = CURRENCY_TO_KEY_OUT_RELAXED, 
                          const std::vector<currency::extra_v>& extr = std::vector<currency::extra_v>(),
                          const std::vector<currency::attachment_v>& att = std::vector<currency::attachment_v>(),
@@ -841,8 +856,8 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
 
 #define MAKE_TX_MIX_LIST_EXTRA_MIX_ATTR(VEC_EVENTS, SET_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, EXTRA, ATTACH)    \
   {                                                                                                \
-    currency::transaction t;                                                                       \
-    construct_tx_to_key(VEC_EVENTS, t, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR, EXTRA, ATTACH); \
+  currency::transaction t;                                                                       \
+  construct_tx_to_key(VEC_EVENTS, t, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR, EXTRA, ATTACH); \
     SET_NAME.push_back(t);                                                                         \
     VEC_EVENTS.push_back(t);                                                                       \
   }

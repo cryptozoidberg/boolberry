@@ -750,6 +750,18 @@ bool gen_tx_signatures_are_invalid::generate(std::vector<test_event_entry>& even
   return true;
 }
 
+void fill_test_offer(offer_details& od)
+{
+  od.offer_type = OFFER_TYPE_LUI_TO_ETC;
+  od.amount_lui = 1000000000;
+  od.amount_etc = 22222222;
+  od.target = "USD";
+  od.location = "USA, New York City";
+  od.contacts = "skype: zina; icq: 12313212; email: zina@zina.com; mobile: +621234567834";
+  od.comment = "The best ever rate in NYC!!!";
+  od.payment_types = "BTC;BANK;CASH";
+  od.expiration_time = 10;
+}
 bool gen_broken_attachments::generate(std::vector<test_event_entry>& events) const
 {
   uint64_t ts_start = 1338224400;
@@ -768,15 +780,7 @@ bool gen_broken_attachments::generate(std::vector<test_event_entry>& events) con
 
   offer_details& od = boost::get<currency::offer_details&>(attachments.back());
 
-  od.offer_type = OFFER_TYPE_LUI_TO_ETC;
-  od.amount_lui = 1000000000;
-  od.amount_etc = 22222222;
-  od.target = "USD";
-  od.location = "USA, New York City";
-  od.contacts = "skype: zina; icq: 12313212; email: zina@zina.com; mobile: +621234567834";
-  od.comment = "The best ever rate in NYC!!!";
-  od.payment_types = "BTC;BANK;CASH";
-  od.expiration_time = 10;
+  fill_test_offer(od);
 
   std::list<currency::transaction> txs_set;
   DO_CALLBACK(events, "mark_invalid_tx");
@@ -809,6 +813,8 @@ gen_crypted_attachments::gen_crypted_attachments()
   REGISTER_CALLBACK("check_crypted_tx", gen_crypted_attachments::check_crypted_tx);
   REGISTER_CALLBACK("set_blockchain_height", gen_crypted_attachments::set_blockchain_height);
   REGISTER_CALLBACK("set_crypted_tx_height", gen_crypted_attachments::set_crypted_tx_height);
+  REGISTER_CALLBACK("check_offers_count_befor_cancel", gen_crypted_attachments::check_offers_count_befor_cancel);
+  REGISTER_CALLBACK("check_offers_count_after_cancel", gen_crypted_attachments::check_offers_count_after_cancel);
   
 }
 
@@ -840,6 +846,48 @@ bool gen_crypted_attachments::generate(std::vector<test_event_entry>& events) co
   DO_CALLBACK(events, "set_crypted_tx_height");
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_6, blk_5, miner_account, txs_list);
   DO_CALLBACK(events, "check_crypted_tx");
+
+  MAKE_TX_LIST_START(events, txs_list2, miner_account, bob_account, MK_COINS(1), blk_6);
+  
+  //create two offers
+  currency::transaction tx;
+  std::vector<currency::attachment_v> attachments2;
+  offer_details od = AUTO_VAL_INIT(od);
+
+  fill_test_offer(od);
+  attachments2.push_back(od);
+  attachments2.push_back(od);
+  currency::keypair off_key_pair = AUTO_VAL_INIT(off_key_pair);
+  construct_tx_to_key(events, tx, blk_6, miner_account, miner_account, MK_COINS(1), TESTS_DEFAULT_FEE, 0, off_key_pair.sec, CURRENCY_TO_KEY_OUT_RELAXED, std::vector<currency::extra_v>(), attachments2);
+  txs_list2.push_back(tx);
+  events.push_back(tx);
+
+  MAKE_NEXT_BLOCK_TX_LIST(events, blk_7, blk_6, miner_account, txs_list2);
+  DO_CALLBACK(events, "check_offers_count_befor_cancel");
+  
+  //create two cancel offers
+  MAKE_TX_LIST_START(events, txs_list3, miner_account, bob_account, MK_COINS(1), blk_7);
+  std::vector<currency::attachment_v> attachments3;
+  cancel_offer co = AUTO_VAL_INIT(co);
+  co.tx_id = get_transaction_hash(tx);
+  co.offer_index = 0;
+  blobdata bl_for_sig = currency::make_cancel_offer_sig_blob(co);
+  crypto::generate_signature(crypto::cn_fast_hash(bl_for_sig.data(), bl_for_sig.size()), 
+                             currency::get_tx_pub_key_from_extra(tx), 
+                             off_key_pair.sec, co.sig);
+  attachments3.push_back(co);
+  co.offer_index = 1;
+  bl_for_sig = currency::make_cancel_offer_sig_blob(co);
+  crypto::generate_signature(crypto::cn_fast_hash(bl_for_sig.data(), bl_for_sig.size()), 
+                             currency::get_tx_pub_key_from_extra(tx), 
+                             off_key_pair.sec, co.sig);
+  attachments3.push_back(co);
+  construct_tx_to_key(events, tx, blk_7, miner_account, miner_account, MK_COINS(1), TESTS_DEFAULT_FEE, 0, CURRENCY_TO_KEY_OUT_RELAXED, std::vector<currency::extra_v>(), attachments3);
+  txs_list3.push_back(tx);
+  events.push_back(tx);
+
+  MAKE_NEXT_BLOCK_TX_LIST(events, blk_8, blk_7, miner_account, txs_list3);
+  DO_CALLBACK(events, "check_offers_count_after_cancel");
   return true;
 }
 
@@ -853,7 +901,20 @@ bool gen_crypted_attachments::set_crypted_tx_height(currency::core& c, size_t ev
   crypted_tx_height = ev_index - 1;
   return true;
 }
-
+bool gen_crypted_attachments::check_offers_count_befor_cancel(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& /*events*/)
+{
+  std::list<offer_details> od;
+  c.get_blockchain_storage().get_all_offers(od);
+  offers_before_canel = od.size();
+  return true;
+}
+bool gen_crypted_attachments::check_offers_count_after_cancel(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& /*events*/)
+{ 
+  std::list<offer_details> od;
+  c.get_blockchain_storage().get_all_offers(od);
+  CHECK_EQ(offers_before_canel - 2, od.size());
+  return true;
+}
 bool gen_crypted_attachments::check_crypted_tx(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
 

@@ -151,10 +151,12 @@ struct gen_crypted_attachments : get_tx_validation_base
   bool check_crypted_tx(currency::core& /*c*/, size_t ev_index, const std::vector<test_event_entry>& /*events*/);
   bool set_blockchain_height(currency::core& /*c*/, size_t ev_index, const std::vector<test_event_entry>& /*events*/);
   bool set_crypted_tx_height(currency::core& /*c*/, size_t ev_index, const std::vector<test_event_entry>& /*events*/);
-  
+  bool check_offers_count_befor_cancel(currency::core& /*c*/, size_t ev_index, const std::vector<test_event_entry>& /*events*/);
+  bool check_offers_count_after_cancel(currency::core& /*c*/, size_t ev_index, const std::vector<test_event_entry>& /*events*/);
 
   mutable size_t crypted_tx_height;
   mutable uint64_t bc_height_before;
+  mutable uint64_t offers_before_canel;
   mutable currency::tx_payer pr;
   mutable currency::tx_comment cm;
   mutable currency::tx_message ms;

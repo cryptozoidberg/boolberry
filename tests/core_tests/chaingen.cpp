@@ -1040,6 +1040,7 @@ bool construct_miner_tx_manually(size_t height, uint64_t already_generated_coins
   return true;
 }
 
+
 bool construct_tx_to_key(const std::vector<test_event_entry>& events, 
                          currency::transaction& tx, 
                          const block& blk_head,
@@ -1053,10 +1054,38 @@ bool construct_tx_to_key(const std::vector<test_event_entry>& events,
                          const std::vector<currency::attachment_v>& att, 
                          bool check_for_spends)
 {
+  crypto::secret_key sk = AUTO_VAL_INIT(sk);
+  return construct_tx_to_key(events,
+                      tx, 
+                         blk_head,
+                         from, 
+                         to, 
+                         amount,
+                         fee, 
+                         nmix,
+                         sk,
+                         mix_attr, 
+                         extr,
+                         att, 
+                         check_for_spends);
+}
+bool construct_tx_to_key(const std::vector<test_event_entry>& events, 
+                         currency::transaction& tx, 
+                         const block& blk_head,
+                         const currency::account_base& from, 
+                         const currency::account_base& to, 
+                         uint64_t amount,
+                         uint64_t fee, 
+                         size_t nmix, 
+                         crypto::secret_key& sk,
+                         uint8_t mix_attr, 
+                         const std::vector<currency::extra_v>& extr,
+                         const std::vector<currency::attachment_v>& att, 
+                         bool check_for_spends)
+{
   vector<tx_source_entry> sources;
   vector<tx_destination_entry> destinations;
   fill_tx_sources_and_destinations(events, blk_head, from, to, amount, fee, nmix, sources, destinations, check_for_spends);
-  crypto::secret_key sk = AUTO_VAL_INIT(sk);
   return construct_tx(from.get_keys(), sources, destinations, extr, att, tx, sk, 0, mix_attr);
 }
 
