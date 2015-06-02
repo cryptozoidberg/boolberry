@@ -893,6 +893,28 @@ QString Html5ApplicationViewer::push_offer(const QString& param)
   });
 }
 
+QString Html5ApplicationViewer::cancel_offer(const QString& param)
+{
+  return que_call2<view::cancel_offer_param>("cancel_offer", param, [this](const view::cancel_offer_param& a, view::api_response& ar){
+
+    view::transfer_response tr = AUTO_VAL_INIT(tr);
+    currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
+
+    ar.error_code = m_backend.cancel_offer(a, res_tx);
+    if (ar.error_code != API_RETURN_CODE_OK)
+    {
+      view::api_void av;
+      dispatch(ar, av);
+      return;
+    }
+    tr.success = true;
+    tr.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(res_tx));
+    tr.tx_blob_size = currency::get_object_blobsize(res_tx);
+    ar.error_code = API_RETURN_CODE_OK;
+    dispatch(ar, tr);
+  });
+}
+
 QString Html5ApplicationViewer::start_pos_mining(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::wallet_id_obj, wo);

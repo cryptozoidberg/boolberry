@@ -711,7 +711,7 @@ void wallet2::drop_offer_keys()
 {
   for (auto it = m_offers_secret_keys.begin(); it != m_offers_secret_keys.end();)
   {
-    if (time(nullptr) > it->second.second && time(nullptr) - it->second.second > OFFER_MAXIMUM_LIFE_TIME)
+    if (static_cast<uint64_t>(time(nullptr)) > it->second.second && static_cast<uint64_t>(time(nullptr)) - it->second.second > OFFER_MAXIMUM_LIFE_TIME)
       m_offers_secret_keys.erase(it++);
     else
       it++;

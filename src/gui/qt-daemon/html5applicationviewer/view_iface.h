@@ -256,6 +256,19 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct cancel_offer_param
+  {
+    uint64_t wallet_id;
+    std::string tx_hash;
+    uint64_t no;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
+      KV_SERIALIZE(tx_hash)
+      KV_SERIALIZE(no)
+    END_KV_SERIALIZE_MAP()
+  };
+
   struct transfer_event_info
   {
     tools::wallet_rpc::wallet_transfer_info ti;

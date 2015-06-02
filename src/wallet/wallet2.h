@@ -163,7 +163,7 @@ namespace tools
     void refresh(std::atomic<bool>& stop);
     
     void push_offer(const currency::offer_details& od, currency::transaction& res_tx);
-    void cancel_offer_by_id(const crypto::hash& tx_id, uint64_t sz, currency::transaction& tx);
+    void cancel_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, currency::transaction& tx);
     void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee);
 
 
