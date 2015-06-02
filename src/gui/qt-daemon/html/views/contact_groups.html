@@ -1,0 +1,82 @@
+
+<div class="modal-header btn btn-primary btn-block">
+  <button type="button" class="close" ng-click="close()"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+  <h4 class="modal-title text-center">Группы контактов</h4>
+</div>
+
+
+<div class="modal-body form-horizontal">
+  <div collapse="collapse.warning">
+    <div class="alert alert-warning">
+      <p><strong>В списке {{group_to_delete.name}} {{group_to_delete.contacts.length}} контакта. Вы действительно хотите удалить список?</strong></p>
+      <p>
+        <button type="button" class="btn btn-danger" ng-click="realRemoveGroup(group_to_delete)">Удалить</button> 
+        <button type="button" class="btn btn-default" ng-click="collapse.warning = true">Отменить</button>
+      </p>
+    </div>
+  </div>
+
+  <ul class="list-group list-edit-fields">
+  
+  <li class="list-group-item" ng-repeat="(index,group) in settings.contact_groups" style="min-height: 0">
+    
+    <div class="dropdown pull-right" dropdown  collapse="items_collapse[index]">
+      <button dropdown-toggle class="btn btn-link dropdown-toggle" type="button">
+        <i class="fa fa-lg fa-cog text-muted"></i> <span class="caret text-muted"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right" role="menu">
+        <li><a type="button" ng-click="items_collapse[index] = !items_collapse[index]">Переименовать</a></li>
+        <li><a type="button" ng-click="removeGroup(group)">Удалить</a></li>   
+      </ul>
+    </div>
+
+    <a collapse="items_collapse[index]"><em>{{group.name}}</em></a>
+
+    <div collapse="!items_collapse[index]" class="form-group has-feedback inline-edit-field">
+      <div class="col-xs-10 col-xs-1 col-sm-10">
+        <input type="text" class="form-control flat-input" ng-model="group.name">
+        <i class="fa fa-lg fa-pencil form-control-feedback"></i>
+      </div>
+      <div class="col-xs-2 col-sm-2">
+        <button class="btn btn-link btn-block" type="button" ng-click="items_collapse[index] = !items_collapse[index]">
+          <i class="fa fa-lg fa-save text-muted"></i>
+        </button> 
+      </div>
+    </div>
+
+  </li>
+
+  <li class="list-group-item" style="min-height: 0" collapse="collapse.new_group">
+    <div class="form-group has-feedback inline-edit-field">
+      <div class="col-xs-10 col-xs-1 col-sm-10">
+        <input type="text" class="form-control flat-input" ng-model="new_group.name" placeholder="название листа">
+        <i class="fa fa-lg fa-pencil form-control-feedback"></i>
+      </div>
+      <div class="col-xs-2 col-sm-2">
+        <button class="btn btn-link btn-block" type="button" ng-disabled="!new_group.name.length" ng-click="addGroup(new_group)">
+          <i class="fa fa-lg fa-save" ng-class="{'text-muted' : !new_group.name.length}"></i>
+        </button> 
+      </div>
+    </div>
+  </li>
+
+</ul>
+
+  <div>
+    <button type="button" ng-click="collapse.new_group = !collapse.new_group" class="btn btn-link text-muted">
+      <i class="fa fa-lg fa-plus-circle"></i> Добавить группу
+    </button>
+  </div>
+</div>
+
+
+<div class="modal-footer">
+  <div class="row">
+    <div class="col-xs-6 col-sm-6">
+      <a type="button" class="btn btn-default  btn-block" ng-click="close()">Отменить</a> 
+    </div>
+    <div class="col-xs-6 col-sm-6">
+      <a type="button" class="btn btn-primary btn-block" ng-click="close()">Сохранить</a>
+    </div>
+  </div>
+</div>

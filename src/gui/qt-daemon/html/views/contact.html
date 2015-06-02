@@ -22,8 +22,13 @@
                     <div class="form-group inline-edit-field collapse in name1">
                         <label class="col-xs-4 col-sm-4 control-label">Группа</label>
 
-                        <select class="{{ selectpicker_class }} show-tick col-xs-4 col-sm-4" multiple title='Выберите группу'>
-                            {{ group_options }}
+                        <select 
+                            selectpicker 
+                            class="show-tick col-xs-4 col-sm-4" 
+                            multiple 
+                            title='Выберите группу'
+                        >
+                            
                         </select>
 
                     </div>
@@ -98,7 +103,7 @@
 
 
                     <div class="form-group has-feedback group-hover inline-edit-field collapse in location1">
-                        <label class="col-xs-4 col-sm-4 control-label">Местожительства</label>
+                        <label class="col-xs-4 col-sm-4 control-label">Место жительства</label>
                         <div class="col-xs-7 col-sm-7">
                             <input type="text" class="form-control flat-input" value="{{ contact.location.city }}, {{ contact.location.country }}">
                             <i class="fa fa-lg fa-pencil form-control-feedback"></i>

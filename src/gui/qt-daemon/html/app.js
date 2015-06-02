@@ -12,17 +12,18 @@
         'ngSanitize',
         'validation.match', // allow to validate inputs match 
         'angularSlideables', // show/hide animations
-
+        
+        'app.app',
         'app.filters',
         'app.services',
         'app.backendServices',
         'app.dashboard',
-        'app.navbar',
         'app.directives',
         'app.safes',
         'app.guldens',
         'app.market' ,
-        'app.settings'
+        'app.settings',
+        'app.contacts'
 
     ]);
 
@@ -45,6 +46,7 @@
             {route: '/addGOfferSell',    template: 'views/addGOffer.html'},
 
             {route: '/addOfferBuy',      template: 'views/addOffer.html'},
+            {route: '/addContact',       template: 'views/addContact.html'},
             {route: '/addOfferSell',     template: 'views/addOffer.html'},
         ];
 

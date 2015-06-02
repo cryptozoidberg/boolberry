@@ -1,3 +1,4 @@
+<div ng-controller="contactsCtrl">
     <a data-target="#addContact" class="btn btn-link pull-right" type="button" data-toggle="modal"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт контактов в файл</span></a>
 
     <h1>Контакты</h1>
@@ -13,14 +14,15 @@
 
 
                     <div class="col-xs-8 col-sm-8">
-                        <a href="contact0.html" class="btn btn-primary">Добавить контакт</a>
-                        <a data-target="#lists" class="btn btn-link" type="button" data-toggle="modal"><i class="fa fa-lg fa-cog  text-muted"></i> <span class="underlined text-muted">Группы контактов</span></a>
+                        <a href="#/addContact" class="btn btn-primary">Добавить контакт</a>
+                        <a ng-click="contactGroups()" class="btn btn-link" type="button">
+                            <i class="fa fa-lg fa-cog  text-muted"></i> 
+                            <span class="underlined text-muted">Группы контактов</span>
+                        </a>
                     </div>
 
                     <div class="col-xs-4 col-sm-4">
-                        <input type="text" placeholder="найти текст в контактах" class="form-control">
-
-
+                        <input type="text" placeholder="найти текст в контактах" class="form-control" ng-model="keywords">
                     </div>
                 </div>
 
@@ -42,54 +44,58 @@
                 </thead>
 
                 <tbody class="contacts_contact_insertion">
+                    <tr ng-repeat="contact in settings.contacts | filter:keywords">
+                        <td>
+                            <a class="safename" href="#contact/{{ contact.id }}">{{ contact.name }}</a>
+                            <div class="text-muted"><a class="text-muted" href="#contact/{{ contact.id }}">{{ contact.location.city }}</a>, <a class="text-muted" href="">{{ contact.location.country }}</a></div>
+                        </td>
 
+                        <td>
+                            <!-- <a class="blocklink" href="#contact/{{ contact.id }}">
+                                <span class="account-text">
+                                    <span class="text-muted">{{ contact.account }}</span>
+                                    <span class="moredots">...</span>
+                                </span>
+                                {{ contact.aliases }}
+                            </a> -->
+                        </td>
+
+                        <td>
+                            <ul class="list-unstyled">
+                                <li><a href="mailto:{{contact.email}}">{{contact.email}}</a></li>
+                                <li ng-repeat="im in contact.ims"><strong>{{im.name}}</strong> {{im.nickname}}</li>
+                            </ul>
+                        </td>
+
+                        <td>
+                            {{ getContactGroups(contact) }}
+                        </td>
+
+                        <td>
+                            <span class="text-muted">{{ contact.comment }}</span>
+                        </td>
+
+                        <td>
+                            <div class="dropdown pull-right">
+                                <button type="button" class="btn btn-sm btn-link dropdown-toggle" data-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <i class="fa fa-lg fa-money text-muted"></i> <span class="caret text-muted"></span>
+                                </button>
+                                <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                                    <li><a href="#sendG/{{ contact.id }}">Отправить гульдены</a></li>
+                                    <li><a href="#history/contact/{{ contact.id }}">Связанные платежи</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
-
-        <table class="hidden">
-            <tbody class="contacts_contact_template">
-                <tr>
-                    <td>
-                        <a class="safename" href="#contact/{{ contact.id }}">{{ contact.name }}</a>
-                        <div class="text-muted"><a class="text-muted" href="#contact/{{ contact.id }}">{{ contact.city }}</a>, <a class="text-muted" href="">{{ contact.country }}</a></div>
-                    </td>
-                    <td>
-                        <a class="blocklink" href="#contact/{{ contact.id }}">
-                            <span class="account-text">
-                                <span class="text-muted">{{ contact.account }}</span>
-                                <span class="moredots">...</span>
-                            </span>
-                            {{ contact.aliases }}
-                        </a>
-                    </td>
-                    <td>
-                        <ul class="list-unstyled">
-                            <li><a href="#contact/{{ contact.id }}">{{ contact.contactField }}</a></li>
-                        </ul>
-                    </td>
-                    <td>{{ contact.groups }}</td>
-                    <td><span class="text-muted">{{ contact.note }}<p></p></span></td>
-                    <td>
-                        <div class="dropdown pull-right">
-                            <button type="button" class="btn btn-sm btn-link dropdown-toggle" data-toggle="dropdown"
-                                    aria-expanded="false">
-                                <i class="fa fa-lg fa-money text-muted"></i> <span class="caret text-muted"></span>
-                            </button>
-                            <ul role="menu" class="dropdown-menu dropdown-menu-right">
-                                <li><a href="#sendG/{{ contact.id }}">Отправить гульдены</a></li>
-                                <li><a href="#history/contact/{{ contact.id }}">Связанные платежи</a></li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-
     </div>
+
     <hr>
+
     <div class="footer">
-
-
     </div>
+
+</div>

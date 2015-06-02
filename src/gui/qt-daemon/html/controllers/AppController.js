@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    var module = angular.module('app.navbar',[]);
+    var module = angular.module('app.app',[]);
 
     module.factory('PassDialogs',['$modal','$rootScope','backend',
         function($modal, $rootScope, backend){
@@ -131,7 +131,7 @@
 
     
 
-    module.controller('NavbarTopController', [
+    module.controller('AppController', [
         'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs','$interval',
         function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs, $interval) {
         
@@ -203,7 +203,8 @@
                 default_user_path: '/',
                 log_level : 0,
                 fav_offers_hash: []
-            }
+            },
+            contacts: []
         };
 
         $scope.wallet_info  = {};

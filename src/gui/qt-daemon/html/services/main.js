@@ -304,4 +304,61 @@
         return this;
     }]);
 
+
+    module.factory('uuid', [function(){
+        this.generate = function(){
+              var s4 = function() {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                  .toString(16)
+                  .substring(1);
+              }
+              return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+        }
+        return this;
+    }]);
+
+
+    module.factory('contacts', ['backend', '$rootScope',function(backend, $rootScope) { // work with $rootScope.settings.contacts
+
+        if(angular.isUndefined($rootScope.settings.contacts)){
+            $rootScope.settings.contacts = [];
+        }
+
+        
+
+        var instance = { // contact instance structure by default
+            group_index: 0, //required
+            name: '', //required
+            email: '', //required
+            phone: '',
+            messengers: [
+                // ex. {name: 'skype', nickname: 'doblon'}
+            ],
+            location: '', // ???
+            comment: '',
+            addresses : [
+                // 'HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ',
+                // 'HhTZP7Sy4FoDR1kJHbFjzd5gSnUPdpHWHj7Gaaeqjt52KS23rHGa1sN73yZYPt77TkN8VVmHrT5qmBJQGzDLYJGjQpxGRid'
+            ]
+        };
+
+        angular.extend(this, instance);
+
+        instance.create = function(group_index, name, email){
+            if(angular.isUndefined(group_index) || angular.isUndefined(name) || angular.isUndefined(email)){
+                console.log('Error create contact :: group, name and email is a minimum set of data to create contact instance');
+                return false;
+            }
+            var contact = angular.copy(contactInstance);
+            contact.group_index = group_index;
+            contact.name = name;
+            contact.email = email;
+        }
+
+        contact.setGroup();
+        contact.addAddress('dgfghfhdfb')
+
+        return this;
+    }]);
+
 }).call(this);
