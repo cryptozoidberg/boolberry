@@ -1903,15 +1903,21 @@ bool blockchain_storage::unprocess_cancel_offer(const cancel_offer& co)
 //------------------------------------------------------------------
 bool blockchain_storage::unprocess_blockchain_tx_attachments(const transaction& tx)
 {
+
+  //handle offers
   size_t cnt_offers = get_offers_count_in_attachments(tx);
-  auto it = m_offers.find(get_transaction_hash(tx));
-  CHECK_AND_ASSERT_MES(it != m_offers.end(), false, "filed to find transaction with id: " << get_transaction_hash(tx) << " at unprocess_blockchain_tx_offers" );
+  if (cnt_offers)
+  {
+    auto it = m_offers.find(get_transaction_hash(tx));
+    CHECK_AND_ASSERT_MES(it != m_offers.end(), false, "filed to find transaction with id: " << get_transaction_hash(tx) << " at unprocess_blockchain_tx_offers");
 
-  CHECK_AND_ASSERT_MES(it->second.size() != cnt_offers, false, "wrong pffers size ("
-    << it->second.size() << ") in unprocess_blockchain_tx_offers with tx " << get_transaction_hash(tx) << ", expected " << cnt_offers);
+    CHECK_AND_ASSERT_MES(it->second.size() != cnt_offers, false, "wrong pffers size ("
+      << it->second.size() << ") in unprocess_blockchain_tx_offers with tx " << get_transaction_hash(tx) << ", expected " << cnt_offers);
 
-  m_offers.erase(it);
-  
+    m_offers.erase(it);
+  }
+
+  //handle cancel offers
   for (const auto& at : tx.attachment)
   {
     if (at.type() == typeid(cancel_offer))
