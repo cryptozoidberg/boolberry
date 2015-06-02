@@ -645,6 +645,7 @@ namespace currency
     crypto::public_key tx_pub_key = currency::get_tx_pub_key_from_extra(tx);
 
     bool r = crypto::generate_key_derivation(tx_pub_key, acc_keys.m_view_secret_key, derivation);
+    CHECK_AND_ASSERT_MES(r, void(), "failed to generate_key_derivation");
     bool was_crypted_entries = false;
     bool check_summ_validated = false;
     LOG_PRINT_GREEN("DECRYPTING ON KEY: " << epee::string_tools::pod_to_hex(derivation), LOG_LEVEL_0);
@@ -666,6 +667,7 @@ namespace currency
   {
     crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
     bool r = crypto::generate_key_derivation(destination_add.m_view_public_key, tx_random_key.sec, derivation);
+    CHECK_AND_ASSERT_MES(r, void(), "failed to generate_key_derivation");
     bool was_crypted_entries = false;
     LOG_PRINT_GREEN("ENCRYPTING ON KEY: " << epee::string_tools::pod_to_hex(derivation), LOG_LEVEL_0);
 

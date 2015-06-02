@@ -622,7 +622,7 @@ const blockchain_storage::block_extended_info&  blockchain_storage::get_last_blo
   };
 
 
-  bool res = enum_blockchain(cb, alt_chain, split_height);
+  enum_blockchain(cb, alt_chain, split_height);
 
   if (pbei)
     return *pbei;
@@ -1861,7 +1861,7 @@ bool blockchain_storage::validate_cancel_order(const cancel_offer& co, offers_co
   CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Cancel offer command: tx " << co.tx_id << " don't have pubkey");
   blobdata buff_to_check_sig = make_cancel_offer_sig_blob(co);
   bool res = crypto::check_signature(crypto::cn_fast_hash(buff_to_check_sig.data(), buff_to_check_sig.size()), tx_pub_key, co.sig);
-  CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Signature check failed offer command: tx " << co.tx_id << " don't have pubkey");
+  CHECK_AND_ASSERT_MES(res, false, "Signature check failed offer command: tx " << co.tx_id << " don't have pubkey");
 
   oit = m_offers.find(co.tx_id);
   CHECK_AND_ASSERT_MES(oit != m_offers.end(), false, "Cancel offer command: tx " << co.tx_id << " not found in offers");
