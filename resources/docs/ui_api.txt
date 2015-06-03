@@ -318,3 +318,53 @@ response:
 }
 
 
+
+[async]push_offer()
+
+param:
+{
+  "wallet_id": 0,
+  "od":
+    {
+      "offer_type": 0,
+      "amount_lui": 2300000000,
+      "amount_etc": 2,
+      "target": "EUR",
+      "location": "USA, NYC",
+      "contacts": "+89876782342",
+      "comment": "Best ever service",
+      "payment_types": "cash",
+      "expiration_time": "two days",
+      "tx_hash": "2fb43b50d0edf7824ba95c414832d324ff5e91287f28929677df3682e4c8bc0c",
+      "index_in_tx": 0
+    }
+
+}
+
+resposne:
+
+{
+  "success": true,
+  "tx_hash": "2fb43b50d0edf7824ba95c414832d324ff5e91287f28929677df3682e4c8bc0c",
+  "tx_blob_size": 2124 
+}
+
+
+
+[async]cancel_offer()
+
+param:
+{
+  "wallet_id": 0,
+  "tx_hash": "28696b9e505f1666daf5989ee4b677d694c97b055f029f48f0f5a57f25a68503",
+  "no": 0 
+
+}
+
+resposne:
+
+{
+  "success": true,
+  "tx_hash": "2fb43b50d0edf7824ba95c414832d324ff5e91287f28929677df3682e4c8bc0c",
+  "tx_blob_size": 2124 
+}

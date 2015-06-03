@@ -1925,8 +1925,6 @@ bool blockchain_storage::unprocess_blockchain_tx_attachments(const transaction& 
       unprocess_cancel_offer(boost::get<cancel_offer>(at));
     }
   }
-
-
   return true;
 }
 //------------------------------------------------------------------
