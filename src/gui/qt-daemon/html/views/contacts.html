@@ -51,13 +51,12 @@
                         </td>
 
                         <td>
-                            <a class="blocklink" href="">
+                            <a class="blocklink" href="" ng-repeat="address in contact.addresses">
                                 <span class="account-text">
-                                    <span class="text-muted">{{contact.addresses[0]}}</span>
+                                    <span class="text-muted">{{address}}</span>
                                     <span class="moredots">...</span>
                                 </span>
-                                {{ contact.aliases }}
-                                <span  ng-repeat="alias in aliases | filter : {address: contact.addresses[0]}"><span class="label label-info">@{{alias.alias}}</span>&nbsp;</span>
+                                <span  ng-repeat="alias in aliases | filter : {address: address}"><span class="label label-info">@{{alias.alias}}</span>&nbsp;</span>
                             </a>
                         </td>
 

@@ -127,6 +127,8 @@
                 nickname: ''
             };
 
+            $scope.new_address = '';
+
             $scope.addIM = function(im){
                 if(im.name.length && im.nickname.length){
                     $scope.contact.ims.push(im);
@@ -151,9 +153,18 @@
 
             $scope.selectAlias = function(obj){
                 var alias = obj.originalObject;
-                $scope.contact.addresses[0] = alias.address;
+                // $scope.contact.addresses[0] = alias.address;
                 $scope.contact.is_valid_address = true;
-                // $scope.transaction.alias = alias.alias;
+                $scope.new_address = alias.address;
+            }
+
+            $scope.addAddress = function(){
+                if($scope.new_address.length && $scope.contact.is_valid_address && $scope.contact.addresses.indexOf($scope.address) == -1){
+                    $scope.contact.addresses.push($scope.new_address);
+                    $scope.$broadcast('angucomplete-alt:clearInput'); // clear autocomplete input
+                    $scope.collapse.new_address = false;
+                    $scope.contact.is_valid_address = false;
+                }
             }
 
             $scope.inputChanged = function(str){
@@ -161,14 +172,14 @@
                 if(str.indexOf('@') != 0){
                     if(backend.validateAddress(str)){
                         $scope.contact.is_valid_address = true;
-                        $scope.contact.addresses[0] = str;
+                        $scope.new_address = str;
                     }else{
                         $scope.contact.is_valid_address = false;
-                        $scope.contact.addresses = [];
+                        $scope.new_address = '';
                     }
                 }else{
                     $scope.contact.is_valid_address = false;
-                    $scope.contact.addresses = [];
+                    $scope.new_address = '';
                 }
             }
         }
