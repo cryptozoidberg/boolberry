@@ -51,13 +51,14 @@
                         </td>
 
                         <td>
-                            <!-- <a class="blocklink" href="#contact/{{ contact.id }}">
+                            <a class="blocklink" href="">
                                 <span class="account-text">
-                                    <span class="text-muted">{{ contact.account }}</span>
+                                    <span class="text-muted">{{contact.addresses[0]}}</span>
                                     <span class="moredots">...</span>
                                 </span>
                                 {{ contact.aliases }}
-                            </a> -->
+                                <span  ng-repeat="alias in aliases | filter : {address: contact.addresses[0]}"><span class="label label-info">@{{alias.alias}}</span>&nbsp;</span>
+                            </a>
                         </td>
 
                         <td>
@@ -82,8 +83,9 @@
                                     <i class="fa fa-lg fa-money text-muted"></i> <span class="caret text-muted"></span>
                                 </button>
                                 <ul role="menu" class="dropdown-menu dropdown-menu-right">
-                                    <li><a href="#sendG/{{ contact.id }}">Отправить гульдены</a></li>
-                                    <li><a href="#history/contact/{{ contact.id }}">Связанные платежи</a></li>
+                                    <li><a href="#sendGToContact/{{ contact.id }}">Отправить гульдены</a></li>
+                                    <li><a>Связанные платежи</a></li>
+                                    <li><a ng-click="deleteContact(contact)">Удалить</a></li>
                                 </ul>
                             </div>
                         </td>

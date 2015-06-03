@@ -8,7 +8,7 @@
 <div class="modal-body form-horizontal">
   <div collapse="collapse.warning">
     <div class="alert alert-warning">
-      <p><strong>В списке {{group_to_delete.name}} {{group_to_delete.contacts.length}} контакта. Вы действительно хотите удалить список?</strong></p>
+      <p><strong>В списке "{{group_to_delete.name}}" контактов: {{group_to_delete.contacts.length}}. Вы действительно хотите удалить список?</strong></p>
       <p>
         <button type="button" class="btn btn-danger" ng-click="realRemoveGroup(group_to_delete)">Удалить</button> 
         <button type="button" class="btn btn-default" ng-click="collapse.warning = true">Отменить</button>

@@ -45,6 +45,19 @@
             if($routeParams.wallet_id){
                 $scope.transaction.from = parseInt($routeParams.wallet_id);
             }
+
+            if($routeParams.contact_id){
+                // $scope.transaction.from = parseInt($routeParams.contact_id);
+                var contact = $filter('filter')($rootScope.settings.contacts, {id : $routeParams.contact_id});
+                if(contact.length){
+                    contact = contact[0];
+                    if(contact.addresses.length){
+                        $scope.transaction.is_valid_address = true;
+                        $scope.transaction.to = contact.addresses[0];
+                    }
+                }
+
+            }
             
             $scope.selectAlias = function(obj){
                 var alias = obj.originalObject;

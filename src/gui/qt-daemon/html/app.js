@@ -30,24 +30,25 @@
     app.config(['$routeProvider', function($routeProvider) {
         
         var routes = [
-            {route: '/',                 template: 'views/index.html'},
-            {route: '/index',            template: 'views/index.html'},
-            {route: '/safes',            template: 'views/safes.html'},
-            {route: '/safe/:wallet_id',  template: 'views/safe.html'},
-            {route: '/market',           template: 'views/market.html'},
-            {route: '/contacts',         template: 'views/contacts.html'},
-            {route: '/history',          template: 'views/history.html'},
-            {route: '/deposits',         template: 'views/deposits.html'},
-            {route: '/settings',         template: 'views/settings.html'},
-            {route: '/sendG',            template: 'views/sendG.html'},
-            {route: '/sendG/:wallet_id', template: 'views/sendG.html'},
+            {route: '/',                           template: 'views/index.html'},
+            {route: '/index',                      template: 'views/index.html'},
+            {route: '/safes',                      template: 'views/safes.html'},
+            {route: '/safe/:wallet_id',            template: 'views/safe.html'},
+            {route: '/market',                     template: 'views/market.html'},
+            {route: '/contacts',                   template: 'views/contacts.html'},
+            {route: '/history',                    template: 'views/history.html'},
+            {route: '/deposits',                   template: 'views/deposits.html'},
+            {route: '/settings',                   template: 'views/settings.html'},
+            {route: '/sendG',                      template: 'views/sendG.html'},
+            {route: '/sendG/:wallet_id',           template: 'views/sendG.html'},
+            {route: '/sendGToContact/:contact_id', template: 'views/sendG.html'},
 
-            {route: '/addGOfferBuy',     template: 'views/addGOffer.html'},
-            {route: '/addGOfferSell',    template: 'views/addGOffer.html'},
+            {route: '/addGOfferBuy',               template: 'views/addGOffer.html'},
+            {route: '/addGOfferSell',              template: 'views/addGOffer.html'},
 
-            {route: '/addOfferBuy',      template: 'views/addOffer.html'},
-            {route: '/addContact',       template: 'views/addContact.html'},
-            {route: '/addOfferSell',     template: 'views/addOffer.html'},
+            {route: '/addOfferBuy',                template: 'views/addOffer.html'},
+            {route: '/addContact',                 template: 'views/addContact.html'},
+            {route: '/addOfferSell',               template: 'views/addOffer.html'},
         ];
 
         for (var i in routes){

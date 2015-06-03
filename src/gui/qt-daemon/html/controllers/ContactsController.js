@@ -2,8 +2,8 @@
     'use strict';
     var module = angular.module('app.contacts',[]);
 
-    module.controller('contactGroupsCtrl', ['$scope','backend', '$modalInstance','informer','$rootScope', '$timeout', 'uuid',
-        function($scope, backend, $modalInstance, informer, $rootScope, $timeout, uuid) {
+    module.controller('contactGroupsCtrl', ['$scope','backend', '$modalInstance','informer','$rootScope', '$timeout', 'uuid', '$filter',
+        function($scope, backend, $modalInstance, informer, $rootScope, $timeout, uuid, $filter) {
             
             $scope.new_group = {
                 name: ''
@@ -21,9 +21,9 @@
 
             if(angular.isUndefined($rootScope.settings.contact_groups)){
                 $rootScope.settings.contact_groups = [ 
-                    {id: uuid.generate(), name: 'Проверенные'},
-                    {id: uuid.generate(), name: 'Черный список'},
-                    {id: uuid.generate(), name: 'Магазины'},
+                    // {id: uuid.generate(), name: 'Проверенные'},
+                    // {id: uuid.generate(), name: 'Черный список'},
+                    // {id: uuid.generate(), name: 'Магазины'},
                 ];
             }
 
@@ -43,13 +43,23 @@
             $scope.removeGroup = function(group){
                 $scope.collapse.warning = false;
                 $scope.group_to_delete = group;
+                var contacts = $filter('filter')($rootScope.settings.contacts, group.id);
+                $scope.group_to_delete.contacts = contacts;
             }
 
             $scope.realRemoveGroup = function(group){
+                var gid = angular.copy(group.id);
+                var contacts = angular.copy(group.contacts);
                 angular.forEach($rootScope.settings.contact_groups, function(item, index){
                     // alert(JSON.stringify(item.id)+' ----->>>>> '+JSON.stringify(group.id));
                     if(item.id == group.id){
                         $rootScope.settings.contact_groups.splice(index,1);
+                        angular.forEach(contacts,function(contact){
+                            var gid_index = contact.group_ids.indexOf(group.id);
+                            if(gid_index > -1){
+                                contact.group_ids.splice(gid_index,1); // delete id of group from all contacts
+                            }
+                        });
                     }
                 });
                 $scope.collapse.warning = true;
@@ -85,11 +95,19 @@
                 });
                 return groups.join(', ');
             }
+
+            $scope.deleteContact = function(contact){
+                angular.forEach($rootScope.settings.contacts, function(item, index){
+                    if(item.id == contact.id){
+                        $rootScope.settings.contacts.splice(index,1);
+                    }
+                });
+            }
         }
     ]);
 
-    module.controller('addContactCtrl',['backend','$rootScope','$scope','informer', '$location',
-        function(backend, $rootScope, $scope, informer, $location){
+    module.controller('addContactCtrl',['backend','$rootScope','$scope','informer', '$location','uuid',
+        function(backend, $rootScope, $scope, informer, $location, uuid){
             $scope.contact = {
                 name: '',
                 email: '',
@@ -101,7 +119,7 @@
                 },
                 comment: '',
                 ims: [],
-                adresses: []
+                addresses: []
             };
 
             $scope.im = {
@@ -121,6 +139,7 @@
             }
 
             $scope.addContact = function(contact){
+                contact.id = uuid.generate();
                 $rootScope.settings.contacts.push(contact);
                 $location.path('/contacts');
             }
@@ -128,6 +147,29 @@
             $scope.addAddress = function(address){
                 $rootScope.settings.contacts.push(address);
 
+            }
+
+            $scope.selectAlias = function(obj){
+                var alias = obj.originalObject;
+                $scope.contact.addresses[0] = alias.address;
+                $scope.contact.is_valid_address = true;
+                // $scope.transaction.alias = alias.alias;
+            }
+
+            $scope.inputChanged = function(str){
+                // delete $scope.transaction.alias;
+                if(str.indexOf('@') != 0){
+                    if(backend.validateAddress(str)){
+                        $scope.contact.is_valid_address = true;
+                        $scope.contact.addresses[0] = str;
+                    }else{
+                        $scope.contact.is_valid_address = false;
+                        $scope.contact.addresses = [];
+                    }
+                }else{
+                    $scope.contact.is_valid_address = false;
+                    $scope.contact.addresses = [];
+                }
             }
         }
     ]);
