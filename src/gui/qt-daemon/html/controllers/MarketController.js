@@ -58,6 +58,14 @@
                 $scope.f_fav_goods_offers = $scope.fav_goods_offers;
             };
 
+            $scope.cancelOffer = function(offer){
+                var wallet_id = 0; //???? What a wallet id ???
+                var data = backend.cancelOffer(wallet_id, offer.tx_hash , function(result){
+                    alert(JSON.stringify(result));
+                });
+                alert(JSON.stringify(data));
+            };
+
             
 
             // GET LIST OF OFFERS

@@ -164,6 +164,15 @@
                 return this.runCommand('push_offer', params, callback);
             },
 
+            cancelOffer: function(wallet_id,tx_hash,callback){
+                var params = {
+                    wallet_id: wallet_id,
+                    tx_hash: tx_hash,
+                    no : 0 // ???
+                };
+                return this.runCommand('cancel_offer', params, callback);
+            },
+
             transfer: function(from, to, ammount, fee, comment, push_payer, lock_time, is_mixin, callback) {
                  var params = {
                     wallet_id : from,
