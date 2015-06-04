@@ -46,17 +46,9 @@
                 $scope.transaction.from = parseInt($routeParams.wallet_id);
             }
 
-            if($routeParams.contact_id){
-                // $scope.transaction.from = parseInt($routeParams.contact_id);
-                var contact = $filter('filter')($rootScope.settings.contacts, {id : $routeParams.contact_id});
-                if(contact.length){
-                    contact = contact[0];
-                    if(contact.addresses.length){
-                        $scope.transaction.is_valid_address = true;
-                        $scope.transaction.to = contact.addresses[0];
-                    }
-                }
-
+            if($routeParams.address){
+                $scope.transaction.is_valid_address = true;
+                $scope.transaction.to = $routeParams.address;
             }
             
             $scope.selectAlias = function(obj){
@@ -143,6 +135,15 @@
             
             $scope.my_safes = angular.copy($rootScope.safes);
             $scope.my_safes.unshift({name: 'Все сейфы', wallet_id : -1});
+
+             $scope.contact = false;
+
+            if($routeParams.contact_id){
+                var contact = $filter('filter')($rootScope.settings.contacts, {id: $routeParams.contact_id});
+                $scope.contact = contact[0];
+            }
+
+
             
             $scope.tx_history = [];
 
@@ -152,7 +153,15 @@
                     if(angular.isDefined(safe.history)){
                         angular.forEach(safe.history, function(item){
                             item.wallet_id = angular.copy(safe.wallet_id);
-                            temp.push(item);    
+
+                            if($routeParams.contact_id){
+                                if(angular.isDefined($scope.contact.addresses) && $scope.contact.addresses.indexOf(item.remote_address) >-1){
+                                    temp.push(item);
+                                }
+                            }else{
+                                temp.push(item);
+                            }
+                            
                         });
                     }
                 },true); 

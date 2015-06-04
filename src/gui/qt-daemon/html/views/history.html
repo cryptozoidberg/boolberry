@@ -1,7 +1,11 @@
 <!--     <a data-toggle="modal" type="button" class="btn btn-link pull-right" data-target="#addContact"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт истории платежей в файл</span></a> -->
-    <h1>История платежей</h1>
+<div ng-controller="trHistoryCtrl">
+    <h1>
+        История платежей
+        <span ng-if="contact"> по контакту {{contact.name}}</span>
+    </h1>
     <h5>Здесь Вы можете просмотреть историю платежей по всем сейфам, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
-    <div class="tabs" ng-controller="trHistoryCtrl">
+    <div class="tabs">
         <div class="navbar" id="navbar-tabs">
             <form class="form-horizontal">
                 <div class="collapse filter1" >
@@ -384,3 +388,4 @@
     <hr>
     <div class="footer">
     </div>
+</div>

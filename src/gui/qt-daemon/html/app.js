@@ -37,11 +37,12 @@
             {route: '/market',                     template: 'views/market.html'},
             {route: '/contacts',                   template: 'views/contacts.html'},
             {route: '/history',                    template: 'views/history.html'},
+            {route: '/history/:contact_id',         template: 'views/history.html'},
             {route: '/deposits',                   template: 'views/deposits.html'},
             {route: '/settings',                   template: 'views/settings.html'},
             {route: '/sendG',                      template: 'views/sendG.html'},
             {route: '/sendG/:wallet_id',           template: 'views/sendG.html'},
-            {route: '/sendGToContact/:contact_id', template: 'views/sendG.html'},
+            {route: '/sendGToContact/:address',    template: 'views/sendG.html'},
 
             {route: '/addGOfferBuy',               template: 'views/addGOffer.html'},
             {route: '/addGOfferSell',              template: 'views/addGOffer.html'},
