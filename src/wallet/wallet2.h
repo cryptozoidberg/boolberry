@@ -25,6 +25,7 @@
 #include "core_default_rpc_proxy.h"
 #include "wallet_errors.h"
 #include "eos/portable_archive.hpp"
+#include "currency_core/pos_config.h"
 
 #define WALLET_DEFAULT_TX_SPENDABLE_AGE                               10
 #define WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL                         10
@@ -91,7 +92,9 @@ namespace tools
                 m_upper_transaction_size_limit(0), 
                 height_of_start_sync(0), 
                 last_sync_percent(0)
-    {};
+    {
+      m_pos_config = currency::get_default_pos_config();
+    };
     struct transfer_details
     {
       uint64_t m_block_height;
@@ -101,6 +104,7 @@ namespace tools
       uint64_t m_global_output_index;
       bool m_spent;
       crypto::key_image m_key_image; //TODO: key_image stored twice :(
+
 
       uint64_t amount() const { return m_tx.vout[m_internal_output_index].amount; }
     };
@@ -290,7 +294,7 @@ namespace tools
     static bool build_kernel(const currency::pos_entry& pe, const currency::stake_modifier_type& stake_modifier, currency::stake_kernel& kernel, uint64_t& coindays_weight, uint64_t timestamp);
     bool is_connected_to_net();
     void drop_offer_keys();
-
+    bool is_coin_age_okay_for_pos(const transfer_details& tr);
 
     currency::account_base m_account;
     std::string m_wallet_file;
@@ -315,7 +319,7 @@ namespace tools
     std::shared_ptr<i_wallet2_callback> m_wcallback;
     uint64_t height_of_start_sync;
     uint64_t last_sync_percent;
-
+    currency::pos_config m_pos_config;
     
  
   };

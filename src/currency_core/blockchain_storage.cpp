@@ -2333,6 +2333,10 @@ bool blockchain_storage::validate_pos_block(const block& b,
   const txin_to_key& coinstake_in = boost::get<txin_to_key>(b.miner_tx.vin[1]);
   r = check_tx_input(coinstake_in, id, b.miner_tx.signatures[0], &max_related_block_height);
   CHECK_AND_ASSERT_MES(r, false, "failed to build kernel_stake");
+
+  CHECK_AND_ASSERT_MES(m_blocks.size()  - max_related_block_height > m_pos_config.min_coinage, false,
+    "Coin age is: " << m_blocks.size() - max_related_block_height << " is less then minimum expected: " << m_pos_config.min_coinage);
+
   return true;
 }
 //------------------------------------------------------------------
@@ -2796,6 +2800,7 @@ bool blockchain_storage::scan_pos(const COMMAND_RPC_SCAN_POS::request& sp, COMMA
   rsp.status = CORE_RPC_STATUS_NOT_FOUND;
   return false;
 }
+/*
 bool blockchain_storage::is_coin_age_okay(uint64_t source_tx_block_timestamp, uint64_t last_block_timestamp)
 {
   if (source_tx_block_timestamp > last_block_timestamp)
@@ -2803,7 +2808,7 @@ bool blockchain_storage::is_coin_age_okay(uint64_t source_tx_block_timestamp, ui
   if (last_block_timestamp - source_tx_block_timestamp < m_pos_config.min_coinage)
     return false;
   return true;
-}
+}*/
 //------------------------------------------------------------------
 void blockchain_storage::set_pos_config(const pos_config& pc)
 {
