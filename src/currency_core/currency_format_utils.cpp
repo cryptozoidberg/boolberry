@@ -94,10 +94,72 @@ namespace currency
     return diff;
   }
   //------------------------------------------------------------------
+  bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins,
+    size_t current_block_size,
+    uint64_t fee,
+    const account_public_address &miner_address,
+    transaction& tx,
+    const blobdata& extra_nonce,
+    size_t max_outs,
+    const alias_info& alias,
+    bool pos,
+    const pos_entry& pe)
+  {
+    uint64_t block_reward;
+    if (!get_block_reward(median_size, current_block_size, already_generated_coins, block_reward))
+    {
+      LOG_PRINT_L0("Block is too big");
+      return false;
+    }
+    block_reward += fee / 2;
+
+    //send PoS entry back to owner
+    if (pos)
+    {
+      block_reward += pe.amount;
+    }
+
+    std::vector<size_t> out_amounts;
+    decompose_amount_into_digits(block_reward, DEFAULT_DUST_THRESHOLD,
+      [&out_amounts](uint64_t a_chunk) { out_amounts.push_back(a_chunk); },
+      [&out_amounts](uint64_t a_dust) { out_amounts.push_back(a_dust); });
+
+    CHECK_AND_ASSERT_MES(1 <= max_outs, false, "max_out must be non-zero");
+    while (max_outs < out_amounts.size())
+    {
+      out_amounts[out_amounts.size() - 2] += out_amounts.back();
+      out_amounts.resize(out_amounts.size() - 1);
+    }
+
+
+    size_t summary_amounts = 0;
+    std::vector<tx_destination_entry> destinations;
+    for (auto a : out_amounts)
+    {
+      tx_destination_entry de;
+      de.addr = miner_address;
+      de.amount = a;
+      destinations.push_back(de);
+      summary_amounts += a;
+    }
+
+//     size_t summary_amounts = 0;
+//     size_t no = 0;
+//     for (; no < out_amounts.size(); no++)
+//     {
+//       bool r = construct_tx_out(miner_address, txkey.sec, no, out_amounts[no], tx);
+//       CHECK_AND_ASSERT_MES(r, false, "Failed to contruct miner tx out");
+//       summary_amounts += out_amounts[no];
+//     }
+// 
+//     CHECK_AND_ASSERT_MES(summary_amounts == block_reward, false, "Failed to construct miner tx, summary_amounts = " << summary_amounts << " not equal block_reward = " << block_reward);
+    return construct_miner_tx(height, median_size, already_generated_coins, current_block_size, fee, destinations, tx, extra_nonce, max_outs, alias, pos, pe);
+  }
+  //------------------------------------------------------------------
   bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins, 
                                                              size_t current_block_size, 
                                                              uint64_t fee, 
-                                                             const account_public_address &miner_address, 
+                                                             const std::vector<tx_destination_entry>& destinations,
                                                              transaction& tx, 
                                                              const blobdata& extra_nonce, 
                                                              size_t max_outs, 
@@ -136,42 +198,13 @@ namespace currency
       tx.signatures[0].resize(posin.key_offsets.size());
     }
 
-    uint64_t block_reward;
-    if(!get_block_reward(median_size, current_block_size, already_generated_coins, block_reward))
-    {
-      LOG_PRINT_L0("Block is too big");
-      return false;
-    }
-    block_reward += fee/2;
-    
-    //send PoS entry back to owner
-    if (pos)
-    {
-      block_reward += pe.amount;
-    }
-
-    std::vector<size_t> out_amounts;
-    decompose_amount_into_digits(block_reward, DEFAULT_DUST_THRESHOLD,
-      [&out_amounts](uint64_t a_chunk) { out_amounts.push_back(a_chunk); },
-      [&out_amounts](uint64_t a_dust) { out_amounts.push_back(a_dust); });
-
-    CHECK_AND_ASSERT_MES(1 <= max_outs, false, "max_out must be non-zero");
-    while (max_outs < out_amounts.size())
-    {
-      out_amounts[out_amounts.size() - 2] += out_amounts.back();
-      out_amounts.resize(out_amounts.size() - 1);
-    }
-
-    size_t summary_amounts = 0;
-    size_t no = 0;
-    for (; no < out_amounts.size(); no++)
-    {
-      bool r = construct_tx_out(miner_address, txkey.sec, no, out_amounts[no], tx);
-      CHECK_AND_ASSERT_MES(r, false, "Failed to contruct miner tx out");
-      summary_amounts += out_amounts[no];
-    }
-
-    CHECK_AND_ASSERT_MES(summary_amounts == block_reward, false, "Failed to construct miner tx, summary_amounts = " << summary_amounts << " not equal block_reward = " << block_reward);
+    uint64_t no = 0;
+    for (auto& d : destinations)
+     {
+      bool r = construct_tx_out(d.addr, txkey.sec, no, d.amount, tx);
+       CHECK_AND_ASSERT_MES(r, false, "Failed to contruct miner tx out");
+       no++;
+     }
 
 
     tx.version = CURRENT_TRANSACTION_VERSION;
@@ -1227,26 +1260,50 @@ namespace currency
     //genesis block
     bl = boost::value_initialized<block>();
     
-//     account_public_address ac = boost::value_initialized<account_public_address>();
-//     std::vector<size_t> sz;
-//     //proof 
-// #ifndef TESTNET
-//     std::string proof = "The Times, May 16 2014: Richest 10% own almost half the nation's wealth";
-// #else 
-//     std::string proof = "The Times, May 13 2014: Fear of public exposure shames stars into paying tax";
-// #endif
-// 
-//     alias_info ai = AUTO_VAL_INIT(ai);
+    //account_public_address ac = boost::value_initialized<account_public_address>();
+    //std::vector<size_t> sz;
+    //proof 
+#ifndef TESTNET
+    std::string proof = "TODO: Paste here some text";
+#else 
+    std::string proof = "TODO: Paste here some text";
+#endif
+
+     alias_info ai = AUTO_VAL_INIT(ai);
 //     ai.m_alias = "zoidberg";
 //     ai.m_text_comment = "Let's go!";
 //     get_account_address_from_str(ai.m_address, "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"); 
-//     construct_miner_tx(0, 0, 0, 0, 0, ac, bl.miner_tx, proof, 11, ai); // zero profit in genesis
-//     blobdata txb = tx_to_blob(bl.miner_tx);
-//     std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
-// 
-//     blobdata tx_bl2;
-//     string_tools::parse_hexstr_to_binbuff(hex_tx_represent, tx_bl2);
-//     bool r2 = parse_and_validate_tx_from_blob(tx_bl2, bl.miner_tx);
+
+    std::vector<tx_destination_entry> destinations;
+    tx_destination_entry de = AUTO_VAL_INIT(de);
+
+#define ADD_PREMINE_ADDRESS(addr_str, coins_amount) \
+    {bool r = get_account_address_from_str(de.addr, addr_str); \
+    CHECK_AND_ASSERT_MES(r, false, "Failed to get_account_address_from_str from address " << addr_str); \
+    de.amount = coins_amount;  \
+    destinations.push_back(de);   }
+
+    uint64_t amount_per_wallet = PREMINE_AMOUNT/10;
+    
+    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_0, amount_per_wallet);
+    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_1, amount_per_wallet);
+    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_2, amount_per_wallet);
+    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_3, amount_per_wallet);
+    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_4, amount_per_wallet);
+    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_5, amount_per_wallet);
+    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_6, amount_per_wallet);
+    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_7, amount_per_wallet);
+    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_8, amount_per_wallet);
+    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_9, amount_per_wallet);
+
+
+    construct_miner_tx(0, 0, 0, 0, 0, destinations, bl.miner_tx, proof, 11, ai); // zero profit in genesis
+    blobdata txb = tx_to_blob(bl.miner_tx);
+    std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
+
+    blobdata tx_bl2;
+    string_tools::parse_hexstr_to_binbuff(hex_tx_represent, tx_bl2);
+    bool r2 = parse_and_validate_tx_from_blob(tx_bl2, bl.miner_tx);
     
     //hard code coinbase tx in genesis block, because "true" generating tx use random, but genesis should be always the same
 #ifndef TESTNET

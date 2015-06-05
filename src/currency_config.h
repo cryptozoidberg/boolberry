@@ -32,7 +32,7 @@
 #define CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE       500000 //size of block (bytes) after which reward for block calculated using block size
 #define CURRENCY_COINBASE_BLOB_RESERVED_SIZE          600
 #define CURRENCY_MAX_TRANSACTION_BLOB_SIZE            (CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE - CURRENCY_COINBASE_BLOB_RESERVED_SIZE*2) 
-#define CURRENCY_DISPLAY_DECIMAL_POINT                6
+#define CURRENCY_DISPLAY_DECIMAL_POINT                8
 
 // COIN - number of smallest units in one coin
 #define COIN                                            ((uint64_t)100000000) // pow(10, 8)
@@ -109,7 +109,7 @@
 #else
 #define POS_MIN_COINAGE                                 720   // minimum n blocks deep
 #endif
-#define POS_MAX_COINAGE                                 (60*60*24*90) // 90 days
+//#define POS_MAX_COINAGE                                 (60*60*24*90) // 90 days
 #define POS_STARTER_KERNEL_HASH                         "bd82e18d42a7ad239588b24fd356d63cc82717e1fae8f6a492cd25d62fda263f"
 #define POS_MODFIFIER_INTERVAL                          10
 #define POS_WALLET_MINING_SCAN_INTERVAL                 POS_SCAN_STEP  //seconds
@@ -134,6 +134,22 @@
 #define CURRENCY_NAME                                   CURRENCY_NAME_BASE"_testnet"
 #define CURRENCY_NAME_SHORT                             CURRENCY_NAME_SHORT_BASE"_testnet"
 #endif
+
+//premine
+#define PREMINE_AMOUNT                                  (100000000*COIN)
+#define PREMINE_WALLET_ADDRESS_0                        "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"
+#define PREMINE_WALLET_ADDRESS_1                        "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"
+#define PREMINE_WALLET_ADDRESS_2                        "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"
+#define PREMINE_WALLET_ADDRESS_3                        "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"
+#define PREMINE_WALLET_ADDRESS_4                        "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"
+#define PREMINE_WALLET_ADDRESS_5                        "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"
+#define PREMINE_WALLET_ADDRESS_6                        "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"
+#define PREMINE_WALLET_ADDRESS_7                        "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"
+#define PREMINE_WALLET_ADDRESS_8                        "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"
+#define PREMINE_WALLET_ADDRESS_9                        "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"
+
+
+
 
 #define CURRENCY_POOLDATA_FILENAME                      "poolstate.bin"
 #define CURRENCY_BLOCKCHAINDATA_FILENAME                "blockchain.bin"

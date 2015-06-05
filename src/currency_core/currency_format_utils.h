@@ -66,14 +66,6 @@ namespace currency
   crypto::hash get_transaction_prefix_hash(const transaction_prefix& tx);
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx, crypto::hash& tx_hash, crypto::hash& tx_prefix_hash);
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx);  
-  /*bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins,
-                                                             size_t current_block_size, 
-                                                             uint64_t fee, 
-                                                             const account_public_address &miner_address, 
-                                                             transaction& tx, 
-                                                             const blobdata& extra_nonce = blobdata(), 
-                                                             size_t max_outs = 11);*/
-
   bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins, 
                                                              size_t current_block_size, 
                                                              uint64_t fee, 
@@ -84,6 +76,19 @@ namespace currency
                                                              const alias_info& alias = alias_info(),
                                                              bool pos = false,
                                                              const pos_entry& pe = pos_entry());
+
+  bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins, 
+                                                             size_t current_block_size, 
+                                                             uint64_t fee, 
+                                                             const std::vector<tx_destination_entry>& destinations,
+                                                             transaction& tx, 
+                                                             const blobdata& extra_nonce = blobdata(),
+                                                             size_t max_outs = 11,
+                                                             const alias_info& alias = alias_info(),
+                                                             bool pos = false,
+                                                             const pos_entry& pe = pos_entry());
+
+
   //---------------------------------------------------------------
   bool construct_tx_out(const account_public_address& destination_addr, const crypto::secret_key& tx_sec_key, size_t output_index, uint64_t amount, transaction& tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool validate_alias_name(const std::string& al);

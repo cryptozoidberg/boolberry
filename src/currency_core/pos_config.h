@@ -10,7 +10,7 @@ namespace currency
   struct pos_config
   {
     uint64_t min_coinage;
-    uint64_t max_coinage;
+//    uint64_t max_coinage;
     uint64_t pos_minimum_heigh; //height
   };
 
@@ -18,7 +18,7 @@ namespace currency
   {
     pos_config pc = AUTO_VAL_INIT(pc);
     pc.min_coinage = POS_MIN_COINAGE;
-    pc.max_coinage = POS_MAX_COINAGE;
+//    pc.max_coinage = POS_MAX_COINAGE;
     pc.pos_minimum_heigh = (60 * 60) / DIFFICULTY_TOTAL_TARGET;
     return pc;
   }
