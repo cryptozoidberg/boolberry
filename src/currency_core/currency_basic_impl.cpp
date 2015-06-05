@@ -35,8 +35,14 @@ namespace currency {
   }
   //-----------------------------------------------------------------------------------------------
   bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t &reward) 
-  {    
+  { 
+    
     uint64_t base_reward = (EMISSION_SUPPLY - already_generated_coins) >> EMISSION_CURVE_CHARACTER;
+    
+    //yep, we are greedy bastards
+    if (!already_generated_coins)
+      base_reward = PREMINE_AMOUNT;
+
     //crop dust
     base_reward = base_reward - base_reward%DEFAULT_DUST_THRESHOLD;
 
