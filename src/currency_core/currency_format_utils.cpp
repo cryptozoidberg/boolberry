@@ -1284,7 +1284,7 @@ namespace currency
     destinations.push_back(de);   }
 
     uint64_t amount_per_wallet = PREMINE_AMOUNT/10;
-    
+
     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_0, amount_per_wallet);
     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_1, amount_per_wallet);
     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_2, amount_per_wallet);
