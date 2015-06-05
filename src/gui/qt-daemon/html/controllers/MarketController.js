@@ -66,6 +66,34 @@
                 alert(JSON.stringify(data));
             };
 
+            $scope.order = function(row, target){
+                switch(target){
+                    case 'currency':
+                        $scope.f_currency_offers = $filter('orderBy')($scope.f_currency_offers, row);
+                        break;
+
+                    case 'goods':
+                        $scope.f_goods_offers = $filter('orderBy')($scope.f_goods_offers, row);
+                        break;
+
+                    case 'my_currency':
+                        $scope.f_my_currency_offers = $filter('orderBy')($scope.f_my_currency_offers, row);
+                        break;
+
+                    case 'my_goods':
+                        $scope.f_my_goods_offers = $filter('orderBy')($scope.f_my_goods_offers, row);
+                        break;
+
+                    case 'fav_currency':
+                        $scope.f_fav_currency_offers = $filter('orderBy')($scope.f_fav_currency_offers, row);
+                        break;
+                        
+                    case 'fav_goods':
+                        $scope.f_fav_goods_offers = $filter('orderBy')($scope.f_fav_goods_offers, row);
+                        break;
+                }
+            };
+
             
 
             // GET LIST OF OFFERS

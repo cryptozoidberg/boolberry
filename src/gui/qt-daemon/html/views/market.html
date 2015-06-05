@@ -253,17 +253,26 @@
                 <table class="table table-condensed data-table table-hover">
                     <thead>
                     <tr>
-                        <th>
-                            <span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                        <th class="col-sm-1">
+                            <span class="nowrap">Возраст 
+                                <i style="opacity:0.3" ng-click="order('timestamp','currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-timestamp','currency')" class="fa fa-chevron-up"></i>
+                            </span>
                         </th>
-                        <th>
+                        <th class="col-sm-1">
                             <!-- <span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span> -->
-                            <span class="nowrap">Предложение <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                            <span class="nowrap">Предложение 
+                                <i style="opacity:0.3" ng-click="order('amount_etc','currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-amount_etc','currency')" class="fa fa-chevron-up"></i>
+                            </span>
                         </th>
-                        <th>
-                            <span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                        <th class="col-sm-1">
+                            <span class="nowrap">Сумма, G 
+                                <i style="opacity:0.3" ng-click="order('amount_lui','currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-amount_lui','currency')" class="fa fa-chevron-up"></i>
+                            </span>
                         </th>
-                        <th>
+                        <th class="col-sm-2">
                             Контакт
                         </th>
                         <!-- <th>
@@ -272,15 +281,22 @@
                         <!-- <th>
                             <span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
                         </th> -->
-                        <th>
-                            <span class="nowrap">Рассчет<i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                        <th class="col-sm-2">
+                            <span class="nowrap">Рассчет
+                                <i style="opacity:0.3" ng-click="order('payment_types','currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-payment_types','currency')" class="fa fa-chevron-up"></i>
+                            </span>
                         </th>
-                        <th>
-                            <span class="nowrap">Местор-е<i class="fa fa-chevron-down" style="opacity:0.3"></i></span>
+                        <th class="col-sm-2">
+                            <span class="nowrap">Местор-е
+                                <i style="opacity:0.3" ng-click="order('location','currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-location','currency')" class="fa fa-chevron-up"></i>
+                            </span>
                         </th>
-                        <th>
+                        <th class="col-sm-2">
                             <span class="nowrap">Комментарий<span></span></span>
                         </th>
+                        <th class="col-sm-1"></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -292,7 +308,7 @@
                                 <span class="nowrap">{{offer.amount_etc}} {{offer.target}}</span>
                             </td>
                             <td>
-                                {{offer.amount_lui | gulden:false}} <span class="label label-danger">+ 2%</span>
+                                {{offer.amount_lui | gulden:false}} <!-- <span class="label label-danger">+ 2%</span> -->
                             </td>
                             <td>
                                 <ul class="list-unstyled">
@@ -485,13 +501,22 @@
                     <thead>
                     <tr>
                         <th>
-                            <span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                            <span class="nowrap">Возраст 
+                                <i style="opacity:0.3" ng-click="order('timestamp','goods')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-timestamp','goods')" class="fa fa-chevron-up"></i>
+                            </span>
                         </th>
                         <th>
-                            Текст предложения
+                            <span class="nowrap">Текст предложения 
+                                <i style="opacity:0.3" ng-click="order('target','goods')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-target','goods')" class="fa fa-chevron-up"></i>
+                            </span>
                         </th>
                         <th>
-                            <span class="nowrap">Цена, G</span>
+                            <span class="nowrap">Цена, G
+                                <i style="opacity:0.3" ng-click="order('amount_lui','goods')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-amount_lui','goods')" class="fa fa-chevron-up"></i>
+                            </span>
                         </th>
                         <th>
                             Контакт
@@ -500,7 +525,10 @@
                             <span class="nowrap">Рейтинг <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
                         </th> -->
                         <th>
-                            <span class="nowrap">Место-е <i style="opacity:0.3" class="fa fa-chevron-down"></i></span>
+                            <span class="nowrap">Место-е 
+                                <i style="opacity:0.3" ng-click="order('location','goods')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-location','goods')" class="fa fa-chevron-up"></i>
+                            </span>
                         </th>
                         <th>
                             <span class="nowrap">Комментарий<span></span></span>
@@ -613,16 +641,55 @@
                     <thead>
                     <tr>
 
-                        <th><span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th><span class="nowrap">Тип <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th><span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th><span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th>
+                            <span class="nowrap">Возраст 
+                                <i style="opacity:0.3" ng-click="order('timestamp','my_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-timestamp','my_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+                        
+                        <th>
+                            <span class="nowrap">Тип 
+                                <i style="opacity:0.3" ng-click="order('is_income','my_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-is_income','my_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+                        
+                        <!-- <th>
+                            <span class="nowrap">Курс, $ 
+                                <i style="opacity:0.3" ng-click="order('timestamp','my_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-timestamp','my_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th> -->
+                        
+                        <th>
+                            <span class="nowrap">Сумма, G 
+                                <i style="opacity:0.3" ng-click="order('amount_lui','my_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-amount_lui','my_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+                        
                         <th>Контакт</th>
-                       <!--  <th><span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th> -->
+                        <!--  <th><span class="nowrap">Рейтинг <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th> -->
                         <!-- <th><span class="nowrap">Условия<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th> -->
-                        <th><span class="nowrap">Рассчет<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                        <th><span class="nowrap">Местор-е<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                        <th><span class="nowrap">Комментарий<span></span></span></th>
+                        <th>
+                            <span class="nowrap">Рассчет
+                                <i style="opacity:0.3" ng-click="order('payment_types','my_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-payment_types','my_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+                        
+                        <th>
+                            <span class="nowrap">Местор-е
+                                <i style="opacity:0.3" ng-click="order('location','my_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-location','my_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+                        
+                        <th>
+                            <span class="nowrap">Комментарий<span></span></span>
+                        </th>
+                        
                         <th></th>
                     </tr>
                     </thead>
@@ -635,9 +702,11 @@
                                 <span ng-if="offer.offer_type == 3">Продажа</span>
                             </td>
 
-                            <td><span class="nowrap"></span></td>
+                            <!-- <td><span class="nowrap"></span></td> -->
 
-                            <td>{{amount_lui | gulden : false }} <span class="label label-danger">+ 2%</span></td>
+                            <td>
+                                {{offer.amount_lui | gulden : false }} <!-- <span class="label label-danger">+ 2%</span> -->
+                            </td>
 
                             <td>{{offer.contacts}}</td>
                             <!-- <td><span class="label label-success">4.5</span></td> -->
@@ -646,7 +715,6 @@
                                 <span ng-repeat="type in offer.payment_types.split(',')">
                                     <span class="label label-info" ng-if="payment_types[type]">{{payment_types[type]}}</span>
                                     <span class="label label-info" ng-if="!payment_types[type]">{{type}}</span>
-
                                 </span>
                             </td>
 
@@ -666,19 +734,50 @@
 
                 <table class="table table-condensed data-table table-hover">
                     <thead>
-                    <tr>
+                        <tr>
 
-                        <th><span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th><span class="nowrap">Тип <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th>Текст предложения</th>
-                        <th><span class="nowrap">Цена, G</span></th>
-                        <th>Контакт</th>
-                        <!-- <th><span class="nowrap">Рейтинг <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th> -->
-                        <th><span class="nowrap">Место-е <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th><span class="nowrap">Комментарий</span></th>
-                        <th></th>
-                    </tr>
+                            <th>
+                                <span class="nowrap">Возраст 
+                                    <i style="opacity:0.3" ng-click="order('timestamp','my_goods')" class="fa fa-chevron-down"></i>
+                                    <i style="opacity:0.3" ng-click="order('-timestamp','my_goods')" class="fa fa-chevron-up"></i>
+                                </span>
+                            </th>
+                            
+                            <th>
+                                <span class="nowrap">Тип 
+                                    <i style="opacity:0.3" ng-click="order('is_income','my_goods')" class="fa fa-chevron-down"></i>
+                                    <i style="opacity:0.3" ng-click="order('-is_income','my_goods')" class="fa fa-chevron-up"></i>
+                                </span>
+                            </th>
+                            
+                            <th>Текст предложения</th>
+                            
+                            <th>
+                                <span class="nowrap">Цена, G
+                                    <i style="opacity:0.3" ng-click="order('amount_lui','my_goods')" class="fa fa-chevron-down"></i>
+                                    <i style="opacity:0.3" ng-click="order('-amount_lui','my_goods')" class="fa fa-chevron-up"></i>
+                                </span>
+                            </th>
+                            
+                            <th>Контакт</th>
+                            <!-- <th><span class="nowrap">Рейтинг <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th> -->
+                            
+                            <th>
+                                <span class="nowrap">Место-е 
+                                    <i style="opacity:0.3" ng-click="order('location','my_goods')" class="fa fa-chevron-down"></i>
+                                    <i style="opacity:0.3" ng-click="order('-location','my_goods')" class="fa fa-chevron-up"></i>
+                                </span>
+                            </th>
+                            
+                            <th>
+                                <span class="nowrap">Комментарий</span>
+                            </th>
+
+                            <th></th>
+
+                        </tr>
                     </thead>
+
                     <tbody>
                     <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_my_goods_offers">
 
@@ -776,14 +875,54 @@
                     <thead>
                     <tr>
 
-                        <th><span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th><span class="nowrap">Тип <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th><span class="nowrap">Курс, $ <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th><span class="nowrap">Сумма, G <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                        <th>
+                            <span class="nowrap">Возраст 
+                                <i style="opacity:0.3" ng-click="order('timestamp','fav_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-timestamp','fav_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+
+                        <th>
+                            <span class="nowrap">Тип 
+                                <i style="opacity:0.3" ng-click="order('is_income','fav_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-is_income','fav_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+
+                        <!-- <th>
+                            <span class="nowrap">Курс, $ 
+                                <i style="opacity:0.3" ng-click="order('location','fav_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-location','fav_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th> -->
+
+                        <th>
+                            <span class="nowrap">Сумма, G 
+                                <i style="opacity:0.3" ng-click="order('amount_lui','fav_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-amount_lui','fav_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+
                         <th>Контакт</th>
-                        <th><span class="nowrap">Рассчет<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                        <th><span class="nowrap">Местор-е<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                        <th><span class="nowrap">Комментарий<span></span></span></th>
+
+                        <th>
+                            <span class="nowrap">Рассчет
+                                <i style="opacity:0.3" ng-click="order('payment_types','fav_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-payment_types','fav_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+
+                        <th>
+                            <span class="nowrap">Местор-е
+                                <i style="opacity:0.3" ng-click="order('location','fav_currency')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-location','fav_currency')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+                        
+                        <th>
+                            <span class="nowrap">Комментарий<span></span></span>
+                        </th>
+
                         <th></th>
                     </tr>
                     </thead>
@@ -800,7 +939,7 @@
                                 <span class="nowrap">{{offer.amount_etc}} {{offer.target}}</span>
                             </td>
                             <td>
-                                {{offer.amount_lui | gulden:false}} <span class="label label-danger">+ 2%</span>
+                                {{offer.amount_lui | gulden:false}} <!-- <span class="label label-danger">+ 2%</span> -->
                             </td>
 
                             <td>{{offer.contacts}}</td>
@@ -829,14 +968,43 @@
                     <thead>
                     <tr>
 
-                        <th><span class="nowrap">Возраст <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th><span class="nowrap">Тип <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th>Текст предложения</th>
-                        <th><span class="nowrap">Цена, G</span></th>
-                        <th>Контакт</th>
-                        <th><span class="nowrap">Место-е <i style="opacity:0.3" class="fa fa-chevron-down"></i></span></th>
-                        <th><span class="nowrap">Комментарий</span></th>
-                        <th></th>
+                        <th  class="col-sm-1">
+                            <span class="nowrap">Возраст 
+                                <i style="opacity:0.3" ng-click="order('timestamp','fav_goods')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-timestamp','fav_goods')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+
+                        <th  class="col-sm-1">
+                            <span class="nowrap">Тип 
+                                <i style="opacity:0.3" ng-click="order('is_income','fav_goods')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-is_income','fav_goods')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+
+                        <th class="col-sm-2">Текст предложения</th>
+
+                        <th  class="col-sm-2">
+                            <span class="nowrap">Цена, G
+                                <i style="opacity:0.3" ng-click="order('amount_lui','fav_goods')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-amount_lui','fav_goods')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+                        
+                        <th class="col-sm-2">Контакт</th>
+
+                        <th class="col-sm-2">
+                            <span class="nowrap">Место-е 
+                                <i style="opacity:0.3" ng-click="order('location','fav_goods')" class="fa fa-chevron-down"></i>
+                                <i style="opacity:0.3" ng-click="order('-location','fav_goods')" class="fa fa-chevron-up"></i>
+                            </span>
+                        </th>
+
+                        <th class="col-sm-2">
+                            <span class="nowrap">Комментарий</span>
+                        </th>
+
+                        <!-- <th></th> -->
                     </tr>
                     </thead>
                     <tbody>
@@ -863,9 +1031,9 @@
 
                         <td>{{offer.comment}}</td>
 
-                        <td>
+                       <!--  <td>
 
-                        </td>
+                        </td> -->
 
                     </tr>
                     </tbody>

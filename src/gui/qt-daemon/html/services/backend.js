@@ -303,7 +303,8 @@
 
             runCommand : function(command, params, callback) {
                 var commandsNoLoading = [
-                    'get_all_aliases'
+                    'get_all_aliases',
+                    'get_all_offers'
                 ];
                 if(this.shouldUseEmulator()){
                     return emulator.runCommand(command, params, callback);
