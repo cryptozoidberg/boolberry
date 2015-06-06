@@ -318,7 +318,7 @@ bool blockchain_storage::purge_transaction_from_blockchain(const crypto::hash& t
   return res;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::get_all_offers(std::list<offer_details>& offers)
+bool blockchain_storage::get_all_offers(std::list<offer_details_ex>& offers)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   for (auto& ol: m_offers)
@@ -1816,13 +1816,14 @@ bool blockchain_storage::process_blockchain_tx_attachments(const transaction& tx
 {
   //check transaction extra
   uint64_t count = 0;
-  std::vector<offer_details> odl;
+  std::vector<offer_details_ex> odl;
   crypto::hash tx_hash = get_transaction_hash(tx);
   for (const auto& at : tx.attachment)
   {
     if (at.type() == typeid(offer_details))
     {
-      odl.push_back(boost::get<offer_details>(at));
+      odl.push_back(offer_details_ex());
+      static_cast<offer_details&>(odl.back()) = boost::get<offer_details>(at);
       odl.back().timestamp = timestamp;
       odl.back().index_in_tx = count++;
       odl.back().tx_hash = string_tools::pod_to_hex(tx_hash);

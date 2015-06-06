@@ -1098,7 +1098,7 @@ namespace
   }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::push_offer(const currency::offer_details& od, currency::transaction& res_tx)
+void wallet2::push_offer(const currency::offer_details_ex& od, currency::transaction& res_tx)
 {
   currency::tx_destination_entry tx_dest;
   tx_dest.addr = m_account.get_keys().m_account_address;

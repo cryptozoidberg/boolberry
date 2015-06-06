@@ -245,10 +245,13 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+
+
+
   struct push_offer_param
   {
     uint64_t wallet_id;
-    currency::offer_details od;
+    currency::offer_details_ex od;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_id)

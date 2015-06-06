@@ -102,11 +102,21 @@ namespace boost
     a & x.comment;       
     a & x.payment_types; 
     a & x.expiration_time;
+  }
+
+
+  template <class Archive>
+  inline void serialize(Archive& a, currency::offer_details_ex& x, const boost::serialization::version_type ver)
+  {
+    a & static_cast<currency::offer_details&>(x);
     a & x.timestamp;
     a & x.tx_hash;
     a & x.index_in_tx;
+    a & x.timestamp;
+    a & x.fee;
     a & x.stopped;
   }
+
   
     template <class Archive>
     inline void serialize(Archive &a, currency::cancel_offer &x, const boost::serialization::version_type ver)

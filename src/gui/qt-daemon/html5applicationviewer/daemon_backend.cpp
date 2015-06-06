@@ -813,7 +813,7 @@ std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_
   return API_RETURN_CODE_OK;
 }
 
-std::string daemon_backend::push_offer(size_t wallet_id, const currency::offer_details& od, currency::transaction& res_tx)
+std::string daemon_backend::push_offer(size_t wallet_id, const currency::offer_details_ex& od, currency::transaction& res_tx)
 {
   GET_WALLET_BY_ID(wallet_id, w);
 
