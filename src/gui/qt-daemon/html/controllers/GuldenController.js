@@ -55,11 +55,12 @@
                 var alias = obj.originalObject;
                 $scope.transaction.to = alias.address;
                 $scope.transaction.is_valid_address = true;
-                $scope.transaction.alias = alias.alias;
+                // $scope.transaction.alias = alias.alias;
+                return alias.address;
             }
 
             $scope.inputChanged = function(str){
-                delete $scope.transaction.alias;
+                // delete $scope.transaction.alias;
                 if(str.indexOf('@') != 0){
                     if(backend.validateAddress(str)){
                         $scope.transaction.is_valid_address = true;

@@ -51,21 +51,27 @@
                                 placeholder="счет или алиас"
                                 ng-change="validate_address()"
                             > -->
-
-                            <angucomplete-alt 
-                                placeholder="счет или алиас"
-                                pause="100"
-                                selected-object="selectAlias"
-                                local-data="aliases"
-                                search-fields="name"
-                                title-field="name"
-                                description-field="comment"
-                                minlength="3"
-                                input-class="form-control"
-                                input-changed="inputChanged"
-                                initial-value="{{transaction.to}}"
-                                text-no-results="Aliases not found"
-                            />
+                            <div>
+                                <angucomplete-alt 
+                                    placeholder="счет или алиас"
+                                    pause="100"
+                                    selected-object="selectAlias"
+                                    local-data="aliases"
+                                    search-fields="name"
+                                    title-field="name"
+                                    description-field="comment"
+                                    minlength="3"
+                                    input-class="form-control"
+                                    input-changed="inputChanged"
+                                    initial-value="{{transaction.to}}"
+                                    text-no-results="Aliases not found"
+                                />
+                            </div>
+                            <div ng-if="transaction.to.length">
+                                <span ng-repeat="alias in aliases | filter : {address: transaction.to}">
+                                    <span class="label label-info">@{{alias.alias}}</span>
+                                <span>
+                            </div>
 
                             
                             
