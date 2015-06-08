@@ -14,7 +14,7 @@
             <div class="col-xs-4 col-sm-4">
                 <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-disabled="!app_pass_form.app_pass.$valid" ng-click="submit(pass)"> Продолжить</a>
             </div>
-            <div class="col-xs-4 col-sm-4">
+            <div class="col-xs-4 col-sm-4" ng-if="canCancel">
                 <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-click="cancel()"> Отменить</a>
             </div>
             <div class="col-xs-4 col-sm-4">
@@ -25,7 +25,7 @@
             <div class="col-xs-6 col-sm-6">
                 <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-disabled="!app_pass_form.app_pass.$valid" ng-click="submit(pass)"> Продолжить</a>
             </div>
-            <div class="col-xs-6 col-sm-6">
+            <div class="col-xs-6 col-sm-6" ng-if="canCancel">
                 <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-click="cancel()"> Отменить</a>
             </div>
         </div>

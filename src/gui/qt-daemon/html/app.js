@@ -9,6 +9,7 @@
         "easypiechart",
 
         'ngRoute', 
+        'ngIdle',
         'ngSanitize',
         'validation.match', // allow to validate inputs match 
         'angularSlideables', // show/hide animations
@@ -27,8 +28,13 @@
 
     ]);
 
-    app.config(['$routeProvider', function($routeProvider) {
+    app.config(['$routeProvider', 'IdleProvider', 'KeepaliveProvider', function($routeProvider, IdleProvider, KeepaliveProvider) {
         
+        // configure Idle settings
+        // IdleProvider.idle(0); // in seconds
+        IdleProvider.timeout(10); // in seconds
+        //KeepaliveProvider.interval(2); // in seconds
+
         var routes = [
             {route: '/',                           template: 'views/index.html'},
             {route: '/index',                      template: 'views/index.html'},
@@ -62,7 +68,7 @@
         
     }]);
 
-    app.run(['$rootScope',function($rootScope){
+    app.run(['$rootScope','Idle',function($rootScope, Idle){
         
         if(angular.isUndefined($rootScope.safes)){
             $rootScope.safes = [];
