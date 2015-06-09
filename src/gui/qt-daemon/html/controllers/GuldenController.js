@@ -30,8 +30,8 @@
 
 
 
-    module.controller('guldenSendCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$modal',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $modal){
+    module.controller('guldenSendCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$modal','txHistory',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $modal, txHistory){
             $scope.transaction = {
                 to: '',
                 push_payer: $rootScope.settings.security.is_hide_sender,
@@ -41,6 +41,8 @@
                 is_valid_address: false,
                 is_mixin : $rootScope.settings.security.is_mixin
             };
+
+            $scope.txHistory = txHistory.reloadHistory();
 
             if($routeParams.wallet_id){
                 $scope.transaction.from = parseInt($routeParams.wallet_id);
@@ -131,53 +133,34 @@
         }
     ]);
 
-    module.controller('trHistoryCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location',
-       function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location){
+    module.controller('trHistoryCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','txHistory',
+       function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, txHistory){
             
             $scope.my_safes = angular.copy($rootScope.safes);
             $scope.my_safes.unshift({name: 'Все сейфы', wallet_id : -1});
 
-             $scope.contact = false;
+            $scope.contact = false;
 
-            if($routeParams.contact_id){
-                var contact = $filter('filter')($rootScope.settings.contacts, {id: $routeParams.contact_id});
-                $scope.contact = contact[0];
-            }
-
-
-            
-            $scope.tx_history = [];
-
-            var reloadHistory = function(){
-                var temp = [];
-                angular.forEach($rootScope.safes, function(safe){ // TODO WATCH?
-                    if(angular.isDefined(safe.history)){
-                        angular.forEach(safe.history, function(item){
-                            item.wallet_id = angular.copy(safe.wallet_id);
-
-                            if($routeParams.contact_id){
-                                if(angular.isDefined($scope.contact.addresses) && $scope.contact.addresses.indexOf(item.remote_address) >-1){
-                                    temp.push(item);
-                                }
-                            }else{
-                                temp.push(item);
-                            }
-                            
-                        });
-                    }
-                },true); 
-                $scope.tx_history = temp;   
+            var init = function(){
+                if($routeParams.contact_id){
+                    var contact = $filter('filter')($rootScope.settings.contacts, {id: $routeParams.contact_id});
+                    $scope.contact = contact[0];
+                    $scope.tx_history = txHistory.contactHistory($scope.contact);
+                }else{
+                    $scope.tx_history = txHistory.reloadHistory();
+                }
             };
 
-            reloadHistory();
+            init();
 
             $scope.$watch(
                 function(){
                     return $rootScope.safes;
                 },
                 function(){
-                    reloadHistory();    
-                }
+                    init();
+                },
+                true
             );
 
             $scope.row = '-timestramp'; //sort by default
@@ -196,7 +179,7 @@
                 $event.stopPropagation();
                 if(name == 'start'){
                     $scope.opened_start = !$scope.opened_start;
-                }else if(name = 'end'){
+                }else if(name == 'end'){
                     $scope.opened_end = !$scope.opened_end;
                 }
             };
