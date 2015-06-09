@@ -59,11 +59,23 @@
             };
 
             $scope.cancelOffer = function(offer){
-                var wallet_id = 0; //???? What a wallet id ???
-                var data = backend.cancelOffer(wallet_id, offer.tx_hash , function(result){
-                    alert(JSON.stringify(result));
-                });
-                alert(JSON.stringify(data));
+                
+                var safe = $filter('filter')($rootScope.safes, offer.tx_hash);
+                if(safe.length){
+                    safe = safe[0];
+                    var data = backend.cancelOffer(safe.wallet_id, offer.tx_hash , function(result){
+                        // {"success":true,"tx_blob_size":775,"tx_hash":"82dc10c91658ff425c8aaf1809e5259ce5269f280429689e195cfbb4be4f6e65"}
+                        angular.forEach($scope.f_my_goods_offers,function(item, key){
+                            if(item.tx_hash == result.tx_hash){
+                                $scope.f_my_goods_offers.splice(key, 1);
+                            }
+                        });
+                    });
+                }else{
+                    informer.error('Не найден сейф, с которого было опубликовано предложение');
+                }
+
+                
             };
 
             $scope.order = function(row, target){
