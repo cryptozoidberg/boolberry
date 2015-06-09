@@ -159,7 +159,7 @@ namespace currency
   bool tx_memory_pool::process_cancel_offer_rules(const transaction& tx)
   {
     cancel_offer co = AUTO_VAL_INIT(co);
-    if (!get_attachment(tx.attachment, co))
+    if (!get_type_in_variant_container(tx.attachment, co))
       return false;
 
     blockchain_storage::offers_container::iterator oit;
@@ -176,7 +176,7 @@ namespace currency
   bool tx_memory_pool::unprocess_cancel_offer_rules(const transaction& tx)
   {
     cancel_offer co = AUTO_VAL_INIT(co);
-    if (!get_attachment(tx.attachment, co))
+    if (!get_type_in_variant_container(tx.attachment, co))
       return false;
 
     auto it = m_cancel_offer_hash.find(co.tx_id);
@@ -513,11 +513,26 @@ namespace currency
     size_t best_position = 0;
     total_size = 0;
     fee = 0;
+    uint64_t alias_count = 0;
 
     std::unordered_set<crypto::key_image> k_images;
 
     for (size_t i = 0; i < txs.size(); i++) {
       txv &tx(*txs[i]);
+
+      tx_extra_info ei = AUTO_VAL_INIT(ei);
+      bool r = parse_and_validate_tx_extra(tx.second, ei);
+      CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra on unprocess_blockchain_tx_extra");
+      if (ei.m_alias.m_alias.size() && ei.m_alias.m_sign != null_sig)
+      {
+        //adding new alias
+        if (alias_count >= MAX_ALIAS_PER_BLOCK)
+        {
+          txs[i] = NULL;
+          continue;
+        }
+      }
+
 
       if(!is_transaction_ready_to_go(tx.second) || have_key_images(k_images, tx.second.tx)) {
         txs[i] = NULL;

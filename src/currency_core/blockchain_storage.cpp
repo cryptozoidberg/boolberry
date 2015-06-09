@@ -2505,7 +2505,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     }
   }
  
-
+  size_t aliases_count_befor_block = m_aliases.size();
   if(m_checkpoints.is_in_checkpoint_zone(get_current_blockchain_height()))
   {
     m_is_in_checkpoint_zone = true;
@@ -2585,6 +2585,17 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     cumulative_block_size += blob_size;
     ++tx_processed_count;
   }
+
+  //check aliases count
+  if (m_aliases.size() - aliases_count_befor_block > MAX_ALIAS_PER_BLOCK)
+  {
+    LOG_PRINT_L0("Block with id: " << id
+      << " have registered too much aliases " << m_aliases.size() - aliases_count_befor_block << ", expected not more then " << MAX_ALIAS_PER_BLOCK);
+    purge_block_data_from_blockchain(bl, tx_processed_count);
+    bvc.m_verifivation_failed = true;
+    return false;
+  }
+
   uint64_t base_reward = 0;
   uint64_t already_generated_coins = m_blocks.size() ? m_blocks.back().already_generated_coins:0;
   if(!validate_miner_transaction(bl, cumulative_block_size, fee_summary, base_reward, already_generated_coins))
