@@ -55,6 +55,7 @@
 
             {route: '/addOfferBuy',                template: 'views/addOffer.html'},
             {route: '/addContact',                 template: 'views/addContact.html'},
+            {route: '/contact/:contact_id',        template: 'views/addContact.html'},
             {route: '/addOfferSell',               template: 'views/addOffer.html'},
         ];
 
