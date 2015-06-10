@@ -626,9 +626,9 @@ namespace tools
       recipient += get_account_address_as_str(d.addr);
     }
     currency::tx_comment cm;
-    get_attachment(attachments, cm);
+    get_type_in_variant_container(attachments, cm);
     add_sent_unconfirmed_tx(tx, change_dts.amount, recipient, cm.comment);
-    if (currency::have_attachment<currency::offer_details>(tx.attachment))
+    if (currency::have_type_in_variant_container<currency::offer_details>(tx.attachment))
     {
       //store private tx key
       m_offers_secret_keys[currency::get_transaction_hash(tx)] = std::make_pair(one_time_key, static_cast<uint64_t>(time(nullptr)));

@@ -178,11 +178,11 @@ void wallet2::prepare_wti_decrypted_attachments(wallet_rpc::wallet_transfer_info
   if (wti.is_income)
   {
     tx_payer tp = AUTO_VAL_INIT(tp);
-    if (get_attachment(decrypted_att, tp))
+    if (get_type_in_variant_container(decrypted_att, tp))
       wti.remote_address = currency::get_account_address_as_str(tp.acc_addr);
   }
   currency::tx_comment cm;
-  if (currency::get_attachment(decrypted_att, cm))
+  if (currency::get_type_in_variant_container(decrypted_att, cm))
     wti.comment = cm.comment;
 }
 //------------

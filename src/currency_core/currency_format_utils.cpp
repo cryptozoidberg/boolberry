@@ -530,7 +530,7 @@ namespace currency
   bool add_attachments_info_to_extra(transaction& tx)
   {
     extra_attachment_info eai = AUTO_VAL_INIT(eai);
-    get_attachment_details(tx, eai);
+    get_type_in_variant_container_details(tx, eai);
     tx.extra.push_back(eai);
     return true;
   } 
@@ -565,7 +565,7 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  void get_attachment_details(const transaction& tx, extra_attachment_info& eai)
+  void get_type_in_variant_container_details(const transaction& tx, extra_attachment_info& eai)
   {
     eai = extra_attachment_info();
     if (!tx.attachment.size())

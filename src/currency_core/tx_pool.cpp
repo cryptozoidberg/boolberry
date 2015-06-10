@@ -521,7 +521,7 @@ namespace currency
       txv &tx(*txs[i]);
 
       tx_extra_info ei = AUTO_VAL_INIT(ei);
-      bool r = parse_and_validate_tx_extra(tx.second, ei);
+      bool r = parse_and_validate_tx_extra(tx.second.tx, ei);
       CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra on unprocess_blockchain_tx_extra");
       if (ei.m_alias.m_alias.size() && ei.m_alias.m_sign != null_sig)
       {

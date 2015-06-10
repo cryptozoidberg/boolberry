@@ -2107,7 +2107,7 @@ bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::ha
     bool r = parse_and_validate_tx_extra(tx, ei);
     CHECK_AND_ASSERT_MES(r, false, "failed to parse_and_validate_tx_extra");
     extra_attachment_info eai = AUTO_VAL_INIT(eai);
-    get_attachment_details(tx, eai);
+    get_type_in_variant_container_details(tx, eai);
     CHECK_AND_ASSERT_MES(eai.hsh == ei.m_attachment_info.hsh && 
       eai.sz == ei.m_attachment_info.sz, false, "attachment hash in tx: " << eai.hsh << ", and sz = " << eai.sz
       << " missmatch with attachment hash specified in extra: "       
