@@ -106,8 +106,9 @@
         }
     ]);
 
-    module.controller('addContactCtrl',['backend','$rootScope','$scope','informer', '$location','uuid',
-        function(backend, $rootScope, $scope, informer, $location, uuid){
+    module.controller('addEditContactCtrl',['backend','$rootScope','$scope','informer', '$location','uuid', '$routeParams', '$filter',
+        function(backend, $rootScope, $scope, informer, $location, uuid, $routeParams, $filter){
+            
             $scope.contact = {
                 name: '',
                 email: '',
@@ -121,6 +122,22 @@
                 ims: [],
                 addresses: []
             };
+
+            $scope.deleteContact = function(contact){
+                angular.forEach($rootScope.settings.contacts, function(item, index){
+                    if(item.id == contact.id){
+                        $rootScope.settings.contacts.splice(index,1);
+                    }
+                });
+                $location.path('/contacts');
+            }
+
+            if($routeParams.contact_id){
+                var contacts = $filter('filter')($rootScope.settings.contacts, {id : $routeParams.contact_id});
+                if(contacts.length){
+                    $scope.contact = contacts[0];
+                }
+            }
 
             $scope.im = {
                 name: '',
@@ -140,15 +157,12 @@
                 }
             }
 
-            $scope.addContact = function(contact){
-                contact.id = uuid.generate();
-                $rootScope.settings.contacts.push(contact);
+            $scope.saveContact = function(contact){
+                if(angular.isUndefined(contact.id)){ // create
+                    contact.id = uuid.generate();
+                    $rootScope.settings.contacts.push(contact);
+                }
                 $location.path('/contacts');
-            }
-
-            $scope.addAddress = function(address){
-                $rootScope.settings.contacts.push(address);
-
             }
 
             $scope.selectAlias = function(obj){

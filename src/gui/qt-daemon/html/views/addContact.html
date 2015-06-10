@@ -1,13 +1,14 @@
- <div ng-controller="addContactCtrl">   
+ <div ng-controller="addEditContactCtrl">   
     
     <div class="navbar">
-        <div class="btn-toolbar pull-right">
-            <a data-toggle="modal" type="button" class="btn btn-link" data-target="#">
+        <div class="btn-toolbar pull-right" ng-if="contact.id">
+            <a type="button" class="btn btn-link" ng-click="deleteContact(contact)">
                 <i class="fa fa-lg fa-times-circle text-muted"></i> 
                 <span class="underlined text-muted">Удалить контакт</span>
             </a>
         </div>
-        <h1>Новый контакт</h1>
+        <h1 ng-if="!contact.id">Новый контакт</h1>
+        <h1 ng-if="contact.id">{{contact.name}}</h1>
     </div>
 
     <div class="form-horizontal">
@@ -290,7 +291,7 @@
         <div class="panel panel-transparent">
             <div class="panel-body">
                 <div class="col-xs-6 col-sm-6">
-                    <a type="button" ng-disabled="!contact.addresses.length" class="btn btn-primary btn-block" ng-click="addContact(contact)">Сохранить</a>
+                    <a type="button" ng-disabled="!contact.addresses.length" class="btn btn-primary btn-block" ng-click="saveContact(contact)">Сохранить</a>
                 </div>
             </div>
         </div>
