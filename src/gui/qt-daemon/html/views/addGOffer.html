@@ -165,6 +165,12 @@
 
                                 <a href="" type="button" data-toggle="collapse" data-target=".collapse01" class="btn btn-block btn-light" >Курс и котировки USD/G <i class="fa fa-chevron-down"></i></a>
 
+                                <!-- {{offers}}
+                                <br>
+                                ---------------------------------------------
+                                <br>
+
+                                {{offers | filter : {target: offer.currency, offer_type: 2}  }} -->
 
                                 <div class="collapse collapse01">
                                     <div class="row">
@@ -174,11 +180,18 @@
                                                 <div class="scroll-inner">
                                                     <table class="table table-condensed table-hover">
                                                         <thead>
-                                                        <tr><th>Курс USD/G</th><th>Сумма, G</th></tr>
+                                                        <tr>
+                                                            <th>Курс {{offer.currency}}/G</th>
+                                                            <th>Сумма, G</th>
+                                                        </tr>
                                                         </thead>
                                                         <tbody>
-                                                        <tr><td>368.89</td><td>0.78</td></tr>
-                                                        <tr><td>368.89</td><td>48.00</td></tr>
+                                                        <tr ng-if="cur_offers_buy.length" ng-repeat="item in cur_offers_buy = (offers | filter : {target: offer.currency, offer_type: 2})">
+                                                            <td>{{(item.amount_etc / (item.amount_lui  | gulden : false))}}</td>
+                                                            <td>{{(item.amount_lui * item.amount_etc) | gulden : false}}</td>
+                                                        </tr>
+                                                        <tr ng-if="!cur_offers_buy.length"><td colsapn="2">Нет данных</td></tr>
+                                                        <!-- <tr><td>368.89</td><td>48.00</td></tr>
                                                         <tr><td>368.88</td><td>0.78</td></tr>
                                                         <tr><td>368.91</td><td>48.89</td></tr>
                                                         <tr><td>368.93</td><td>0.78</td></tr>
@@ -188,7 +201,7 @@
                                                         <tr><td>369.19</td><td>45.80</td></tr>
                                                         <tr><td>369.89</td><td>45.34</td></tr>
                                                         <tr><td>369.99</td><td>3.78</td></tr>
-                                                        <tr><td>370.09</td><td>8.48</td></tr>
+                                                        <tr><td>370.09</td><td>8.48</td></tr> -->
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -201,10 +214,18 @@
                                                 <div class="scroll-inner">
                                                     <table class="table table-condensed table-hover">
                                                         <thead>
-                                                        <tr><th>Курс USD/G</th><th>Сумма, G</th></tr>
+                                                            <tr>
+                                                                <th>Курс {{offer.currency}}/G</th>
+                                                                <th>Сумма, G</th>
+                                                            </tr>
                                                         </thead>
                                                         <tbody>
-                                                        <tr><td>368.89</td><td>0.78</td></tr>
+                                                        <tr ng-if="cur_offers_sell.length" ng-repeat="item in cur_offers_sell = (offers | filter : {target: offer.currency, offer_type: 3})">
+                                                            <td>{{(item.amount_etc / (item.amount_lui  | gulden : false))}}</td>
+                                                            <td>{{(item.amount_lui * item.amount_etc) | gulden : false}}</td>
+                                                        </tr>
+                                                        <tr ng-if="!cur_offers_sell.length"><td colsapn="2">Нет данных</td></tr>
+                                                        <!-- <tr><td>368.89</td><td>0.78</td></tr>
                                                         <tr><td>368.89</td><td>48.00</td></tr>
                                                         <tr><td>368.88</td><td>0.78</td></tr>
                                                         <tr><td>368.91</td><td>48.89</td></tr>
@@ -215,7 +236,7 @@
                                                         <tr><td>369.19</td><td>45.80</td></tr>
                                                         <tr><td>369.89</td><td>45.34</td></tr>
                                                         <tr><td>369.99</td><td>3.78</td></tr>
-                                                        <tr><td>370.09</td><td>8.48</td></tr>
+                                                        <tr><td>370.09</td><td>8.48</td></tr> -->
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -242,7 +263,8 @@
                                                         <tr><th>Возраст</th><th>Курс USD/G</th><th>Сумма, G</th></tr>
                                                         </thead>
                                                         <tbody>
-                                                        <tr><td>3 сек назад</td><td>368.89</td><td>0.78</td></tr>
+                                                        <tr><td colsapn="2">Нет данных</td></tr>
+                                                        <!-- <tr><td>3 сек назад</td><td>368.89</td><td>0.78</td></tr>
                                                         <tr><td>4 сек назад</td><td>368.89</td><td>48.00</td></tr>
                                                         <tr><td>4 сек назад</td><td>368.88</td><td>0.78</td></tr>
                                                         <tr><td>6 сек назад</td><td>368.91</td><td>48.89</td></tr>
@@ -253,7 +275,7 @@
                                                         <tr><td>20 сек назад</td><td>369.19</td><td>45.80</td></tr>
                                                         <tr><td>24 сек назад</td><td>369.89</td><td>45.34</td></tr>
                                                         <tr><td>34 сек назад</td><td>369.99</td><td>3.78</td></tr>
-                                                        <tr><td>44 сек назад</td><td>370.09</td><td>8.48</td></tr>
+                                                        <tr><td>44 сек назад</td><td>370.09</td><td>8.48</td></tr> -->
                                                         </tbody>
                                                     </table>
                                                 </div>

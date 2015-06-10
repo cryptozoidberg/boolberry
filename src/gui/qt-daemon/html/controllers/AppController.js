@@ -339,10 +339,18 @@
 
         $scope.startMining = function(wallet_id){
             backend.startPosMining(wallet_id);
+            var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            if(safe.length){
+                safe[0].is_mining_set_manual = true; // flag to understand that we want to prevent auto mining
+            }
         }
 
         $scope.stopMining = function(wallet_id){
             backend.stopPosMining(wallet_id);
+            var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            if(safe.length){
+                safe[0].is_mining_set_manual = true; // flag to understand that we want to prevent auto mining
+            }
         }
 
         $scope.resynch = function(wallet_id){
@@ -438,6 +446,10 @@
 
                     if(wallet_state == 2){ // ready
                         safe.loaded = true;
+                        if($rootScope.settings.mining.auto_mining && !safe.is_mining_set_manual){
+                            backend.startPosMining(data.wallet_id);
+                            safe.is_mining_set_manual = true;
+                        }
                     }
 
                     if(wallet_state == 3){ // error
