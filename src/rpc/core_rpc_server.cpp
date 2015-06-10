@@ -102,6 +102,7 @@ namespace currency
     m_core.get_blockchain_storage().get_transactions_daily_stat(res.transactions_cnt_per_day, res.transactions_volume_per_day);
     res.last_pos_timestamp = m_core.get_blockchain_storage().get_last_block_of_type(true).bl.timestamp;
     res.last_pow_timestamp = m_core.get_blockchain_storage().get_last_block_of_type(false).bl.timestamp;
+    res.total_coins = m_core.get_blockchain_storage().total_coins();
 
     if (!res.outgoing_connections_count)
       res.daemon_network_state = COMMAND_RPC_GET_INFO::daemon_network_state_connecting;

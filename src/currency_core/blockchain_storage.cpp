@@ -1362,6 +1362,15 @@ bool blockchain_storage::get_random_outs_for_amounts(const COMMAND_RPC_GET_RANDO
   return true;
 }
 //------------------------------------------------------------------
+uint64_t blockchain_storage::total_coins()
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  if (!m_blocks.size())
+    return 0;
+
+  return m_blocks.back().already_generated_coins;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);

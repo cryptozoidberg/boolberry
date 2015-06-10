@@ -130,6 +130,7 @@ namespace currency
     uint64_t get_seconds_between_last_n_block(size_t n);
     bool print_transactions_statistics();
     bool update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent);
+    uint64_t total_coins();
 
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     wide_difficulty_type block_difficulty(size_t i);

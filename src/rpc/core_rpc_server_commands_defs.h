@@ -339,6 +339,7 @@ namespace currency
       uint64_t pow_sequense_factor;
       uint64_t last_pow_timestamp;
       uint64_t last_pos_timestamp;
+      uint64_t total_coins;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -369,6 +370,7 @@ namespace currency
         KV_SERIALIZE(last_pos_timestamp)
         KV_SERIALIZE(seconds_for_10_blocks)
         KV_SERIALIZE(seconds_for_30_blocks)
+        KV_SERIALIZE(total_coins)
       END_KV_SERIALIZE_MAP()
     };
   };    

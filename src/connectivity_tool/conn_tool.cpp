@@ -203,27 +203,29 @@ bool handle_get_daemon_info(po::variables_map& vm)
     return false;
   }
   std::cout << "OK" << ENDL
-  << "height: " << res.height << ENDL
-  << "pos_difficulty: " << res.pos_difficulty << ENDL
-  << "pow_difficulty: " << res.pow_difficulty << ENDL
-  << "tx_count: " << res.tx_count << ENDL
-  << "tx_pool_size: " << res.tx_pool_size << ENDL
-  << "alt_blocks_count: " << res.alt_blocks_count << ENDL
-  << "outgoing_connections_count: " << res.outgoing_connections_count << ENDL
-  << "incoming_connections_count: " << res.incoming_connections_count << ENDL
-  << "white_peerlist_size: " << res.white_peerlist_size << ENDL
-  << "grey_peerlist_size: " << res.grey_peerlist_size << ENDL
-  << "current_network_hashrate_50: " << res.current_network_hashrate_50 << ENDL
-  << "current_network_hashrate_350: " << res.current_network_hashrate_350 << ENDL
-  << "seconds_between_10_blocks: " << res.seconds_for_10_blocks << ENDL
-  << "seconds_between_30_blocks: " << res.seconds_for_30_blocks << ENDL
-  << "alias_count: " << res.alias_count << ENDL
-  << "transactions_cnt_per_day: " << res.transactions_cnt_per_day << ENDL
-  << "transactions_volume_per_day: " << res.transactions_volume_per_day << ENDL
-  << "pos_sequense_factor: " << res.pos_sequense_factor << ENDL
-  << "pow_sequense_factor: " << res.pow_sequense_factor << ENDL
-  << "last_pos_timestamp: " << res.last_pos_timestamp << ENDL
-  << "last_pow_timestamp: " << res.last_pow_timestamp << ENDL;
+    << "height: " << res.height << ENDL
+    << "pos_difficulty: " << res.pos_difficulty << ENDL
+    << "pow_difficulty: " << res.pow_difficulty << ENDL
+    << "tx_count: " << res.tx_count << ENDL
+    << "tx_pool_size: " << res.tx_pool_size << ENDL
+    << "alt_blocks_count: " << res.alt_blocks_count << ENDL
+    << "outgoing_connections_count: " << res.outgoing_connections_count << ENDL
+    << "incoming_connections_count: " << res.incoming_connections_count << ENDL
+    << "white_peerlist_size: " << res.white_peerlist_size << ENDL
+    << "grey_peerlist_size: " << res.grey_peerlist_size << ENDL
+    << "current_network_hashrate_50: " << res.current_network_hashrate_50 << ENDL
+    << "current_network_hashrate_350: " << res.current_network_hashrate_350 << ENDL
+    << "seconds_between_10_blocks: " << res.seconds_for_10_blocks << ENDL
+    << "seconds_between_30_blocks: " << res.seconds_for_30_blocks << ENDL
+    << "alias_count: " << res.alias_count << ENDL
+    << "transactions_cnt_per_day: " << res.transactions_cnt_per_day << ENDL
+    << "transactions_volume_per_day: " << res.transactions_volume_per_day << ENDL
+    << "pos_sequense_factor: " << res.pos_sequense_factor << ENDL
+    << "pow_sequense_factor: " << res.pow_sequense_factor << ENDL
+    << "last_pos_timestamp: " << res.last_pos_timestamp << ENDL
+    << "last_pow_timestamp: " << res.last_pow_timestamp << ENDL
+    << "total_coins: " << res.total_coins / COIN << ENDL
+    << "pos_difficulty_in_coins: " << currency::wide_difficulty_type(res.pos_difficulty) / COIN << ENDL;
 
   return true;
 }
