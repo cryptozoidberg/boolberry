@@ -178,26 +178,26 @@ namespace currency
   void print_currency_details();
     
   //---------------------------------------------------------------
-  template<typename variant_t>
-  bool get_type_in_variant_container(const std::vector<attachment_v>& av, variant_t& a)
+  template<typename specic_type_t, typename variant_t>
+  bool get_type_in_variant_container(const std::vector<variant_t>& av, specic_type_t& a)
   {
     for (auto& ai : av)
     {
-      if (ai.type() == typeid(variant_t))
+      if (ai.type() == typeid(specic_type_t))
       {
-        a = boost::get<variant_t>(ai);
+        a = boost::get<specic_type_t>(ai);
         return true;
       }
     }
     return false;
   }
   //---------------------------------------------------------------
-  template<typename variant_t>
+  template<typename specic_type_t, typename variant_t>
   bool have_type_in_variant_container(const std::vector<variant_t>& av)
   {
     for (auto& ai : av)
     {
-      if (ai.type() == typeid(variant_t))
+      if (ai.type() == typeid(specic_type_t))
       {
         return true;
       }

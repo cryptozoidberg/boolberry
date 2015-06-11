@@ -159,6 +159,7 @@ namespace currency
                             uint64_t split_height = 0);
     bool is_coin_age_okay(uint64_t source_tx_block_timestamp, uint64_t last_block_timestamp);
     void set_pos_config(const pos_config& pc);
+    pos_config& get_pos_config();
     size_t get_current_sequence_factor(bool pos);
     const block_extended_info&  get_last_block_of_type(bool looking_for_pos, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
     bool validate_cancel_order(const cancel_offer& co, offers_container::iterator& oit);
@@ -225,7 +226,7 @@ namespace currency
     typedef std::unordered_map<crypto::hash, block> blocks_by_hash;
     typedef std::map<uint64_t, std::vector<std::pair<crypto::hash, size_t>>> outputs_container; //crypto::hash - tx hash, size_t - index of out in transaction
     typedef std::map<std::string, std::list<alias_info_base>> aliases_container; //alias can be address address address + view key
-    typedef std::unordered_map<account_public_address, std::string> address_to_aliases_container;
+    typedef std::unordered_map<account_public_address, std::set<std::string> > address_to_aliases_container;
     typedef std::list<blockchain_storage::blocks_ext_by_hash::iterator> alt_chain_list;
     
     tx_memory_pool& m_tx_pool;

@@ -176,6 +176,18 @@ bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_14, blk_13, miner_account, txs_2);
 
   DO_CALLBACK(events, "check_height_not_changed");
+  
+  //try to put more alias then allowed
+  MAKE_TX_LIST_START(events, txs_3, miner_account, miner_account, MK_COINS(1), blk_13);
+  for (size_t i = 0; i != MAX_ALIAS_PER_BLOCK + 2; i++)
+  {
+    if (!put_alias_via_tx_to_list(events, txs_3, blk_13, std::string(SIX_NAME) + std::to_string(i), miner_account, miner_account, generator))
+      return false;
+  }
+  MAKE_NEXT_BLOCK_TX_LIST(events, blk_15, blk_13, miner_account, txs_3);
+  DO_CALLBACK(events, "check_height_not_changed");
+
+
 
   return true;
 }
@@ -183,8 +195,6 @@ bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
 bool gen_alias_tests::check_first_alias_added(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
   const currency::account_base& first_acc = boost::get<const currency::account_base&>(events[1]);
-  //currency::account_base& second_acc = boost::get<currency::account_base&>(events[2]);
-  //currency::account_base& third_acc = boost::get<currency::account_base&>(events[3]);
 
   currency::alias_info_base ai = AUTO_VAL_INIT(ai);
   bool r = c.get_blockchain_storage().get_alias_info(FIRST_ALIAS_NAME, ai);

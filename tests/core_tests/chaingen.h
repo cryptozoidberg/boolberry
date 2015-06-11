@@ -29,6 +29,8 @@
 
 #define MK_COINS(amount) (UINT64_C(amount) * COIN)
 #define TESTS_DEFAULT_FEE TX_POOL_MINIMUM_FEE//((uint64_t)1000000) // pow(10, 6)
+#define TESTS_POS_CONFIG_MIN_COINAGE  4
+#define TESTS_POS_CONFIG_POS_MINIMUM_HEIGH  4
 
 namespace concolor
 {

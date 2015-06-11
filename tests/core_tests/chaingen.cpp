@@ -326,6 +326,11 @@ bool test_generator::build_wallets(const blockchain_vector& blocks,
     wallets.back()->assign_account(a);
     wallets.back()->get_account().set_createtime(0);
     wallets.back()->set_core_proxy(tmp_proxy);
+
+    currency::pos_config pc = get_default_pos_config();
+    pc.min_coinage = TESTS_POS_CONFIG_MIN_COINAGE; //four blocks
+    pc.pos_minimum_heigh = TESTS_POS_CONFIG_POS_MINIMUM_HEIGH; //four blocks
+    wallets.back()->set_pos_config(pc);
   }
   uint64_t height = 0;
   for (auto& w : wallets)

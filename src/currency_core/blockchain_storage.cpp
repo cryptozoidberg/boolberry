@@ -74,7 +74,7 @@ void blockchain_storage::fill_addr_to_alias_dict()
   {
     if (a.second.size())
     {
-      m_addr_to_alias[a.second.back().m_address] = a.first;
+      m_addr_to_alias[a.second.back().m_address].insert(a.first);
     }
   }
 }
@@ -1732,7 +1732,10 @@ std::string blockchain_storage::get_alias_by_address(const account_public_addres
 {
   auto it = m_addr_to_alias.find(addr);
   if (it != m_addr_to_alias.end())
-    return it->second;
+  {
+    CHECK_AND_ASSERT_MES(it->second.size(), "", "address for alias found, but names set is empty");
+    return *it->second.begin();
+  }
   
   return "";
 }
@@ -1747,7 +1750,12 @@ bool blockchain_storage::pop_alias_info(const alias_info& ai)
   auto it = m_addr_to_alias.find(alias_history.back().m_address);
   if (it != m_addr_to_alias.end())
   {
-    m_addr_to_alias.erase(it);
+    auto it_in_set = it->second.find(ai.m_alias);
+    CHECK_AND_ASSERT_MES(it_in_set != it->second.end(), false, "it_in_set != it->second.end() validation failed");
+    it->second.erase(it_in_set);
+
+    if (!it->second.size())
+      m_addr_to_alias.erase(it);
   }
   else
   {
@@ -1757,7 +1765,7 @@ bool blockchain_storage::pop_alias_info(const alias_info& ai)
   alias_history.pop_back();
   if (alias_history.size())
   {
-    m_addr_to_alias[alias_history.back().m_address] = ai.m_alias;
+    m_addr_to_alias[alias_history.back().m_address].insert(ai.m_alias);
   }
   
   return true;
@@ -1773,7 +1781,7 @@ bool blockchain_storage::put_alias_info(const alias_info& ai)
   {//adding new alias, check sat name is free
     CHECK_AND_ASSERT_MES(!alias_history.size(), false, "alias " << ai.m_alias << " already in use");
     alias_history.push_back(ai);
-    m_addr_to_alias[alias_history.back().m_address] = ai.m_alias;
+    m_addr_to_alias[alias_history.back().m_address].insert(ai.m_alias);
     LOG_PRINT_MAGENTA("[ALIAS_REGISTERED]: " << ai.m_alias << ": " << get_account_address_as_str(ai.m_address), LOG_LEVEL_0);
   }else
   {
@@ -1783,15 +1791,28 @@ bool blockchain_storage::put_alias_info(const alias_info& ai)
     make_tx_extra_alias_entry(signed_buff, ai, true);
     bool r = crypto::check_signature(get_blob_hash(signed_buff), alias_history.back().m_address.m_spend_public_key, ai.m_sign);
     CHECK_AND_ASSERT_MES(r, false, "Failed to check signature, alias update failed");
-    //update granted
+    //update dictionary
     auto it = m_addr_to_alias.find(alias_history.back().m_address);
     if (it != m_addr_to_alias.end())
-      m_addr_to_alias.erase(it);
+    {
+      auto it_in_set = it->second.find(ai.m_alias);
+      if (it_in_set == it->second.end())
+      {
+        LOG_ERROR("it_in_set == it->second.end()");
+      }
+      else
+      {
+        it->second.erase(it_in_set);
+      }
+
+      if (!it->second.size())
+        m_addr_to_alias.erase(it);
+    }
     else
-      LOG_ERROR("Wromg m_addr_to_alias state: address not found " << get_account_address_as_str(alias_history.back().m_address));
+      LOG_ERROR("Wrong m_addr_to_alias state: address not found " << get_account_address_as_str(alias_history.back().m_address));
 
     alias_history.push_back(ai);
-    m_addr_to_alias[alias_history.back().m_address] = ai.m_alias;
+    m_addr_to_alias[alias_history.back().m_address].insert(ai.m_alias);
     LOG_PRINT_MAGENTA("[ALIAS_UPDATED]: " << ai.m_alias << ": " << get_account_address_as_str(ai.m_address), LOG_LEVEL_0);
 
   }
@@ -2824,4 +2845,9 @@ bool blockchain_storage::is_coin_age_okay(uint64_t source_tx_block_timestamp, ui
 void blockchain_storage::set_pos_config(const pos_config& pc)
 {
   m_pos_config = pc;
+}
+//------------------------------------------------------------------
+pos_config& blockchain_storage::get_pos_config()
+{
+  return m_pos_config;
 }

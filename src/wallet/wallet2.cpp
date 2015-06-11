@@ -1058,6 +1058,11 @@ void wallet2::get_unconfirmed_transfers(std::vector<wallet_rpc::wallet_transfer_
     trs.push_back(u.second);
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::set_pos_config(const currency::pos_config& pc)
+{
+  m_pos_config = pc;
+}
+//----------------------------------------------------------------------------------------------------
 bool wallet2::is_transfer_unlocked(const transfer_details& td) const
 {
   if(!is_tx_spendtime_unlocked(td.m_tx.unlock_time))

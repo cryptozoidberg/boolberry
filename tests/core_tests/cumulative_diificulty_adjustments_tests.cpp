@@ -80,8 +80,8 @@ bool cumulative_difficulty_adjustment_test::generate(std::vector<test_event_entr
 bool cumulative_difficulty_adjustment_test::configure_core(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
   currency::pos_config pc = get_default_pos_config();
-  pc.min_coinage = DIFFICULTY_POW_TARGET * 10; //four blocks
-  pc.pos_minimum_heigh = 4; //four blocks
+  pc.min_coinage = TESTS_POS_CONFIG_MIN_COINAGE; //four blocks
+  pc.pos_minimum_heigh = TESTS_POS_CONFIG_POS_MINIMUM_HEIGH; //four blocks
 
   c.get_blockchain_storage().set_pos_config(pc);
   return true;
