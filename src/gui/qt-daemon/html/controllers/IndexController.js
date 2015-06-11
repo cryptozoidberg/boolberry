@@ -6,7 +6,7 @@
 
     module.controller('indexController', ['utils', 'backend', '$scope', '$modal','$timeout','emulator','$rootScope', 'informer',
         function(utils, backend, $scope, $modal, $timeout, emulator, $rootScope, informer) {
-            $scope.settings = {
+            $scope.db_settings = {
                 maxWidgets: 12,
                 userSettings: {
                     'sendG_showPassword': true
@@ -42,10 +42,15 @@
             setUpWidgets();
 
             function setUpWidgets() {
-                $scope.widgetColumns = {
-                    'left': {},
-                    'right': {}
-                };
+                
+
+                if(angular.isUndefined($scope.widgetColumns)){
+                    $scope.widgetColumns = {
+                        'left': {},
+                        'right': {}
+                    };    
+                }
+                
 
                 $scope.addWidget = function(col) {
                     var widget_number = $scope.getWidgetCount() + '_' + utils.getRandomInt(0, 1000000); // getWidgetCount to avoid auto-sorting by angular
@@ -61,7 +66,7 @@
                     return Object.size($scope.widgetColumns.left) + Object.size($scope.widgetColumns.right);
                 };
                 $scope.widgetCountSanityCheck = function() {
-                    return ($scope.getWidgetCount() >= $scope.settings.maxWidgets);
+                    return ($scope.getWidgetCount() >= $scope.db_settings.maxWidgets);
                 };
 
                 $scope.am = {}; //active mining chart data
@@ -132,13 +137,13 @@
                     // 'ingoingPayments': {name: 'Входящие платежи', link: ''},
                     // 'outgoingPayments': {name: 'Исходящие платежи', link: ''},
                     'activeMining': {name: 'Активная добыча', link: ''},
-                    // 'coinDemand': {name: 'Спрос на гульдены в системе', link: ''},
-                    // 'coinOffer': {name: 'Предложение гульденов в системе', link: ''},
-                    // 'commodityDemand': {name: 'Спрос на товар', link: ''},
-                    // 'commodityOffer': {name: 'Предложения товаров', link: ''},
+                    'coinDemand': {name: 'Спрос на гульдены в системе', link: ''},
+                    'coinOffer': {name: 'Предложение гульденов в системе', link: ''},
+                    'commodityDemand': {name: 'Спрос на товар', link: ''},
+                    'commodityOffer': {name: 'Предложения товаров', link: ''},
                     // 'currencyFavorite': {name: 'Избранное – Валюта', link: ''},
                     // 'commodityFavorite': {name: 'Избранное – Товар', link: ''},
-                    // 'lastContacts': {name: 'Последние контакты', link: ''},
+                    'lastContacts': {name: 'Последние контакты', link: ''},
                     // 'exchangeDeals': {name: 'Сделки на биржах', link: ''},
                     'backendInfo': {name: 'Информация о сети', link: 'settings'}
                 };

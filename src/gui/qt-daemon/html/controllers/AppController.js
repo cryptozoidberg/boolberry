@@ -377,6 +377,7 @@
 
         var loaded = false;
         var alias_count = 0;
+        var newVersionShown = [];
 
         backend.subscribe('update_daemon_state', function(data){// move to run
             if(data.daemon_network_state == 2){
@@ -405,6 +406,8 @@
                     });
                 };
 
+                
+
                 if(alias_count != data.alias_count){
                     alias_count = data.alias_count;
                     getAliases();
@@ -417,9 +420,50 @@
                 //     li = loader.open(loadinMessage);
                 // }
             }
+
+            var newVersionModalCtrl = function($scope, $rootScope, $modalInstance) {
+                $scope.close = function() {
+                  $modalInstance.close();
+                };
+                //var type = 'success';
+                switch($rootScope.deamon_state.last_build_displaymode){
+                    case 1:
+                        $scope.type = 'success';
+                        break;
+                    case 2:
+                        $scope.type = 'info';
+                        break;
+                    case 3:
+                        $scope.type = 'warning';
+                        break;
+                    case 4:
+                        $scope.type = 'danger';
+                        break;
+                    default:
+                        $scope.type = 'warning';
+                }
+            };
+
+            data.last_build_displaymode = 4;
+            data.last_build_available   = '4.0.0.1';
+            var current_v = '4.0.0.0';
+            // var current_v = backend.getVersion();
+
             $timeout(function(){
             	$rootScope.deamon_state = data;	
+                if(data.last_build_displaymode > 0 && current_v != data.last_build_available && newVersionShown.indexOf(data.last_build_available) == -1){
+                    var modalInstance = $modal.open({
+                        templateUrl: "views/new_version.html",
+                        controller: newVersionModalCtrl,
+                        size: 'md',
+                        windowClass: 'modal fade in',
+                        backdrop: false
+                    });
+                    newVersionShown.push(data.last_build_available);
+                }
             });
+
+
         });
         
         backend.subscribe('update_wallet_status', function(data){

@@ -52,6 +52,11 @@
                 return this.runCommand('get_all_offers', params, callback);
             },
 
+            getVersion : function() {
+                var params = {};
+                return this.runCommand('get_version', params);
+            },
+
             startPosMining : function(wallet_id) {
                 var params = {
                     wallet_id : wallet_id
@@ -652,6 +657,9 @@
                 case 'get_wallet_info' : 
                     result = this.getWalletInfo();
                     break;
+                case 'get_version' : 
+                    result = '4.23.12.1';
+                    break;
                 case 'update_wallet_info' :
                     result = {
                         wallets  : []
@@ -701,8 +709,8 @@
                                 "type": "PoW"
                             }
                         ],
-                        "last_build_available": "0.0.0.0",
-                        "last_build_displaymode": 0,
+                        "last_build_available": "4.23.12.2",
+                        "last_build_displaymode": 1,
 
                         "out_connections_count": 2,
                         "pos_difficulty": "107285151137540",

@@ -255,8 +255,127 @@
                     <div class="scroll-inner">
                         <div ng-switch="w.type">
                             <div ng-switch-when=""></div>
+
+
+                            <div ng-switch-when="commodityDemand">
+                                <table class="table table-condensed table-hover">
+                                    <thead>
+                                      <tr><th>Дата</th><th>Товар</th><th>Контакт</th></tr>
+                                    </thead>
+                                    
+                                    <tbody>
+                                        <tr ng-if="good_offers_buy.length" ng-repeat="item in good_offers_buy = (offers | filter : {offer_type: 0})">
+                                            <td>{{item.timestamp | intToDate | date:'dd.MM.yy hh:mm'}}</td>
+                                            <td>{{item.target}}</td>
+                                            <td>{{item.contacts}}</td>
+                                        </tr>
+                                        <tr ng-if="!good_offers_buy.length"><td colsapn="3">Нет данных</td></tr>
+                                        <!-- <tr><td>1 мин назад</td><td>368.89</td><td>0.78</td></tr> -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div ng-switch-when="commodityOffer">
+                                <table class="table table-condensed table-hover">
+                                    <thead>
+                                      <tr><th>Дата</th><th>Товар</th><th>Контакт</th></tr>
+                                    </thead>
+                                    
+                                    <tbody>
+                                        <tr ng-if="good_offers_sell.length" ng-repeat="item in good_offers_sell = (offers | filter : {offer_type: 1})">
+                                            <td>{{item.timestamp | intToDate | date:'dd.MM.yy hh:mm'}}</td>
+                                            <td>{{item.target}}</td>
+                                            <td>{{item.contacts}}</td>
+                                        </tr>
+                                        <tr ng-if="!good_offers_sell.length"><td colsapn="3">Нет данных</td></tr>
+                                        <!-- <tr><td>1 мин назад</td><td>368.89</td><td>0.78</td></tr> -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div ng-switch-when="lastContacts">
+                                <table class="table table-condensed  data-table  contacts-table">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th><span class="nowrap">Контакт</span></th>
+                                            <th><span class="nowrap">Счет</span></th>
+                                            <th><span class="nowrap">Email/IM's <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        <tr ng-repeat="contact in settings.contacts">
+                                            <td><i class="fa fa-lg fa-user text-primary"></i></td>
+                                            
+                                            <td>
+                                                <a class="safename"><big>{{contact.name}}</big></a>
+                                            </td>
+
+                                            <td>
+                                                <a href="#/contact/{{contact.id}}" class="blocklink" ng-repeat="address in contact.addresses">
+                                                    <span class="account-text">
+                                                        <span class="text-muted">{{address}}</span>
+                                                    <span class="moredots">...</span>
+                                                    </span>
+                                                    <span  ng-repeat="alias in aliases | filter : {address: address}"><span class="label label-info">@{{alias.alias}}</span><span>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <ul class="list-unstyled">
+                                                    <li><a href="mailto:{{contact.email}}">{{contact.email}}</a></li>
+                                                    <li ng-repeat="im in contact.ims"><strong>{{im.name}}</strong> {{im.nickname}}</li>
+                                                </ul>
+                                            </td>
+                                        </tr> 
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+
+                            <div ng-switch-when="coinDemand">
+                                <table class="table table-condensed table-hover">
+                                    <thead>
+                                      <tr><th>Дата</th><th>Курс</th><th>Сумма, G</th></tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr ng-if="cur_offers_buy.length" ng-repeat="item in cur_offers_buy = (offers | filter : {offer_type: 2})">
+                                            <td>{{item.timestamp | intToDate | date:'dd.MM.yy hh:mm'}}</td>
+                                            <td>{{(item.amount_etc / (item.amount_lui  | gulden : false))}}</td>
+                                            <td>{{(item.amount_lui * item.amount_etc) | gulden : false}}</td>
+                                        </tr>
+                                        <tr ng-if="!cur_offers_buy.length"><td colsapn="3">Нет данных</td></tr>
+                                        <!-- <tr><td>1 мин назад</td><td>368.89</td><td>0.78</td></tr> -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div ng-switch-when="coinOffer">
+                                <table class="table table-condensed table-hover">
+                                    <thead>
+                                      <tr><th>Дата</th><th>Курс</th><th>Сумма, G</th></tr>
+                                    </thead>
+                                    
+                                    <tbody>
+                                        <tr ng-if="cur_offers_sell.length" ng-repeat="item in cur_offers_sell = (offers | filter : {offer_type: 3})">
+                                            <td>{{item.timestamp | intToDate | date:'dd.MM.yy hh:mm'}}</td>
+                                            <td>{{(item.amount_etc / (item.amount_lui  | gulden : false))}}</td>
+                                            <td>{{(item.amount_lui * item.amount_etc) | gulden : false}}</td>
+                                        </tr>
+                                        <tr ng-if="!cur_offers_sell.length"><td colsapn="3">Нет данных</td></tr>
+                                        <!-- <tr><td>1 мин назад</td><td>368.89</td><td>0.78</td></tr> -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            
+
                             <div ng-switch-when="activeMining" class="flot-chart">
-                                    <div class="flot-chart-content" ui-chart="am.data" chart-options="am.options"></div>
+                                <div class="flot-chart-content" ui-chart="am.data" chart-options="am.options"></div>
                             </div>
                             <div ng-switch-when="backendInfo">
                                 <table class="table table-condensed table-striped table-hover data-table backendInfoTable">
