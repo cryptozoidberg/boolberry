@@ -5,7 +5,6 @@
     module.controller('marketCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','market','$timeout',
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market, $timeout){
             
-            // TODO refactor code with using services ex. offer.isFav(), offer.getFav(), etc 
             var is_currency_offer = function(offer){
                 if(offer.offer_type == 2 || offer.offer_type == 3){
                     return true;

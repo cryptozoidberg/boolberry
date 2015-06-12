@@ -24,7 +24,8 @@
         'app.guldens',
         'app.market' ,
         'app.settings',
-        'app.contacts'
+        'app.contacts',
+        'app.mining'
 
     ]);
 

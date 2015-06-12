@@ -246,7 +246,13 @@
                 log_level : 0,
                 fav_offers_hash: []
             },
-            contacts: []
+            
+            contacts: [],
+
+            widgetColumns : {
+                'left': {},
+                'right': {}
+            } 
         };
 
         $scope.wallet_info  = {};
@@ -444,10 +450,12 @@
                 }
             };
 
-            data.last_build_displaymode = 4;
-            data.last_build_available   = '4.0.0.1';
-            var current_v = '4.0.0.0';
-            // var current_v = backend.getVersion();
+            // data.last_build_displaymode = 4;
+            // data.last_build_available   = '4.0.0.1';
+            // var current_v = '4.0.0.0';
+            var current_v = backend.getVersion();
+
+            //informer.info(current_v + ' --->>>> '+data.last_build_available);
 
             $timeout(function(){
             	$rootScope.deamon_state = data;	

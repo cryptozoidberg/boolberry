@@ -53,8 +53,13 @@
             },
 
             getVersion : function() {
-                var params = {};
-                return this.runCommand('get_version', params);
+                if(!this.shouldUseEmulator()){
+                    var res = Qt_parent['get_version']();
+                }else{
+                    var res = '0.0.0.0';
+                }
+                
+                return res;
             },
 
             startPosMining : function(wallet_id) {
