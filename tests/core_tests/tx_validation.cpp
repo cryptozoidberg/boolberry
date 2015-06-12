@@ -175,7 +175,7 @@ bool gen_tx_unlock_time::generate(std::vector<test_event_entry>& events) const
 
   auto make_tx_with_unlock_time = [&](uint64_t unlock_time) -> transaction
   {
-    return make_simple_tx_with_unlock_time(events, blk_1, miner_account, miner_account, MK_COINS(1), unlock_time);
+    return make_simple_tx_with_unlock_time(events, blk_1r, miner_account, miner_account, MK_COINS(1), unlock_time);
   };
 
   std::list<transaction> txs_0;
