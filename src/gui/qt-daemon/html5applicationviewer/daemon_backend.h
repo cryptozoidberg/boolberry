@@ -79,6 +79,7 @@ public:
   std::string resync_wallet(uint64_t wallet_id);
   std::string start_pos_mining(uint64_t wallet_id);
   std::string stop_pos_mining(uint64_t wallet_id);
+  std::string get_mining_history(uint64_t wallet_id, tools::wallet_rpc::mining_history& wrpc);
 
 
   void toggle_pos_mining();

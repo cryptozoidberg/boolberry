@@ -252,7 +252,7 @@ namespace tools
     bool build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& req, const currency::COMMAND_RPC_SCAN_POS::response& rsp);
     bool reset_history();
     bool is_transfer_unlocked(const transfer_details& td) const;
-
+    void get_mining_history(wallet_rpc::mining_history& hist);
   private:
     bool store_keys(std::string& buff, const std::string& password);
     void load_keys(const std::string& keys_file_name, const std::string& password);

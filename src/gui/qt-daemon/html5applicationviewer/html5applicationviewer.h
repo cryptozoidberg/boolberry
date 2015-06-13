@@ -82,6 +82,7 @@ protected:
   QString validate_address(const QString& param);
   QString on_request_quit();
   QString resync_wallet(const QString& param);
+  QString get_mining_history(const QString& param);
   QString start_pos_mining(const QString& param);
   QString stop_pos_mining(const QString& param);
   QString set_log_level(const QString& param);

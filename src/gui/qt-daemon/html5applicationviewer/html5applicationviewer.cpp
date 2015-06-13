@@ -914,7 +914,24 @@ QString Html5ApplicationViewer::cancel_offer(const QString& param)
     dispatch(ar, tr);
   });
 }
+QString Html5ApplicationViewer::get_mining_history(const QString& param)
+{
 
+  return que_call2<view::wallet_id_obj>("get_mining_history", param, [this](const view::wallet_id_obj& a, view::api_response& ar)
+  {
+    tools::wallet_rpc::mining_history mh = AUTO_VAL_INIT(mh);
+
+    ar.error_code = m_backend.get_mining_history(a.wallet_id, mh);
+    if (ar.error_code != API_RETURN_CODE_OK)
+    {
+      view::api_void av;
+      dispatch(ar, av);
+      return;
+    }
+    ar.error_code = API_RETURN_CODE_OK;
+    dispatch(ar, mh);
+  });
+}
 QString Html5ApplicationViewer::start_pos_mining(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::wallet_id_obj, wo);
