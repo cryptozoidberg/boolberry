@@ -1,3 +1,7 @@
+if(POLICY CMP0043)
+  cmake_policy(SET CMP0043 OLD)
+endif()
+
 file(GLOB_RECURSE COMMON common/*)
 file(GLOB_RECURSE CRYPTO crypto/*)
 file(GLOB_RECURSE CURRENCY_CORE currency_core/*)

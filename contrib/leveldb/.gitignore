@@ -1,0 +1,16 @@
+build_config.mk
+*.a
+*.o
+*.dylib*
+*.so
+*.so.*
+*_test
+db_bench
+leveldbutil
+Release
+Debug
+Benchmark
+vs2010.*
+!vs2010.vcxproj
+ipch
+_build/
