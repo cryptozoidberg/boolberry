@@ -2,19 +2,142 @@
     'use strict';
     var module = angular.module('app.mining',[]);
 
-    module.controller('minigHistoryCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location){
+    module.controller('minigHistoryCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','emulator',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,emulator){
 
             //informer.info('mining');
             $scope.mining_history = [];
 
-            var nextDate = new Date().getTime();
+            $scope.safes_diagramm = {};
 
-            for(var i=1; i!=20; i++){
-                var step = Math.random()*10;
-                $scope.mining_history.push([new Date(nextDate), step]);
-                nextDate += 1000*60*60*24;
+            var getPoints = function () {
+                var nextDate = new Date().getTime();
+
+                var points = [];
+
+                var total = 0;
+
+                for(var i=1; i!=20; i++){
+                    var step = Math.random()*10;
+                    total += step;
+                    points.push([new Date(nextDate).getTime(), total]);
+                    nextDate += 1000*60*60*24;
+                }
+
+                return points;
+            };
+            
+
+            $scope.calculate = function(){
+                $scope.calc_diagramm = [{
+                    data: getPoints(),
+                    label: 'Calculator'
+                }];
             }
+
+            $scope.calculate();
+
+            angular.forEach($rootScope.safes,function(safe){
+                
+                var diagramm = {
+                    data: getPoints(),
+                    label: safe.name
+                };
+
+                $scope.safes_diagramm[safe.address] = [diagramm];
+            }); 
+
+            var position = "right";
+
+            var euroFormatter = function (v, axis) {
+                return v.toFixed(axis.tickDecimals) + "G";
+            }
+
+            $scope.am = {};
+
+            $scope.diagramm_options = {
+                xaxes: [{
+                    mode: 'time'
+                }],
+                yaxes: [{
+                    min: 0
+                }, {
+                    // align if we are to the right
+                    alignTicksWithAxis: position == "right" ? 1 : null,
+                    position: position,
+                    tickFormatter: euroFormatter
+                }],
+                legend: {
+                    position: 'sw'
+                },
+                colors: ["#1ab394"],
+                grid: {
+                    color: "#999999",
+                    clickable: true,
+                    tickColor: "#D4D4D4",
+                    borderWidth:0,
+                    hoverable: true //IMPORTANT! this is needed for tooltip to work,
+
+                },
+                tooltip: true,
+                tooltipOpts: {
+                    content: "%s for %x was %y",
+                    xDateFormat: "%y-%m-%d",
+
+                    onHover: function(flotItem, $tooltipEl) {
+                        // console.log(flotItem, $tooltipEl);
+                    }
+                }
+            };
+
+
+            var euroFormatter = function (v, axis) {
+                return v.toFixed(axis.tickDecimals) + "G";
+            }
+
+            $scope.am.data = [{
+                data: emulator.getAMData(),
+                label: "Safelabel1"
+            }, {
+                data: emulator.getAMData(),
+                label: "Safelabel2",
+                // yaxis: 2
+            }];
+            var position = "right";
+            $scope.am.options = {
+                xaxes: [{
+                    mode: 'time'
+                }],
+                yaxes: [{
+                    min: 0
+                }, {
+                    // align if we are to the right
+                    alignTicksWithAxis: position == "right" ? 1 : null,
+                    position: position,
+                    tickFormatter: euroFormatter
+                }],
+                legend: {
+                    position: 'sw'
+                },
+                colors: ["#1ab394"],
+                grid: {
+                    color: "#999999",
+                    clickable: true,
+                    tickColor: "#D4D4D4",
+                    borderWidth:0,
+                    hoverable: true //IMPORTANT! this is needed for tooltip to work,
+
+                },
+                tooltip: true,
+                tooltipOpts: {
+                    content: "%s for %x was %y",
+                    xDateFormat: "%y-%0m-%0d",
+
+                    onHover: function(flotItem, $tooltipEl) {
+                        // console.log(flotItem, $tooltipEl);
+                    }
+                }
+            };
 
         }
     ]);

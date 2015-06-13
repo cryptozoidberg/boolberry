@@ -15,9 +15,8 @@
                         </label>
                         <div class="form-group clearfix">
                             <div class="input-group">
-                                <input type="text" class="form-control" value=""/>  <span class="input-group-addon">дней</span>
+                                <input type="text" class="form-control" ng-model="calc.days"/>  <span class="input-group-addon">дней</span>
                             </div>
-
                         </div>
 
 
@@ -26,18 +25,17 @@
                         </label>
                         <div class="form-group clearfix">
                             <div class="input-group">
-                                <input type="text" class="form-control" value=""/>  <span class="input-group-addon">G</span>
+                                <input type="text" class="form-control" ng-model="calc.amount"/>  <span class="input-group-addon">G</span>
                             </div>
                         </div>
                         <div class="form-group clearfix">
-                            <button class="btn btn-block btn-primary">Рассчитать</button>
-
+                            <button class="btn btn-block btn-primary" ng-click="calculate()">Рассчитать</button>
                         </div>
                     </div>
 
                     <div class="col-xs-9 col-sm-9">
                         <div class="flot-chart">
-                            <div class="flot-chart-content" id="calculator"></div>
+                            <div class="flot-chart-content" ui-chart="calc_diagramm" chart-options="diagramm_options"></div>
                         </div>
                     </div>
                 </div>
@@ -81,11 +79,10 @@
                     </div>
                 </div>
 
-
                 <tabset>
                     <tab heading="Диаграмма">
                         <div class="flot-chart">
-                            <div class="flot-chart-content" id="profit1"></div>
+                            <div class="flot-chart-content" ui-chart="safes_diagramm[safe.address]" chart-options="diagramm_options"></div>
                         </div>
                     </tab>
 
@@ -109,7 +106,7 @@
                                 </thead>
 
                                 <tbody>
-                                    <tr class="success" ng-repeat="item in mining_history">
+                                    <tr class="success" ng-repeat="item in safes_diagramm[safe.address][0].data">
                                         <td>
                                             <span class="mix-label mix-label-up">
                                                 <em><i class="fa fa-lg fa-arrow-circle-o-down text-success"></i></em>
@@ -117,7 +114,7 @@
                                         </td>
 
                                         <td>
-                                            <small class="text-muted nowrap">{{item.timestamp | date:'dd.MM.yy hh:mm'}}</small>
+                                            <small class="text-muted nowrap">{{item[0] | date:'dd.MM.yy hh:mm'}}</small>
                                         </td>
 
                                         <td>

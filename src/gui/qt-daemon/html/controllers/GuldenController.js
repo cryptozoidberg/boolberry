@@ -33,6 +33,7 @@
     module.controller('guldenSendCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$modal','txHistory',
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $modal, txHistory){
             $scope.transaction = {
+                from: $rootScope.safes.length ? $rootScope.safes[0].wallet_id : '',
                 to: '',
                 push_payer: $rootScope.settings.security.is_hide_sender,
                 is_delay : false,
@@ -63,22 +64,28 @@
 
             $scope.inputChanged = function(str){
                 // delete $scope.transaction.alias;
-                if(str.indexOf('@') != 0){
-                    if(backend.validateAddress(str)){
-                        $scope.transaction.is_valid_address = true;
-                        $scope.transaction.to = str;
-                    }else{
-                        $scope.transaction.is_valid_address = false;
-                        $scope.transaction.to = '';
-                    }
-                }else{
-                    $scope.transaction.to = '';
-                    $scope.transaction.is_valid_address = false;
-                }
+                $scope.transaction.to = str;
+                // if(str.indexOf('@') != 0){
+                //     if(backend.validateAddress(str)){
+                //         // $scope.transaction.is_valid_address = true;
+                //         $scope.transaction.to = str;
+                //     }else{
+                //         // $scope.transaction.is_valid_address = false;
+                //         $scope.transaction.to = '';
+                //     }
+                // }else{
+                //     $scope.transaction.to = '';
+                //     // $scope.transaction.is_valid_address = false;
+                // }
             }
 
             $scope.send = function(tr){
-                console.log(tr);
+
+                if(!$scope.sendGForm.$valid){
+                    informer.info(JSON.stringify($scope.sendGForm.$error));
+                    return;
+                }
+
                 $modal.open({
                     templateUrl: "views/tr_confirm.html",
                     controller: 'appPassOnTransferCtrl',
@@ -95,13 +102,13 @@
                 
             };
 
-            $scope.validate_address = function(){
-                if($scope.transaction.to.length == 95){
-                    $scope.transaction.is_valid_address = true;
-                }else{
-                    $scope.transaction.is_valid_address = false;
-                }
-            };
+            // $scope.changeAddress = function(){
+            //     if($scope.transaction.to.length == 95){
+            //         $scope.transaction.is_valid_address = true;
+            //     }else{
+            //         $scope.transaction.is_valid_address = false;
+            //     }
+            // };
 
             $scope.disabled = function(date, mode) {
                 return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
