@@ -228,7 +228,8 @@
                 keywords: '',
                 is_anonim : $scope.is_anonim_values[0].key,
                 is_mixin : -1,
-                interval : $scope.interval_values[0].key
+                interval : $scope.interval_values[0].key,
+                is_hide_service_tx : false
             };
 
             $scope.tx_date = {
@@ -270,7 +271,6 @@
                     }
                 }else{
                     $scope.hide_calendar = true;
-
                 }
 
                 if(f.interval > 0){
@@ -307,6 +307,10 @@
                 if(f.is_mixin != -1){
                     var condition = f.is_mixin ? { is_anonymous: true} : { is_anonymous: false}; // is_anonymous its actualy is_mixin 
                     $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,condition);
+                }
+
+                if(f.is_hide_service_tx == true){
+                    $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history, {is_service: false});
                 }
 
                 if(f.tr_type != 'all'){

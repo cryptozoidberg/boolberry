@@ -105,6 +105,20 @@
                                 </select>
 
                             </div>
+
+                            <div class="form-group">
+                                <div class="col-xs-10 col-sm-10 col-sm-offset-2">
+                                    <label class="checkbox text-muted">
+                                        <input 
+                                            type      = "checkbox" 
+                                            ng-model  = "filter.is_hide_service_tx"
+                                            ng-change = "filterChange()"
+
+                                        >
+                                        Cкрывать технические транзакции
+                                    </label>
+                                </div>
+                            </div>
                             <!-- <div class="form-group">
                                 <div class="collapse in filter1">
                                     <div class="row">
@@ -212,6 +226,7 @@
                 <tbody>
                 <tr ng-repeat="item in filtered_history" class="transaction-item">
                     <td>
+                        
                         <span class="mix-label mix-label-up">
                          <img src="assets/font/svg/sound8.svg">
                             <em>
@@ -228,12 +243,16 @@
                                 </i>
                             </em>
                         </span>
+
+
                     </td>
                     
                     <td>
+                        
                         <a ng-click="trDetails(item)"><small class="text-muted nowrap">{{item.timestamp | intToDate | date:'dd.MM.yy hh:mm'}}</small></a>
-                        <span class="chart send-timer" data-percent="86">
-                        </span>
+                        <!-- <span class="chart send-timer" data-percent="86">
+                        </span> -->
+                        <i class="fa fa-lg fa-cog text-muted" ng-if="item.is_service"></i>
                     </td>
 
                     <td>
