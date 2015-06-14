@@ -131,10 +131,11 @@
         }
   });
 
-  module.directive('wallet_address', ['backend',function() {
+  module.directive('walletAddress', ['backend',function(backend) {
     return {
       require: 'ngModel',
       link: function(scope, elm, attrs, ctrl) {
+        
         ctrl.$validators.wallet_address = function(modelValue, viewValue) {
           if (ctrl.$isEmpty(modelValue)) {
             return false;

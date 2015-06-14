@@ -16,7 +16,7 @@
             Сообщение о том, что сначала лучше бы поискать, есть ли что-то похожее на рынке, и только потом создавать заявку
         </h5>
 
-        <form class="form-horizontal">
+        <form class="form-horizontal" name="gOfferForm" ng-submit="addOffer(offer)" novalidate>
         
         <div class="tabs">
 
@@ -27,10 +27,25 @@
                             <span>Выбор сейфа</span>
                         </a>
                     </h4>
+
+                    <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="gOfferForm.$submitted || gOfferForm.wallet_id.$touched">
+                        <div ng-show="gOfferForm.wallet_id.$error.required">Обязательное поле</div>
+                    </div>
+
                     <div class="collapse in collapse1">
                         <div class="form-group">
-                            <label class="col-xs-4 col-sm-4">Сейф, за счет которого будет осуществлена заявка</label>
-                            <select class="col-xs-4 col-sm-4" selectpicker ng-model="offer.wallet_id" ng-options="safe.wallet_id as safe.name + ' (' +safe.balance_formated + ')' for safe in safes"></select>
+                            <label class="col-xs-4 col-sm-4">
+                                Сейф, за счет которого будет осуществлена заявка
+                            </label>
+                            <select 
+                                class="col-xs-4 col-sm-4" 
+                                name="wallet_id" 
+                                required
+                                selectpicker 
+                                ng-model="offer.wallet_id" 
+                                ng-options="safe.wallet_id as safe.name + ' (' +safe.balance_formated + ')' for safe in safes"
+                            >
+                            </select>
                             <!-- <div class="col-xs-4 col-sm-4">
                                 <label class="checkbox"><input type="checkbox"> Не показывать номер счета в предложении</label>
                             </div> -->
@@ -51,243 +66,279 @@
                         </a>
                     </h4>
 
-                    <div class="there-are-more-deals-like-this-panel buyG_sticker">
+                    <!-- <div class="there-are-more-deals-like-this-panel buyG_sticker">
                         <div class="panel-content">
                             В данный момент на рынке есть<br>
                             <a href="">
                                 <strong>5</strong> заявок, соответствующих вашей
                             </a>
                         </div>
+                    </div> -->
+
+                    <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="gOfferForm.$submitted || gOfferForm.offer_type.$touched">
+                        <div ng-show="gOfferForm.offer_type.$error.required">Обязательное поле</div>
                     </div>
 
                     <div class="form-group">
                         <label class="col-xs-4 col-sm-4 control-label">
                             Тип объявления 
                         </label>
-                        <select class="col-xs-4 col-sm-4" selectpicker ng-model="offer.offer_type" ng-options="type.key as type.value for type in offer_types"></select>
+                        <select 
+                            class="col-xs-4 col-sm-4" 
+                            selectpicker 
+                            required
+                            name="offer_type"
+                            ng-model="offer.offer_type" 
+                            ng-options="type.key as type.value for type in offer_types"
+                        >
+                        </select>
                     </div>
+
+
+
                     <div class="collapse in collapse00">
+                        
+                        <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="gOfferForm.$submitted || gOfferForm.currency.$touched">
+                            <div ng-show="gOfferForm.currency.$error.required">Обязательное поле</div>
+                        </div>
+
                         <div class="form-group">
                             <label class="control-label col-xs-4 col-sm-4">
                                 Валюта расчета
                             </label>
-                            <select class="col-xs-4 col-sm-4" selectpicker  ng-model="offer.currency" ng-options="currency.code as currency.title for currency in currencies"></select>
+                            <select 
+                                class="col-xs-4 col-sm-4" 
+                                selectpicker  
+                                required
+                                name="currency"
+                                ng-model="offer.currency" 
+                                ng-options="currency.code as currency.title for currency in currencies"
+                            >
+                            </select>
                         </div>
-                        <div class="tab-content">
-                            <div class="tab-pane usd active">
-                                <div class="form-group">
-                                    <label class="control-label col-xs-4 col-sm-4">
-                                        Сумма 
-                                        <span ng-if="offer.offer_type == 2">покупки</span>
-                                        <span ng-if="offer.offer_type == 3">продажи</span>
-                                         в G
-                                    </label>
-                                    <div class="col-xs-4 col-sm-4">
-                                        <div class="input-group">
-                                            <input type="text" ng-change="recount('lui')" ng-model="offer.amount_lui" class="form-control buyG_amountG">
-                                            <span class="input-group-addon">G</span>
-                                        </div>
-                                    </div>
 
+                        <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="gOfferForm.$submitted || gOfferForm.amount_lui.$touched">
+                            <div ng-show="gOfferForm.amount_lui.$error.required">Обязательное поле</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-xs-4 col-sm-4">
+                                Сумма 
+                                <span ng-if="offer.offer_type == 2">покупки</span>
+                                <span ng-if="offer.offer_type == 3">продажи</span>
+                                 в G
+                            </label>
+                            <div class="col-xs-4 col-sm-4">
+                                <div class="input-group">
+                                    <input 
+                                        type="text" 
+                                        ng-change="recount('lui')" 
+                                        ng-model="offer.amount_lui" 
+                                        class="form-control buyG_amountG"
+                                        name="amount_lui"
+                                        required
+                                    >
+                                    <span class="input-group-addon">G</span>
                                 </div>
-                                <!-- <div class="form-group collapse selltext">
-                                    <label class="col-xs-4 col-sm-4 control-label">
-                                        Бонус
-                                    </label>
-                                    <div class="col-xs-4 col-sm-4">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control">
-                                            <select class="selectpicker input-group-btn select-btn-success"><option>%</option><option>G</option></select>
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-4 col-sm-4"><div class="help-block">Вы можете повысить приклекательность своей заявки, если установите небольшой процент от сделки или сумму гульденов сверх суммы продажи</div></div>
-                                </div> -->
-                                <div class="form-group">
-                                    <label class="control-label col-xs-4 col-sm-4">
-                                        Сумма 
-                                        <span ng-if="offer.offer_type == 2">покупки</span>
-                                        <span ng-if="offer.offer_type == 3">продажи</span>
-                                         в {{offer.currency}}
-                                    </label>
-                                    <div class="col-xs-4 col-sm-4">
-                                        <!-- <div class="input-group"> -->
-                                            <input type="text" ng-change="recount('target')" ng-model="offer.amount_etc" class="form-control buyG_amountFiat">
-                                            <!-- <span class="input-group-addon"><i class="fa fa-dollar"></i></span> -->
-                                        <!-- </div> -->
-                                    </div>
-                                </div>
-                                <div class="form-group">
-
-                                    <label class="control-label col-xs-4 col-sm-4">Курс</label>
-                                    <div class="col-xs-4 col-sm-4">
-                                        <!-- <div class="input-group"> -->
-                                            <input type="text" ng-change="recount('rate')" ng-model="offer.rate" placeholder="цена 1 гульдена" class="form-control buyG_rate">
-                                            <!-- <span class="input-group-addon"><i class="fa fa-dollar"></i></span> -->
-                                        <!-- </div> -->
-                                    </div>
-                                    <div class="col-xs-4 col-sm-4">
-                                        <div class="help-block nomargin">
-                                            <span ng-if="offer.offer_type == 1">Верхняя граница, по которой вы сможете купить</span>
-                                            <span ng-if="offer.offer_type == 0">Нижняя граница, по которой вы сможете продать</span> 
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- <div class="form-group">
-
-                                    <label class="control-label col-xs-4 col-sm-4">Ваш счет,<span class="collapse in selltext"> на который перечислят G</span><span class="collapse selltext"> c которого нужно снять G</span></label>
-
-                                    <select class="selectpicker col-xs-4 col-sm-4">
-                                        <option>Safelabel (@@safealias) 4.20 G</option>
-                                        <option>Safelabel1 (@safealias1) 30.40 G</option>
-                                        <option>Safelabel2 (@safealias2) 0.56 G</option>
-                                        <option>Safelabel-997398r (@safealias5) 0.56 G</option>
-                                    </select>
-                                    <div class="col-xs-4 col-sm-4">
-                                        <label class="checkbox"><input type="checkbox"> Не показывать номер счета в предложении</label>
-                                    </div>
-                                </div> -->
-                                <div class="form-group">
-                                    <label class="control-label col-xs-4 col-sm-4">
-                                        Условия 
-                                        <span ng-if="offer.offer_type == 1">покупки</span>
-                                        <span ng-if="offer.offer_type == 0">продажи</span>
-                                    </label>
-                                    <select selectpicker class="col-xs-4 col-sm-4" ng-options="item for item in deal_details" ng-model="offer.deal_details"></select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="control-label col-xs-4 col-sm-4">Комментарий к заявке</label>
-                                    
-                                    <div class="col-xs-4 col-sm-4">
-                                        <input type="text" ng-model="offer.comment" class="form-control">
-                                    </div>
-                                </div>
-
-                                <a href="" type="button" data-toggle="collapse" data-target=".collapse01" class="btn btn-block btn-light" >Курс и котировки USD/G <i class="fa fa-chevron-down"></i></a>
-
-                                <!-- {{offers}}
-                                <br>
-                                ---------------------------------------------
-                                <br>
-
-                                {{offers | filter : {target: offer.currency, offer_type: 2}  }} -->
-
-                                <div class="collapse collapse01">
-                                    <div class="row">
-                                        <div class="col-xs-3 col-sm-3">
-                                            <label class="width100">Спрос в системе</label>
-                                            <div class="scroll">
-                                                <div class="scroll-inner">
-                                                    <table class="table table-condensed table-hover">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>Курс {{offer.currency}}/G</th>
-                                                            <th>Сумма, G</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        <tr ng-if="cur_offers_buy.length" ng-repeat="item in cur_offers_buy = (offers | filter : {target: offer.currency, offer_type: 2})">
-                                                            <td>{{(item.amount_etc / (item.amount_lui  | gulden : false))}}</td>
-                                                            <td>{{(item.amount_lui * item.amount_etc) | gulden : false}}</td>
-                                                        </tr>
-                                                        <tr ng-if="!cur_offers_buy.length"><td colsapn="2">Нет данных</td></tr>
-                                                        <!-- <tr><td>368.89</td><td>48.00</td></tr>
-                                                        <tr><td>368.88</td><td>0.78</td></tr>
-                                                        <tr><td>368.91</td><td>48.89</td></tr>
-                                                        <tr><td>368.93</td><td>0.78</td></tr>
-                                                        <tr><td>368.96</td><td>34.90</td></tr>
-                                                        <tr><td>368.98</td><td>10.78</td></tr>
-                                                        <tr><td>369.00</td><td>80.89</td></tr>
-                                                        <tr><td>369.19</td><td>45.80</td></tr>
-                                                        <tr><td>369.89</td><td>45.34</td></tr>
-                                                        <tr><td>369.99</td><td>3.78</td></tr>
-                                                        <tr><td>370.09</td><td>8.48</td></tr> -->
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                        <div class="col-xs-3 col-sm-3">
-                                            <label class="width100">Предложение в системе</label>
-                                            <div class="scroll">
-                                                <div class="scroll-inner">
-                                                    <table class="table table-condensed table-hover">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Курс {{offer.currency}}/G</th>
-                                                                <th>Сумма, G</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        <tr ng-if="cur_offers_sell.length" ng-repeat="item in cur_offers_sell = (offers | filter : {target: offer.currency, offer_type: 3})">
-                                                            <td>{{(item.amount_etc / (item.amount_lui  | gulden : false))}}</td>
-                                                            <td>{{(item.amount_lui * item.amount_etc) | gulden : false}}</td>
-                                                        </tr>
-                                                        <tr ng-if="!cur_offers_sell.length"><td colsapn="2">Нет данных</td></tr>
-                                                        <!-- <tr><td>368.89</td><td>0.78</td></tr>
-                                                        <tr><td>368.89</td><td>48.00</td></tr>
-                                                        <tr><td>368.88</td><td>0.78</td></tr>
-                                                        <tr><td>368.91</td><td>48.89</td></tr>
-                                                        <tr><td>368.93</td><td>0.78</td></tr>
-                                                        <tr><td>368.96</td><td>34.90</td></tr>
-                                                        <tr><td>368.98</td><td>10.78</td></tr>
-                                                        <tr><td>369.00</td><td>80.89</td></tr>
-                                                        <tr><td>369.19</td><td>45.80</td></tr>
-                                                        <tr><td>369.89</td><td>45.34</td></tr>
-                                                        <tr><td>369.99</td><td>3.78</td></tr>
-                                                        <tr><td>370.09</td><td>8.48</td></tr> -->
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                        <div class="col-xs-6 col-sm-6">
-                                            <label class="width100">
-                                                <div class="btn-group pull-right">
-                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                                        softmarket.com <span class="caret"></span>
-                                                    </button>
-                                                    <ul class="dropdown-menu" role="menu">
-                                                        <li><a href="#">softmarket.com</a></li>
-                                                        <li><a href="#">softmarket2.com</a></li>
-                                                        <li><a href="#">softmarket5.com</a></li>
-                                                    </ul>
-                                                </div>
-                                                Последние сделки на биржах </label>
-                                            <div class="scroll">
-                                                <div class="scroll-inner">
-                                                    <table class="table table-condensed table-hover">
-                                                        <thead>
-                                                        <tr><th>Возраст</th><th>Курс USD/G</th><th>Сумма, G</th></tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        <tr><td colsapn="2">Нет данных</td></tr>
-                                                        <!-- <tr><td>3 сек назад</td><td>368.89</td><td>0.78</td></tr>
-                                                        <tr><td>4 сек назад</td><td>368.89</td><td>48.00</td></tr>
-                                                        <tr><td>4 сек назад</td><td>368.88</td><td>0.78</td></tr>
-                                                        <tr><td>6 сек назад</td><td>368.91</td><td>48.89</td></tr>
-                                                        <tr><td>10 сек назад</td><td>368.93</td><td>0.78</td></tr>
-                                                        <tr><td>10 сек назад</td><td>368.96</td><td>34.90</td></tr>
-                                                        <tr><td>12 сек назад</td><td>368.98</td><td>10.78</td></tr>
-                                                        <tr><td>15 сек назад</td><td>369.00</td><td>80.89</td></tr>
-                                                        <tr><td>20 сек назад</td><td>369.19</td><td>45.80</td></tr>
-                                                        <tr><td>24 сек назад</td><td>369.89</td><td>45.34</td></tr>
-                                                        <tr><td>34 сек назад</td><td>369.99</td><td>3.78</td></tr>
-                                                        <tr><td>44 сек назад</td><td>370.09</td><td>8.48</td></tr> -->
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-
                             </div>
-                            
+
                         </div>
+                        <!-- <div class="form-group collapse selltext">
+                            <label class="col-xs-4 col-sm-4 control-label">
+                                Бонус
+                            </label>
+                            <div class="col-xs-4 col-sm-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control">
+                                    <select class="selectpicker input-group-btn select-btn-success"><option>%</option><option>G</option></select>
+                                </div>
+                            </div>
+                            <div class="col-xs-4 col-sm-4"><div class="help-block">Вы можете повысить приклекательность своей заявки, если установите небольшой процент от сделки или сумму гульденов сверх суммы продажи</div></div>
+                        </div> -->
+
+                        <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="gOfferForm.$submitted || gOfferForm.amount_etc.$touched">
+                            <div ng-show="gOfferForm.amount_etc.$error.required">Обязательное поле</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-xs-4 col-sm-4">
+                                Сумма 
+                                <span ng-if="offer.offer_type == 2">покупки</span>
+                                <span ng-if="offer.offer_type == 3">продажи</span>
+                                 в {{offer.currency}}
+                            </label>
+                            <div class="col-xs-4 col-sm-4">
+                                <!-- <div class="input-group"> -->
+                                    <input 
+                                        type="text" 
+                                        ng-change="recount('target')" 
+                                        ng-model="offer.amount_etc" 
+                                        class="form-control buyG_amountFiat"
+                                        name="amount_etc"
+                                        required
+                                    >
+                                    <!-- <span class="input-group-addon"><i class="fa fa-dollar"></i></span> -->
+                                <!-- </div> -->
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="control-label col-xs-4 col-sm-4">Курс</label>
+                            <div class="col-xs-4 col-sm-4">
+                                <!-- <div class="input-group"> -->
+                                    <input 
+                                        type="text" 
+                                        ng-change="recount('rate')" 
+                                        ng-model="offer.rate" 
+                                        placeholder="цена 1 гульдена" 
+                                        class="form-control buyG_rate"
+                                    >
+                                    <!-- <span class="input-group-addon"><i class="fa fa-dollar"></i></span> -->
+                                <!-- </div> -->
+                            </div>
+                            <div class="col-xs-4 col-sm-4">
+                                <div class="help-block nomargin">
+                                    <span ng-if="offer.offer_type == 1">Верхняя граница, по которой вы сможете купить</span>
+                                    <span ng-if="offer.offer_type == 0">Нижняя граница, по которой вы сможете продать</span> 
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- <div class="form-group">
+
+                            <label class="control-label col-xs-4 col-sm-4">Ваш счет,<span class="collapse in selltext"> на который перечислят G</span><span class="collapse selltext"> c которого нужно снять G</span></label>
+
+                            <select class="selectpicker col-xs-4 col-sm-4">
+                                <option>Safelabel (@@safealias) 4.20 G</option>
+                                <option>Safelabel1 (@safealias1) 30.40 G</option>
+                                <option>Safelabel2 (@safealias2) 0.56 G</option>
+                                <option>Safelabel-997398r (@safealias5) 0.56 G</option>
+                            </select>
+                            <div class="col-xs-4 col-sm-4">
+                                <label class="checkbox"><input type="checkbox"> Не показывать номер счета в предложении</label>
+                            </div>
+                        </div> -->
+                        <div class="form-group">
+                            <label class="control-label col-xs-4 col-sm-4">
+                                Условия 
+                                <span ng-if="offer.offer_type == 1">покупки</span>
+                                <span ng-if="offer.offer_type == 0">продажи</span>
+                            </label>
+                            <select 
+                                selectpicker 
+                                class="col-xs-4 col-sm-4" 
+                                ng-options="item for item in deal_details" 
+                                ng-model="offer.deal_details"
+                            >
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-xs-4 col-sm-4">
+                                Комментарий к заявке
+                            </label>
+                            
+                            <div class="col-xs-4 col-sm-4">
+                                <input 
+                                    type="text" 
+                                    ng-model="offer.comment" 
+                                    class="form-control"
+                                >
+                            </div>
+                        </div>
+
+                        <a href="" type="button" data-toggle="collapse" data-target=".collapse01" class="btn btn-block btn-light" >Курс и котировки USD/G <i class="fa fa-chevron-down"></i></a>
+
+                        <!-- {{offers}}
+                        <br>
+                        ---------------------------------------------
+                        <br>
+
+                        {{offers | filter : {target: offer.currency, offer_type: 2}  }} -->
+
+                        <div class="collapse collapse01">
+                            <div class="row">
+                                <div class="col-xs-3 col-sm-3">
+                                    <label class="width100">Спрос в системе</label>
+                                    <div class="scroll">
+                                        <div class="scroll-inner">
+                                            <table class="table table-condensed table-hover">
+                                                <thead>
+                                                <tr>
+                                                    <th>Курс {{offer.currency}}/G</th>
+                                                    <th>Сумма, G</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr ng-if="cur_offers_buy.length" ng-repeat="item in cur_offers_buy = (offers | filter : {target: offer.currency, offer_type: 2})">
+                                                    <td>{{(item.amount_etc / (item.amount_lui  | gulden : false))}}</td>
+                                                    <td>{{(item.amount_lui * item.amount_etc) | gulden : false}}</td>
+                                                </tr>
+                                                <tr ng-if="!cur_offers_buy.length"><td colsapn="2">Нет данных</td></tr>
+                                                
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-xs-3 col-sm-3">
+                                    <label class="width100">Предложение в системе</label>
+                                    <div class="scroll">
+                                        <div class="scroll-inner">
+                                            <table class="table table-condensed table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Курс {{offer.currency}}/G</th>
+                                                        <th>Сумма, G</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr ng-if="cur_offers_sell.length" ng-repeat="item in cur_offers_sell = (offers | filter : {target: offer.currency, offer_type: 3})">
+                                                    <td>{{(item.amount_etc / (item.amount_lui  | gulden : false))}}</td>
+                                                    <td>{{(item.amount_lui * item.amount_etc) | gulden : false}}</td>
+                                                </tr>
+                                                <tr ng-if="!cur_offers_sell.length"><td colsapn="2">Нет данных</td></tr>
+                                                
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-xs-6 col-sm-6">
+                                    <label class="width100">
+                                        <div class="btn-group pull-right">
+                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                softmarket.com <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu">
+                                                <li><a href="#">softmarket.com</a></li>
+                                                <li><a href="#">softmarket2.com</a></li>
+                                                <li><a href="#">softmarket5.com</a></li>
+                                            </ul>
+                                        </div>
+                                        Последние сделки на биржах </label>
+                                    <div class="scroll">
+                                        <div class="scroll-inner">
+                                            <table class="table table-condensed table-hover">
+                                                <thead>
+                                                <tr><th>Возраст</th><th>Курс USD/G</th><th>Сумма, G</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr><td colsapn="2">Нет данных</td></tr>
+                                                
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                            
                     </div>
                 </div>
             </div>
@@ -297,16 +348,34 @@
 
                     <h4><a href="" type="button" data-toggle="collapse" data-target=".collapse2">  <span>Cпособы связи</span></a></h4>
                     <div class="collapse in collapse2">
+                         <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="gOfferForm.$submitted || gOfferForm.contacts_email.$touched">
+                            <div ng-show="gOfferForm.contacts_email.$error.email">Не верный email</div>
+                        </div>
+
                         <div class="form-group">
                             <label  class="control-label col-xs-4 col-sm-4">Email</label>
                             <div class="col-xs-4 col-sm-4">
-                                <input type="text" class="form-control" ng-model="offer.contacts.email" placeholder="username@domain.com">
+                                <input 
+                                    type="email" 
+                                    class="form-control" 
+                                    name="contacts_email"
+                                    ng-model="offer.contacts.email" 
+                                    placeholder="username@domain.com"
+
+                                >
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label  class="control-label col-xs-4 col-sm-4">Телефон</label>
                             <div class="col-xs-4 col-sm-4">
-                                <input type="text" class="form-control" ng-model="offer.contacts.phone" placeholder="0897654321">
+                                <input 
+                                    type="text" 
+                                    class="form-control"
+                                    name="contacts_phone"
+                                    ng-model="offer.contacts.phone" 
+                                    placeholder="0897654321"
+                                >
                             </div>
                         </div>
 
@@ -382,16 +451,30 @@
 
                     <div class="collapse in collapse3">
                         
+                        <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="gOfferForm.$submitted || gOfferForm.expiration_time.$touched">
+                            <div ng-show="gOfferForm.expiration_time.$error.required">Обязательное поле</div>
+                        </div>
+
                         <div class="form-group">
                             <label  class="control-label col-xs-4 col-sm-4">
                                 Количество дней размещения 
                                 <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Максимальное количество дней - 14. Оставьте без изменений или установите меньшее значение"></i>
                             </label>
 
-                            <select class="col-xs-2 col-sm-2" selectpicker ng-model="offer.expiration_time" ng-options="interval for interval in intervals"></select>
+                            <select 
+                                class="col-xs-2 col-sm-2" 
+                                selectpicker 
+                                ng-model="offer.expiration_time" 
+                                ng-options="interval for interval in intervals"
+                                name="expiration_time"
+                                required
+                            >
+                            </select>
 
                             <div class="col-xs-4 col-sm-4">
-                                <div class="help-block">После указанного срока заявка автоматически удалится.</div>
+                                <div class="help-block">
+                                    После указанного срока заявка автоматически удалится.
+                                </div>
                             </div>
                         </div>
 
@@ -401,17 +484,31 @@
                                 <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Ваша заявка будет вверху списка в указанной стране"></i>
                             </label>
                             <div class="col-xs-3 col-sm-3 nopadding-right">
-                                <input type="text" ng-model="offer.location.country" class="form-control" placeholder="страна">
+                                <input 
+                                    type="text" 
+                                    ng-model="offer.location.country" 
+                                    class="form-control" 
+                                    placeholder="страна"
+                                >
                             </div>
                             <div class="col-xs-3 col-sm-3 nopadding-right">
-                                <input type="text" ng-model="offer.location.city" class="form-control" placeholder="город">
+                                <input 
+                                    type="text" 
+                                    ng-model="offer.location.city" 
+                                    class="form-control" 
+                                    placeholder="город"
+                                >
                             </div>
                         </div>
 
                         <div class="form-group  unlock-block">
 
                             <label class="btn btn-success label-heading">
-                                <input type="checkbox" ng-model="offer.is_premium" ng-change="changePackage(true)"> Премиум размещение
+                                <input 
+                                    type="checkbox" 
+                                    ng-model="offer.is_premium" 
+                                    ng-change="changePackage(true)"
+                                > Премиум размещение
                             </label>
 
                             <div class="rounded-block">
@@ -429,7 +526,12 @@
 
                                     <div class="col-xs-2 col-sm-2">
                                         <div class="input-group">
-                                            <input type="text" ng-model="offer.fee_premium" placeholder="число" class="form-control">
+                                            <input 
+                                                type="text" 
+                                                ng-model="offer.fee_premium" 
+                                                placeholder="число" 
+                                                class="form-control"
+                                            >
                                             <span class="input-group-addon">G</span>
                                         </div>
                                     </div>
@@ -445,15 +547,25 @@
 
                         <div class="form-group unlock-block">
                             <label class="btn label-heading" style="background:#eee;">
-                                <input type="checkbox" ng-model="offer.is_standart"  ng-change="changePackage(false)" id="sellProduct_standardPlacement_checkbox"> Стандартное размещение
+                                <input 
+                                    type="checkbox" 
+                                    ng-model="offer.is_standart" 
+                                    ng-change="changePackage(false)" 
+                                > Стандартное размещение
                             </label>
+
                             <div class="rounded-block">
-                                
                                 <div class="form-group">
-                                    <label  class="control-label col-xs-4 col-sm-4">Комиссия за размещение</label>
+                                    <label class="control-label col-xs-4 col-sm-4">Комиссия за размещение</label>
                                     <div class="col-xs-2 col-sm-2">
                                         <div class="input-group">
-                                            <input ng-disabled="true" ng-model="offer.fee_standart" type="text" class="form-control" placeholder="" >
+                                            <input 
+                                                ng-disabled="true" 
+                                                ng-model="offer.fee_standart" 
+                                                type="text" 
+                                                class="form-control" 
+                                                placeholder="" 
+                                            >
                                             <span class="input-group-addon">G</span>
                                         </div>
                                     </div>
@@ -466,9 +578,12 @@
             </div>
 
             <div class="form-group">
+                <div class="col-xs-12 col-sm-12 text-danger"  ng-show="gOfferForm.$submitted || gOfferForm.is_agree.$touched">
+                    <div ng-show="gOfferForm.is_agree.$error.required">Обязательное поле</div>
+                </div>
                 <div class="col-xs-1 col-xs-12 col-sm-12">
                     <label class="btn label-heading">
-                        <input type="checkbox" ng-model="is_agree"> Подтвержаю, что ознакомился с условиями использования системы
+                        <input type="checkbox" ng-model="is_agree" name="is_agree" required> Подтвержаю, что ознакомился с условиями использования системы
                     </label>
                 </div>
             </div>
@@ -480,7 +595,7 @@
                     <a class="btn btn-block btn-lg btn-default">Отмена</a>
                 </div>
                 <div class="col-xs-6 col-sm-6">
-                    <button type="button" ng-click="addOffer(offer)" ng-disabled="!is_agree" class="btn btn-block btn-lg btn-primary">Отправить</button>
+                    <button type="submit" class="btn btn-block btn-lg btn-primary">Отправить</button>
                 </div> 
             </div>
         </div>

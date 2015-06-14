@@ -55,34 +55,22 @@
             }
             
             $scope.selectAlias = function(obj){
-                var alias = obj.originalObject;
-                $scope.transaction.to = alias.address;
-                $scope.transaction.is_valid_address = true;
-                // $scope.transaction.alias = alias.alias;
-                return alias.address;
+                if(angular.isDefined(obj)){
+                    var alias = obj.originalObject;
+                    $scope.transaction.to = alias.address;
+                    $scope.transaction.is_valid_address = true;
+                    return alias.address;
+                }
             }
 
             $scope.inputChanged = function(str){
-                // delete $scope.transaction.alias;
                 $scope.transaction.to = str;
-                // if(str.indexOf('@') != 0){
-                //     if(backend.validateAddress(str)){
-                //         // $scope.transaction.is_valid_address = true;
-                //         $scope.transaction.to = str;
-                //     }else{
-                //         // $scope.transaction.is_valid_address = false;
-                //         $scope.transaction.to = '';
-                //     }
-                // }else{
-                //     $scope.transaction.to = '';
-                //     // $scope.transaction.is_valid_address = false;
-                // }
             }
 
             $scope.send = function(tr){
 
                 if(!$scope.sendGForm.$valid){
-                    informer.info(JSON.stringify($scope.sendGForm.$error));
+                    // informer.info(JSON.stringify($scope.sendGForm.$error));
                     return;
                 }
 

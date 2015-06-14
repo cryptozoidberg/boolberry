@@ -614,7 +614,7 @@
                 }
 
             }
-            
+
 
             $scope.changePackage = function(is_premium){
                 if(is_premium){
@@ -681,7 +681,10 @@
             };
 
             $scope.addOffer = function(offer){
-                
+                if(!$scope.gOfferForm.$valid){
+                    return;
+                }
+
                 var o = angular.copy(offer);
                 
                 o.fee = o.is_premium ? o.fee_premium : o.fee_standart;
