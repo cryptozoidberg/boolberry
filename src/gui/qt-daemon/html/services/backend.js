@@ -203,6 +203,13 @@
                 return this.runCommand('transfer', params, callback);
             },
 
+            getMiningHistory: function(wallet_id,callback){
+                var params = {
+                    wallet_id: wallet_id
+                };
+                return this.runCommand('get_mining_history', params, callback);
+            },
+
             validateAddress: function(address){
                 if(!this.shouldUseEmulator()){
                     var result =  JSON.parse(Qt_parent['validate_address'](address));

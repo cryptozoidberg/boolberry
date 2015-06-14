@@ -40,11 +40,15 @@
             angular.forEach($rootScope.safes,function(safe){
                 
                 var diagramm = {
-                    data: getPoints(),
                     label: safe.name
                 };
 
-                $scope.safes_diagramm[safe.address] = [diagramm];
+                backend.getMiningHistory(safe.wallet_id, function(data){
+                    diagramm.data = [data.mined_entries.t * 100, data.mined_entries.a];
+                    $scope.safes_diagramm[safe.address] = [diagramm];
+                });
+
+                
             }); 
 
             var position = "right";

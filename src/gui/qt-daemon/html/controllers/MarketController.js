@@ -451,15 +451,56 @@
                 comment: ''
             };
 
-            if($rootScope.safes.length){
-                $scope.offer.wallet_id = $rootScope.safes[0].wallet_id;
-            }
-
             if($location.path() == '/addOfferSell'){
                 $scope.offer.offer_type = 1;
             }else{
                 $scope.offer.offer_type = 0;
             }
+
+            var last_offer = false;
+
+            angular.forEach($filter('orderBy')($rootScope.offers, '-timestamp'),function(item){
+                if(item.offer_type == $scope.offer.offer_type){
+                    var result = $filter('filter')($rootScope.safes, item.tx_hash);
+
+                    if(result.length){
+                        last_offer = item;
+                    }
+                }
+                
+            });
+
+            if(last_offer){
+                $scope.offer.is_standart     = last_offer.is_standart;
+                $scope.offer.expiration_time = last_offer.expiration_time;
+
+                var contacts = last_offer.contacts.split(', ');
+                
+                if(angular.isDefined(contacts[0])){
+                    $scope.offer.contacts.email = contacts[0];
+                }
+
+                if(angular.isDefined(contacts[1])){
+                    $scope.offer.contacts.phone = contacts[1];
+                }
+
+                var location = last_offer.location.split(', ');
+                
+                if(angular.isDefined(location[0])){
+                    $scope.offer.location.country = location[0];
+                }
+
+                if(angular.isDefined(location[1])){
+                    $scope.offer.location.city = location[1];
+                }
+
+            }
+
+            if($rootScope.safes.length){
+                $scope.offer.wallet_id = $rootScope.safes[0].wallet_id;
+            }
+
+            
 
             
 
@@ -534,6 +575,46 @@
             }else{
                 $scope.offer.offer_type = 2;
             }
+
+            var last_offer = false;
+
+            angular.forEach($filter('orderBy')($rootScope.offers, '-timestamp'),function(item){
+                if(item.offer_type == $scope.offer.offer_type){
+                    var result = $filter('filter')($rootScope.safes, item.tx_hash);
+
+                    if(result.length){
+                        last_offer = item;
+                    }
+                }
+                
+            });
+
+            if(last_offer){
+                $scope.offer.is_standart     = last_offer.is_standart;
+                $scope.offer.expiration_time = last_offer.expiration_time;
+
+                var contacts = last_offer.contacts.split(', ');
+                
+                if(angular.isDefined(contacts[0])){
+                    $scope.offer.contacts.email = contacts[0];
+                }
+
+                if(angular.isDefined(contacts[1])){
+                    $scope.offer.contacts.phone = contacts[1];
+                }
+
+                var location = last_offer.location.split(', ');
+                
+                if(angular.isDefined(location[0])){
+                    $scope.offer.location.country = location[0];
+                }
+
+                if(angular.isDefined(location[1])){
+                    $scope.offer.location.city = location[1];
+                }
+
+            }
+            
 
             $scope.changePackage = function(is_premium){
                 if(is_premium){
