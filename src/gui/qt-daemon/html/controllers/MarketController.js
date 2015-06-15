@@ -513,6 +513,11 @@
             };
 
             $scope.addOffer = function(offer){
+                
+                if(!$scope.offerForm.$valid){
+                    return;
+                }
+
                 var o = angular.copy(offer);
                 o.fee = o.is_premium ? o.fee_premium : o.fee_standart;
                 o.location = o.location.country + ', ' + o.location.city;
@@ -534,8 +539,6 @@
     module.controller('addGOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$timeout','market',
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,$timeout,market){
             $scope.intervals = [1,3,5,14];
-
-            console.log();
 
             $scope.currencies = market.currencies;
 

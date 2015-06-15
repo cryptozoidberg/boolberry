@@ -1,4 +1,4 @@
- <div ng-controller="addEditContactCtrl">   
+ <div ng-controller="addEditContactCtrl" >   
     
     <div class="navbar">
         <div class="btn-toolbar pull-right" ng-if="contact.id">
@@ -11,10 +11,11 @@
         <h1 ng-if="contact.id">{{contact.name}}</h1>
     </div>
 
-    <div class="form-horizontal">
+    <form class="form-horizontal" name="contactForm" ng-submit="saveContact(contact)" novalidate>
         <div class="tabs">
             <div class="panel panel-transparent">
                 <div class="panel-body">
+                    
                     <div class="clearfix">
                         <h4>
                             <a type="button" ng-click="collapse.contactData = !collapse.contactData">
@@ -37,16 +38,24 @@
                             </select>
                         </div>
 
+                        <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="contactForm.$submitted || contactForm.contact_name.$touched">
+                            <div ng-show="contactForm.contact_name.$error.required">Обязательное поле</div>
+                        </div>
+
                         <div class="form-group has-feedback group-hover inline-edit-field">
                             <label class="col-xs-4 col-sm-4 control-label">Контакт</label>
                             <div class="col-xs-7 col-sm-7">
-                                <input type="text" class="form-control flat-input" ng-model="contact.name" placeholder="имя или название">
+                                <input 
+                                    type="text" 
+                                    class="form-control flat-input" 
+                                    ng-model="contact.name" 
+                                    placeholder="имя или название"
+                                    name="contact_name"
+                                    required
+                                >
                                 <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                             </div>
-                            
                         </div>
-
-                        
 
                         <div class="form-group has-feedback group-hover inline-edit-field">
                             <label class="col-xs-4 col-sm-4 control-label">Телефон</label>
@@ -54,7 +63,6 @@
                                 <input type="text" class="form-control flat-input" ng-model="contact.phone" placeholder="0891234567">
                                 <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                             </div>
-                            
                         </div>
 
                         <div class="form-group has-feedback group-hover inline-edit-field collapse in email1">
@@ -174,57 +182,59 @@
                     
                     <h4><a type="button" ng-click="collapse.addresses = !collapse.addresses"><span>Счета</span></a></h4>
 
-                    <div class="tab-content nopadding">
-                        <div class="tab-pane list-view active">
-                            <div class="table-responsive panel">
-                                
-                                <table class="table table-condensed table-hover data-table safes-table">
-                                    <thead>
-                                        <tr>
-                                            <th class="col-sm-6"><span class="nowrap">Счет сейфа <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                                            <th class="col-sm-6"><span class="nowrap">Алиасы <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                                        </tr>
-                                    </thead>
+                    <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="contactForm.$submitted">
+                        <div ng-show="!contact.addresses.length">К контакту должен быть привязан хотя бы один счет</div>
+                    </div>
 
-                                    <tbody>
-                                        <tr ng-if="!contact.addresses.length">
-                                            <td colspan="2">Нет записей</td>
-                                        </tr>
-                                        <tr ng-repeat="address in contact.addresses">
-                                            <td>
-                                                <div class="dropdown" dropdown auto-close="outsideClick">
-                                                    <button aria-expanded="false" dropdown-toggle class="btn btn-link dropdown-toggle" type="button">
-                                                        <span class="account-text">
-                                                            <span class="text-muted"> 
-                                                                <span style="color:#999">
-                                                                    {{address}}
-                                                                </span>
-                                                            </span>
-                                                            <span class="moredots">...<span class="caret"></span></span>
+                    <div class="table-responsive panel">
+                        
+                        <table class="table table-condensed table-hover data-table safes-table">
+                            
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-6"><span class="nowrap">Счет сейфа <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                                    <th class="col-sm-6"><span class="nowrap">Алиасы <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr ng-if="!contact.addresses.length">
+                                    <td colspan="2">Нет записей</td>
+                                </tr>
+                                <tr ng-repeat="address in contact.addresses">
+                                    <td>
+                                        <div class="dropdown" dropdown auto-close="outsideClick">
+                                            <button aria-expanded="false" dropdown-toggle class="btn btn-link dropdown-toggle" type="button">
+                                                <span class="account-text">
+                                                    <span class="text-muted"> 
+                                                        <span style="color:#999">
+                                                            {{address}}
                                                         </span>
-                                                    </button>
-                                                    <div role="menu" class="dropdown-menu dropdown-menu-left">
-                                                        <div style="padding:10px">
-                                                            <ul class="list-unstyled">
-                                                                <li>
-                                                                    <div class="contractor">
-                                                                        <pre class="safe-number" style="height:60px">{{address}}</pre>
-                                                                    </div>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
+                                                    </span>
+                                                    <span class="moredots">...<span class="caret"></span></span>
+                                                </span>
+                                            </button>
+                                            <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                                <div style="padding:10px">
+                                                    <ul class="list-unstyled">
+                                                        <li>
+                                                            <div class="contractor">
+                                                                <pre class="safe-number" style="height:60px">{{address}}</pre>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <span  ng-repeat="alias in aliases | filter : {address: address}"><span class="label label-info">@{{alias.alias}}</span><span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                
-                            </div>
-                        </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span ng-repeat="alias in aliases | filter : {address: address}"><span class="label label-info">@{{alias.alias}}</span><span>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                        
                     </div>
                     
                     <div collapse="collapse.addresses">
@@ -262,7 +272,7 @@
                                     input-class="form-control"
                                     input-changed="inputChanged"
                                     text-no-results="Aliases not found"
-                                />
+                                /></angucomplete-alt>
                                 <!-- <i class="fa fa-lg fa-pencil form-control-feedback"></i> -->
                             </div>
                             <div class="col-xs-1 col-sm-1 text-right">
@@ -291,11 +301,11 @@
         <div class="panel panel-transparent">
             <div class="panel-body">
                 <div class="col-xs-6 col-sm-6">
-                    <a type="button" ng-disabled="!contact.addresses.length" class="btn btn-primary btn-block" ng-click="saveContact(contact)">Сохранить</a>
+                    <button type="submit" class="btn btn-primary btn-block">Сохранить</button>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 
     <hr>
 

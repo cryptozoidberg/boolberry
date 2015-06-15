@@ -158,6 +158,10 @@
             }
 
             $scope.saveContact = function(contact){
+                if(!$scope.contactForm.$valid || !contact.addresses.length){
+                    return;
+                }
+
                 if(angular.isUndefined(contact.id)){ // create
                     contact.id = uuid.generate();
                     $rootScope.settings.contacts.push(contact);
