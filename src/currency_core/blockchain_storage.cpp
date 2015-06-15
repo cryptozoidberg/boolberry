@@ -471,6 +471,7 @@ void blockchain_storage::get_all_known_block_ids(std::list<crypto::hash> &main, 
   BOOST_FOREACH(blocks_ext_by_hash::value_type &v, m_invalid_blocks)
     invalid.push_back(v.first);
 } 
+
 //------------------------------------------------------------------
 bool blockchain_storage::rollback_blockchain_switching(std::list<block>& original_chain, size_t rollback_height)
 {

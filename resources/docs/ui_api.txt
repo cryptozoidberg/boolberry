@@ -383,3 +383,8 @@ resposne:
   "mined_entries": [{"a":232342, "t": 2342234},{"a":232342, "t": 2342234},{"a":232342, "t": 2342234}] //first number reward, second timestamp
 }
 
+[async] dump_all_offers()
+
+no param
+
+api resposne status

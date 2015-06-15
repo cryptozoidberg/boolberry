@@ -786,7 +786,6 @@ std::string daemon_backend::get_mining_history(uint64_t wallet_id, tools::wallet
   wo.w->get()->get_mining_history(mh);
   return API_RETURN_CODE_OK;
 }
-
 void daemon_backend::prepare_wallet_status_info(wallet_vs_options& wo, view::wallet_status_info& wsi)
 {
   wsi.is_mining = wo.do_mining;

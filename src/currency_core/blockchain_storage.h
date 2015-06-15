@@ -81,7 +81,7 @@ namespace currency
     bool get_block_extended_info_by_hash(const crypto::hash &h, block_extended_info &blk);
     bool get_block_by_height(uint64_t h, block &blk);
     void get_all_known_block_ids(std::list<crypto::hash> &main, std::list<crypto::hash> &alt, std::list<crypto::hash> &invalid);
-
+    //bool dump_all_offers(const std::string& path);
     template<class archive_t>
     void serialize(archive_t & ar, const unsigned int version);
 

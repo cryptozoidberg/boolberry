@@ -81,7 +81,6 @@ public:
   std::string stop_pos_mining(uint64_t wallet_id);
   std::string get_mining_history(uint64_t wallet_id, tools::wallet_rpc::mining_history& wrpc);
 
-
   void toggle_pos_mining();
   std::string transfer(size_t wallet_id, const view::transfer_params& tp, currency::transaction& res_tx);
   std::string get_config_folder();
