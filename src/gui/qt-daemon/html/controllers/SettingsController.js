@@ -2,23 +2,29 @@
     'use strict';
     var module = angular.module('app.settings',[]);
 
-    module.controller('settingsCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','PassDialogs',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,PassDialogs){
+    module.controller('settingsCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','PassDialogs','Idle',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,PassDialogs,Idle){
 
             $scope.settings = $rootScope.settings;
 
             $scope.checkPass = function(){
                 if($rootScope.settings.security.is_use_app_pass){ // if want to use
-                    PassDialogs.generateMPDialog(function(){
-                        $rootScope.settings.security.is_use_app_pass = false;
-                        $rootScope.settings.security.is_pass_required_on_transfer = false;
-                    });
+                    PassDialogs.generateMPDialog(
+                        function(){
+                            $rootScope.settings.security.is_use_app_pass = false;
+                            $rootScope.settings.security.is_pass_required_on_transfer = false;
+                        },
+                        function(){
+                            Idle.watch();
+                        }
+                    );
                 }else{ //if dont want to use
                     PassDialogs.requestMPDialog(
                         function(){
                             $rootScope.settings.security.is_use_app_pass = true;
                         }, function(){
                             $rootScope.settings.security.is_pass_required_on_transfer = false;
+                            Idle.unwatch();
                         },
                         false
                     );
@@ -35,7 +41,14 @@
 
             $scope.changePassReqInterval = function(index){
                 $rootScope.settings.security.password_required_interval = $rootScope.pass_required_intervals[index];
-                //console.log($rootScope.settings.security.password_required_interval);
+                
+                if($rootScope.settings.security.password_required_interval > 0){
+                    Idle.watch();
+                    Idle.setIdle($rootScope.settings.security.password_required_interval);
+                }else{
+                    Idle.unwatch();
+                }
+                
             };
 
             $scope.logLevel = $rootScope.settings.system.log_level;

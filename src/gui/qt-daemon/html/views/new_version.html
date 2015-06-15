@@ -1,0 +1,21 @@
+<div 
+	class="modal-header btn btn-block" 
+	ng-class="{
+		'btn-success': type == 'success', 
+		'btn-info'   : type == 'info', 
+		'btn-warning': type == 'warning', 
+		'btn-danger' : type == 'danger'
+	}"
+>
+    <button type="button" class="close" ng-click="close()"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+    <h4 class="modal-title text-center">Доступна новая версия</h4>
+</div>
+
+<div class="modal-body">
+	<alert type="{{type}}">
+		<p>Вышло обновление программы до версии {{deamon_state.last_build_available}}</p>
+	    <p>Для безопасной работы вы должны загрузить его и установить</p>
+	</alert>
+	<div><a ng-click="close()" class="btn btn-default btn-block btn-sm">Продолжить</a></div>
+</div>
+

@@ -742,6 +742,35 @@ QString Html5ApplicationViewer::set_log_level(const QString& param)
   LOG_PRINT_L0("[LOG LEVEL]: set to " << lvl.v);
   return epee::serialization::store_t_to_json(ar).c_str();
 }
+QString Html5ApplicationViewer::dump_all_offers()
+{
+  return que_call2<view::api_void>("dump_all_offers", "{}", [this](const view::api_void& owd, view::api_response& ar){
+    view::api_void av;
+    QString path = QFileDialog::getOpenFileName(this, "Select file",
+      "",
+      "");
+
+    if (!path.length())
+    {
+      ar.error_code = API_RETURN_CODE_CANCELED;
+      dispatch(ar, av);
+      return;
+    }
+
+    currency::COMMAND_RPC_GET_ALL_OFFERS::response rp = AUTO_VAL_INIT(rp);
+    ar.error_code = m_backend.get_all_offers(rp);
+
+    std::string buff = epee::serialization::store_t_to_json(rp);
+    bool r = file_io_utils::save_string_to_file(path.toStdString(), buff);
+    if(!r)
+      ar.error_code = API_RETURN_CODE_FAIL;
+    else
+      ar.error_code = API_RETURN_CODE_OK;
+
+    dispatch(ar, av);
+    return;
+  });
+}
 QString Html5ApplicationViewer::webkit_launched_script()
 {
   m_last_update_daemon_status_json.clear();
@@ -914,7 +943,24 @@ QString Html5ApplicationViewer::cancel_offer(const QString& param)
     dispatch(ar, tr);
   });
 }
+QString Html5ApplicationViewer::get_mining_history(const QString& param)
+{
 
+  return que_call2<view::wallet_id_obj>("get_mining_history", param, [this](const view::wallet_id_obj& a, view::api_response& ar)
+  {
+    tools::wallet_rpc::mining_history mh = AUTO_VAL_INIT(mh);
+
+    ar.error_code = m_backend.get_mining_history(a.wallet_id, mh);
+    if (ar.error_code != API_RETURN_CODE_OK)
+    {
+      view::api_void av;
+      dispatch(ar, av);
+      return;
+    }
+    ar.error_code = API_RETURN_CODE_OK;
+    dispatch(ar, mh);
+  });
+}
 QString Html5ApplicationViewer::start_pos_mining(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::wallet_id_obj, wo);

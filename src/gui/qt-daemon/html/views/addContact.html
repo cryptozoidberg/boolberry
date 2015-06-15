@@ -1,20 +1,20 @@
- <div ng-controller="addContactCtrl">   
+ <div ng-controller="addEditContactCtrl">   
     
     <div class="navbar">
-        <div class="btn-toolbar pull-right">
-            <a data-toggle="modal" type="button" class="btn btn-link" data-target="#">
+        <div class="btn-toolbar pull-right" ng-if="contact.id">
+            <a type="button" class="btn btn-link" ng-click="deleteContact(contact)">
                 <i class="fa fa-lg fa-times-circle text-muted"></i> 
                 <span class="underlined text-muted">Удалить контакт</span>
             </a>
         </div>
-        <h1>Новый контакт</h1>
+        <h1 ng-if="!contact.id">Новый контакт</h1>
+        <h1 ng-if="contact.id">{{contact.name}}</h1>
     </div>
 
     <div class="form-horizontal">
         <div class="tabs">
             <div class="panel panel-transparent">
                 <div class="panel-body">
-
                     <div class="clearfix">
                         <h4>
                             <a type="button" ng-click="collapse.contactData = !collapse.contactData">
@@ -78,7 +78,6 @@
                             </div>
 
                             <div class="col-xs-1 col-sm-1"></div>
-
                             
                         </div>
 
@@ -144,6 +143,7 @@
                                     <i class="fa fa-lg fa-save"></i>
                                 </button> 
                             </div>
+                        </div>
 
 
                         <!-- <div class="form-group">
@@ -152,9 +152,9 @@
                                     <i class="fa fa-lg fa-plus-circle"></i> Добавить поле
                                 </button>
                             </div>
-                        </div>
+                        </div> -->
 
-                        <div class="form-group has-feedback group-hover inline-edit-field addfield collapse addfield">
+                        <!-- <div class="form-group has-feedback group-hover inline-edit-field addfield collapse addfield">
                             <div class="col-xs-4 col-sm-4"><input type="text" class="form-control flat-input text-right" placeholder="Название поля"></div>
                             <div class="col-xs-7 col-sm-7">
                                 <input type="text" class="form-control flat-input" placeholder="Значение поля" value="">
@@ -169,68 +169,116 @@
 
             
 
-    <!--         <div class="panel panel-transparent collapse in accountpanel1">
+            <div class="panel panel-transparent">
                 <div class="panel-body">
                     
-                    <h4><a type="button" href="#"><span>Счет</span></a></h4>
+                    <h4><a type="button" ng-click="collapse.addresses = !collapse.addresses"><span>Счета</span></a></h4>
+
+                    <div class="tab-content nopadding">
+                        <div class="tab-pane list-view active">
+                            <div class="table-responsive panel">
+                                
+                                <table class="table table-condensed table-hover data-table safes-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-6"><span class="nowrap">Счет сейфа <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                                            <th class="col-sm-6"><span class="nowrap">Алиасы <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr ng-if="!contact.addresses.length">
+                                            <td colspan="2">Нет записей</td>
+                                        </tr>
+                                        <tr ng-repeat="address in contact.addresses">
+                                            <td>
+                                                <div class="dropdown" dropdown auto-close="outsideClick">
+                                                    <button aria-expanded="false" dropdown-toggle class="btn btn-link dropdown-toggle" type="button">
+                                                        <span class="account-text">
+                                                            <span class="text-muted"> 
+                                                                <span style="color:#999">
+                                                                    {{address}}
+                                                                </span>
+                                                            </span>
+                                                            <span class="moredots">...<span class="caret"></span></span>
+                                                        </span>
+                                                    </button>
+                                                    <div role="menu" class="dropdown-menu dropdown-menu-left">
+                                                        <div style="padding:10px">
+                                                            <ul class="list-unstyled">
+                                                                <li>
+                                                                    <div class="contractor">
+                                                                        <pre class="safe-number" style="height:60px">{{address}}</pre>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span  ng-repeat="alias in aliases | filter : {address: address}"><span class="label label-info">@{{alias.alias}}</span><span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                            </div>
+                        </div>
+                    </div>
                     
-                    <div class="collapse in collapse00">
-                        <div class="form-group has-feedback group-hover inline-edit-field collapse in account1">
-                            <label class="col-xs-4 col-sm-4 control-label">Счет</label>
-                            <div class="col-xs-7 col-sm-7">
-                                <input type="text" value="" placeholder="длинный номер счета" class="form-control flat-input">
-                                <i class="fa fa-lg fa-pencil form-control-feedback"></i>
+                    <div collapse="collapse.addresses">
+                        <div>
+                            <div class="" style="margin:-15px 0 15px">
+                                <a class="btn btn-link" type="button" ng-click="collapse.new_address = !collapse.new_address">
+                                    <i class="fa fa-lg fa-plus-circle"></i> 
+                                    <span class="underlined ">Добавить еще счет</span>
+                                </a>
                             </div>
-                            <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".account1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
                         </div>
-                        <div class="form-group has-feedback group-hover inline-edit-field collapse in alias1">
-                            <label class="col-xs-4 col-sm-4 control-label">Алиас(1-й) счета</label>
+
+                        <div class="form-group has-feedback group-hover inline-edit-field" collapse="!collapse.new_address">
+                            <label class="col-xs-4 col-sm-4 control-label">
+                                Счет
+                                <i 
+                                    class="fa fa-lg " 
+                                    ng-class="{
+                                        'text-success fa-check':contact.is_valid_address,
+                                        'text-danger fa-question':!contact.is_valid_address,
+                                    }"
+                                ></i>
+                            </label>
                             <div class="col-xs-7 col-sm-7">
-                                <input type="text" value="" placeholder="@" class="form-control flat-input">
-                                <i class="fa fa-lg fa-pencil form-control-feedback"></i>
+                                <!-- <input type="text" value="" placeholder="длинный номер счета " class="form-control flat-input"> -->
+                                <angucomplete-alt 
+                                    placeholder="счет или @алиас"
+                                    pause="100"
+                                    selected-object="selectAlias"
+                                    local-data="aliases"
+                                    search-fields="name"
+                                    title-field="name"
+                                    description-field="comment"
+                                    minlength="3"
+                                    input-class="form-control"
+                                    input-changed="inputChanged"
+                                    text-no-results="Aliases not found"
+                                />
+                                <!-- <i class="fa fa-lg fa-pencil form-control-feedback"></i> -->
                             </div>
-                            <div class="col-xs-1 col-sm-1 text-right"><button class="btn btn-link btn-block" data-target=".alias1" data-toggle="collapse" type="button"><i class="fa fa-lg fa-times-circle text-muted"></i></button> </div>
+                            <div class="col-xs-1 col-sm-1 text-right">
+                                <button class="btn btn-link btn-block" type="button" ng-disabled="!contact.is_valid_address" ng-click="addAddress()">
+                                    <i class="fa fa-lg fa-save"></i>
+                                </button> 
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <div class="col-xs-7 col-sm-7 col-sm-offset-4">
-                            <button type="button" data-toggle="collapse" data-target=".alias2" class="btn btn-link text-muted">
-                                <i class="fa fa-lg fa-plus-circle"></i> Добавить еще алиас
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-group has-feedback group-hover inline-edit-field  collapse alias2">
-                        <label class="col-xs-4 col-sm-4 control-label">Алиас(2-й) счета</label>
-                        <div class="col-xs-7 col-sm-7">
-                            <input type="text" value="@chelovek's_alias1" class="form-control flat-input">
-                            <i class="fa fa-lg fa-pencil form-control-feedback"></i>
-                        </div>
-                        <div class="col-xs-1 col-sm-1 text-right">
-                            <button class="btn btn-link btn-block" data-target=".alias2" data-toggle="collapse" type="button">
-                                <i class="fa fa-lg fa-times-circle text-muted"></i>
-                            </button> 
-                        </div>
-                    </div>
-
-                    <div class="text-right">
-                        <a data-target=".accountpanel1" class="btn btn-link" type="button" data-toggle="collapse">
-                            <i class="fa fa-lg fa-times-circle text-muted"></i> 
-                            <span class="underlined text-muted">Удалить счет</span>
-                        </a>
-                    </div>
                 </div>
-            </div> -->
-       
-            <!-- <div class="" style="margin:-15px 0 15px">
-                <a data-target=".accountpanel2" class="btn btn-link" type="button" data-toggle="modal">
-                    <i class="fa fa-lg fa-plus-circle"></i> 
-                    <span class="underlined ">Добавить еще счет</span>
-                </a>
             </div>
+       
+            
 
-            <div class="startbox" id="contacthistiry">
+            <!-- <div class="startbox" id="contacthistiry">
                 <div class="panel">
                     <div class="panel-body">
                         <h4><i class="gu gu-3x  gu-money"></i>Связанные платежи</h4>
@@ -243,7 +291,7 @@
         <div class="panel panel-transparent">
             <div class="panel-body">
                 <div class="col-xs-6 col-sm-6">
-                    <a type="button" class="btn btn-primary btn-block" ng-click="addContact(contact)">Сохранить</a>
+                    <a type="button" ng-disabled="!contact.addresses.length" class="btn btn-primary btn-block" ng-click="saveContact(contact)">Сохранить</a>
                 </div>
             </div>
         </div>
@@ -253,5 +301,9 @@
 
     <div class="footer"></div>
 </div>
+
+
+
+
 
 

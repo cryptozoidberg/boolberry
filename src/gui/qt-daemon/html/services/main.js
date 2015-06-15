@@ -132,6 +132,51 @@
 
     }]);
 
+    module.factory('txHistory', ['$rootScope',function($rootScope) {
+        var returnObject = {
+            reloadHistory: function() {
+                var temp = [];
+                angular.forEach($rootScope.safes, function(safe){
+                    if(angular.isDefined(safe.history)){
+                        angular.forEach(safe.history, function(item){
+                            item.wallet_id = angular.copy(safe.wallet_id);
+                            temp.push(item);
+                        });
+                    }
+                },true); 
+                return temp;
+            },
+            contactHistory: function(contact) {
+                // contact example
+                // { 
+                //     group_index: 0, 
+                //     name: '', 
+                //     email: '', 
+                //     phone: '',
+                //     messengers: [
+                //         {name: 'skype', nickname: 'doblon'}
+                //     ],
+                //     location: '', 
+                //     comment: '',
+                //     addresses : [
+                //         'HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ',
+                //         'HhTZP7Sy4FoDR1kJHbFjzd5gSnUPdpHWHj7Gaaeqjt52KS23rHGa1sN73yZYPt77TkN8VVmHrT5qmBJQGzDLYJGjQpxGRid'
+                //     ]
+                // };
+
+                var history = returnObject.reloadHistory();
+                var temp = [];
+                angular.forEach(history, function(item){
+                    if(angular.isDefined(contact.addresses) && contact.addresses.indexOf(item.remote_address) >-1){
+                        temp.push(item);
+                    }
+                });
+                return temp;
+            }
+        }
+        return returnObject;
+    }]);
+
     module.factory('market', [function() {
 
         this.paymentTypes = {

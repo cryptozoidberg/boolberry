@@ -68,6 +68,24 @@ namespace wallet_rpc
     END_KV_SERIALIZE_MAP()
   };
 
+  struct mining_history_entry
+  {
+    uint64_t a;
+    uint64_t t;
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(a)
+      KV_SERIALIZE(t)
+    END_KV_SERIALIZE_MAP()
+
+  };
+
+  struct mining_history
+  {
+    std::vector<mining_history_entry> mined_entries;
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(mined_entries)
+    END_KV_SERIALIZE_MAP()
+  };
 
   struct COMMAND_RPC_GET_BALANCE
   {

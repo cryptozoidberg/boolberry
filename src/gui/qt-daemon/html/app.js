@@ -9,6 +9,7 @@
         "easypiechart",
 
         'ngRoute', 
+        'ngIdle',
         'ngSanitize',
         'validation.match', // allow to validate inputs match 
         'angularSlideables', // show/hide animations
@@ -23,31 +24,40 @@
         'app.guldens',
         'app.market' ,
         'app.settings',
-        'app.contacts'
+        'app.contacts',
+        'app.mining'
 
     ]);
 
-    app.config(['$routeProvider', function($routeProvider) {
+    app.config(['$routeProvider', 'IdleProvider', 'KeepaliveProvider', function($routeProvider, IdleProvider, KeepaliveProvider) {
         
+        // configure Idle settings
+        // IdleProvider.idle(0); // in seconds
+        IdleProvider.timeout(10); // in seconds
+        //KeepaliveProvider.interval(2); // in seconds
+
         var routes = [
-            {route: '/',                 template: 'views/index.html'},
-            {route: '/index',            template: 'views/index.html'},
-            {route: '/safes',            template: 'views/safes.html'},
-            {route: '/safe/:wallet_id',  template: 'views/safe.html'},
-            {route: '/market',           template: 'views/market.html'},
-            {route: '/contacts',         template: 'views/contacts.html'},
-            {route: '/history',          template: 'views/history.html'},
-            {route: '/deposits',         template: 'views/deposits.html'},
-            {route: '/settings',         template: 'views/settings.html'},
-            {route: '/sendG',            template: 'views/sendG.html'},
-            {route: '/sendG/:wallet_id', template: 'views/sendG.html'},
+            {route: '/',                           template: 'views/index.html'},
+            {route: '/index',                      template: 'views/index.html'},
+            {route: '/safes',                      template: 'views/safes.html'},
+            {route: '/safe/:wallet_id',            template: 'views/safe.html'},
+            {route: '/market',                     template: 'views/market.html'},
+            {route: '/contacts',                   template: 'views/contacts.html'},
+            {route: '/history',                    template: 'views/history.html'},
+            {route: '/history/:contact_id',         template: 'views/history.html'},
+            {route: '/deposits',                   template: 'views/deposits.html'},
+            {route: '/settings',                   template: 'views/settings.html'},
+            {route: '/sendG',                      template: 'views/sendG.html'},
+            {route: '/sendG/:wallet_id',           template: 'views/sendG.html'},
+            {route: '/sendGToContact/:address',    template: 'views/sendG.html'},
 
-            {route: '/addGOfferBuy',     template: 'views/addGOffer.html'},
-            {route: '/addGOfferSell',    template: 'views/addGOffer.html'},
+            {route: '/addGOfferBuy',               template: 'views/addGOffer.html'},
+            {route: '/addGOfferSell',              template: 'views/addGOffer.html'},
 
-            {route: '/addOfferBuy',      template: 'views/addOffer.html'},
-            {route: '/addContact',       template: 'views/addContact.html'},
-            {route: '/addOfferSell',     template: 'views/addOffer.html'},
+            {route: '/addOfferBuy',                template: 'views/addOffer.html'},
+            {route: '/addContact',                 template: 'views/addContact.html'},
+            {route: '/contact/:contact_id',        template: 'views/addContact.html'},
+            {route: '/addOfferSell',               template: 'views/addOffer.html'},
         ];
 
         for (var i in routes){
@@ -60,7 +70,7 @@
         
     }]);
 
-    app.run(['$rootScope',function($rootScope){
+    app.run(['$rootScope','Idle',function($rootScope, Idle){
         
         if(angular.isUndefined($rootScope.safes)){
             $rootScope.safes = [];

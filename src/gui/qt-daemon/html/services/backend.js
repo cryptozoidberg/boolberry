@@ -52,6 +52,16 @@
                 return this.runCommand('get_all_offers', params, callback);
             },
 
+            getVersion : function() {
+                if(!this.shouldUseEmulator()){
+                    var res = Qt_parent['get_version']();
+                }else{
+                    var res = '0.0.0.0';
+                }
+                
+                return res;
+            },
+
             startPosMining : function(wallet_id) {
                 var params = {
                     wallet_id : wallet_id
@@ -164,6 +174,15 @@
                 return this.runCommand('push_offer', params, callback);
             },
 
+            cancelOffer: function(wallet_id,tx_hash,callback){
+                var params = {
+                    wallet_id: wallet_id,
+                    tx_hash: tx_hash,
+                    no : 0 // ???
+                };
+                return this.runCommand('cancel_offer', params, callback);
+            },
+
             transfer: function(from, to, ammount, fee, comment, push_payer, lock_time, is_mixin, callback) {
                  var params = {
                     wallet_id : from,
@@ -182,6 +201,13 @@
                 };
                 console.log(params);
                 return this.runCommand('transfer', params, callback);
+            },
+
+            getMiningHistory: function(wallet_id,callback){
+                var params = {
+                    wallet_id: wallet_id
+                };
+                return this.runCommand('get_mining_history', params, callback);
             },
 
             validateAddress: function(address){
@@ -221,20 +247,22 @@
 
                     $rootScope.tx_count = txCount; 
 
-                    returnObject.get_all_offers(function(data){
-                        if(angular.isDefined(data.offers)){
-                            $rootScope.offers = data.offers;
-                            var my_offers = [];
-                            angular.forEach($rootScope.offers,function(item){
-                                var result = $filter('filter')($rootScope.safes, item.tx_hash);
-                                if(result.length){
-                                    my_offers.push(item);
-                                }
-                            });
+                    if(!returnObject.shouldUseEmulator()){
+                        returnObject.get_all_offers(function(data){
+                            if(angular.isDefined(data.offers)){
+                                $rootScope.offers = data.offers;
+                                var my_offers = [];
+                                angular.forEach($rootScope.offers,function(item){
+                                    var result = $filter('filter')($rootScope.safes, item.tx_hash);
+                                    if(result.length){
+                                        my_offers.push(item);
+                                    }
+                                });
 
-                            $rootScope.offers_count = my_offers.length;
-                        }
-                    });
+                                $rootScope.offers_count = my_offers.length;
+                            }
+                        });
+                    }
                 });
                 
             },
@@ -294,7 +322,8 @@
 
             runCommand : function(command, params, callback) {
                 var commandsNoLoading = [
-                    'get_all_aliases'
+                    'get_all_aliases',
+                    'get_all_offers'
                 ];
                 if(this.shouldUseEmulator()){
                     return emulator.runCommand(command, params, callback);
@@ -640,6 +669,9 @@
                 case 'get_wallet_info' : 
                     result = this.getWalletInfo();
                     break;
+                case 'get_version' : 
+                    result = '4.23.12.1';
+                    break;
                 case 'update_wallet_info' :
                     result = {
                         wallets  : []
@@ -656,7 +688,9 @@
                     result = {
                         'wallet_id' :this.getWalletId(),
                         'wallet_state' : '2',
-                        'is_mining' : false
+                        'is_mining' : false,
+                        'balance' : 4300000000,
+                        'unlocked_balance' : 4100000000,
                     };
                     break; 
                 case 'wallet_sync_progress' :
@@ -687,8 +721,8 @@
                                 "type": "PoW"
                             }
                         ],
-                        "last_build_available": "0.0.0.0",
-                        "last_build_displaymode": 0,
+                        "last_build_available": "4.23.12.2",
+                        "last_build_displaymode": 1,
 
                         "out_connections_count": 2,
                         "pos_difficulty": "107285151137540",

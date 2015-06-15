@@ -14,7 +14,7 @@ using namespace epee;
 #include "currency_core/currency_format_utils.h"
 #include "rpc/core_rpc_server_commands_defs.h"
 #include "misc_language.h"
-#include "currency_core/currency_basic_impl.h"
+
 #include "common/boost_serialization_helper.h"
 #include "crypto/crypto.h"
 #include "serialization/binary_utils.h"
@@ -845,6 +845,20 @@ bool wallet2::is_coin_age_okay(const transfer_details& tr)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::get_mining_history(wallet_rpc::mining_history& hist)
+{
+  for (auto& tr : m_transfer_history)
+  {
+    if (currency::is_coinbase(tr.tx) && tr.tx.vin.size() == 2)
+    {
+      tools::wallet_rpc::mining_history_entry mhe = AUTO_VAL_INIT(mhe);
+      mhe.a = tr.amount;
+      mhe.t = tr.timestamp;
+      hist.mined_entries.push_back(mhe);
+    }
+  }
+}
+//----------------------------------------------------------------------------------------------------
 bool wallet2::get_pos_entries(currency::COMMAND_RPC_SCAN_POS::request& req)
 {
   for (size_t i = 0; i != m_transfers.size(); i++)
@@ -1114,7 +1128,7 @@ namespace
   }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::push_offer(const currency::offer_details& od, currency::transaction& res_tx)
+void wallet2::push_offer(const currency::offer_details_ex& od, currency::transaction& res_tx)
 {
   currency::tx_destination_entry tx_dest;
   tx_dest.addr = m_account.get_keys().m_account_address;

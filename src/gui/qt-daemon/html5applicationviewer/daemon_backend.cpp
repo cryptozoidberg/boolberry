@@ -780,6 +780,12 @@ std::string daemon_backend::start_pos_mining(uint64_t wallet_id)
   m_pview->update_wallet_status(wsi);
   return API_RETURN_CODE_OK;
 }
+std::string daemon_backend::get_mining_history(uint64_t wallet_id, tools::wallet_rpc::mining_history& mh)
+{
+  GET_WALLET_OPT_BY_ID(wallet_id, wo);
+  wo.w->get()->get_mining_history(mh);
+  return API_RETURN_CODE_OK;
+}
 void daemon_backend::prepare_wallet_status_info(wallet_vs_options& wo, view::wallet_status_info& wsi)
 {
   wsi.is_mining = wo.do_mining;
@@ -813,7 +819,7 @@ std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_
   return API_RETURN_CODE_OK;
 }
 
-std::string daemon_backend::push_offer(size_t wallet_id, const currency::offer_details& od, currency::transaction& res_tx)
+std::string daemon_backend::push_offer(size_t wallet_id, const currency::offer_details_ex& od, currency::transaction& res_tx)
 {
   GET_WALLET_BY_ID(wallet_id, w);
 

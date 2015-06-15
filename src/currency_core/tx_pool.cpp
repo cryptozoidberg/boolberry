@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "tx_pool.h"
-#include "currency_format_utils.h"
 #include "currency_boost_serialization.h"
 #include "currency_config.h"
 #include "blockchain_storage.h"

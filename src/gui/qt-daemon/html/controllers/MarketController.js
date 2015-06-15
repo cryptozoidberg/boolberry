@@ -5,7 +5,6 @@
     module.controller('marketCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','market','$timeout',
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market, $timeout){
             
-            // TODO refactor code with using services ex. offer.isFav(), offer.getFav(), etc 
             var is_currency_offer = function(offer){
                 if(offer.offer_type == 2 || offer.offer_type == 3){
                     return true;
@@ -56,6 +55,55 @@
                 $scope.fav_goods_offers    = $filter('filter')($scope.fav_offers, is_goods_offer);
                 $scope.f_fav_currency_offers = $scope.fav_currency_offers;
                 $scope.f_fav_goods_offers = $scope.fav_goods_offers;
+            };
+
+            $scope.cancelOffer = function(offer){
+                
+                var safe = $filter('filter')($rootScope.safes, offer.tx_hash);
+                if(safe.length){
+                    safe = safe[0];
+                    var data = backend.cancelOffer(safe.wallet_id, offer.tx_hash , function(result){
+                        // {"success":true,"tx_blob_size":775,"tx_hash":"82dc10c91658ff425c8aaf1809e5259ce5269f280429689e195cfbb4be4f6e65"}
+                        // informer.info(result.tx_hash);
+                        angular.forEach($scope.f_my_goods_offers,function(item, key){
+                            if(item.tx_hash == offer.tx_hash){
+                                $scope.f_my_goods_offers.splice(key, 1);
+                            }
+                        });
+                    });
+                }else{
+                    informer.error('Не найден сейф, с которого было опубликовано предложение');
+                }
+
+                
+            };
+
+            $scope.order = function(row, target){
+                switch(target){
+                    case 'currency':
+                        $scope.f_currency_offers = $filter('orderBy')($scope.f_currency_offers, row);
+                        break;
+
+                    case 'goods':
+                        $scope.f_goods_offers = $filter('orderBy')($scope.f_goods_offers, row);
+                        break;
+
+                    case 'my_currency':
+                        $scope.f_my_currency_offers = $filter('orderBy')($scope.f_my_currency_offers, row);
+                        break;
+
+                    case 'my_goods':
+                        $scope.f_my_goods_offers = $filter('orderBy')($scope.f_my_goods_offers, row);
+                        break;
+
+                    case 'fav_currency':
+                        $scope.f_fav_currency_offers = $filter('orderBy')($scope.f_fav_currency_offers, row);
+                        break;
+                        
+                    case 'fav_goods':
+                        $scope.f_fav_goods_offers = $filter('orderBy')($scope.f_fav_goods_offers, row);
+                        break;
+                }
             };
 
             
@@ -403,15 +451,56 @@
                 comment: ''
             };
 
-            if($rootScope.safes.length){
-                $scope.offer.wallet_id = $rootScope.safes[0].wallet_id;
-            }
-
             if($location.path() == '/addOfferSell'){
                 $scope.offer.offer_type = 1;
             }else{
                 $scope.offer.offer_type = 0;
             }
+
+            var last_offer = false;
+
+            angular.forEach($filter('orderBy')($rootScope.offers, '-timestamp'),function(item){
+                if(item.offer_type == $scope.offer.offer_type){
+                    var result = $filter('filter')($rootScope.safes, item.tx_hash);
+
+                    if(result.length){
+                        last_offer = item;
+                    }
+                }
+                
+            });
+
+            if(last_offer){
+                $scope.offer.is_standart     = last_offer.is_standart;
+                $scope.offer.expiration_time = last_offer.expiration_time;
+
+                var contacts = last_offer.contacts.split(', ');
+                
+                if(angular.isDefined(contacts[0])){
+                    $scope.offer.contacts.email = contacts[0];
+                }
+
+                if(angular.isDefined(contacts[1])){
+                    $scope.offer.contacts.phone = contacts[1];
+                }
+
+                var location = last_offer.location.split(', ');
+                
+                if(angular.isDefined(location[0])){
+                    $scope.offer.location.country = location[0];
+                }
+
+                if(angular.isDefined(location[1])){
+                    $scope.offer.location.city = location[1];
+                }
+
+            }
+
+            if($rootScope.safes.length){
+                $scope.offer.wallet_id = $rootScope.safes[0].wallet_id;
+            }
+
+            
 
             
 
@@ -487,6 +576,46 @@
                 $scope.offer.offer_type = 2;
             }
 
+            var last_offer = false;
+
+            angular.forEach($filter('orderBy')($rootScope.offers, '-timestamp'),function(item){
+                if(item.offer_type == $scope.offer.offer_type){
+                    var result = $filter('filter')($rootScope.safes, item.tx_hash);
+
+                    if(result.length){
+                        last_offer = item;
+                    }
+                }
+                
+            });
+
+            if(last_offer){
+                $scope.offer.is_standart     = last_offer.is_standart;
+                $scope.offer.expiration_time = last_offer.expiration_time;
+
+                var contacts = last_offer.contacts.split(', ');
+                
+                if(angular.isDefined(contacts[0])){
+                    $scope.offer.contacts.email = contacts[0];
+                }
+
+                if(angular.isDefined(contacts[1])){
+                    $scope.offer.contacts.phone = contacts[1];
+                }
+
+                var location = last_offer.location.split(', ');
+                
+                if(angular.isDefined(location[0])){
+                    $scope.offer.location.country = location[0];
+                }
+
+                if(angular.isDefined(location[1])){
+                    $scope.offer.location.city = location[1];
+                }
+
+            }
+
+
             $scope.changePackage = function(is_premium){
                 if(is_premium){
                     $scope.offer.is_standart = $scope.offer.is_premium ? false : true;
@@ -552,7 +681,10 @@
             };
 
             $scope.addOffer = function(offer){
-                
+                if(!$scope.gOfferForm.$valid){
+                    return;
+                }
+
                 var o = angular.copy(offer);
                 
                 o.fee = o.is_premium ? o.fee_premium : o.fee_standart;

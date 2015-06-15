@@ -9,7 +9,7 @@
 #include <boost/archive/binary_iarchive.hpp>
 
 #include "include_base_utils.h"
-#include "currency_basic_impl.h"
+
 #include "blockchain_storage.h"
 #include "currency_format_utils.h"
 #include "currency_boost_serialization.h"
@@ -318,7 +318,7 @@ bool blockchain_storage::purge_transaction_from_blockchain(const crypto::hash& t
   return res;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::get_all_offers(std::list<offer_details>& offers)
+bool blockchain_storage::get_all_offers(std::list<offer_details_ex>& offers)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   for (auto& ol: m_offers)
@@ -471,6 +471,7 @@ void blockchain_storage::get_all_known_block_ids(std::list<crypto::hash> &main, 
   BOOST_FOREACH(blocks_ext_by_hash::value_type &v, m_invalid_blocks)
     invalid.push_back(v.first);
 } 
+
 //------------------------------------------------------------------
 bool blockchain_storage::rollback_blockchain_switching(std::list<block>& original_chain, size_t rollback_height)
 {
@@ -1362,6 +1363,15 @@ bool blockchain_storage::get_random_outs_for_amounts(const COMMAND_RPC_GET_RANDO
   return true;
 }
 //------------------------------------------------------------------
+uint64_t blockchain_storage::total_coins()
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  if (!m_blocks.size())
+    return 0;
+
+  return m_blocks.back().already_generated_coins;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -1837,13 +1847,14 @@ bool blockchain_storage::process_blockchain_tx_attachments(const transaction& tx
 {
   //check transaction extra
   uint64_t count = 0;
-  std::vector<offer_details> odl;
+  std::vector<offer_details_ex> odl;
   crypto::hash tx_hash = get_transaction_hash(tx);
   for (const auto& at : tx.attachment)
   {
     if (at.type() == typeid(offer_details))
     {
-      odl.push_back(boost::get<offer_details>(at));
+      odl.push_back(offer_details_ex());
+      static_cast<offer_details&>(odl.back()) = boost::get<offer_details>(at);
       odl.back().timestamp = timestamp;
       odl.back().index_in_tx = count++;
       odl.back().tx_hash = string_tools::pod_to_hex(tx_hash);

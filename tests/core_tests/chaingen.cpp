@@ -12,7 +12,6 @@
 
 #include "p2p/net_node.h"
 #include "currency_core/currency_basic.h"
-#include "currency_core/currency_basic_impl.h"
 #include "currency_core/currency_format_utils.h"
 #include "currency_core/miner.h"
 #include "wallet/wallet2.h"

@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-#include "currency_core/currency_basic_impl.h"
+
 
 using namespace currency;
 /*

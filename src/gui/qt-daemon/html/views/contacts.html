@@ -1,17 +1,17 @@
 <div ng-controller="contactsCtrl">
-    <a data-target="#addContact" class="btn btn-link pull-right" type="button" data-toggle="modal"><i class="fa fa-lg fa-file-excel-o text-muted"></i> <span class="underlined text-muted">Экспорт контактов в файл</span></a>
+    <a data-target="#addContact" class="btn btn-link pull-right" type="button" data-toggle="modal">
+        <i class="fa fa-lg fa-file-excel-o text-muted"></i> 
+        <span class="underlined text-muted">Экспорт контактов в файл</span>
+    </a>
 
     <h1>Контакты</h1>
     <h5>Здесь Вы можете просмотреть список всех контактов, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
 
-
     <div class="tabs">
         <div class="navbar">
-
             <form class="form-horizontal">
 
                 <div class="row">
-
 
                     <div class="col-xs-8 col-sm-8">
                         <a href="#/addContact" class="btn btn-primary">Добавить контакт</a>
@@ -51,13 +51,13 @@
                         </td>
 
                         <td>
-                            <!-- <a class="blocklink" href="#contact/{{ contact.id }}">
+                            <a class="blocklink" href="" ng-repeat="address in contact.addresses">
                                 <span class="account-text">
-                                    <span class="text-muted">{{ contact.account }}</span>
+                                    <span class="text-muted">{{address}}</span>
                                     <span class="moredots">...</span>
                                 </span>
-                                {{ contact.aliases }}
-                            </a> -->
+                                <span  ng-repeat="alias in aliases | filter : {address: address}"><span class="label label-info">@{{alias.alias}}</span>&nbsp;</span>
+                            </a>
                         </td>
 
                         <td>
@@ -76,14 +76,30 @@
                         </td>
 
                         <td>
-                            <div class="dropdown pull-right">
-                                <button type="button" class="btn btn-sm btn-link dropdown-toggle" data-toggle="dropdown"
-                                        aria-expanded="false">
-                                    <i class="fa fa-lg fa-money text-muted"></i> <span class="caret text-muted"></span>
+                            <div class="dropdown pull-right" dropdown auto-close="outsideClick">
+                                <button type="button" class="btn btn-sm btn-link dropdown-toggle" dropdown-toggle>
+                                    <i class="fa fa-lg fa-money text-muted"></i>
+                                    <span class="caret text-muted"></span>
                                 </button>
+
                                 <ul role="menu" class="dropdown-menu dropdown-menu-right">
-                                    <li><a href="#sendG/{{ contact.id }}">Отправить гульдены</a></li>
-                                    <li><a href="#history/contact/{{ contact.id }}">Связанные платежи</a></li>
+                                    
+                                    <li><a href="#history/{{contact.id}}">Связанные платежи</a></li>
+                                    <li><a ng-click="deleteContact(contact)">Удалить</a></li>
+                                    <li><a ng-click="collapse.subitems[contact.id] = !collapse.subitems[contact.id]">Отправить гульдены</a></li>
+
+                                    <li ng-repeat="address in contact.addresses" collapse="!collapse.subitems[contact.id]">
+                                        <a href="#sendGToContact/{{ address }}">
+                                            <span  ng-repeat="alias in filtered = (aliases | filter : {address: address})">
+                                                <span class="label label-info">@{{alias.alias}}</span>&nbsp;
+                                            </span>
+                                             <span class="account-text" ng-hide="filtered.length">
+                                                <span class="text-muted">{{address}}</span>
+                                                <span class="moredots">...</span>
+                                            </span>
+                                        </a>
+                                    </li>
+                                    
                                 </ul>
                             </div>
                         </td>

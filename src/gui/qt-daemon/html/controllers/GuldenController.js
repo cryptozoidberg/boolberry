@@ -30,9 +30,10 @@
 
 
 
-    module.controller('guldenSendCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$modal',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $modal){
+    module.controller('guldenSendCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$modal','txHistory',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $modal, txHistory){
             $scope.transaction = {
+                from: $rootScope.safes.length ? $rootScope.safes[0].wallet_id : '',
                 to: '',
                 push_payer: $rootScope.settings.security.is_hide_sender,
                 is_delay : false,
@@ -42,35 +43,37 @@
                 is_mixin : $rootScope.settings.security.is_mixin
             };
 
+            $scope.txHistory = txHistory.reloadHistory();
+
             if($routeParams.wallet_id){
                 $scope.transaction.from = parseInt($routeParams.wallet_id);
             }
+
+            if($routeParams.address){
+                $scope.transaction.is_valid_address = true;
+                $scope.transaction.to = $routeParams.address;
+            }
             
             $scope.selectAlias = function(obj){
-                var alias = obj.originalObject;
-                $scope.transaction.to = alias.address;
-                $scope.transaction.is_valid_address = true;
-                $scope.transaction.alias = alias.alias;
-            }
-
-            $scope.inputChanged = function(str){
-                delete $scope.transaction.alias;
-                if(str.indexOf('@') != 0){
-                    if(backend.validateAddress(str)){
-                        $scope.transaction.is_valid_address = true;
-                        $scope.transaction.to = str;
-                    }else{
-                        $scope.transaction.is_valid_address = false;
-                        $scope.transaction.to = '';
-                    }
-                }else{
-                    $scope.transaction.to = '';
-                    $scope.transaction.is_valid_address = false;
+                if(angular.isDefined(obj)){
+                    var alias = obj.originalObject;
+                    $scope.transaction.to = alias.address;
+                    $scope.transaction.is_valid_address = true;
+                    return alias.address;
                 }
             }
 
+            $scope.inputChanged = function(str){
+                $scope.transaction.to = str;
+            }
+
             $scope.send = function(tr){
-                console.log(tr);
+
+                if(!$scope.sendGForm.$valid){
+                    // informer.info(JSON.stringify($scope.sendGForm.$error));
+                    return;
+                }
+
                 $modal.open({
                     templateUrl: "views/tr_confirm.html",
                     controller: 'appPassOnTransferCtrl',
@@ -87,13 +90,13 @@
                 
             };
 
-            $scope.validate_address = function(){
-                if($scope.transaction.to.length == 95){
-                    $scope.transaction.is_valid_address = true;
-                }else{
-                    $scope.transaction.is_valid_address = false;
-                }
-            };
+            // $scope.changeAddress = function(){
+            //     if($scope.transaction.to.length == 95){
+            //         $scope.transaction.is_valid_address = true;
+            //     }else{
+            //         $scope.transaction.is_valid_address = false;
+            //     }
+            // };
 
             $scope.disabled = function(date, mode) {
                 return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
@@ -125,36 +128,34 @@
         }
     ]);
 
-    module.controller('trHistoryCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location',
-       function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location){
+    module.controller('trHistoryCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','txHistory',
+       function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, txHistory){
             
             $scope.my_safes = angular.copy($rootScope.safes);
             $scope.my_safes.unshift({name: 'Все сейфы', wallet_id : -1});
-            
-            $scope.tx_history = [];
 
-            var reloadHistory = function(){
-                var temp = [];
-                angular.forEach($rootScope.safes, function(safe){ // TODO WATCH?
-                    if(angular.isDefined(safe.history)){
-                        angular.forEach(safe.history, function(item){
-                            item.wallet_id = angular.copy(safe.wallet_id);
-                            temp.push(item);    
-                        });
-                    }
-                },true); 
-                $scope.tx_history = temp;   
+            $scope.contact = false;
+
+            var init = function(){
+                if($routeParams.contact_id){
+                    var contact = $filter('filter')($rootScope.settings.contacts, {id: $routeParams.contact_id});
+                    $scope.contact = contact[0];
+                    $scope.tx_history = txHistory.contactHistory($scope.contact);
+                }else{
+                    $scope.tx_history = txHistory.reloadHistory();
+                }
             };
 
-            reloadHistory();
+            init();
 
             $scope.$watch(
                 function(){
                     return $rootScope.safes;
                 },
                 function(){
-                    reloadHistory();    
-                }
+                    init();
+                },
+                true
             );
 
             $scope.row = '-timestramp'; //sort by default
@@ -173,7 +174,7 @@
                 $event.stopPropagation();
                 if(name == 'start'){
                     $scope.opened_start = !$scope.opened_start;
-                }else if(name = 'end'){
+                }else if(name == 'end'){
                     $scope.opened_end = !$scope.opened_end;
                 }
             };
@@ -215,7 +216,8 @@
                 keywords: '',
                 is_anonim : $scope.is_anonim_values[0].key,
                 is_mixin : -1,
-                interval : $scope.interval_values[0].key
+                interval : $scope.interval_values[0].key,
+                is_hide_service_tx : false
             };
 
             $scope.tx_date = {
@@ -257,7 +259,6 @@
                     }
                 }else{
                     $scope.hide_calendar = true;
-
                 }
 
                 if(f.interval > 0){
@@ -294,6 +295,10 @@
                 if(f.is_mixin != -1){
                     var condition = f.is_mixin ? { is_anonymous: true} : { is_anonymous: false}; // is_anonymous its actualy is_mixin 
                     $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,condition);
+                }
+
+                if(f.is_hide_service_tx == true){
+                    $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history, {is_service: false});
                 }
 
                 if(f.tr_type != 'all'){

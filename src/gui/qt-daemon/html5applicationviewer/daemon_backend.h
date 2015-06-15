@@ -70,7 +70,7 @@ public:
   std::string get_wallet_info(size_t wallet_id, view::wallet_info& wi);
   std::string get_wallet_info(wallet_vs_options& w, view::wallet_info& wi);
   std::string close_wallet(size_t wallet_id);
-  std::string push_offer(size_t wallet_id, const currency::offer_details& od, currency::transaction& res_tx);
+  std::string push_offer(size_t wallet_id, const currency::offer_details_ex& od, currency::transaction& res_tx);
   std::string cancel_offer(const view::cancel_offer_param& co, currency::transaction& res_tx);
   std::string get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS::response& od);
   std::string get_aliases(view::alias_set& al_set);
@@ -79,7 +79,7 @@ public:
   std::string resync_wallet(uint64_t wallet_id);
   std::string start_pos_mining(uint64_t wallet_id);
   std::string stop_pos_mining(uint64_t wallet_id);
-
+  std::string get_mining_history(uint64_t wallet_id, tools::wallet_rpc::mining_history& wrpc);
 
   void toggle_pos_mining();
   std::string transfer(size_t wallet_id, const view::transfer_params& tp, currency::transaction& res_tx);

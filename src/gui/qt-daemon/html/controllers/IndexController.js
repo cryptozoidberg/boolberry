@@ -4,9 +4,9 @@
 
 
 
-    module.controller('indexController', ['utils', 'backend', '$scope', '$modal','$timeout','emulator','$rootScope', 'informer',
-        function(utils, backend, $scope, $modal, $timeout, emulator, $rootScope, informer) {
-            $scope.settings = {
+    module.controller('indexController', ['utils', 'backend', '$scope', '$modal','$timeout','emulator','$rootScope', 'informer', 'txHistory',
+        function(utils, backend, $scope, $modal, $timeout, emulator, $rootScope, informer, txHistory) {
+            $scope.db_settings = {
                 maxWidgets: 12,
                 userSettings: {
                     'sendG_showPassword': true
@@ -42,35 +42,41 @@
             setUpWidgets();
 
             function setUpWidgets() {
-                $scope.widgetColumns = {
-                    'left': {},
-                    'right': {}
-                };
+                
+
+                if(angular.isUndefined($rootScope.settings.widgetColumns)){
+                    $rootScope.settings.widgetColumns = {
+                        'left': {},
+                        'right': {}
+                    };    
+                }
+                
 
                 $scope.addWidget = function(col) {
                     var widget_number = $scope.getWidgetCount() + '_' + utils.getRandomInt(0, 1000000); // getWidgetCount to avoid auto-sorting by angular
                     var widget = { id: widget_number, type: '', name: $scope.getWidgetNameByType('') };
-                    var col = (col=='left') ? $scope.widgetColumns.left : $scope.widgetColumns.right;
+                    var col = (col=='left') ? $rootScope.settings.widgetColumns.left : $rootScope.settings.widgetColumns.right;
                     col[widget_number] = widget;
                 };
                 $scope.removeWidget = function(id) {
-                    delete $scope.widgetColumns.left[id];
-                    delete $scope.widgetColumns.right[id];
+                    delete $rootScope.settings.widgetColumns.left[id];
+                    delete $rootScope.settings.widgetColumns.right[id];
                 };
                 $scope.getWidgetCount = function() {
-                    return Object.size($scope.widgetColumns.left) + Object.size($scope.widgetColumns.right);
+                    return Object.size($rootScope.settings.widgetColumns.left) + Object.size($rootScope.settings.widgetColumns.right);
                 };
                 $scope.widgetCountSanityCheck = function() {
-                    return ($scope.getWidgetCount() >= $scope.settings.maxWidgets);
+                    return ($scope.getWidgetCount() >= $scope.db_settings.maxWidgets);
                 };
 
                 $scope.am = {}; //active mining chart data
 
                 $scope.changeWidget = function(id, type) {
-                    var col = ($scope.widgetColumns.left[id]) ? $scope.widgetColumns.left : $scope.widgetColumns.right;
+                    var col = ($rootScope.settings.widgetColumns.left[id]) ? $rootScope.settings.widgetColumns.left : $rootScope.settings.widgetColumns.right;
 
                     col[id].type = type;
                     col[id].name = $scope.getWidgetNameByType(type);
+                    col[id].link = $scope.getWidgetLinkByType(type);
 
                     // Patches
                     if (type == 'activeMining') {
@@ -129,20 +135,22 @@
                 };
                 $scope.widgets = {
                     '': {name: 'Выберите тип виджета справа', link: ''},
-                    // 'ingoingPayments': {name: 'Входящие платежи', link: ''},
-                    // 'outgoingPayments': {name: 'Исходящие платежи', link: ''},
-                    'activeMining': {name: 'Активная добыча', link: ''},
-                    // 'coinDemand': {name: 'Спрос на гульдены в системе', link: ''},
-                    // 'coinOffer': {name: 'Предложение гульденов в системе', link: ''},
-                    // 'commodityDemand': {name: 'Спрос на товар', link: ''},
-                    // 'commodityOffer': {name: 'Предложения товаров', link: ''},
-                    // 'currencyFavorite': {name: 'Избранное – Валюта', link: ''},
-                    // 'commodityFavorite': {name: 'Избранное – Товар', link: ''},
-                    // 'lastContacts': {name: 'Последние контакты', link: ''},
+                    'ingoingPayments': {name: 'Входящие платежи', link: 'history'},
+                    'outgoingPayments': {name: 'Исходящие платежи', link: 'history'},
+                    'activeMining': {name: 'Активная добыча', link: 'deposits'},
+                    'coinDemand': {name: 'Спрос на гульдены в системе', link: 'market'},
+                    'coinOffer': {name: 'Предложение гульденов в системе', link: 'market'},
+                    'commodityDemand': {name: 'Спрос на товар', link: 'market'},
+                    'commodityOffer': {name: 'Предложения товаров', link: 'market'},
+                    'currencyFavorite': {name: 'Избранное – Валюта', link: 'market'},
+                    'commodityFavorite': {name: 'Избранное – Товар', link: 'market'},
+                    'lastContacts': {name: 'Последние контакты', link: 'contacts'},
                     // 'exchangeDeals': {name: 'Сделки на биржах', link: ''},
                     'backendInfo': {name: 'Информация о сети', link: 'settings'}
                 };
+
                 $scope.widgetOrder = Object.keys($scope.widgets);
+
                 $scope.getWidgetNameByType = function(type) {
                     if ($scope.widgets.hasOwnProperty(type)) {
                         return $scope.widgets[type].name;
@@ -150,6 +158,41 @@
                         return 'Виджет '+type;
                     }
                 };
+
+                $scope.getWidgetLinkByType = function(type) {
+                    if ($scope.widgets.hasOwnProperty(type)) {
+                        return $scope.widgets[type].link;
+                    } else {
+                        return '';
+                    }
+                };
+
+                $scope.fav_currency = function(item){
+                    if((item.offer_type == 2 || item.offer_type == 3) && $rootScope.settings.system.fav_offers_hash.indexOf(item.tx_hash) > -1){
+                        return true;
+                    }
+                    // return true;
+                }
+
+                $scope.history = [];
+
+                $scope.$watch(
+                    function(){
+                        return $rootScope.safes;
+                    },
+                    function(){
+                        $scope.history = txHistory.reloadHistory();
+                    },
+                    true
+                );
+
+                
+
+                $scope.fav_goods = function(item){
+                    if((item.offer_type == 0 || item.offer_type == 1) && $rootScope.settings.system.fav_offers_hash.indexOf(item.tx_hash) > -1){
+                        return true;
+                    }
+                }
             }
         }
     ]);

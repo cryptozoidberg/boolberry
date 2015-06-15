@@ -1,18 +1,31 @@
+
+
 <h1>Перевод другому пользователю</h1>
 <h5>Здесь Вы можете отправить гульдены любому пользваотелю сети, бла-бла-бла” и так для каждого экрана который мы выбираем слева в меню</h5>
-<form class="form-horizontal" ng-controller="guldenSendCtrl">
+<form class="form-horizontal" name="sendGForm" ng-controller="guldenSendCtrl" ng-submit="send(transaction)" novalidate>
     <div class="tabs">
         <div class="panel">
             <div class="panel-body">
+
+                    <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="sendGForm.$submitted || sendGForm.from.$touched">
+                        <div ng-show="sendGForm.from.$error.required">Обязательное поле</div>
+                    </div>
+
                     <div class="form-group">
                         <label class="control-label col-xs-4 col-sm-4">Со счета</label>
                         <select 
                             class="col-xs-8 col-sm-8" 
                             selectpicker 
                             ng-model="transaction.from" 
-                            ng-options="safe.wallet_id as safe.name + ' (' +safe.balance_formated + ')' for safe in safes">
+                            ng-options="safe.wallet_id as safe.name + ' (' +safe.balance_formated + ')' for safe in safes"
+                            required
+                            name="from"
+                        >
                         </select>
+                        
                     </div>
+
+
 
                     <div class="form-group">
                         <div class="col-xs-8 col-sm-8 col-sm-offset-4">
@@ -32,54 +45,103 @@
                         </div>
                     </div>
 
+                    <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="sendGForm.$submitted || sendGForm.to.$touched">
+                        <div ng-show="sendGForm.to.$error.required">Обязательное поле</div>
+                        <div ng-show="sendGForm.to.$error.wallet_address">Адрес не валиден</div>
+                    </div>
+
                     <div class="form-group has-success has-feedback">
                         <label class="control-label col-xs-4 col-sm-4">
                             Получатель
                             <i 
                                 class="fa fa-lg " 
                                 ng-class="{
-                                    'text-success fa-check':transaction.is_valid_address,
-                                    'text-danger fa-question':!transaction.is_valid_address,
+                                    'text-success fa-check':!sendGForm.to.$error.wallet_address,
+                                    'text-danger fa-question':sendGForm.to.$error.wallet_address,
                                 }"
                             ></i>
                         </label>
                         <div class="col-xs-6 col-sm-6">
-                            <!-- <input 
-                                type="text" 
+                            <input 
+                                type="hidden" 
                                 class="form-control" 
                                 ng-model="transaction.to" 
+                                name="to"
                                 placeholder="счет или алиас"
-                                ng-change="validate_address()"
-                            > -->
-
-                            <angucomplete-alt 
-                                placeholder="счет или алиас"
-                                pause="100"
-                                selected-object="selectAlias"
-                                local-data="aliases"
-                                search-fields="name"
-                                title-field="name"
-                                description-field="comment"
-                                minlength="3"
-                                input-class="form-control"
-                                input-changed="inputChanged"
-                                text-no-results="Aliases not found"
-                            />
+                                wallet-address
+                                required
+                            >
+                            <div>
+                                <angucomplete-alt 
+                                    placeholder="счет или алиас"
+                                    pause="100"
+                                    selected-object="selectAlias"
+                                    local-data="aliases"
+                                    search-fields="name"
+                                    title-field="name"
+                                    description-field="comment"
+                                    minlength="3"
+                                    input-class="form-control"
+                                    input-changed="inputChanged"
+                                    initial-value="{{transaction.to}}"
+                                    text-no-results="Aliases not found"
+                                />
+                            </div>
+                            <div ng-if="!sendGForm.to.$error.wallet_address">
+                                <span ng-repeat="alias in aliases | filter : {address: transaction.to}">
+                                    <span class="label label-info">@{{alias.alias}}</span>
+                                <span>
+                            </div>
 
                             
                             
                             <!-- <span id="inputSuccess2Status" class="sr-only">(success)</span> -->
                         </div>
+
+
+
+                        <script type="text/ng-template" id="recepientHistory">
+                            <div style='margin: -10px -14px 10px; max-height: 300px; overflow: auto;'>
+                                <table class='table table-condensed'>
+                                    <tbody>
+                                        <tr ng-if="items.length" ng-repeat="item in items = (txHistory | filter : {remote_address : transaction.to})">
+                                            <td>
+                                                <a class='blocklink' href=''></a>
+                                                <a ng-repeat="contact in settings.system.contacts" href=''>{{contact.name}}</a>
+                                                <span class='account-text'>
+                                                    <span class='text-muted'>{{item.remote_address}}</span>
+                                                    <span class='moredots'>...</span>
+                                                </span>
+                                                <span ng-repeat="alias in aliases | filter : {address: transaction.to}">
+                                                    <span class="label label-info">@{{alias.alias}}</span>
+                                                <span>
+                                            </td>
+                                            <td>
+                                                <i ng-if="item.is_income" class='fa fa-lg fa-arrow-circle-o-down text-success'></i>
+                                                <i ng-if="!item.is_income" class='fa fa-lg fa-arrow-circle-o-up text-danger'></i>
+                                            </td>
+                                            <td>
+                                                <span class='nowrap'>{{item.amount | gulden}}</span>
+                                            </td>
+                                        </tr>
+                                        <tr ng-if="!items.length">
+                                            <td colspan="3">Нет истории</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </script>
+
+
+
                         <div class="col-xs-2 col-sm-2">
                             <div class="btn-group">
                                 <button 
-                                    type="button" 
                                     class="btn btn-default popover-name" 
-                                    data-placement="left"  
-                                    data-html="true" 
-                                    data-toggle="popover" 
-                                    title="История платежей по контакту" 
-                                    data-content="<div style='margin: -10px -14px 10px;'><table class='table table-condensed'><tbody><tr><td><a class='blocklink' href=''></a><a href=''>chelovek@domain.com</a><span class='account-text'><span class='text-muted'>2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class='moredots'>...</span></span>@onechelovekaccout </td><td><i class='fa fa-lg fa-arrow-circle-o-up text-danger'></i></td><td><span class='nowrap'>20.00 G </span></td></tr><tr><td><a class='blocklink' href=''></a><a href=''>chelovek@domain.com</a><span class='account-text'><span class='text-muted'>2f7oJocRhav1HUWFZP3giGepi2foJocRhav7mSQ2RnYYB4QqkxudA7hJjwhPYFScTFYi4To7wGVNhJzmyoKvpDH7Kitxq48Yr4v46hF8Ak</span><span class='moredots'>...</span></span>@onechelovekaccout </td><td><i class='fa fa-lg fa-arrow-circle-o-up text-danger'></i></td><td><span class='nowrap'>20.00 G </span></td></tr></tbody></table></div>"
+                                    popover-placement="left"  
+                                    popover-template="'recepientHistory'"
+                                    popover-title="История платежей по контакту" 
+                                    ng-disabled = "!transaction.is_valid_address"
                                 > 
                                     <i class="fa fa-lg fa-history"></i>
                                 </button>
@@ -94,19 +156,44 @@
                                 </ul>
                             </div>
                         </div>
+
+                        
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-xs-3 col-sm-3 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="sendGForm.$submitted || sendGForm.ammount.$touched">
+                            <div ng-show="sendGForm.ammount.$error.required">Обязательное поле</div>
+                        </div>
+                        <div class="col-xs-3 col-sm-3 text-danger"  ng-show="sendGForm.$submitted || sendGForm.fee.$touched">
+                            <div ng-show="sendGForm.fee.$error.required">Обязательное поле</div>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label class="control-label col-xs-4 col-sm-4">Сумма</label>
                         <div class="col-xs-3 col-sm-3">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="число" ng-model="transaction.ammount">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="число" 
+                                    ng-model="transaction.ammount"
+                                    name="ammount"
+                                    required
+                                >
                                 <span class="input-group-addon">G</span>
                             </div>
                         </div>
                         <div class="col-xs-3 col-sm-3">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="число" ng-model="transaction.fee" value="1.76">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="число" 
+                                    ng-model="transaction.fee"
+                                    name="fee"
+                                    required
+                                >
                                 <span class="input-group-addon" >G</span>
                             </div>
                         </div>
@@ -138,9 +225,6 @@
                                         ng-model="transaction.lock_time" 
                                         is-open="opened" 
                                         datepicker-options="dateOptions" 
-                                        date-disabled="disabled(date, mode)" 
-                                        ng-required="true" 
-                                        ng-change=""
                                         close-text="Close" 
                                     />
                                     <span class="input-group-btn">
@@ -185,7 +269,7 @@
                                     <a class="btn btn-block btn-lg btn-default">Отменить</a>
                                 </div>
                                 <div class="col-xs-6 col-sm-6">
-                                    <button data-target="#confirm" data-toggle="modal" ng-click="send(transaction)" class="btn btn-block btn-lg btn-primary" id="submibtn" type="button">Отправить</button> 
+                                    <button type="submit" class="btn btn-block btn-lg btn-primary" id="submibtn">Отправить</button> 
                                 </div>
                             </div>
                         </div>

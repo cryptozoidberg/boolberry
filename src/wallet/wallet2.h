@@ -11,7 +11,7 @@
 #include "include_base_utils.h"
 #include "profile_tools.h"
 
-#include "currency_core/currency_basic_impl.h"
+
 #include "currency_core/currency_boost_serialization.h"
 #include "currency_core/account_boost_serialization.h"
 
@@ -29,7 +29,7 @@
 
 #define WALLET_DEFAULT_TX_SPENDABLE_AGE                               10
 #define WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL                         10
-#define WALLET_FILE_SERIALIZATION_VERSION                             21
+#define WALLET_FILE_SERIALIZATION_VERSION                             22
 namespace tools
 {
 #pragma pack(push, 1)
@@ -55,12 +55,9 @@ namespace tools
     virtual void on_money_received(uint64_t /*height*/, const currency::transaction& /*tx*/, size_t /*out_index*/) {}
     virtual void on_money_spent(uint64_t /*height*/, const currency::transaction& /*in_tx*/, size_t /*out_index*/, const currency::transaction& /*spend_tx*/) {}
     virtual void on_transfer2(const wallet_rpc::wallet_transfer_info& wti) {}
-//    virtual void on_money_sent(const wallet_rpc::wallet_transfer_info& wti) {}
     virtual void on_pos_block_found(const currency::block& /*block*/) {}
     virtual void on_sync_progress(const uint64_t& /*percents*/) {}
   };
-
-    
 
   struct tx_dust_policy
   {
@@ -75,6 +72,7 @@ namespace tools
     {
     }
   };
+
 
   class test_generator;
 
@@ -166,7 +164,7 @@ namespace tools
     bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok, std::atomic<bool>& stop);
     void refresh(std::atomic<bool>& stop);
     
-    void push_offer(const currency::offer_details& od, currency::transaction& res_tx);
+    void push_offer(const currency::offer_details_ex& od, currency::transaction& res_tx);
     void cancel_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, currency::transaction& tx);
     void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee);
 
@@ -258,8 +256,8 @@ namespace tools
     bool build_minted_block(const currency::COMMAND_RPC_SCAN_POS::request& req, const currency::COMMAND_RPC_SCAN_POS::response& rsp);
     bool reset_history();
     bool is_transfer_unlocked(const transfer_details& td) const;
-    void set_pos_config(const currency::pos_config& pc);
-  private:
+    void get_mining_history(wallet_rpc::mining_history& hist);
+    void set_pos_config(const currency::pos_config& pc);  private:
     bool store_keys(std::string& buff, const std::string& password);
     void load_keys(const std::string& keys_file_name, const std::string& password);
     void process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b);
@@ -387,8 +385,8 @@ namespace boost
       //do not store unlock_time
       if (Archive::is_loading::value)
         x.unlock_time = x.tx.unlock_time;
-
     }
+
   }
 }
 

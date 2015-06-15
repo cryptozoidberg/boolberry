@@ -26,8 +26,8 @@
                 });
             };
 
-            this.generateMPDialog = function(oncancel){
-                dialog("views/generate_pass.html", oncancel, false, false);
+            this.generateMPDialog = function(oncancel, onsuccess){
+                dialog("views/generate_pass.html", oncancel, onsuccess, false);
             };
 
             this.requestMPDialog = function(oncancel, onsuccess, canReset){
@@ -65,9 +65,9 @@
         function($scope, backend, $modalInstance, informer, $rootScope, $timeout, PassDialogs, oncancel, onsuccess, canReset) {
             
             $scope.cancel = function(){
-                $modalInstance.close();
-                console.log('cancel');
+                
                 if(angular.isFunction(oncancel)){
+                    $modalInstance.close();
                     oncancel();
                 }
             };
@@ -95,6 +95,11 @@
 
             $scope.canReset = canReset;
 
+            if(angular.isFunction(oncancel)){
+                $scope.canCancel = true;
+            }else{
+                $scope.canCancel = false;                
+            }
 
             $scope.submit = function(appPass){
                 console.log(appPass);
@@ -132,9 +137,46 @@
     
 
     module.controller('AppController', [
-        'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs','$interval',
-        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs, $interval) {
+        'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs','$interval','Idle',
+        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs, $interval, Idle) {
         
+        // Idle events
+        $scope.$on('IdleStart', function() {
+        // the user appears to have gone idle
+            //informer.info('IdleStart');
+        });
+
+        $scope.$on('IdleWarn', function(e, countdown) {
+            // follows after the IdleStart event, but includes a countdown until the user is considered timed out
+            // the countdown arg is the number of seconds remaining until then.
+            // you can change the title or display a warning dialog from here.
+            // you can let them resume their session by calling Idle.watch()
+            // informer.info('IdleWarn');
+        });
+
+        $scope.$on('IdleTimeout', function() {
+            // the user has timed out (meaning idleDuration + timeout has passed without any activity)
+            // this is where you'd log them
+            //informer.info('IdleTimeout');
+            PassDialogs.requestMPDialog(
+                false,
+                function(){ // onsuccess
+                    Idle.watch();
+                },
+                false
+            );
+        });
+
+        $scope.$on('IdleEnd', function() {
+            // the user has come back from AFK and is doing stuff. if you are warning them, you can use this to hide the dialog
+            //informer.info('IdleEnd');
+        });
+
+        // $scope.$on('Keepalive', function() {
+        //     // do something to keep the user's session alive
+        //     informer.info('Keepalive');
+        // });
+
         backend.webkitLaunchedScript(); // webkit ready signal to backend
 
         $rootScope.appPass = false;
@@ -157,10 +199,10 @@
 
         $rootScope.pass_required_intervals = [
             0,
-            30000, //5 minutes
-            60000, //10 minutes
-            90000, //15 minutes
-            180000 //30 minutes
+            10, //5 minutes
+            600, //10 minutes
+            900, //15 minutes
+            1800 //30 minutes
         ];
 
         $rootScope.settings = {
@@ -172,7 +214,7 @@
                 is_backup_reminder: false,
                 backup_reminder_interval: 0,
                 is_use_app_pass: true,
-                password_required_interval: $rootScope.pass_required_intervals[0]
+                password_required_interval: $rootScope.pass_required_intervals[1]
             },
             mining: {
                 is_block_transfer_when_mining : true,
@@ -204,7 +246,13 @@
                 log_level : 0,
                 fav_offers_hash: []
             },
-            contacts: []
+            
+            contacts: [],
+
+            widgetColumns : {
+                'left': {},
+                'right': {}
+            } 
         };
 
         $scope.wallet_info  = {};
@@ -227,7 +275,11 @@
                             $rootScope.settings.security.is_pass_required_on_transfer = false;
                         }, 
                         function(appData){
-                        
+                            if(angular.isDefined($rootScope.settings.security.password_required_interval) && $rootScope.settings.security.password_required_interval > 0){
+                                Idle.setIdle($rootScope.settings.security.password_required_interval);
+                                Idle.watch();
+                            }
+                            
                             angular.forEach(appData,function(item){
                                 backend.openWallet(item.path, item.pass,function(data){
                                     
@@ -293,10 +345,18 @@
 
         $scope.startMining = function(wallet_id){
             backend.startPosMining(wallet_id);
+            var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            if(safe.length){
+                safe[0].is_mining_set_manual = true; // flag to understand that we want to prevent auto mining
+            }
         }
 
         $scope.stopMining = function(wallet_id){
             backend.stopPosMining(wallet_id);
+            var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+            if(safe.length){
+                safe[0].is_mining_set_manual = true; // flag to understand that we want to prevent auto mining
+            }
         }
 
         $scope.resynch = function(wallet_id){
@@ -323,6 +383,7 @@
 
         var loaded = false;
         var alias_count = 0;
+        var newVersionShown = [];
 
         backend.subscribe('update_daemon_state', function(data){// move to run
             if(data.daemon_network_state == 2){
@@ -351,6 +412,8 @@
                     });
                 };
 
+                
+
                 if(alias_count != data.alias_count){
                     alias_count = data.alias_count;
                     getAliases();
@@ -363,51 +426,54 @@
                 //     li = loader.open(loadinMessage);
                 // }
             }
+
+            var newVersionModalCtrl = function($scope, $rootScope, $modalInstance) {
+                $scope.close = function() {
+                  $modalInstance.close();
+                };
+                //var type = 'success';
+                switch($rootScope.deamon_state.last_build_displaymode){
+                    case 1:
+                        $scope.type = 'success';
+                        break;
+                    case 2:
+                        $scope.type = 'info';
+                        break;
+                    case 3:
+                        $scope.type = 'warning';
+                        break;
+                    case 4:
+                        $scope.type = 'danger';
+                        break;
+                    default:
+                        $scope.type = 'warning';
+                }
+            };
+
+            // data.last_build_displaymode = 4;
+            // data.last_build_available   = '4.0.0.1';
+            // var current_v = '4.0.0.0';
+            var current_v = backend.getVersion();
+
+            //informer.info(current_v + ' --->>>> '+data.last_build_available);
+
             $timeout(function(){
             	$rootScope.deamon_state = data;	
+                if(data.last_build_displaymode > 0 && current_v != data.last_build_available && newVersionShown.indexOf(data.last_build_available) == -1){
+                    var modalInstance = $modal.open({
+                        templateUrl: "views/new_version.html",
+                        controller: newVersionModalCtrl,
+                        size: 'md',
+                        windowClass: 'modal fade in',
+                        backdrop: false
+                    });
+                    newVersionShown.push(data.last_build_available);
+                }
             });
+
+
         });
         
-        backend.subscribe('update_wallet_info', function(data){
-            return;
-            
-
-            angular.forEach(data.wallets,function (wallet){
-                console.log('update_wallet_info');
-                console.log(data);
-                var wallet_id = wallet.wallet_id;
-                var wallet_info = wallet.wi;
-                var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-                if(safe.length){
-                    safe = safe[0];
-                }else{
-                    return;
-                }
-                angular.forEach(wallet_info, function(value,property){
-                    safe[property] = value;
-                });
-
-
-
-                safe.loaded = true;
-                safe.balance_formated = $filter('gulden')(safe.balance);
-
-                // if(angular.isUndefined(safe.history)){
-                //     backend.getRecentTransfers(wallet_id, function(data){
-                //         if(angular.isDefined(data.unconfirmed)){
-                //             data.history = data.unconfirmed.concat(data.history);
-                //         }
-                //         safe.history = data.history;
-                //         //informer.info('tr count before wallet update '+$rootScope.tr_count);
-                //         $rootScope.tr_count = $rootScope.tr_count + safe.history.length;
-                //         //informer.info('tr count after wallet update '+$rootScope.tr_count);
-                //     });
-                // }
-            });
-            // recountTotalBalance();
-        });
-
-
         backend.subscribe('update_wallet_status', function(data){
             var wallet_id = data.wallet_id;
             console.log('UPDATE WALLET STATUS :: ');
@@ -432,6 +498,10 @@
 
                     if(wallet_state == 2){ // ready
                         safe.loaded = true;
+                        if($rootScope.settings.mining.auto_mining && !safe.is_mining_set_manual){
+                            backend.startPosMining(data.wallet_id);
+                            safe.is_mining_set_manual = true;
+                        }
                     }
 
                     if(wallet_state == 3){ // error

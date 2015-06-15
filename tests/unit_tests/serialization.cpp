@@ -9,7 +9,7 @@
 #include <vector>
 #include <boost/foreach.hpp>
 #include "currency_core/currency_basic.h"
-#include "currency_core/currency_basic_impl.h"
+
 #include "serialization/serialization.h"
 #include "serialization/binary_archive.h"
 #include "serialization/json_archive.h"

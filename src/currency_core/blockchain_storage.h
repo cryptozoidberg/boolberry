@@ -58,7 +58,7 @@ namespace currency
     };
     typedef std::unordered_map<crypto::hash, block_extended_info> blocks_ext_by_hash;
     typedef std::list<blocks_ext_by_hash::iterator> alt_chain_type;
-    typedef std::unordered_map<crypto::hash, std::vector<offer_details>> offers_container;
+    typedef std::unordered_map<crypto::hash, std::vector<offer_details_ex>> offers_container;
 
 
     blockchain_storage(tx_memory_pool& tx_pool);
@@ -81,7 +81,7 @@ namespace currency
     bool get_block_extended_info_by_hash(const crypto::hash &h, block_extended_info &blk);
     bool get_block_by_height(uint64_t h, block &blk);
     void get_all_known_block_ids(std::list<crypto::hash> &main, std::list<crypto::hash> &alt, std::list<crypto::hash> &invalid);
-
+    //bool dump_all_offers(const std::string& path);
     template<class archive_t>
     void serialize(archive_t & ar, const unsigned int version);
 
@@ -130,6 +130,7 @@ namespace currency
     uint64_t get_seconds_between_last_n_block(size_t n);
     bool print_transactions_statistics();
     bool update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent);
+    uint64_t total_coins();
 
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     wide_difficulty_type block_difficulty(size_t i);
@@ -167,7 +168,7 @@ namespace currency
 
     //exchange access functions
     //this function mostly made for debug purposes
-    bool get_all_offers(std::list<offer_details>& offers);
+    bool get_all_offers(std::list<offer_details_ex>& offers);
 
 
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
@@ -320,7 +321,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          52
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          54
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 

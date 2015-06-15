@@ -16,7 +16,8 @@ using namespace epee;
 #include "string_tools.h"
 #include "syncobj.h"
 #include "math_helper.h"
-#include "currency_basic_impl.h"
+
+#include "currency_format_utils.h"
 #include "verification_context.h"
 #include "crypto/hash.h"
 #include "common/boost_serialization_helper.h"
