@@ -14,7 +14,7 @@ using namespace epee;
 #include "currency_core/currency_format_utils.h"
 #include "rpc/core_rpc_server_commands_defs.h"
 #include "misc_language.h"
-#include "currency_core/currency_basic_impl.h"
+
 #include "common/boost_serialization_helper.h"
 #include "crypto/crypto.h"
 #include "serialization/binary_utils.h"
@@ -838,7 +838,7 @@ void wallet2::get_mining_history(wallet_rpc::mining_history& hist)
 {
   for (auto& tr : m_transfer_history)
   {
-    if (currency::is_coinbase(tr.tx))
+    if (currency::is_coinbase(tr.tx) && tr.tx.vin.size() == 2)
     {
       tools::wallet_rpc::mining_history_entry mhe = AUTO_VAL_INIT(mhe);
       mhe.a = tr.amount;

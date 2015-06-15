@@ -9,7 +9,7 @@
 #include <boost/archive/binary_iarchive.hpp>
 
 #include "include_base_utils.h"
-#include "currency_basic_impl.h"
+
 #include "blockchain_storage.h"
 #include "currency_format_utils.h"
 #include "currency_boost_serialization.h"

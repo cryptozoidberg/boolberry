@@ -7,7 +7,7 @@
 #include <cstdint>
 
 #include "common/base58.cpp"
-#include "currency_core/currency_basic_impl.h"
+
 #include "serialization/binary_utils.h"
 
 using namespace tools;

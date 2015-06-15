@@ -20,7 +20,6 @@
 
 #include "currency_core/account_boost_serialization.h"
 #include "currency_core/currency_basic.h"
-#include "currency_core/currency_basic_impl.h"
 #include "currency_core/currency_format_utils.h"
 #include "currency_core/currency_core.h"
 #include "currency_core/currency_boost_serialization.h"

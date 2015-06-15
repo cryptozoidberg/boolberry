@@ -6,7 +6,7 @@
 // 
 // #include <boost/program_options/variables_map.hpp>
 // 
-// #include "currency_core/currency_basic_impl.h"
+// 
 // #include "currency_core/verification_context.h"
 // #include <unordered_map>
 // 

@@ -11,7 +11,7 @@ using namespace epee;
 #include "common/command_line.h"
 #include "currency_core/currency_format_utils.h"
 #include "currency_core/account.h"
-#include "currency_core/currency_basic_impl.h"
+
 #include "misc_language.h"
 #include "crypto/hash.h"
 #include "core_rpc_server_error_codes.h"
@@ -80,7 +80,7 @@ namespace currency
       res.status = CORE_RPC_STATUS_BUSY; 
       return true; 
     }
-
+     
     res.height = m_core.get_current_blockchain_height();
     res.pos_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(true).convert_to<std::string>();
     res.pow_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(false).convert_to<uint64_t>();

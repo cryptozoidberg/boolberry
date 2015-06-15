@@ -11,7 +11,7 @@
 #include "include_base_utils.h"
 #include "profile_tools.h"
 
-#include "currency_core/currency_basic_impl.h"
+
 #include "currency_core/currency_boost_serialization.h"
 #include "currency_core/account_boost_serialization.h"
 

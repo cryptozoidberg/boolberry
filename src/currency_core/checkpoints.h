@@ -4,8 +4,8 @@
 
 #pragma once
 #include <map>
-#include "currency_basic_impl.h"
 
+#include "currency_core/currency_format_utils.h"
 
 namespace currency
 {

@@ -9,7 +9,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include "currency_core/account.h"
-#include "currency_core/currency_basic_impl.h"
+
 #include "wallet/wallet2.h"
 #include "console_handler.h"
 #include "password_container.h"

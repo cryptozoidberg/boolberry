@@ -10,7 +10,7 @@
 #include "account.h"
 #include "warnings.h"
 #include "crypto/crypto.h"
-#include "currency_core/currency_basic_impl.h"
+
 #include "currency_core/currency_format_utils.h"
 using namespace std;
 
