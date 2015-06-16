@@ -55,7 +55,7 @@ namespace currency
     // load/store operations
     bool init(const std::string& config_folder);
     bool deinit();
-    bool fill_block_template(block &bl, size_t median_size, uint64_t already_generated_coins, size_t &total_size, uint64_t &fee);
+    bool fill_block_template(block &bl, size_t median_size, uint64_t already_generated_coins, size_t &total_size, uint64_t &fee, uint64_t height, const wide_difficulty_type& pos_diff);
     bool get_transactions(std::list<transaction>& txs);
     bool get_transaction(const crypto::hash& h, transaction& tx);
     size_t get_transactions_count();

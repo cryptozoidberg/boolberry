@@ -98,6 +98,7 @@ namespace currency
   }
   //------------------------------------------------------------------
   bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins,
+    const wide_difficulty_type pos_diff,
     size_t current_block_size,
     uint64_t fee,
     const account_public_address &miner_address,
@@ -109,7 +110,7 @@ namespace currency
     const pos_entry& pe)
   {
     uint64_t block_reward;
-    if (!get_block_reward(median_size, current_block_size, already_generated_coins, block_reward))
+    if (!get_block_reward(median_size, current_block_size, already_generated_coins, block_reward, height, pos_diff))
     {
       LOG_PRINT_L0("Block is too big");
       return false;
@@ -159,7 +160,7 @@ namespace currency
     return construct_miner_tx(height, median_size, already_generated_coins, current_block_size, fee, destinations, tx, extra_nonce, max_outs, alias, pos, pe);
   }
   //------------------------------------------------------------------
-  bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins, 
+  bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins,
                                                              size_t current_block_size, 
                                                              uint64_t fee, 
                                                              const std::vector<tx_destination_entry>& destinations,
@@ -1190,10 +1191,11 @@ namespace currency
     uint64_t already_generated_coins = 0;
 //    uint64_t emission_supply = EMISSION_SUPPLY;
     uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
+    uint64_t h = 0;
     for(uint64_t day = 0; day != 365*10; ++day)
     {
       uint64_t emission_reward = 0;
-      get_block_reward(0, 0, already_generated_coins,emission_reward);
+      get_block_reward(0, 0, already_generated_coins, emission_reward, h, 0);
       if(!(day%183))
       {
         std::cout << std::left 
@@ -1206,8 +1208,11 @@ namespace currency
       
       for(size_t i = 0; i != 720; i++)
       {
-        get_block_reward(0, 0, already_generated_coins, emission_reward);
+        h++;
+        get_block_reward(0, 0, already_generated_coins, emission_reward, h, 0);
         already_generated_coins += emission_reward;
+        if (h < 60000 && i > 360)
+          break;
       }
     }
   }
@@ -1480,11 +1485,30 @@ namespace currency
     return CURRENCY_MAX_TX_SIZE;
   }
   //-----------------------------------------------------------------------------------------------
-  bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t &reward)
+  uint64_t get_base_block_reward(uint64_t already_generated_coins, uint64_t height, const wide_difficulty_type& pos_diff)
   {
-    uint64_t base_reward = (EMISSION_SUPPLY - already_generated_coins) >> EMISSION_CURVE_CHARACTER;
+    if (!height)
+      return PREMINE_AMOUNT;
+    
+    uint64_t base_reward = 0;
+    //emission curve
+    if (height < 910000)
+    {
+      base_reward = height*(920000 - height) * 5 / 16;
+    }
+    else
+    {
+      base_reward = ((already_generated_coins - pos_diff / 100) / 50) / 262800;
+    }
+
     //crop dust
     base_reward = base_reward - base_reward%DEFAULT_DUST_THRESHOLD;
+    return base_reward;
+  }
+  //-----------------------------------------------------------------------------------------------
+  bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t &reward, uint64_t height, const wide_difficulty_type& pos_diff)
+  {
+    uint64_t base_reward = get_base_block_reward(already_generated_coins, height, pos_diff);
 
 
     //make it soft

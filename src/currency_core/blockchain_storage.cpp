@@ -693,7 +693,12 @@ bool blockchain_storage::prevalidate_miner_transaction(const block& b, uint64_t 
   return true;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::validate_miner_transaction(const block& b, size_t cumulative_block_size, uint64_t fee, uint64_t& base_reward, uint64_t already_generated_coins)
+bool blockchain_storage::validate_miner_transaction(const block& b, 
+                                                    size_t cumulative_block_size, 
+                                                    uint64_t fee, 
+                                                    uint64_t& base_reward, 
+                                                    uint64_t already_generated_coins, 
+                                                    const wide_difficulty_type& pos_diff)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   //validate reward
@@ -713,7 +718,7 @@ bool blockchain_storage::validate_miner_transaction(const block& b, size_t cumul
 
   std::vector<size_t> last_blocks_sizes;
   get_last_n_blocks_sizes(last_blocks_sizes, CURRENCY_REWARD_BLOCKS_WINDOW);
-  if(!get_block_reward(misc_utils::median(last_blocks_sizes), cumulative_block_size, already_generated_coins, base_reward))
+  if (!get_block_reward(misc_utils::median(last_blocks_sizes), cumulative_block_size, already_generated_coins, base_reward, get_block_height(b), pos_diff))
   {
     LOG_PRINT_L0("block size " << cumulative_block_size << " is bigger than allowed for this blockchain");
     return false;
@@ -778,7 +783,7 @@ bool blockchain_storage::create_block_template(block& b,
 {
   size_t median_size;
   uint64_t already_generated_coins;
-
+  wide_difficulty_type pos_diff = 0;
   CRITICAL_REGION_BEGIN(m_blockchain_lock);
   b.major_version = CURRENT_BLOCK_MAJOR_VERSION;
   b.minor_version = CURRENT_BLOCK_MINOR_VERSION;
@@ -792,6 +797,7 @@ bool blockchain_storage::create_block_template(block& b,
   }
 
   diffic = get_next_diff_conditional(pos);
+  pos_diff = pos ? diffic : get_next_diff_conditional(true);
 
   CHECK_AND_ASSERT_MES(diffic, false, "difficulty owverhead.");
 
@@ -805,7 +811,8 @@ bool blockchain_storage::create_block_template(block& b,
 
   size_t txs_size;
   uint64_t fee;
-  if (!m_tx_pool.fill_block_template(b, median_size, already_generated_coins, txs_size, fee)) {
+  if (!m_tx_pool.fill_block_template(b, median_size, already_generated_coins, txs_size, fee, height, pos_diff))
+  {
     return false;
   }
   /*
@@ -814,6 +821,7 @@ bool blockchain_storage::create_block_template(block& b,
   */
   //make blocks coin-base tx looks close to real coinbase tx to get truthful blob size
   bool r = construct_miner_tx(height, median_size, already_generated_coins,  
+                                                   pos_diff,
                                                    txs_size, 
                                                    fee, 
                                                    miner_address, 
@@ -831,6 +839,7 @@ bool blockchain_storage::create_block_template(block& b,
   size_t cumulative_size = txs_size + get_object_blobsize(b.miner_tx);
   for (size_t try_count = 0; try_count != 10; ++try_count) {
     r = construct_miner_tx(height, median_size, already_generated_coins, 
+                                                pos_diff,
                                                 cumulative_size, 
                                                 fee, 
                                                 miner_address, 
@@ -2514,6 +2523,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   //check proof of work
   TIME_MEASURE_START(target_calculating_time);
   wide_difficulty_type current_diffic = get_next_diff_conditional(is_pos_bl);
+  wide_difficulty_type pos_diffic = is_pos_bl ? current_diffic : get_next_diff_conditional(true);
   CHECK_AND_ASSERT_MES(current_diffic, false, "!!!!!!!!! difficulty overhead !!!!!!!!!");
   TIME_MEASURE_FINISH(target_calculating_time);
 
@@ -2630,7 +2640,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
 
   uint64_t base_reward = 0;
   uint64_t already_generated_coins = m_blocks.size() ? m_blocks.back().already_generated_coins:0;
-  if(!validate_miner_transaction(bl, cumulative_block_size, fee_summary, base_reward, already_generated_coins))
+  if (!validate_miner_transaction(bl, cumulative_block_size, fee_summary, base_reward, already_generated_coins, pos_diffic))
   {
     LOG_PRINT_L0("Block with id: " << id
       << " have wrong miner transaction");

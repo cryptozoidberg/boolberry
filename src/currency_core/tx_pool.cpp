@@ -490,7 +490,14 @@ namespace currency
     return ss.str();
   }
   //---------------------------------------------------------------------------------
-  bool tx_memory_pool::fill_block_template(block &bl, size_t median_size, uint64_t already_generated_coins, size_t &total_size, uint64_t &fee) {
+  bool tx_memory_pool::fill_block_template(block &bl, 
+    size_t median_size, 
+    uint64_t already_generated_coins, 
+    size_t &total_size, 
+    uint64_t &fee, 
+    uint64_t height, 
+    const wide_difficulty_type& pos_diff)
+  {
     typedef transactions_container::value_type txv;
     CRITICAL_REGION_LOCAL(m_transactions_lock);
 
@@ -505,7 +512,7 @@ namespace currency
     size_t current_size = 0;
     uint64_t current_fee = 0;
     uint64_t best_money;
-    if (!get_block_reward(median_size, CURRENCY_COINBASE_BLOB_RESERVED_SIZE, already_generated_coins, best_money)) {
+    if (!get_block_reward(median_size, CURRENCY_COINBASE_BLOB_RESERVED_SIZE, already_generated_coins, best_money, height, pos_diff)) {
       LOG_ERROR("Block with just a miner transaction is already too large!");
       return false;
     }
@@ -543,7 +550,8 @@ namespace currency
       current_fee += tx.second.fee;
 
       uint64_t current_reward;
-      if (!get_block_reward(median_size, current_size + CURRENCY_COINBASE_BLOB_RESERVED_SIZE, already_generated_coins, current_reward)) {
+      if (!get_block_reward(median_size, current_size + CURRENCY_COINBASE_BLOB_RESERVED_SIZE, already_generated_coins, current_reward, height, pos_diff))
+      {
         break;
       }
 

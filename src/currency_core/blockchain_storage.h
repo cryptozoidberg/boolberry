@@ -274,7 +274,7 @@ namespace currency
     bool handle_block_to_main_chain(const block& bl, const crypto::hash& id, block_verification_context& bvc);
     bool handle_alternative_block(const block& b, const crypto::hash& id, block_verification_context& bvc);
     bool prevalidate_miner_transaction(const block& b, uint64_t height, bool pos);
-    bool validate_miner_transaction(const block& b, size_t cumulative_block_size, uint64_t fee, uint64_t& base_reward, uint64_t already_generated_coins);
+    bool validate_miner_transaction(const block& b, size_t cumulative_block_size, uint64_t fee, uint64_t& base_reward, uint64_t already_generated_coins, const wide_difficulty_type& pos_diff);
     bool validate_transaction(const block& b, uint64_t height, const transaction& tx);
     bool rollback_blockchain_switching(std::list<block>& original_chain, size_t rollback_height);
     bool add_transaction_from_block(const transaction& tx, const crypto::hash& tx_id, const crypto::hash& bl_id, uint64_t bl_height, uint64_t timestamp);

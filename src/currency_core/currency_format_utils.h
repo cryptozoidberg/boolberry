@@ -67,6 +67,7 @@ namespace currency
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx, crypto::hash& tx_hash, crypto::hash& tx_prefix_hash);
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx);  
   bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins, 
+                                                             const wide_difficulty_type pos_diff,
                                                              size_t current_block_size, 
                                                              uint64_t fee, 
                                                              const account_public_address &miner_address, 
@@ -206,7 +207,7 @@ namespace currency
   /************************************************************************/
   size_t get_max_block_size();
   size_t get_max_tx_size();
-  bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t &reward);
+  bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t &reward, uint64_t height, const wide_difficulty_type& pos_diff);
   uint8_t get_account_address_checksum(const public_address_outer_blob& bl);
   std::string get_account_address_as_str(const account_public_address& adr);
   bool get_account_address_from_str(account_public_address& adr, const std::string& str);

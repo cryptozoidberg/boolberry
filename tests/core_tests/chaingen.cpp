@@ -108,7 +108,7 @@ void test_generator::add_block(const currency::block& blk,
 {
   const size_t block_size = tsx_size + get_object_blobsize(blk.miner_tx);
   uint64_t block_reward;
-  get_block_reward(misc_utils::median(block_sizes), block_size, already_generated_coins, block_reward);
+  get_block_reward(misc_utils::median(block_sizes), block_size, already_generated_coins, block_reward, currency::get_block_height(blk), 0);
 
   m_blocks_info[get_block_hash(blk)] = block_info(blk, already_generated_coins + block_reward, block_size, cum_diff, tx_list, ks_hash);
 }
@@ -1021,7 +1021,7 @@ bool construct_miner_tx_manually(size_t height, uint64_t already_generated_coins
 
   // This will work, until size of constructed block is less then CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE
   uint64_t block_reward;
-  if (!get_block_reward(0, 0, already_generated_coins, block_reward))
+  if (!get_block_reward(0, 0, already_generated_coins, block_reward, height, 0))
   {
     LOG_PRINT_L0("Block is too big");
     return false;
