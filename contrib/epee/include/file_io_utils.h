@@ -330,11 +330,12 @@ namespace file_io_utils
 		try
 		{
 			std::ifstream fstream;
-			fstream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+			//fstream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 			fstream.open(path_to_file, std::ios_base::binary | std::ios_base::in | std::ios::ate);
-
+      if (!fstream.good())
+        return false;
 			std::ifstream::pos_type file_size = fstream.tellg();
-			
+
 			if(file_size > 1000000000)
 				return false;//don't go crazy
 			size_t file_size_t = static_cast<size_t>(file_size);
@@ -343,6 +344,9 @@ namespace file_io_utils
 
 			fstream.seekg (0, std::ios::beg);
 			fstream.read((char*)target_str.data(), target_str.size());
+      if (!fstream.good())
+        return false;
+
 			fstream.close();
 			return true;
 		}

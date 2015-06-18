@@ -85,13 +85,14 @@ bool gen_pos_basic_tests::generate(std::vector<test_event_entry>& events) const
   od.amount_lui = 1000000000;
   od.amount_etc = 22222222;
   od.target = "USD";
-  od.location = "USA, New York City";
+  od.location_country = "US";
+  od.location_city = "New York City";
   od.contacts = "skype: zina; icq: 12313212; email: zina@zina.com; mobile: +621234567834";
   od.comment = "The best ever rate in NYC!!!";
   od.payment_types = "BTC;BANK;CASH";
   od.expiration_time = 10;
 
-  MAKE_TX_LIST_START_WITH_ATTACHS(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a, attachments);
+  MAKE_TX_LIST_START_WITH_ATTACHS(events, txs_blk, miner_account, some_account_1, MK_TEST_COINS(1), blk_33_a, attachments);
   //MAKE_TX_LIST_OFFER(events, txs_blk, miner_account, some_account_1, MK_COINS(1), blk_33_a, offers);
 
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_35, blk_34, miner_account, txs_blk);
@@ -103,11 +104,11 @@ bool gen_pos_basic_tests::generate(std::vector<test_event_entry>& events) const
 
 bool gen_pos_basic_tests::configure_core(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  currency::pos_config pc = get_default_pos_config();
+  currency::core_runtime_config pc = c.get_blockchain_storage().get_core_runtime_config();
   pc.min_coinage = TESTS_POS_CONFIG_MIN_COINAGE; //four blocks
   pc.pos_minimum_heigh = TESTS_POS_CONFIG_POS_MINIMUM_HEIGH; //four blocks
 
-  c.get_blockchain_storage().set_pos_config(pc);
+  c.get_blockchain_storage().set_core_runtime_config(pc);
   return true;
 }
 bool gen_pos_basic_tests::configure_check_height1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
@@ -126,7 +127,7 @@ bool gen_pos_basic_tests::configure_check_height2(currency::core& c, size_t ev_i
 
 bool gen_pos_basic_tests::check_exchange_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  std::list<offer_details> offers;
+  std::list<offer_details_ex> offers;
   c.get_blockchain_storage().get_all_offers(offers);
 
   CHECK_EQ(offers.size(), 1);

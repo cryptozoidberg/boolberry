@@ -105,8 +105,8 @@ bool gen_uint_overflow_1::generate(std::vector<test_event_entry>& events) const
   // Problem 2. total_fee overflow, block_reward overflow
   std::list<currency::transaction> txs_1;
   // Create txs with huge fee
-  txs_1.push_back(construct_tx_with_fee(events, blk_3, bob_account, alice_account, MK_COINS(1), TOTAL_MONEY_SUPPLY - MK_COINS(1)));
-  txs_1.push_back(construct_tx_with_fee(events, blk_3, bob_account, alice_account, MK_COINS(1), TOTAL_MONEY_SUPPLY - MK_COINS(1)));
+  txs_1.push_back(construct_tx_with_fee(events, blk_3, bob_account, alice_account, MK_TEST_COINS(1), TOTAL_MONEY_SUPPLY - MK_TEST_COINS(1)));
+  txs_1.push_back(construct_tx_with_fee(events, blk_3, bob_account, alice_account, MK_TEST_COINS(1), TOTAL_MONEY_SUPPLY - MK_TEST_COINS(1)));
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_4, blk_3r, miner_account, txs_1);
 
   return true;

@@ -871,6 +871,13 @@ namespace currency
       i++;
     }
 
+    //if (!check_money_overflow(tx))
+    //{
+    //  LOG_ERROR("tx have money overflow after construct: " << get_transaction_hash(tx));
+    //  return false;
+    //}
+
+
     LOG_PRINT2("construct_tx.log", "transaction_created: " << get_transaction_hash(tx) << ENDL << obj_to_json_str(tx) << ENDL << ss_ring_s.str() , LOG_LEVEL_3);
 
     return true;
@@ -1494,11 +1501,16 @@ namespace currency
     //emission curve
     if (height < 910000)
     {
+      //------------------------------------------------------------
+      //we did this tiny workaround to make easier life of coretests
+      if (height < 100)
+        height = 100;
+      //------------------------------------------------------------
       base_reward = height*(920000 - height) * 5 / 16;
     }
     else
     {
-      base_reward = ((already_generated_coins - pos_diff / 100) / 50) / 262800;
+      base_reward = ((already_generated_coins - (pos_diff / 100).convert_to<uint64_t>()) / 50) / 262800;
     }
 
     //crop dust

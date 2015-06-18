@@ -55,7 +55,7 @@ bool put_alias_via_tx_to_list(std::vector<test_event_entry>& events,
     tx_set,
     miner_acc,
     miner_acc,
-    MK_COINS(1),
+    MK_TEST_COINS(1),
     0,
     head_block,
     CURRENCY_TO_KEY_OUT_RELAXED,
@@ -72,7 +72,7 @@ bool put_next_block_with_alias_in_tx(std::vector<test_event_entry>& events,
                                      test_generator& generator)
 {
 
-    MAKE_TX_LIST_START(events, txs_0, miner_acc, miner_acc, MK_COINS(1) + 1, head_block);
+    MAKE_TX_LIST_START(events, txs_0, miner_acc, miner_acc, MK_TEST_COINS(1) + 1, head_block);
     
     if (!put_alias_via_tx_to_list(events, txs_0, head_block, alias_name, miner_acc, miner_acc, generator))
       return false;
@@ -155,7 +155,7 @@ bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
   DO_CALLBACK(events, "check_height_not_changed");
 
   //check notmal tx in tx pool
-  MAKE_TX_LIST_START(events, txs_0, miner_account, miner_account, MK_COINS(1), blk_9);
+  MAKE_TX_LIST_START(events, txs_0, miner_account, miner_account, MK_TEST_COINS(1), blk_9);
 
   if (!put_alias_via_tx_to_list(events, txs_0, blk_9, FOURTH_NAME, miner_account, miner_account, generator))
     return false;
@@ -166,7 +166,7 @@ bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
   DO_CALLBACK(events, "check_height_changed");
   //
   //check duplicate tx in tx pool
-  MAKE_TX_LIST_START(events, txs_2, miner_account, miner_account, MK_COINS(1), blk_13);
+  MAKE_TX_LIST_START(events, txs_2, miner_account, miner_account, MK_TEST_COINS(1), blk_13);
 
   if (!put_alias_via_tx_to_list(events, txs_2, blk_13, SIX_NAME, miner_account, miner_account, generator))
     return false;
@@ -178,7 +178,7 @@ bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
   DO_CALLBACK(events, "check_height_not_changed");
   
   //try to put more alias then allowed
-  MAKE_TX_LIST_START(events, txs_3, miner_account, miner_account, MK_COINS(1), blk_13);
+  MAKE_TX_LIST_START(events, txs_3, miner_account, miner_account, MK_TEST_COINS(1), blk_13);
   for (size_t i = 0; i != MAX_ALIAS_PER_BLOCK + 2; i++)
   {
     if (!put_alias_via_tx_to_list(events, txs_3, blk_13, std::string(SIX_NAME) + std::to_string(i), miner_account, miner_account, generator))

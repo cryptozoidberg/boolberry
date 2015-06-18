@@ -39,7 +39,7 @@ bool cumulative_difficulty_adjustment_test::generate(std::vector<test_event_entr
 
 
   MAKE_NEXT_BLOCK(events, blk_1, blk_0, miner_account);
-  REWIND_BLOCKS_N(events, blk_11, blk_1, miner_account, 10);
+  REWIND_BLOCKS_N(events, blk_11, blk_1, miner_account, 15);
   MAKE_NEXT_POS_BLOCK(events, blk_12, blk_11, miner_account, coin_stake_sources);
   //DO_CALLBACK(events, "configure_check_height1");
 
@@ -79,11 +79,11 @@ bool cumulative_difficulty_adjustment_test::generate(std::vector<test_event_entr
 
 bool cumulative_difficulty_adjustment_test::configure_core(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  currency::pos_config pc = get_default_pos_config();
+  currency::core_runtime_config pc = get_default_core_runtime_config();
   pc.min_coinage = TESTS_POS_CONFIG_MIN_COINAGE; //four blocks
   pc.pos_minimum_heigh = TESTS_POS_CONFIG_POS_MINIMUM_HEIGH; //four blocks
 
-  c.get_blockchain_storage().set_pos_config(pc);
+  c.get_blockchain_storage().set_core_runtime_config(pc);
   return true;
 }
 bool cumulative_difficulty_adjustment_test::configure_check_height1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)

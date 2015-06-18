@@ -12,11 +12,11 @@ using namespace currency;
 
 namespace
 {
-  bool construct_miner_tx_by_size(transaction& miner_tx, uint64_t height, uint64_t already_generated_coins,
+  bool construct_miner_tx_by_size(transaction& miner_tx, uint64_t height, uint64_t already_generated_coins, wide_difficulty_type pos_diff,
     const account_public_address& miner_address, std::vector<size_t>& block_sizes, size_t target_tx_size,
     size_t target_block_size, uint64_t fee = 0)
   {
-    if (!construct_miner_tx(height, misc_utils::median(block_sizes), already_generated_coins, target_block_size, fee, miner_address, miner_tx))
+    if (!construct_miner_tx(height, misc_utils::median(block_sizes), already_generated_coins, pos_diff, target_block_size, fee, miner_address, miner_tx))
       return false;
 
     size_t current_size = get_object_blobsize(miner_tx);
@@ -57,7 +57,7 @@ namespace
     median = std::max(median, static_cast<size_t>(CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE));
 
     transaction miner_tx;
-    bool r = construct_miner_tx_by_size(miner_tx, get_block_height(blk_prev) + 1, generator.get_already_generated_coins(blk_prev),
+    bool r = construct_miner_tx_by_size(miner_tx, get_block_height(blk_prev) + 1, generator.get_already_generated_coins(blk_prev), 0,
       miner_account.get_keys().m_account_address, block_sizes, 2 * median, 2 * median);
     if (!r)
       return false;
@@ -148,21 +148,21 @@ bool gen_block_reward::generate(std::vector<test_event_entry>& events) const
     return false;
 
   // Test: fee increases block reward
-  transaction tx_0(construct_tx_with_fee(events, blk_5, miner_account, bob_account, MK_COINS(1), 3 * TESTS_DEFAULT_FEE));
+  transaction tx_0(construct_tx_with_fee(events, blk_5, miner_account, bob_account, MK_TEST_COINS(1), 3 * TESTS_DEFAULT_FEE));
   MAKE_NEXT_BLOCK_TX1(events, blk_6, blk_5r, miner_account, tx_0);
   DO_CALLBACK(events, "mark_checked_block");
 
   // Test: fee from all block transactions increase block reward
   std::list<transaction> txs_0;
-  txs_0.push_back(construct_tx_with_fee(events, blk_5, miner_account, bob_account, MK_COINS(1), 5 * TESTS_DEFAULT_FEE));
-  txs_0.push_back(construct_tx_with_fee(events, blk_5, miner_account, bob_account, MK_COINS(1), 7 * TESTS_DEFAULT_FEE));
+  txs_0.push_back(construct_tx_with_fee(events, blk_5, miner_account, bob_account, MK_TEST_COINS(1), 5 * TESTS_DEFAULT_FEE));
+  txs_0.push_back(construct_tx_with_fee(events, blk_5, miner_account, bob_account, MK_TEST_COINS(1), 7 * TESTS_DEFAULT_FEE));
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_7, blk_6, miner_account, txs_0);
   DO_CALLBACK(events, "mark_checked_block");
 
   // Test: block reward == transactions fee
   {
-    transaction tx_1 = construct_tx_with_fee(events, blk_5, miner_account, bob_account, MK_COINS(1), 11 * TESTS_DEFAULT_FEE);
-    transaction tx_2 = construct_tx_with_fee(events, blk_5, miner_account, bob_account, MK_COINS(1), 13 * TESTS_DEFAULT_FEE);
+    transaction tx_1 = construct_tx_with_fee(events, blk_5, miner_account, bob_account, MK_TEST_COINS(1), 11 * TESTS_DEFAULT_FEE);
+    transaction tx_2 = construct_tx_with_fee(events, blk_5, miner_account, bob_account, MK_TEST_COINS(1), 13 * TESTS_DEFAULT_FEE);
     size_t txs_1_size = get_object_blobsize(tx_1) + get_object_blobsize(tx_2);
     uint64_t txs_fee = get_tx_fee(tx_1) + get_tx_fee(tx_2);
 
@@ -171,7 +171,7 @@ bool gen_block_reward::generate(std::vector<test_event_entry>& events) const
     size_t median = misc_utils::median(block_sizes);
 
     transaction miner_tx;
-    bool r = construct_miner_tx_by_size(miner_tx, get_block_height(blk_7) + 1, generator.get_already_generated_coins(blk_7),
+    bool r = construct_miner_tx_by_size(miner_tx, get_block_height(blk_7) + 1, generator.get_already_generated_coins(blk_7), 0,
       miner_account.get_keys().m_account_address, block_sizes, 2 * median - txs_1_size, 2 * median, txs_fee);
     if (!r)
       return false;

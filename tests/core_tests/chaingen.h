@@ -26,9 +26,9 @@
 #include "misc_language.h"
 #include "wallet/wallet2.h"
 
-#define MK_COINS(amount) (UINT64_C(amount) * COIN)
-#define TESTS_DEFAULT_FEE TX_POOL_MINIMUM_FEE//((uint64_t)1000000) // pow(10, 6)
-#define TESTS_POS_CONFIG_MIN_COINAGE  4
+#define MK_TEST_COINS(amount) (UINT64_C(amount) * COIN/1000)
+#define TESTS_DEFAULT_FEE                   TX_POOL_MINIMUM_FEE/1000  
+#define TESTS_POS_CONFIG_MIN_COINAGE        4
 #define TESTS_POS_CONFIG_POS_MINIMUM_HEIGH  4
 
 namespace concolor
@@ -557,6 +557,10 @@ inline bool replay_events_through_core(currency::core& cr, const std::vector<tes
   TRY_ENTRY();
 
   //init core here
+  currency::core_runtime_config cc = cr.get_blockchain_storage().get_core_runtime_config();
+  cc.tx_pool_min_fee = TESTS_DEFAULT_FEE;
+  cr.get_blockchain_storage().set_core_runtime_config(cc);
+
 
   CHECK_AND_ASSERT_MES(typeid(currency::block) == events[0].type(), false, "First event must be genesis block creation");
   cr.set_genesis_block(boost::get<currency::block>(events[0]));
@@ -754,7 +758,7 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
   currency::transaction t = AUTO_VAL_INIT(t);
   std::vector<currency::tx_source_entry> sources;
   std::vector<currency::tx_destination_entry> destinations;
-  fill_tx_sources_and_destinations(events, blk_head, sender_account_keys, rcvr_account_keys, MK_COINS(1), TESTS_DEFAULT_FEE, 0, sources, destinations, true);
+  fill_tx_sources_and_destinations(events, blk_head, sender_account_keys, rcvr_account_keys, MK_TEST_COINS(1), TESTS_DEFAULT_FEE, 0, sources, destinations, true);
 
   bool r = construct_broken_tx(sender_account_keys.get_keys(), sources, destinations, std::vector<extra_v>(), att, t, 0, CURRENCY_TO_KEY_OUT_RELAXED, cb);
   txs_set.push_back(t);

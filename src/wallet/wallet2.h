@@ -25,7 +25,7 @@
 #include "core_default_rpc_proxy.h"
 #include "wallet_errors.h"
 #include "eos/portable_archive.hpp"
-#include "currency_core/pos_config.h"
+#include "currency_core/core_runtime_config.h"
 
 #define WALLET_DEFAULT_TX_SPENDABLE_AGE                               10
 #define WALLET_POS_MINT_CHECK_HEIGHT_INTERVAL                         10
@@ -91,7 +91,7 @@ namespace tools
                 height_of_start_sync(0), 
                 last_sync_percent(0)
     {
-      m_pos_config = currency::get_default_pos_config();
+      m_core_runtime_config = currency::get_default_core_runtime_config();
     };
     struct transfer_details
     {
@@ -257,7 +257,7 @@ namespace tools
     bool reset_history();
     bool is_transfer_unlocked(const transfer_details& td) const;
     void get_mining_history(wallet_rpc::mining_history& hist);
-    void set_pos_config(const currency::pos_config& pc);  private:
+    void set_core_runtime_config(const currency::core_runtime_config& pc);  private:
     bool store_keys(std::string& buff, const std::string& password);
     void load_keys(const std::string& keys_file_name, const std::string& password);
     void process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b);
@@ -317,7 +317,7 @@ namespace tools
     std::shared_ptr<i_wallet2_callback> m_wcallback;
     uint64_t height_of_start_sync;
     uint64_t last_sync_percent;
-    currency::pos_config m_pos_config;
+    currency::core_runtime_config m_core_runtime_config;
     
  
   };

@@ -164,7 +164,8 @@ namespace currency
     uint64_t amount_lui;       //amount of lui
     uint64_t amount_etc;       //amount of other currency or goods
     std::string target;        //[max 30 characters] currency / goods
-    std::string location;      //[max 50 characters] geo-location
+    std::string location_country;   //US
+    std::string location_city;      //ChIJD7fiBh9u5kcRYJSMaMOCCwQ (google geo-autocomplete id)
     std::string contacts;      //[max 140 characters] (Skype, mail, ICQ, etc., website)
     std::string comment;       //[max 160 characters]
     std::string payment_types; //[max 20 characters ]money accept type(bank transaction, internet money, cash, etc)
@@ -175,7 +176,8 @@ namespace currency
       VARINT_FIELD(amount_lui)
       VARINT_FIELD(amount_etc)
       VALUE(target)
-      VALUE(location)
+      VALUE(location_country)
+      VALUE(location_city)
       VALUE(contacts)
       VALUE(comment)
       VALUE(payment_types)
@@ -441,7 +443,7 @@ namespace currency
   */
 
 
-    struct offer_details_ex : public currency::offer_details
+  struct offer_details_ex : public currency::offer_details
   {
     std::string tx_hash;
     uint64_t index_in_tx;
@@ -454,7 +456,8 @@ namespace currency
       KV_SERIALIZE(amount_lui)
       KV_SERIALIZE(amount_etc)
       KV_SERIALIZE(target)
-      KV_SERIALIZE(location)
+      KV_SERIALIZE(location_country)
+      KV_SERIALIZE(location_city)
       KV_SERIALIZE(contacts)
       KV_SERIALIZE(comment)
       KV_SERIALIZE(payment_types)

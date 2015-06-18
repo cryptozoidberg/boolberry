@@ -97,7 +97,8 @@ namespace boost
     a & x.amount_lui;    
     a & x.amount_etc;    
     a & x.target;        
-    a & x.location;      
+    a & x.location_country;      
+    a & x.location_city;
     a & x.contacts;      
     a & x.comment;       
     a & x.payment_types; 

@@ -77,7 +77,7 @@ namespace currency
       }
 
       //transaction spam protection, soft rule
-      if (inputs_amount - outputs_amount < TX_POOL_MINIMUM_FEE)
+      if (inputs_amount - outputs_amount < m_blockchain.get_core_runtime_config().tx_pool_min_fee)
       {
         //exception for cancel offer transactions
         if (!process_cancel_offer_rules(tx))

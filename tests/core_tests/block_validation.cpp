@@ -550,7 +550,7 @@ bool gen_block_invalid_binary_format::generate(std::vector<test_event_entry>& ev
   while (diffic < 200);
 
   blk_last = boost::get<block>(events.back());
-  MAKE_TX(events, tx_0, miner_account, miner_account, MK_COINS(120), blk_last);
+  MAKE_TX(events, tx_0, miner_account, miner_account, MK_TEST_COINS(120), blk_last);
   DO_CALLBACK(events, "corrupt_blocks_boundary");
 
   block blk_test;

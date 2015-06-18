@@ -36,7 +36,7 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool):m_tx_pool(tx_poo
                                                                 m_is_in_checkpoint_zone(false), 
                                                                 m_is_blockchain_storing(false), 
                                                                 m_current_pruned_rs_height(0), 
-                                                                m_pos_config(get_default_pos_config()),
+                                                                m_core_runtime_config(get_default_core_runtime_config()),
                                                                 m_bei_stub(AUTO_VAL_INIT(m_bei_stub))
 {}
 //------------------------------------------------------------------
@@ -998,7 +998,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
 
     bool pos_block = is_pos_block(bei.bl);
     //check if PoS block allowed on this height
-    CHECK_AND_ASSERT_MES(!(pos_block && bei.height < m_pos_config.pos_minimum_heigh), false, "PoS block is not allowed on this height");
+    CHECK_AND_ASSERT_MES(!(pos_block && bei.height < m_core_runtime_config.pos_minimum_heigh), false, "PoS block is not allowed on this height");
 
 
     //wide_difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei, pos_block);
@@ -1063,7 +1063,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
       cumulative_diff_delta = current_diff;
 
     size_t n = get_current_sequence_factor_for_alt(alt_chain, pos_block, connection_height);
-    if (bei.height >= m_pos_config.pos_minimum_heigh)
+    if (bei.height >= m_core_runtime_config.pos_minimum_heigh)
       cumulative_diff_delta = correct_difficulty_with_sequence_factor(n, cumulative_diff_delta);
 
     bei.cumulative_diff_adjusted += cumulative_diff_delta;
@@ -2375,8 +2375,8 @@ bool blockchain_storage::validate_pos_block(const block& b,
   r = check_tx_input(coinstake_in, id, b.miner_tx.signatures[0], &max_related_block_height);
   CHECK_AND_ASSERT_MES(r, false, "failed to build kernel_stake");
 
-  CHECK_AND_ASSERT_MES(m_blocks.size()  - max_related_block_height > m_pos_config.min_coinage, false,
-    "Coin age is: " << m_blocks.size() - max_related_block_height << " is less then minimum expected: " << m_pos_config.min_coinage);
+  CHECK_AND_ASSERT_MES(m_blocks.size()  - max_related_block_height > m_core_runtime_config.min_coinage, false,
+    "Coin age is: " << m_blocks.size() - max_related_block_height << " is less then minimum expected: " << m_core_runtime_config.min_coinage);
 
   return true;
 }
@@ -2518,7 +2518,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   wide_difficulty_type this_coin_diff = 0;
   bool is_pos_bl = is_pos_block(bl);
   //check if PoS allowed in this height
-  CHECK_AND_ASSERT_MES(!(is_pos_bl && m_blocks.size() < m_pos_config.pos_minimum_heigh), false, "PoS block not allowed on height " << m_blocks.size());
+  CHECK_AND_ASSERT_MES(!(is_pos_bl && m_blocks.size() < m_core_runtime_config.pos_minimum_heigh), false, "PoS block not allowed on height " << m_blocks.size());
 
   //check proof of work
   TIME_MEASURE_START(target_calculating_time);
@@ -2680,7 +2680,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
 
 
   size_t n = get_current_sequence_factor(is_pos_bl);
-  if (bei.height >= m_pos_config.pos_minimum_heigh)
+  if (bei.height >= m_core_runtime_config.pos_minimum_heigh)
     cumulative_diff_delta = correct_difficulty_with_sequence_factor(n, cumulative_diff_delta);
   
   bei.cumulative_diff_adjusted += cumulative_diff_delta;
@@ -2858,17 +2858,17 @@ bool blockchain_storage::is_coin_age_okay(uint64_t source_tx_block_timestamp, ui
 {
   if (source_tx_block_timestamp > last_block_timestamp)
     return false;
-  if (last_block_timestamp - source_tx_block_timestamp < m_pos_config.min_coinage)
+  if (last_block_timestamp - source_tx_block_timestamp < m_core_runtime_config.min_coinage)
     return false;
   return true;
 }*/
 //------------------------------------------------------------------
-void blockchain_storage::set_pos_config(const pos_config& pc)
+void blockchain_storage::set_core_runtime_config(const core_runtime_config& pc)
 {
-  m_pos_config = pc;
+  m_core_runtime_config = pc;
 }
 //------------------------------------------------------------------
-pos_config& blockchain_storage::get_pos_config()
+const core_runtime_config& blockchain_storage::get_core_runtime_config()
 {
-  return m_pos_config;
+  return m_core_runtime_config;
 }

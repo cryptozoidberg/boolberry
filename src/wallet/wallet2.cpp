@@ -829,7 +829,7 @@ bool wallet2::is_coin_age_okay_for_pos(const transfer_details& tr)
   if (!is_transfer_unlocked(tr))
     return false;
 
-  if (m_blockchain.size() - tr.m_block_height <= m_pos_config.min_coinage)
+  if (m_blockchain.size() - tr.m_block_height <= m_core_runtime_config.min_coinage)
     return false;
   return true;
 }
@@ -1072,9 +1072,9 @@ void wallet2::get_unconfirmed_transfers(std::vector<wallet_rpc::wallet_transfer_
     trs.push_back(u.second);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::set_pos_config(const currency::pos_config& pc)
+void wallet2::set_core_runtime_config(const currency::core_runtime_config& pc)
 {
-  m_pos_config = pc;
+  m_core_runtime_config = pc;
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::is_transfer_unlocked(const transfer_details& td) const

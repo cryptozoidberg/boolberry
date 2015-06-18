@@ -25,7 +25,7 @@
 #include "verification_context.h"
 #include "crypto/hash.h"
 #include "checkpoints.h"
-#include "pos_config.h"
+#include "core_runtime_config.h"
 POD_MAKE_HASHABLE(currency, account_public_address);
 
 namespace currency
@@ -159,8 +159,8 @@ namespace currency
                             const alt_chain_type& alt_chain = alt_chain_type(), 
                             uint64_t split_height = 0);
     bool is_coin_age_okay(uint64_t source_tx_block_timestamp, uint64_t last_block_timestamp);
-    void set_pos_config(const pos_config& pc);
-    pos_config& get_pos_config();
+    void set_core_runtime_config(const core_runtime_config& pc);
+    const core_runtime_config& get_core_runtime_config();
     size_t get_current_sequence_factor(bool pos);
     const block_extended_info&  get_last_block_of_type(bool looking_for_pos, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
     bool validate_cancel_order(const cancel_offer& co, offers_container::iterator& oit);
@@ -257,7 +257,7 @@ namespace currency
     std::atomic<bool> m_is_blockchain_storing;
 
     //pos
-    pos_config m_pos_config;
+    core_runtime_config m_core_runtime_config;
     block_extended_info m_bei_stub;
 
     //offers

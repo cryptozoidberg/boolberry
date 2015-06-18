@@ -185,6 +185,7 @@ bool test_generator::construct_block(currency::block& blk,
   {
     if (!construct_miner_tx(height, misc_utils::median(block_sizes), 
                                     already_generated_coins,
+                                    0,
                                     target_block_size, 
                                     total_fee, 
                                     miner_acc.get_keys().m_account_address, 
@@ -326,10 +327,10 @@ bool test_generator::build_wallets(const blockchain_vector& blocks,
     wallets.back()->get_account().set_createtime(0);
     wallets.back()->set_core_proxy(tmp_proxy);
 
-    currency::pos_config pc = get_default_pos_config();
+    currency::core_runtime_config pc = get_default_core_runtime_config();
     pc.min_coinage = TESTS_POS_CONFIG_MIN_COINAGE; //four blocks
     pc.pos_minimum_heigh = TESTS_POS_CONFIG_POS_MINIMUM_HEIGH; //four blocks
-    wallets.back()->set_pos_config(pc);
+    wallets.back()->set_core_runtime_config(pc);
   }
   uint64_t height = 0;
   for (auto& w : wallets)
@@ -705,7 +706,7 @@ bool test_generator::construct_block(const std::vector<test_event_entry>& events
   {
     size_t current_block_size = txs_sizes + get_object_blobsize(blk.miner_tx);
     // TODO: This will work, until size of constructed block is less then CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE
-    if (!construct_miner_tx(height, misc_utils::median(block_sizes), already_generated_coins, current_block_size, 0, miner_acc.get_keys().m_account_address, blk.miner_tx, blobdata(), 1))
+    if (!construct_miner_tx(height, misc_utils::median(block_sizes), already_generated_coins, 0, current_block_size, 0, miner_acc.get_keys().m_account_address, blk.miner_tx, blobdata(), 1))
       return false;
   }
 

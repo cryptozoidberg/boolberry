@@ -20,7 +20,7 @@ get_random_outs_test::get_random_outs_test()
 
 bool get_random_outs_test::generate(std::vector<test_event_entry>& events) const
 {
-#define TEST_COIN_TRANSFER_UNIQUE_SIZE    111010210111
+#define TEST_COIN_TRANSFER_UNIQUE_SIZE    11910711
 
   uint64_t ts_start = 1338224400;
   GENERATE_ACCOUNT(miner_account);
