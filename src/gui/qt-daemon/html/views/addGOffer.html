@@ -250,13 +250,6 @@
 
                         <a href="" type="button" data-toggle="collapse" data-target=".collapse01" class="btn btn-block btn-light" >Курс и котировки USD/G <i class="fa fa-chevron-down"></i></a>
 
-                        <!-- {{offers}}
-                        <br>
-                        ---------------------------------------------
-                        <br>
-
-                        {{offers | filter : {target: offer.currency, offer_type: 2}  }} -->
-
                         <div class="collapse collapse01">
                             <div class="row">
                                 <div class="col-xs-3 col-sm-3">
@@ -479,25 +472,53 @@
                         </div>
 
                         <div class="form-group">
+                            <div class="col-xs-3 col-sm-3 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="gOfferForm.$submitted">
+                                <div ng-show="gOfferForm.country.$error.required">Поле заполнено некоректно</div>
+                            </div>
+
+                            <div class="col-xs-3 col-sm-3 text-danger"  ng-show="gOfferForm.$submitted">
+                                <div ng-show="gOfferForm.city.$error.required">Поле заполнено некоректно</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
                             <label class="col-xs-4 col-sm-4 control-label">
                                 География видимости 
                                 <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Ваша заявка будет вверху списка в указанной стране"></i>
                             </label>
                             <div class="col-xs-3 col-sm-3 nopadding-right">
-                                <input 
+                                <!-- <input 
                                     type="text" 
                                     ng-model="offer.location.country" 
                                     class="form-control" 
                                     placeholder="страна"
-                                >
+                                    g-places-autocomplete
+                                > -->
+                                <angucomplete-alt 
+                                    id="ex1"
+                                    placeholder="страна"
+                                    pause="100"
+                                    selected-object="selectedCountry"
+                                    local-data="countryList"
+                                    search-fields="name"
+                                    title-field="name"
+                                    input-changed="changeCountryInput"
+                                    minlength="1"
+                                    input-class="form-control form-control-small"
+                                />
                             </div>
                             <div class="col-xs-3 col-sm-3 nopadding-right">
                                 <input 
                                     type="text" 
-                                    ng-model="offer.location.city" 
+                                    ng-model="offer.autocomplete_city" 
                                     class="form-control" 
                                     placeholder="город"
+                                    g-places-autocomplete
+                                    options="cityOptionsAC"
+                                    ng-disabled="!cityOptionsAC.componentRestrictions.country"
                                 >
+                                <input type="hidden" name="city" required ng-model="offer.location.city">
+                                <input type="hidden" name="country" required ng-model="offer.location.country">
                             </div>
                         </div>
 

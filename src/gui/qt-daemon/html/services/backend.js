@@ -247,22 +247,22 @@
 
                     $rootScope.tx_count = txCount; 
 
-                    // if(!returnObject.shouldUseEmulator()){
-                    //     returnObject.get_all_offers(function(data){
-                    //         if(angular.isDefined(data.offers)){
-                    //             $rootScope.offers = data.offers;
-                    //             var my_offers = [];
-                    //             angular.forEach($rootScope.offers,function(item){
-                    //                 var result = $filter('filter')($rootScope.safes, item.tx_hash);
-                    //                 if(result.length){
-                    //                     my_offers.push(item);
-                    //                 }
-                    //             });
+                    if(!returnObject.shouldUseEmulator()){
+                        returnObject.get_all_offers(function(data){
+                            if(angular.isDefined(data.offers)){
+                                $rootScope.offers = data.offers;
+                                var my_offers = [];
+                                angular.forEach($rootScope.offers,function(item){
+                                    var result = $filter('filter')($rootScope.safes, item.tx_hash);
+                                    if(result.length){
+                                        my_offers.push(item);
+                                    }
+                                });
 
-                    //             $rootScope.offers_count = my_offers.length;
-                    //         }
-                    //     });
-                    // }
+                                $rootScope.offers_count = my_offers.length;
+                            }
+                        });
+                    }
                 });
                 
             },
@@ -610,7 +610,7 @@
                             "amount_lui": 2300000000,
                             "amount_etc": 2,
                             "target": "Шкаф деревяный",
-                            "location": "USA, NYC",
+                            "location": "RU,ChIJybDUc_xKtUYRTM9XV8zWRD0",
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "cash",
@@ -623,7 +623,7 @@
                             "amount_lui": 4300000000,
                             "amount_etc": 2,
                             "target": "EUR",
-                            "location": "USA, Washington",
+                            "location": "RU,ChIJybDUc_xKtUYRTM9XV8zWRD0",
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "EPS,BC,Qiwi",
@@ -636,7 +636,7 @@
                             "amount_lui": 1230000000,
                             "amount_etc": 2,
                             "target": "IDR",
-                            "location": "Indonesia, Bali",
+                            "location": "US,ChIJybDUc_xKtUYRTM9XV8zWRD0",
                             "contacts": "+89876782342",
                             "comment": "We will rock you",
                             "payment_types": "EPS,BC,Qiwi",
@@ -649,7 +649,7 @@
                             "amount_lui": 4300000000,
                             "amount_etc": 2,
                             "target": "Лошадка",
-                            "location": "USA, Washington",
+                            "location": "US,ChIJybDUc_xKtUYRTM9XV8zWRD0",
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "CSH,BT",

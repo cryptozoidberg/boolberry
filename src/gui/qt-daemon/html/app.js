@@ -7,6 +7,7 @@
         'ui.slider',
         "angucomplete-alt",
         "easypiechart",
+        'google.places',
 
         'ngRoute', 
         'ngIdle',

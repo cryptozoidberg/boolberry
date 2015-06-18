@@ -2,8 +2,8 @@
     'use strict';
     var module = angular.module('app.market',[]);
 
-    module.controller('marketCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','market','$timeout',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market, $timeout){
+    module.controller('marketCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','market','$timeout', 'gPlace', '$http',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market, $timeout, gPlace, $http){
             
             var is_currency_offer = function(offer){
                 if(offer.offer_type == 2 || offer.offer_type == 3){
@@ -110,21 +110,50 @@
 
             // GET LIST OF OFFERS
             backend.get_all_offers(function(data){
+                if(angular.isUndefined($rootScope.gplaces)){
+                    $rootScope.gplaces = {};
+                }
+                if(angular.isUndefined($rootScope.countryList)){
+                    $http.get('all.json').then(
+                        function(res){
+                          $rootScope.countryList = res.data;
+                        }
+                    );
+                }
                 if(angular.isDefined(data.offers)){
                     $rootScope.offers = $filter('orderBy')(data.offers,'-timestamp');
-                    
 
-                    $scope.currency_offers = $filter('filter')($rootScope.offers, is_currency_offer);
-                    $scope.goods_offers = $filter('filter')($rootScope.offers, is_goods_offer);
-                    
-
-                    $scope.f_currency_offers = $scope.currency_offers; // filtered currency offers by default
-                    $scope.f_goods_offers    = $scope.goods_offers; // filtered goods offers by default
+                    // my offers
 
                     $scope.my_offers = [];
 
-
                     angular.forEach($rootScope.offers,function(item){
+                        // var item = $rootScope.offers[0];
+                        var placeId = item.location.split(',')[1].trim();
+
+                        // informer.info(placeId);
+
+                        if(angular.isUndefined($rootScope.gplaces[placeId]) && placeId.length == 27){
+                            $rootScope.gplaces[placeId] = {name : 'Loading...'};
+                            gPlace.getById(placeId,function(place, status){
+                                //informer.info(JSON.stringify(status) + ' '+placeId);
+                                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                                    //informer.info('ok ' + JSON.stringify(place));
+                                    $timeout(function(){
+                                        $rootScope.gplaces[placeId] = place;    
+                                    });
+                                }else{
+                                    //informer.info('fail');
+                                    $rootScope.gplaces[placeId] = {name : 'City not found'};
+                                }
+                                
+                            });
+                        }else{
+                            $rootScope.gplaces[placeId] = {name : 'City not found'};
+                        }
+                        
+                        // load gplaces
+
                         var result = $filter('filter')($rootScope.safes, item.tx_hash);
 
                         if(result.length){
@@ -132,6 +161,12 @@
                             
                         }
                     });
+
+                    $scope.currency_offers = $filter('filter')($rootScope.offers, is_currency_offer);
+                    $scope.goods_offers = $filter('filter')($rootScope.offers, is_goods_offer);
+                    
+                    $scope.f_currency_offers = $scope.currency_offers; // filtered currency offers by default
+                    $scope.f_goods_offers    = $scope.goods_offers; // filtered goods offers by default
 
                     $rootScope.offers_count = $scope.my_offers.length;
 
@@ -431,8 +466,8 @@
         }
     ]);
 
-    module.controller('addOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location){
+    module.controller('addOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$http',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $http){
             $scope.intervals = [1,3,5,14];
 
             $scope.offer_types = [
@@ -450,6 +485,42 @@
                 contacts: {phone : '', email : ''},
                 comment: ''
             };
+
+
+            if(angular.isUndefined($rootScope.countryList)){
+                $http.get('all.json').then(
+                    function(res){
+                      $rootScope.countryList = res.data;
+                    }
+                );
+            }
+
+            $scope.cityOptionsAC = {
+                types: ['(cities)']
+            }
+
+            $scope.selectedCountry = function(obj){
+                if(angular.isDefined(obj)){
+                    var o = obj.originalObject;
+                    $scope.cityOptionsAC.componentRestrictions = {country: o.alpha2Code};
+                    $scope.offer.location.country = o.alpha2Code;
+                    $scope.offer.autocomplete_city = '';
+                    $scope.offer.location.city = '';
+                }
+
+                $scope.$watch(function(){
+                    return $scope.offer.autocomplete_city;
+                },
+                function($value){
+                    if(angular.isDefined($value.place_id)){
+                        $scope.offer.location.city = $value.place_id;
+                    }
+                },
+                true);
+               
+            };
+
+            
 
             if($location.path() == '/addOfferSell'){
                 $scope.offer.offer_type = 1;
@@ -536,8 +607,8 @@
         }
     ]);
     // Guilden offer
-    module.controller('addGOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$timeout','market',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,$timeout,market){
+    module.controller('addGOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$timeout','market', '$http',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,$timeout,market,$http){
             $scope.intervals = [1,3,5,14];
 
             $scope.currencies = market.currencies;
@@ -554,6 +625,38 @@
                 "возможно частями"
             ];
 
+            if(angular.isUndefined($rootScope.countryList)){
+                $http.get('all.json').then(
+                    function(res){
+                      $rootScope.countryList = res.data;
+                    }
+                );
+            }
+
+            $scope.cityOptionsAC = {
+                types: ['(cities)']
+            }
+
+            $scope.selectedCountry = function(obj){
+                if(angular.isDefined(obj)){
+                    var o = obj.originalObject;
+                    $scope.cityOptionsAC.componentRestrictions = {country: o.alpha2Code};
+                    $scope.offer.location.country = o.alpha2Code;
+                    $scope.offer.autocomplete_city = '';
+                    $scope.offer.location.city = '';
+                }
+
+                $scope.$watch(function(){
+                    return $scope.offer.autocomplete_city;
+                },
+                function($value){
+                    if(angular.isDefined($value.place_id)){
+                        $scope.offer.location.city = $value.place_id;
+                    }
+                },
+                true);
+               
+            };
 
             $scope.offer = {
                 expiration_time : $scope.intervals[3],
@@ -567,6 +670,10 @@
                 currency: $scope.currencies[0].code,
                 payment_types: [],
                 deal_details: $scope.deal_details[0]
+            };
+
+            $scope.changeCountryInput = function(str){
+                $scope.offer.location.country = '';
             };
 
             if($rootScope.safes.length){
@@ -692,7 +799,7 @@
                 
                 o.fee = o.is_premium ? o.fee_premium : o.fee_standart;
                 o.location = o.location.country + ', ' + o.location.city;
-                o.contacts = o.contacts.email + ', ' + o.contacts.phone;
+                o.contacts = [o.contacts.email,o.contacts.phone].join(",");
                 if(o.payment_type_other) o.payment_types.push(o.payment_type_other);
                 o.payment_types = o.payment_types.join(",");
                 o.comment = o.comment + (o.comment?' ':'') + o.deal_details;

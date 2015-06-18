@@ -335,7 +335,12 @@
                                 </span>
                             </td>
                             <td>
-                                {{offer.location}}
+                                <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                                    {{country.name}}
+                                </span>
+                                <span>
+                                    {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                                </span>
                             </td>
                             <td>
                                 {{offer.comment}}
@@ -557,7 +562,12 @@
                                 <span class="label label-success">4.5</span>
                             </td> -->
                             <td>
-                                {{offer.location}}
+                                <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                                    {{country.name}}
+                                </span>
+                                <span>
+                                    {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                                </span>
                             </td>
                             <td>
                                 {{offer.comment}}
@@ -718,7 +728,14 @@
                                 </span>
                             </td>
 
-                            <td>{{offer.location}}</td>
+                            <td>
+                                <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                                    {{country.name}}
+                                </span>
+                                <span>
+                                    {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                                </span>
+                            </td>
                             <td>{{offer.comment}}</td>
                             <td>
                                 <!-- <div class="btn-group nowrapbtns">
@@ -802,7 +819,14 @@
 
                         <!-- <td><span class="label label-success">4.5</span></td> -->
 
-                        <td>{{offer.location}}</td>
+                        <td>
+                            <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                                {{country.name}}
+                            </span>
+                            <span>
+                                {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                            </span>
+                        </td>
 
                         <td>{{offer.comment}}</td>
 
@@ -952,7 +976,14 @@
                                 </span>
                             </td>
 
-                            <td>{{offer.location}}</td>
+                            <td>
+                                <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                                    {{country.name}}
+                                </span>
+                                <span>
+                                    {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                                </span>
+                            </td>
                             <td>{{offer.comment}}</td>
                             <td>
                                 
@@ -1027,7 +1058,14 @@
                         </td>
 
 
-                        <td>{{offer.location}}</td>
+                        <td>
+                            <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                                {{country.name}}
+                            </span>
+                            <span>
+                                {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                            </span>
+                        </td>
 
                         <td>{{offer.comment}}</td>
 
