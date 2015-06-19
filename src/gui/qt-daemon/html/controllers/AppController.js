@@ -528,7 +528,6 @@
             backend.quitRequest();
         });
 
-        var wait = 0;
 
         backend.subscribe('wallet_sync_progress', function(data){
             console.log('wallet_sync_progress');
@@ -537,25 +536,15 @@
             var wallet_id = data.wallet_id;
             var progress = data.progress;
 
-            // $timeout(function(){
-                if($rootScope.safes.length){
-                    $scope.result = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
-                    // informer.info(JSON.stringify($rootScope.safes));
-                    if($scope.result.length){
-                        var safe = $scope.result[0];
-                        $timeout(function(){
-                            safe.progress = progress;    
-                        });
-                        
-                            // if(safe.progress == 100){
-                            //     safe.loaded = true;
-                            // }
-                    }    
-                }
-                
-            // },wait);
-            // wait+=100;
-            
+            if($rootScope.safes.length){
+                $scope.result = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+                if($scope.result.length){
+                    var safe = $scope.result[0];
+                    $timeout(function(){
+                        safe.progress = progress;    
+                    });
+                }    
+            }
         });
 
         backend.subscribe('money_transfer', function(data){
@@ -576,6 +565,7 @@
 
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             if(safe.length){ // safe transaction
+                
                 safe = safe[0];
 
                 $timeout(function(){
@@ -609,8 +599,8 @@
                     });
                     
                 }
+                
                 backend.reloadCounters();
-                    
                 
             }else{
                 return;

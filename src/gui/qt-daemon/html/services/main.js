@@ -132,6 +132,25 @@
 
     }]);
 
+    module.factory('gPlace', [function(){
+
+        return {
+            getById: function(placeId,callback){
+                var request = {
+                  placeId: placeId
+                };
+
+                var map = new google.maps.Map(document.getElementById('mapCanvas')); // 
+
+                var service = new google.maps.places.PlacesService(map);
+                service.getDetails(request, callback);
+
+            }
+        };
+
+        
+    }]);
+
     module.factory('txHistory', ['$rootScope',function($rootScope) {
         var returnObject = {
             reloadHistory: function() {

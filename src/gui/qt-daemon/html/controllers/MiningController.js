@@ -40,11 +40,17 @@
             angular.forEach($rootScope.safes,function(safe){
                 
                 var diagramm = {
-                    label: safe.name
+                    label: safe.name,
+                    data: []
                 };
 
                 backend.getMiningHistory(safe.wallet_id, function(data){
-                    diagramm.data = [data.mined_entries.t * 100, data.mined_entries.a];
+                    // informer.info(JSON.stringify(data));
+                    var total = 0;
+                    angular.forEach(data.mined_entries,function(item){
+                        total += item.a;
+                        diagramm.data.push([item.t * 1000, $filter('gulden')(total, false)]);
+                    });
                     $scope.safes_diagramm[safe.address] = [diagramm];
                 });
 
