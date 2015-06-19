@@ -633,22 +633,15 @@ void wallet2::assign_account(const currency::account_base& acc)
   m_account_public_address = m_account.get_keys().m_account_address;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::generate(const std::string& wallet_, const std::string& password)
+bool wallet2::basic_init(const std::string& path, const std::string& pass)
 {
   clear();
-  m_wallet_file = wallet_;
-  m_password = password;
+  m_wallet_file = path;
+  m_password = pass;
 
   boost::system::error_code ignored_ec;
   CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
-
-  m_account.generate();
-  m_account_public_address = m_account.get_keys().m_account_address;
-
-  //bool r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str() );
-  //if(!r) LOG_PRINT_RED_L0("String with address text not saved");
-
-  store();
+  return true;
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::check_connection()

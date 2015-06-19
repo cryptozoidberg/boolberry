@@ -65,6 +65,7 @@ public:
   bool send_stop_signal();
   std::string open_wallet(const std::string& path, const std::string& password, view::open_wallet_response& owr);
   std::string generate_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id);
+  std::string restore_wallet(const std::string& path, const std::string& password, const std::string& restore_key, uint64_t& wallet_id);
   std::string run_wallet(uint64_t wallet_id);
   std::string get_recent_transfers(size_t wallet_id, view::transfers_array& tr_hist);
   std::string get_wallet_info(size_t wallet_id, view::wallet_info& wi);
@@ -80,6 +81,7 @@ public:
   std::string start_pos_mining(uint64_t wallet_id);
   std::string stop_pos_mining(uint64_t wallet_id);
   std::string get_mining_history(uint64_t wallet_id, tools::wallet_rpc::mining_history& wrpc);
+  std::string get_wallet_restore_info(uint64_t wallet_id, std::string& restore_key);
 
   void toggle_pos_mining();
   std::string transfer(size_t wallet_id, const view::transfer_params& tp, currency::transaction& res_tx);

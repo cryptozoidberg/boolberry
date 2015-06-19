@@ -287,7 +287,7 @@ namespace tools
     bool is_coin_age_okay(const transfer_details& tr);
     static bool build_kernel(const currency::pos_entry& pe, const currency::stake_modifier_type& stake_modifier, currency::stake_kernel& kernel, uint64_t& coindays_weight, uint64_t timestamp);
     bool is_connected_to_net();
-    void drop_offer_keys();
+    void drop_offer_keys();    
 
 
     currency::account_base m_account;

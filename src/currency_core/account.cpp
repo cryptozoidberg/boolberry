@@ -51,7 +51,7 @@ DISABLE_VS_WARNINGS(4244 4345)
   bool account_base::restore_keys(const std::vector<uint8_t>& restore_data)
   {
     CHECK_AND_ASSERT_MES(restore_data.size() == sizeof(m_keys.m_spend_secret_key), false, "wrong restore data size");
-    memcpy(&m_keys.m_spend_secret_key, (void*)restore_data[0], sizeof(m_keys.m_spend_secret_key));
+    memcpy(&m_keys.m_spend_secret_key, &restore_data[0], sizeof(m_keys.m_spend_secret_key));
 
     dependent_key(m_keys.m_spend_secret_key, m_keys.m_view_secret_key);
 
