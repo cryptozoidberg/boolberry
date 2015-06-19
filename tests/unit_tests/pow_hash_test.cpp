@@ -149,13 +149,13 @@ TEST(pow_tests, test_reference_func)
 
   bool r = check_hash([](const std::string& blob, std::vector<crypto::hash>& scratchpad){
     
-    return get_blob_longhash(blob, 1, scratchpad);
+    return get_blob_longhash(blob);
   });
   ASSERT_TRUE(r);
 
   r = check_hash([](const std::string& blob, std::vector<crypto::hash>& scratchpad){
 
-    return get_blob_longhash(blob, scratchpad);
+    return get_blob_longhash(blob);
   });
   ASSERT_TRUE(r);
 }

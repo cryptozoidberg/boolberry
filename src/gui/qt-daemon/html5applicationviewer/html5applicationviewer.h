@@ -88,6 +88,8 @@ protected:
   QString set_log_level(const QString& param);
   QString dump_all_offers();
   QString webkit_launched_script();
+  QString get_smart_safe_info(const QString& param);
+  QString restore_wallet(const QString& param);
 
 
 

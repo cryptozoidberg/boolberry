@@ -71,6 +71,8 @@ namespace crypto {
 
     static void generate_keys(public_key &, secret_key &);
     friend void generate_keys(public_key &, secret_key &);
+    static void dependent_key(const secret_key& first, secret_key& second);
+    friend void dependent_key(const secret_key& first, secret_key& second);
     static bool check_key(const public_key &);
     friend bool check_key(const public_key &);
     static bool secret_key_to_public_key(const secret_key &, public_key &);
@@ -111,6 +113,10 @@ namespace crypto {
    */
   inline void generate_keys(public_key &pub, secret_key &sec) {
     crypto_ops::generate_keys(pub, sec);
+  }
+
+  inline void dependent_key(const secret_key& first, secret_key& second){
+    return crypto_ops::dependent_key(first, second);
   }
 
   /* Check a public key. Returns true if it is valid, false otherwise.

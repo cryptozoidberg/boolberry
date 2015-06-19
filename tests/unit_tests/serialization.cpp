@@ -9,7 +9,7 @@
 #include <vector>
 #include <boost/foreach.hpp>
 #include "currency_core/currency_basic.h"
-
+#include "currency_core/currency_format_utils.h"
 #include "serialization/serialization.h"
 #include "serialization/binary_archive.h"
 #include "serialization/json_archive.h"
@@ -326,7 +326,11 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   ASSERT_TRUE(serialization::dump_binary(tx, blob));
   ASSERT_EQ(6, blob.size()); // 5 bytes + 0 bytes extra + 0 bytes signatures
   ASSERT_TRUE(serialization::parse_binary(blob, tx1));
-  ASSERT_EQ(tx, tx1);
+  if (!(tx == tx1))
+  {
+    ASSERT_TRUE(false);
+  }
+  
   ASSERT_EQ(linearize_vector2(tx.signatures), linearize_vector2(tx1.signatures));
 
   // Miner tx without signatures
@@ -337,7 +341,10 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   ASSERT_TRUE(serialization::dump_binary(tx, blob));
   ASSERT_EQ(8, blob.size()); // 5 bytes + 2 bytes vin[0] + 0 bytes extra + 0 bytes signatures
   ASSERT_TRUE(serialization::parse_binary(blob, tx1));
-  ASSERT_EQ(tx, tx1);
+  if (!(tx == tx1))
+  {
+    ASSERT_TRUE(false);
+  }
   ASSERT_EQ(linearize_vector2(tx.signatures), linearize_vector2(tx1.signatures));
 
   // Miner tx with empty signatures 2nd vector
@@ -345,7 +352,10 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   ASSERT_TRUE(serialization::dump_binary(tx, blob));
   ASSERT_EQ(9, blob.size()); // 5 bytes + 2 bytes vin[0] + 0 bytes extra + 0 bytes signatures + counter
   ASSERT_TRUE(serialization::parse_binary(blob, tx1));
-  ASSERT_EQ(tx, tx1);
+  if (!(tx == tx1))
+  {
+    ASSERT_TRUE(false);
+  }
   ASSERT_EQ(linearize_vector2(tx.signatures), linearize_vector2(tx1.signatures));
 
   //TX VALIDATION REMOVED FROM SERIALIZATION
@@ -372,7 +382,10 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   ASSERT_TRUE(serialization::dump_binary(tx, blob));
   ASSERT_EQ(10, blob.size()); // 5 bytes + 2 * 2 bytes vins + 0 bytes extra + 0 bytes signatures
   ASSERT_TRUE(serialization::parse_binary(blob, tx1));
-  ASSERT_EQ(tx, tx1);
+  if (!(tx == tx1))
+  {
+    ASSERT_TRUE(false);
+  }
   ASSERT_EQ(linearize_vector2(tx.signatures), linearize_vector2(tx1.signatures));
 
   // Two txin_gen, signatures vector contains only one empty element
@@ -384,7 +397,10 @@ TEST(Serialization, serializes_transacion_signatures_correctly)
   ASSERT_TRUE(serialization::dump_binary(tx, blob));
   ASSERT_EQ(12, blob.size()); // 5 bytes + 2 * 2 bytes vins + 0 bytes extra + 0 bytes signatures
   ASSERT_TRUE(serialization::parse_binary(blob, tx1));
-  ASSERT_EQ(tx, tx1);
+  if (!(tx == tx1))
+  {
+    ASSERT_TRUE(false);
+  }
   ASSERT_EQ(linearize_vector2(tx.signatures), linearize_vector2(tx1.signatures));
 
   // Two txin_gen, signatures vector contains three empty elements
