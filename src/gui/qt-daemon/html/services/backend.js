@@ -62,6 +62,20 @@
                 return res;
             },
 
+            getSmartSafeInfo : function(wallet_id) {
+                var params = {
+                    wallet_id : wallet_id
+                };
+                return this.runCommand('get_smart_safe_info', params);
+            },
+
+            restoreWallet : function(restore_key) {
+                var params = {
+                    restore_key : restore_key
+                };
+                return this.runCommand('restore_wallet', params);
+            },
+
             startPosMining : function(wallet_id) {
                 var params = {
                     wallet_id : wallet_id
@@ -536,6 +550,11 @@
                         "path": "/home/master/Lui/test_wallet.lui"
                     };
                     break;
+                case 'get_smart_safe_info' :
+                    result = {
+                        'restore_key' : 'KFDKTLIUWSEDREBYIOKMTGHJKLGORDDV' + ' И большой хуй!!!'
+                    }
+                    break;
                 case 'show_savefile_dialog' : 
                     result = { 
                         "error_code": "OK",
@@ -599,7 +618,7 @@
                     break;
                 case 'generate_wallet' : 
                     result = {
-                        param: {"wallet_id" : this.getWalletId()}
+                        "wallet_id" : 1
                     }
                     break;
                 case 'get_all_offers':
