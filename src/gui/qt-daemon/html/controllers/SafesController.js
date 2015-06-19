@@ -263,8 +263,8 @@
         }
     ]);
 
-    module.controller('safeSmartRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes', '$rootScope',
-        function($scope, backend, $modalInstance, $modal, $timeout, path, safes, $rootScope) {
+    module.controller('safeSmartRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes', '$rootScope', 'informer',
+        function($scope, backend, $modalInstance, $modal, $timeout, path, safes, $rootScope, informer) {
             $scope.owl_options  = {
               singleItem: true,
               autoHeight: true,
@@ -277,6 +277,22 @@
               smartSpeed: 100,
               autoplayHoverPause: true,
             };
+
+            $scope.safe = {
+                restore_key : '',  
+                pass : '',
+                path : '',
+            }
+
+            $scope.changeRestoreKey = function(safe){
+                
+                backend.restoreWallet(safe.path,safe.pass,safe.restore_key,function(data){
+                    informer.info(data.wallet_id);
+                    $scope.safe.wallet_id = data.wallet_id;
+                });
+                    
+                
+            }
         }
     ]);
 

@@ -69,11 +69,13 @@
                 return this.runCommand('get_smart_safe_info', params);
             },
 
-            restoreWallet : function(restore_key) {
+            restoreWallet : function(path, pass, restore_key, callback) {
                 var params = {
-                    restore_key : restore_key
+                    restore_key : restore_key,
+                    path: path,
+                    pass: pass
                 };
-                return this.runCommand('restore_wallet', params);
+                return this.runCommand('restore_wallet', params, callback);
             },
 
             startPosMining : function(wallet_id) {
@@ -552,7 +554,12 @@
                     break;
                 case 'get_smart_safe_info' :
                     result = {
-                        'restore_key' : 'KFDKTLIUWSEDREBYIOKMTGHJKLGORDDV' + ' И большой хуй!!!'
+                        'restore_key' : 'KFDKTLIUWSEDREBYIOKMTGHJKLGORDDV'
+                    }
+                    break;
+                case 'restore_wallet' :
+                    result = {
+                        'wallet_id' : '14'
                     }
                     break;
                 case 'show_savefile_dialog' : 

@@ -31,6 +31,21 @@
                 <div class="help-block">Случайный набор букв, сгенерированный компьютером, при создании smartsafe бекапа сейфа.</div>
             </div>
             <div class="form-group clearfix">
+                <div class="col-xs-12 col-sm-12">
+                    <input type="text" ng-model="safe.restore_key" class="form-control">
+                </div>
+                <!-- <div class="col-xs-3 col-sm-3">
+                    <input type="text" value="" class="form-control">
+                </div>
+                <div class="col-xs-3 col-sm-3">
+                    <input type="text" value="" class="form-control">
+                </div>
+                <div class="col-xs-3 col-sm-3">
+                    <input type="text" value="" class="form-control">
+                </div> -->
+
+            </div>
+            <!-- <div class="form-group clearfix">
                 <div class="col-xs-3 col-sm-3">
                     <input type="text" value="" class="form-control">
                 </div>
@@ -45,28 +60,13 @@
                 </div>
 
             </div>
-            <div class="form-group clearfix">
-                <div class="col-xs-3 col-sm-3">
-                    <input type="text" value="" class="form-control">
-                </div>
-                <div class="col-xs-3 col-sm-3">
-                    <input type="text" value="" class="form-control">
-                </div>
-                <div class="col-xs-3 col-sm-3">
-                    <input type="text" value="" class="form-control">
-                </div>
-                <div class="col-xs-3 col-sm-3">
-                    <input type="text" value="" class="form-control">
-                </div>
-
-            </div>
-
+ -->
             <a class="btn btn-link text-muted" type="button" href="#screen11"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
 
             <div class="form-group">
                 <div class="col-xs-6 col-sm-6"><a data-dismiss="modal" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a></div>
                 <div class="col-xs-6 col-sm-6">
-                    <a class="btn btn-primary btn-block btn-lg owl-next" type="button" >Продолжить</a>
+                    <a class="btn btn-primary btn-block btn-lg owl-next" type="button" ng-disabled="!safe.restore_key.length">Продолжить</a>
                 </div>
             </div>
         </div>
@@ -76,7 +76,7 @@
                 <label class="requred">Новый пароль для сейфа</label>
                 <div class="help-block">Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы. Для надежности используйте автоматический генератор с
                     установкой сложности пароля</div>
-                <input type="password" placeholder="" class="input-lg form-control">
+                <input type="password" placeholder="" ng-model="safe.pass" class="input-lg form-control">
 
             </div>
             <div class="form-group clearfix">
@@ -95,7 +95,7 @@
             <div class="form-group">
                 <div class="col-xs-6 col-sm-6"><a data-dismiss="modal" href="#" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a></div>
                 <div class="col-xs-6 col-sm-6">
-                    <a class="btn btn-primary btn-block btn-lg owl-next" type="button">Продолжить</a>
+                    <a class="btn btn-primary btn-block btn-lg owl-next" type="button" ng-disabled="!safe.pass.length">Продолжить</a>
                 </div>
             </div>
         </div>
@@ -108,7 +108,7 @@
             <h4>Проверьте точно ли вы запомнили пароль? </h4>
             <div class="form-group">
                 <label  class="requred">Введите пароль повторно</label>
-                <input class="form-control" type="password">
+                <input class="form-control" ng-model="safe.pass" type="password">
             </div>
 
             <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savefile0" id="savefilebtn0">Сохранить файл сейфа <i class="fa fa-lg fa-check"  id="savestatesuccess0" style="display:none"></i></a>
@@ -118,7 +118,7 @@
 
 
             <!-- <button type="button" class="btn btn-primary btn-block btn-lg" disabled="" id="gotoBackups0">Продолжить</button> -->
-            <a class="btn btn-primary btn-block btn-lg owl-next" id="gotoBackupslink0">Продолжить</a>
+            <a class="btn btn-primary btn-block btn-lg owl-next">Продолжить</a>
 
         </div>
 
@@ -136,7 +136,7 @@
             </div>
 
             <div class="form-group">
-                <button type="button" disabled="" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn0" data-dismiss="modal">Восстановить сейф</button>
+                <button type="button" ng-click="changeRestoreKey(safe)" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn0" data-dismiss="modal">Восстановить сейф</button>
             </div>
         </div>
 
