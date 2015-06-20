@@ -211,35 +211,35 @@
 
                 backend.generateWallet(result.path,safe.password,function(data){
                     var wallet_id = data.wallet_id;
-                    $timeout(function(){
-                        $scope.safe.wallet_id = wallet_id;
-                        $scope.safe.path = result.path;
-                        $scope.safe.password = safe.password;
-                        $scope.safe.fileSaved = true;
-                    });
+                    // $timeout(function(){
+                    //     $scope.safe.wallet_id = wallet_id;
+                    //     $scope.safe.path = result.path;
+                    //     $scope.safe.password = safe.password;
+                    //     $scope.safe.fileSaved = true;
+                    // });
+
+
+                    var new_safe = data.wi;
+                    new_safe.wallet_id = wallet_id;
+                    new_safe.name = safe.name;
+                    new_safe.pass = safe.password;
+                    new_safe.history = [];
+
+
                     
+                    $timeout(function(){
+                        $scope.safe = new_safe;
+                        $scope.safe.fileSaved = true;
+                        $rootScope.safes.unshift(new_safe);
+                        backend.runWallet(data.wallet_id);
+                        backend.reloadCounters();
+                    });
                     
                 });    
             };
 
             $scope.startUseSafe = function(){
                 $modalInstance.close();
-
-                backend.openWallet($scope.safe.path,$scope.safe.password,function(data){
-                    
-                    var new_safe = data.wi;
-                    new_safe.wallet_id = data.wallet_id;
-                    new_safe.name = $scope.safe.name;
-                    new_safe.pass = $scope.safe.password;
-                    new_safe.history = [];
-                    
-                    $timeout(function(){
-                        $rootScope.safes.unshift(new_safe);
-                        backend.runWallet(data.wallet_id);
-                        backend.reloadCounters();
-                    });
-
-                });
             }
 
             $scope.openSmartSafeForm = function() {
