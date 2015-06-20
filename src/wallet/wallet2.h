@@ -137,6 +137,7 @@ namespace tools
     };
     void assign_account(const currency::account_base& acc);
     void generate(const std::string& wallet, const std::string& password);
+    void restore(const std::string& path, const std::string& pass, const std::string& restore_key);
     void load(const std::string& wallet, const std::string& password);    
     void store();
     std::string get_wallet_path(){ return m_wallet_file; }

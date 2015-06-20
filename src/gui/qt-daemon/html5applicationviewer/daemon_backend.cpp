@@ -588,13 +588,7 @@ std::string daemon_backend::restore_wallet(const std::string& path, const std::s
 
   try
   {
-    if (!acc.restore_keys(restore_key_decoded))
-    {
-      LOG_ERROR("Failed to restore wallet using keys: " << restore_key_encoded);
-      return API_RETURN_CODE_FAIL;
-    }
-    w->assign_account(acc);
-    
+    w->restore(path, password, restore_key_decoded);    
   }
   catch (const tools::error::file_exists/*& e*/)
   {

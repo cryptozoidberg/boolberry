@@ -644,6 +644,18 @@ void wallet2::generate(const std::string& path, const std::string& pass)
   store();
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::restore(const std::string& path, const std::string& pass, const std::string& restore_key)
+{
+  clear();
+  m_wallet_file = path;
+  m_password = pass;
+  bool r = m_account.restore_keys(restore_key);
+  CHECK_AND_THROW_WALLET_EX(r, error::wallet_internal_error, m_wallet_file);
+  boost::system::error_code ignored_ec;
+  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
+  store();
+}
+//----------------------------------------------------------------------------------------------------
 bool wallet2::check_connection()
 {
   return m_core_proxy->check_connection();
