@@ -187,7 +187,7 @@
         function($scope, backend, $modalInstance, $modal, $timeout, $rootScope, informer) {
             $scope.owl_options  = {
               singleItem: true,
-              autoHeight: true,
+              autoHeight: false,
               navigation: false,
               pagination: false,
               margin: 16,
@@ -259,7 +259,7 @@
         function($scope, backend, $modalInstance, $modal, $timeout, path, safes, $rootScope, informer) {
             $scope.owl_options  = {
               singleItem: true,
-              autoHeight: true,
+              autoHeight: false,
               navigation: false,
               pagination: false,
               margin: 16,
@@ -288,10 +288,23 @@
             
 
             $scope.changeRestoreKey = function(safe){
-                informer.info(safe.path);
                 backend.restoreWallet(safe.path,safe.pass,safe.restore_key,function(data){
-                    informer.info(data.wallet_id);
-                    $scope.safe.wallet_id = data.wallet_id;
+                    var new_safe = data.wi;
+                    new_safe.wallet_id = data.wallet_id;
+                    new_safe.name = safe.name;
+                    new_safe.pass = safe.pass;
+                    new_safe.history = [];
+
+                    if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
+                        new_safe.history = data.recent_history.history;
+                    }
+                    
+                    $modalInstance.close();
+                    $timeout(function(){
+                        $rootScope.safes.unshift(new_safe); 
+                        backend.runWallet(data.wallet_id);
+                        backend.reloadCounters();
+                    });
                 });
                     
                 
@@ -338,15 +351,6 @@
                     new_safe.name = safe.name;
                     new_safe.pass = safe.pass;
                     new_safe.history = [];
-
-
-                    // var wallet_id = data.wallet_id;
-                    // var new_safe = {
-                    //     wallet_id : wallet_id,
-                    //     name : safe.name,
-                    //     pass : safe.pass,
-                    //     hisory: []
-                    // };
 
                     if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
                         new_safe.history = data.recent_history.history;
