@@ -210,22 +210,14 @@
                 var result = backend.saveFileDialog(caption, filemask); // TODO digest angular error fix
 
                 backend.generateWallet(result.path,safe.password,function(data){
+                    
                     var wallet_id = data.wallet_id;
-                    // $timeout(function(){
-                    //     $scope.safe.wallet_id = wallet_id;
-                    //     $scope.safe.path = result.path;
-                    //     $scope.safe.password = safe.password;
-                    //     $scope.safe.fileSaved = true;
-                    // });
-
 
                     var new_safe = data.wi;
                     new_safe.wallet_id = wallet_id;
                     new_safe.name = safe.name;
                     new_safe.pass = safe.password;
                     new_safe.history = [];
-
-
                     
                     $timeout(function(){
                         $scope.safe = new_safe;
@@ -284,8 +276,19 @@
                 path : '',
             }
 
+            $scope.saveWalletFile = function(){
+                var caption = "Please, choose the file";
+                var filemask = "*.lui";
+                var result;
+                if(result = backend.saveFileDialog(caption, filemask)){
+                    $scope.safe.path = result.path;
+                }
+            }
+
+            
+
             $scope.changeRestoreKey = function(safe){
-                
+                informer.info(safe.path);
                 backend.restoreWallet(safe.path,safe.pass,safe.restore_key,function(data){
                     informer.info(data.wallet_id);
                     $scope.safe.wallet_id = data.wallet_id;

@@ -111,7 +111,10 @@
                 <input class="form-control" ng-model="safe.pass" type="password">
             </div>
 
-            <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savefile0" id="savefilebtn0">Сохранить файл сейфа <i class="fa fa-lg fa-check"  id="savestatesuccess0" style="display:none"></i></a>
+            <a class="btn btn-success btn-block btn-lg" type="button" ng-click="saveWalletFile()">
+                Сохранить файл сейфа 
+                <i class="fa fa-lg fa-check"  id="savestatesuccess0" style="display:none"></i>
+            </a>
 
             <hr>
             <h5>Чтобы не потерять и надежно защитить файл сейфа, вам необходимо создать  бекап файла сейфа на следующем шаге</h5>
