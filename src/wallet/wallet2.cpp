@@ -638,7 +638,7 @@ void wallet2::generate(const std::string& path, const std::string& pass)
   clear();
   m_wallet_file = path;
   m_password = pass;
-
+  m_account.generate();
   boost::system::error_code ignored_ec;
   CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
   store();
