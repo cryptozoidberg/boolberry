@@ -633,7 +633,7 @@ void wallet2::assign_account(const currency::account_base& acc)
   m_account_public_address = m_account.get_keys().m_account_address;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::basic_init(const std::string& path, const std::string& pass)
+void wallet2::generate(const std::string& path, const std::string& pass)
 {
   clear();
   m_wallet_file = path;
@@ -641,7 +641,7 @@ bool wallet2::basic_init(const std::string& path, const std::string& pass)
 
   boost::system::error_code ignored_ec;
   CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
-  return true;
+  store();
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::check_connection()

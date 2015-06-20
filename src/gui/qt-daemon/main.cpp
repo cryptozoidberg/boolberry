@@ -27,9 +27,4 @@ int main(int argc, char *argv[])
       return false;
     viewer.init_config();
     return app.exec();
-
-
-
-
-
 }

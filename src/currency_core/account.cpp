@@ -43,12 +43,12 @@ DISABLE_VS_WARNINGS(4244 4345)
     return m_keys;
   }
   //-----------------------------------------------------------------
-  const std::vector<uint8_t> account_base::get_restore_data() const
+  std::string account_base::get_restore_data() const
   {
-    return vector<uint8_t>((uint8_t*)&m_keys.m_spend_secret_key.data[0], (uint8_t*)&m_keys.m_spend_secret_key.data[32]);
+    return std::string(&m_keys.m_spend_secret_key.data[0], sizeof(m_keys.m_spend_secret_key.data));
   }
   //-----------------------------------------------------------------
-  bool account_base::restore_keys(const std::vector<uint8_t>& restore_data)
+  bool account_base::restore_keys(const std::string& restore_data)
   {
     CHECK_AND_ASSERT_MES(restore_data.size() == sizeof(m_keys.m_spend_secret_key), false, "wrong restore data size");
     memcpy(&m_keys.m_spend_secret_key, &restore_data[0], sizeof(m_keys.m_spend_secret_key));

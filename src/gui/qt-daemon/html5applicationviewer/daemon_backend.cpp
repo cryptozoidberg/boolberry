@@ -6,6 +6,7 @@
 #include "daemon_backend.h"
 #include "currency_core/alias_helper.h"
 #include "core_fast_rpc_proxy.h"
+#include "common/base58.h"
 
 #define GET_WALLET_OPT_BY_ID(wallet_id, name)       \
   CRITICAL_REGION_LOCAL(m_wallets_lock);    \
@@ -544,11 +545,11 @@ std::string daemon_backend::get_recent_transfers(size_t wallet_id, view::transfe
   return API_RETURN_CODE_OK;
 }
 */
-std::string daemon_backend::generate_wallet(const std::string& path, const std::string& password, uint64_t& wallet_id)
+std::string daemon_backend::generate_wallet(const std::string& path, const std::string& password, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
-  wallet_id = m_wallet_id_counter++;
-  w->callback(std::shared_ptr<tools::i_wallet2_callback>(new i_wallet_to_i_backend_adapter(this, wallet_id)));
+  owr.wallet_id = m_wallet_id_counter++;
+  w->callback(std::shared_ptr<tools::i_wallet2_callback>(new i_wallet_to_i_backend_adapter(this, owr.wallet_id)));
   w->set_core_proxy(std::shared_ptr<tools::i_core_proxy>(new tools::core_fast_rpc_proxy(m_rpc_server)));
 
   CRITICAL_REGION_LOCAL(m_wallets_lock);
@@ -566,28 +567,30 @@ std::string daemon_backend::generate_wallet(const std::string& path, const std::
   {
     return std::string(API_RETURN_CODE_FAIL) + ":" + e.what();
   }
-  wallet_vs_options& wo = m_wallets[wallet_id];
+  wallet_vs_options& wo = m_wallets[owr.wallet_id];
   **wo.w = w;
-  init_wallet_entry(wo, wallet_id);
+  init_wallet_entry(wo, owr.wallet_id);
+  get_wallet_info(wo, owr.wi);
   return API_RETURN_CODE_OK;
 }
-std::string daemon_backend::restore_wallet(const std::string& path, const std::string& password, const std::string& restore_key, uint64_t& wallet_id)
+std::string daemon_backend::restore_wallet(const std::string& path, const std::string& password, const std::string& restore_key_encoded, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
-  wallet_id = m_wallet_id_counter++;
-  w->callback(std::shared_ptr<tools::i_wallet2_callback>(new i_wallet_to_i_backend_adapter(this, wallet_id)));
+  owr.wallet_id = m_wallet_id_counter++;
+  w->callback(std::shared_ptr<tools::i_wallet2_callback>(new i_wallet_to_i_backend_adapter(this, owr.wallet_id)));
   w->set_core_proxy(std::shared_ptr<tools::i_core_proxy>(new tools::core_fast_rpc_proxy(m_rpc_server)));
   currency::account_base acc;
-  std::vector<uint8_t> buff = tools::base58.decode(restore_key);
-  
+  std::string restore_key_decoded;
+  if(!tools::base58::decode(restore_key_encoded, restore_key_decoded))
+    return API_RETURN_CODE_BAD_ARG;
 
   CRITICAL_REGION_LOCAL(m_wallets_lock);
 
   try
   {
-    if (!acc.restore_keys(buff))
+    if (!acc.restore_keys(restore_key_decoded))
     {
-      LOG_ERROR("Failed to restore wallet using keys: " << restore_key);
+      LOG_ERROR("Failed to restore wallet using keys: " << restore_key_encoded);
       return API_RETURN_CODE_FAIL;
     }
     w->assign_account(acc);
@@ -602,9 +605,10 @@ std::string daemon_backend::restore_wallet(const std::string& path, const std::s
   {
     return std::string(API_RETURN_CODE_FAIL) + ":" + e.what();
   }
-  wallet_vs_options& wo = m_wallets[wallet_id];
+  wallet_vs_options& wo = m_wallets[owr.wallet_id];
   **wo.w = w;
-  init_wallet_entry(wo, wallet_id);
+  init_wallet_entry(wo, owr.wallet_id);
+  get_wallet_info(wo, owr.wi);
   return API_RETURN_CODE_OK;
 }
 std::string daemon_backend::close_wallet(size_t wallet_id)

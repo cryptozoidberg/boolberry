@@ -411,6 +411,17 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct get_restore_info_response
+  {
+    std::string restore_key;
+    std::string error_code;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(restore_key)
+      KV_SERIALIZE(error_code)
+    END_KV_SERIALIZE_MAP()
+  };
+
 
   struct api_response
   {
