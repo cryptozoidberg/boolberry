@@ -70,6 +70,7 @@
                                 $scope.f_my_goods_offers.splice(key, 1);
                             }
                         });
+                        
                     });
                 }else{
                     informer.error('Не найден сейф, с которого было опубликовано предложение');

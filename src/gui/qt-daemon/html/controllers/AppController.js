@@ -330,6 +330,7 @@
                     }
                 }
                 backend.reloadCounters();
+                backend.loadMyOffers();
                 var path = $location.path();
                 
                 if(path.indexOf('/safe/') > -1){

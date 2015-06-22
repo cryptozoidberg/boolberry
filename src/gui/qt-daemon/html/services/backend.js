@@ -247,7 +247,24 @@
                 return this.runCommand('on_request_quit', {});
             },
 
-            
+            loadMyOffers : function() {
+                if(!returnObject.shouldUseEmulator()){
+                    returnObject.get_all_offers(function(data){
+                        if(angular.isDefined(data.offers)){
+                            $rootScope.offers = data.offers;
+                            var my_offers = [];
+                            angular.forEach($rootScope.offers,function(item){
+                                var result = $filter('filter')($rootScope.safes, item.tx_hash);
+                                if(result.length){
+                                    my_offers.push(item);
+                                }
+                            });
+
+                            $rootScope.offers_count = my_offers.length;
+                        }
+                    });
+                }
+            },
 
             reloadCounters : function(){
                 $timeout(function(){
@@ -263,22 +280,7 @@
 
                     $rootScope.tx_count = txCount; 
 
-                    if(!returnObject.shouldUseEmulator()){
-                        returnObject.get_all_offers(function(data){
-                            if(angular.isDefined(data.offers)){
-                                $rootScope.offers = data.offers;
-                                var my_offers = [];
-                                angular.forEach($rootScope.offers,function(item){
-                                    var result = $filter('filter')($rootScope.safes, item.tx_hash);
-                                    if(result.length){
-                                        my_offers.push(item);
-                                    }
-                                });
-
-                                $rootScope.offers_count = my_offers.length;
-                            }
-                        });
-                    }
+                    
                 });
                 
             },

@@ -302,6 +302,7 @@
                         $rootScope.safes.unshift(new_safe); 
                         backend.runWallet(data.wallet_id);
                         backend.reloadCounters();
+                        backend.loadMyOffers();
                     });
                 });
                     
@@ -359,6 +360,7 @@
                         safes.unshift(new_safe); 
                         backend.runWallet(data.wallet_id);
                         backend.reloadCounters();   
+                        backend.loadMyOffers();
                     });
 
                 });
