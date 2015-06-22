@@ -88,11 +88,6 @@
             // -use master password: false
             // -use master password on money transfer: false
 
-            // $scope.cancelGenerate = function(){
-            //     $modalInstance.close(); 
-            //     $rootScope.settings.security.is_use_app_pass = false;
-            // };
-
             $scope.canReset = canReset;
 
             if(angular.isFunction(oncancel)){
@@ -297,6 +292,7 @@
                                         $rootScope.safes.push(new_safe); 
                                         backend.runWallet(data.wallet_id);  
                                         backend.reloadCounters(); 
+                                        backend.loadMyOffers();
                                     });
 
                                 });

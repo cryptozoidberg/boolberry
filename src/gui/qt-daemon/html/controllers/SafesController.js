@@ -285,8 +285,6 @@
                 }
             }
 
-            
-
             $scope.changeRestoreKey = function(safe){
                 backend.restoreWallet(safe.path,safe.pass,safe.restore_key,function(data){
                     var new_safe = data.wi;
