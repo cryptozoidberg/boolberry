@@ -7,13 +7,10 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/list.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/global_fun.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/member.hpp>
 #include <boost/foreach.hpp>
 #include <atomic>
 
+#include "blockchain_basic_tructs.h"
 #include "tx_pool.h"
 #include "currency_basic.h"
 #include "common/util.h"
@@ -25,7 +22,7 @@
 #include "verification_context.h"
 #include "crypto/hash.h"
 #include "checkpoints.h"
-
+#include "currency_core/currency_db_base.h"
 POD_MAKE_HASHABLE(currency, account_public_address);
 
 namespace currency
@@ -43,17 +40,6 @@ namespace currency
       uint64_t m_keeper_block_height;
       std::vector<uint64_t> m_global_output_indexes;
       std::vector<bool> m_spent_flags;
-    };
-
-    struct block_extended_info
-    {
-      block   bl;
-      uint64_t height;
-      size_t block_cumulative_size;
-      wide_difficulty_type cumulative_difficulty;
-      uint64_t already_generated_coins;
-      uint64_t already_donated_coins;
-      uint64_t scratch_offset;
     };
 
     blockchain_storage(tx_memory_pool& tx_pool);
@@ -191,7 +177,8 @@ namespace currency
     critical_section m_blockchain_lock; // TODO: add here reader/writer lock
 
     // main chain
-    blocks_container m_blocks;               // height  -> block_extended_info
+    db::blockchain_vector_to_db_adapter m_blocks;
+    blocks_container m_blocks_old;               // height  -> block_extended_info
     blocks_by_id_index m_blocks_index;       // crypto::hash -> height
     transactions_container m_transactions;
     key_images_container m_spent_keys;
@@ -266,7 +253,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          27
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          28
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 
@@ -277,7 +264,9 @@ namespace currency
       return;
     CHECK_PROJECT_NAME();
     CRITICAL_REGION_LOCAL(m_blockchain_lock);
-    ar & m_blocks;
+    if(version < 28)
+      ar & m_blocks_old;
+
     ar & m_blocks_index;
     ar & m_transactions;
     ar & m_spent_keys;
@@ -414,5 +403,5 @@ namespace currency
 
 BOOST_CLASS_VERSION(currency::blockchain_storage, CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER)
 BOOST_CLASS_VERSION(currency::blockchain_storage::transaction_chain_entry, CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER)
-BOOST_CLASS_VERSION(currency::blockchain_storage::block_extended_info, CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER)
+BOOST_CLASS_VERSION(currency::block_extended_info, CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER)
   

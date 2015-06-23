@@ -132,6 +132,7 @@
 
 #define CURRENCY_POOLDATA_FILENAME                      "poolstate.bin"
 #define CURRENCY_BLOCKCHAINDATA_FILENAME                "blockchain.bin"
+#define CURRENCY_BLOCKS_DB_FILENAME                     "blocks.db"
 #define CURRENCY_BLOCKCHAINDATA_TEMP_FILENAME           "blockchain.bin.tmp"
 #define P2P_NET_DATA_FILENAME                           "p2pstate.bin"
 #define MINER_CONFIG_FILENAME                           "miner_conf.json"

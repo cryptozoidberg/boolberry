@@ -97,6 +97,24 @@ bool blockchain_storage::init(const std::string& config_folder)
       add_new_block(bl, bvc);
       CHECK_AND_ASSERT_MES(!bvc.m_verifivation_failed && bvc.m_added_to_main_chain, false, "Failed to add genesis block to blockchain");
   }
+
+  if (!m_blocks.init(m_config_folder + "/" CURRENCY_BLOCKS_DB_FILENAME))
+  {
+    LOG_ERROR("Failed to initialize db file at path " << m_config_folder + "/" CURRENCY_BLOCKS_DB_FILENAME);
+    return false;
+  }
+  if (!m_blocks.size() && m_blocks_old.size())
+  {
+    LOG_PRINT_GREEN("Converting blocks to db file....", LOG_LEVEL_0);
+
+    for (const auto& b : m_blocks_old)
+    {
+      m_blocks.push_back(b);
+    }
+    LOG_PRINT_GREEN("Converting DONE!", LOG_LEVEL_0);
+  }
+
+
   if(!m_blocks.size())
   {
     LOG_PRINT_L0("Blockchain not loaded, generating genesis block.");
@@ -158,7 +176,7 @@ bool blockchain_storage::pop_block_from_blockchain()
 
   CHECK_AND_ASSERT_MES(m_blocks.size() > 1, false, "pop_block_from_blockchain: can't pop from blockchain with size = " << m_blocks.size());
   size_t h = m_blocks.size()-1;
-  block_extended_info& bei = m_blocks[h];
+  const block_extended_info& bei = m_blocks[h];
   pop_block_scratchpad_data(bei.bl, m_scratchpad);
   //crypto::hash id = get_block_hash(bei.bl);
   bool r = purge_block_data_from_blockchain(bei.bl, bei.bl.tx_hashes.size());

@@ -15,7 +15,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 enable_testing()
 
-include_directories(src contrib contrib/epee/include "${CMAKE_BINARY_DIR}/version")
+include_directories(src contrib contrib/epee/include contrib/leveldb/include "${CMAKE_BINARY_DIR}/version")
 add_definitions(-DSTATICLIB)
 
 set(TESTNET FALSE CACHE BOOL "Compile for testnet")

@@ -2,10 +2,11 @@ set(UPNPC_BUILD_STATIC ON CACHE BOOL "Build static library")
 set(UPNPC_BUILD_SHARED OFF CACHE BOOL "Build shared library")
 set(UPNPC_BUILD_TESTS OFF CACHE BOOL "Build test executables")
 
-include_directories(leveldb/include)
 
 add_subdirectory(miniupnpc)
 add_subdirectory(leveldb)
+
+include_directories(contrib/leveldb/include)
 
 
 set_property(TARGET upnpc-static PROPERTY FOLDER "contrib")
