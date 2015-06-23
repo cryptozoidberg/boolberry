@@ -14,6 +14,7 @@
 #include "currency_basic.h"
 #include "common/unordered_containers_boost_serialization.h"
 #include "common/crypto_boost_serialization.h"
+#include "blockchain_basic_tructs.h"
 
 #define CURRENT_BLOCK_ARCHIVE_VER   2
 BOOST_CLASS_VERSION(currency::block, CURRENT_BLOCK_ARCHIVE_VER)
@@ -109,6 +110,28 @@ namespace boost
     a & b.miner_tx;
     a & b.tx_hashes;
     a & b.flags;
+  }
+
+  template<class archive_t>
+  void serialize(archive_t & ar, currency::block_extended_info& ei, const unsigned int version)
+  {
+    ar & ei.bl;
+    ar & ei.height;
+    if (version < 1)
+    {
+      CHECK_AND_ASSERT_THROW_MES(archive_t::is_loading::value, "Wrong version at storing blockchain storage file");
+      currency::difficulty_type old_dif = 0;
+      ar & old_dif;
+      ei.cumulative_difficulty = old_dif;
+    }
+    else
+    {
+      ar & ei.cumulative_difficulty;
+    }
+    ar & ei.block_cumulative_size;
+    ar & ei.already_generated_coins;
+    ar & ei.already_donated_coins;
+    ar & ei.scratch_offset;
   }
 }
 }

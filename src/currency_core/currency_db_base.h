@@ -7,7 +7,7 @@
 
 #include "currency_db_base.h"
 #include "leveldb/db.h"
-
+#include "currency_boost_serialization.h"
 
 namespace currency
 {
