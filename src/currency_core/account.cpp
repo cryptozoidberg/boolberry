@@ -45,7 +45,7 @@ DISABLE_VS_WARNINGS(4244 4345)
   //-----------------------------------------------------------------
   std::string account_base::get_restore_data() const
   {
-    return std::string(&m_keys.m_spend_secret_key, sizeof(m_keys.m_spend_secret_key));
+    return std::string((const char*)&m_keys.m_spend_secret_key, sizeof(m_keys.m_spend_secret_key));
   }
   //-----------------------------------------------------------------
   bool account_base::restore_keys(const std::string& restore_data)
