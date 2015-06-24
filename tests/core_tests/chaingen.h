@@ -460,11 +460,20 @@ inline bool replay_events_through_core(currency::core& cr, const std::vector<tes
 template<class t_test_class>
 inline bool do_replay_events(std::vector<test_event_entry>& events)
 {
+  bool res = false;
+  std::string data_dir = epee::string_tools::get_current_module_folder() + "/" + std::to_string(crypto::rand<uint64_t>());
+  boost::system::error_code ec;
+  bool r = boost::filesystem::create_directory(data_dir, ec);
+  if (!r || ec)
+  {
+    std::cout << concolor::magenta << "Failed to make test folder for datadir: " << data_dir << concolor::normal << std::endl;
+    return false;
+  }
   boost::program_options::options_description desc("Allowed options");
   currency::core::init_options(desc);
-  command_line::add_arg(desc, command_line::arg_data_dir);
+  command_line::add_arg(desc, command_line::arg_data_dir, data_dir);
   boost::program_options::variables_map vm;
-  bool r = command_line::handle_error_helper(desc, [&]()
+  r = command_line::handle_error_helper(desc, [&]()
   {
     boost::program_options::store(boost::program_options::basic_parsed_options<char>(&desc), vm);
     boost::program_options::notify(vm);
@@ -473,15 +482,25 @@ inline bool do_replay_events(std::vector<test_event_entry>& events)
   if (!r)
     return false;
 
-  currency::currency_protocol_stub pr; //TODO: stub only for this kind of test, make real validation of relayed objects
-  currency::core c(&pr);
-  if (!c.init(vm))
   {
-    std::cout << concolor::magenta << "Failed to init core" << concolor::normal << std::endl;
+    currency::currency_protocol_stub pr; //TODO: stub only for this kind of test, make real validation of relayed objects
+    currency::core c(&pr);
+    if (!c.init(vm))
+    {
+      std::cout << concolor::magenta << "Failed to init core" << concolor::normal << std::endl;
+      return false;
+    }
+    t_test_class validator;
+    res = replay_events_through_core<t_test_class>(c, events, validator);
+  }
+  r = boost::filesystem::remove_all(data_dir, ec);
+  if (!r || ec)
+  {
+    std::cout << concolor::magenta << "Failed to remove test folder for datadir: " << data_dir << concolor::normal << std::endl;
     return false;
   }
-  t_test_class validator;
-  return replay_events_through_core<t_test_class>(c, events, validator);
+
+  return res;
 }
 //--------------------------------------------------------------------------
 template<class t_test_class>
@@ -497,8 +516,8 @@ inline bool do_replay_file(const std::string& filename)
 }
 //--------------------------------------------------------------------------
 #define GENERATE_ACCOUNT(account) \
-    currency::account_base account; \
-    account.generate();
+  currency::account_base account; \
+  account.generate();
 
 #define MAKE_ACCOUNT(VEC_EVENTS, account) \
   currency::account_base account; \
@@ -521,7 +540,7 @@ inline bool do_replay_file(const std::string& filename)
 #define MAKE_GENESIS_BLOCK(VEC_EVENTS, BLK_NAME, MINER_ACC, TS)                       \
   test_generator generator;                                                           \
   currency::block BLK_NAME = AUTO_VAL_INIT(BLK_NAME);                                 \
-  generator.construct_block(BLK_NAME, MINER_ACC, TS);                                 \
+  generator.construct_block(BLK_NAME, MINER_ACC, TS);                               \
   VEC_EVENTS.push_back(BLK_NAME);
 
 #define MAKE_NEXT_BLOCK(VEC_EVENTS, BLK_NAME, PREV_BLOCK, MINER_ACC)                  \

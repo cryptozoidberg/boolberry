@@ -86,6 +86,14 @@ bool blockchain_storage::init(const std::string& config_folder)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   m_config_folder = config_folder;
+
+  if (!m_blocks.init(m_config_folder + "/" CURRENCY_BLOCKS_DB_FILENAME))
+  {
+    LOG_ERROR("Failed to initialize db file at path " << m_config_folder + "/" CURRENCY_BLOCKS_DB_FILENAME);
+    return false;
+  }
+
+
   LOG_PRINT_L0("Loading blockchain...");
   const std::string filename = m_config_folder + "/" CURRENCY_BLOCKCHAINDATA_FILENAME;
   if(!tools::unserialize_obj_from_file(*this, filename))
@@ -98,11 +106,6 @@ bool blockchain_storage::init(const std::string& config_folder)
       CHECK_AND_ASSERT_MES(!bvc.m_verifivation_failed && bvc.m_added_to_main_chain, false, "Failed to add genesis block to blockchain");
   }
 
-  if (!m_blocks.init(m_config_folder + "/" CURRENCY_BLOCKS_DB_FILENAME))
-  {
-    LOG_ERROR("Failed to initialize db file at path " << m_config_folder + "/" CURRENCY_BLOCKS_DB_FILENAME);
-    return false;
-  }
   if (!m_blocks.size() && m_blocks_old.size())
   {
     LOG_PRINT_GREEN("Converting blocks to db file....", LOG_LEVEL_0);
