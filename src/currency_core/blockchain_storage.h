@@ -130,7 +130,7 @@ namespace currency
         {
           CHECK_AND_ASSERT_MES(it->second < m_blocks.size(), false, "Internal error: bl_id=" << string_tools::pod_to_hex(bl_id)
             << " have index record with offset="<<it->second<< ", bigger then m_blocks.size()=" << m_blocks.size());
-            blocks.push_back(m_blocks[it->second].bl);
+            blocks.push_back(m_blocks[it->second]->bl);
         }
       }
       return true;
@@ -177,7 +177,7 @@ namespace currency
     critical_section m_blockchain_lock; // TODO: add here reader/writer lock
 
     // main chain
-    db::blockchain_vector_to_db_adapter m_blocks;
+    db::vector_accessor<block_extended_info> m_blocks;
     blocks_container m_blocks_old;               // height  -> block_extended_info
     blocks_by_id_index m_blocks_index;       // crypto::hash -> height
     transactions_container m_transactions;
