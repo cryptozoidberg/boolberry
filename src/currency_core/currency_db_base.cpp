@@ -6,6 +6,5 @@
 #include "include_base_utils.h"
 using namespace epee;
 
-#include "currency_db_base.h"
-#include "currency_format_utils.h"
+
 

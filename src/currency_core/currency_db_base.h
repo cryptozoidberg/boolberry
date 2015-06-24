@@ -12,6 +12,7 @@
 #include "currency_boost_serialization.h"
 #include "difficulty.h"
 #include "common/difficulty_boost_serialization.h"
+#include "currency_format_utils.h"
 
 namespace currency
 {
