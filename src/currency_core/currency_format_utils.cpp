@@ -1230,7 +1230,7 @@ namespace currency
     
     std::cout << "Currency name: \t\t" << CURRENCY_NAME <<"(" << CURRENCY_NAME_SHORT << ")" << std::endl;
     std::cout << "Money supply: \t\t" << print_money(TOTAL_MONEY_SUPPLY) << " coins"
-                  << "(" << print_money(EMISSION_SUPPLY) << "), dev bounties is ???" << std::endl;
+      << "(" << print_money(TOTAL_MONEY_SUPPLY) << "), dev bounties is ???" << std::endl;
 
     std::cout << "PoS block interval: \t" << DIFFICULTY_POS_TARGET << " seconds" << std::endl;
     std::cout << "PoW block interval: \t" << DIFFICULTY_POW_TARGET << " seconds" << std::endl;
