@@ -32,13 +32,34 @@ DISABLE_VS_WARNINGS(4244 4345)
   void account_base::generate()
   {
     generate_keys(m_keys.m_account_address.m_spend_public_key, m_keys.m_spend_secret_key);
-    generate_keys(m_keys.m_account_address.m_view_public_key, m_keys.m_view_secret_key);
+    dependent_key(m_keys.m_spend_secret_key, m_keys.m_view_secret_key);
+    if (!crypto::secret_key_to_public_key(m_keys.m_view_secret_key, m_keys.m_account_address.m_view_public_key))
+      throw std::runtime_error("Failed to create public view key");
     m_creation_timestamp = time(NULL);
   }
   //-----------------------------------------------------------------
   const account_keys& account_base::get_keys() const
   {
     return m_keys;
+  }
+  //-----------------------------------------------------------------
+  std::string account_base::get_restore_data() const
+  {
+    return std::string((const char*)&m_keys.m_spend_secret_key, sizeof(m_keys.m_spend_secret_key));
+  }
+  //-----------------------------------------------------------------
+  bool account_base::restore_keys(const std::string& restore_data)
+  {
+    CHECK_AND_ASSERT_MES(restore_data.size() == sizeof(m_keys.m_spend_secret_key), false, "wrong restore data size");
+    memcpy(&m_keys.m_spend_secret_key, &restore_data[0], sizeof(m_keys.m_spend_secret_key));
+
+    dependent_key(m_keys.m_spend_secret_key, m_keys.m_view_secret_key);
+
+    bool r = crypto::secret_key_to_public_key(m_keys.m_spend_secret_key, m_keys.m_account_address.m_spend_public_key);
+    CHECK_AND_ASSERT_MES(r, false, "failed to secret_key_to_public_key for secrete key");
+    r = crypto::secret_key_to_public_key(m_keys.m_view_secret_key, m_keys.m_account_address.m_view_public_key);
+    CHECK_AND_ASSERT_MES(r, false, "failed to secret_key_to_public_key for view key");
+    return true;
   }
   //-----------------------------------------------------------------
   std::string account_base::get_public_address_str()

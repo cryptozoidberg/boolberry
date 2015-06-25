@@ -388,3 +388,37 @@ resposne:
 no param
 
 api resposne status
+
+[sync] get_smart_safe_info()
+param:
+{
+  "wallet_id": 0
+}
+
+
+resposne:
+{
+  "restore_key": "SDfdsfdffdsfsdfsfsdwdwwdx"
+}
+
+
+[async] restore_Wallet()
+param:
+{
+  "path": "\home\wallet_dir",
+  "pass": "12345",
+  "restore_key": "SDfdsfdffdsfsdfsfsdwdwwdx"
+}
+
+
+resposne:
+{
+  "wallet_id": 0
+}
+
+
+
+
+
+
+

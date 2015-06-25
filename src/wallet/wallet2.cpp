@@ -455,9 +455,9 @@ void wallet2::scan_tx_pool()
       decrypt_attachments(tx, m_account.get_keys(), decrypted_att);
 
       //prepare notification about pending transaction
-      wallet_rpc::wallet_transfer_info unconfirmed_wti = m_unconfirmed_txs[currency::get_transaction_hash(tx)];
+      wallet_rpc::wallet_transfer_info& unconfirmed_wti = m_unconfirmed_txs[currency::get_transaction_hash(tx)];
 
-      unconfirmed_wti.timestamp = 
+      unconfirmed_wti.timestamp = time(nullptr);
       unconfirmed_wti.is_income = true;
       m_unconfirmed_in_transfers[tx_hash] = tx;
       prepare_wti(unconfirmed_wti, 0, time(NULL), tx, tx_money_got_in_outs, money_transfer2_details());
@@ -566,6 +566,7 @@ bool wallet2::clear()
   m_unconfirmed_txs.clear();
   m_payments.clear();
   m_transfer_history.clear();
+  m_account = AUTO_VAL_INIT(m_account);
 
   currency::block b;
   currency::generate_genesis_block(b);
@@ -633,21 +634,26 @@ void wallet2::assign_account(const currency::account_base& acc)
   m_account_public_address = m_account.get_keys().m_account_address;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::generate(const std::string& wallet_, const std::string& password)
+void wallet2::generate(const std::string& path, const std::string& pass)
 {
   clear();
-  m_wallet_file = wallet_;
-  m_password = password;
-
+  m_wallet_file = path;
+  m_password = pass;
+  m_account.generate();
   boost::system::error_code ignored_ec;
   CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
-
-  m_account.generate();
-  m_account_public_address = m_account.get_keys().m_account_address;
-
-  //bool r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str() );
-  //if(!r) LOG_PRINT_RED_L0("String with address text not saved");
-
+  store();
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::restore(const std::string& path, const std::string& pass, const std::string& restore_key)
+{
+  clear();
+  m_wallet_file = path;
+  m_password = pass;
+  bool r = m_account.restore_keys(restore_key);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, m_wallet_file);
+  boost::system::error_code ignored_ec;
+  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
   store();
 }
 //----------------------------------------------------------------------------------------------------

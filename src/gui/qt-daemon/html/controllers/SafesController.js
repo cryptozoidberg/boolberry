@@ -159,13 +159,35 @@
                 // console.log('Safe form dismissed');
             });
         };
+
+        $scope.openSmartSafeRestoreForm = function(path) {
+            var modalInstance = $modal.open({
+                templateUrl: "views/safe_smart_restore.html",
+                controller: 'safeSmartRestoreCtrl',
+                size: 'md',
+                windowClass: 'modal fade in out',
+                resolve: {
+                    path: function(){
+                        return path;
+                    },
+                    safes: function(){
+                        return $scope.safes;
+                    }
+                }
+            });
+            modalInstance.result.then((function() {
+                // console.log('Safe form closed');
+            }), function() {
+                // console.log('Safe form dismissed');
+            });
+        };
     }]);
 
-    module.controller('safeAddCtrl', ['$scope','backend', '$modalInstance', '$modal', '$timeout','$rootScope',
-        function($scope, backend, $modalInstance, $modal, $timeout, $rootScope) {
+    module.controller('safeAddCtrl', ['$scope','backend', '$modalInstance', '$modal', '$timeout','$rootScope', 'informer',
+        function($scope, backend, $modalInstance, $modal, $timeout, $rootScope, informer) {
             $scope.owl_options  = {
               singleItem: true,
-              autoHeight: true,
+              autoHeight: false,
               navigation: false,
               pagination: false,
               margin: 16,
@@ -188,31 +210,29 @@
                 var result = backend.saveFileDialog(caption, filemask); // TODO digest angular error fix
 
                 backend.generateWallet(result.path,safe.password,function(data){
+                    
                     var wallet_id = data.wallet_id;
+
+                    var new_safe = data.wi;
+                    new_safe.wallet_id = wallet_id;
+                    new_safe.name = safe.name;
+                    new_safe.pass = safe.password;
+                    new_safe.history = [];
+                    
                     $timeout(function(){
-                        $scope.safe.wallet_id = wallet_id;
-                    });
-                    console.log(data);
-                    $modalInstance.close();
-
-                    backend.openWallet(result.path,safe.password,function(data){
-                        
-                        var new_safe = data.wi;
-                        new_safe.wallet_id = data.wallet_id;
-                        new_safe.name = safe.name;
-                        new_safe.pass = safe.password;
-                        new_safe.history = [];
-                        
-                        $timeout(function(){
-                            $rootScope.safes.unshift(new_safe);
-                            backend.runWallet(data.wallet_id);
-                            backend.reloadCounters();
-                        });
-
+                        $scope.safe = new_safe;
+                        $scope.safe.fileSaved = true;
+                        $rootScope.safes.unshift(new_safe);
+                        backend.runWallet(data.wallet_id);
+                        backend.reloadCounters();
                     });
                     
                 });    
             };
+
+            $scope.startUseSafe = function(){
+                $modalInstance.close();
+            }
 
             $scope.openSmartSafeForm = function() {
                 var modalInstance = $modal.open({
@@ -220,6 +240,11 @@
                     controller: 'smartSafeAddCtrl',
                     size: 'md',
                     windowClass: 'modal fade in out',
+                    resolve : {
+                        safe : function(){
+                            return $scope.safe;
+                        }
+                    }
                 });
                 modalInstance.result.then((function() {
                     //console.log('Safe form closed');
@@ -227,6 +252,62 @@
                     //console.log('Safe form dismissed');
                 });
             };
+        }
+    ]);
+
+    module.controller('safeSmartRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes', '$rootScope', 'informer',
+        function($scope, backend, $modalInstance, $modal, $timeout, path, safes, $rootScope, informer) {
+            $scope.owl_options  = {
+              singleItem: true,
+              autoHeight: false,
+              navigation: false,
+              pagination: false,
+              margin: 16,
+              mouseDrag: false,
+              touchDrag: false,
+              callbacks: true,
+              smartSpeed: 100,
+              autoplayHoverPause: true,
+            };
+
+            $scope.safe = {
+                restore_key : '',  
+                pass : '',
+                path : '',
+            }
+
+            $scope.saveWalletFile = function(){
+                var caption = "Please, choose the file";
+                var filemask = "*.lui";
+                var result;
+                if(result = backend.saveFileDialog(caption, filemask)){
+                    $scope.safe.path = result.path;
+                }
+            }
+
+            $scope.changeRestoreKey = function(safe){
+                backend.restoreWallet(safe.path,safe.pass,safe.restore_key,function(data){
+                    var new_safe = data.wi;
+                    new_safe.wallet_id = data.wallet_id;
+                    new_safe.name = safe.name;
+                    new_safe.pass = safe.pass;
+                    new_safe.history = [];
+
+                    if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
+                        new_safe.history = data.recent_history.history;
+                    }
+                    
+                    $modalInstance.close();
+                    $timeout(function(){
+                        $rootScope.safes.unshift(new_safe); 
+                        backend.runWallet(data.wallet_id);
+                        backend.reloadCounters();
+                        backend.loadMyOffers();
+                    });
+                });
+                    
+                
+            }
         }
     ]);
 
@@ -270,15 +351,6 @@
                     new_safe.pass = safe.pass;
                     new_safe.history = [];
 
-
-                    // var wallet_id = data.wallet_id;
-                    // var new_safe = {
-                    //     wallet_id : wallet_id,
-                    //     name : safe.name,
-                    //     pass : safe.pass,
-                    //     hisory: []
-                    // };
-
                     if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
                         new_safe.history = data.recent_history.history;
                     }
@@ -288,6 +360,7 @@
                         safes.unshift(new_safe); 
                         backend.runWallet(data.wallet_id);
                         backend.reloadCounters();   
+                        backend.loadMyOffers();
                     });
 
                 });
@@ -296,8 +369,15 @@
         }
     ]);
 
-    module.controller('smartSafeAddCtrl', ['$scope','backend', '$modalInstance',
-        function($scope, backend, $modalInstance) {
+    module.controller('smartSafeAddCtrl', ['$scope','backend', '$modalInstance', 'safe', 'informer',
+        function($scope, backend, $modalInstance, safe, informer) {
+            
+            //$scope.safe = safe;
+
+            var data = backend.getSmartSafeInfo(safe.wallet_id);
+
+            $scope.restore_key = data.restore_key;
+
             $scope.closeSmartSafeForm = function(){
                 $modalInstance.close();
             }

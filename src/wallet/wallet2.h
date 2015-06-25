@@ -141,6 +141,7 @@ namespace tools
     };
     void assign_account(const currency::account_base& acc);
     void generate(const std::string& wallet, const std::string& password);
+    void restore(const std::string& path, const std::string& pass, const std::string& restore_key);
     void load(const std::string& wallet, const std::string& password);    
     void store();
     std::string get_wallet_path(){ return m_wallet_file; }
@@ -291,7 +292,7 @@ namespace tools
     bool is_coin_age_okay(const transfer_details& tr);
     static bool build_kernel(const currency::pos_entry& pe, const currency::stake_modifier_type& stake_modifier, currency::stake_kernel& kernel, uint64_t& coindays_weight, uint64_t timestamp);
     bool is_connected_to_net();
-    void drop_offer_keys();
+    void drop_offer_keys();    
     bool is_coin_age_okay_for_pos(const transfer_details& tr);
 
     currency::account_base m_account;

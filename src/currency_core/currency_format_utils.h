@@ -213,8 +213,6 @@ namespace currency
   bool get_account_address_from_str(account_public_address& adr, const std::string& str);
   bool is_coinbase(const transaction& tx);
 
-  bool operator ==(const currency::transaction& a, const currency::transaction& b);
-  bool operator ==(const currency::block& a, const currency::block& b);
   //---------------------------------------------------------------
   template<typename specic_type_t, typename variant_t>
   bool get_type_in_variant_container(const std::vector<variant_t>& av, specic_type_t& a)
@@ -397,6 +395,9 @@ template <class T>
 std::ostream &print256(std::ostream &o, const T &v) {
   return o << "<" << epee::string_tools::pod_to_hex(v) << ">";
 }
+
+bool operator ==(const currency::transaction& a, const currency::transaction& b);
+bool operator ==(const currency::block& a, const currency::block& b);
 
 bool parse_hash256(const std::string str_hash, crypto::hash& hash);
 

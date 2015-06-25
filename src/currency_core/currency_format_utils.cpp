@@ -1649,14 +1649,15 @@ namespace currency
     return true;
   }
 
-  bool operator ==(const currency::transaction& a, const currency::transaction& b) {
-    return currency::get_transaction_hash(a) == currency::get_transaction_hash(b);
-  }
-
-  bool operator ==(const currency::block& a, const currency::block& b) {
-    return currency::get_block_hash(a) == currency::get_block_hash(b);
-  }
   //--------------------------------------------------------------------------------
+}
+
+bool operator ==(const currency::transaction& a, const currency::transaction& b) {
+  return currency::get_transaction_hash(a) == currency::get_transaction_hash(b);
+}
+
+bool operator ==(const currency::block& a, const currency::block& b) {
+  return currency::get_block_hash(a) == currency::get_block_hash(b);
 }
 
 bool parse_hash256(const std::string str_hash, crypto::hash& hash)

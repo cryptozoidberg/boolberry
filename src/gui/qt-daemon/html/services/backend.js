@@ -62,6 +62,22 @@
                 return res;
             },
 
+            getSmartSafeInfo : function(wallet_id) {
+                var params = {
+                    wallet_id : wallet_id
+                };
+                return this.runCommand('get_smart_safe_info', params);
+            },
+
+            restoreWallet : function(path, pass, restore_key, callback) {
+                var params = {
+                    restore_key : restore_key,
+                    path: path,
+                    pass: pass
+                };
+                return this.runCommand('restore_wallet', params, callback);
+            },
+
             startPosMining : function(wallet_id) {
                 var params = {
                     wallet_id : wallet_id
@@ -231,7 +247,24 @@
                 return this.runCommand('on_request_quit', {});
             },
 
-            
+            loadMyOffers : function() {
+                if(!returnObject.shouldUseEmulator()){
+                    returnObject.get_all_offers(function(data){
+                        if(angular.isDefined(data.offers)){
+                            $rootScope.offers = data.offers;
+                            var my_offers = [];
+                            angular.forEach($rootScope.offers,function(item){
+                                var result = $filter('filter')($rootScope.safes, item.tx_hash);
+                                if(result.length){
+                                    my_offers.push(item);
+                                }
+                            });
+
+                            $rootScope.offers_count = my_offers.length;
+                        }
+                    });
+                }
+            },
 
             reloadCounters : function(){
                 $timeout(function(){
@@ -247,22 +280,7 @@
 
                     $rootScope.tx_count = txCount; 
 
-                    if(!returnObject.shouldUseEmulator()){
-                        returnObject.get_all_offers(function(data){
-                            if(angular.isDefined(data.offers)){
-                                $rootScope.offers = data.offers;
-                                var my_offers = [];
-                                angular.forEach($rootScope.offers,function(item){
-                                    var result = $filter('filter')($rootScope.safes, item.tx_hash);
-                                    if(result.length){
-                                        my_offers.push(item);
-                                    }
-                                });
-
-                                $rootScope.offers_count = my_offers.length;
-                            }
-                        });
-                    }
+                    
                 });
                 
             },
@@ -536,6 +554,16 @@
                         "path": "/home/master/Lui/test_wallet.lui"
                     };
                     break;
+                case 'get_smart_safe_info' :
+                    result = {
+                        'restore_key' : 'KFDKTLIUWSEDREBYIOKMTGHJKLGORDDV'
+                    }
+                    break;
+                case 'restore_wallet' :
+                    result = {
+                        'wallet_id' : '14'
+                    }
+                    break;
                 case 'show_savefile_dialog' : 
                     result = { 
                         "error_code": "OK",
@@ -599,7 +627,7 @@
                     break;
                 case 'generate_wallet' : 
                     result = {
-                        param: {"wallet_id" : this.getWalletId()}
+                        "wallet_id" : 1
                     }
                     break;
                 case 'get_all_offers':

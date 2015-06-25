@@ -34,6 +34,8 @@ namespace currency
     void generate();
     const account_keys& get_keys() const;
     std::string get_public_address_str();
+    std::string get_restore_data() const;
+    bool restore_keys(const std::string& restore_data);
 
     uint64_t get_createtime() const { return m_creation_timestamp; }
     void set_createtime(uint64_t val) { m_creation_timestamp = val; }

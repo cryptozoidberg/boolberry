@@ -310,6 +310,19 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct restore_wallet_request
+  {
+    std::string pass;
+    std::string path;
+    std::string restore_key;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(pass)
+      KV_SERIALIZE(path)
+      KV_SERIALIZE(restore_key)
+    END_KV_SERIALIZE_MAP()
+  };
+
   struct open_wallet_response
   {
     uint64_t wallet_id;
@@ -395,6 +408,17 @@ public:
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_id)
       KV_SERIALIZE(progress)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct get_restore_info_response
+  {
+    std::string restore_key;
+    std::string error_code;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(restore_key)
+      KV_SERIALIZE(error_code)
     END_KV_SERIALIZE_MAP()
   };
 

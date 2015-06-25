@@ -7,9 +7,9 @@
 #include <cstdint>
 
 #include "common/base58.cpp"
-
+#include "currency_core/currency_format_utils.h"
 #include "serialization/binary_utils.h"
-
+#include "currency_core/currency_basic.h"
 using namespace tools;
 
 #define MAKE_STR(arr) std::string(arr, sizeof(arr) - 1)
