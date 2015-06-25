@@ -19,10 +19,24 @@
 
 // TOTAL_MONEY_SUPPLY - total number coins to be generated
 #define TOTAL_MONEY_SUPPLY                            ((uint64_t)(-1))
-#define DONATIONS_SUPPLY                              (TOTAL_MONEY_SUPPLY/100) 
-#define EMISSION_SUPPLY                               (TOTAL_MONEY_SUPPLY - DONATIONS_SUPPLY) 
 
-#define EMISSION_CURVE_CHARACTER                      20
+#define TEST_FAST_EMISSION_CURVE
+
+#ifndef TEST_FAST_EMISSION_CURVE 
+#define POS_START_HEIGHT                              60000
+#define SIGNIFICANT_EMISSION_RANGE                    920000
+#define SIGNIFICANT_EMISSION_SWICH_HEIGHT             910000
+#define SIGNIFICANT_EMISSION_REWARD_MULTIPLIER        5 / 16
+#define PERCENTS_PERIOD                               262800
+#else
+#define POS_START_HEIGHT                              600
+#define SIGNIFICANT_EMISSION_RANGE                    9200
+#define SIGNIFICANT_EMISSION_SWICH_HEIGHT             9100
+#define SIGNIFICANT_EMISSION_REWARD_MULTIPLIER        30000
+#define PERCENTS_PERIOD                               2628
+#endif
+//#define EMISSION_SUPPLY                               (TOTAL_MONEY_SUPPLY - DONATIONS_SUPPLY) 
+//#define EMISSION_CURVE_CHARACTER                      20
 
 
 #define CURRENCY_TO_KEY_OUT_RELAXED                   0

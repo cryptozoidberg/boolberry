@@ -1499,18 +1499,18 @@ namespace currency
     
     uint64_t base_reward = 0;
     //emission curve
-    if (height < 910000)
+    if (height < SIGNIFICANT_EMISSION_SWICH_HEIGHT)
     {
       //------------------------------------------------------------
       //we did this tiny workaround to make easier life of coretests
       if (height < 100)
         height = 100;
       //------------------------------------------------------------
-      base_reward = height*(920000 - height) * 5 / 16;
+      base_reward = height*(SIGNIFICANT_EMISSION_RANGE - height) * SIGNIFICANT_EMISSION_REWARD_MULTIPLIER;
     }
     else
     {
-      base_reward = ((already_generated_coins - (pos_diff / 100).convert_to<uint64_t>()) / 50) / 262800;
+      base_reward = ((already_generated_coins - (pos_diff / 100).convert_to<uint64_t>()) / 50) / PERCENTS_PERIOD;
     }
 
     //crop dust
