@@ -248,7 +248,6 @@
             </div>
 
             <h5>Легенда - объяснить цвета: зеленый топ, желтое, серое и прочее</h5>
-
             <div class="table-responsive panel market-table-responsive">
                 <table class="table table-condensed data-table table-hover">
                     <thead>
@@ -308,7 +307,10 @@
                                 <span class="nowrap">{{offer.amount_etc}} {{offer.target}}</span>
                             </td>
                             <td>
-                                {{offer.amount_lui | gulden:false}} <!-- <span class="label label-danger">+ 2%</span> -->
+                                {{offer.amount_lui | gulden:false}} 
+                                <span class="label label-danger">
+                                    {{ offer.bonus }} 
+                                </span>
                             </td>
                             <td>
                                 <ul class="list-unstyled">
@@ -335,11 +337,11 @@
                                 </span>
                             </td>
                             <td>
-                                <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                                <span ng-if="offer.location_country" ng-repeat="country in countryList | filter : {alpha2Code: offer.location_country}">
                                     {{country.name}}
                                 </span>
                                 <span>
-                                    {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                                    {{gplaces[offer.location_city].name}} 
                                 </span>
                             </td>
                             <td>
@@ -562,11 +564,11 @@
                                 <span class="label label-success">4.5</span>
                             </td> -->
                             <td>
-                                <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                                <span ng-if="offer.location_country" ng-repeat="country in countryList | filter : {alpha2Code: offer.location_country}">
                                     {{country.name}}
                                 </span>
                                 <span>
-                                    {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                                    {{gplaces[offer.location_city].name}} 
                                 </span>
                             </td>
                             <td>
@@ -715,7 +717,10 @@
                             <!-- <td><span class="nowrap"></span></td> -->
 
                             <td>
-                                {{offer.amount_lui | gulden : false }} <!-- <span class="label label-danger">+ 2%</span> -->
+                                {{offer.amount_lui | gulden : false }}
+                                <span class="label label-danger">
+                                    {{ offer.bonus }} 
+                                </span>
                             </td>
 
                             <td>{{offer.contacts}}</td>
@@ -729,11 +734,11 @@
                             </td>
 
                             <td>
-                                <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                                <span ng-if="offer.location_country" ng-repeat="country in countryList | filter : {alpha2Code: offer.location_country}">
                                     {{country.name}}
                                 </span>
                                 <span>
-                                    {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                                    {{gplaces[offer.location_city].name}} 
                                 </span>
                             </td>
                             <td>{{offer.comment}}</td>
@@ -820,11 +825,11 @@
                         <!-- <td><span class="label label-success">4.5</span></td> -->
 
                         <td>
-                            <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                            <span ng-if="offer.location_country" ng-repeat="country in countryList | filter : {alpha2Code: offer.location_country}">
                                 {{country.name}}
                             </span>
                             <span>
-                                {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                                {{gplaces[offer.location_city].name}} 
                             </span>
                         </td>
 
@@ -977,11 +982,11 @@
                             </td>
 
                             <td>
-                                <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                                <span ng-if="offer.location_country" ng-repeat="country in countryList | filter : {alpha2Code: offer.location_country}">
                                     {{country.name}}
                                 </span>
                                 <span>
-                                    {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                                    {{gplaces[offer.location_city].name}} 
                                 </span>
                             </td>
                             <td>{{offer.comment}}</td>
@@ -1059,11 +1064,11 @@
 
 
                         <td>
-                            <span ng-if="offer.location.split(',')[0].length" ng-repeat="country in countryList | filter : {alpha2Code: offer.location.split(',')[0]}">
+                            <span ng-if="offer.location_country" ng-repeat="country in countryList | filter : {alpha2Code: offer.location_country}">
                                 {{country.name}}
                             </span>
                             <span>
-                                {{gplaces[offer.location.split(',')[1].trim()].name}} 
+                                {{gplaces[offer.location_city].name}} 
                             </span>
                         </td>
 

@@ -174,8 +174,8 @@
             },
 
             pushOffer : function(
-                wallet_id, offer_type, amount_lui, target, location, contacts, 
-                comment, expiration_time, fee, amount_etc, payment_types, callback){
+                wallet_id, offer_type, amount_lui, target, location_city, location_country, contacts, 
+                comment, expiration_time, fee, amount_etc, payment_types, bonus, callback){
                 var params = {
                     "wallet_id" : wallet_id,
                     "od": {
@@ -183,15 +183,17 @@
                         "amount_lui": $filter('gulden_to_int')(amount_lui),
                         "amount_etc": $filter('gulden_to_int')(amount_etc),
                         "target": target,
-                        "location": location,
+                        "location_city":    location_city,
+                        "location_country": location_country,
                         "contacts": contacts,
                         "comment": comment,
                         "payment_types": payment_types,
                         "expiration_time": expiration_time,
                         "fee" : $filter('gulden_to_int')(fee)
+                        
                     }
                 };
-                console.log(params);
+                if(angular.isDefined(bonus) && bonus) params.od.bonus = parseInt(bonus);
                 return this.runCommand('push_offer', params, callback);
             },
 

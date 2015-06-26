@@ -143,18 +143,27 @@
                             </div>
 
                         </div>
-                        <!-- <div class="form-group collapse selltext">
+
+                        <div class="form-group" ng-if="offer.offer_type == 3">
                             <label class="col-xs-4 col-sm-4 control-label">
                                 Бонус
                             </label>
                             <div class="col-xs-4 col-sm-4">
                                 <div class="input-group">
-                                    <input type="text" class="form-control">
-                                    <select class="selectpicker input-group-btn select-btn-success"><option>%</option><option>G</option></select>
+                                    <input type="text" ng-model="offer.bonus" class="form-control">
+                                    <select class="input-group-btn select-btn-success" ng-model="bonus_type" selectpicker ng-options="item for item in ['G','%']">
+                                        
+                                    </select>
                                 </div>
                             </div>
-                            <div class="col-xs-4 col-sm-4"><div class="help-block">Вы можете повысить приклекательность своей заявки, если установите небольшой процент от сделки или сумму гульденов сверх суммы продажи</div></div>
-                        </div> -->
+                            <div class="col-xs-4 col-sm-4">
+                                <div class="help-block">
+                                    Вы можете повысить приклекательность своей заявки, 
+                                    если установите небольшой процент от сделки или сумму 
+                                    гульденов сверх суммы продажи
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="gOfferForm.$submitted || gOfferForm.amount_etc.$touched">
                             <div ng-show="gOfferForm.amount_etc.$error.required">Обязательное поле</div>
@@ -517,8 +526,8 @@
                                     options="cityOptionsAC"
                                     ng-disabled="!cityOptionsAC.componentRestrictions.country"
                                 >
-                                <input type="hidden" name="city" required ng-model="offer.location.city">
-                                <input type="hidden" name="country" required ng-model="offer.location.country">
+                                <input type="hidden" name="city" required ng-model="offer.location_city">
+                                <input type="hidden" name="country" required ng-model="offer.location_country">
                             </div>
                         </div>
 

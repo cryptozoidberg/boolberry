@@ -41,6 +41,8 @@
                 success: '#5CB85C',
             };
 
+            $scope.safeView = 'list';
+
             $scope.pieChartoptions = {
                 barColor: $scope.pieStates.info, // #5BC0DE info,  #F0AD4E warning,  danger
                 trackColor: '#f2f2f2',

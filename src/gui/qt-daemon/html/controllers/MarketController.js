@@ -111,6 +111,7 @@
 
             // GET LIST OF OFFERS
             backend.get_all_offers(function(data){
+                
                 if(angular.isUndefined($rootScope.gplaces)){
                     $rootScope.gplaces = {};
                 }
@@ -130,7 +131,7 @@
 
                     angular.forEach($rootScope.offers,function(item){
                         // var item = $rootScope.offers[0];
-                        var placeId = item.location.split(',')[1].trim();
+                        var placeId = item.location_city;
 
                         // informer.info(placeId);
 
@@ -504,9 +505,9 @@
                 if(angular.isDefined(obj)){
                     var o = obj.originalObject;
                     $scope.cityOptionsAC.componentRestrictions = {country: o.alpha2Code};
-                    $scope.offer.location.country = o.alpha2Code;
+                    $scope.offer.location_country = o.alpha2Code;
                     $scope.offer.autocomplete_city = '';
-                    $scope.offer.location.city = '';
+                    $scope.offer.location_city = '';
                 }
 
                 $scope.$watch(function(){
@@ -514,7 +515,7 @@
                 },
                 function($value){
                     if(angular.isDefined($value.place_id)){
-                        $scope.offer.location.city = $value.place_id;
+                        $scope.offer.location_city = $value.place_id;
                     }
                 },
                 true);
@@ -543,8 +544,10 @@
             });
 
             if(last_offer){
-                $scope.offer.is_standart     = last_offer.is_standart;
-                $scope.offer.expiration_time = last_offer.expiration_time;
+                $scope.offer.is_standart      = last_offer.is_standart;
+                $scope.offer.expiration_time  = last_offer.expiration_time;
+                $scope.offer.location_city    = last_offer.location_city;
+                $scope.offer.location_country = last_offer.location_country;
 
                 var contacts = last_offer.contacts.split(', ');
                 
@@ -556,15 +559,6 @@
                     $scope.offer.contacts.phone = contacts[1];
                 }
 
-                var location = last_offer.location.split(', ');
-                
-                if(angular.isDefined(location[0])){
-                    $scope.offer.location.country = location[0];
-                }
-
-                if(angular.isDefined(location[1])){
-                    $scope.offer.location.city = location[1];
-                }
 
             }
 
@@ -592,14 +586,14 @@
 
                 var o = angular.copy(offer);
                 o.fee = o.is_premium ? o.fee_premium : o.fee_standart;
-                o.location = o.location.country + ', ' + o.location.city;
+                // o.location = o.location.country + ', ' + o.location.city;
                 o.contacts = o.contacts.email + ', ' + o.contacts.phone;
                 o.amount_etc = 1;
                 o.payment_types = '';
 
                 backend.pushOffer(
-                    o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location, 
-                    o.contacts, o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types,
+                    o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, 
+                    o.contacts, o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, '',
                     function(data){
                         informer.success('Спасибо. Заявка Добавлена');
                     }
@@ -618,6 +612,8 @@
                 {key : 2, value: 'Покупка гульденов'},
                 {key : 3, value: 'Продажа гульденов'}
             ];
+
+            $scope.bonus_type = 'G';
 
             $scope.payment_types = market.paymentTypes;
 
@@ -642,9 +638,9 @@
                 if(angular.isDefined(obj)){
                     var o = obj.originalObject;
                     $scope.cityOptionsAC.componentRestrictions = {country: o.alpha2Code};
-                    $scope.offer.location.country = o.alpha2Code;
+                    $scope.offer.location_country = o.alpha2Code;
                     $scope.offer.autocomplete_city = '';
-                    $scope.offer.location.city = '';
+                    $scope.offer.location_city = '';
                 }
 
                 $scope.$watch(function(){
@@ -652,7 +648,7 @@
                 },
                 function($value){
                     if(angular.isDefined($value.place_id)){
-                        $scope.offer.location.city = $value.place_id;
+                        $scope.offer.location_city = $value.place_id;
                     }
                 },
                 true);
@@ -665,6 +661,7 @@
                 is_premium : true,
                 fee_premium : '6.00',
                 fee_standart : '1.00',
+                bonus: '',
                 location: {country : '', city: ''},
                 contacts: {phone : '', email : ''},
                 comment: '',
@@ -674,7 +671,7 @@
             };
 
             $scope.changeCountryInput = function(str){
-                $scope.offer.location.country = '';
+                $scope.offer.location_country = '';
             };
 
             if($rootScope.safes.length){
@@ -703,8 +700,10 @@
             if(last_offer){
                 $scope.offer.is_standart     = last_offer.is_standart;
                 $scope.offer.expiration_time = last_offer.expiration_time;
+                $scope.offer.location_city = last_offer.location_city;
+                $scope.offer.location_country = last_offer.location_country;
 
-                var contacts = last_offer.contacts.split(', ');
+                var contacts = last_offer.contacts.split(',');
                 
                 if(angular.isDefined(contacts[0])){
                     $scope.offer.contacts.email = contacts[0];
@@ -714,16 +713,8 @@
                     $scope.offer.contacts.phone = contacts[1];
                 }
 
-                var location = last_offer.location.split(', ');
+
                 
-                if(angular.isDefined(location[0])){
-                    $scope.offer.location.country = location[0];
-                }
-
-                if(angular.isDefined(location[1])){
-                    $scope.offer.location.city = location[1];
-                }
-
             }
 
 
@@ -799,7 +790,7 @@
                 var o = angular.copy(offer);
                 
                 o.fee = o.is_premium ? o.fee_premium : o.fee_standart;
-                o.location = o.location.country + ', ' + o.location.city;
+                // o.location = o.location.country + ', ' + o.location.city;
                 o.contacts = [o.contacts.email,o.contacts.phone].join(",");
                 if(o.payment_type_other) o.payment_types.push(o.payment_type_other);
                 o.payment_types = o.payment_types.join(",");
@@ -808,8 +799,8 @@
                 //informer.info(JSON.stringify(o));
                 
                 backend.pushOffer(
-                    o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location, o.contacts, 
-                    o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types,
+                    o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
+                    o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus,
                     function(data){
                         informer.success('Спасибо. Заявка Добавлена');
                     }

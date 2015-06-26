@@ -12,7 +12,7 @@
             if(angular.isDefined(input)){
                 input = input.toString();
 
-                var CDDP = 6; //CURRENCY_DISPLAY_DECIMAL_POINT
+                var CDDP = 8; //CURRENCY_DISPLAY_DECIMAL_POINT
                 var result = '';
                 if(input.length ){
                     result = angular.copy(input);
@@ -47,7 +47,7 @@
     module.filter('gulden_to_int',[function(){
         return function(input){
 
-            var CURRENCY_DISPLAY_DECIMAL_POINT = 6;
+            var CURRENCY_DISPLAY_DECIMAL_POINT = 8;
 
             var append_string_with_zeros = function (result, len){
 
