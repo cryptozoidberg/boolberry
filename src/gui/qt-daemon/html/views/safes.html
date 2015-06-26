@@ -22,7 +22,7 @@
                 <div class="pull-right col-xs-5 col-sm-5"><form><input type="text" class="form-control" placeholder="найти"></form></div>
                 <div class="pull-right col-xs-7 col-sm-7">
                     <div class="btn-toolbar pull-right">
-                        <ul class="nav nav-tabs btn-group-tabs">
+                        <!-- <ul class="nav nav-tabs btn-group-tabs">
                             <li class="active">
                                 <button data-target=".list-view" data-toggle="tab" class="btn btn-default" type="button">
                                     <i class="fa fa-list"></i> Списком
@@ -33,7 +33,11 @@
                                     <i class="fa fa-th"></i> Блоками
                                 </button>
                             </li>
-                        </ul>
+                        </ul> -->
+                        <div class="btn-group">
+                            <label class="btn btn-primary" ng-model="safeView" btn-radio="'Left'"><i class="fa fa-list"></i> Списком</label>
+                            <label class="btn btn-primary" ng-model="safeView" btn-radio="'Middle'"><i class="fa fa-th"></i> Блоками</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -204,9 +208,13 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div>
-                                <span  ng-repeat="alias in aliases | filter : {address: safe.address}"><span class="label label-info">@{{alias.alias}}</span> <span>
+                                <span  ng-repeat="alias in aliases | filter : {address: safe.address}">
+                                    <span class="label label-info">@{{alias.alias}}</span> 
+                                <span>
                             </div>
+
                         </div>
 
                         <div class="panel-body">

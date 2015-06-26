@@ -409,8 +409,6 @@
                     });
                 };
 
-                
-
                 if(alias_count != data.alias_count){
                     alias_count = data.alias_count;
                     getAliases();
@@ -525,11 +523,12 @@
             backend.quitRequest();
         });
 
+        var reload_time = 500;
+        var progress_time_out = 0;
 
         backend.subscribe('wallet_sync_progress', function(data){
             console.log('wallet_sync_progress');
             console.log(data);
-
             var wallet_id = data.wallet_id;
             var progress = data.progress;
 
@@ -537,12 +536,19 @@
                 $scope.result = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
                 if($scope.result.length){
                     var safe = $scope.result[0];
-                    $timeout(function(){
-                        safe.progress = progress;    
-                    });
+                    if(!progress_time_out){
+                        progress_time_out = $timeout(function(){
+                            safe.progress = progress;    
+                            progress_time_out = 0;
+                        },reload_time);
+                    }
+                    
                 }    
             }
         });
+
+        var transfer_balance_time_out = 0;
+        var transfer_tx_time_out      = 0;
 
         backend.subscribe('money_transfer', function(data){
             console.log('money_transfer');
@@ -553,51 +559,59 @@
 
             var wallet_id = data.wallet_id;
             var tr_info   = data.ti;
-            var alias = $filter('filter')($rootScope.unconfirmed_aliases,{tx_hash : data.ti.tx_hash});
+
+            if($rootScope.unconfirmed_aliases.length){
+                var alias = $filter('filter')($rootScope.unconfirmed_aliases,{tx_hash : data.ti.tx_hash});
             
-            if(alias.length){ // alias transaction
-                alias = alias[0];
-                informer.info('Алиас "'+alias.name+'" зарегистрирован');
+                if(alias.length){ // alias transaction
+                    alias = alias[0];
+                    informer.info('Алиас "'+alias.name+'" зарегистрирован');
+                }    
             }
+            
 
             var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
             if(safe.length){ // safe transaction
                 
                 safe = safe[0];
 
-                $timeout(function(){
-                    safe.balance = data.balance;
-                    safe.unlocked_balance = data.unlocked_balance;
-                });
+                if(!transfer_balance_time_out){
+                    transfer_balance_time_out = $timeout(function(){
+                        safe.balance = data.balance;
+                        safe.unlocked_balance = data.unlocked_balance;
+                        transfer_balance_time_out = 0;
+                    },reload_time);    
+                }
+                
                 
 
                 var tr_exists = false;
 
-                angular.forEach(safe.history,function(tr_item, key){
-                    if(tr_item.tx_hash == tr_info.tx_hash){
-                        // tr_item = tr_info;
-                        tr_exists = true;
-                        $timeout(function(){
-                            safe.history[key] = tr_info;
-                        });
+                // angular.forEach(safe.history,function(tr_item, key){
+                //     if(tr_item.tx_hash == tr_info.tx_hash){
+                //         // tr_item = tr_info;
+                //         tr_exists = true;
+                //         $timeout(function(){
+                //             safe.history[key] = tr_info;
+                //         });
                         
 
-                    }
-                });
+                //     }
+                // });
 
-                if(tr_exists){
-                    console.log(tr_info.tx_hash+' tr exists');
-                }else{
-                    console.log(tr_info.tx_hash+' tr does not exist');
+                // if(tr_exists){
+                //     console.log(tr_info.tx_hash+' tr exists');
+                // }else{
+                //     console.log(tr_info.tx_hash+' tr does not exist');
 
-                    $timeout(function(){
-                        $rootScope.tr_count++;
-                        safe.history.unshift(tr_info); // insert new
-                    });
+                //     $timeout(function(){
+                //         $rootScope.tr_count++;
+                //         safe.history.unshift(tr_info); // insert new
+                //     });
                     
-                }
+                // }
                 
-                backend.reloadCounters();
+                // backend.reloadCounters();
                 
             }else{
                 return;
