@@ -968,7 +968,7 @@ bool wallet2::try_mint_pos()
   mining_context ctx = AUTO_VAL_INIT(ctx);
   LOG_PRINT_L0("Starting PoS mint iteration");
   fill_mining_context(ctx);
-  if (ctx.rsp.is_pos_allowed)
+  if (!ctx.rsp.is_pos_allowed)
   {
     LOG_PRINT_L0("POS MINING NOT ALLOWED YET");
     return true;
