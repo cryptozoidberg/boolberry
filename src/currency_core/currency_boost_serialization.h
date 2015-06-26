@@ -96,6 +96,7 @@ namespace boost
     a & x.offer_type;
     a & x.amount_lui;    
     a & x.amount_etc;    
+    a & x.bonus;
     a & x.target;        
     a & x.location_country;      
     a & x.location_city;

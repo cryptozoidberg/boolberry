@@ -1275,54 +1275,54 @@ namespace currency
     //genesis block
     bl = boost::value_initialized<block>();
     
-    //account_public_address ac = boost::value_initialized<account_public_address>();
-    //std::vector<size_t> sz;
-    //proof 
-#ifndef TESTNET
-    std::string proof = "TODO: Paste here some text";
-#else 
-    std::string proof = "TODO: Paste here some text";
-#endif
-
-     alias_info ai = AUTO_VAL_INIT(ai);
-//     ai.m_alias = "zoidberg";
-//     ai.m_text_comment = "Let's go!";
-//     get_account_address_from_str(ai.m_address, "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"); 
-
-    std::vector<tx_destination_entry> destinations;
-    tx_destination_entry de = AUTO_VAL_INIT(de);
-
-#define ADD_PREMINE_ADDRESS(addr_str, coins_amount) \
-    {bool r = get_account_address_from_str(de.addr, addr_str); \
-    CHECK_AND_ASSERT_MES(r, false, "Failed to get_account_address_from_str from address " << addr_str); \
-    de.amount = coins_amount;  \
-    destinations.push_back(de);   }
-
-    uint64_t amount_per_wallet = PREMINE_AMOUNT/10;
-
-    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_0, amount_per_wallet);
-    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_1, amount_per_wallet);
-    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_2, amount_per_wallet);
-    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_3, amount_per_wallet);
-    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_4, amount_per_wallet);
-    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_5, amount_per_wallet);
-    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_6, amount_per_wallet);
-    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_7, amount_per_wallet);
-    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_8, amount_per_wallet);
-    ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_9, amount_per_wallet);
-
-
-    construct_miner_tx(0, 0, 0, 0, 0, destinations, bl.miner_tx, proof, 11, ai); // zero profit in genesis
-    blobdata txb = tx_to_blob(bl.miner_tx);
-    std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
-
-    blobdata tx_bl2;
-    string_tools::parse_hexstr_to_binbuff(hex_tx_represent, tx_bl2);
-    parse_and_validate_tx_from_blob(tx_bl2, bl.miner_tx);
+//     //account_public_address ac = boost::value_initialized<account_public_address>();
+//     //std::vector<size_t> sz;
+//     //proof 
+// #ifndef TESTNET
+//     std::string proof = "TODO: Paste here some text";
+// #else 
+//     std::string proof = "TODO: Paste here some text";
+// #endif
+// 
+//      alias_info ai = AUTO_VAL_INIT(ai);
+// //     ai.m_alias = "zoidberg";
+// //     ai.m_text_comment = "Let's go!";
+// //     get_account_address_from_str(ai.m_address, "HgBGCZTVFVA3uaeQx1Tyi7Vz1StYcWofGF3seFfiduzwadHcj4ha7PGgLwgHzVbzmTV1vpEbDnpuaUF6CAcvwkM8GstFX5R"); 
+// 
+//     std::vector<tx_destination_entry> destinations;
+//     tx_destination_entry de = AUTO_VAL_INIT(de);
+// 
+// #define ADD_PREMINE_ADDRESS(addr_str, coins_amount) \
+//     {bool r = get_account_address_from_str(de.addr, addr_str); \
+//     CHECK_AND_ASSERT_MES(r, false, "Failed to get_account_address_from_str from address " << addr_str); \
+//     de.amount = coins_amount;  \
+//     destinations.push_back(de);   }
+// 
+//     uint64_t amount_per_wallet = PREMINE_AMOUNT/10;
+// 
+//     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_0, amount_per_wallet);
+//     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_1, amount_per_wallet);
+//     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_2, amount_per_wallet);
+//     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_3, amount_per_wallet);
+//     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_4, amount_per_wallet);
+//     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_5, amount_per_wallet);
+//     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_6, amount_per_wallet);
+//     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_7, amount_per_wallet);
+//     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_8, amount_per_wallet);
+//     ADD_PREMINE_ADDRESS(PREMINE_WALLET_ADDRESS_9, amount_per_wallet);
+// 
+// 
+//     construct_miner_tx(0, 0, 0, 0, 0, destinations, bl.miner_tx, proof, 11, ai); // zero profit in genesis
+//     blobdata txb = tx_to_blob(bl.miner_tx);
+//     std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
+// 
+//     blobdata tx_bl2;
+//     string_tools::parse_hexstr_to_binbuff(hex_tx_represent, tx_bl2);
+//     parse_and_validate_tx_from_blob(tx_bl2, bl.miner_tx);*/
     
     //hard code coinbase tx in genesis block, because "true" generating tx use random, but genesis should be always the same
 #ifndef TESTNET
-    std::string genesis_coinbase_tx_hex = "010a01ff000a80809aa6eaafe30102b5884200f85c2f39225337daa54254fafd0658a1ba7e48bf46c6e64616cd21dd0080809aa6eaafe30102aff8969f2828bf5ecd142e75272b67454b2e3f60a852243a921b3de305655bf70080809aa6eaafe30102cc7c658099f65d0df0f1b45942116559de4c7c146fbf5f567567e7101b8900f90080809aa6eaafe301025fda823bb30f4d9967042a76cf19057e41f354bca6fba61bdfe01f9cbb5a99ba0080809aa6eaafe301023aff2655a1e4bc75c7cf8b9675fec90950c7bd0b71f02c8cdb62f5c6b594e7890080809aa6eaafe301020557a07b75e9b6c83bad14c5ba767e9e9fd2c51cf7e54fa50300f27ce0ca6e4e0080809aa6eaafe30102638a3d466b85f774a0dd23ff7d177a9d41b77ba35873ee33fc5b1476463f63a80080809aa6eaafe3010221960b8e5409d7cbccaa84c57758de76b2437ac743b6adc41757d2375d7516fd0080809aa6eaafe30102bd14aee4d7bfa2a10e2c5480d5734a57e17a49a1357d2b783b2743456ca419970080809aa6eaafe301021d3847093a215f6aca555dbdb654af259f843065765c1def0395bf379cec5cb6000204ff8a4d6ec6c69da013cd356a4d7a737f83265ec1423df625ffbbed5eb1c29172011a544f444f3a205061737465206865726520736f6d6520746578740000";
+    std::string genesis_coinbase_tx_hex = "010a01ff000a80809aa6eaafe301027425ae90fadeae982dc82a3e4c9d8e490bba698a17ff30f4998dfdbf8ebc87960080809aa6eaafe301023666237e4f559ad9ba39d82623d32649e985bfefeb568853e1e60dbcb22932120080809aa6eaafe30102fe9c72fbe0496b8aa1ee358f3e58977ebd43d9f4f3567104e63d396cf0d306fa0080809aa6eaafe3010284a567e3346167e88e3f48e53885386d625e9e93c8a0eb657cc207f412a5efce0080809aa6eaafe30102d4c396b920ff044cb3714bfa7043b8a6e55e59083d0e6a3d445c94e22831bb330080809aa6eaafe30102e289e99722b4a9c18ec2b70dfd745acb4cef3c340b346f07e4e0e999f85c65da0080809aa6eaafe301029cca00df258d04cecf908d2020a3d456f1e0c549ce3752c4766967243eb2be2a0080809aa6eaafe30102fb0e57487f9bd58f64f4d58f14dc0fb7195d5c3c737d4f16f8f5116a742754de0080809aa6eaafe30102fb7d905fb759f73e0877e30f5f295aefda283bd3c1a4055e9907cb0324af98a70080809aa6eaafe30102dd5379b55773f4714986edec1bc2beb5ac4e6283fae6c87576bd5484f21bf701000204b6e5ab272163ff83ba28e333c4e0e3ff22acff3e7a81b15c7fb1e1b00cc57700011a544f444f3a205061737465206865726520736f6d6520746578740000";
 #else 
     std::string genesis_coinbase_tx_hex = "";                                          
 #endif
