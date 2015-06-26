@@ -80,9 +80,10 @@ namespace currency
       res.status = CORE_RPC_STATUS_BUSY; 
       return true; 
     }
-     
+    wide_difficulty_type pos_diff = m_core.get_blockchain_storage().get_next_diff_conditional(true);
+
     res.height = m_core.get_current_blockchain_height();
-    res.pos_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(true).convert_to<std::string>();
+    res.pos_difficulty = pos_diff.convert_to<std::string>();
     res.pow_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(false).convert_to<uint64_t>();
     res.tx_count = m_core.get_blockchain_storage().get_total_transactions() - res.height; //without coinbase
     res.tx_pool_size = m_core.get_pool_transactions_count();
@@ -116,6 +117,7 @@ namespace currency
     m_p2p.get_maintainers_info(res.mi);
     res.pos_sequense_factor = m_core.get_blockchain_storage().get_current_sequence_factor(true);
     res.pow_sequense_factor = m_core.get_blockchain_storage().get_current_sequence_factor(false);
+    res.block_reward = currency::get_base_block_reward(res.total_coins, res.height, pos_diff);
 
     
     res.status = CORE_RPC_STATUS_OK;

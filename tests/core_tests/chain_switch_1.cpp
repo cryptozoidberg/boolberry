@@ -8,6 +8,7 @@
 using namespace epee;
 using namespace currency;
 
+#include "currency_core/currency_format_utils.h"
 
 gen_chain_switch_1::gen_chain_switch_1()
 {

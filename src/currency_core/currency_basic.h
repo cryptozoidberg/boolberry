@@ -163,6 +163,7 @@ namespace currency
     uint8_t offer_type;
     uint64_t amount_lui;       //amount of lui
     uint64_t amount_etc;       //amount of other currency or goods
+    uint64_t bonus;            //
     std::string target;        //[max 30 characters] currency / goods
     std::string location_country;   //US
     std::string location_city;      //ChIJD7fiBh9u5kcRYJSMaMOCCwQ (google geo-autocomplete id)
@@ -175,6 +176,7 @@ namespace currency
       VALUE(offer_type)
       VARINT_FIELD(amount_lui)
       VARINT_FIELD(amount_etc)
+      VARINT_FIELD(bonus)
       VALUE(target)
       VALUE(location_country)
       VALUE(location_city)
@@ -455,6 +457,7 @@ namespace currency
       KV_SERIALIZE(offer_type)
       KV_SERIALIZE(amount_lui)
       KV_SERIALIZE(amount_etc)
+      KV_SERIALIZE(bonus)
       KV_SERIALIZE(target)
       KV_SERIALIZE(location_country)
       KV_SERIALIZE(location_city)

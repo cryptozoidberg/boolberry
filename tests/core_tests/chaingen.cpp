@@ -17,7 +17,7 @@
 #include "wallet/wallet2.h"
 #include "chaingen.h"
 
-using namespace std;
+//using namespace std;
 
 using namespace epee;
 using namespace currency;
@@ -316,13 +316,13 @@ bool test_generator::build_wallets(const blockchain_vector& blocks,
     }
   };
 
-  shared_ptr<tools::i_core_proxy> tmp_proxy(new stub_core_proxy(txs_outs));
+  std::shared_ptr<tools::i_core_proxy> tmp_proxy(new stub_core_proxy(txs_outs));
 
   //build wallets
   wallets.clear();
   for (auto a : accs)
   {
-    wallets.push_back(shared_ptr<tools::wallet2>(new tools::wallet2()));
+    wallets.push_back(std::shared_ptr<tools::wallet2>(new tools::wallet2()));
     wallets.back()->assign_account(a);
     wallets.back()->get_account().set_createtime(0);
     wallets.back()->set_core_proxy(tmp_proxy);
@@ -771,11 +771,11 @@ struct output_index {
 
 typedef std::map<uint64_t, std::vector<size_t> > map_output_t;
 typedef std::map<uint64_t, std::vector<output_index> > map_output_idx_t;
-typedef pair<uint64_t, size_t>  outloc_t;
+typedef std::pair<uint64_t, size_t>  outloc_t;
 
 namespace
 {
-  uint64_t get_inputs_amount(const vector<tx_source_entry> &s)
+  uint64_t get_inputs_amount(const std::vector<tx_source_entry> &s)
   {
     uint64_t r = 0;
     BOOST_FOREACH(const tx_source_entry &e, s)
@@ -790,7 +790,7 @@ namespace
 bool init_output_indices(map_output_idx_t& outs, std::map<uint64_t, std::vector<size_t> >& outs_mine, const std::vector<currency::block>& blockchain, const map_hash2tx_t& mtx, const currency::account_base& from) {
 
     BOOST_FOREACH (const block& blk, blockchain) {
-        vector<const transaction*> vtx;
+        std::vector<const transaction*> vtx;
         vtx.push_back(&blk.miner_tx);
 
         BOOST_FOREACH(const crypto::hash &h, blk.tx_hashes) {
@@ -838,7 +838,7 @@ bool init_spent_output_indices(map_output_idx_t& outs, map_output_t& outs_mine, 
             keypair in_ephemeral;
             generate_key_image_helper(from.get_keys(), get_tx_pub_key_from_extra(*oi.p_tx), oi.out_no, in_ephemeral, img);
 
-            // lookup for this key image in the events vector
+            // lookup for this key image in the events std::vector
             BOOST_FOREACH(auto& tx_pair, mtx) {
                 const transaction& tx = *tx_pair.second;
                 BOOST_FOREACH(const txin_v &in, tx.vin) {
@@ -1088,8 +1088,8 @@ bool construct_tx_to_key(const std::vector<test_event_entry>& events,
                          const std::vector<currency::attachment_v>& att, 
                          bool check_for_spends)
 {
-  vector<tx_source_entry> sources;
-  vector<tx_destination_entry> destinations;
+  std::vector<tx_source_entry> sources;
+  std::vector<tx_destination_entry> destinations;
   fill_tx_sources_and_destinations(events, blk_head, from, to, amount, fee, nmix, sources, destinations, check_for_spends);
   return construct_tx(from.get_keys(), sources, destinations, extr, att, tx, sk, 0, mix_attr);
 }

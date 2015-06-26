@@ -4,7 +4,7 @@
 
 #pragma once 
 #include "chaingen.h"
-
+/*
 struct gen_block_reward : public test_chain_unit_base
 {
   gen_block_reward();
@@ -21,3 +21,4 @@ private:
   size_t m_invalid_block_index;
   std::vector<size_t> m_checked_blocks_indices;
 };
+*/

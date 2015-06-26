@@ -396,8 +396,26 @@ std::ostream &print256(std::ostream &o, const T &v) {
   return o << "<" << epee::string_tools::pod_to_hex(v) << ">";
 }
 
-bool operator ==(const currency::transaction& a, const currency::transaction& b);
-bool operator ==(const currency::block& a, const currency::block& b);
+namespace currency
+{
+  bool operator ==(const currency::transaction& a, const currency::transaction& b);
+  bool operator ==(const currency::block& a, const currency::block& b);
+
+}
+
+// namespace std
+// {
+//   inline
+//   bool operator ==(const currency::transaction& a, const currency::transaction& b)
+//   {
+//     return currency::get_transaction_hash(a) == currency::get_transaction_hash(b);
+//   }
+//   inline
+//   bool operator ==(const currency::block& a, const currency::block& b)
+//   {
+//     return currency::get_block_hash(a) == currency::get_block_hash(b);
+//   }
+// }
 
 bool parse_hash256(const std::string str_hash, crypto::hash& hash);
 

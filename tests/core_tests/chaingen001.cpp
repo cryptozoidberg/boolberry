@@ -15,7 +15,7 @@
 #include "chaingen.h"
 #include "chaingen_tests_list.h"
 
-using namespace std;
+//using namespace std;
 
 using namespace epee;
 using namespace currency;

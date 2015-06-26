@@ -26,6 +26,7 @@
 #include "crypto/hash.h"
 #include "checkpoints.h"
 #include "core_runtime_config.h"
+
 POD_MAKE_HASHABLE(currency, account_public_address);
 
 namespace currency
