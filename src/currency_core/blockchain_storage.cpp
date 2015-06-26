@@ -88,6 +88,7 @@ bool blockchain_storage::init(const std::string& config_folder)
   if(!tools::unserialize_obj_from_file(*this, filename))
   {
       LOG_PRINT_L0("Can't load blockchain storage from file, generating genesis block.");
+      clear();
       block bl = boost::value_initialized<block>();
       block_verification_context bvc = boost::value_initialized<block_verification_context>();
       generate_genesis_block(bl);
@@ -97,6 +98,7 @@ bool blockchain_storage::init(const std::string& config_folder)
   if(!m_blocks.size())
   {
     LOG_PRINT_L0("Blockchain not loaded, generating genesis block.");
+    clear();
     block bl = boost::value_initialized<block>();
     block_verification_context bvc = boost::value_initialized<block_verification_context>();
     generate_genesis_block(bl);
@@ -213,7 +215,7 @@ bool blockchain_storage::prune_ring_signatures_if_need()
   return true;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::reset_and_set_genesis_block(const block& b)
+bool blockchain_storage::clear()
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   m_transactions.clear();
@@ -222,7 +224,12 @@ bool blockchain_storage::reset_and_set_genesis_block(const block& b)
   m_blocks_index.clear();
   m_alternative_chains.clear();
   m_outputs.clear();
-
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::reset_and_set_genesis_block(const block& b)
+{
+  clear();
   block_verification_context bvc = boost::value_initialized<block_verification_context>();
   add_new_block(b, bvc);
   return bvc.m_added_to_main_chain && !bvc.m_verifivation_failed;

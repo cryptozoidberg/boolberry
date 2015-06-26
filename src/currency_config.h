@@ -35,8 +35,6 @@
 #define SIGNIFICANT_EMISSION_REWARD_MULTIPLIER        30000
 #define PERCENTS_PERIOD                               2628
 #endif
-//#define EMISSION_SUPPLY                               (TOTAL_MONEY_SUPPLY - DONATIONS_SUPPLY) 
-//#define EMISSION_CURVE_CHARACTER                      20
 
 
 #define CURRENCY_TO_KEY_OUT_RELAXED                   0
@@ -119,11 +117,6 @@
 //PoS definitions
 #define POS_SCAN_WINDOW                                 60*20 //seconds//(60*20) // 20 minutes
 #define POS_SCAN_STEP                                   15    //seconds
-#ifndef TESTNET
-#define POS_MIN_COINAGE                                 720   // minimum n blocks deep
-#else
-#define POS_MIN_COINAGE                                 720   // minimum n blocks deep
-#endif
 //#define POS_MAX_COINAGE                                 (60*60*24*90) // 90 days
 #define POS_STARTER_KERNEL_HASH                         "bd82e18d42a7ad239588b24fd356d63cc82717e1fae8f6a492cd25d62fda263f"
 #define POS_MODFIFIER_INTERVAL                          10

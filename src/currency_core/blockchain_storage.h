@@ -102,6 +102,7 @@ namespace currency
     wide_difficulty_type get_next_diff_conditional2(bool pos, const alt_chain_type& alt_chain, uint64_t split_height);
  
     bool add_new_block(const block& bl_, block_verification_context& bvc);
+    bool clear();
     bool reset_and_set_genesis_block(const block& b);
     bool create_block_template(block& b, const account_public_address& miner_address, wide_difficulty_type& di, uint64_t& height, const blobdata& ex_nonce, const alias_info& ai);
     bool create_block_template(block& b, const account_public_address& miner_address, wide_difficulty_type& di, uint64_t& height, const blobdata& ex_nonce, const alias_info& ai, bool pos, const pos_entry& pe);
@@ -322,7 +323,7 @@ namespace currency
   /*                                                                      */
   /************************************************************************/
 
-  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          54
+  #define CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER          60
   #define CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER     3
   #define CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER         1
 

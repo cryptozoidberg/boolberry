@@ -17,8 +17,8 @@ namespace currency
   inline core_runtime_config get_default_core_runtime_config()
   {
     core_runtime_config pc = AUTO_VAL_INIT(pc);
-    pc.min_coinage = POS_MIN_COINAGE;
-    pc.pos_minimum_heigh = (60 * 60) / DIFFICULTY_TOTAL_TARGET;
+    pc.min_coinage = 0;
+    pc.pos_minimum_heigh = POS_START_HEIGHT;
     pc.tx_pool_min_fee = TX_POOL_MINIMUM_FEE;
     return pc;
   }

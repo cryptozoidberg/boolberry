@@ -208,6 +208,7 @@ namespace currency
   size_t get_max_block_size();
   size_t get_max_tx_size();
   bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t &reward, uint64_t height, const wide_difficulty_type& pos_diff);
+  uint64_t get_base_block_reward(uint64_t already_generated_coins, uint64_t height, const wide_difficulty_type& pos_diff);
   uint8_t get_account_address_checksum(const public_address_outer_blob& bl);
   std::string get_account_address_as_str(const account_public_address& adr);
   bool get_account_address_from_str(account_public_address& adr, const std::string& str);
