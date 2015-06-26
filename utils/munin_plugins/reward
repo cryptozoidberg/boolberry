@@ -1,0 +1,15 @@
+#!/bin/bash
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title reward
+graph_vlabel reward
+graph_category luid
+block_reward.label block_reward
+EOM
+        exit 0;;
+esac
+
+printf "block_reward.value "
+connectivity_tool --ip=127.0.0.1 --rpc_port=11112 --timeout=1000 --rpc_get_daemon_info | grep block_reward| cut -d ' ' -f2
