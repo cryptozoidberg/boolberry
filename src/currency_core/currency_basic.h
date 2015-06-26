@@ -176,7 +176,7 @@ namespace currency
       VALUE(offer_type)
       VARINT_FIELD(amount_lui)
       VARINT_FIELD(amount_etc)
-      VARINT_FIELD(bonus)
+      VALUE(bonus)
       VALUE(target)
       VALUE(location_country)
       VALUE(location_city)
