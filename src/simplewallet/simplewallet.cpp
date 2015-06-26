@@ -324,16 +324,27 @@ bool simple_wallet::open_wallet(const string &wallet_file, const std::string& pa
   m_wallet.reset(new tools::wallet2());
   m_wallet->callback(shared_from_this());
 
-  try
+  while (true)
   {
-    m_wallet->load(m_wallet_file, password);
-    message_writer(epee::log_space::console_color_white, true) << "Opened wallet: " << m_wallet->get_account().get_public_address_str();
+    try
+    {
+      m_wallet->load(m_wallet_file, password);
+      message_writer(epee::log_space::console_color_white, true) << "Opened wallet: " << m_wallet->get_account().get_public_address_str();
+      break;
+    }
+    catch (const tools::error::wallet_load_notice_wallet_restored& e)
+    {
+      message_writer(epee::log_space::console_color_white, true) << "Opened wallet: " << m_wallet->get_account().get_public_address_str();
+      message_writer(epee::log_space::console_color_red, true) << "NOTICE: Wallet file was damaged and restored.";
+      break;
+    }
+    catch (const std::exception& e)
+    {
+      fail_msg_writer() << "failed to load wallet: " << e.what();
+      return false;
+    }
   }
-  catch (const std::exception& e)
-  {
-    fail_msg_writer() << "failed to load wallet: " << e.what();
-    return false;
-  }
+
 
   m_wallet->init(m_daemon_address);
 

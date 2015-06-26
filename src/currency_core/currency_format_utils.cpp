@@ -1318,7 +1318,7 @@ namespace currency
 
     blobdata tx_bl2;
     string_tools::parse_hexstr_to_binbuff(hex_tx_represent, tx_bl2);
-    bool r2 = parse_and_validate_tx_from_blob(tx_bl2, bl.miner_tx);
+    parse_and_validate_tx_from_blob(tx_bl2, bl.miner_tx);
     
     //hard code coinbase tx in genesis block, because "true" generating tx use random, but genesis should be always the same
 #ifndef TESTNET
