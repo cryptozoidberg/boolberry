@@ -699,11 +699,6 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
   LOG_PRINT_L0("Loaded wallet keys file, with public address: " << m_account.get_public_address_str());
 
   bool r = tools::portable_unserialize_obj_from_stream(*this, data_file);
-//CHECK_AND_THROW_WALLET_EX(!r, error::file_read_error, m_wallet_file);
-//   CHECK_AND_THROW_WALLET_EX(
-//     m_account_public_address.m_spend_public_key != m_account.get_keys().m_account_address.m_spend_public_key ||
-//     m_account_public_address.m_view_public_key  != m_account.get_keys().m_account_address.m_view_public_key,
-//     error::wallet_files_doesnt_correspond, m_wallet_file);
 
   if (!r)
   {
@@ -964,6 +959,7 @@ bool wallet2::fill_mining_context(mining_context& ctx)
   ctx.sm = pos_details_resp.sm;
   ctx.rsp.height = pos_details_resp.height;
   ctx.rsp.status = CORE_RPC_STATUS_OK;
+  ctx.rsp.is_pos_allowed = pos_details_resp.pos_mining_allowed;
   return true;
 }
 //------------------------------------------------------------------
@@ -972,6 +968,11 @@ bool wallet2::try_mint_pos()
   mining_context ctx = AUTO_VAL_INIT(ctx);
   LOG_PRINT_L0("Starting PoS mint iteration");
   fill_mining_context(ctx);
+  if (ctx.rsp.is_pos_allowed)
+  {
+    LOG_PRINT_L0("POS MINING NOT ALLOWED YET");
+    return true;
+  }
   LOG_PRINT_L0("POS_ENTRIES: " << ctx.sp.pos_entries.size());
 
   std::atomic<bool> stop(false);

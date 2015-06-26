@@ -1388,6 +1388,11 @@ uint64_t blockchain_storage::total_coins()
   return m_blocks.back().already_generated_coins;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::is_pos_allowed()
+{
+  return get_current_blockchain_height() > m_core_runtime_config.pos_minimum_heigh;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);

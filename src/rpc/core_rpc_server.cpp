@@ -290,6 +290,13 @@ namespace currency
       res.status = CORE_RPC_STATUS_DISCONNECTED;
       return true;
     }
+    res.pos_mining_allowed = m_core.get_blockchain_storage().is_pos_allowed();
+    if (!res.pos_mining_allowed)
+    {
+      res.status = CORE_RPC_STATUS_OK;
+      return true;
+    }
+
     res.pos_basic_difficulty = m_core.get_blockchain_storage().get_next_diff_conditional(true).convert_to<std::string>();
     m_core.get_blockchain_storage().build_stake_modifier(res.sm);
     

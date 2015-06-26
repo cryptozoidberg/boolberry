@@ -573,6 +573,15 @@ std::string daemon_backend::generate_wallet(const std::string& path, const std::
   get_wallet_info(wo, owr.wi);
   return API_RETURN_CODE_OK;
 }
+
+std::string daemon_backend::is_pos_allowed()
+{
+  if (m_ccore.get_blockchain_storage().is_pos_allowed())
+    return API_RETURN_CODE_TRUE;
+  else 
+    return API_RETURN_CODE_FALSE;
+}
+
 std::string daemon_backend::restore_wallet(const std::string& path, const std::string& password, const std::string& restore_key_encoded, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());

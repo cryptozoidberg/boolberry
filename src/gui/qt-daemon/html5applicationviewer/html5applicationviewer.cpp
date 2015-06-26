@@ -655,12 +655,19 @@ QString Html5ApplicationViewer::store_app_data(const QString& param)
 {
   bool r = file_io_utils::save_string_to_file(m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME, param.toStdString());
   view::api_response ar;
-  if (r)
-    ar.error_code = API_RETURN_CODE_OK;
-  else
-    ar.error_code = API_RETURN_CODE_ACCESS_DENIED;
+  ar.error_code = store_to_file((m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME).c_str(), param).toStdString();
   return epee::serialization::store_t_to_json(ar).c_str();
 }
+
+QString Html5ApplicationViewer::store_to_file(const QString& path, const QString& buff)
+{
+  bool r = file_io_utils::save_string_to_file(path.toStdString(), buff.toStdString());
+  if (r)
+    return API_RETURN_CODE_OK;
+  else
+    return API_RETURN_CODE_ACCESS_DENIED;
+}
+
 QString Html5ApplicationViewer::get_app_data()
 {
   std::string app_data_buff;
@@ -860,6 +867,12 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
     dispatch(ar, owr);
   });
 }
+
+QString Html5ApplicationViewer::is_pos_allowed()
+{
+  return m_backend.is_pos_allowed().c_str();
+}
+
 QString Html5ApplicationViewer::run_wallet(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::wallet_id_obj, wio);

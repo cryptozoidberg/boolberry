@@ -416,7 +416,15 @@ resposne:
   "wallet_id": 0
 }
 
+[sync]  is_pos_allowed()
 
+param - no param
+resposne: "TRUE" or "FALSE"
+
+[sync]  store_file(path, buff)
+
+path - path to file to save
+buff - buffer (usualy json text  to write to file)
 
 
 
