@@ -235,10 +235,12 @@ public:
   {
     uint64_t final_amount;
     uint64_t all_coins_and_pos_diff_rate;
+    std::string error_code;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(final_amount)
       KV_SERIALIZE(all_coins_and_pos_diff_rate)
+      KV_SERIALIZE(error_code)
     END_KV_SERIALIZE_MAP()
   };
 
