@@ -231,6 +231,17 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct response_mining_estimate
+  {
+    uint64_t final_amount;
+    uint64_t all_coins_and_pos_diff_rate;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(final_amount)
+      KV_SERIALIZE(all_coins_and_pos_diff_rate)
+    END_KV_SERIALIZE_MAP()
+  };
+
 
   struct system_filedialog_request
   {

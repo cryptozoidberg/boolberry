@@ -1006,8 +1006,8 @@ QString Html5ApplicationViewer::get_smart_safe_info(const QString& param)
 QString Html5ApplicationViewer::get_mining_estimate(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::request_mining_estimate, me);
-  view::get_restore_info_response res;
-  res.error_code = m_backend.get_wallet_restore_info(wo.wallet_id, res.restore_key);
+  view::response_mining_estimate res;
+  res.error_code = m_backend.get_mining_estimate(me.amuont_coins, me.time, res.final_amount, res.all_coins_and_pos_diff_rate);
   return epee::serialization::store_t_to_json(res).c_str();
 
 }
