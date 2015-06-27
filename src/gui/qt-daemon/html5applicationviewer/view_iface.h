@@ -220,6 +220,17 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct request_mining_estimate
+  {
+    uint64_t amuont_coins;
+    uint64_t time;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(amuont_coins)
+      KV_SERIALIZE(time)
+    END_KV_SERIALIZE_MAP()
+  };
+
 
   struct system_filedialog_request
   {

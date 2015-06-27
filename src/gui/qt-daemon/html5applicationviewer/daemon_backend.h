@@ -82,6 +82,7 @@ public:
   std::string stop_pos_mining(uint64_t wallet_id);
   std::string get_mining_history(uint64_t wallet_id, tools::wallet_rpc::mining_history& wrpc);
   std::string get_wallet_restore_info(uint64_t wallet_id, std::string& restore_key);
+  std::string get_mining_estimate(uint64_t amuont_coins, uint64_t time, uint64_t& estimate_result, uint64_t& pos_coins_and_pos_diff_rate);
   std::string is_pos_allowed();
   void toggle_pos_mining();
   std::string transfer(size_t wallet_id, const view::transfer_params& tp, currency::transaction& res_tx);

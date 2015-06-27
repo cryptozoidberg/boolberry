@@ -1003,7 +1003,14 @@ QString Html5ApplicationViewer::get_smart_safe_info(const QString& param)
   res.error_code = m_backend.get_wallet_restore_info(wo.wallet_id, res.restore_key);
   return epee::serialization::store_t_to_json(res).c_str();
 }
+QString Html5ApplicationViewer::get_mining_estimate(const QString& param)
+{
+  PREPARE_ARG_FROM_JSON(view::request_mining_estimate, me);
+  view::get_restore_info_response res;
+  res.error_code = m_backend.get_wallet_restore_info(wo.wallet_id, res.restore_key);
+  return epee::serialization::store_t_to_json(res).c_str();
 
+}
 
 void Html5ApplicationViewer::dispatch(const QString& status, const QString& param)
 {
