@@ -586,7 +586,6 @@
 
                 var o = angular.copy(offer);
                 o.fee = o.is_premium ? o.fee_premium : o.fee_standart;
-                // o.location = o.location.country + ', ' + o.location.city;
                 o.contacts = o.contacts.email + ', ' + o.contacts.phone;
                 o.amount_etc = 1;
                 o.payment_types = '';

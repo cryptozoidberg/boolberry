@@ -10,6 +10,13 @@
 
             $scope.safes_diagramm = {};
 
+            
+
+            $scope.calc = {
+                days: 0,
+                amount: 0
+            };
+
             var getPoints = function () {
                 var nextDate = new Date().getTime();
 
@@ -29,13 +36,29 @@
             
 
             $scope.calculate = function(){
+                
+                var result = backend.getMiningEstimate($scope.calc.amount, parseInt($scope.calc.days)*60*60*24);
+
+                var points = [];
+
+                var days = result.days_estimate;
+                days = [123200000000, 143200000000, 163200000000, 193200000000, 223200000000];
+
+                var nextDate = new Date().getTime();
+
+                angular.forEach(days,function(item){
+                    points.push([nextDate, item]);
+                    nextDate += 1000*60*60*24;
+                });
+
                 $scope.calc_diagramm = [{
-                    data: getPoints(),
-                    label: 'Calculator'
+                    data: points,
+                    label: 'Прогнозируемый доход'
                 }];
+
             }
 
-            $scope.calculate();
+            //$scope.calculate();
 
             angular.forEach($rootScope.safes,function(safe){
                 

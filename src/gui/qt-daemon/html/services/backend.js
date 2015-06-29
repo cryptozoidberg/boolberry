@@ -173,6 +173,17 @@
                 }
             },
 
+            getMiningEstimate: function(amount_coins, time) {
+
+                var params = {
+                  "amuont_coins": parseInt(amount_coins),
+                  "time": parseInt(time)  //in seconds, 43200000 sec = 500 days
+                };
+                informer.info(JSON.stringify(params));
+                return this.runCommand('get_mining_estimate', params);
+            },
+
+
             pushOffer : function(
                 wallet_id, offer_type, amount_lui, target, location_city, location_country, contacts, 
                 comment, expiration_time, fee, amount_etc, payment_types, bonus, callback){
@@ -181,7 +192,7 @@
                     "od": {
                         "offer_type": offer_type, //0 buy, 1 sell
                         "amount_lui": $filter('gulden_to_int')(amount_lui),
-                        "amount_etc": $filter('gulden_to_int')(amount_etc),
+                        "amount_etc": parseInt(amount_etc),//$filter('gulden_to_int')(amount_etc),
                         "target": target,
                         "location_city":    location_city,
                         "location_country": location_country,
