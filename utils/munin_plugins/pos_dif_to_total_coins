@@ -11,5 +11,5 @@ EOM
         exit 0;;
 esac
 
-printf "block_reward.value "
-connectivity_tool --ip=127.0.0.1 --rpc_port=11112 --timeout=1000 --rpc_get_daemon_info | grep pos_diff_to_total_coins| cut -d ' ' -f2
+printf "pos_diff_to_total_coins.value "
+connectivity_tool --ip=127.0.0.1 --rpc_port=11112 --timeout=1000 --rpc_get_daemon_info | grep pos_diff_total_coins_rate| cut -d ' ' -f2
