@@ -222,11 +222,11 @@ public:
 
   struct request_mining_estimate
   {
-    uint64_t amuont_coins;
+    uint64_t amount_coins;
     uint64_t time;
 
     BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(amuont_coins)
+      KV_SERIALIZE(amount_coins)
       KV_SERIALIZE(time)
     END_KV_SERIALIZE_MAP()
   };

@@ -1007,7 +1007,7 @@ QString Html5ApplicationViewer::get_mining_estimate(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::request_mining_estimate, me);
   view::response_mining_estimate res;
-  res.error_code = m_backend.get_mining_estimate(me.amuont_coins, me.time, res.final_amount, res.all_coins_and_pos_diff_rate, res.days_estimate);
+  res.error_code = m_backend.get_mining_estimate(me.amount_coins, me.time, res.final_amount, res.all_coins_and_pos_diff_rate, res.days_estimate);
   return epee::serialization::store_t_to_json(res).c_str();
 }
 
