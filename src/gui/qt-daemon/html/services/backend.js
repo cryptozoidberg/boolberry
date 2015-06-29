@@ -179,7 +179,7 @@
                   "amount_coins": $filter('gulden_to_int')(amount_coins),
                   "time": parseInt(time)  //in seconds, 43200000 sec = 500 days
                 };
-                informer.info(JSON.stringify(params));
+                // informer.info(JSON.stringify(params));
                 return this.runCommand('get_mining_estimate', params);
             },
 
