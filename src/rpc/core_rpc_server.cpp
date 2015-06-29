@@ -118,7 +118,7 @@ namespace currency
     res.pos_sequense_factor = m_core.get_blockchain_storage().get_current_sequence_factor(true);
     res.pow_sequense_factor = m_core.get_blockchain_storage().get_current_sequence_factor(false);
     res.block_reward = currency::get_base_block_reward(res.total_coins, res.height, pos_diff);
-    //res.pos_diff_total_coins_rate = (pos_diff / (res.total_coins - PREMINE_AMOUNT)).convert_to<uint64_t>();
+    res.pos_diff_total_coins_rate = (pos_diff / (res.total_coins - PREMINE_AMOUNT+1)).convert_to<uint64_t>();
     
     
     res.status = CORE_RPC_STATUS_OK;
