@@ -176,7 +176,7 @@
             getMiningEstimate: function(amount_coins, time) {
 
                 var params = {
-                  "amuont_coins": parseInt(amount_coins),
+                  "amount_coins": $filter('gulden_to_int')(amount_coins),
                   "time": parseInt(time)  //in seconds, 43200000 sec = 500 days
                 };
                 informer.info(JSON.stringify(params));
