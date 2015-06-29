@@ -1009,7 +1009,6 @@ QString Html5ApplicationViewer::get_mining_estimate(const QString& param)
   view::response_mining_estimate res;
   res.error_code = m_backend.get_mining_estimate(me.amuont_coins, me.time, res.final_amount, res.all_coins_and_pos_diff_rate, res.days_estimate);
   return epee::serialization::store_t_to_json(res).c_str();
-
 }
 
 void Html5ApplicationViewer::dispatch(const QString& status, const QString& param)

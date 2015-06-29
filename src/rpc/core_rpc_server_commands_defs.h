@@ -341,6 +341,7 @@ namespace currency
       uint64_t last_pos_timestamp;
       uint64_t total_coins;
       uint64_t block_reward;
+      uint64_t pos_diff_total_coins_rate;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -373,6 +374,7 @@ namespace currency
         KV_SERIALIZE(seconds_for_30_blocks)
         KV_SERIALIZE(total_coins)
         KV_SERIALIZE(block_reward)
+        KV_SERIALIZE(pos_diff_total_coins_rate)
       END_KV_SERIALIZE_MAP()
     };
   };    

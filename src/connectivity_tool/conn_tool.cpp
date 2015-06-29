@@ -226,7 +226,8 @@ bool handle_get_daemon_info(po::variables_map& vm)
     << "last_pow_timestamp: " << res.last_pow_timestamp << ENDL
     << "total_coins: " << res.total_coins / COIN << ENDL
     << "pos_difficulty_in_coins: " << currency::wide_difficulty_type(res.pos_difficulty) / COIN << ENDL
-    << "block_reward: " << res.block_reward / COIN << ENDL;
+    << "block_reward: " << res.block_reward / COIN << ENDL
+    << "pos_diff_total_coins_rate: " << res.pos_diff_total_coins_rate << ENDL;
 
   return true;
 }

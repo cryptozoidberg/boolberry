@@ -1,0 +1,15 @@
+#!/bin/bash
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title pos_diff_to_total_coins
+graph_vlabel pos_diff_to_total_coins
+graph_category luid
+pos_diff_to_total_coins.label pos_diff_to_total_coins
+EOM
+        exit 0;;
+esac
+
+printf "block_reward.value "
+connectivity_tool --ip=127.0.0.1 --rpc_port=11112 --timeout=1000 --rpc_get_daemon_info | grep pos_diff_to_total_coins| cut -d ' ' -f2
