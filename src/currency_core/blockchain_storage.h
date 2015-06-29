@@ -167,7 +167,11 @@ namespace currency
     size_t get_current_sequence_factor(bool pos);
     const block_extended_info&  get_last_block_of_type(bool looking_for_pos, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
     bool validate_cancel_order(const cancel_offer& co, offers_container::iterator& oit);
-    void get_pos_mining_estimate(uint64_t amuont_coins, uint64_t time, uint64_t& estimate_result, uint64_t& pos_coins_and_pos_diff_rate);
+    void get_pos_mining_estimate(uint64_t amuont_coins,   
+        uint64_t time, 
+        uint64_t& estimate_result, 
+        uint64_t& pos_coins_and_pos_diff_rate, 
+        std::vector<uint64_t>& days);
 
 
     //exchange access functions

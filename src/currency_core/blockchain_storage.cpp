@@ -2327,7 +2327,11 @@ bool blockchain_storage::validate_pos_block(const block& b, wide_difficulty_type
   return validate_pos_block(b, basic_diff, coin_age, final_diff, proof_hash, id, for_altchain);
 }
 //------------------------------------------------------------------
-void blockchain_storage::get_pos_mining_estimate(uint64_t amuont_coins, uint64_t time, uint64_t& estimate_result, uint64_t& pos_diff_and_amount_rate)
+void blockchain_storage::get_pos_mining_estimate(uint64_t amuont_coins, 
+  uint64_t time, 
+  uint64_t& estimate_result, 
+  uint64_t& pos_diff_and_amount_rate, 
+  std::vector<uint64_t>& days)
 {
   if (!is_pos_allowed())
   {
@@ -2352,6 +2356,14 @@ void blockchain_storage::get_pos_mining_estimate(uint64_t amuont_coins, uint64_t
     uint64_t reward = get_base_block_reward(current_total_coins, i, curent_diff_original);
     current_total_coins += reward;
     curent_diff_original = current_total_coins * pos_diff_and_amount_rate;
+
+    if (i % 720)
+    {
+      //by day calculation for nice graph
+      uint64_t de = amuont_coins * current_total_coins / total_original / 2;
+      days.push_back(de);
+    }
+
   }
 
   estimate_result = amuont_coins * current_total_coins / total_original / 2;

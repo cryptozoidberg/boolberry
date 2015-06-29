@@ -574,9 +574,13 @@ std::string daemon_backend::generate_wallet(const std::string& path, const std::
   return API_RETURN_CODE_OK;
 }
 
-std::string daemon_backend::get_mining_estimate(uint64_t amuont_coins, uint64_t time, uint64_t& estimate_result, uint64_t& pos_coins_and_pos_diff_rate)
+std::string daemon_backend::get_mining_estimate(uint64_t amuont_coins, 
+  uint64_t time, 
+  uint64_t& estimate_result, 
+  uint64_t& pos_coins_and_pos_diff_rate, 
+  std::vector<uint64_t>& days)
 {
-  m_ccore.get_blockchain_storage().get_pos_mining_estimate(amuont_coins, time, estimate_result, pos_coins_and_pos_diff_rate);
+  m_ccore.get_blockchain_storage().get_pos_mining_estimate(amuont_coins, time, estimate_result, pos_coins_and_pos_diff_rate, dyas);
   return API_RETURN_CODE_OK;
 }
 
