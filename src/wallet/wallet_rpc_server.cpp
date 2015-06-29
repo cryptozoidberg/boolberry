@@ -38,7 +38,7 @@ namespace tools
       m_wallet.refresh(blocks_fetched, received_money, ok, stop);
       m_wallet.try_mint_pos();
       return true;
-    }, 20000);
+    }, 2000);
 
     //DO NOT START THIS SERVER IN MORE THEN 1 THREADS WITHOUT REFACTORING
     return epee::http_server_impl_base<wallet_rpc_server, connection_context>::run(1, true);
