@@ -549,6 +549,7 @@
 
         var transfer_balance_time_out = 0;
         var transfer_tx_time_out      = 0;
+        var tx_temp = {};
 
         backend.subscribe('money_transfer', function(data){
             console.log('money_transfer');
@@ -582,8 +583,6 @@
                         transfer_balance_time_out = 0;
                     },reload_time);    
                 }
-                
-                
 
                 var tr_exists = false;
 
