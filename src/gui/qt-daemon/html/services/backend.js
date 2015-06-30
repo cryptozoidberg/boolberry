@@ -87,7 +87,9 @@
                 var params = {
                     wallet_id : wallet_id
                 };
-                return this.runCommand('start_pos_mining', params);
+                if($rootScope.daemon_network_state.pos_allowed){
+                    return this.runCommand('start_pos_mining', params);
+                }
             },
 
             stopPosMining : function(wallet_id) {
@@ -146,6 +148,15 @@
                 console.log(pass);
                 if(!this.shouldUseEmulator()){
                     return Qt_parent['store_secure_app_data'](JSON.stringify(data), pass);
+                }else{
+                    return '';
+                }
+            },
+
+            storeFile: function(path, buff) {
+                //console.log(pass);
+                if(!this.shouldUseEmulator()){
+                    return Qt_parent['store_file'](path, JSON.stringify(buff));
                 }else{
                     return '';
                 }

@@ -181,6 +181,18 @@
                 }
             });
 
+            $scope.saveMyOffers = function(){
+                var caption = "Please, choose the path";
+                var filemask = "*.txt";
+                var result = backend.saveFileDialog(caption, filemask); 
+                if(typeof result !== 'undefined' && typeof result.path !== 'undefined'){
+                    var path = result.path;
+                    backend.storeFile(path,$scope.my_offers);
+                    // informer.info(path);
+                    // informer.info(JSON.stringify());
+                }
+            };
+
             $scope.goods_interval_values = [
                 { key: -1, value : "не важно"},
                 { key: 3600, value : "час"},
