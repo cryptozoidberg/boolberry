@@ -1195,8 +1195,7 @@ namespace currency
     std::cout << std::endl << "Reward halving for 10 years:" << std::endl;
     std::cout << std::setw(10) << std::left << "day" << std::setw(19) << "block reward" << std::setw(19) << "generated coins" << std::endl;
 
-    uint64_t already_generated_coins = 0;
-//    uint64_t emission_supply = EMISSION_SUPPLY;
+    uint64_t already_generated_coins = PREMINE_AMOUNT;
     uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
     uint64_t h = 0;
     for(uint64_t day = 0; day != 365*10; ++day)
@@ -1208,7 +1207,7 @@ namespace currency
         std::cout << std::left 
           << std::setw(10) << day 
           << std::setw(19) << print_money(emission_reward) 
-          << std::setw(4) << std::string(std::to_string(GET_PERECENTS_BIG_NUMBERS((already_generated_coins), total_money_supply)) + "%")  
+          << std::setw(4) << print_money(already_generated_coins) //std::string(std::to_string(GET_PERECENTS_BIG_NUMBERS((already_generated_coins), total_money_supply)) + "%")  
           << std::endl;
       }
 
@@ -1218,7 +1217,38 @@ namespace currency
         h++;
         get_block_reward(0, 0, already_generated_coins, emission_reward, h, 0);
         already_generated_coins += emission_reward;
-        if (h < 60000 && i > 360)
+        if (h < POS_START_HEIGHT && i > 360)
+          break;
+      }
+    }
+  }
+  void print_reward_halwing_short()
+  {
+    std::cout << std::endl << "Reward halving for 20 days:" << std::endl;
+    std::cout << std::setw(10) << std::left << "day" << std::setw(19) << "block reward" << std::setw(19) << "generated coins" << std::endl;
+
+    uint64_t already_generated_coins = PREMINE_AMOUNT;
+    uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
+    uint64_t h = 0;
+    for (uint64_t day = 0; day != 20; ++day)
+    {
+      uint64_t emission_reward = 0;
+      get_block_reward(0, 0, already_generated_coins, emission_reward, h, (already_generated_coins - PREMINE_AMOUNT) * 140);
+
+      std::cout << std::left
+        << std::setw(10) << day
+        << std::setw(19) << print_money(emission_reward)
+        << std::setw(4) << print_money(already_generated_coins)//std::string(std::to_string(GET_PERECENTS_BIG_NUMBERS((already_generated_coins), total_money_supply)) + "%")
+        << std::endl;
+
+
+
+      for (size_t i = 0; i != 720; i++)
+      {
+        h++;
+        get_block_reward(0, 0, already_generated_coins, emission_reward, h, (already_generated_coins - PREMINE_AMOUNT) * 140);
+        already_generated_coins += emission_reward;
+        if (h < POS_START_HEIGHT && i > 360)
           break;
       }
     }
@@ -1236,7 +1266,11 @@ namespace currency
     std::cout << "PoW block interval: \t" << DIFFICULTY_POW_TARGET << " seconds" << std::endl;
     std::cout << "Default p2p port: \t" << P2P_DEFAULT_PORT << std::endl;
     std::cout << "Default rpc port: \t" << RPC_DEFAULT_PORT << std::endl;
+#ifndef TEST_FAST_EMISSION_CURVE
     print_reward_halwing();
+#else
+    print_reward_halwing_short();
+#endif
   }
   //------------------------------------------------------------------
   std::string dump_patch(const std::map<uint64_t, crypto::hash>& patch)
@@ -1334,7 +1368,7 @@ namespace currency
     bl.major_version = CURRENT_BLOCK_MAJOR_VERSION;
     bl.minor_version = CURRENT_BLOCK_MINOR_VERSION;
     bl.timestamp = 0;
-    bl.nonce = 1010101020; //bender's nightmare
+    bl.nonce = 101010121; //bender's nightmare
     //miner::find_nonce_for_given_block(bl, 1, 0,);
     LOG_PRINT_GREEN("Generated genesis: " << get_block_hash(bl), LOG_LEVEL_0);
     return true;
@@ -1510,7 +1544,7 @@ namespace currency
     }
     else
     {
-      base_reward = ((already_generated_coins - (pos_diff / 100).convert_to<uint64_t>()) / 50) / PERCENTS_PERIOD;
+      base_reward = ((already_generated_coins - PREMINE_AMOUNT - (pos_diff / 150).convert_to<uint64_t>()) / 50) / PERCENTS_PERIOD;
     }
 
     //crop dust

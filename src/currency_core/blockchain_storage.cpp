@@ -2336,8 +2336,9 @@ void blockchain_storage::get_pos_mining_estimate(uint64_t amuont_coins,
   if (!is_pos_allowed())
   {
     estimate_result = 0;
-  }
     return;
+  }
+
   //for now only first part of emission take in count
   uint64_t height_from_time = time / DIFFICULTY_TOTAL_TARGET;
   if (!height_from_time)
@@ -2345,7 +2346,7 @@ void blockchain_storage::get_pos_mining_estimate(uint64_t amuont_coins,
 
   uint64_t total_original = total_coins();
   wide_difficulty_type pos_diff_original = get_next_diff_conditional(true);
-  pos_diff_and_amount_rate = (pos_diff_original / total_original).convert_to<uint64_t>();
+  pos_diff_and_amount_rate = (pos_diff_original / (total_original - PREMINE_AMOUNT) ).convert_to<uint64_t>();
 
   uint64_t current_total_coins = total_original;
   wide_difficulty_type curent_diff_original = pos_diff_original;
@@ -2357,11 +2358,14 @@ void blockchain_storage::get_pos_mining_estimate(uint64_t amuont_coins,
     current_total_coins += reward;
     curent_diff_original = current_total_coins * pos_diff_and_amount_rate;
 
-    if (i % 720)
+    days.push_back(reward);
+
+    if (! (i % 720))
     {
       //by day calculation for nice graph
-      uint64_t de = amuont_coins * current_total_coins / total_original / 2;
-      days.push_back(de);
+      uint64_t de = (wide_difficulty_type(amuont_coins) * (current_total_coins - ((current_total_coins - total_original)/2)) / total_original).convert_to<uint64_t>();
+      //days.push_back(de);
+      //days.push_back(reward);
     }
 
   }

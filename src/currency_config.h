@@ -32,7 +32,7 @@
 #define POS_START_HEIGHT                              600
 #define SIGNIFICANT_EMISSION_RANGE                    9200
 #define SIGNIFICANT_EMISSION_SWICH_HEIGHT             9100
-#define SIGNIFICANT_EMISSION_REWARD_MULTIPLIER        30000
+#define SIGNIFICANT_EMISSION_REWARD_MULTIPLIER        300000
 #define PERCENTS_PERIOD                               2628
 #endif
 
