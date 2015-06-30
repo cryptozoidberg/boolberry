@@ -2358,13 +2358,13 @@ void blockchain_storage::get_pos_mining_estimate(uint64_t amuont_coins,
     current_total_coins += reward;
     curent_diff_original = current_total_coins * pos_diff_and_amount_rate;
 
-    days.push_back(reward);
+    //days.push_back(reward);
 
     if (! (i % 720))
     {
       //by day calculation for nice graph
       uint64_t de = (wide_difficulty_type(amuont_coins) * (current_total_coins - ((current_total_coins - total_original)/2)) / total_original).convert_to<uint64_t>();
-      //days.push_back(de);
+      days.push_back(de);
       //days.push_back(reward);
     }
 
