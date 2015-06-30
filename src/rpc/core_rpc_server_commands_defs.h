@@ -335,13 +335,14 @@ namespace currency
       uint64_t transactions_cnt_per_day;
       uint64_t transactions_volume_per_day;
       nodetool::maintainers_info_external mi;
-      uint64_t pos_sequense_factor;
+      uint64_t pos_sequense_factor; 
       uint64_t pow_sequense_factor;
       uint64_t last_pow_timestamp;
       uint64_t last_pos_timestamp;
       uint64_t total_coins;
       uint64_t block_reward;
       uint64_t pos_diff_total_coins_rate;
+      bool pos_allowed;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -375,6 +376,7 @@ namespace currency
         KV_SERIALIZE(total_coins)
         KV_SERIALIZE(block_reward)
         KV_SERIALIZE(pos_diff_total_coins_rate)
+        KV_SERIALIZE(pos_allowed)
       END_KV_SERIALIZE_MAP()
     };
   };    
