@@ -575,12 +575,21 @@
                 case 'get_smart_safe_info' :
                     result = {
                         'restore_key' : 'KFDKTLIUWSEDREBYIOKMTGHJKLGORDDV'
-                    }
+                    };
+                    break;
+                case 'get_mining_history' :
+                    result = {
+                        "mined_entries": [
+                            {"a":232323, "t": 1429715920},
+                            {"a":152244, "t": 1429815920},
+                            {"a":132312, "t": 1430755920}
+                        ]
+                    };
                     break;
                 case 'restore_wallet' :
                     result = {
                         'wallet_id' : '14'
-                    }
+                    };
                     break;
                 case 'show_savefile_dialog' : 
                     result = { 

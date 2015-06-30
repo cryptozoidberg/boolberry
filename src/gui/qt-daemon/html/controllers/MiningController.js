@@ -59,6 +59,7 @@
             }
 
             //$scope.calculate();
+            $scope.safes_mining_interval = {};
 
             angular.forEach($rootScope.safes,function(safe){
                 
@@ -70,11 +71,19 @@
                 backend.getMiningHistory(safe.wallet_id, function(data){
                     // informer.info(JSON.stringify(data));
                     var total = 0;
-                    angular.forEach(data.mined_entries,function(item){
-                        total += item.a;
-                        diagramm.data.push([item.t * 1000, $filter('gulden')(total, false)]);
-                    });
-                    $scope.safes_diagramm[safe.address] = [diagramm];
+                    $scope.safes_mining_interval[safe.address] = 0;
+
+                    if(angular.isDefined(data.mined_entries)){
+                        angular.forEach(data.mined_entries,function(item){
+                            total += item.a;
+                            diagramm.data.push([item.t * 1000, $filter('gulden')(total, false)]);
+                        });
+                        $scope.safes_diagramm[safe.address] = [diagramm];
+                        if(data.mined_entries.length){
+                            $scope.safes_mining_interval[safe.address] = Math.ceil((data.mined_entries[data.mined_entries.length - 1].t - data.mined_entries[0].t)/(60*60*24));
+                        }
+                    }
+                    
                 });
 
                 
