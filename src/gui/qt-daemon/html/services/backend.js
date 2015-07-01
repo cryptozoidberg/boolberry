@@ -136,7 +136,6 @@
             },
 
             getSecureAppData: function(pass) {
-                console.log(pass);
                 if(!this.shouldUseEmulator()){
                     return Qt_parent['get_secure_app_data'](JSON.stringify(pass));
                 }else{
@@ -145,7 +144,6 @@
             },
 
             storeSecureAppData: function(data, pass) {
-                console.log(pass);
                 if(!this.shouldUseEmulator()){
                     return Qt_parent['store_secure_app_data'](JSON.stringify(data), pass);
                 }else{
@@ -154,9 +152,8 @@
             },
 
             storeFile: function(path, buff) {
-                //console.log(pass);
                 if(!this.shouldUseEmulator()){
-                    return Qt_parent['store_file'](path, JSON.stringify(buff));
+                    return Qt_parent['store_to_file'](path, JSON.stringify(buff));
                 }else{
                     return '';
                 }

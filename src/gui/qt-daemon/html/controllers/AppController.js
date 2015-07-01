@@ -586,31 +586,29 @@
 
                 var tr_exists = false;
 
-                // angular.forEach(safe.history,function(tr_item, key){
-                //     if(tr_item.tx_hash == tr_info.tx_hash){
-                //         // tr_item = tr_info;
-                //         tr_exists = true;
-                //         $timeout(function(){
-                //             safe.history[key] = tr_info;
-                //         });
-                        
+                angular.forEach(safe.history,function(tr_item, key){
+                    if(tr_item.tx_hash == tr_info.tx_hash){
+                        // tr_item = tr_info;
+                        tr_exists = true;
+                        $timeout(function(){
+                            safe.history[key] = tr_info;
+                        });
+                    }
+                });
 
-                //     }
-                // });
+                if(tr_exists){
+                    console.log(tr_info.tx_hash+' tr exists');
+                }else{
+                    console.log(tr_info.tx_hash+' tr does not exist');
 
-                // if(tr_exists){
-                //     console.log(tr_info.tx_hash+' tr exists');
-                // }else{
-                //     console.log(tr_info.tx_hash+' tr does not exist');
-
-                //     $timeout(function(){
-                //         $rootScope.tr_count++;
-                //         safe.history.unshift(tr_info); // insert new
-                //     });
+                    $timeout(function(){
+                        $rootScope.tr_count++;
+                        safe.history.unshift(tr_info); // insert new
+                    });
                     
-                // }
+                }
                 
-                // backend.reloadCounters();
+                backend.reloadCounters();
                 
             }else{
                 return;

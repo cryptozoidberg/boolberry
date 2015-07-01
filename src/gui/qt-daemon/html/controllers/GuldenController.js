@@ -38,7 +38,7 @@
                 push_payer: $rootScope.settings.security.is_hide_sender,
                 is_delay : false,
                 lock_time: new Date(),
-                fee: '10',
+                fee: '0.1',
                 is_valid_address: false,
                 is_mixin : $rootScope.settings.security.is_mixin
             };

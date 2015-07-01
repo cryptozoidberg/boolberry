@@ -187,7 +187,7 @@
                 var result = backend.saveFileDialog(caption, filemask); 
                 if(typeof result !== 'undefined' && typeof result.path !== 'undefined'){
                     var path = result.path;
-                    backend.storeFile(path,$scope.my_offers);
+                    backend.storeFile(path, $scope.my_offers);
                     // informer.info(path);
                     // informer.info(JSON.stringify());
                 }
@@ -494,7 +494,7 @@
                 is_standart : false,
                 is_premium : true,
                 fee_premium : '6.00',
-                fee_standart : '1.00',
+                fee_standart : '0.1',
                 location: {country : '', city: ''},
                 contacts: {phone : '', email : ''},
                 comment: ''
@@ -671,7 +671,7 @@
                 is_standart : false,
                 is_premium : true,
                 fee_premium : '6.00',
-                fee_standart : '1.00',
+                fee_standart : '0.1',
                 bonus: '',
                 location: {country : '', city: ''},
                 contacts: {phone : '', email : ''},
