@@ -595,6 +595,17 @@ bool wallet2::store_keys(std::string& buff, const std::string& password)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+bool wallet2::backup_keys(const std::string& path)
+{
+  std::string buff;
+  bool r = store_keys(buff, m_password);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to store keys");
+
+  r = file_io_utils::save_string_to_file(path, buff);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to save_string_to_file at store keys");
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
 namespace
 {
   bool verify_keys(const crypto::secret_key& sec, const crypto::public_key& expected_pub)

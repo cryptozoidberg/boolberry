@@ -248,6 +248,17 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct backup_keys_request
+  {
+
+    uint64_t wallet_id;
+    std:string path;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
+      KV_SERIALIZE(path)
+    END_KV_SERIALIZE_MAP()
+  };
 
   struct system_filedialog_request
   {

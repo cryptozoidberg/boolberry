@@ -92,8 +92,8 @@ protected:
   QString restore_wallet(const QString& param);
   QString is_pos_allowed();
   QString store_to_file(const QString& path, const QString& buff);
-  QString copy_file(const QString& source, const QString& destination);
   QString get_mining_estimate(const QString& obj);
+  QString backup_wallet_keys(const QString& obj);
 
 
 

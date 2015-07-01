@@ -4,6 +4,9 @@
 
 #pragma once 
 
+#define BOOST_FILESYSTEM_VERSION 3
+#define BOOST_NO_CXX11_SCOPED_ENUMS
+
 #include <mutex>
 #include <system_error>
 #include <boost/filesystem.hpp>

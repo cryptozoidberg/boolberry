@@ -815,6 +815,15 @@ std::string daemon_backend::get_wallet_info(size_t wallet_id, view::wallet_info&
   return get_wallet_info(w, wi);
 }
 
+std::string daemon_backend::backup_wallet(uint64_t wallet_id, std::string& path)
+{
+  GET_WALLET_OPT_BY_ID(wallet_id, w);
+  if (w.w->get()->backup_keys())
+    return API_RETURN_CODE_OK;
+  else
+    return API_RETURN_CODE_FAIL;
+}
+
 std::string daemon_backend::resync_wallet(uint64_t wallet_id)
 {
   GET_WALLET_OPT_BY_ID(wallet_id, w);

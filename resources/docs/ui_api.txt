@@ -466,10 +466,19 @@ buff - buffer (usualy json text  to write to file)
 
 ============================================================================
 ============================================================================
-[sync]  copy_file(source, destination)
+[sync]  backup_wallet_keys()
 
-source - path to file to copy
-destination - destination path
+param:
+{
+  "wallet_id": 0,
+  "path": "\home\backup\w.lui"
+}
+
+resposne:
+{
+  "error_code": "OK"
+}
+
 
 ============================================================================
 ============================================================================
