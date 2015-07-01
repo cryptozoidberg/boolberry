@@ -1009,11 +1009,11 @@ QString Html5ApplicationViewer::get_mining_estimate(const QString& param)
   res.error_code = m_backend.get_mining_estimate(me.amount_coins, me.time, res.final_amount, res.all_coins_and_pos_diff_rate, res.days_estimate);
   return epee::serialization::store_t_to_json(res).c_str();
 }
-QString backup_wallet_keys(const QString& obj)
+QString Html5ApplicationViewer::backup_wallet_keys(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::backup_keys_request, me);
-  res.error_code = m_backend.backup_wallet(me.wallet_id, me.path);
-  return epee::serialization::store_t_to_json(res).c_str();
+  ar.error_code = m_backend.backup_wallet(me.wallet_id, me.path);
+  return epee::serialization::store_t_to_json(ar).c_str();
 }
 void Html5ApplicationViewer::dispatch(const QString& status, const QString& param)
 {

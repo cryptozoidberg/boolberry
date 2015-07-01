@@ -252,7 +252,7 @@ public:
   {
 
     uint64_t wallet_id;
-    std:string path;
+    std::string path;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(wallet_id)
