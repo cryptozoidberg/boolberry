@@ -668,12 +668,11 @@ QString Html5ApplicationViewer::store_to_file(const QString& path, const QString
 }
 QString Html5ApplicationViewer::copy_file(const QString& source, const QString& destination)
 {
-  boost::system::error_code ec;
-  boost::filesystem::copy_file(source.toStdString(), destination.toStdString(), ec);
-  if (ec)
-    return API_RETURN_CODE_FAIL;
-  else
+  bool r = copy_file(source.toStdString(), destination.toStdString());
+  if (r)
     return API_RETURN_CODE_OK;
+  else
+    return API_RETURN_CODE_FAIL;
 }
 
 QString Html5ApplicationViewer::get_app_data()

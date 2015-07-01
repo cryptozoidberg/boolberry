@@ -356,7 +356,16 @@ namespace file_io_utils
 			return false;
 		}
 	}
-
+  inline
+  bool copy_file(const std::string& source, const std::string& destination)
+  {
+    boost::system::error_code ec;
+    boost::filesystem::copy_file(source, destination, ec);
+    if (ec)
+      return false;
+    else
+      return true;
+  }
 	inline
 		bool append_string_to_file(const std::string& path_to_file, const std::string& str)
 	{
