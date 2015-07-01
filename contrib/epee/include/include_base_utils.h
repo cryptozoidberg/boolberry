@@ -27,6 +27,9 @@
 #pragma once
 
 #define BOOST_FILESYSTEM_VERSION 3
+
+#define BOOST_NO_CXX11_SCOPED_ENUMS
+
 #define ENABLE_RELEASE_LOGGING
 
 #include "misc_log_ex.h"
