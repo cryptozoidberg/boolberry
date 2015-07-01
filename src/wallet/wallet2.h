@@ -258,7 +258,9 @@ namespace tools
     bool reset_history();
     bool is_transfer_unlocked(const transfer_details& td) const;
     void get_mining_history(wallet_rpc::mining_history& hist);
-    void set_core_runtime_config(const currency::core_runtime_config& pc);  private:
+    void set_core_runtime_config(const currency::core_runtime_config& pc);  
+    currency::core_runtime_config& get_core_runtime_config();
+private:
     bool store_keys(std::string& buff, const std::string& password);
     void load_keys(const std::string& keys_file_name, const std::string& password);
     void process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b);

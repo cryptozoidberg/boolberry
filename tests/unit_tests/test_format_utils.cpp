@@ -13,7 +13,7 @@ TEST(parse_and_validate_tx_extra, is_correct_parse_and_validate_tx_extra)
   currency::account_base acc;
   acc.generate();
   currency::blobdata b = "dsdsdfsdfsf";
-  bool r = currency::construct_miner_tx(0, 0, 10000000000000, 1000, DEFAULT_FEE, acc.get_keys().m_account_address, tx, b, 1);
+  bool r = currency::construct_miner_tx(0, 0, 10000000000000, 1000, TESTS_DEFAULT_FEE, acc.get_keys().m_account_address, tx, b, 1);
   ASSERT_TRUE(r);
   crypto::public_key tx_pub_key;
   r = currency::parse_and_validate_tx_extra(tx, tx_pub_key);
@@ -25,7 +25,7 @@ TEST(parse_and_validate_tx_extra, is_correct_extranonce_too_big)
   currency::account_base acc;
   acc.generate();
   currency::blobdata b(260, 0);
-  bool r = currency::construct_miner_tx(0, 0, 10000000000000, 1000, DEFAULT_FEE, acc.get_keys().m_account_address, tx, b, 1);
+  bool r = currency::construct_miner_tx(0, 0, 10000000000000, 1000, TESTS_DEFAULT_FEE, acc.get_keys().m_account_address, tx, b, 1);
   ASSERT_FALSE(r);
 }
 

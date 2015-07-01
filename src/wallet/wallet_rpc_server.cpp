@@ -213,7 +213,7 @@ namespace tools
       std::vector<currency::extra_v> extra;
       std::vector<currency::attachment_v> attachments;
 
-      m_wallet.transfer(dsts, 0, 0, DEFAULT_FEE, extra, attachments, tx);
+      m_wallet.transfer(dsts, 0, 0, m_wallet.get_core_runtime_config().tx_pool_min_fee, extra, attachments, tx);
     }
     catch (const std::runtime_error& er)
     {
@@ -327,7 +327,7 @@ namespace tools
     std::vector<currency::tx_destination_entry> dsts(1);
     currency::tx_destination_entry& dst = dsts.back();
     dst.addr = acc2;
-    dst.amount = amount - DEFAULT_FEE;
+    dst.amount = amount - m_wallet.get_core_runtime_config().tx_pool_min_fee;
 
     //generate transaction
     const std::vector<currency::extra_v> extra;

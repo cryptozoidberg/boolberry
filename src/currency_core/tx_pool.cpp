@@ -82,7 +82,7 @@ namespace currency
         //exception for cancel offer transactions
         if (!process_cancel_offer_rules(tx))
         {
-          LOG_ERROR("Transaction with id= " << id << " has to small fee: " << inputs_amount - outputs_amount << ", expected fee: " << DEFAULT_FEE);
+          LOG_ERROR("Transaction with id= " << id << " has to small fee: " << inputs_amount - outputs_amount << ", expected fee: " << m_blockchain.get_core_runtime_config().tx_pool_min_fee);
           tvc.m_verifivation_failed = true;
           return false;
         }

@@ -1084,6 +1084,11 @@ void wallet2::set_core_runtime_config(const currency::core_runtime_config& pc)
   m_core_runtime_config = pc;
 }
 //----------------------------------------------------------------------------------------------------
+currency::core_runtime_config& wallet2::get_core_runtime_config()
+{
+  return m_core_runtime_config;
+}
+//----------------------------------------------------------------------------------------------------
 bool wallet2::is_transfer_unlocked(const transfer_details& td) const
 {
   if(!is_tx_spendtime_unlocked(td.m_tx.unlock_time))
@@ -1139,7 +1144,7 @@ void wallet2::push_offer(const currency::offer_details_ex& od, currency::transac
 {
   currency::tx_destination_entry tx_dest;
   tx_dest.addr = m_account.get_keys().m_account_address;
-  tx_dest.amount = DEFAULT_FEE;
+  tx_dest.amount = m_core_runtime_config.tx_pool_min_fee;
   std::vector<currency::tx_destination_entry> destinations;
   std::vector<currency::extra_v> extra;
   std::vector<currency::attachment_v> attachments;
@@ -1152,7 +1157,7 @@ void wallet2::cancel_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, cur
 {
   currency::tx_destination_entry tx_dest;
   tx_dest.addr = m_account.get_keys().m_account_address;
-  tx_dest.amount = DEFAULT_FEE;
+  tx_dest.amount = m_core_runtime_config.tx_pool_min_fee;
   std::vector<currency::tx_destination_entry> destinations;
   std::vector<currency::extra_v> extra;
   std::vector<currency::attachment_v> attachments;
@@ -1173,7 +1178,7 @@ void wallet2::request_alias_registration(const currency::alias_info& ai, currenc
 {
   currency::tx_destination_entry tx_dest;
   tx_dest.addr = m_account.get_keys().m_account_address;
-  tx_dest.amount = DEFAULT_FEE;
+  tx_dest.amount = m_core_runtime_config.tx_pool_min_fee;
   std::vector<currency::tx_destination_entry> destinations;
   std::vector<currency::extra_v> extra;
   std::vector<currency::attachment_v> attachments;
