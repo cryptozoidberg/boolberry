@@ -658,7 +658,6 @@ QString Html5ApplicationViewer::store_app_data(const QString& param)
   ar.error_code = store_to_file((m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME).c_str(), param).toStdString();
   return epee::serialization::store_t_to_json(ar).c_str();
 }
-
 QString Html5ApplicationViewer::store_to_file(const QString& path, const QString& buff)
 {
   bool r = file_io_utils::save_string_to_file(path.toStdString(), buff.toStdString());
@@ -666,6 +665,15 @@ QString Html5ApplicationViewer::store_to_file(const QString& path, const QString
     return API_RETURN_CODE_OK;
   else
     return API_RETURN_CODE_ACCESS_DENIED;
+}
+QString Html5ApplicationViewer::copy_file(const QString& source, const QString& destination)
+{
+  boost::system::error_code ec;
+  boost::filesystem::copy_file(source.toStdString(), destination.toStdString(), ec);
+  if (ec)
+    return API_RETURN_CODE_FAIL;
+  else
+    return API_RETURN_CODE_OK;
 }
 
 QString Html5ApplicationViewer::get_app_data()
