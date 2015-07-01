@@ -1196,7 +1196,7 @@ namespace currency
     std::cout << std::setw(10) << std::left << "day" << std::setw(19) << "block reward" << std::setw(19) << "generated coins" << std::endl;
 
     uint64_t already_generated_coins = PREMINE_AMOUNT;
-    uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
+    //uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
     uint64_t h = 0;
     for(uint64_t day = 0; day != 365*10; ++day)
     {
@@ -1228,7 +1228,7 @@ namespace currency
     std::cout << std::setw(10) << std::left << "day" << std::setw(19) << "block reward" << std::setw(19) << "generated coins" << std::endl;
 
     uint64_t already_generated_coins = PREMINE_AMOUNT;
-    uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
+    //uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
     uint64_t h = 0;
     for (uint64_t day = 0; day != 20; ++day)
     {
