@@ -132,6 +132,7 @@ public:
     uint64_t alias_count;
     std::string last_build_available;
     std::list<block_info> last_blocks;
+    bool is_pos_allowed;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(daemon_network_state)
@@ -147,6 +148,7 @@ public:
       KV_SERIALIZE(last_build_available)
       KV_SERIALIZE(last_blocks)
       KV_SERIALIZE(alias_count)
+      KV_SERIALIZE(is_pos_allowed)
     END_KV_SERIALIZE_MAP()
   };
 

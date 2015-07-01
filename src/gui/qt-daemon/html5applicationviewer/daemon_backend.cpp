@@ -378,6 +378,7 @@ bool daemon_backend::update_state_info()
   dsi.daemon_network_state = inf.daemon_network_state;
   dsi.synchronization_start_height = inf.synchronization_start_height;
   dsi.max_net_seen_height = inf.max_net_seen_height;
+  dsi.is_pos_allowed = inf.is_pos_allowed;
 
   dsi.last_build_available = std::to_string(inf.mi.ver_major)
     + "." + std::to_string(inf.mi.ver_minor)
