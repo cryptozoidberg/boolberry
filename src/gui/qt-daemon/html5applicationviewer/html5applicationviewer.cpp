@@ -668,7 +668,7 @@ QString Html5ApplicationViewer::store_to_file(const QString& path, const QString
 }
 QString Html5ApplicationViewer::copy_file(const QString& source, const QString& destination)
 {
-  bool r = copy_file(source.toStdString(), destination.toStdString());
+  bool r = file_io_utils::copy_file(source.toStdString(), destination.toStdString());
   if (r)
     return API_RETURN_CODE_OK;
   else
