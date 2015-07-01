@@ -85,6 +85,20 @@
                 });
             }
 
+            $scope.saveContacts = function(){
+                // informer.info('ok');
+                // informer.info(JSON.stringify()); 
+
+                var caption = "Please, choose the path";
+                var filemask = "*.txt";
+                var result = backend.saveFileDialog(caption, filemask); 
+                if(typeof result !== 'undefined' && typeof result.path !== 'undefined'){
+                    var path = result.path;
+                    backend.storeFile(path, $rootScope.settings.contacts);
+                    
+                }
+            };
+
             $scope.getContactGroups = function(contact){
                 var groups = [];
                 angular.forEach(contact.group_ids,function(group_id){
