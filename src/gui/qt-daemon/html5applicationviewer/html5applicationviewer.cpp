@@ -252,6 +252,9 @@ void Html5ApplicationViewer::changeEvent(QEvent *e)
 
 void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
 {
+
+  bool r = QSslSocket::supportsSsl();
+
   if (!QSystemTrayIcon::isSystemTrayAvailable())
     return;
 
