@@ -330,10 +330,27 @@ bool blockchain_storage::get_all_offers(std::list<offer_details_ex>& offers)
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   for (auto& ol: m_offers)
     for (auto& o: ol.second)
-      if(!o.stopped)
+    if (!o.stopped && o.timestamp + o.expiration_time < static_cast<uint64_t>(time(nullptr)))
         offers.push_back(o);
  
     return true;
+}
+//------------------------------------------------------------------
+#define SECONDS_IN_TWO_WEEKS    (60*60*24*7*2)
+
+bool blockchain_storage::trim_offers()
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  uint64_t size_before = m_offers.size();
+  for (auto it = m_offers.begin(); it != m_offers.end();)
+  {
+    if (!it->second.size() || it->second.begin()->timestamp + SECONDS_IN_TWO_WEEKS > m_blocks.back().bl.timestamp)
+      m_offers.erase(it++);
+    else
+      it++;
+  }
+  LOG_PRINT_GREEN("TRIM OFFERS: " << size_before - m_offers.size() << " offers removed", LOG_LEVEL_0);
+  return true;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::purge_block_data_from_blockchain(const block& bl, size_t processed_tx_count)
@@ -2338,7 +2355,9 @@ void blockchain_storage::get_pos_mining_estimate(uint64_t amuont_coins,
     estimate_result = 0;
     return;
   }
-
+#ifdef _DEBUG
+  std::vector<uint64_t> rewards;
+#endif
   //for now only first part of emission take in count
   uint64_t height_from_time = time / DIFFICULTY_TOTAL_TARGET;
   if (!height_from_time)
@@ -2358,7 +2377,11 @@ void blockchain_storage::get_pos_mining_estimate(uint64_t amuont_coins,
     current_total_coins += reward;
     curent_diff_original = current_total_coins * pos_diff_and_amount_rate;
 
-    //days.push_back(reward);
+#ifdef _DEBUG
+    rewards.push_back(reward);
+#endif
+
+    
 
     if (! (i % 720))
     {
@@ -2780,6 +2803,9 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
 
   bvc.m_added_to_main_chain = true;
   
+  //trim offers once a day
+  if (!(bei.height%CURRENCY_BLOCK_PER_DAY))
+    trim_offers();
 
   m_tx_pool.on_blockchain_inc(bei.height, id);
   return true;

@@ -134,6 +134,7 @@ namespace currency
     bool update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent);
     uint64_t total_coins();
     bool is_pos_allowed();
+    bool trim_offers();
 
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     wide_difficulty_type block_difficulty(size_t i);

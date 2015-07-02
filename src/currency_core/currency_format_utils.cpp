@@ -1544,7 +1544,16 @@ namespace currency
     }
     else
     {
-      base_reward = ((already_generated_coins - PREMINE_AMOUNT - (pos_diff / 150).convert_to<uint64_t>()) / 50) / PERCENTS_PERIOD;
+      // adjustments
+      uint64_t estimated_mining_coins = (pos_diff / 150).convert_to<uint64_t>();
+      uint64_t already_generated_coins_actual = already_generated_coins - PREMINE_AMOUNT;
+
+      if (estimated_mining_coins > already_generated_coins_actual)
+        estimated_mining_coins = already_generated_coins_actual;
+      
+      //------
+
+      base_reward = ((already_generated_coins_actual - estimated_mining_coins) / 50) / PERCENTS_PERIOD;
     }
 
     //crop dust
