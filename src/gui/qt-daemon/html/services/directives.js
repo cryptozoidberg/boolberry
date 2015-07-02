@@ -98,9 +98,21 @@
       };
   }]);
 
+  module.directive('disabledLink', [function() {
+      return {
+          restrict: 'A',
+          link: function(scope, element) {
+            $(element).addClass('disabled-link');
+            $(element).click(function(event){
+              event.preventDefault();
+            });
+          }
+      };
+  }]);
+
 
   module.service('templateCompiler', function ($compile, $templateCache, $rootScope) {
-    var service = {}
+    var service = {};
     var scope;
     
     this.bind = function (template_id, data) {

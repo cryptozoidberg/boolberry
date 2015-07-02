@@ -24,36 +24,35 @@
                             <h4><a href="#" type="button" data-toggle="collapse" data-target=".collapse00"><span>Состояние</span></a></h4>
 
                             <div class="form-group nomargin">
-                                <label class="col-xs-4 col-sm-4 control-label ">Общее количество средств</label>
+                                <label class="col-xs-4 col-sm-4 control-label">Общее количество средств</label>
                                 <div class="col-xs-4 col-sm-4"><div class="help-block required">{{safe.balance | gulden}}</div></div>
                             </div>
                             <div class="form-group nomargin">
-                                <label class="col-xs-4 col-sm-4 control-label ">Доступно для платежей</label>
+                                <label class="col-xs-4 col-sm-4 control-label">Доступно для платежей</label>
                                 <div class="col-xs-4 col-sm-4"><div class="help-block required">{{safe.unlocked_balance | gulden}}</div></div>
                             </div>
                             <div class="form-group nomargin">
-                                <label class="col-xs-4 col-sm-4 control-label ">Ожидается</label>
+                                <label class="col-xs-4 col-sm-4 control-label">Ожидается</label>
                                 <div class="col-xs-8 col-sm-8"><div class="help-block required">-- <span class="chart receive-timer" data-percent="86"></span></div>
                                 </div>
 
                                 <div class="col-xs-4 col-sm-4"></div>
                             </div>
                             <div class="form-group nomargin">
-                                <label class="col-xs-4 col-sm-4 control-label ">Отправляется</label>
+                                <label class="col-xs-4 col-sm-4 control-label">Отправляется</label>
                                 <div class="col-xs-4 col-sm-4"><div class="help-block required">-- </div></div>
                             </div>
                             <div class="form-group nomargin">
-                                <label class="col-xs-4 col-sm-4 control-label ">Размещено в добычу</label>
+                                <label class="col-xs-4 col-sm-4 control-label">Размещено в добычу</label>
                                 <div class="col-xs-4 col-sm-4"><div class="help-block required">-- </div></div>
                             </div>
 
 
                         </div>
                         <div class="col-xs-3 col-sm-3">
+                            
                             <div class="clearfix">
                                 <div class="pull-right btn-toolbar">
-
-
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                             Операции <span class="caret"></span>
@@ -63,7 +62,9 @@
 
                                             <li><a href="">Продать гульдены</a></li>
                                             <li><a href="">Купить гульдены</a></li>
-                                            <li><a href="" ng-click="startMining(safe.wallet_id)">Начать добычу</a></li>
+
+                                            <li ng-if="!safe.is_mining"><a  disabled-link href="" ng-click="startMining(safe.wallet_id)">Начать добычу</a></li>
+                                            <li ng-if="safe.is_mining"><a href="" ng-click="stopMining(safe.wallet_id)">Остановить добычу</a></li>
 
                                             <li class="divider"></li>
                                             <li><a href="" ng-click="registerAlias(safe)">Присвоить алиас</a></li>
@@ -72,7 +73,9 @@
                                             <li><a href="" ng-click="resynch(safe.wallet_id)">Синхронизировать</a></li>
                                         </ul>
                                     </div>
-                                </div>  </div>
+                                </div>
+                            </div>
+
                             <div style="margin:160px 0 0" class="coins">
                                 <img src="assets/img/coins24.svg" class="img-responsive">
                             </div>

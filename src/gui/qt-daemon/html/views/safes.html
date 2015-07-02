@@ -137,7 +137,9 @@
 
                                     <li><a href="">Продать гульдены</a></li>
                                     <li><a href="">Купить гульдены</a></li>
-                                    <li><a href="" ng-click="startMining(safe.wallet_id)">Начать добычу</a></li>
+
+                                    <li ng-if="!safe.is_mining"><a  disabled-link href="" ng-click="startMining(safe.wallet_id)">Начать добычу</a></li>
+                                    <li ng-if="safe.is_mining"><a href="" ng-click="stopMining(safe.wallet_id)">Остановить добычу</a></li>
 
                                     <li class="divider"></li>
                                     <li><a href="" ng-click="registerAlias(safe)">Присвоить алиас</a></li>

@@ -87,9 +87,9 @@
                 var params = {
                     wallet_id : wallet_id
                 };
-                if($rootScope.daemon_network_state.pos_allowed){
+                // if($rootScope.daemon_network_state.pos_allowed){
                     return this.runCommand('start_pos_mining', params);
-                }
+                // }
             },
 
             stopPosMining : function(wallet_id) {
