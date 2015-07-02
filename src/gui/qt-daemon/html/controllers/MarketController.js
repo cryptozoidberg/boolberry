@@ -497,7 +497,8 @@
                 fee_standart : '0.1',
                 location: {country : '', city: ''},
                 contacts: {phone : '', email : ''},
-                comment: ''
+                comment: '',
+                bonus: ''
             };
 
 

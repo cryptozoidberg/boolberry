@@ -47,7 +47,7 @@
                 var nextDate = new Date().getTime();
 
                 angular.forEach(days,function(item){
-                    points.push([nextDate, item]);
+                    points.push([nextDate, parseInt($filter('gulden')(item, false))]);
                     nextDate += 1000*60*60*24;
                 });
 
@@ -92,10 +92,10 @@
             var position = "right";
 
             var euroFormatter = function (v, axis) {
-                return v.toFixed(axis.tickDecimals) + "G";
+                return $filter('gulden')(axis.tickDecimals);
             }
 
-            $scope.am = {};
+            //$scope.am = {};
 
             $scope.diagramm_options = {
                 xaxes: [{
@@ -107,7 +107,7 @@
                     // align if we are to the right
                     alignTicksWithAxis: position == "right" ? 1 : null,
                     position: position,
-                    tickFormatter: euroFormatter
+                    //tickFormatter: euroFormatter
                 }],
                 legend: {
                     position: 'sw'
@@ -133,53 +133,49 @@
             };
 
 
-            var euroFormatter = function (v, axis) {
-                return v.toFixed(axis.tickDecimals) + "G";
-            }
+            // $scope.am.data = [{
+            //     data: emulator.getAMData(),
+            //     label: "Safelabel1"
+            // }, {
+            //     data: emulator.getAMData(),
+            //     label: "Safelabel2",
+            //     // yaxis: 2
+            // }];
+            // var position = "right";
+            // $scope.am.options = {
+            //     xaxes: [{
+            //         mode: 'time'
+            //     }],
+            //     yaxes: [{
+            //         min: 0
+            //     }, {
+            //         // align if we are to the right
+            //         alignTicksWithAxis: position == "right" ? 1 : null,
+            //         position: position,
+            //         tickFormatter: euroFormatter
+            //     }],
+            //     legend: {
+            //         position: 'sw'
+            //     },
+            //     colors: ["#1ab394"],
+            //     grid: {
+            //         color: "#999999",
+            //         clickable: true,
+            //         tickColor: "#D4D4D4",
+            //         borderWidth:0,
+            //         hoverable: true //IMPORTANT! this is needed for tooltip to work,
 
-            $scope.am.data = [{
-                data: emulator.getAMData(),
-                label: "Safelabel1"
-            }, {
-                data: emulator.getAMData(),
-                label: "Safelabel2",
-                // yaxis: 2
-            }];
-            var position = "right";
-            $scope.am.options = {
-                xaxes: [{
-                    mode: 'time'
-                }],
-                yaxes: [{
-                    min: 0
-                }, {
-                    // align if we are to the right
-                    alignTicksWithAxis: position == "right" ? 1 : null,
-                    position: position,
-                    tickFormatter: euroFormatter
-                }],
-                legend: {
-                    position: 'sw'
-                },
-                colors: ["#1ab394"],
-                grid: {
-                    color: "#999999",
-                    clickable: true,
-                    tickColor: "#D4D4D4",
-                    borderWidth:0,
-                    hoverable: true //IMPORTANT! this is needed for tooltip to work,
+            //     },
+            //     tooltip: true,
+            //     tooltipOpts: {
+            //         content: "%s for %x was %y",
+            //         xDateFormat: "%y-%0m-%0d",
 
-                },
-                tooltip: true,
-                tooltipOpts: {
-                    content: "%s for %x was %y",
-                    xDateFormat: "%y-%0m-%0d",
-
-                    onHover: function(flotItem, $tooltipEl) {
-                        // console.log(flotItem, $tooltipEl);
-                    }
-                }
-            };
+            //         onHover: function(flotItem, $tooltipEl) {
+            //             // console.log(flotItem, $tooltipEl);
+            //         }
+            //     }
+            // };
 
         }
     ]);

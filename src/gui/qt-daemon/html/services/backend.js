@@ -208,11 +208,12 @@
                         "comment": comment,
                         "payment_types": payment_types,
                         "expiration_time": expiration_time,
-                        "fee" : $filter('gulden_to_int')(fee)
+                        "fee" : $filter('gulden_to_int')(fee),
+                        "bonus" : bonus
                         
                     }
                 };
-                if(angular.isDefined(bonus) && bonus) params.od.bonus = parseInt(bonus);
+                //if(angular.isDefined(bonus) && bonus) params.od.bonus = parseInt(bonus);
                 return this.runCommand('push_offer', params, callback);
             },
 
