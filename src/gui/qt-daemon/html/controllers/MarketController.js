@@ -723,9 +723,6 @@
                 if(angular.isDefined(contacts[1])){
                     $scope.offer.contacts.phone = contacts[1];
                 }
-
-
-                
             }
 
 

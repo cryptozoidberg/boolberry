@@ -383,7 +383,6 @@
         var newVersionShown = [];
 
         backend.subscribe('update_daemon_state', function(data){// move to run
-            
             if(data.daemon_network_state == 2){
                 
                 if(!loaded){

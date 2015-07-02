@@ -558,6 +558,39 @@
             }
             
         };
+        this.getDaemonState = function(){
+            return {
+                "daemon_network_state": 2,
+                "alias_count" : Math.floor(Math.random()*10),
+                "hashrate": 0,
+                "max_net_seen_height": 9800,
+                "synchronization_start_height": 9700,
+                "height": 9729,
+                "inc_connections_count": 0,
+                "last_blocks": [
+                    {
+                        "date": 1425441268,
+                        "diff": "107458354441446",
+                        "h": 9728,
+                        "type": "PoS"
+                    }, {
+                        "date": 1425441256,
+                        "diff": "2778612",
+                        "h": 9727,
+                        "type": "PoW"
+                    }
+                ],
+                "last_build_available": "4.23.12.2",
+                "last_build_displaymode": 1,
+
+                "out_connections_count": 2,
+                "pos_difficulty": "107285151137540",
+                "pow_difficulty": "2759454",
+                "text_state": "Offline",
+                "pos_allowed" : false
+            };
+        };
+
         this.subscribe = function(command, callback) {
             var data = {};
             var commandData = false;
@@ -767,36 +800,7 @@
                     }
                     break;
                 case 'update_daemon_state': 
-                    result = {
-                        "daemon_network_state": 2,
-                        "alias_count" : Math.floor(Math.random()*10),
-                        "hashrate": 0,
-                        "max_net_seen_height": 9800,
-                        "synchronization_start_height": 9700,
-                        "height": 9729,
-                        "inc_connections_count": 0,
-                        "last_blocks": [
-                            {
-                                "date": 1425441268,
-                                "diff": "107458354441446",
-                                "h": 9728,
-                                "type": "PoS"
-                            }, {
-                                "date": 1425441256,
-                                "diff": "2778612",
-                                "h": 9727,
-                                "type": "PoW"
-                            }
-                        ],
-                        "last_build_available": "4.23.12.2",
-                        "last_build_displaymode": 1,
-
-                        "out_connections_count": 2,
-                        "pos_difficulty": "107285151137540",
-                        "pow_difficulty": "2759454",
-                        
-                        "text_state": "Offline"
-                    };
+                    result = this.getDaemonState();
                     break;
                 default:
                     result = false;

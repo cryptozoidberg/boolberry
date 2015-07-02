@@ -101,11 +101,20 @@
   module.directive('disabledLink', [function() {
       return {
           restrict: 'A',
-          link: function(scope, element) {
-            $(element).addClass('disabled-link');
-            $(element).click(function(event){
-              event.preventDefault();
-            });
+          link: function(scope, element, attrs) {
+            scope.$watch(attrs.disabledLink,
+              function(v){
+                if(v){
+                  $(element).removeClass('disabled-link');
+                  $(element).unbind('click');
+                }else{
+                  $(element).addClass('disabled-link');
+                  $(element).click(function(event){
+                    event.preventDefault();
+                  });
+                }
+              }
+            );
           }
       };
   }]);
