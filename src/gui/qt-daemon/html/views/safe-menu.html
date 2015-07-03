@@ -1,0 +1,20 @@
+<div class="btn-group navbar-btn" dropdown>
+    <button aria-expanded="false" ng-disabled="!safe.loaded" dropdown-toggle class="btn btn-default dropdown-toggle" type="button">
+        <i class="fa fa-gear"></i> <span class="caret"></span>
+    </button>
+    <ul role="menu" class="dropdown-menu dropdown-menu-right">
+        <li><a href="#sendG/{{safe.wallet_id}}">Отправить гульдены</a></li>
+
+        <li><a href="#addGOfferSell">Продать гульдены</a></li>
+        <li><a href="#addGOfferBuy">Купить гульдены</a></li>
+
+        <li ng-if="!safe.is_mining"><a disabled-link="!deamon_state.pos_allowed" ng-click="startMining(safe.wallet_id)">Начать добычу</a></li>
+        <li ng-if="safe.is_mining"><a href="" ng-click="stopMining(safe.wallet_id)">Остановить добычу</a></li>
+
+        <li class="divider"></li>
+        <li><a href="" ng-click="registerAlias(safe)">Присвоить алиас</a></li>
+        <li><a href="" ng-click="closeWallet(safe.wallet_id)">Отключить сейф</a></li>
+        <li><a href="" ng-click="">Сделать бекап</a></li>
+        <li><a href="" ng-click="resynch(safe.wallet_id)">Синхронизировать</a></li>
+    </ul>
+</div>

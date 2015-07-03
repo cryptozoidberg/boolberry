@@ -232,21 +232,7 @@
                 });    
             };
 
-            $scope.safeBackup = function(){
-                var caption      = "Please, choose the file";
-                var filemask     = "*.lui";
-                var result       = backend.saveFileDialog(caption, filemask); // TODO digest angular error fix
-                var original_dir = result.path.substr(0,result.path.lastIndexOf('/'));
-                var new_dir      = $scope.safe.path.substr(0,$scope.safe.path.lastIndexOf('/'));
-                
-                if(original_dir == new_dir){
-                    informer.error('Вы не можете сохранить копию в ту же директорию');
-                    //$scope.safeBackup();
-                }else{
-                    var res = backend.backupWalletKeys($scope.safe.wallet_id, result.path);
-                    informer.success('Копия создана');
-                }
-            };
+            
 
             $scope.startUseSafe = function(){
                 $modalInstance.close();

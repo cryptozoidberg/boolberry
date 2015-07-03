@@ -106,7 +106,9 @@
               function(v){
                 if(v){
                   $(element).removeClass('disabled-link');
-                  $(element).unbind('click');
+                  $(element).click(function(event){
+                    return true;
+                  });
                 }else{
                   $(element).addClass('disabled-link');
                   $(element).click(function(event){
@@ -118,6 +120,7 @@
           }
       };
   }]);
+
 
 
   module.service('templateCompiler', function ($compile, $templateCache, $rootScope) {
@@ -140,6 +143,79 @@
       
     };  
   });
+
+  // module.directive('safemenu', [function() {
+  //   return {
+  //       restrict: 'E',
+  //       scope: {
+  //         safe: '=safe'
+  //       },
+  //       controller: 'safeMenu',
+  //       templateUrl: 'views/safe-menu.html'
+  //   };
+  // }]);
+
+  // module.controller('safeMenu', ['$scope','$rootScope','informer','$filter',
+  //     function($scope,$rootScope,informer,$filter){
+       
+  //     $rootScope.closeWallet = function(wallet_id){
+  //         backend.closeWallet(wallet_id, function(data){
+  //             console.log(data);
+  //             for (var i in $rootScope.safes){
+  //                 if($rootScope.safes[i].wallet_id == wallet_id){
+  //                     $rootScope.safes.splice(i,1);
+  //                 }
+  //             }
+  //             backend.reloadCounters();
+  //             backend.loadMyOffers();
+  //             var path = $location.path();
+              
+  //             if(path.indexOf('/safe/') > -1){
+  //                 $location.path('/safes');
+  //             }
+  //         });
+  //     };
+
+  //     $scope.startMining = function(wallet_id){
+  //         backend.startPosMining(wallet_id);
+  //         var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+  //         if(safe.length){
+  //             safe[0].is_mining_set_manual = true; // flag to understand that we want to prevent auto mining
+  //         }
+  //     }
+
+  //     $scope.stopMining = function(wallet_id){
+  //         backend.stopPosMining(wallet_id);
+  //         var safe = $filter('filter')($rootScope.safes,{wallet_id : wallet_id});
+  //         if(safe.length){
+  //             safe[0].is_mining_set_manual = true; // flag to understand that we want to prevent auto mining
+  //         }
+  //     }
+
+  //     $scope.resynch = function(wallet_id){
+  //         console.log('RESYNCH WALLET ::' + wallet_id);
+  //         backend.resync_wallet(wallet_id, function(result){
+  //             console.log(result);
+  //         });
+  //     };
+
+  //     $scope.registerAlias = function(safe){ //TODO check safe data
+          
+  //         var modalInstance = $modal.open({
+  //             templateUrl: "views/create_alias.html",
+  //             controller: 'createAliasCtrl',
+  //             size: 'md',
+  //             windowClass: 'modal fade in',
+  //             resolve: {
+  //                 safe: function(){
+  //                     return safe;
+  //                 }
+  //             }
+  //         });
+  //     };
+
+  //     }
+  // ]);
 
   module.directive('datepickerPopup', function (){
     return {
