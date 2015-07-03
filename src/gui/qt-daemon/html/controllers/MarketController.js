@@ -134,8 +134,10 @@
                         var placeId = item.location_city;
 
                         // informer.info(placeId);
+                        var not_found = 'City not found';
 
-                        if(angular.isUndefined($rootScope.gplaces[placeId]) && placeId.length == 27){
+                        if((angular.isUndefined($rootScope.gplaces[placeId]) || (angular.isDefined(
+                            ) && $rootScope.gplaces[placeId].name==not_found)) && placeId.length == 27){
                             $rootScope.gplaces[placeId] = {name : 'Loading...'};
                             gPlace.getById(placeId,function(place, status){
                                 //informer.info(JSON.stringify(status) + ' '+placeId);
@@ -146,12 +148,12 @@
                                     });
                                 }else{
                                     //informer.info('fail');
-                                    $rootScope.gplaces[placeId] = {name : 'City not found'};
+                                    $rootScope.gplaces[placeId] = {name : not_found};
                                 }
                                 
                             });
                         }else{
-                            $rootScope.gplaces[placeId] = {name : 'City not found'};
+                            $rootScope.gplaces[placeId] = {name : not_found};
                         }
                         
                         // load gplaces
