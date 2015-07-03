@@ -268,7 +268,7 @@
                             class="col-xs-2 col-sm-2" 
                             selectpicker 
                             ng-model="offer.expiration_time" 
-                            ng-options="interval for interval in intervals"
+                            ng-options="interval.seconds as interval.days for interval in intervals"
                             name="expiration_time"
                             required
                         >
