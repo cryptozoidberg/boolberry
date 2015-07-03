@@ -60,8 +60,8 @@
                                         <ul role="menu" class="dropdown-menu dropdown-menu-right">
                                             <li><a href="#sendG/{{safe.wallet_id}}">Отправить гульдены</a></li>
 
-                                            <li><a href="">Продать гульдены</a></li>
-                                            <li><a href="">Купить гульдены</a></li>
+                                            <li><a href="#addGOfferSell">Продать гульдены</a></li>
+                                            <li><a href="#addGOfferBuy">Купить гульдены</a></li>
 
                                             <li ng-if="!safe.is_mining"><a disabled-link="!deamon_state.pos_allowed" href="" ng-click="startMining(safe.wallet_id)">Начать добычу</a></li>
                                             <li ng-if="safe.is_mining"><a href="" ng-click="stopMining(safe.wallet_id)">Остановить добычу</a></li>
