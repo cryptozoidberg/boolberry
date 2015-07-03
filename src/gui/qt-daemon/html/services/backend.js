@@ -191,6 +191,15 @@
                 return this.runCommand('get_mining_estimate', params);
             },
 
+            backupWalletKeys: function(wallet_id, path) {
+
+                var params = {
+                  "wallet_id": wallet_id,
+                  "path": path
+                };
+
+                return this.runCommand('backup_wallet_keys', params);
+            },
 
             pushOffer : function(
                 wallet_id, offer_type, amount_lui, target, location_city, location_country, contacts, 
@@ -696,7 +705,8 @@
                     break;
                 case 'generate_wallet' : 
                     result = {
-                        "wallet_id" : 1
+                        "wallet_id" : 1,
+                        "wi" : this.getWalletInfo()
                     }
                     break;
                 case 'get_all_offers':
