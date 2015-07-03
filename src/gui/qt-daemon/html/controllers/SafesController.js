@@ -241,10 +241,10 @@
                 
                 if(original_dir == new_dir){
                     informer.error('Вы не можете сохранить копию в ту же директорию');
-                    $scope.safeBackup();
+                    //$scope.safeBackup();
                 }else{
-                    var res = backend.backupWalletKeys($scope.safe.wallet_id, new_dir);
-                    informer.info(JSON.strinfigy(res));
+                    var res = backend.backupWalletKeys($scope.safe.wallet_id, result.path);
+                    informer.success('Копия создана');
                 }
             };
 

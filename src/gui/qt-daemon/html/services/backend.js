@@ -371,7 +371,6 @@
                 return this.runCommand('generate_wallet', params, callback);
             },
 
-
             // system functions
 
             runCommand : function(command, params, callback) {

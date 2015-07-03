@@ -482,7 +482,12 @@
 
     module.controller('addOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$http',
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $http){
-            $scope.intervals = [1,3,5,14];
+            $scope.intervals = [
+                {seconds: 60*60*24,    days: 1},
+                {seconds: 60*60*24*3,  days: 3},
+                {seconds: 60*60*24*5,  days: 5},
+                {seconds: 60*60*24*14, days: 14}
+            ];
 
             $scope.offer_types = [
                 {key : 0, value: 'Купить товар'},
@@ -490,7 +495,7 @@
             ];
 
             $scope.offer = {
-                expiration_time : $scope.intervals[3],
+                expiration_time : $scope.intervals[3].seconds,
                 is_standart : false,
                 is_premium : true,
                 fee_premium : '6.00',
@@ -500,7 +505,6 @@
                 comment: '',
                 bonus: ''
             };
-
 
             if(angular.isUndefined($rootScope.countryList)){
                 $http.get('all.json').then(
@@ -616,7 +620,12 @@
     // Guilden offer
     module.controller('addGOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$timeout','market', '$http',
         function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,$timeout,market,$http){
-            $scope.intervals = [1,3,5,14];
+            $scope.intervals = [
+                {seconds: 60*60*24,    days: 1},
+                {seconds: 60*60*24*3,  days: 3},
+                {seconds: 60*60*24*5,  days: 5},
+                {seconds: 60*60*24*14, days: 14}
+            ];
 
             $scope.currencies = market.currencies;
 
@@ -668,7 +677,7 @@
             };
 
             $scope.offer = {
-                expiration_time : $scope.intervals[3],
+                expiration_time : $scope.intervals[3].seconds,
                 is_standart : false,
                 is_premium : true,
                 fee_premium : '6.00',
