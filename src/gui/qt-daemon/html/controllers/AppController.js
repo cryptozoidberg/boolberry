@@ -393,6 +393,21 @@
             });
         };
 
+        $scope.safeChangePass = function(safe){ //TODO check safe data
+            
+            var modalInstance = $modal.open({
+                templateUrl: "views/safe_change_pass.html",
+                controller: 'safeChangePassCtrl',
+                size: 'md',
+                windowClass: 'modal fade in',
+                resolve: {
+                    safe: function(){
+                        return safe;
+                    }
+                }
+            });
+        };
+
         var loaded = false;
         var alias_count = 0;
         var newVersionShown = [];

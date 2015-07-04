@@ -13,27 +13,20 @@
                     </button>
                     <ul role="menu" class="dropdown-menu dropdown-menu-right">
                         <li><a class="safes_open-safe-button" ng-click="openFileDialog();" type="button">Открыть файл-сейф</a></li>
-                        <li><a type="button">Восстановить из smartsafe</a></li>
+                        <li><a  ng-click="openSmartSafeRestoreForm()" type="button">Восстановить из smartsafe</a></li>
 
                     </ul>
                 </div>
             </div>
             <div class="col-xs-7 col-sm-7">
-                <div class="pull-right col-xs-5 col-sm-5"><form><input type="text" class="form-control" placeholder="найти"></form></div>
+                <div class="pull-right col-xs-5 col-sm-5">
+                    <form>
+                        <input type="text" class="form-control" placeholder="найти" ng-model="filter.name" ng-change="filterChange()">
+                    </form>
+                </div>
+
                 <div class="pull-right col-xs-7 col-sm-7">
                     <div class="btn-toolbar pull-right">
-                        <!-- <ul class="nav nav-tabs btn-group-tabs">
-                            <li class="active">
-                                <button data-target=".list-view" data-toggle="tab" class="btn btn-default" type="button">
-                                    <i class="fa fa-list"></i> Списком
-                                </button>
-                            </li>
-                            <li>
-                                <button class="btn btn-default" data-target=".tiles-view" data-toggle="tab" type="button">
-                                    <i class="fa fa-th"></i> Блоками
-                                </button>
-                            </li>
-                        </ul> -->
                         <div class="btn-group">
                             <label class="btn btn-primary" ng-model="safeView" btn-radio="'list'"><i class="fa fa-list"></i> Списком</label>
                             <label class="btn btn-primary" ng-model="safeView" btn-radio="'blocks'"><i class="fa fa-th"></i> Блоками</label>
@@ -63,7 +56,7 @@
                     <tr ng-if="!safes.length">
                         <td colspan="6">Нет записей</td>
                     </tr>
-                    <tr ng-repeat="safe in safes" ng-class="{'danger' : safe.error}">
+                    <tr ng-repeat="safe in f_safes" ng-class="{'danger' : safe.error}">
                         <td>
                             <i class="fa fa-spinner fa-pulse" ng-hide="safe.loaded"></i>
                             <a class="btn btn-link" href="#safe/{{safe.wallet_id}}">
@@ -157,23 +150,27 @@
 
     <div collapse="safeView != 'blocks'">
         <div class="row">
-            <div class="col-xs-6 col-xs-6 col-sm-6 safebox" ng-repeat="safe in safes">
+            <div class="col-xs-6 col-xs-6 col-sm-6 safebox" ng-repeat="safe in f_safes">
                 <div class="panel">
                     <div class="panel-heading">
                         <div class="btn-group navbar-btn pull-right" dropdown>
                             <button aria-expanded="false" dropdown-toggle class="btn btn-default dropdown-toggle" type="button">
                                 Операции <span class="caret"></span>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                            <ul role="menu" class="dropdown-menu dropdown-menu-right">
                                 <li><a href="#sendG/{{safe.wallet_id}}">Отправить гульдены</a></li>
 
-                                <li><a href="market.html">Продать гульдены</a></li>
-                                <li><a href="market.html">Купить гульдены</a></li><li><a href="#">Начать добычу</a></li>
+                                <li><a href="#addGOfferSell">Продать гульдены</a></li>
+                                <li><a href="#addGOfferBuy">Купить гульдены</a></li>
+
+                                <li ng-if="!safe.is_mining"><a disabled-link="!deamon_state.pos_allowed" href="" ng-click="startMining(safe.wallet_id)">Начать добычу</a></li>
+                                <li ng-if="safe.is_mining"><a href="" ng-click="stopMining(safe.wallet_id)">Остановить добычу</a></li>
 
                                 <li class="divider"></li>
-                                <li><a href="" data-toggle="modal" data-target="#alias">Присвоить алиас</a></li>
-                                <li><a ng-click="closeWallet(safe.wallet_id)">Отключить сейф</a></li>
-                                <li><a href="market.html">Сделать бекап</a></li>
+                                <li><a href="" ng-click="registerAlias(safe)">Присвоить алиас</a></li>
+                                <li><a href="" ng-click="closeWallet(safe.wallet_id)">Отключить сейф</a></li>
+                                <li><a href="" ng-click="safeBackup(safe)">Сделать бекап</a></li>
+                                <li><a href="" ng-click="resynch(safe.wallet_id)">Синхронизировать</a></li>
                             </ul>
                         </div>
 

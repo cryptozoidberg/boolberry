@@ -1,0 +1,49 @@
+<div class="modal-header btn btn-primary btn-block">
+    <button type="button" class="close" data-dismiss="modal" ng-click="close()"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+    <h4 class="modal-title text-center">Смена пароля к сейфу</h4>
+</div>
+<div class="modal-body">
+    <div class="item">      
+      <div class="form-group">
+      <label class="requred">Старый пароль</label>
+      <input type="password" class="form-control" ng-model="safe.old_pass">
+     </div>
+
+      <div class="alert alert-warning">
+          <h4 style="margin:0" class="text-danger">Важно</h4>
+          <p>
+            Восстановить пароль невозможно. 
+            При утере пароля от сейфа, сейф придется отключить из приложения. 
+            Восстановить сейф можно только из цифровой копии ( brainwallet) 
+            или физической копии файла с другим паролем, который вы помните. 
+          </p>
+      </div>
+
+      <div class="form-group">
+       <label class="requred">Новый пароль</label>
+        <input type="password" class="form-control" ng-model="safe.old_pass">
+      </div>
+
+      <div class="form-group">
+       <label class="requred">Новый пароль повторно</label>
+        <input type="password" class="form-control" ng-model="safe.old_pass_repeat">
+      </div>
+
+      <!-- <div class="form-group clearfix">
+        <button data-target="#generator" data-toggle="modal" class="btn btn-sm btn-success pull-right" type="button">Генератор паролей</button> 
+        Надежность: <span class="label label-success">высокая</span>
+      </div> -->
+
+      <div class="form-group clearfix">
+        
+        <div style="padding-left:0" class="col-xs-6 col-sm-6">
+          <button data-dismiss="modal" type="button" class="btn btn-lg btn-block">Отменить</button>
+        </div>
+
+        <div style="padding-right:0" class="col-xs-6 col-sm-6">
+          <a class="btn btn-primary btn-lg btn-block" type="button">Сохранить</a>
+        </div>
+
+      </div>        
+    </div>
+</div>

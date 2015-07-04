@@ -16,7 +16,6 @@
 
             $scope.register = function(alias){
                 backend.registerAlias(safe.wallet_id, alias.name, safe.address, alias.fee, alias.comment, function(data){
-                    console.log('ALIAS CREATED ::');
                     $rootScope.unconfirmed_aliases.push(
                         {
                             tx_hash : data.tx_hash,
@@ -31,8 +30,32 @@
         }
     ]);
 
-    module.controller('safeListCtrl',['backend','$scope','$rootScope', '$modal','$interval',
-        function(backend, $scope, $rootScope, $modal,$interval){
+    module.controller('safeChangePassCtrl',['$scope', '$modalInstance', 'backend', 'safe', '$rootScope',
+        function($scope, $modalInstance, backend, safe, $rootScope){
+            
+            $scope.close = function(){
+                $modalInstance.close();
+            };
+
+            $scope.safe = {};
+
+            $scope.save = function(safe){
+                backend.safeChangePass(safe.wallet_id, alias.name, safe.address, alias.fee, alias.comment, function(data){
+                    $rootScope.unconfirmed_aliases.push(
+                        {
+                            tx_hash : data.tx_hash,
+                            name : alias.name
+                        }
+                    );
+                    
+                    $modalInstance.close();
+                });
+            };
+        }
+    ]);
+
+    module.controller('safeListCtrl',['backend','$scope','$rootScope', '$modal','$interval','$filter',
+        function(backend, $scope, $rootScope, $modal,$interval, $filter){
             
             $scope.pieStates = {
                 danger: '#D9534F',
@@ -40,6 +63,19 @@
                 info: '#5BC0DE',
                 success: '#5CB85C',
             };
+
+            $scope.filter = {
+                name: ''
+            };
+
+            $scope.filterChange = function(){
+                $scope.f_safes = $rootScope.safes;
+                if($scope.filter.name.length){
+                    $scope.f_safes = $filter('filter')($scope.f_safes, {name: $scope.filter.name});
+                }
+            };
+
+            $scope.filterChange();
 
             $scope.safeView = 'list';
 
@@ -55,24 +91,6 @@
                 animate: {},
                 // easing: {}
             };
-
-            //$scope.initLoading = function(){
-            // $scope.percent = 0;
-
-            // var loadProcess = $interval(function(){
-                
-            //     if ($scope.percent == 100) {
-            //         $scope.percent = 0;
-            //     }
-
-            //     $scope.percent += 5;
-            // },500);
-
-                //return $scope.percent;
-            //};
-
-            
-            
         }
     ]);
 
@@ -103,6 +121,32 @@
                 });
             }
 
+            $scope.row = '-timestramp'; //sort by default
+
+            $scope.order = function(key){
+                $scope.row = key;
+                $scope.filtered_history = $filter('orderBy')($scope.filtered_history,key);
+            };
+
+            $scope.open = function($event,name) {
+                $event.preventDefault();
+                $event.stopPropagation();
+                if(name == 'start'){
+                    $scope.opened_start = !$scope.opened_start;
+                }else if(name == 'end'){
+                    $scope.opened_end = !$scope.opened_end;
+                }
+            };
+
+            $scope.dateOptions = {
+                formatYear: 'yy',
+                startingDay: 1
+            };
+
+            $scope.format = 'dd/MMMM/yyyy';
+
+            $scope.hide_calendar = true;
+
             $scope.is_anonim_values = [
                 {key : -1 , value: 'любое'},
                 {key : 0 , value: 'анонимно'},
@@ -128,13 +172,97 @@
 
             $scope.filter = {
                 tr_type: 'all', //all, in, out
-                wallet_id: -1,
                 keywords: '',
                 is_anonim : $scope.is_anonim_values[0].key,
-                is_mixin : -1,
+                // is_mixin : -1,
                 interval : $scope.interval_values[0].key,
-                is_hide_service_tx : false
+                // is_hide_service_tx : false
             };
+
+            $scope.tx_date = {
+                // start : new Date(),
+                // end: new Date(new Date().getTime() + 604800)
+            };
+
+            $scope.filterChange = function(){
+                var f = $scope.filter;
+                $scope.prefiltered_history = angular.copy($scope.safe.history);
+
+                var  message = '';
+
+                if(f.interval == -2){
+                    $scope.hide_calendar = false;
+
+                    if(angular.isDefined($scope.tx_date.start) && angular.isDefined($scope.tx_date.end)){
+                        var start = $scope.tx_date.start.getTime()/1000;
+                        var end   = $scope.tx_date.end.getTime()/1000 + 60*60*24;
+
+                        var in_range = function(item){
+                            console.log(item.timestamp);
+                            console.log((start < item.timestamp) && (item.timestamp < end));
+                            if((start < item.timestamp) && (item.timestamp < end)){
+                                return true;
+                            }
+                            return false;
+                        }
+
+                        if(start < end){
+                            $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,in_range);
+                        }
+                    }
+                }else{
+                    $scope.hide_calendar = true;
+                }
+
+                if(f.interval > 0){
+                    var now = new Date().getTime();
+                    now = now/1000;
+                    var in_interval = function(item){
+                        if(item.timestamp > (now - f.interval)){
+                            return true;
+                        }
+                        return false;
+                    }
+                    $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,in_interval);
+                }
+
+                if(f.is_anonim != -1){
+                    var is_anonymous = function(item){
+                        if(item.remote_address == ''){
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    var is_not_anonymous = function(item){
+                        return !is_anonymous(item);
+                    }
+
+                    if(!f.is_anonim){
+                        $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,is_anonymous);
+                    }else{
+                        $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,is_not_anonymous);
+                    }
+                }
+
+                if(f.tr_type != 'all'){
+                    var is_income = (f.tr_type == 'in') ? true : false;
+                    var condition = { is_income: is_income};
+                    $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,condition);
+                }
+
+                if(f.keywords != ''){
+                    $scope.prefiltered_history = $filter('filter')($scope.prefiltered_history,f.keywords);
+                }
+
+
+                $scope.filtered_history = $scope.prefiltered_history;
+                $scope.order($scope.row);
+
+            };
+
+            $scope.filterChange();
+
         }
     ]);
 
