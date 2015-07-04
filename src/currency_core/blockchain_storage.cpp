@@ -344,7 +344,7 @@ bool blockchain_storage::trim_offers()
   uint64_t size_before = m_offers.size();
   for (auto it = m_offers.begin(); it != m_offers.end();)
   {
-    if (!it->second.size() || it->second.begin()->timestamp + SECONDS_IN_TWO_WEEKS > m_blocks.back().bl.timestamp)
+    if (!it->second.size() && it->second.begin()->timestamp + SECONDS_IN_TWO_WEEKS > m_blocks.back().bl.timestamp)
       m_offers.erase(it++);
     else
       it++;

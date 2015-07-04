@@ -94,6 +94,7 @@ protected:
   QString store_to_file(const QString& path, const QString& buff);
   QString get_mining_estimate(const QString& obj);
   QString backup_wallet_keys(const QString& obj);
+  QString reset_wallet_password(const QString& param);
 
 
 

@@ -606,6 +606,12 @@ bool wallet2::backup_keys(const std::string& path)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+bool wallet2::reset_password(const std::string& pass)
+{
+  m_password = pass;
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
 namespace
 {
   bool verify_keys(const crypto::secret_key& sec, const crypto::public_key& expected_pub)

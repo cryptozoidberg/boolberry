@@ -823,7 +823,14 @@ std::string daemon_backend::backup_wallet(uint64_t wallet_id, std::string& path)
   else
     return API_RETURN_CODE_FAIL;
 }
-
+std::string daemon_backend::reset_wallet_password(uint64_t wallet_id, const std::string& pass)
+{
+  GET_WALLET_OPT_BY_ID(wallet_id, w);
+  if (w.w->get()->reset_password(pass))
+    return API_RETURN_CODE_OK;
+  else
+    return API_RETURN_CODE_FAIL;
+}
 std::string daemon_backend::resync_wallet(uint64_t wallet_id)
 {
   GET_WALLET_OPT_BY_ID(wallet_id, w);

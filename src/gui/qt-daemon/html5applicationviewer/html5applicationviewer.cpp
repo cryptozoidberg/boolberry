@@ -1018,6 +1018,13 @@ QString Html5ApplicationViewer::backup_wallet_keys(const QString& param)
   ar.error_code = m_backend.backup_wallet(me.wallet_id, me.path);
   return epee::serialization::store_t_to_json(ar).c_str();
 }
+QString Html5ApplicationViewer::reset_wallet_password(const QString& param)
+{
+  PREPARE_ARG_FROM_JSON(view::reset_pass_request, me);
+  ar.error_code = m_backend.reset_wallet_password(me.wallet_id, me.pass);
+  return epee::serialization::store_t_to_json(ar).c_str();
+}
+
 void Html5ApplicationViewer::dispatch(const QString& status, const QString& param)
 {
   m_d->do_dispatch(status, param);

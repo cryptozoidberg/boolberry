@@ -261,6 +261,7 @@ namespace tools
     void set_core_runtime_config(const currency::core_runtime_config& pc);  
     currency::core_runtime_config& get_core_runtime_config();
     bool backup_keys(const std::string& path);
+    bool reset_password(const std::string& pass);
 private:
     bool store_keys(std::string& buff, const std::string& password);
     void load_keys(const std::string& keys_file_name, const std::string& password);

@@ -349,6 +349,17 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct reset_pass_request
+  {
+    uint64_t wallet_id;
+    std::string pass;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
+      KV_SERIALIZE(pass)
+    END_KV_SERIALIZE_MAP()
+  };
+
   struct restore_wallet_request
   {
     std::string pass;

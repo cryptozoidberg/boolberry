@@ -83,6 +83,7 @@ public:
   std::string get_mining_history(uint64_t wallet_id, tools::wallet_rpc::mining_history& wrpc);
   std::string get_wallet_restore_info(uint64_t wallet_id, std::string& restore_key);
   std::string backup_wallet(uint64_t wallet_id, std::string& path);
+  std::string reset_wallet_password(uint64_t wallet_id, const std::string& pass);
   std::string get_mining_estimate(uint64_t amuont_coins, 
     uint64_t time, 
     uint64_t& estimate_result, 
