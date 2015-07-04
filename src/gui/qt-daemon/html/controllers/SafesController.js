@@ -102,6 +102,39 @@
                     }
                 });
             }
+
+            $scope.is_anonim_values = [
+                {key : -1 , value: 'любое'},
+                {key : 0 , value: 'анонимно'},
+                {key : 1 , value: 'неанонимно'},
+            ];
+
+            $scope.is_mixin_values = [
+                {key : -1 , value: 'не важно'},
+                {key : 0 , value: 'микшировано'},
+                {key : 1 , value: 'не микшировано'},
+            ];
+
+            $scope.interval_values = [
+                { key: -1, value : "весь период"},
+                { key: 86400, value : "день"},
+                { key: 604800, value : "неделя"},
+                { key: 2592000, value : "месяц"},
+                { key: 5184000, value : "два месяца"},
+                { key: -2, value : "другой период"}
+            ];
+
+            $scope.hide_calendar = true;
+
+            $scope.filter = {
+                tr_type: 'all', //all, in, out
+                wallet_id: -1,
+                keywords: '',
+                is_anonim : $scope.is_anonim_values[0].key,
+                is_mixin : -1,
+                interval : $scope.interval_values[0].key,
+                is_hide_service_tx : false
+            };
         }
     ]);
 
