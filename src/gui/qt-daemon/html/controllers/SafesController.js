@@ -30,26 +30,30 @@
         }
     ]);
 
-    module.controller('safeChangePassCtrl',['$scope', '$modalInstance', 'backend', 'safe', '$rootScope',
-        function($scope, $modalInstance, backend, safe, $rootScope){
+    module.controller('safeChangePassCtrl',['$scope', '$modalInstance', 'backend', 'safe', '$rootScope', 'informer',
+        function($scope, $modalInstance, backend, safe, $rootScope, informer){
             
             $scope.close = function(){
                 $modalInstance.close();
             };
 
-            $scope.safe = {};
+            $scope.safe = {
+                old_pass: '',
+                new_pass: '',
+                new_pass_repeat: ''
+            };
 
-            $scope.save = function(safe){
-                backend.safeChangePass(safe.wallet_id, alias.name, safe.address, alias.fee, alias.comment, function(data){
-                    $rootScope.unconfirmed_aliases.push(
-                        {
-                            tx_hash : data.tx_hash,
-                            name : alias.name
-                        }
-                    );
-                    
+            $scope.save = function(old_pass, new_pass){
+                if(!$scope.change_pass_form.$valid){
+                    return;
+                }
+                var result = backend.resetWalletPass(safe.wallet_id, new_pass);
+                if(angular.isDefined(result.error_code) && result.error_code=='OK'){
+                    informer.success('Пароль успешно изменен');
+                    safe.pass = new_pass;
                     $modalInstance.close();
-                });
+                }
+                
             };
         }
     ]);

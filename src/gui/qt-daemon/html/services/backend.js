@@ -57,13 +57,20 @@
                 return this.runCommand('get_all_offers', params, callback);
             },
 
+            resetWalletPass: function(wallet_id, pass) {
+                var params = {
+                    wallet_id: wallet_id,
+                    pass: pass
+                };
+                return this.runCommand('reset_wallet_password', params);
+            },
+
             getVersion : function() {
                 if(!this.shouldUseEmulator()){
                     var res = Qt_parent['get_version']();
                 }else{
                     var res = '0.0.0.0';
                 }
-                
                 return res;
             },
 
@@ -774,6 +781,11 @@
                     result = {
                         'history' : []
 
+                    }
+                    break;
+                case 'reset_wallet_password' :
+                    result = {
+                        'error_code' : 'OK'
                     }
                     break;
                 case 'get_wallet_info' : 

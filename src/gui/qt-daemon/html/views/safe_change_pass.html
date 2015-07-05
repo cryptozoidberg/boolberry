@@ -3,10 +3,16 @@
     <h4 class="modal-title text-center">Смена пароля к сейфу</h4>
 </div>
 <div class="modal-body">
+    <form name="change_pass_form" novalidate ng-submit="save(safe.old_pass, safe.new_pass)">
     <div class="item">      
+      
+      <div class="col-xs-12 col-sm-12 text-danger" ng-show="change_pass_form.$submitted || change_pass_form.old_pass.$touched">
+          <div ng-show="change_pass_form.old_pass.$error.required">Обязательное поле</div>
+      </div>
+
       <div class="form-group">
-      <label class="requred">Старый пароль</label>
-      <input type="password" class="form-control" ng-model="safe.old_pass">
+        <label class="requred">Старый пароль</label>
+        <input type="password" class="form-control" name="old_pass" required ng-model="safe.old_pass">
      </div>
 
       <div class="alert alert-warning">
@@ -14,19 +20,28 @@
           <p>
             Восстановить пароль невозможно. 
             При утере пароля от сейфа, сейф придется отключить из приложения. 
-            Восстановить сейф можно только из цифровой копии ( brainwallet) 
+            Восстановить сейф можно только из цифровой копии (brainwallet) 
             или физической копии файла с другим паролем, который вы помните. 
           </p>
       </div>
 
+      <div class="col-xs-12 col-sm-12 text-danger" ng-show="change_pass_form.$submitted || change_pass_form.new_pass.$touched">
+          <div ng-show="change_pass_form.new_pass.$error.required">Обязательное поле</div>
+      </div>
+
       <div class="form-group">
        <label class="requred">Новый пароль</label>
-        <input type="password" class="form-control" ng-model="safe.old_pass">
+        <input type="password" name="new_pass" class="form-control" required ng-model="safe.new_pass">
+      </div>
+
+      <div class="col-xs-12 col-sm-12 text-danger"  ng-show="change_pass_form.$submitted || change_pass_form.new_pass_repeat.$touched">
+          <div ng-show="change_pass_form.new_pass_repeat.$error.required">Обязательное поле</div>
+          <div ng-show="safe.new_pass != safe.new_pass_repeat">Пароли не совпадают</div>
       </div>
 
       <div class="form-group">
        <label class="requred">Новый пароль повторно</label>
-        <input type="password" class="form-control" ng-model="safe.old_pass_repeat">
+        <input type="password" name="new_pass_repeat" required match="safe.new_pass" class="form-control" ng-model="safe.new_pass_repeat">
       </div>
 
       <!-- <div class="form-group clearfix">
@@ -37,13 +52,14 @@
       <div class="form-group clearfix">
         
         <div style="padding-left:0" class="col-xs-6 col-sm-6">
-          <button data-dismiss="modal" type="button" class="btn btn-lg btn-block">Отменить</button>
+          <button ng-click="close()" type="button" class="btn btn-lg btn-block">Отменить</button>
         </div>
 
         <div style="padding-right:0" class="col-xs-6 col-sm-6">
-          <a class="btn btn-primary btn-lg btn-block" type="button">Сохранить</a>
+          <button class="btn btn-primary btn-lg btn-block" type="submit">Сохранить</button>
         </div>
 
       </div>        
     </div>
+    </form>
 </div>
