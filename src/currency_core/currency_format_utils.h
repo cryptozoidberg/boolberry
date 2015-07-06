@@ -175,7 +175,7 @@ namespace currency
   bool is_pos_block(const transaction& tx);
   uint64_t get_coinday_weight(uint64_t amount);
   wide_difficulty_type correct_difficulty_with_sequence_factor(size_t sequence_factor, wide_difficulty_type diff);
-  blobdata make_cancel_offer_sig_blob(const cancel_offer& co);
+  blobdata make_offer_sig_blob(const cancel_offer& co);
   void print_currency_details();
 
 
@@ -215,6 +215,17 @@ namespace currency
   bool is_coinbase(const transaction& tx);
 
   //---------------------------------------------------------------
+  //---------------------------------------------------------------
+  template<typename t_offer_sig_struct>
+  blobdata make_offer_sig_blob(const t_offer_sig_struct& co)
+  {
+    blobdata bd;
+    string_tools::apped_pod_to_strbuff(bd, co.tx_id);
+    string_tools::apped_pod_to_strbuff(bd, co.offer_index);
+    return bd;
+  }
+
+
   template<typename specic_type_t, typename variant_t>
   bool get_type_in_variant_container(const std::vector<variant_t>& av, specic_type_t& a)
   {

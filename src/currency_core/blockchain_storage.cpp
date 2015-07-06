@@ -1929,7 +1929,7 @@ bool blockchain_storage::validate_cancel_order(const cancel_offer& co, offers_co
   CHECK_AND_ASSERT_MES(it != m_transactions.end(), false, "Cancel offer command: tx " << co.tx_id << " not found");
   crypto::public_key tx_pub_key = get_tx_pub_key_from_extra(it->second.tx);
   CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Cancel offer command: tx " << co.tx_id << " don't have pubkey");
-  blobdata buff_to_check_sig = make_cancel_offer_sig_blob(co);
+  blobdata buff_to_check_sig = make_offer_sig_blob(co);
   bool res = crypto::check_signature(crypto::cn_fast_hash(buff_to_check_sig.data(), buff_to_check_sig.size()), tx_pub_key, co.sig);
   CHECK_AND_ASSERT_MES(res, false, "Signature check failed offer command: tx " << co.tx_id << " don't have pubkey");
 

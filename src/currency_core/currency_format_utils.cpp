@@ -722,14 +722,6 @@ namespace currency
     }
   }
   //---------------------------------------------------------------
-  blobdata make_cancel_offer_sig_blob(const cancel_offer& co)
-  {
-    blobdata bd;
-    string_tools::apped_pod_to_strbuff(bd, co.tx_id);
-    string_tools::apped_pod_to_strbuff(bd, co.offer_index);
-    return bd;
-  }
-  //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
                                                              const std::vector<extra_v>& extra,

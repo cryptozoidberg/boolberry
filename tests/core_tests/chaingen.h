@@ -766,6 +766,9 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
   return r;
   }
 
+
+crypto::secret_key last_tx_generated_secrete_key;
+
   //--------------------------------------------------------------------------
 #define GENERATE_ACCOUNT(account) \
   currency::account_base account; \

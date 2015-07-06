@@ -188,9 +188,6 @@ namespace currency
 
   };
 
-  /************************************************************************/
-  /* attachment structures                                                */
-  /************************************************************************/
   struct cancel_offer
   {
     crypto::hash tx_id;
@@ -202,6 +199,21 @@ namespace currency
       VALUE(offer_index)
       VALUE(sig)
     END_SERIALIZE()
+  };
+
+  struct update_offer
+  {
+    crypto::hash tx_id;
+    uint64_t offer_index;
+    crypto::signature sig; //tx_id signed by transaction secrete key
+    offer_details of;
+
+    BEGIN_SERIALIZE_OBJECT()
+      VALUE(tx_id)
+      VALUE(offer_index)
+      VALUE(sig)
+      FIELD(of)
+      END_SERIALIZE()
   };
 
   struct tx_comment
@@ -240,7 +252,7 @@ namespace currency
       END_SERIALIZE()
   };
 
-  typedef boost::variant<offer_details, tx_comment, tx_payer, tx_crypto_checksum, tx_message, std::string, cancel_offer> attachment_v;
+  typedef boost::variant<offer_details, tx_comment, tx_payer, tx_crypto_checksum, tx_message, std::string, cancel_offer, update_offer> attachment_v;
 
   /************************************************************************/
   /* extra structures                                                     */
@@ -526,6 +538,7 @@ VARIANT_TAG(binary_archive, std::string, 0x3);
 VARIANT_TAG(binary_archive, currency::tx_crypto_checksum, 0x4);
 VARIANT_TAG(binary_archive, currency::tx_message, 0x5);
 VARIANT_TAG(binary_archive, currency::cancel_offer, 0x6);
+VARIANT_TAG(binary_archive, currency::update_offer, 0x7);
 
 
 
@@ -555,6 +568,8 @@ VARIANT_TAG(json_archive, crypto::public_key, "pub_key");
 VARIANT_TAG(json_archive, currency::tx_crypto_checksum, "check_summ");
 VARIANT_TAG(json_archive, currency::tx_message, "message");
 VARIANT_TAG(json_archive, currency::cancel_offer, "canscel_offer");
+VARIANT_TAG(json_archive, currency::update_offer, "update_offer");
+
 
 
 
@@ -589,4 +604,5 @@ VARIANT_TAG(debug_archive, currency::extra_user_data, "user_data");
 VARIANT_TAG(debug_archive, currency::extra_alias_entry, "alias");
 VARIANT_TAG(debug_archive, currency::extra_padding, "padding");
 VARIANT_TAG(debug_archive, currency::cancel_offer, "cancel_offer");
+VARIANT_TAG(debug_archive, currency::update_offer, "update_offer");
 
