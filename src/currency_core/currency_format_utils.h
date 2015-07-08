@@ -175,7 +175,6 @@ namespace currency
   bool is_pos_block(const transaction& tx);
   uint64_t get_coinday_weight(uint64_t amount);
   wide_difficulty_type correct_difficulty_with_sequence_factor(size_t sequence_factor, wide_difficulty_type diff);
-  blobdata make_offer_sig_blob(const cancel_offer& co);
   void print_currency_details();
 
 
