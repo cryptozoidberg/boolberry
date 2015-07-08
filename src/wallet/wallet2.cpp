@@ -1183,7 +1183,7 @@ void wallet2::cancel_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, cur
   co.tx_id = tx_id;
   auto it = m_offers_secret_keys.find(tx_id);
   CHECK_AND_ASSERT_THROW_MES(it != m_offers_secret_keys.end(), "scerete key not found for tx " << tx_id);
-  blobdata sig_blob = currency::make_cancel_offer_sig_blob(co);
+  blobdata sig_blob = currency::make_offer_sig_blob(co);
   crypto::generate_signature(crypto::cn_fast_hash(sig_blob.data(), sig_blob.size()), it->second.first.pub, it->second.first.sec, co.sig);
   attachments.push_back(co);
   destinations.push_back(tx_dest);

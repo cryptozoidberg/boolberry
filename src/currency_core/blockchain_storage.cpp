@@ -308,7 +308,7 @@ bool blockchain_storage::purge_transaction_from_blockchain(const crypto::hash& t
   bool r = unprocess_blockchain_tx_extra(tx);
   CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_extra");
   r = unprocess_blockchain_tx_attachments(tx);
-  CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_offers");
+  //CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_offers");
 
 
   if(!is_coinbase(tx))
@@ -1903,6 +1903,11 @@ bool blockchain_storage::process_blockchain_tx_attachments(const transaction& tx
       bool r = process_cancel_offer(boost::get<cancel_offer>(at));
       CHECK_AND_ASSERT_MES(r, false, "process_cancel_offer failed");
     }
+    else if (at.type() == typeid(update_offer))
+    {
+      bool r = process_update_offer(boost::get<update_offer>(at), tx_hash, count++, timestamp);
+      CHECK_AND_ASSERT_MES(r, false, "process_update_offer failed");
+    }
   }
   if (odl.size())
   {
@@ -1925,13 +1930,8 @@ size_t get_offers_count_in_attachments(const transaction& tx)
 bool blockchain_storage::validate_cancel_order(const cancel_offer& co, offers_container::iterator& oit)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  auto it = m_transactions.find(co.tx_id);
-  CHECK_AND_ASSERT_MES(it != m_transactions.end(), false, "Cancel offer command: tx " << co.tx_id << " not found");
-  crypto::public_key tx_pub_key = get_tx_pub_key_from_extra(it->second.tx);
-  CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Cancel offer command: tx " << co.tx_id << " don't have pubkey");
-  blobdata buff_to_check_sig = make_offer_sig_blob(co);
-  bool res = crypto::check_signature(crypto::cn_fast_hash(buff_to_check_sig.data(), buff_to_check_sig.size()), tx_pub_key, co.sig);
-  CHECK_AND_ASSERT_MES(res, false, "Signature check failed offer command: tx " << co.tx_id << " don't have pubkey");
+  bool r = validate_modify_order_signature(co);
+  CHECK_AND_ASSERT_MES(r, false, "failed to validate_modify_order_signature at validate_cancel_order");
 
   oit = m_offers.find(co.tx_id);
   CHECK_AND_ASSERT_MES(oit != m_offers.end(), false, "Cancel offer command: tx " << co.tx_id << " not found in offers");
@@ -1950,6 +1950,7 @@ bool blockchain_storage::process_cancel_offer(const cancel_offer& co)
   offers_container::iterator it = m_offers.end();
   bool r = validate_cancel_order(co, it);
   CHECK_AND_ASSERT_MES(r, false, "failed to validate order");
+
   it->second[co.offer_index].stopped = true;
   LOG_PRINT_MAGENTA("Offer " << co.tx_id << ":" << co.offer_index << " cancelled", LOG_LEVEL_0);
   return true;
@@ -1971,6 +1972,42 @@ bool blockchain_storage::unprocess_cancel_offer(const cancel_offer& co)
   return true;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::process_update_offer(const update_offer& co, const crypto::hash& tx_id, uint64_t no, uint64_t timestamp)
+{
+  bool r = validate_modify_order_signature(co);
+  CHECK_AND_ASSERT_MES(r, false, "failed to validate order");
+
+  offers_container::iterator it = m_offers.find(co.tx_id);
+  CHECK_AND_ASSERT_MES(it != m_offers.end(), false, "Update offer command: tx " << co.tx_id << " not found in offers");
+  
+  std::vector<offer_details_ex>& odl = m_offers[tx_id];
+  odl.push_back(offer_details_ex());
+  static_cast<offer_details&>(odl.back()) = co.of;
+  odl.back().timestamp = timestamp;
+  odl.back().index_in_tx = no;
+  odl.back().tx_hash = string_tools::pod_to_hex(tx_id);
+  odl.back().stopped = false;
+
+  //remove old order
+  m_offers.erase(it);
+
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::unprocess_update_offer(const update_offer& co, const crypto::hash& tx_id)
+{
+  offers_container::iterator it = m_offers.find(tx_id);
+  CHECK_AND_ASSERT_MES(it != m_offers.end(), false, "Unprocess update offer command: tx " << tx_id << " not found in offers");
+  
+  CHECK_AND_ASSERT_MES(it->second.size(), false, "Unprocess update offer command: tx " << tx_id << ", size() is empty ");
+  it->second.pop_back();
+
+  if (!it->second.size())
+    m_offers.erase(it);
+
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::unprocess_blockchain_tx_attachments(const transaction& tx)
 {
 
@@ -1987,12 +2024,17 @@ bool blockchain_storage::unprocess_blockchain_tx_attachments(const transaction& 
     m_offers.erase(it);
   }
 
-  //handle cancel offers
-  for (const auto& at : tx.attachment)
+  //handle cancel offers 
+  for (auto it = tx.attachment.rbegin(); it != tx.attachment.rend(); it++)
   {
+    const auto& at = *it;
     if (at.type() == typeid(cancel_offer))
     {
       unprocess_cancel_offer(boost::get<cancel_offer>(at));
+    }
+    else if (at.type() == typeid(update_offer))
+    {
+      unprocess_update_offer(boost::get<update_offer>(at), get_transaction_hash(tx));
     }
   }
   return true;
@@ -2006,7 +2048,7 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
   CHECK_AND_ASSERT_MES(r, false, "failed to process_blockchain_tx_extra");
 
   r = process_blockchain_tx_attachments(tx, timestamp);
-  CHECK_AND_ASSERT_MES(r, false, "failed to process_blockchain_tx_offers");
+ // CHECK_AND_ASSERT_MES(r, false, "failed to process_blockchain_tx_offers");
 
 
   struct add_transaction_input_visitor: public boost::static_visitor<bool>
@@ -2043,7 +2085,6 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
         }
       }
 
-
       return true;
     }
 
@@ -2061,7 +2102,7 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
       bool r = unprocess_blockchain_tx_extra(tx);
       CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_extra");
       r = unprocess_blockchain_tx_attachments(tx);
-      CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_offers");
+      //CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_offers");
       return false;
     }
   }
@@ -2077,7 +2118,7 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
     bool r = unprocess_blockchain_tx_extra(tx);
     CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_extra");
     r = unprocess_blockchain_tx_attachments(tx);
-    CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_offers");
+    //CHECK_AND_ASSERT_MES(r, false, "failed to unprocess_blockchain_tx_offers");
 
     return false;
   }

@@ -198,7 +198,7 @@ public:
     currency::wide_difficulty_type cumul_difficulty;
     std::vector<currency::transaction> m_transactions;
     crypto::hash ks_hash;
-  };
+     };
 
   //               amount             vec_ind, tx_index, out index in tx
   typedef std::map<uint64_t, std::vector<std::tuple<size_t, size_t, size_t> > > outputs_index;
@@ -319,7 +319,8 @@ public:
     const currency::account_base& miner_acc, const std::vector<crypto::hash>& tx_hashes, size_t txs_size);
   bool find_nounce(currency::block& blk, std::vector<const block_info*>& blocks, currency::wide_difficulty_type dif, uint64_t height);
   //bool find_nounce(currency::block& blk, currency::wide_difficulty_type dif, uint64_t height);
-
+  
+  crypto::secret_key last_tx_generated;
 private:
   std::unordered_map<crypto::hash, block_info> m_blocks_info;
 };
@@ -767,7 +768,7 @@ bool construct_broken_tx(std::list<currency::transaction>& txs_set,
   }
 
 
-crypto::secret_key last_tx_generated_secrete_key;
+extern crypto::secret_key last_tx_generated_secrete_key;
 
   //--------------------------------------------------------------------------
 #define GENERATE_ACCOUNT(account) \
@@ -847,7 +848,7 @@ crypto::secret_key last_tx_generated_secrete_key;
 
 #define MAKE_TX_MIX_ATTR_EXTRA(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, EXTRA, CHECK_SPENDS)                   \
   currency::transaction TX_NAME;                                                                                      \
-  construct_tx_to_key(VEC_EVENTS, TX_NAME, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, MIX_ATTR, EXTRA, std::vector<currency::attachment_v>(), CHECK_SPENDS);  \
+  construct_tx_to_key(VEC_EVENTS, TX_NAME, HEAD, FROM, TO, AMOUNT, TESTS_DEFAULT_FEE, NMIX, generator.last_tx_generated, MIX_ATTR, EXTRA, std::vector<currency::attachment_v>(), CHECK_SPENDS);  \
   VEC_EVENTS.push_back(TX_NAME);
 
 #define MAKE_TX_MIX_ATTR(VEC_EVENTS, TX_NAME, FROM, TO, AMOUNT, NMIX, HEAD, MIX_ATTR, CHECK_SPENDS)                   \

@@ -873,13 +873,13 @@ bool gen_crypted_attachments::generate(std::vector<test_event_entry>& events) co
   cancel_offer co = AUTO_VAL_INIT(co);
   co.tx_id = get_transaction_hash(tx);
   co.offer_index = 0;
-  blobdata bl_for_sig = currency::make_cancel_offer_sig_blob(co);
+  blobdata bl_for_sig = currency::make_offer_sig_blob(co);
   crypto::generate_signature(crypto::cn_fast_hash(bl_for_sig.data(), bl_for_sig.size()), 
                              currency::get_tx_pub_key_from_extra(tx), 
                              off_key_pair.sec, co.sig);
   attachments3.push_back(co);
   co.offer_index = 1;
-  bl_for_sig = currency::make_cancel_offer_sig_blob(co);
+  bl_for_sig = currency::make_offer_sig_blob(co);
   crypto::generate_signature(crypto::cn_fast_hash(bl_for_sig.data(), bl_for_sig.size()), 
                              currency::get_tx_pub_key_from_extra(tx), 
                              off_key_pair.sec, co.sig);

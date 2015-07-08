@@ -174,10 +174,14 @@ namespace currency
         uint64_t& pos_coins_and_pos_diff_rate, 
         std::vector<uint64_t>& days);
 
+    template<class t_modify_offer>
+    bool validate_modify_order_signature(const t_modify_offer& co);
+
 
     //exchange access functions
     //this function mostly made for debug purposes
     bool get_all_offers(std::list<offer_details_ex>& offers);
+
 
 
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
@@ -317,6 +321,9 @@ namespace currency
     bool enum_blockchain(visitor_t& v, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
     bool process_cancel_offer(const cancel_offer& co);
     bool unprocess_cancel_offer(const cancel_offer& co);
+    bool process_update_offer(const update_offer& co, const crypto::hash& tx_id, uint64_t no, uint64_t timestamp);
+    bool unprocess_update_offer(const update_offer& co, const crypto::hash& tx_id);
+
 
     //POS
     wide_difficulty_type get_adjusted_cumulative_difficulty_for_next_pos(wide_difficulty_type next_diff);
@@ -478,6 +485,23 @@ namespace currency
 
     return true;
   }
+
+  //------------------------------------------------------------------
+  template<class t_modify_offer>
+  bool blockchain_storage::validate_modify_order_signature(const t_modify_offer& co)
+  {
+    CRITICAL_REGION_LOCAL(m_blockchain_lock);
+    auto it = m_transactions.find(co.tx_id);
+    CHECK_AND_ASSERT_MES(it != m_transactions.end(), false, "Cancel offer command: tx " << co.tx_id << " not found");
+    crypto::public_key tx_pub_key = get_tx_pub_key_from_extra(it->second.tx);
+    CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "Modify offer command: tx " << co.tx_id << " don't have pubkey");
+    blobdata buff_to_check_sig = make_offer_sig_blob(co);
+    bool res = crypto::check_signature(crypto::cn_fast_hash(buff_to_check_sig.data(), buff_to_check_sig.size()), tx_pub_key, co.sig);
+    CHECK_AND_ASSERT_MES(res, false, "Signature check failed offer command: tx " << co.tx_id << " don't have pubkey");
+
+    return true;
+  }
+
 }
 
 

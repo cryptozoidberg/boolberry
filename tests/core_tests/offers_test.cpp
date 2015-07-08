@@ -67,7 +67,6 @@ bool offers_tests::generate(std::vector<test_event_entry>& events) const
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_13, blk_12, miner_account, txs_blk2);
   DO_CALLBACK(events, "check_offers_1");
 
-  //
   //now update offer
   std::vector<currency::attachment_v> attachments3;
   attachments3.push_back(currency::update_offer());
