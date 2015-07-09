@@ -167,6 +167,7 @@ namespace tools
     
     void push_offer(const currency::offer_details_ex& od, currency::transaction& res_tx);
     void cancel_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, currency::transaction& tx);
+    void update_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, const currency::offer_details_ex& od, currency::transaction& res_tx);
     void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee);
 
 
@@ -631,7 +632,8 @@ namespace tools
     currency::tx_comment cm;
     get_type_in_variant_container(attachments, cm);
     add_sent_unconfirmed_tx(tx, change_dts.amount, recipient, cm.comment);
-    if (currency::have_type_in_variant_container<currency::offer_details>(tx.attachment))
+    if (currency::have_type_in_variant_container<currency::offer_details>(tx.attachment) 
+      || currency::have_type_in_variant_container<currency::update_offer>(tx.attachment))
     {
       //store private tx key
       m_offers_secret_keys[currency::get_transaction_hash(tx)] = std::make_pair(one_time_key, static_cast<uint64_t>(time(nullptr)));

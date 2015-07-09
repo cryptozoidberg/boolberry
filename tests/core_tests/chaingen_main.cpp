@@ -77,13 +77,14 @@ int main(int argc, char* argv[])
 
     CALL_TEST("TRANSACTIONS TESTS", test_transactions);
 
+    GENERATE_AND_PLAY(offers_tests);
     GENERATE_AND_PLAY(cumulative_difficulty_adjustment_test);
     GENERATE_AND_PLAY(gen_alias_tests);
     GENERATE_AND_PLAY(gen_crypted_attachments);
     GENERATE_AND_PLAY(cumulative_difficulty_adjustment_test);
     GENERATE_AND_PLAY(cumulative_difficulty_adjustment_test_alt);
     GENERATE_AND_PLAY(gen_pos_basic_tests);
-   GENERATE_AND_PLAY(prun_ring_signatures);
+    GENERATE_AND_PLAY(prun_ring_signatures);
     GENERATE_AND_PLAY(get_random_outs_test);
     GENERATE_AND_PLAY(mix_attr_tests);
     GENERATE_AND_PLAY(gen_simple_chain_001);

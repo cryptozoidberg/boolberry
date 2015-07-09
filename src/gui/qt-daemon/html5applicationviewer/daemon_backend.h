@@ -73,6 +73,7 @@ public:
   std::string close_wallet(size_t wallet_id);
   std::string push_offer(size_t wallet_id, const currency::offer_details_ex& od, currency::transaction& res_tx);
   std::string cancel_offer(const view::cancel_offer_param& co, currency::transaction& res_tx);
+  std::string push_update_offer(const view::update_offer_param& uo, currency::transaction& res_tx);
   std::string get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS::response& od);
   std::string get_aliases(view::alias_set& al_set);
   std::string request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, uint64_t fee, currency::transaction& res_tx);

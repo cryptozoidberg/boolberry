@@ -62,7 +62,7 @@ bool offers_tests::generate(std::vector<test_event_entry>& events) const
   offer_details& od2 = boost::get<currency::offer_details&>(attachments2.back());
   fill_default_offer(od2);
   MAKE_TX_LIST_START_WITH_ATTACHS(events, txs_blk2, miner_account, miner_account, MK_TEST_COINS(1), blk_12, attachments2);
-  crypto::secret_key offer_secrete_key = last_tx_generated_secrete_key;
+  crypto::secret_key offer_secrete_key = generator.last_tx_generated_secrete_key;
   currency::transaction tx = txs_blk2.back();
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_13, blk_12, miner_account, txs_blk2);
   DO_CALLBACK(events, "check_offers_1");
@@ -80,8 +80,9 @@ bool offers_tests::generate(std::vector<test_event_entry>& events) const
     currency::get_tx_pub_key_from_extra(tx),
     offer_secrete_key, uo.sig);
   MAKE_TX_LIST_START_WITH_ATTACHS(events, txs_blk3, miner_account, miner_account, MK_TEST_COINS(1), blk_13, attachments3);
-  offer_secrete_key = last_tx_generated_secrete_key;
+  offer_secrete_key = generator.last_tx_generated_secrete_key;
   tx = txs_blk3.back();
+  tx_id_1 = currency::get_transaction_hash(tx);
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_14, blk_13, miner_account, txs_blk3);
   DO_CALLBACK(events, "check_offers_updated_1");
 
@@ -99,13 +100,13 @@ bool offers_tests::generate(std::vector<test_event_entry>& events) const
     offer_secrete_key, 
     uo2.sig);
   MAKE_TX_LIST_START_WITH_ATTACHS(events, txs_blk4, miner_account, miner_account, MK_TEST_COINS(1), blk_14, attachments4);
+  generator.last_tx_generated_secrete_key;
+  tx_id_2 = currency::get_transaction_hash(txs_blk4.back());
   MAKE_NEXT_BLOCK_TX_LIST(events, blk_15, blk_14, miner_account, txs_blk4);
   DO_CALLBACK(events, "check_offers_updated_2");
 
 
   MAKE_NEXT_BLOCK(events, blk_16, blk_15, miner_account);
-  
-
   return true;
 }
 
@@ -118,9 +119,27 @@ bool offers_tests::configure_core(currency::core& c, size_t ev_index, const std:
   c.get_blockchain_storage().set_core_runtime_config(pc);
   return true;
 }
+
+bool get_of_by_hash(crypto::hash& id, const std::list<offer_details_ex>& of_list, offer_details_ex& od)
+{
+  std::string str_hash = string_tools::pod_to_hex(id);
+  for (auto& of : of_list)
+  {
+    if (of.tx_hash == str_hash)
+    {
+      od = of;
+      return true;
+    }
+  }
+
+  return false;
+}
+
 bool offers_tests::check_offers_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
   std::list<offer_details_ex> offers;
+
+
   c.get_blockchain_storage().get_all_offers(offers);
   CHECK_EQ(2, offers.size());
   return true;
@@ -128,20 +147,33 @@ bool offers_tests::check_offers_1(currency::core& c, size_t ev_index, const std:
 bool offers_tests::check_offers_updated_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
   std::list<offer_details_ex> offers;
+ 
   c.get_blockchain_storage().get_all_offers(offers);
   CHECK_EQ(2, offers.size());
+  
+  offer_details_ex target_offer;
+  bool r = get_of_by_hash(tx_id_1, offers, target_offer);
+  CHECK_TEST_CONDITION(r);
 
-  CHECK_EQ(offers.back().location_city, FIRST_UPDATED_LOCATION);
+  CHECK_EQ(target_offer.location_city, FIRST_UPDATED_LOCATION);
 
   return true;
 }
+
 bool offers_tests::check_offers_updated_2(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
   std::list<offer_details_ex> offers;
+
   c.get_blockchain_storage().get_all_offers(offers);
   CHECK_EQ(2, offers.size());
 
-  CHECK_EQ(offers.back().location_city, SECOND_UPDATED_LOCATION);
+  offer_details_ex target_offer;
+  bool r = get_of_by_hash(tx_id_1, offers, target_offer);
+  CHECK_TEST_CONDITION(!r);
+  r = get_of_by_hash(tx_id_2, offers, target_offer);
+  CHECK_TEST_CONDITION(r);
+
+  CHECK_EQ(target_offer.location_city, SECOND_UPDATED_LOCATION);
 
   return true;
 }

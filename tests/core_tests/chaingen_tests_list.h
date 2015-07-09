@@ -19,6 +19,7 @@
 #include "pruning_ring_signatures.h"
 #include "pos_basic_tests.h"
 #include "cumulative_diificulty_adjustments_tests.h"
+#include "offers_test.h"
 /************************************************************************/
 /*                                                                      */
 /************************************************************************/

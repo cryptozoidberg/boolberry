@@ -1074,8 +1074,6 @@ bool construct_tx_to_key(const std::vector<test_event_entry>& events,
                          att, 
                          check_for_spends);
 }
-//TODO: remove this hack
-crypto::secret_key last_tx_generated_secrete_key = currency::null_skey;
 
 bool construct_tx_to_key(const std::vector<test_event_entry>& events, 
                          currency::transaction& tx, 
