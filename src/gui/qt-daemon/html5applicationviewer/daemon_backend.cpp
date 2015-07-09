@@ -944,14 +944,14 @@ std::string daemon_backend::cancel_offer(const view::cancel_offer_param& co, cur
 
 std::string daemon_backend::push_update_offer(const view::update_offer_param& uo, currency::transaction& res_tx)
 {
-  GET_WALLET_BY_ID(co.wallet_id, w);
+  GET_WALLET_BY_ID(uo.wallet_id, w);
   crypto::hash tx_id = currency::null_hash;
-  if (!epee::string_tools::parse_tpod_from_hex_string(co.tx_hash, tx_id))
+  if (!epee::string_tools::parse_tpod_from_hex_string(uo.tx_hash, tx_id))
     return API_RETURN_CODE_BAD_ARG;
 
   try
   {
-    w->get()->push_update_offer_by_id(tx_id, co.no, res_tx);
+    w->get()->update_offer_by_id(tx_id, uo.no, uo.od, res_tx);
     return API_RETURN_CODE_OK;
   }
   catch (const std::exception& e)
