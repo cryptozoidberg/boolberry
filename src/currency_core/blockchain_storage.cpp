@@ -1867,6 +1867,27 @@ bool blockchain_storage::put_alias_info(const alias_info& ai)
   return true;
 }
 //------------------------------------------------------------------
+uint64_t blockchain_storage::validate_alias_reward(const transaction& tx, const std::string& alias)
+{
+  //validate alias coast
+  uint64_t median = get_tx_fee_median();
+  CHECK_AND_ASSERT_MES(median, false, "can't calculate median");
+  uint64_t fee_for_alias = get_alias_coast(alias, median);
+  
+  //validate that price had been paid
+  crypto::hash alias_hash = crypto::cn_fast_hash(alias.data(), alias.size());
+  CHECK_AND_ASSERT_MES(tx.vout.size(), false, "wrong outs counter (0) in validate_alias_reward");
+  CHECK_AND_ASSERT_MES(tx.vout[0].amount >= fee_for_alias, false, "wrong out reward " 
+    << tx.vout[0].amount << ", expected at least " << fee_for_alias << " in validate_alias_reward");
+  CHECK_AND_ASSERT_MES(tx.vout[0].target.type() == typeid(txout_to_key), false, "wrong out type (0) in validate_alias_reward");
+
+  const txout_to_key& o = boost::get<txout_to_key>(tx.vout[0].target);
+
+  int res = memcmp(&o.key, &alias_hash, sizeof(alias_hash));
+  CHECK_AND_ASSERT_MES(res == 0, false, "wrong out in validate_alias_reward: reward didn't paid");
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
 {
   //check transaction extra
@@ -1875,6 +1896,9 @@ bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
   CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra");
   if(ei.m_alias.m_alias.size())
   {
+    r = validate_alias_reward(tx, ei.m_alias.m_alias);
+    CHECK_AND_ASSERT_MES(r, false, "failed to validate_alias_reward");
+
     r = put_alias_info(ei.m_alias);
     CHECK_AND_ASSERT_MES(r, false, "failed to put_alias_info");
   }
@@ -1927,6 +1951,27 @@ size_t get_offers_count_in_attachments(const transaction& tx)
   return cnt;
 }
 //------------------------------------------------------------------
+uint64_t blockchain_storage::get_tx_fee_median()
+{
+  uint64_t period = is_pos_allowed() ? ALIAS_COAST_PERIOD : ALIAS_COAST_PERIOD/2;
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  if (period > m_blocks.size())
+    period = m_blocks.size();
+
+  std::vector<uint64_t> tx_fee_list;
+  for (uint64_t i = m_blocks.size() - period; i != m_blocks.size(); i++)
+  {
+    block_extended_info& bei = m_blocks[i];
+    for (auto h : bei.bl.tx_hashes)
+    {
+      auto it = m_transactions.find(h);
+      CHECK_AND_ASSERT_MES(it != m_transactions.end(), 0, "Internal error: tx hash " << h << " from block " << i << "not found in m_transactions.");
+      tx_fee_list.push_back(get_tx_fee(it->second.tx));
+    }
+  }
+  return epee::misc_utils::median(tx_fee_list);
+}
+//------------------------------------------------------------------
 bool blockchain_storage::validate_cancel_order(const cancel_offer& co, offers_container::iterator& oit)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
@@ -1954,6 +1999,28 @@ bool blockchain_storage::process_cancel_offer(const cancel_offer& co)
   it->second[co.offer_index].stopped = true;
   LOG_PRINT_MAGENTA("Offer " << co.tx_id << ":" << co.offer_index << " cancelled", LOG_LEVEL_0);
   return true;
+}
+//------------------------------------------------------------------
+uint64_t blockchain_storage::get_alias_coast(const std::string& alias, uint64_t median_fee)
+{
+  switch (alias.size())
+  {
+  case 1:
+    return median_fee * 500000;
+  case 2:
+    return median_fee * 100000;
+  case 3:
+    return median_fee * 50000;
+  case 4:
+    return median_fee * 10000;
+  case 5:
+    return median_fee * 5000;
+  case 6:
+    return median_fee * 2000;
+  default:
+    return median_fee * 1000;
+  }
+  return 0;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::unprocess_cancel_offer(const cancel_offer& co)

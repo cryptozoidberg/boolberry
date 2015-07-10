@@ -268,5 +268,6 @@ POP_WARNINGS
 		time_t m_last_worked_time;
 		time_t m_interval;
 	};
+
 }
 }

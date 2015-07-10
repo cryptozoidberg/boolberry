@@ -135,6 +135,9 @@ namespace currency
     uint64_t total_coins();
     bool is_pos_allowed();
     bool trim_offers();
+    uint64_t get_tx_fee_median();
+    uint64_t validate_alias_reward(const transaction& tx, const std::string& ai);
+
 
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     wide_difficulty_type block_difficulty(size_t i);
@@ -176,6 +179,7 @@ namespace currency
 
     template<class t_modify_offer>
     bool validate_modify_order_signature(const t_modify_offer& co);
+    uint64_t get_alias_coast(const std::string& alias, uint64_t median_fee);
 
 
     //exchange access functions
@@ -323,6 +327,7 @@ namespace currency
     bool unprocess_cancel_offer(const cancel_offer& co);
     bool process_update_offer(const update_offer& co, const crypto::hash& tx_id, uint64_t no, uint64_t timestamp);
     bool unprocess_update_offer(const update_offer& co, const crypto::hash& tx_id);
+
 
 
     //POS
