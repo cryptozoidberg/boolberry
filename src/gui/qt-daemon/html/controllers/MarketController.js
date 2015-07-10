@@ -2,8 +2,8 @@
     'use strict';
     var module = angular.module('app.market',[]);
 
-    module.controller('marketCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','market','$timeout', 'gPlace', '$http',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market, $timeout, gPlace, $http){
+    module.controller('marketCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','market','$timeout', 'gProxy', '$http',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market, $timeout, gProxy, $http){
             
             var is_currency_offer = function(offer){
                 if(offer.offer_type == 2 || offer.offer_type == 3){
@@ -130,34 +130,22 @@
                     $scope.my_offers = [];
 
                     angular.forEach($rootScope.offers,function(item){
-                        // var item = $rootScope.offers[0];
                         var placeId = item.location_city;
 
-                        // informer.info(placeId);
                         var not_found = 'City not found';
 
                         if((angular.isUndefined($rootScope.gplaces[placeId]) || (angular.isDefined(
                             ) && $rootScope.gplaces[placeId].name==not_found)) && placeId.length == 27){
                             $rootScope.gplaces[placeId] = {name : 'Loading...'};
-                            gPlace.getById(placeId,function(place, status){
-                                //informer.info(JSON.stringify(status) + ' '+placeId);
-                                if (status == google.maps.places.PlacesServiceStatus.OK) {
-                                    //informer.info('ok ' + JSON.stringify(place));
-                                    $timeout(function(){
-                                        $rootScope.gplaces[placeId] = place;    
-                                    });
-                                }else{
-                                    //informer.info('fail');
-                                    $rootScope.gplaces[placeId] = {name : not_found};
-                                }
-                                
+                            gProxy.getDetails(placeId,function(place){
+                                $timeout(function(){
+                                    $rootScope.gplaces[placeId] = place;    
+                                });
                             });
                         }else{
                             $rootScope.gplaces[placeId] = {name : not_found};
                         }
                         
-                        // load gplaces
-
                         var result = $filter('filter')($rootScope.safes, item.tx_hash);
 
                         if(result.length){
@@ -482,8 +470,8 @@
         }
     ]);
 
-    module.controller('addOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$http',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $http){
+    module.controller('addOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$http','$timeout','$q','$window', 'gProxy',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $http, $timeout, $q, $window, gProxy){
             $scope.intervals = [
                 {seconds: 60*60*24,    days: 1},
                 {seconds: 60*60*24*3,  days: 3},
@@ -507,6 +495,32 @@
                 comment: '',
                 bonus: ''
             };
+
+            $scope.selectedCity = function(obj){
+                 if(angular.isDefined(obj)){
+                    var o = obj.originalObject;
+                    $scope.offer.location_city = o.place_id;
+                }
+            }
+
+            $scope.searchAPI = function(userInputString, timeoutPromise) {
+
+                return $q(function(resolve, reject) {
+                    var country = '';
+                    if(angular.isDefined($scope.offer.location_country) && $scope.offer.location_country.length){
+                        country = $scope.offer.location_country;
+                    }
+
+                    $timeout(function(){
+                        gProxy.getPredictions(userInputString,'ru','ru',function(data){
+                            resolve({data: data});
+                        });
+                    });
+                });
+
+            }
+
+
 
             if(angular.isUndefined($rootScope.countryList)){
                 $http.get('all.json').then(
@@ -620,8 +634,8 @@
         }
     ]);
     // Guilden offer
-    module.controller('addGOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$timeout','market', '$http',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,$timeout,market,$http){
+    module.controller('addGOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$timeout','market', '$http','$q','gProxy',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,$timeout,market,$http,$q,gProxy){
             $scope.intervals = [
                 {seconds: 60*60*24,    days: 1},
                 {seconds: 60*60*24*3,  days: 3},
@@ -635,6 +649,30 @@
                 {key : 2, value: 'Покупка гульденов'},
                 {key : 3, value: 'Продажа гульденов'}
             ];
+
+            $scope.selectedCity = function(obj){
+                 if(angular.isDefined(obj)){
+                    var o = obj.originalObject;
+                    $scope.offer.location_city = o.place_id;
+                }
+            }
+
+            $scope.searchAPI = function(userInputString, timeoutPromise) {
+
+                return $q(function(resolve, reject) {
+
+                    $timeout(function(){
+                        var country = '';
+                        if(angular.isDefined($scope.offer.location_country) && $scope.offer.location_country.length){
+                            country = $scope.offer.location_country;
+                        }
+                        gProxy.getPredictions(userInputString,country,'ru',function(data){
+                            resolve({data: data});
+                        });
+                    });
+                });
+
+            }
 
             $scope.bonus_type = 'G';
 

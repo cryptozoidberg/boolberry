@@ -318,7 +318,16 @@
                             />
                         </div>
                         <div class="col-xs-3 col-sm-3 nopadding-right">
-                            <input 
+                           <!--  <input 
+                                type="text" 
+                                ng-model="offer.autocomplete_city" 
+                                class="form-control" 
+                                placeholder="город"
+                                options="cityOptionsAC"
+                                ng-change="change"
+                                ng-disabled="!cityOptionsAC.componentRestrictions.country"
+                            > -->
+                            <!-- input 
                                 type="text" 
                                 ng-model="offer.autocomplete_city" 
                                 class="form-control" 
@@ -326,7 +335,19 @@
                                 g-places-autocomplete
                                 options="cityOptionsAC"
                                 ng-disabled="!cityOptionsAC.componentRestrictions.country"
-                            >
+                            > -->
+                            <div ng-show="offer.location_country">
+                                <angucomplete-alt
+                                    placeholder="город"
+                                    pause="400"
+                                    selected-object="selectedCity"
+                                    remote-api-handler="searchAPI"
+                                    title-field="description"
+                                    input-class="form-control"
+                                />
+                            </div>
+                        </div>
+                        <div>
                             <input type="hidden" name="city" required ng-model="offer.location_city">
                             <input type="hidden" name="country" required ng-model="offer.location_country">
                         </div>

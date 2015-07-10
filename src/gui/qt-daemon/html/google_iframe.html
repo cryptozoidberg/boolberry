@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <title>Google</title>
+        <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+    </head>
+
+    <body>
+        <div id="mapCanvas"></div>
+        <script type="text/javascript">
+            
+            autocompleteService = new google.maps.places.AutocompleteService();
+
+            var map = new google.maps.Map(document.getElementById('mapCanvas')); // 
+
+            placesService = new google.maps.places.PlacesService(map);
+            
+            function listener(event) {
+                if(event.data.method == 'get_predictions'){
+                    request = { 
+                        input: event.data.input,
+                        types: ['(cities)']
+                    };
+                    
+                    if(event.data.country.length){
+                        request.componentRestrictions = {country: event.data.country}; 
+                    }
+
+                    // if(event.data.language.length){
+                    //     request.componentRestrictions = {language: event.data.language}; 
+                    // }
+                    
+                    autocompleteService.getPlacePredictions(request, function (predictions, status){
+                        
+                        var message = {
+                            method : 'get_predictions',
+                            data: predictions,
+                            requestIndex: event.data.requestIndex
+                        };
+                        event.source.postMessage(message,'*');
+                    });
+                }else if(event.data.method == 'get_details'){
+                    var placeId = event.data.placeId;
+                    placesService.getDetails({ placeId: placeId }, function (place, status) {
+                        if (status == google.maps.places.PlacesServiceStatus.OK) {
+                            var message = {
+                                method : 'get_details',
+                                data: place,
+                                requestIndex: event.data.requestIndex
+                            };
+                            event.source.postMessage(message,'*');
+                        }
+                    });
+                }
+                
+              
+
+              
+            }
+            window.addEventListener("message", listener);
+        </script>
+        
+    </body>
+
+</html>
