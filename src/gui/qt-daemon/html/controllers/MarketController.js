@@ -479,6 +479,8 @@
                 {seconds: 60*60*24*14, days: 14}
             ];
 
+            
+
             $scope.offer_types = [
                 {key : 0, value: 'Купить товар'},
                 {key : 1, value: 'Продать товар'}
@@ -495,6 +497,10 @@
                 comment: '',
                 bonus: ''
             };
+
+            if($routeParams.offer_hash){
+                //informer.info($routeParams.offer_hash);
+            }
 
             $scope.selectedCity = function(obj){
                  if(angular.isDefined(obj)){
@@ -731,6 +737,15 @@
                 deal_details: $scope.deal_details[0]
             };
 
+            var offer_to_edit = false;
+
+            if($routeParams.offer_hash){
+                var search = $filter('filter')($rootScope.offers, {tx_hash : $routeParams.offer_hash});
+                if(search.length){
+                    offer_to_edit = search[0];
+                }
+            }
+
             $scope.changeCountryInput = function(str){
                 $scope.offer.location_country = '';
             };
@@ -758,13 +773,15 @@
                 
             });
 
-            if(last_offer){
-                $scope.offer.is_standart     = last_offer.is_standart;
-                $scope.offer.expiration_time = last_offer.expiration_time;
-                $scope.offer.location_city = last_offer.location_city;
-                $scope.offer.location_country = last_offer.location_country;
+            var offer_to_fill = offer_to_edit ? offer_to_edit : (last_offer ? last_offer : false);
+            informer.info(offer_to_fill);
+            if(offer_to_fill){
+                $scope.offer.is_standart     = offer_to_fill.is_standart;
+                $scope.offer.expiration_time = offer_to_fill.expiration_time;
+                $scope.offer.location_city = offer_to_fill.location_city;
+                $scope.offer.location_country = offer_to_fill.location_country;
 
-                var contacts = last_offer.contacts.split(',');
+                var contacts = offer_to_fill.contacts.split(',');
                 
                 if(angular.isDefined(contacts[0])){
                     $scope.offer.contacts.email = contacts[0];
