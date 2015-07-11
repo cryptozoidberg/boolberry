@@ -1875,7 +1875,7 @@ uint64_t blockchain_storage::validate_alias_reward(const transaction& tx, const 
   uint64_t fee_for_alias = get_alias_coast(alias, median);
   
   //validate that price had been paid
-  crypto::hash alias_hash = crypto::cn_fast_hash(alias.data(), alias.size());
+
   CHECK_AND_ASSERT_MES(tx.vout.size(), false, "wrong outs counter (0) in validate_alias_reward");
   CHECK_AND_ASSERT_MES(tx.vout[0].amount >= fee_for_alias, false, "wrong out reward " 
     << tx.vout[0].amount << ", expected at least " << fee_for_alias << " in validate_alias_reward");
@@ -1883,8 +1883,12 @@ uint64_t blockchain_storage::validate_alias_reward(const transaction& tx, const 
 
   const txout_to_key& o = boost::get<txout_to_key>(tx.vout[0].target);
 
-  int res = memcmp(&o.key, &alias_hash, sizeof(alias_hash));
-  CHECK_AND_ASSERT_MES(res == 0, false, "wrong out in validate_alias_reward: reward didn't paid");
+  account_keys acc = AUTO_VAL_INIT(acc);
+  bool r = get_aliases_reward_account(acc.m_account_address, acc.m_view_secret_key);
+  CHECK_AND_ASSERT_MES(r, false, "get_aliases_reward_account failed");
+  r = is_out_to_acc(acc, o, get_tx_pub_key_from_extra(tx), 0);
+  CHECK_AND_ASSERT_MES(r, false, "alias reward account not mutched");
+
   return true;
 }
 //------------------------------------------------------------------

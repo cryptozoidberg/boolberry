@@ -176,6 +176,8 @@ namespace currency
   uint64_t get_coinday_weight(uint64_t amount);
   wide_difficulty_type correct_difficulty_with_sequence_factor(size_t sequence_factor, wide_difficulty_type diff);
   void print_currency_details();
+  bool get_aliases_reward_account(account_public_address& acc, crypto::secret_key& acc_view_key);
+  bool get_aliases_reward_account(account_public_address& acc);
 
 
   /************************************************************************/

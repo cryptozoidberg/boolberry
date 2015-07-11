@@ -1226,7 +1226,7 @@ void wallet2::request_alias_registration(const currency::alias_info& ai, currenc
   extra.push_back(eae);
 
   destinations.push_back(tx_dest);
-  transfer(destinations, 0, 0, fee, extra, attachments, res_tx);
+  transfer(destinations, 0, 0, fee, extra, attachments, detail::void_split_strategy, tx_dust_policy(fee), res_tx);
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::select_indices_for_transfer(std::list<size_t>& selected_indexes, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money)

@@ -452,6 +452,13 @@ namespace tools
       }
     }
     //----------------------------------------------------------------------------------------------------
+    inline void void_split_strategy(const std::vector<currency::tx_destination_entry>& dsts,
+      const currency::tx_destination_entry& change_dst, uint64_t dust_threshold,
+      std::vector<currency::tx_destination_entry>& splitted_dsts, uint64_t& dust)
+    {
+      splitted_dsts = dsts;
+    }
+    //----------------------------------------------------------------------------------------------------
     inline void print_source_entry(const currency::tx_source_entry& src)
     {
       std::string indexes;
@@ -468,7 +475,7 @@ namespace tools
     currency::transaction tx;
     transfer(dsts, fake_outputs_count, unlock_time, fee, extra, attachments, destination_split_strategy, dust_policy, tx);
   }
-
+  //----------------------------------------------------------------------------------------------------
   template<typename T>
   void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, 
                          size_t fake_outputs_count,

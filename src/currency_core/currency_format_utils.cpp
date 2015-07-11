@@ -1493,6 +1493,20 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
+  bool get_aliases_reward_account(account_public_address& acc)
+  {
+    bool r = string_tools::parse_tpod_from_hex_string(ALIAS_REWARDS_ACCOUNT_SPEND_PUB_KEY, acc.m_spend_public_key);
+    r &= string_tools::parse_tpod_from_hex_string(ALIAS_REWARDS_ACCOUNT_VIEW_PUB_KEY, acc.m_view_public_key);
+    return r;
+  }
+  //---------------------------------------------------------------
+  bool get_aliases_reward_account(account_public_address& acc, crypto::secret_key& acc_view_key)
+  {
+    bool r = get_aliases_reward_account(acc);
+    r &= string_tools::parse_tpod_from_hex_string(ALIAS_REWARDS_ACCOUNT_VIEW_SEC_KEY, acc_view_key);
+    return r;
+  }
+  //---------------------------------------------------------------
   bool is_pos_block(const block& b)
   {
     if (!b.flags&CURRENCY_BLOCK_FLAG_POS_BLOCK)
