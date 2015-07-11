@@ -179,7 +179,7 @@ namespace currency
 
     template<class t_modify_offer>
     bool validate_modify_order_signature(const t_modify_offer& co);
-    uint64_t get_alias_coast(const std::string& alias, uint64_t median_fee);
+    uint64_t get_alias_coast(const std::string& alias);
 
 
     //exchange access functions

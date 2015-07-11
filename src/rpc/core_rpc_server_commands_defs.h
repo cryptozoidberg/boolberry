@@ -597,6 +597,27 @@ namespace currency
     };
   };
 
+  struct COMMAND_RPC_GET_ALIAS_REWARD
+  {
+    struct request
+    {
+      std::string alias;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(alias)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      uint64_t reward;
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(reward)
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
 
   struct COMMAND_RPC_GET_ALL_ALIASES
   {

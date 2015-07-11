@@ -1870,9 +1870,7 @@ bool blockchain_storage::put_alias_info(const alias_info& ai)
 uint64_t blockchain_storage::validate_alias_reward(const transaction& tx, const std::string& alias)
 {
   //validate alias coast
-  uint64_t median = get_tx_fee_median();
-  CHECK_AND_ASSERT_MES(median, false, "can't calculate median");
-  uint64_t fee_for_alias = get_alias_coast(alias, median);
+  uint64_t fee_for_alias = get_alias_coast(alias);
   
   //validate that price had been paid
 
@@ -2005,8 +2003,11 @@ bool blockchain_storage::process_cancel_offer(const cancel_offer& co)
   return true;
 }
 //------------------------------------------------------------------
-uint64_t blockchain_storage::get_alias_coast(const std::string& alias, uint64_t median_fee)
+uint64_t blockchain_storage::get_alias_coast(const std::string& alias)
 {
+  uint64_t median_fee = get_tx_fee_median();
+  CHECK_AND_ASSERT_MES(median_fee, 0, "can't calculate median");
+
   switch (alias.size())
   {
   case 1:

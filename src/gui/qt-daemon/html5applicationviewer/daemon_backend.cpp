@@ -680,8 +680,19 @@ bool daemon_backend::alias_rpc_details_to_alias_info(const currency::alias_rpc_d
   ai.m_alias = ard.alias;
   return true;
 }
+std::string daemon_backend::get_alias_coast(const std::string& a, uint64_t& coast)
+{
+  currency::COMMAND_RPC_GET_ALIAS_REWARD::request req;
+  currency::COMMAND_RPC_GET_ALIAS_REWARD::response rsp = AUTO_VAL_INIT(rsp);
+  req.alias = a;
+  if (!m_rpc_proxy->call_COMMAND_RPC_GET_ALIAS_REWARD(req, rsp))
+    return API_RETURN_CODE_BAD_ARG;
 
-std::string daemon_backend::request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, uint64_t fee, currency::transaction& res_tx)
+  coast = rsp.reward;
+  return rsp.status;
+
+}
+std::string daemon_backend::request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, uint64_t fee, currency::transaction& res_tx, uint64_t reward)
 {
   currency::alias_info ai = AUTO_VAL_INIT(ai);
   if (!alias_rpc_details_to_alias_info(al, ai))
@@ -699,7 +710,7 @@ std::string daemon_backend::request_alias_registration(const currency::alias_rpc
     GET_WALLET_BY_ID(wallet_id, w);
     try
     {
-      w->get()->request_alias_registration(ai, res_tx, fee);
+      w->get()->request_alias_registration(ai, res_tx, fee, reward);
       return API_RETURN_CODE_OK;
     }
     catch (const std::exception& e)

@@ -1213,11 +1213,8 @@ void wallet2::update_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, con
   transfer(destinations, 0, 0, 1, extra, attachments, res_tx);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee)
+void wallet2::request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee, uint64_t reward)
 {
-  currency::tx_destination_entry tx_dest;
-  tx_dest.addr = m_account.get_keys().m_account_address;
-  tx_dest.amount = m_core_runtime_config.tx_pool_min_fee;
   std::vector<currency::tx_destination_entry> destinations;
   std::vector<currency::extra_v> extra;
   std::vector<currency::attachment_v> attachments;
@@ -1225,7 +1222,10 @@ void wallet2::request_alias_registration(const currency::alias_info& ai, currenc
   currency::make_tx_extra_alias_entry(eae.buff, ai, false);
   extra.push_back(eae);
 
-  destinations.push_back(tx_dest);
+  currency::tx_destination_entry tx_dest_alias_reward;
+  get_aliases_reward_account(tx_dest_alias_reward.addr);
+  tx_dest_alias_reward.amount = reward;
+
   transfer(destinations, 0, 0, fee, extra, attachments, detail::void_split_strategy, tx_dust_policy(fee), res_tx);
 }
 //----------------------------------------------------------------------------------------------------

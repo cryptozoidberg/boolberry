@@ -76,7 +76,8 @@ public:
   std::string push_update_offer(const view::update_offer_param& uo, currency::transaction& res_tx);
   std::string get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS::response& od);
   std::string get_aliases(view::alias_set& al_set);
-  std::string request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, uint64_t fee, currency::transaction& res_tx);
+  std::string request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, uint64_t fee, currency::transaction& res_tx, uint64_t reward);
+  std::string get_alias_coast(const std::string& a, uint64_t& coast);
   std::string validate_address(const std::string& addr);
   std::string resync_wallet(uint64_t wallet_id);
   std::string start_pos_mining(uint64_t wallet_id);

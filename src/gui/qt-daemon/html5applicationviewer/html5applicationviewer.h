@@ -80,6 +80,7 @@ protected:
   QString push_update_offer(const QString& param);
   QString get_all_aliases();
   QString request_alias_registration(const QString& param);
+  QString get_alias_coast(const QString& param);
   QString validate_address(const QString& param);
   QString on_request_quit();
   QString resync_wallet(const QString& param);

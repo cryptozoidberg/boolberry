@@ -108,6 +108,10 @@ namespace tools
   {
     return epee::net_utils::invoke_http_json_rpc("/json_rpc", "get_alias_details", req, res, m_http_client);
   }
+  bool default_http_core_proxy::call_COMMAND_RPC_GET_ALIAS_REWARD(const currency::COMMAND_RPC_GET_ALIAS_REWARD::request& req, currency::COMMAND_RPC_GET_ALIAS_REWARD::response& rsp)
+  {
+    return epee::net_utils::invoke_http_json_rpc("/json_rpc", "get_alias_reward", req, rsp, m_http_client);
+  }
   //------------------------------------------------------------------------------------------------------------------------------
   bool default_http_core_proxy::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
   {

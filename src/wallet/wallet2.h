@@ -168,7 +168,7 @@ namespace tools
     void push_offer(const currency::offer_details_ex& od, currency::transaction& res_tx);
     void cancel_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, currency::transaction& tx);
     void update_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, const currency::offer_details_ex& od, currency::transaction& res_tx);
-    void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee);
+    void request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee, uint64_t reward);
 
 
     bool set_core_proxy(const std::shared_ptr<i_core_proxy>& proxy);

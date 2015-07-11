@@ -853,6 +853,17 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_alias_reward(const COMMAND_RPC_GET_ALIAS_REWARD::request& req, COMMAND_RPC_GET_ALIAS_REWARD::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
+  {
+    res.reward = m_core.get_blockchain_storage().get_alias_coast(req.alias);
+    
+    if (res.reward)
+      res.status = CORE_RPC_STATUS_OK;
+    else
+      res.status = CORE_RPC_STATUS_NOT_FOUND;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_alias_by_address(const COMMAND_RPC_GET_ALIASES_BY_ADDRESS::request& req, COMMAND_RPC_GET_ALIASES_BY_ADDRESS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
   {
     account_public_address addr = AUTO_VAL_INIT(addr);

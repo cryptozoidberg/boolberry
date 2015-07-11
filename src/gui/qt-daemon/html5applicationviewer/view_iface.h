@@ -457,11 +457,13 @@ public:
     currency::alias_rpc_details alias;
     uint64_t wallet_id;
     uint64_t fee;
+    uint64_t reward;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(alias)
       KV_SERIALIZE(wallet_id)
       KV_SERIALIZE(fee)
+      KV_SERIALIZE(reward)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -487,6 +489,16 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+  struct get_alias_coast_response
+  {
+    std::string error_code;
+    uint64_t coast;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(coast)
+      KV_SERIALIZE(error_code)
+    END_KV_SERIALIZE_MAP()
+  };
 
   struct api_response
   {
@@ -497,7 +509,6 @@ public:
       KV_SERIALIZE(request_id)
       KV_SERIALIZE(error_code)
     END_KV_SERIALIZE_MAP()
-
   };
 
   struct api_void
