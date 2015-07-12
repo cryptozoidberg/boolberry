@@ -4,6 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #pragma once
+
 #include "currency_protocol/currency_protocol_defs.h"
 
 #include "account.h"
@@ -18,7 +19,7 @@
 
 namespace currency
 {
-
+  typedef boost::multiprecision::uint128_t uint128_tl;
   struct tx_source_entry
   {
     typedef std::pair<uint64_t, crypto::public_key> output_entry;

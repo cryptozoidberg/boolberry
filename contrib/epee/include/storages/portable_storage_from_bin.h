@@ -53,7 +53,7 @@ namespace epee
       template<class type_name>
       storage_entry read_ae();
       storage_entry load_storage_array_entry(uint8_t type);
-      size_t read_varint();
+      uint64_t read_varint();
       template<class t_type>
       storage_entry read_se();
       storage_entry load_storage_entry();
@@ -133,7 +133,7 @@ namespace epee
       RECURSION_LIMITATION();
       //for pod types
       array_entry_t<type_name> sa;
-      size_t size = read_varint();
+      uint64_t size = read_varint();
       //TODO: add some optimization here later
       while(size--)
         sa.m_array.push_back(read<type_name>());        
@@ -166,11 +166,11 @@ namespace epee
     }
 
     inline 
-    size_t throwable_buffer_reader::read_varint()
+    uint64_t throwable_buffer_reader::read_varint()
     {
       RECURSION_LIMITATION();
       CHECK_AND_ASSERT_THROW_MES(m_count >= 1, "empty buff, expected place for varint");
-      size_t v = 0;
+      uint64_t v = 0;
       uint8_t size_mask = (*(uint8_t*)m_ptr) &PORTABLE_RAW_SIZE_MARK_MASK;
       switch (size_mask)
       {
@@ -256,7 +256,7 @@ namespace epee
     {
       RECURSION_LIMITATION();
       sec.m_entries.clear();
-      size_t count = read_varint();
+      uint64_t count = read_varint();
       while(count--)
       {
         //read section name string
@@ -269,7 +269,7 @@ namespace epee
     void throwable_buffer_reader::read(std::string& str)
     {
       RECURSION_LIMITATION();
-      size_t len = read_varint();
+      uint64_t len = read_varint();
       CHECK_AND_ASSERT_THROW_MES(len < MAX_STRING_LEN_POSSIBLE, "to big string len value in storage: " << len);
       CHECK_AND_ASSERT_THROW_MES(m_count >= len, "string len count value " << len << " goes out of remain storage len " << m_count);
       //do this manually to avoid double memory write in huge strings (first time at resize, second at read)

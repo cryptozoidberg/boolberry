@@ -1593,17 +1593,18 @@ namespace currency
     CHECK_AND_ASSERT_MES(median_size < std::numeric_limits<uint32_t>::max(), false, "median_size < std::numeric_limits<uint32_t>::max() asert failed");
     CHECK_AND_ASSERT_MES(current_block_size < std::numeric_limits<uint32_t>::max(), false, "current_block_size < std::numeric_limits<uint32_t>::max()");
 
-    uint64_t product_hi;
-    uint64_t product_lo = mul128(base_reward, current_block_size * (2 * median_size - current_block_size), &product_hi);
+    //uint64_t product_hi;
+    //uint64_t product_lo = mul128(base_reward, current_block_size * (2 * median_size - current_block_size), &product_hi);
+    uint128_tl product = uint128_tl(base_reward) * current_block_size * (2 * median_size - current_block_size);
+    uint128_tl reward_wide = product / median_size;
+//    uint64_t reward_hi;
+//    uint64_t reward_lo;
+//    div128_32(product_hi, product_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);
+//    div128_32(reward_hi, reward_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);
+//    CHECK_AND_ASSERT_MES(0 == reward_hi, false, "0 == reward_hi");
+    CHECK_AND_ASSERT_MES(reward_wide < base_reward, false, "reward_lo < base_reward");
 
-    uint64_t reward_hi;
-    uint64_t reward_lo;
-    div128_32(product_hi, product_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);
-    div128_32(reward_hi, reward_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);
-    CHECK_AND_ASSERT_MES(0 == reward_hi, false, "0 == reward_hi");
-    CHECK_AND_ASSERT_MES(reward_lo < base_reward, false, "reward_lo < base_reward");
-
-    reward = reward_lo;
+    reward = reward_wide.convert_to<uint64_t>();
     return true;
   }
   //------------------------------------------------------------------------------------

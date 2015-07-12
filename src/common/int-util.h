@@ -14,6 +14,7 @@
 #include <intrin.h>
 #include <stdlib.h>
 
+
 static inline uint32_t rol32(uint32_t x, int r) {
   static_assert(sizeof(uint32_t) == sizeof(unsigned int), "this code assumes 32-bit integers");
   return _rotl(x, r);
@@ -92,7 +93,7 @@ static inline uint32_t div128_32_manually(uint64_t dividend_hi, uint64_t dividen
 
   return remainder;
 }
-
+/*
 static inline uint64_t mul128(uint64_t multiplier, uint64_t multiplicand, uint64_t* product_hi)
 {
 #if defined(_MSC_VER)
@@ -105,7 +106,8 @@ static inline uint64_t mul128(uint64_t multiplier, uint64_t multiplicand, uint64
   return mul128_manually(multiplier, multiplicand, product_hi);
 #endif
 }
-
+*/
+/*
 static inline uint32_t div128_32(uint64_t dividend_hi, uint64_t dividend_lo, uint32_t divisor, uint64_t* quotient_hi, uint64_t* quotient_lo)
 {
 #if defined(__GNUC__)
@@ -119,7 +121,7 @@ static inline uint32_t div128_32(uint64_t dividend_hi, uint64_t dividend_lo, uin
   return div128_32_manually(dividend_hi, dividend_lo, divisor, quotient_hi, quotient_lo);
 #endif
 }
-
+*/
 #define IDENT32(x) ((uint32_t) (x))
 #define IDENT64(x) ((uint64_t) (x))
 

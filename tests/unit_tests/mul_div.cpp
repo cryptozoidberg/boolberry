@@ -6,6 +6,7 @@
 
 #include "common/int-util.h"
 
+/*
 namespace
 {
   TEST(mul128, handles_zero)
@@ -177,3 +178,4 @@ namespace
     ASSERT_EQ(lo, 0xddf2fdb09bc2e2e9);
   }
 }
+*/

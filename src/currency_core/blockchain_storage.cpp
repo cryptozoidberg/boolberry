@@ -2883,7 +2883,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   bei.already_generated_coins = already_generated_coins + base_reward;
 
 
-  auto ind_res = m_blocks_index.insert(std::pair<crypto::hash, size_t>(id, bei.height));
+  auto ind_res = m_blocks_index.insert(std::pair<crypto::hash, uint64_t>(id, bei.height));
   if(!ind_res.second)
   {
     LOG_ERROR("block with id: " << id << " already in block indexes");

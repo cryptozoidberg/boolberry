@@ -8,6 +8,8 @@
 #include <assert.h>
 #include <string>
 #include <vector>
+#include <boost/multiprecision/cpp_int.hpp>
+
 
 #include "crypto/hash.h"
 #include "int-util.h"
@@ -140,11 +142,13 @@ namespace tools
             return false; // Invalid symbol
 
           uint64_t product_hi;
-          uint64_t tmp = res_num + mul128(order, digit, &product_hi);
-          if (tmp < res_num || 0 != product_hi)
+          boost::multiprecision::uint128_t tmp = res_num;
+          tmp += boost::multiprecision::uint128_t(order) * digit;
+
+          if (tmp < res_num || tmp > std::numeric_limits<uint64_t>::max() )
             return false; // Overflow
 
-          res_num = tmp;
+          res_num = tmp.convert_to<uint64_t>();
           order *= alphabet_size; // Never overflows, 58^10 < 2^64
         }
 

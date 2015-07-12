@@ -504,9 +504,10 @@ namespace currency
     std::vector<txv *> txs(m_transactions.size());
     std::transform(m_transactions.begin(), m_transactions.end(), txs.begin(), [](txv &a) -> txv * { return &a; });
     std::sort(txs.begin(), txs.end(), [](txv *a, txv *b) -> bool {
-      uint64_t a_hi, a_lo = mul128(a->second.fee, b->second.blob_size, &a_hi);
-      uint64_t b_hi, b_lo = mul128(b->second.fee, a->second.blob_size, &b_hi);
-      return a_hi > b_hi || (a_hi == b_hi && a_lo > b_lo);
+      boost::multiprecision::uint128_t a_, b_;
+      a_ = boost::multiprecision::uint128_t(a->second.fee) * b->second.blob_size;
+      b_ = boost::multiprecision::uint128_t(b->second.fee) * a->second.blob_size;
+      return a_ > b_;
     });
 
     size_t current_size = 0;
