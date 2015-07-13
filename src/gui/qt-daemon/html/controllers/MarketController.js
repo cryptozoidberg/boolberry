@@ -691,7 +691,7 @@
                     var safe = $filter('filter')($rootScope.safes, $routeParams.offer_hash);
                     if(safe.length){
                         backend.pushUpdateOffer(
-                            safe.wallet_id, $routeParams.offer_hash, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
+                            safe[0].wallet_id, $routeParams.offer_hash, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
                             o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus,
                             function(data){
                                 informer.success('Спасибо. Заявка Обновлена');
@@ -972,7 +972,7 @@
                     var safe = $filter('filter')($rootScope.safes, $routeParams.offer_hash);
                     if(safe.length){
                         backend.pushUpdateOffer(
-                            safe.wallet_id, $routeParams.offer_hash, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
+                            safe[0].wallet_id, $routeParams.offer_hash, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
                             o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus,
                             function(data){
                                 informer.success('Спасибо. Заявка Обновлена');
