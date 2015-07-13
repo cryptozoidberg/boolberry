@@ -521,9 +521,9 @@
             };
 
             var offer_to_edit = false;
-
+            $scope.is_edit    = false;
             if($routeParams.offer_hash){
-
+                $scope.is_edit = true;
                 var search = $filter('filter')($rootScope.offers, {tx_hash : $routeParams.offer_hash});
                 if(search.length){
                     offer_to_edit = search[0];
@@ -629,7 +629,7 @@
                     $scope.offer.initial_city = data.name;
                 });
 
-                $scope.offer.amount_lui = offer_to_fill.amount_lui;
+                $scope.offer.amount_lui = $filter('gulden')(offer_to_fill.amount_lui, false);
                 //$scope.offer.amount_etc = offer_to_fill.amount_etc;
                 $scope.offer.comment    = offer_to_fill.comment;
                 $scope.offer.target     = offer_to_fill.target;
@@ -688,7 +688,18 @@
 
                 // informer.info(o.expiration_time);
                 if($routeParams.offer_hash){
-                    informer.info('Edit');
+                    var safe = $filter('filter')($rootScope.safes, $routeParams.offer_hash);
+                    if(safe.length){
+                        backend.pushUpdateOffer(
+                            safe.wallet_id, $routeParams.offer_hash, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
+                            o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus,
+                            function(data){
+                                informer.success('Спасибо. Заявка Обновлена');
+                            }
+                        );
+                    }else{
+                        informer.error('Не найден сейф, с которого было опубликовано предложение');
+                    }
                 }else{
                     backend.pushOffer(
                         o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, 
@@ -807,9 +818,9 @@
             };
 
             var offer_to_edit = false;
-
+            $scope.is_edit = false;
             if($routeParams.offer_hash){
-
+                $scope.is_edit = true;
                 var search = $filter('filter')($rootScope.offers, {tx_hash : $routeParams.offer_hash});
                 if(search.length){
                     offer_to_edit = search[0];
@@ -913,7 +924,7 @@
                     $scope.offer.initial_city = data.name;
                 });
 
-                $scope.offer.amount_lui = offer_to_fill.amount_lui;
+                $scope.offer.amount_lui = $filter('gulden')(offer_to_fill.amount_lui, false);
                 $scope.offer.amount_etc = offer_to_fill.amount_etc;
                 $scope.offer.comment    = offer_to_fill.comment;
                 $scope.offer.target     = offer_to_fill.target;
@@ -958,7 +969,18 @@
                 o.target = o.currency;
                 
                 if($routeParams.offer_hash){
-                    informer.info('Edit');
+                    var safe = $filter('filter')($rootScope.safes, $routeParams.offer_hash);
+                    if(safe.length){
+                        backend.pushUpdateOffer(
+                            safe.wallet_id, $routeParams.offer_hash, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
+                            o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus,
+                            function(data){
+                                informer.success('Спасибо. Заявка Обновлена');
+                            }
+                        );
+                    }else{
+                        informer.error('Не найден сейф, с которого было опубликовано предложение');
+                    }
                 }else{
                     backend.pushOffer(
                         o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 

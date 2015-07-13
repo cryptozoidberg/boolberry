@@ -233,6 +233,33 @@
                 return this.runCommand('push_offer', params, callback);
             },
 
+            pushUpdateOffer : function(
+                wallet_id, tx_hash, offer_type, amount_lui, target, location_city, location_country, contacts, 
+                comment, expiration_time, fee, amount_etc, payment_types, bonus, callback){
+                var params = {
+                    "wallet_id" : wallet_id,
+                    "tx_hash" : tx_hash,
+                    "no" : 0,
+                    "od": {
+                        "offer_type": offer_type, //0 buy, 1 sell
+                        "amount_lui": $filter('gulden_to_int')(amount_lui),
+                        "amount_etc": parseInt(amount_etc),//$filter('gulden_to_int')(amount_etc),
+                        "target": target,
+                        "location_city":    location_city,
+                        "location_country": location_country,
+                        "contacts": contacts,
+                        "comment": comment,
+                        "payment_types": payment_types,
+                        "expiration_time": expiration_time,
+                        "fee" : $filter('gulden_to_int')(fee),
+                        "bonus" : bonus
+                        
+                    }
+                };
+                //if(angular.isDefined(bonus) && bonus) params.od.bonus = parseInt(bonus);
+                return this.runCommand('push_update_offer', params, callback);
+            },
+
             cancelOffer: function(wallet_id,tx_hash,callback){
                 var params = {
                     wallet_id: wallet_id,

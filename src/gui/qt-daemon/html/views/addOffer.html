@@ -18,7 +18,7 @@
 <form class="form-horizontal" name="offerForm" ng-submit="addOffer(offer)" novalidate>
     <div class="tabs">
         
-        <div class="panel">
+        <div class="panel" ng-if="!is_edit">
             <div class="panel-body">
                 <h4>
                     <a type="button" data-toggle="collapse" data-target=".collapse1">  
