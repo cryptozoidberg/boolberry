@@ -222,8 +222,8 @@ namespace currency
   blobdata make_offer_sig_blob(const t_offer_sig_struct& co)
   {
     blobdata bd;
-    string_tools::apped_pod_to_strbuff(bd, co.tx_id);
-    string_tools::apped_pod_to_strbuff(bd, co.offer_index);
+    epee::string_tools::apped_pod_to_strbuff(bd, co.tx_id);
+    epee::string_tools::apped_pod_to_strbuff(bd, co.offer_index);
     return bd;
   }
 
