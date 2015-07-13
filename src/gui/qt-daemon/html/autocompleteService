@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <title>Google</title>
+        <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+    </head>
+
+    <body>
+        <script type="text/javascript">
+            
+            autocompleteService = new google.maps.places.AutocompleteService();
+            //placesService = new google.maps.places.PlacesService(element[0]);
+            
+            alert('ok');
+            
+            function listener(event) {
+              
+                request = { input: 'Kuta' };
+                autocompleteService.getPlacePredictions(request, function (predictions, status){
+                    
+                    var message = {
+                        method : 'get_predictions',
+                        data: predictions
+                    };
+                    console.log(predictions);
+                    event.source.postMessage(message,'*');
+                });
+              
+
+              
+            }
+            window.addEventListener("message", listener);
+        </script>
+        
+    </body>
+
+</html>

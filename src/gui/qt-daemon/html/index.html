@@ -56,14 +56,29 @@
     <script src="assets/js/angular/angular-ui-chart.js"></script>
     <script src="assets/js/angular/angular-idle.min.js"></script>
     <script src="assets/js/angular/angular-slidebles.js"></script>
-
-    <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
-    <script src="assets/js/angular/autocomplete.js"></script>
+    
+    <script type="text/javascript">
+        google = {}; 
+        function access_test(){
+            alert('ok');
+        }
+    </script>
 
     <script src="assets/js/angular/ui-bootstrap-tpls-0.13.0.min.js"></script>
 </head>
 
 <body data-turn-links  ng-controller="AppController">
+
+<iframe 
+    id="google_iframe" 
+    width="0" 
+    height="0" 
+    src="google_iframe.html" 
+    name="target"
+    sandbox="allow-scripts"
+>
+</iframe>
+
 <div style="display: none;" id="mapCanvas"></div>
 <div class="guilder-bar navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="row">
@@ -170,7 +185,11 @@
                     <span class="collapse in menulabel"> <em>Помощь</em></span>
                 </a></li>
             </ul>
-            <div class="sidebar-bar sidebar-footer"><a data-target="#pincode" data-toggle="modal" type="button" class="btn btn-lg btn-default" href="#"><i class="fa fa-lg fa-lock"></i></a></div>
+            <div class="sidebar-bar sidebar-footer">
+                <a data-target="#pincode" data-toggle="modal" type="button" class="btn btn-lg btn-default" href="#">
+                    <i class="fa fa-lg fa-lock"></i>
+                </a>
+            </div>
         </div>
         
         <div class="col-xs-9 col-sm-9 col-xs-offset-3 col-sm-offset-3 col-md-10 col-md-offset-2 main">
@@ -211,7 +230,7 @@
 <!-- Placed at the end of the document so the pages load faster -->
 
 <!--script src="assets/js/docs.min.js"></script--><!-- do not switch on - throws errors! -->
-
+<script src="assets/js/angular/autocomplete.js"></script>
 <script src="assets/js/owl-carousel/owl.carousel.min.js"></script>
 <!-- <script src="assets/js/bootstrap-slider.js"></script> -->
 <script src="assets/js/sidebar-collapse.js"></script>

@@ -57,13 +57,20 @@
                 return this.runCommand('get_all_offers', params, callback);
             },
 
+            resetWalletPass: function(wallet_id, pass) {
+                var params = {
+                    wallet_id: wallet_id,
+                    pass: pass
+                };
+                return this.runCommand('reset_wallet_password', params);
+            },
+
             getVersion : function() {
                 if(!this.shouldUseEmulator()){
                     var res = Qt_parent['get_version']();
                 }else{
                     var res = '0.0.0.0';
                 }
-                
                 return res;
             },
 
@@ -718,10 +725,10 @@
                             "target": "Шкаф деревяный",
                             "location_country": "US",
                             "location_city": "ChIJybDUc_xKtUYRTM9XV8zWRD0",
-                            "contacts": "+89876782342",
+                            "contacts": "test@test.ru,+89876782342",
                             "comment": "Best ever service",
-                            "payment_types": "cash",
-                            "expiration_time":3,
+                            "payment_types": "EPS,BC,cash",
+                            "expiration_time":3*60*60*24,
                             'timestamp': 1429715920,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b1"
                         }, 
@@ -732,10 +739,10 @@
                             "target": "EUR",
                             "location_country": "US",
                             "location_city": "ChIJybDUc_xKtUYRTM9XV8zWRD0",
-                            "contacts": "+89876782342",
+                            "contacts": "test@test.ru,+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "EPS,BC,Qiwi",
-                            "expiration_time":5,
+                            "expiration_time":5*60*60*24,
                             'timestamp': 1429715920,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b2"
                         }, 
@@ -749,7 +756,7 @@
                             "contacts": "+89876782342",
                             "comment": "We will rock you",
                             "payment_types": "EPS,BC,Qiwi",
-                            "expiration_time":5,
+                            "expiration_time":5*60*60*24,
                             'timestamp': 1430715920,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b3"
                         },
@@ -763,7 +770,7 @@
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "CSH,BT",
-                            "expiration_time":5,
+                            "expiration_time":5*60*60*24,
                             'timestamp': 1429715920,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b9"
                         }
@@ -774,6 +781,11 @@
                     result = {
                         'history' : []
 
+                    }
+                    break;
+                case 'reset_wallet_password' :
+                    result = {
+                        'error_code' : 'OK'
                     }
                     break;
                 case 'get_wallet_info' : 

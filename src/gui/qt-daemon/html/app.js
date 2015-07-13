@@ -7,7 +7,7 @@
         'ui.slider',
         "angucomplete-alt",
         "easypiechart",
-        'google.places',
+        // 'google.places',
 
         'ngRoute', 
         'ngIdle',
@@ -53,12 +53,15 @@
             {route: '/sendGToContact/:address',    template: 'views/sendG.html'},
 
             {route: '/addGOfferBuy',               template: 'views/addGOffer.html'},
+            {route: '/addGOfferBuy/:offer_hash',     template: 'views/addGOffer.html'},
             {route: '/addGOfferSell',              template: 'views/addGOffer.html'},
 
             {route: '/addOfferBuy',                template: 'views/addOffer.html'},
+            {route: '/addOfferSell',               template: 'views/addOffer.html'},
+
             {route: '/addContact',                 template: 'views/addContact.html'},
             {route: '/contact/:contact_id',        template: 'views/addContact.html'},
-            {route: '/addOfferSell',               template: 'views/addOffer.html'},
+            
         ];
 
         for (var i in routes){

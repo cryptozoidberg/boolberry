@@ -12,6 +12,55 @@
         return new Utils();
     }]);
 
+    module.service('gProxy',['$window','informer',
+        function($window, informer){
+        
+            var targetFrameName = 'target';//have to include this iframe in your template body
+
+            if(angular.isUndefined($window.frames[targetFrameName])){
+                throw 'Cannot find iframe with name '+targetFrameName+' in DOM';
+            }else{
+                var iframe = $window.frames[targetFrameName];
+            }
+
+            var callbacks = {};
+            var requestIndex = 0;
+
+            $window.addEventListener('message', function(event){
+                callbacks[event.data.requestIndex](event.data.data);
+            });
+
+            var oReturn =  {
+                getPredictions: function(input, country, language, callback){
+                    var message = {
+                        method : 'get_predictions',
+                        input : input,
+                        country : country,
+                        language : language
+                    }
+
+                    oReturn.sendMessage(message, callback);
+                },
+                sendMessage: function(message, callback){
+                    requestIndex++;
+                    message.requestIndex = requestIndex;
+                    callbacks[message.requestIndex.toString()] = callback;
+                    iframe.postMessage(message, "*");
+                },
+                getDetails: function(placeId, callback){
+                    var message = {
+                        method : 'get_details',
+                        placeId : placeId
+                    }
+
+                    oReturn.sendMessage(message, callback);
+                }
+            };
+
+            return oReturn;
+        }
+    ]);
+
     module.factory('loader',['$modal',function($modal){
         var ModalInstanceCtrl = function($scope, $modalInstance) {
 
@@ -129,7 +178,6 @@
                 }
             }
         }
-
     }]);
 
     module.factory('gPlace', [function(){
@@ -147,8 +195,6 @@
 
             }
         };
-
-        
     }]);
 
     module.factory('txHistory', ['$rootScope',function($rootScope) {
