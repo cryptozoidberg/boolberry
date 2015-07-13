@@ -679,7 +679,7 @@
                                     },
                                     'timestamp': 1429715920,
                                     'tx_blob_size': 311,
-                                    'tx_hash': "62b4f42bcff74c05199a4961ed226b542db38ea2bffbb4c2c384ee3b84f34e59",
+                                    'tx_hash': "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b2",
                                     'unlock_time': 0,
                                     'wid' : params.wallet_id,
                                     'is_anonimous' : true
@@ -728,7 +728,7 @@
                             "contacts": "test@test.ru,+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "EPS,BC,cash",
-                            "expiration_time":3*60*60*24,
+                            "expiration_time":3,
                             'timestamp': 1429715920,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b1"
                         }, 
@@ -742,7 +742,7 @@
                             "contacts": "test@test.ru,+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "EPS,BC,Qiwi",
-                            "expiration_time":5*60*60*24,
+                            "expiration_time":5,
                             'timestamp': 1429715920,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b2"
                         }, 
@@ -756,7 +756,7 @@
                             "contacts": "+89876782342",
                             "comment": "We will rock you",
                             "payment_types": "EPS,BC,Qiwi",
-                            "expiration_time":5*60*60*24,
+                            "expiration_time":5,
                             'timestamp': 1430715920,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b3"
                         },
@@ -770,7 +770,7 @@
                             "contacts": "+89876782342",
                             "comment": "Best ever service",
                             "payment_types": "CSH,BT",
-                            "expiration_time":5*60*60*24,
+                            "expiration_time":5,
                             'timestamp': 1429715920,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b9"
                         }

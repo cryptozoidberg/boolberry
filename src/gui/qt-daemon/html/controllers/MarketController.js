@@ -79,6 +79,25 @@
                 
             };
 
+            $scope.getEditLink = function(offer) {
+                var link = 'market'; //by default
+                switch(offer.offer_type){
+                    case 0:
+                        link = 'addOfferBuy/' + offer.tx_hash;
+                        break;
+                    case 1:
+                        link = 'addOfferSell/' + offer.tx_hash;
+                        break;
+                    case 2:
+                        link = 'addGOfferBuy/' + offer.tx_hash;
+                        break;
+                    case 3:
+                        link = 'addGOfferBuy/' + offer.tx_hash;
+                        break;
+                }
+                return link;
+            };
+
             $scope.order = function(row, target){
                 switch(target){
                     case 'currency':
@@ -466,8 +485,12 @@
         }
     ]);
 
-    module.controller('addOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$http','$timeout','$q','$window', 'gProxy',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $http, $timeout, $q, $window, gProxy){
+    module.controller('addOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$http','$timeout','$q','$window', 'gProxy','market',
+        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $http, $timeout, $q, $window, gProxy, market){
+           if(angular.isUndefined($rootScope.offers)){
+                $rootScope.offers = [];
+            }
+
             $scope.intervals = [ 
                 1, 3, 5, 14
                 // {seconds: 60*60*24,    days: 1},
@@ -492,11 +515,19 @@
                 location: {country : '', city: ''},
                 contacts: {phone : '', email : ''},
                 comment: '',
-                bonus: ''
+                bonus: '',
+                initial_country: '',
+                initial_city: ''
             };
 
+            var offer_to_edit = false;
+
             if($routeParams.offer_hash){
-                //informer.info($routeParams.offer_hash);
+
+                var search = $filter('filter')($rootScope.offers, {tx_hash : $routeParams.offer_hash});
+                if(search.length){
+                    offer_to_edit = search[0];
+                }
             }
 
             $scope.selectedCity = function(obj){
@@ -579,13 +610,42 @@
                 
             });
 
-            if(last_offer){
-                $scope.offer.is_standart      = last_offer.is_standart;
-                $scope.offer.expiration_time  = last_offer.expiration_time;
-                $scope.offer.location_city    = last_offer.location_city;
-                $scope.offer.location_country = last_offer.location_country;
+            var offer_to_fill = offer_to_edit ? offer_to_edit : (last_offer ? last_offer : false);
+            if(offer_to_fill){
+                //$scope.offer = offer_to_fill;
 
-                var contacts = last_offer.contacts.split(', ');
+                $scope.offer.is_standart      = offer_to_fill.is_standart;
+                $scope.offer.expiration_time  = offer_to_fill.expiration_time;
+                $scope.offer.location_city    = offer_to_fill.location_city;
+                $scope.offer.location_country = offer_to_fill.location_country;
+
+                var country = $filter('filter')($rootScope.countryList, {alpha2Code: $scope.offer.location_country});
+                if(country.length){
+                    country = country[0];
+                    $scope.offer.initial_country = country.name;
+                }
+
+                gProxy.getDetails($scope.offer.location_city, function(data){
+                    $scope.offer.initial_city = data.name;
+                });
+
+                $scope.offer.amount_lui = offer_to_fill.amount_lui;
+                //$scope.offer.amount_etc = offer_to_fill.amount_etc;
+                $scope.offer.comment    = offer_to_fill.comment;
+                $scope.offer.target     = offer_to_fill.target;
+
+                if(offer_to_fill.payment_types.length){
+                    $scope.offer.payment_types = offer_to_fill.payment_types.split(',');
+
+                    angular.forEach($scope.offer.payment_types,function(value){
+                        if(!market.paymentTypes.hasOwnProperty(value)){
+                            $scope.offer.payment_type_other = value;
+                        }
+                    });  
+                }
+                
+
+                var contacts = offer_to_fill.contacts.split(',');
                 
                 if(angular.isDefined(contacts[0])){
                     $scope.offer.contacts.email = contacts[0];
@@ -595,7 +655,7 @@
                     $scope.offer.contacts.phone = contacts[1];
                 }
 
-
+                //$scope.recount('target');
             }
 
             if($rootScope.safes.length){
@@ -627,14 +687,17 @@
                 o.payment_types = '';
 
                 // informer.info(o.expiration_time);
-
-                backend.pushOffer(
-                    o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, 
-                    o.contacts, o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, '',
-                    function(data){
-                        informer.success('Спасибо. Заявка Добавлена');
-                    }
-                );
+                if($routeParams.offer_hash){
+                    informer.info('Edit');
+                }else{
+                    backend.pushOffer(
+                        o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, 
+                        o.contacts, o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, '',
+                        function(data){
+                            informer.success('Спасибо. Заявка Добавлена');
+                        }
+                    );
+                }
             };
         }
     ]);
@@ -738,7 +801,9 @@
                 comment: '',
                 currency: $scope.currencies[0].code,
                 payment_types: [],
-                deal_details: $scope.deal_details[0]
+                deal_details: $scope.deal_details[0],
+                initial_country: '',
+                initial_city: ''
             };
 
             var offer_to_edit = false;
@@ -838,6 +903,16 @@
                 $scope.offer.location_city    = offer_to_fill.location_city;
                 $scope.offer.location_country = offer_to_fill.location_country;
 
+                var country = $filter('filter')($rootScope.countryList, {alpha2Code: $scope.offer.location_country});
+                if(country.length){
+                    country = country[0];
+                    $scope.offer.initial_country = country.name;
+                }
+
+                gProxy.getDetails($scope.offer.location_city, function(data){
+                    $scope.offer.initial_city = data.name;
+                });
+
                 $scope.offer.amount_lui = offer_to_fill.amount_lui;
                 $scope.offer.amount_etc = offer_to_fill.amount_etc;
                 $scope.offer.comment    = offer_to_fill.comment;
@@ -882,14 +957,19 @@
                 o.comment = o.comment + (o.comment?' ':'') + o.deal_details;
                 o.target = o.currency;
                 
+                if($routeParams.offer_hash){
+                    informer.info('Edit');
+                }else{
+                    backend.pushOffer(
+                        o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
+                        o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus,
+                        function(data){
+                            informer.success('Спасибо. Заявка Добавлена');
+                        }
+                    );
+                }
+
                 
-                backend.pushOffer(
-                    o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
-                    o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus,
-                    function(data){
-                        informer.success('Спасибо. Заявка Добавлена');
-                    }
-                );
             };
         }
     ]);

@@ -45,7 +45,7 @@
             {route: '/market',                     template: 'views/market.html'},
             {route: '/contacts',                   template: 'views/contacts.html'},
             {route: '/history',                    template: 'views/history.html'},
-            {route: '/history/:contact_id',         template: 'views/history.html'},
+            {route: '/history/:contact_id',        template: 'views/history.html'},
             {route: '/deposits',                   template: 'views/deposits.html'},
             {route: '/settings',                   template: 'views/settings.html'},
             {route: '/sendG',                      template: 'views/sendG.html'},
@@ -53,11 +53,14 @@
             {route: '/sendGToContact/:address',    template: 'views/sendG.html'},
 
             {route: '/addGOfferBuy',               template: 'views/addGOffer.html'},
-            {route: '/addGOfferBuy/:offer_hash',     template: 'views/addGOffer.html'},
+            {route: '/addGOfferBuy/:offer_hash',   template: 'views/addGOffer.html'},
             {route: '/addGOfferSell',              template: 'views/addGOffer.html'},
+            {route: '/addGOfferSell/:offer_hash',  template: 'views/addGOffer.html'},
 
             {route: '/addOfferBuy',                template: 'views/addOffer.html'},
+            {route: '/addOfferBuy/:offer_hash',    template: 'views/addOffer.html'},
             {route: '/addOfferSell',               template: 'views/addOffer.html'},
+            {route: '/addOfferSell/:offer_hash',   template: 'views/addOffer.html'},
 
             {route: '/addContact',                 template: 'views/addContact.html'},
             {route: '/contact/:contact_id',        template: 'views/addContact.html'},
