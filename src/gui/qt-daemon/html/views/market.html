@@ -308,7 +308,7 @@
                             </td>
                             <td>
                                 {{offer.amount_lui | gulden:false}} 
-                                <span class="label label-danger">
+                                <span class="label label-danger" ng-show="offer.bonus.length">
                                     {{ offer.bonus }} 
                                 </span>
                             </td>
@@ -718,7 +718,7 @@
 
                             <td>
                                 {{offer.amount_lui | gulden : false }}
-                                <span class="label label-danger">
+                                <span class="label label-danger" ng-show="offer.bonus.length">
                                     {{ offer.bonus }} 
                                 </span>
                             </td>

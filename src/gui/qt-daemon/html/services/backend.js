@@ -260,6 +260,13 @@
                 return this.runCommand('push_update_offer', params, callback);
             },
 
+            getAliasCoast: function(alias){
+                var params = {
+                    v: alias
+                };
+                return this.runCommand('get_alias_coast', params);
+            },
+
             cancelOffer: function(wallet_id,tx_hash,callback){
                 var params = {
                     wallet_id: wallet_id,

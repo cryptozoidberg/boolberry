@@ -12,6 +12,8 @@
                 return false;
             };
 
+            informer.info(backend.getAliasCoast("zalupa"));
+
             var is_goods_offer = function(offer){
                 if(offer.offer_type == 0 || offer.offer_type == 1){
                     return true;
@@ -626,7 +628,10 @@
                 }
 
                 gProxy.getDetails($scope.offer.location_city, function(data){
-                    $scope.offer.initial_city = data.name;
+                    $timeout(function(){
+                        $scope.offer.initial_city = data.name;
+                    });
+                    
                 });
 
                 $scope.offer.amount_lui = $filter('gulden')(offer_to_fill.amount_lui, false);
@@ -921,7 +926,9 @@
                 }
 
                 gProxy.getDetails($scope.offer.location_city, function(data){
-                    $scope.offer.initial_city = data.name;
+                    $timeout(function(){
+                        $scope.offer.initial_city = data.name;
+                    });
                 });
 
                 $scope.offer.amount_lui = $filter('gulden')(offer_to_fill.amount_lui, false);
