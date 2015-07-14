@@ -210,7 +210,7 @@
 
             pushOffer : function(
                 wallet_id, offer_type, amount_lui, target, location_city, location_country, contacts, 
-                comment, expiration_time, fee, amount_etc, payment_types, bonus, callback){
+                comment, expiration_time, fee, amount_etc, payment_types, bonus, deal_option, callback){
                 var params = {
                     "wallet_id" : wallet_id,
                     "od": {
@@ -225,8 +225,8 @@
                         "payment_types": payment_types,
                         "expiration_time": expiration_time,
                         "fee" : $filter('gulden_to_int')(fee),
-                        "bonus" : bonus
-                        
+                        "bonus" : bonus,
+                        "deal_option" : deal_option
                     }
                 };
                 //if(angular.isDefined(bonus) && bonus) params.od.bonus = parseInt(bonus);
@@ -235,7 +235,7 @@
 
             pushUpdateOffer : function(
                 wallet_id, tx_hash, offer_type, amount_lui, target, location_city, location_country, contacts, 
-                comment, expiration_time, fee, amount_etc, payment_types, bonus, callback){
+                comment, expiration_time, fee, amount_etc, payment_types, bonus, deal_option, callback){
                 var params = {
                     "wallet_id" : wallet_id,
                     "tx_hash" : tx_hash,
@@ -252,7 +252,8 @@
                         "payment_types": payment_types,
                         "expiration_time": expiration_time,
                         "fee" : $filter('gulden_to_int')(fee),
-                        "bonus" : bonus
+                        "bonus" : bonus,
+                        "deal_option" : deal_option
                         
                     }
                 };

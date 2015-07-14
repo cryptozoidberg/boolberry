@@ -237,8 +237,7 @@
                             <select 
                                 selectpicker 
                                 class="col-xs-4 col-sm-4" 
-                                ng-options="item for item in deal_details" 
-                                ng-model="offer.deal_details"
+                                ng-options="item.key as item.value for item in deal_details"ng-model="offer.deal_details"
                             >
                             </select>
                         </div>

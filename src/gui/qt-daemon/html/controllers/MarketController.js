@@ -12,7 +12,7 @@
                 return false;
             };
 
-            informer.info(backend.getAliasCoast("zalupa"));
+            //informer.info(backend.getAliasCoast("test"));
 
             var is_goods_offer = function(offer){
                 if(offer.offer_type == 0 || offer.offer_type == 1){
@@ -26,7 +26,6 @@
             }else{
                 $scope.fav_offers_hash = [];
             }
-            
 
             var is_fav = function(offer){
                 if($scope.fav_offers_hash.indexOf(offer.tx_hash) > -1){
@@ -697,7 +696,7 @@
                     if(safe.length){
                         backend.pushUpdateOffer(
                             safe[0].wallet_id, $routeParams.offer_hash, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
-                            o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus,
+                            o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus, '',
                             function(data){
                                 informer.success('Спасибо. Заявка Обновлена');
                             }
@@ -708,7 +707,7 @@
                 }else{
                     backend.pushOffer(
                         o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, 
-                        o.contacts, o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, '',
+                        o.contacts, o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, '', '',
                         function(data){
                             informer.success('Спасибо. Заявка Добавлена');
                         }
@@ -739,6 +738,11 @@
                 {key : 3, value: 'Продажа гульденов'}
             ];
 
+            $scope.deal_details = [
+                {key : 'ALL',   value: 'всю сумму целиком'},
+                {key : 'PARTS', value: 'возможно частями'}
+            ];
+
             $scope.selectedCity = function(obj){
                  if(angular.isDefined(obj)){
                     var o = obj.originalObject;
@@ -767,10 +771,7 @@
 
             $scope.payment_types = market.paymentTypes;
 
-            $scope.deal_details = [
-                "всю сумму целиком",
-                "возможно частями"
-            ];
+            
 
             if(angular.isUndefined($rootScope.countryList)){
                 $http.get('all.json').then(
@@ -817,7 +818,7 @@
                 comment: '',
                 currency: $scope.currencies[0].code,
                 payment_types: [],
-                deal_details: $scope.deal_details[0],
+                deal_details: $scope.deal_details[0].key,
                 initial_country: '',
                 initial_city: ''
             };
@@ -972,7 +973,7 @@
                 o.contacts = [o.contacts.email,o.contacts.phone].join(",");
                 if(o.payment_type_other) o.payment_types.push(o.payment_type_other);
                 o.payment_types = o.payment_types.join(",");
-                o.comment = o.comment + (o.comment?' ':'') + o.deal_details;
+                //o.comment = o.comment + (o.comment?' ':'') + o.deal_details;
                 o.target = o.currency;
                 
                 if($routeParams.offer_hash){
@@ -980,7 +981,7 @@
                     if(safe.length){
                         backend.pushUpdateOffer(
                             safe[0].wallet_id, $routeParams.offer_hash, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
-                            o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus,
+                            o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus, o.deal_details,
                             function(data){
                                 informer.success('Спасибо. Заявка Обновлена');
                             }
@@ -991,7 +992,7 @@
                 }else{
                     backend.pushOffer(
                         o.wallet_id, o.offer_type, o.amount_lui, o.target, o.location_city, o.location_country, o.contacts, 
-                        o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus,
+                        o.comment, o.expiration_time, o.fee, o.amount_etc, o.payment_types, o.bonus, o.deal_details,
                         function(data){
                             informer.success('Спасибо. Заявка Добавлена');
                         }
