@@ -2,16 +2,23 @@
     'use strict';
     var module = angular.module('app.safes',[]);
     
-    module.controller('createAliasCtrl',['$scope', '$modalInstance', 'backend', 'safe', '$rootScope',
-        function($scope, $modalInstance, backend, safe, $rootScope){
+    module.controller('createAliasCtrl',['$scope', '$modalInstance', 'backend', 'safe', '$rootScope', '$filter', '$timeout',
+        function($scope, $modalInstance, backend, safe, $rootScope, $filter, $timeout){
             $scope.alias = {
                 name : '',
-                fee : '1.76',
+                fee : '',
                 comment: ''
             };
 
             $scope.close = function(){
                 $modalInstance.close();
+            };
+
+            $scope.getAliasCoast = function(alias){
+                var result = backend.getAliasCoast(alias);
+                $timeout(function(){
+                    $scope.alias.fee = $filter('gulden')(result.coast,false);    
+                });
             };
 
             $scope.register = function(alias){
@@ -397,7 +404,21 @@
                 });    
             };
 
-            
+            $scope.safeBackup = function(safe){
+                var caption      = "Please, choose the file";
+                var filemask     = "*.lui";
+                var result       = backend.saveFileDialog(caption, filemask); // TODO digest angular error fix
+                var original_dir = result.path.substr(0,result.path.lastIndexOf('/'));
+                var new_dir      = safe.path.substr(0,safe.path.lastIndexOf('/'));
+                
+                if(original_dir == new_dir){
+                    informer.error('Вы не можете сохранить копию в ту же директорию');
+                    //$scope.safeBackup();
+                }else{
+                    var res = backend.backupWalletKeys(safe.wallet_id, result.path);
+                    informer.success('Копия создана');
+                }
+            };
 
             $scope.startUseSafe = function(){
                 $modalInstance.close();
@@ -452,6 +473,10 @@
                 if(result = backend.saveFileDialog(caption, filemask)){
                     $scope.safe.path = result.path;
                 }
+            }
+
+            $scope.close = function(){
+                $modalInstance.close();
             }
 
             $scope.changeRestoreKey = function(safe){

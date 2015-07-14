@@ -1,6 +1,6 @@
 
 <div class="modal-header btn btn-primary btn-block">
-    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+    <button type="button" class="close" ng-click="close()"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
     <h4 class="modal-title text-center">Восстановление сейфа smartsafe</h4>
 </div>
 
@@ -13,13 +13,16 @@
                     <label class="requred">
                         Имя для обозначения сейфа в приложении<!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
                     </label>
-                    <div class="help-block">Вы сможете создать сколько угодно сейфов.  Имя для сейфа &ndash; это любое слово или словосочетание для
+                    <div class="help-block">
+                        Имя для сейфа &ndash; это любое слово или словосочетание для
                         обозначения этого сейфа в списке</div>
                     <input type="text" class="input-lg form-control" placeholder="любое слово или словосочетание">
                 </div>
 
                 <div class="row">
-                    <div class="col-xs-6 col-sm-6"><a data-dismiss="modal" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a></div>
+                    <div class="col-xs-6 col-sm-6">
+                        <a type="button" ng-click="close()" class="btn btn-default btn-block btn-lg"> Отменить</a>
+                    </div>
                     <div class="col-xs-6 col-sm-6">
                         <a class="btn btn-primary btn-block btn-lg owl-next"  type="button">Продолжить</a>
                     </div>
@@ -65,7 +68,9 @@
                 <a class="btn btn-link text-muted owl-prev" type="button"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
 
                 <div class="form-group">
-                    <div class="col-xs-6 col-sm-6"><a data-dismiss="modal" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a></div>
+                    <div class="col-xs-6 col-sm-6">
+                        <a ng-click="close()" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a>
+                    </div>
                     <div class="col-xs-6 col-sm-6">
                         <a class="btn btn-primary btn-block btn-lg owl-next" type="button" ng-disabled="!safe.restore_key.length">Продолжить</a>
                     </div>
@@ -93,9 +98,15 @@
                     <div class="col-xs-6 col-sm-6 text-right"><button data-target="#generator" data-toggle="modal" class="btn btn-success" type="button">Генератор паролей</button> </div>
                 </div> -->
 
-                <a class="btn btn-link text-muted" type="button" href="#screen12"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
+                <a class="btn btn-link text-muted owl-prev" type="button">
+                    <i class="fa fa-lg fa-arrow-circle-left text-muted"></i> 
+                    <span class="text-muted">Назад</span>
+                </a>
                 <div class="form-group">
-                    <div class="col-xs-6 col-sm-6"><a data-dismiss="modal" href="#" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a></div>
+                    <div class="col-xs-6 col-sm-6">
+                        <a ng-click="close()" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a>
+                    </div>
+
                     <div class="col-xs-6 col-sm-6">
                         <a class="btn btn-primary btn-block btn-lg owl-next" type="button" ng-disabled="!safe.pass.length">Продолжить</a>
                     </div>
@@ -136,12 +147,14 @@
                     <div class="help-block">Скопируйте созданный файл сейфа в другое надежное место, не храните бекап на том же компьютере.</div>
                 </div>
                 <div class="form-group">
-                    <a class="btn btn-success btn-block btn-lg" type="button" data-toggle="modal" data-target="#savecopyfile0" >Сохранить копию файла на компьютере
-                        <i class="fa fa-lg fa-check savefilesuccess0" style="display:none"></i></a>
+                    <a class="btn btn-success btn-block btn-lg" type="button" >
+                        Сохранить копию файла на компьютере
+                        <i class="fa fa-lg fa-check savefilesuccess0" style="display:none"></i>
+                    </a>
                 </div>
 
                 <div class="form-group">
-                    <button type="button" ng-click="changeRestoreKey(safe)" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn0" data-dismiss="modal">Восстановить сейф</button>
+                    <button type="button" ng-click="changeRestoreKey(safe)" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn0">Восстановить сейф</button>
                 </div>
             </div>
 

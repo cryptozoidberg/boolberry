@@ -12,8 +12,6 @@
                 return false;
             };
 
-            //informer.info(backend.getAliasCoast("test"));
-
             var is_goods_offer = function(offer){
                 if(offer.offer_type == 0 || offer.offer_type == 1){
                     return true;

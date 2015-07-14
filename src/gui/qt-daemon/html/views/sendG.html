@@ -17,7 +17,7 @@
                             class="col-xs-8 col-sm-8" 
                             selectpicker 
                             ng-model="transaction.from" 
-                            ng-options="safe.wallet_id as safe.name + ' (' +safe.balance_formated + ')' for safe in safes"
+                            ng-options="safe.wallet_id as safe.name + '(' + (safe.unlocked_balance | gulden) + ')' for safe in safes"
                             required
                             name="from"
                         >

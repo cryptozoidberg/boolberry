@@ -678,6 +678,12 @@
                         ]
                     };
                     break;
+                case 'get_alias_coast' : 
+                    result = {
+                        coast : 10000000000,
+                        error_code : "OK"
+                    };
+                    break;
                 case 'restore_wallet' :
                     result = {
                         'wallet_id' : '14'

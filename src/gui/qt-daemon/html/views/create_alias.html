@@ -15,7 +15,7 @@
 
              <div class="input-group">
                 <span class="input-group-addon">@</span>
-                <input type="text" class="form-control input-lg" ng-model="alias.name">
+                <input type="text" class="form-control input-lg" ng-change="getAliasCoast(alias.name)" ng-model="alias.name">
                 
             </div>
             
@@ -27,11 +27,11 @@
         </div>
 
         <div class="form-group clearfix">
-            <label class="requred col-xs-4 col-sm-4" style="padding-left:0; padding-top:5px">Цена создания алиса</label>
+            <label class="requred col-xs-4 col-sm-4" style="padding-left:0; padding-top:5px">Цена создания алиаса</label>
 
             <div class="col-xs-4 col-sm-4">
                 <div class="input-group">
-                    <input type="text" class="form-control" ng-model="alias.fee">
+                    <input type="text" class="form-control" disabled ng-model="alias.fee">
                     <span class="input-group-addon">G</span>
                 </div>
             </div>

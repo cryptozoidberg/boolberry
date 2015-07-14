@@ -194,7 +194,7 @@
 
         $rootScope.pass_required_intervals = [
             0,
-            10, //5 minutes
+            300, //5 minutes
             600, //10 minutes
             900, //15 minutes
             1800 //30 minutes
