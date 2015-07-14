@@ -1210,7 +1210,7 @@ void wallet2::update_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, con
   attachments.push_back(uo);
   destinations.push_back(tx_dest);
   //use minimum amount for cancel
-  transfer(destinations, 0, 0, 1, extra, attachments, res_tx);
+  transfer(destinations, 0, 0, od.fee, extra, attachments, res_tx);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee, uint64_t reward)
