@@ -6,6 +6,7 @@
 
 #include "common/util.h"
 #include "currency_core/currency_format_utils.h"
+#include "../core_tests/chaingen.h"
 
 TEST(parse_and_validate_tx_extra, is_correct_parse_and_validate_tx_extra)
 {
@@ -13,7 +14,7 @@ TEST(parse_and_validate_tx_extra, is_correct_parse_and_validate_tx_extra)
   currency::account_base acc;
   acc.generate();
   currency::blobdata b = "dsdsdfsdfsf";
-  bool r = currency::construct_miner_tx(0, 0, 10000000000000, 1000, TESTS_DEFAULT_FEE, acc.get_keys().m_account_address, tx, b, 1);
+  bool r = currency::construct_miner_tx(0, 0, 10000000000000, 0, 1000, TESTS_DEFAULT_FEE, acc.get_keys().m_account_address, tx, b, 1);
   ASSERT_TRUE(r);
   crypto::public_key tx_pub_key;
   r = currency::parse_and_validate_tx_extra(tx, tx_pub_key);
@@ -25,7 +26,7 @@ TEST(parse_and_validate_tx_extra, is_correct_extranonce_too_big)
   currency::account_base acc;
   acc.generate();
   currency::blobdata b(260, 0);
-  bool r = currency::construct_miner_tx(0, 0, 10000000000000, 1000, TESTS_DEFAULT_FEE, acc.get_keys().m_account_address, tx, b, 1);
+  bool r = currency::construct_miner_tx(0, 0, 10000000000000, 0, 1000, TESTS_DEFAULT_FEE, acc.get_keys().m_account_address, tx, b, 1);
   ASSERT_FALSE(r);
 }
 
@@ -81,7 +82,7 @@ TEST(parse_and_validate_tx_extra, put_and_load_alias)
   alias.m_alias = "sdsdsd";
   alias.m_text_comment = "werwrwerw";
 
-  bool res = currency::construct_miner_tx(0, 0, 0, 0, 0, acc, miner_tx, currency::blobdata(), 10, alias);
+  bool res = currency::construct_miner_tx(0, 0, 0, 0, 0, 0, acc, miner_tx, currency::blobdata(), 10, alias);
   currency::tx_extra_info ei = AUTO_VAL_INIT(ei);
   bool r = parse_and_validate_tx_extra(miner_tx, ei);
   ASSERT_TRUE(r);

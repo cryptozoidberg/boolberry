@@ -8,6 +8,9 @@
 #include "crypto/crypto.h"
 #include "serialization/keyvalue_serialization.h"
 
+
+#define ACCOUNT_RESTORE_DATA_SIZE         16
+
 namespace currency
 {
 
@@ -35,7 +38,10 @@ namespace currency
     const account_keys& get_keys() const;
     std::string get_public_address_str();
     std::string get_restore_data() const;
+    std::string get_restore_braindata() const;
+
     bool restore_keys(const std::string& restore_data);
+    bool restore_keys_from_braindata(const std::string& restore_data);
 
     uint64_t get_createtime() const { return m_creation_timestamp; }
     void set_createtime(uint64_t val) { m_creation_timestamp = val; }
@@ -48,16 +54,19 @@ namespace currency
     {
       a & m_keys;
       a & m_creation_timestamp;
+      a & 
     }
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(m_keys)
       KV_SERIALIZE(m_creation_timestamp)
+      KV_SERIALIZE(m_seed)
     END_KV_SERIALIZE_MAP()
 
   private:
     void set_null();
     account_keys m_keys;
     uint64_t m_creation_timestamp;
+    std::string m_seed;
   };
 }

@@ -141,7 +141,7 @@ namespace tools
           if (digit < 0)
             return false; // Invalid symbol
 
-          uint64_t product_hi;
+          //uint64_t product_hi;
           boost::multiprecision::uint128_t tmp = res_num;
           tmp += boost::multiprecision::uint128_t(order) * digit;
 

@@ -24,5 +24,21 @@ TEST(brain_wallet, store_restore_test)
       ASSERT_TRUE(false);
     }
   }
-  //ASSERT_TRUE(r.total_height == 3);
+
+  for (size_t i = 0; i != 100; i++)
+  {
+    currency::account_base acc;
+    acc.generate();
+    auto restore_data = acc.get_restore_braindata();
+
+    currency::account_base acc2;
+    bool r = acc2.restore_keys_from_braindata(restore_data);
+    ASSERT_TRUE(r);
+
+    if (memcmp(&acc2.get_keys(), &acc.get_keys(), sizeof(currency::account_keys)))
+    {
+      ASSERT_TRUE(false);
+    }
+  }
+
 }

@@ -71,6 +71,10 @@ namespace crypto {
 
     static void generate_keys(public_key &, secret_key &);
     friend void generate_keys(public_key &, secret_key &);
+    static void generate_brain_keys(public_key &, secret_key &, std::string& seed);
+    friend void generate_brain_keys(public_key &, secret_key &, std::string& seed);
+    static void keys_from_short(unsigned char* a_part, public_key &pub, secret_key &sec);
+    friend void keys_from_short(unsigned char* a_part, public_key &pub, secret_key &sec);
     static void dependent_key(const secret_key& first, secret_key& second);
     friend void dependent_key(const secret_key& first, secret_key& second);
     static bool check_key(const public_key &);
@@ -113,6 +117,15 @@ namespace crypto {
    */
   inline void generate_keys(public_key &pub, secret_key &sec) {
     crypto_ops::generate_keys(pub, sec);
+  }
+
+  inline void generate_brain_keys(public_key &pub, secret_key &sec, std::string& seed) {
+    crypto_ops::generate_brain_keys(pub, sec, seed);
+  }
+
+  inline void keys_from_short(unsigned char* a_part, public_key &pub, secret_key &sec)
+  {
+    crypto_ops::keys_from_short(a_part, pub, sec);
   }
 
   inline void dependent_key(const secret_key& first, secret_key& second){

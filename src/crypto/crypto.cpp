@@ -68,36 +68,36 @@ namespace crypto {
     memcpy(&res, tmp, 32);
   }
 
-//   static inline void keys_from_short(unsigned char* a_part, public_key &pub, secret_key &sec)
-//   {
-//     unsigned char b_part[32];
-//     cn_fast_hash(tmp, 32, reinterpret_cast<hash &>(res));
-// 
-//     sc_reduce(tmp);
-//     memcpy(&res, tmp, 32);
-// 
-//   }
 
-  static inline void random_brain_scalar(ec_scalar &res) {
-    unsigned char tmp[64];
-    generate_random_bytes(32, tmp);
 
+   void crypto_ops::keys_from_short(unsigned char* a_part, public_key &pub, secret_key &sec)
+   {
+     unsigned char tmp[64] = {0};
+     memcpy(tmp, a_part, 16);
+     //generate_random_bytes(16, tmp);
+
+     cn_fast_hash(tmp, 16, (char*)&tmp[16]);
+     cn_fast_hash(tmp, 32, (char*)&tmp[32]);
+ 
+     sc_reduce(tmp);
+     memcpy(&sec, tmp, 32);
+     ge_p3 point;
+     ge_scalarmult_base(&point, &sec);
+     ge_p3_tobytes(&pub, &point);
+   }
+
+   void crypto_ops::generate_brain_keys(public_key &pub, secret_key &sec, std::string& seed)
+  {
+    unsigned char tmp[16];
+    generate_random_bytes(16, tmp);
+    seed.assign((const char*)tmp, 16);
+    keys_from_short(tmp, pub, sec);
   }
-
 
   static inline void hash_to_scalar(const void *data, size_t length, ec_scalar &res) {
     cn_fast_hash(data, length, reinterpret_cast<hash &>(res));
     sc_reduce32(&res);
   }
-
-//   void crypto_ops::generate_keys_brain(public_key &pub, secret_key &sec) {
-//     lock_guard<mutex> lock(random_lock);
-//     ge_p3 point;
-//     random_scalar(sec);
-//     ge_scalarmult_base(&point, &sec);
-//     ge_p3_tobytes(&pub, &point);
-//   }
-//   
 
   void crypto_ops::generate_keys(public_key &pub, secret_key &sec) {
     lock_guard<mutex> lock(random_lock);
