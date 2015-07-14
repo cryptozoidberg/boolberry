@@ -69,7 +69,7 @@ namespace currency
     bool inflate_pool(const std::strig& folder);
     */
 
-#define CURRENT_MEMPOOL_ARCHIVE_VER    16
+#define CURRENT_MEMPOOL_ARCHIVE_VER    17
 
     template<class archive_t>
     void serialize(archive_t & ar, const unsigned int version)

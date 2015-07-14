@@ -167,9 +167,10 @@ namespace currency
     std::string target;        //[max 30 characters] currency / goods
     std::string location_country;   //US
     std::string location_city;      //ChIJD7fiBh9u5kcRYJSMaMOCCwQ (google geo-autocomplete id)
-    std::string contacts;      //[max 140 characters] (Skype, mail, ICQ, etc., website)
-    std::string comment;       //[max 160 characters]
-    std::string payment_types; //[max 20 characters ]money accept type(bank transaction, internet money, cash, etc)
+    std::string contacts;      //[] (Skype, mail, ICQ, etc., website)
+    std::string comment;       //[]
+    std::string payment_types; //[]money accept type(bank transaction, internet money, cash, etc)
+    std::string deal_option;   //[]full amount, by parts
     uint8_t expiration_time;   //n-days
 
     BEGIN_SERIALIZE_OBJECT()
@@ -183,6 +184,7 @@ namespace currency
       VALUE(contacts)
       VALUE(comment)
       VALUE(payment_types)
+      VALUE(deal_option)
       VALUE(expiration_time)
     END_SERIALIZE()
 
