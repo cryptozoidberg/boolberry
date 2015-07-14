@@ -31,10 +31,10 @@ DISABLE_VS_WARNINGS(4244 4345)
   //-----------------------------------------------------------------
   void account_base::generate()
   {
-//    generate_keys(m_keys.m_account_address.m_spend_public_key, m_keys.m_spend_secret_key);
-//    dependent_key(m_keys.m_spend_secret_key, m_keys.m_view_secret_key);
-//    if (!crypto::secret_key_to_public_key(m_keys.m_view_secret_key, m_keys.m_account_address.m_view_public_key))
-//      throw std::runtime_error("Failed to create public view key");
+    generate_keys(m_keys.m_account_address.m_spend_public_key, m_keys.m_spend_secret_key);
+    dependent_key(m_keys.m_spend_secret_key, m_keys.m_view_secret_key);
+    if (!crypto::secret_key_to_public_key(m_keys.m_view_secret_key, m_keys.m_account_address.m_view_public_key))
+      throw std::runtime_error("Failed to create public view key");
 
 
     m_creation_timestamp = time(NULL);
