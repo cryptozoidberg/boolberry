@@ -123,16 +123,17 @@
 
             },
 
-            registerAlias: function(wallet_id, alias, address, fee, comment, callback) {
+            registerAlias: function(wallet_id, alias, address, fee, comment, reward, callback) {
                 var params = {
                     "wallet_id": wallet_id,
                     "alias": {
                         "alias": alias,
                         "address": address,
                         "tracking_key": "",
-                        "comment": comment
+                        "comment": comment,
                     },
-                    "fee": $filter('gulden_to_int')(fee)
+                    "fee": $filter('gulden_to_int')(fee),
+                    "reward": $filter('gulden_to_int')(reward)
                 };
 
                 return this.runCommand('request_alias_registration', params, callback);

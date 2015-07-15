@@ -561,7 +561,7 @@
             backend.quitRequest();
         });
 
-        
+        var progress_time_out = false;
 
         backend.subscribe('wallet_sync_progress', function(data){
             console.log('wallet_sync_progress');

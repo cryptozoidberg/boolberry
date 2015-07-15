@@ -6,7 +6,8 @@
         function($scope, $modalInstance, backend, safe, $rootScope, $filter, $timeout){
             $scope.alias = {
                 name : '',
-                fee : '',
+                fee : '0.01',
+                reward: '0',
                 comment: ''
             };
 
@@ -17,12 +18,12 @@
             $scope.getAliasCoast = function(alias){
                 var result = backend.getAliasCoast(alias);
                 $timeout(function(){
-                    $scope.alias.fee = $filter('gulden')(result.coast,false);    
+                    $scope.alias.reward = $filter('gulden')(result.coast,false);    
                 });
             };
 
             $scope.register = function(alias){
-                backend.registerAlias(safe.wallet_id, alias.name, safe.address, alias.fee, alias.comment, function(data){
+                backend.registerAlias(safe.wallet_id, alias.name, safe.address, alias.fee, alias.comment, alias.reward, function(data){
                     $rootScope.unconfirmed_aliases.push(
                         {
                             tx_hash : data.tx_hash,
