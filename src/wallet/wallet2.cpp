@@ -667,7 +667,7 @@ void wallet2::restore(const std::string& path, const std::string& pass, const st
   clear();
   m_wallet_file = path;
   m_password = pass;
-  bool r = m_account.restore_keys(restore_key);
+  bool r = m_account.restore_keys_from_braindata(restore_key);
   CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, m_wallet_file);
   boost::system::error_code ignored_ec;
   CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);

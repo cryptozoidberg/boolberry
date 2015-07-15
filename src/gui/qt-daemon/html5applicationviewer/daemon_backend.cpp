@@ -868,7 +868,7 @@ std::string daemon_backend::get_mining_history(uint64_t wallet_id, tools::wallet
 std::string daemon_backend::get_wallet_restore_info(uint64_t wallet_id, std::string& restore_key)
 {
   GET_WALLET_OPT_BY_ID(wallet_id, wo);
-  auto rst_data = wo.w->get()->get_account().get_restore_data();
+  auto rst_data = wo.w->get()->get_account().get_restore_braindata();
   restore_key = tools::base58::encode(rst_data);
   return API_RETURN_CODE_OK;
 }

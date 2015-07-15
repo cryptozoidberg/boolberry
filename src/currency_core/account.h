@@ -54,7 +54,7 @@ namespace currency
     {
       a & m_keys;
       a & m_creation_timestamp;
-      a & 
+      a & m_seed;
     }
 
     BEGIN_KV_SERIALIZE_MAP()
