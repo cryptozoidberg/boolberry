@@ -107,7 +107,6 @@
           link: function(scope, element, attrs) {
             
             var init = function (state){
-              informer.info(state);
               if(state){ // disbale link
                 $(element).addClass('disabled-link');
                 $(element).click(function(event){
@@ -121,7 +120,6 @@
               }
             }
 
-            // init(attrs.disabledLink);
             scope.$watch('state',
               function(v){
                 init(v);
