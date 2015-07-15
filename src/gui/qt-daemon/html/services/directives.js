@@ -98,23 +98,33 @@
       };
   }]);
 
-  module.directive('disabledLink', [function() {
+  module.directive('disabledLink', ['informer',function(informer) {
       return {
           restrict: 'A',
+          scope : {
+            state : '=disabledLink'
+          },
           link: function(scope, element, attrs) {
-            scope.$watch(attrs.disabledLink,
+            
+            var init = function (state){
+              informer.info(state);
+              if(state){ // disbale link
+                $(element).addClass('disabled-link');
+                $(element).click(function(event){
+                  event.preventDefault();
+                });
+              }else{ // enable link
+                $(element).removeClass('disabled-link');
+                $(element).click(function(event){
+                  return true;
+                });
+              }
+            }
+
+            // init(attrs.disabledLink);
+            scope.$watch('state',
               function(v){
-                if(v){
-                  $(element).removeClass('disabled-link');
-                  $(element).click(function(event){
-                    return true;
-                  });
-                }else{
-                  $(element).addClass('disabled-link');
-                  $(element).click(function(event){
-                    event.preventDefault();
-                  });
-                }
+                init(v);
               }
             );
           }

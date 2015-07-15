@@ -259,14 +259,21 @@
                         <small class="text-muted" ng-if="!item.is_income && !item.height">
                             <em>Отправление</em>
                         </small>
+
                         <small class="text-warning" ng-if="!item.is_income && item.height">
                             <em>Отправлено</em>
                         </small>
+
                         <small class="text-muted" ng-if="item.is_income && !item.height">
                             <em>Получение</em>
                         </small>
+
                         <small class="text-info" ng-if="item.is_income && item.height">
                             <em>Получено</em>
+                        </small>
+
+                        <small> 
+                            (Подтверждено {{deamon_state.height - item.height}})
                         </small>
                     </td>
 

@@ -573,7 +573,7 @@
 
             var object = {
                 "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ",
-                "balance": random_balance(),
+                "balance": 0,//random_balance(),
                 "do_mint": 1,
                 "mint_is_in_progress": 0,
                 "path": "\/Users\/roky\/projects\/louidor\/wallets\/mac\/roky_wallet_small_2.lui",
