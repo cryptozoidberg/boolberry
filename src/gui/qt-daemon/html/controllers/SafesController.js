@@ -392,6 +392,7 @@
                     new_safe.wallet_id = wallet_id;
                     new_safe.name = safe.name;
                     new_safe.pass = safe.password;
+                    new_safe.confirm_password = safe.password;
                     new_safe.history = [];
                     
                     $timeout(function(){
