@@ -287,10 +287,11 @@
         }
     ]);
 
-    module.controller('safeModals', ['$scope','backend','$modal',function($scope,backend,$modal){
+    module.controller('safeModals', ['CONFIG', '$scope','backend','$modal',
+        function(CONFIG,$scope,backend,$modal){
         $scope.openFileDialog = function(){
             var caption = "Please, choose the file";
-            var filemask = "*.lui";
+            var filemask = CONFIG.filemask;
             var result = backend.openFileDialog(caption, filemask);
             if(typeof result !== 'undefined' && typeof result.path !== 'undefined'){
                 var path = result.path;
@@ -357,8 +358,8 @@
         };
     }]);
 
-    module.controller('safeAddCtrl', ['$scope','backend', '$modalInstance', '$modal', '$timeout','$rootScope', 'informer',
-        function($scope, backend, $modalInstance, $modal, $timeout, $rootScope, informer) {
+    module.controller('safeAddCtrl', ['CONFIG', '$scope','backend', '$modalInstance', '$modal', '$timeout','$rootScope', 'informer',
+        function(CONFIG, $scope, backend, $modalInstance, $modal, $timeout, $rootScope, informer) {
             $scope.owl_options  = {
               singleItem: true,
               autoHeight: false,
@@ -379,8 +380,8 @@
             };
 
             $scope.saveSafeFile = function(safe) {
-                var caption = "Please, choose the file";
-                var filemask = "*.lui";
+                var caption  = "Please, choose the file";
+                var filemask = CONFIG.filemask;
                 var result = backend.saveFileDialog(caption, filemask); // TODO digest angular error fix
 
                 backend.generateWallet(result.path,safe.password,function(data){
@@ -406,7 +407,7 @@
 
             $scope.safeBackup = function(safe){
                 var caption      = "Please, choose the file";
-                var filemask     = "*.lui";
+                var filemask     = CONFIG.filemask;
                 var result       = backend.saveFileDialog(caption, filemask); // TODO digest angular error fix
                 var original_dir = result.path.substr(0,result.path.lastIndexOf('/'));
                 var new_dir      = safe.path.substr(0,safe.path.lastIndexOf('/'));
@@ -445,8 +446,8 @@
         }
     ]);
 
-    module.controller('safeSmartRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes', '$rootScope', 'informer',
-        function($scope, backend, $modalInstance, $modal, $timeout, path, safes, $rootScope, informer) {
+    module.controller('safeSmartRestoreCtrl', ['CONFIG', '$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes', '$rootScope', 'informer',
+        function(CONFIG, $scope, backend, $modalInstance, $modal, $timeout, path, safes, $rootScope, informer) {
             $scope.owl_options  = {
               singleItem: true,
               autoHeight: false,
@@ -468,7 +469,7 @@
 
             $scope.saveWalletFile = function(){
                 var caption = "Please, choose the file";
-                var filemask = "*.lui";
+                var filemask = CONFIG.filemask;
                 var result;
                 if(result = backend.saveFileDialog(caption, filemask)){
                     $scope.safe.path = result.path;

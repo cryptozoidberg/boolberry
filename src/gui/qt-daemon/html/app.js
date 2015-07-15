@@ -30,6 +30,10 @@
 
     ]);
 
+    app.constant('CONFIG',{
+        filemask : "*;;*.lui"
+    });
+
     app.config(['$routeProvider', 'IdleProvider', 'KeepaliveProvider', function($routeProvider, IdleProvider, KeepaliveProvider) {
         
         // configure Idle settings

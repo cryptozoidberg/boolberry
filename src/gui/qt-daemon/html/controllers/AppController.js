@@ -132,8 +132,8 @@
     
 
     module.controller('AppController', [
-        'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs','$interval','Idle',
-        function(backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs, $interval, Idle) {
+        'CONFIG', 'backend', '$scope','$timeout', 'loader', '$rootScope','$location', '$filter', '$modal','informer', 'PassDialogs','$interval','Idle',
+        function(CONFIG, backend, $scope, $timeout, loader, $rootScope, $location, $filter, $modal, informer, PassDialogs, $interval, Idle) {
         
         // Idle events
         $scope.$on('IdleStart', function() {
@@ -341,7 +341,7 @@
 
         $scope.safeBackup = function(safe){
             var caption      = "Please, choose the file";
-            var filemask     = "*.lui";
+            var filemask     = CONFIG.filemask;
             var result       = backend.saveFileDialog(caption, filemask); // TODO digest angular error fix
             var original_dir = result.path.substr(0,result.path.lastIndexOf('/'));
             var new_dir      = safe.path.substr(0,safe.path.lastIndexOf('/'));
