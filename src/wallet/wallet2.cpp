@@ -1225,6 +1225,7 @@ void wallet2::request_alias_registration(const currency::alias_info& ai, currenc
   currency::tx_destination_entry tx_dest_alias_reward;
   get_aliases_reward_account(tx_dest_alias_reward.addr);
   tx_dest_alias_reward.amount = reward;
+  destinations.push_back(tx_dest_alias_reward);
 
   transfer(destinations, 0, 0, fee, extra, attachments, detail::void_split_strategy, tx_dust_policy(fee), res_tx);
 }

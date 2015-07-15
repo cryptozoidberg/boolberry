@@ -6,7 +6,7 @@
 #include "daemon_backend.h"
 #include "currency_core/alias_helper.h"
 #include "core_fast_rpc_proxy.h"
-#include "common/base58.h"
+
 
 #define GET_WALLET_OPT_BY_ID(wallet_id, name)       \
   CRITICAL_REGION_LOCAL(m_wallets_lock);    \
@@ -593,22 +593,19 @@ std::string daemon_backend::is_pos_allowed()
     return API_RETURN_CODE_FALSE;
 }
 
-std::string daemon_backend::restore_wallet(const std::string& path, const std::string& password, const std::string& restore_key_encoded, view::open_wallet_response& owr)
+std::string daemon_backend::restore_wallet(const std::string& path, const std::string& password, const std::string& restore_key, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
   owr.wallet_id = m_wallet_id_counter++;
   w->callback(std::shared_ptr<tools::i_wallet2_callback>(new i_wallet_to_i_backend_adapter(this, owr.wallet_id)));
   w->set_core_proxy(std::shared_ptr<tools::i_core_proxy>(new tools::core_fast_rpc_proxy(m_rpc_server)));
   currency::account_base acc;
-  std::string restore_key_decoded;
-  if(!tools::base58::decode(restore_key_encoded, restore_key_decoded))
-    return API_RETURN_CODE_BAD_ARG;
 
   CRITICAL_REGION_LOCAL(m_wallets_lock);
 
   try
   {
-    w->restore(path, password, restore_key_decoded);    
+    w->restore(path, password, restore_key);
   }
   catch (const tools::error::file_exists/*& e*/)
   {
@@ -868,8 +865,8 @@ std::string daemon_backend::get_mining_history(uint64_t wallet_id, tools::wallet
 std::string daemon_backend::get_wallet_restore_info(uint64_t wallet_id, std::string& restore_key)
 {
   GET_WALLET_OPT_BY_ID(wallet_id, wo);
-  auto rst_data = wo.w->get()->get_account().get_restore_braindata();
-  restore_key = tools::base58::encode(rst_data);
+  restore_key = wo.w->get()->get_account().get_restore_braindata();
+//  restore_key = tools::base58::encode(rst_data);
   return API_RETURN_CODE_OK;
 }
 void daemon_backend::prepare_wallet_status_info(wallet_vs_options& wo, view::wallet_status_info& wsi)
