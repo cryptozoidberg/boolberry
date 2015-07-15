@@ -498,6 +498,9 @@
 
 
         });
+
+        var reload_time = 200;
+        var status_time_out = false;
         
         backend.subscribe('update_wallet_status', function(data){
             var wallet_id = data.wallet_id;
@@ -533,9 +536,14 @@
                         safe.error = true;
                     }   
 
-                    safe.balance = balance;
-                    safe.unlocked_balance = unlocked_balance;
-                    backend.reloadCounters();
+                    if(!status_time_out){
+                        status_time_out = $timeout(function(){
+                            safe.balance = balance;
+                            safe.unlocked_balance = unlocked_balance;
+                            backend.reloadCounters();    
+                            status_time_out = false;
+                        },reload_time);
+                    }
                     
                 });
                 
@@ -553,8 +561,7 @@
             backend.quitRequest();
         });
 
-        var reload_time = 500;
-        var progress_time_out = 0;
+        
 
         backend.subscribe('wallet_sync_progress', function(data){
             console.log('wallet_sync_progress');
@@ -569,7 +576,7 @@
                     if(!progress_time_out){
                         progress_time_out = $timeout(function(){
                             safe.progress = progress;    
-                            progress_time_out = 0;
+                            progress_time_out = false;
                         },reload_time);
                     }
                     
