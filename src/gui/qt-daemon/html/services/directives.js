@@ -109,14 +109,8 @@
             var init = function (state){
               if(state){ // disbale link
                 $(element).addClass('disabled-link');
-                $(element).click(function(event){
-                  event.preventDefault();
-                });
               }else{ // enable link
                 $(element).removeClass('disabled-link');
-                $(element).click(function(event){
-                  return true;
-                });
               }
             }
 

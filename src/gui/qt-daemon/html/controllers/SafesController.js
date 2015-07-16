@@ -575,12 +575,20 @@
         }
     ]);
 
-    module.controller('smartSafeAddCtrl', ['$scope','backend', '$modalInstance', 'safe', 'informer',
-        function($scope, backend, $modalInstance, safe, informer) {
+    module.controller('smartSafeAddCtrl', ['$scope','backend', '$modalInstance', 'safe', 'informer', '$window',
+        function($scope, backend, $modalInstance, safe, informer, $window) {
             
             //$scope.safe = safe;
 
             var data = backend.getSmartSafeInfo(safe.wallet_id);
+
+            $scope.printPhrase = function(phrase) {
+              var printContents ="<h1>"+phrase+"</h1>";//document.getElementById(divName).innerHTML;
+              var popupWin = $window.open('', '_blank', 'width=300,height=300');
+              popupWin.document.open();
+              popupWin.document.write('<html><head><link rel="stylesheet" type="text/css" href="style.css" /></head><body onload="window.print()">' + printContents + '</html>');
+              popupWin.document.close();
+            } 
 
             $scope.restore_key = data.restore_key;
 

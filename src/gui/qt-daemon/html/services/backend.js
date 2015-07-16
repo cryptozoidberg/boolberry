@@ -639,7 +639,7 @@
                 "pos_difficulty": "107285151137540",
                 "pow_difficulty": "2759454",
                 "text_state": "Offline",
-                "pos_allowed" : false
+                "pos_allowed" : true
             };
         };
 

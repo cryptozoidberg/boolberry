@@ -11,7 +11,7 @@
             </div>
             <div class="form-group clearfix">
                 <div class="col-xs-12 col-sm-12">
-                    <input type="text" ng-model="restore_key" class="form-control">
+                    <input type="text" disabled ng-model="restore_key" class="form-control">
                 </div>
                 <!-- <div class="col-xs-3 col-sm-3">
                     <input type="text" value="TLIU" class="form-control">
@@ -40,9 +40,25 @@
 
             </div> -->
             <div class="btn-toolbar">
-                <div class="btn-group pull-right"><button type="button" class="btn btn-primary"><i class="fa fa-lg fa-print"></i> Печать</button></div><div class="btn-group  pull-right"><button type="button" class="btn btn-default"><i class="fa fa-lg fa-qrcode"></i> QR-код</button></div>
+                <div class="btn-group pull-right">
+                    <button ng-disabled="!restore_key.length" type="button" class="btn btn-primary" ng-click="printPhrase(restore_key)">
+                        <i class="fa fa-lg fa-print"></i> Печать
+                    </button>
+                </div>
+
+                <div class="btn-group  pull-right">
+                    <button type="button" class="btn btn-default">
+                        <i class="fa fa-lg fa-qrcode"></i> QR-код
+                    </button>
+                </div>
             </div>
-            <div class="checkbox"><label><input type="checkbox" ng-model="is_printed"> Я распечатал фразу и сохранил в надежном месте</label></div>
+
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" ng-model="is_printed"> 
+                    Я распечатал фразу и сохранил в надежном месте
+                </label>
+            </div>
             <div class="form-group">
                 <button class="btn btn-lg btn-block btn-info" type="button" ng-disabled="!is_printed" ng-click="closeSmartSafeForm()">Продолжить</button>
             </div>
