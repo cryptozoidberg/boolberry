@@ -432,11 +432,11 @@ int main(int argc, char* argv[])
   currency::wide_difficulty_type dif = 11178242329;
   if (!currency::check_hash(h, dif))
   {
-    LOG_PRINT_L0("check failed");
+    std::cout << "check failed" << std::endl();
   }
   else
   {
-    LOG_PRINT_L0("check passed");
+    std::cout << "check passed" << std::endl();
   }
 
 
