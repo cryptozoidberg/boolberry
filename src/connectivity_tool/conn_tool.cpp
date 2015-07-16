@@ -427,6 +427,19 @@ int main(int argc, char* argv[])
   po::options_description desc_all;
   desc_all.add(desc_general).add(desc_params);
 
+  crypto::hash h = null_hash;
+  bool r_ = epee::string_tools::parse_tpod_from_hex_string("1a460b86ad85ff4da34bfc17cf0c7707116b6d5afd68cbeb7648033ee6a0c3a5", h);
+  currency::wide_difficulty_type dif = 11178242329;
+  if (!currency::check_hash(h, dif))
+  {
+    LOG_PRINT_L0("check failed");
+  }
+  else
+  {
+    LOG_PRINT_L0("check passed");
+  }
+
+
   po::variables_map vm;
   bool r = command_line::handle_error_helper(desc_all, [&]()
   {
