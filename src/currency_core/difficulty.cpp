@@ -27,10 +27,10 @@ namespace currency {
 #include <winnt.h>
 
   static inline void mul(uint64_t a, uint64_t b, uint64_t &low, uint64_t &high) {
-    //boost::multiprecision::uint128_t res = boost::multiprecision::uint128_t(a) * b;
-    //low = (res & 0xffffffffffffffffLL).convert_to<uint64_t>();
-    //high = (res << 64).convert_to<uint64_t>();
-    low = _umul128(a, b, &high);
+    boost::multiprecision::uint128_t res = boost::multiprecision::uint128_t(a) * b;
+    low = (res & 0xffffffffffffffffLL).convert_to<uint64_t>();
+    high = (res >> 64).convert_to<uint64_t>();
+    //low = _umul128(a, b, &high);
     //low = UnsignedMultiply128(a, b, &high);
   }
 
