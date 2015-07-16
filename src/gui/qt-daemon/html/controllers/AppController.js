@@ -278,22 +278,32 @@
                             angular.forEach(appData,function(item){
                                 backend.openWallet(item.path, item.pass,function(data){
                                     
-                                    var new_safe = data.wi;
-                                    new_safe.wallet_id = data.wallet_id;
-                                    new_safe.name = item.name;
-                                    new_safe.pass = item.pass;
-                                    new_safe.history = [];
+                                    var exists = $filter('filter')($rootScope.safes, {address: data.wi.address});
+                    
+                                    if(exists.length){
+                                        informer.warning('Сейф с таким адресом уже открыт');
+                                        backend.closeWallet(data.wallet_id, function(){
+                                            // safe closed
+                                        });
+                                    }else{
 
-                                    if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
-                                        new_safe.history = data.recent_history.history;
+                                        var new_safe = data.wi;
+                                        new_safe.wallet_id = data.wallet_id;
+                                        new_safe.name = item.name;
+                                        new_safe.pass = item.pass;
+                                        new_safe.history = [];
+
+                                        if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
+                                            new_safe.history = data.recent_history.history;
+                                        }
+
+                                        $timeout(function(){
+                                            $rootScope.safes.push(new_safe); 
+                                            backend.runWallet(data.wallet_id);  
+                                            backend.reloadCounters(); 
+                                            backend.loadMyOffers();
+                                        });
                                     }
-
-                                    $timeout(function(){
-                                        $rootScope.safes.push(new_safe); 
-                                        backend.runWallet(data.wallet_id);  
-                                        backend.reloadCounters(); 
-                                        backend.loadMyOffers();
-                                    });
 
                                 });
                             });

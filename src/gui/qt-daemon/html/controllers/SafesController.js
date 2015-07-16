@@ -508,8 +508,8 @@
         }
     ]);
 
-    module.controller('safeRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes', '$rootScope',
-        function($scope, backend, $modalInstance, $modal, $timeout, path, safes, $rootScope) {
+    module.controller('safeRestoreCtrl', ['$scope', 'backend', '$modalInstance', '$modal', '$timeout', 'path', 'safes', '$rootScope', '$filter', 'informer',
+        function($scope, backend, $modalInstance, $modal, $timeout, path, safes, $rootScope, $filter, informer) {
             $scope.owl_options  = {
               singleItem: true,
               autoHeight: false,
@@ -542,23 +542,32 @@
             $scope.openSafe = function(safe){
                 backend.openWallet(safe.path, safe.pass,function(data){
                     
-                    var new_safe = data.wi;
-                    new_safe.wallet_id = data.wallet_id;
-                    new_safe.name = safe.name;
-                    new_safe.pass = safe.pass;
-                    new_safe.history = [];
-
-                    if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
-                        new_safe.history = data.recent_history.history;
-                    }
+                    var exists = $filter('filter')($rootScope.safes, {address: data.wi.address});
                     
-                    $modalInstance.close();
-                    $timeout(function(){
-                        safes.unshift(new_safe); 
-                        backend.runWallet(data.wallet_id);
-                        backend.reloadCounters();   
-                        backend.loadMyOffers();
-                    });
+                    if(exists.length){
+                        informer.warning('Сейф с таким адресом уже открыт');
+                        backend.closeWallet(data.wallet_id, function(){
+                            // safe closed
+                        });
+                    }else{
+                        var new_safe = data.wi;
+                        new_safe.wallet_id = data.wallet_id;
+                        new_safe.name = safe.name;
+                        new_safe.pass = safe.pass;
+                        new_safe.history = [];
+
+                        if(angular.isDefined(data.recent_history) && angular.isDefined(data.recent_history.history)){
+                            new_safe.history = data.recent_history.history;
+                        }
+                        
+                        $modalInstance.close();
+                        $timeout(function(){
+                            safes.unshift(new_safe); 
+                            backend.runWallet(data.wallet_id);
+                            backend.reloadCounters();   
+                            backend.loadMyOffers();
+                        });
+                    }
 
                 });
             };

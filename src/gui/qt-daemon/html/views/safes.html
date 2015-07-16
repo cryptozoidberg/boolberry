@@ -58,6 +58,7 @@
                     </tr>
                     <tr ng-repeat="safe in f_safes" ng-class="{'danger' : safe.error}">
                         <td>
+                            ({{safe.wallet_id}})
                             <i class="fa fa-spinner fa-pulse" ng-hide="safe.loaded"></i>
                             <a class="btn btn-link" href="#safe/{{safe.wallet_id}}">
                                 <big>{{safe.name}}</big>
