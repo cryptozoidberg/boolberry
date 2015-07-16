@@ -1,13 +1,28 @@
 html {
     overflow: -moz-scrollbars-vertical;
     overflow-y: scroll;
+	-moz-user-select: none;
+	-webkit-user-select: none;
 }
 body {
 padding-top: 67px;
 background: none repeat scroll 0 0 #f8f8f8;
 font-size: 13px;
 padding-right: 0 !important;
+-moz-user-select: none;
+-webkit-user-select: none;
 }
+
+div.modal, div.guilder-bar {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+
+div.contractor pre {
+	-moz-user-select: all;
+	-webkit-user-select: all;
+}
+
 .container-fluid {
 min-width: 960px!important;
 }
