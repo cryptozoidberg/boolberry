@@ -467,6 +467,7 @@
                 restore_key : '',  
                 pass : '',
                 path : '',
+                name : ''
             }
 
             $scope.saveWalletFile = function(){

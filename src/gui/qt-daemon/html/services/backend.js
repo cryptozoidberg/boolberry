@@ -572,7 +572,7 @@
             }
 
             var object = {
-                "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVo8jJ",
+                "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVok"+Math.floor(Math.random() * 100),
                 "balance": 0,//random_balance(),
                 "do_mint": 1,
                 "mint_is_in_progress": 0,
@@ -639,7 +639,7 @@
                 "pos_difficulty": "107285151137540",
                 "pow_difficulty": "2759454",
                 "text_state": "Offline",
-                "pos_allowed" : true
+                "is_pos_allowed" : true
             };
         };
 
