@@ -2373,6 +2373,11 @@ bool blockchain_storage::check_block_timestamp_main(const block& b)
     LOG_PRINT_L0("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", bigger than adjusted time + 2 hours");
     return false;
   }
+  if (is_pos_block(b) && b.timestamp > get_adjusted_time() + CURRENCY_POS_BLOCK_FUTURE_TIME_LIMIT)
+  {
+    LOG_PRINT_L0("Timestamp of PoS block with id: " << get_block_hash(b) << ", " << b.timestamp << ", bigger than adjusted time + 4 minutes");
+    return false;
+  }
 
   std::vector<uint64_t> timestamps;
   size_t offset = m_blocks.size() <= BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW ? 0: m_blocks.size()- BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW;

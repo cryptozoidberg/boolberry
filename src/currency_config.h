@@ -14,6 +14,7 @@
 #define CURRENT_BLOCK_MAJOR_VERSION                   1
 #define CURRENT_BLOCK_MINOR_VERSION                   0
 #define CURRENCY_BLOCK_FUTURE_TIME_LIMIT              60*60*2
+#define CURRENCY_POS_BLOCK_FUTURE_TIME_LIMIT          4
 
 #define BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW             60
 
