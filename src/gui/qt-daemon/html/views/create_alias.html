@@ -4,6 +4,9 @@
     <h4 class="modal-title" id="aliasLabel">Создание нового алиаса для счета сейфа</h4>
 </div>
 <div class="modal-body">
+    <alert type="danger" ng-show="not_enought">
+        У вас не достаточно средств для создания данного алиаса
+    </alert>
 
     <form name="create_alias_form">
 
@@ -61,7 +64,7 @@
                 <button class="btn btn-lg btn-block" type="button" ng-click="close()">Отменить</button>
             </div>
             <div class="col-xs-6 col-sm-6" style="padding-right:0">
-                <button class="btn btn-lg btn-block btn-primary" type="button" ng-click="register(alias)">Создать</button>
+                <button class="btn btn-lg btn-block btn-primary" ng-disabled="not_enought || !alias.name.length" type="button" ng-click="register(alias)">Создать</button>
             </div>
         </div>
     </form>

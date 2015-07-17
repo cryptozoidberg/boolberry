@@ -853,7 +853,7 @@
                         'wallet_id' :this.getWalletId(),
                         'wallet_state' : '2',
                         'is_mining' : false,
-                        'balance' : 4300000000,
+                        'balance' : 14300000000,
                         'unlocked_balance' : 4100000000,
                     };
                     break; 

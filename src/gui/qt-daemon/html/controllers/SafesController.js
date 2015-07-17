@@ -15,8 +15,13 @@
                 $modalInstance.close();
             };
 
+            $scope.not_enought = false;
+
             $scope.getAliasCoast = function(alias){
-                var result = backend.getAliasCoast(alias);
+                var result = alias.length ? backend.getAliasCoast(alias) : {coast:0};
+                
+                $scope.not_enought = (result.coast + $filter('gulden_to_int')($scope.alias.fee)) > safe.balance;
+
                 $timeout(function(){
                     $scope.alias.reward = $filter('gulden')(result.coast,false);    
                 });
