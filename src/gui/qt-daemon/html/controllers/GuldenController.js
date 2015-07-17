@@ -30,15 +30,15 @@
 
 
 
-    module.controller('guldenSendCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$modal','txHistory',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $modal, txHistory){
+    module.controller('guldenSendCtrl',['CONFIG', 'backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$modal','txHistory',
+        function(CONFIG, backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $modal, txHistory){
             $scope.transaction = {
                 from: $rootScope.safes.length ? $rootScope.safes[0].wallet_id : '',
                 to: '',
                 push_payer: $rootScope.settings.security.is_hide_sender,
                 is_delay : false,
                 lock_time: new Date(),
-                fee: '0.1',
+                fee: CONFIG.standart_fee,
                 is_valid_address: false,
                 is_mixin : $rootScope.settings.security.is_mixin
             };

@@ -3,7 +3,7 @@
 
     var module = angular.module('app.filters', []);
 
-    module.filter('gulden',[function(){
+    module.filter('gulden',['CONFIG',function(CONFIG){
         return function(input, need_g){
             if(angular.isUndefined(need_g)){
                 need_g = true;
@@ -12,7 +12,7 @@
             if(angular.isDefined(input)){
                 input = input.toString();
 
-                var CDDP = 8; //CURRENCY_DISPLAY_DECIMAL_POINT
+                var CDDP = CONFIG.CDDP; //CURRENCY_DISPLAY_DECIMAL_POINT
                 var result = '';
                 if(input.length ){
                     result = angular.copy(input);
@@ -44,10 +44,10 @@
         }
     }]);
 
-    module.filter('gulden_to_int',[function(){
+    module.filter('gulden_to_int',['CONFIG',function(CONFIG){
         return function(input){
 
-            var CURRENCY_DISPLAY_DECIMAL_POINT = 8;
+            var CURRENCY_DISPLAY_DECIMAL_POINT = CONFIG.CDDP;
 
             var append_string_with_zeros = function (result, len){
 

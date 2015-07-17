@@ -2,11 +2,11 @@
     'use strict';
     var module = angular.module('app.safes',[]);
     
-    module.controller('createAliasCtrl',['$scope', '$modalInstance', 'backend', 'safe', '$rootScope', '$filter', '$timeout',
-        function($scope, $modalInstance, backend, safe, $rootScope, $filter, $timeout){
+    module.controller('createAliasCtrl',['CONFIG', '$scope', '$modalInstance', 'backend', 'safe', '$rootScope', '$filter', '$timeout',
+        function(CONFIG, $scope, $modalInstance, backend, safe, $rootScope, $filter, $timeout){
             $scope.alias = {
                 name : '',
-                fee : '0.01',
+                fee : CONFIG.standart_fee,
                 reward: '0',
                 comment: ''
             };

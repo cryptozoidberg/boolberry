@@ -484,8 +484,8 @@
         }
     ]);
 
-    module.controller('addOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$http','$timeout','$q','$window', 'gProxy','market',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $http, $timeout, $q, $window, gProxy, market){
+    module.controller('addOfferCtrl',['CONFIG', 'backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$http','$timeout','$q','$window', 'gProxy','market',
+        function(CONFIG, backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $http, $timeout, $q, $window, gProxy, market){
            if(angular.isUndefined($rootScope.offers)){
                 $rootScope.offers = [];
             }
@@ -510,7 +510,7 @@
                 is_standart : false,
                 is_premium : true,
                 fee_premium : '6.00',
-                fee_standart : '0.1',
+                fee_standart : CONFIG.standart_fee,
                 location: {country : '', city: ''},
                 contacts: {phone : '', email : ''},
                 comment: '',
@@ -715,8 +715,8 @@
         }
     ]);
     // Guilden offer
-    module.controller('addGOfferCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$timeout','market', '$http','$q','gProxy',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location,$timeout,market,$http,$q,gProxy){
+    module.controller('addGOfferCtrl',['CONFIG', 'backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$timeout','market', '$http','$q','gProxy',
+        function(CONFIG, backend,$rootScope,$scope,informer,$routeParams,$filter,$location,$timeout,market,$http,$q,gProxy){
             if(angular.isUndefined($rootScope.offers)){
                 $rootScope.offers = [];
             }
@@ -809,7 +809,7 @@
                 is_standart : false,
                 is_premium : true,
                 fee_premium : '6.00',
-                fee_standart : '0.1',
+                fee_standart : CONFIG.standart_fee,
                 bonus: '',
                 location: {country : '', city: ''},
                 contacts: {phone : '', email : ''},
