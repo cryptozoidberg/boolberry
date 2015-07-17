@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "html5applicationviewer.h"
+#include <codecvt>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -20,6 +21,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QTimer>
+
 #include "warnings.h"
 #include "net/http_client.h"
 
@@ -852,6 +854,11 @@ QString Html5ApplicationViewer::generate_wallet(const QString& param)
 {
   return que_call2<view::open_wallet_request>("generate_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
     view::open_wallet_response owr = AUTO_VAL_INIT(owr);
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    //std::string s = conv.to_bytes(uchars);
+    std::wstring ws2 = conv.from_bytes(owd.path);
+
     ar.error_code = m_backend.generate_wallet(owd.path, owd.pass, owr);
     dispatch(ar, owr);
   });

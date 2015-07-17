@@ -14,7 +14,7 @@
 #define CURRENT_BLOCK_MAJOR_VERSION                   1
 #define CURRENT_BLOCK_MINOR_VERSION                   0
 #define CURRENCY_BLOCK_FUTURE_TIME_LIMIT              60*60*2
-#define CURRENCY_POS_BLOCK_FUTURE_TIME_LIMIT          4
+#define CURRENCY_POS_BLOCK_FUTURE_TIME_LIMIT          60*15
 
 #define BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW             60
 
@@ -117,7 +117,7 @@
 #define P2P_IDLE_CONNECTION_KILL_INTERVAL               (5*60) //5 minutes
 
 //PoS definitions
-#define POS_SCAN_WINDOW                                 60*20 //seconds//(60*20) // 20 minutes
+#define POS_SCAN_WINDOW                                 60*10 //seconds//(60*20) // 10 minutes
 #define POS_SCAN_STEP                                   15    //seconds
 //#define POS_MAX_COINAGE                                 (60*60*24*90) // 90 days
 #define POS_STARTER_KERNEL_HASH                         "bd82e18d42a7ad239588b24fd356d63cc82717e1fae8f6a492cd25d62fda263f"
