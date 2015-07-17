@@ -614,6 +614,7 @@
                 if(alias.length){ // alias transaction
                     alias = alias[0];
                     informer.info('Алиас "'+alias.name+'" зарегистрирован');
+                    $rootScope.unconfirmed_aliases.splice($rootScope.unconfirmed_aliases.indexOf(alias),1);
                 }    
             }
             
