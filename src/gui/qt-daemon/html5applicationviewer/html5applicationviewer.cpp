@@ -24,6 +24,7 @@
 
 #include "warnings.h"
 #include "net/http_client.h"
+#include "gui_utils.h"
 
 #define PREPARE_ARG_FROM_JSON(arg_type, var_name)   \
   arg_type var_name = AUTO_VAL_INIT(var_name); \
@@ -1060,6 +1061,29 @@ QString Html5ApplicationViewer::reset_wallet_password(const QString& param)
 void Html5ApplicationViewer::dispatch(const QString& status, const QString& param)
 {
   m_d->do_dispatch(status, param);
+}
+
+QString Html5ApplicationViewer::is_autosrtart_enabled()
+{
+  view::api_response ar;
+  
+  if (gui_tools::GetStartOnSystemStartup())
+    ar.error_code = API_RETURN_CODE_TRUE;
+  else
+    ar.error_code = API_RETURN_CODE_TRUE;
+
+  return epee::serialization::store_t_to_json(ar).c_str();
+}
+QString Html5ApplicationViewer::togle_autostart(const QString& param)
+{
+  PREPARE_ARG_FROM_JSON(view::struct_with_one_t_type<bool>, as);
+
+  if(gui_tools::SetStartOnSystemStartup(as.v))
+    ar.error_code = API_RETURN_CODE_OK;
+  else
+    ar.error_code = API_RETURN_CODE_FAIL;
+
+  return epee::serialization::store_t_to_json(ar).c_str();
 }
 
 

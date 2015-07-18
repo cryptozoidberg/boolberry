@@ -5,7 +5,7 @@
 
 #pragma once
 
-namespace
+namespace gui_tools
 {
   bool GetStartOnSystemStartup();
   bool SetStartOnSystemStartup(bool fAutoStart);

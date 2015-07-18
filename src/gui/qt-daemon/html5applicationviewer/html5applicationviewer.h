@@ -97,7 +97,8 @@ protected:
   QString get_mining_estimate(const QString& obj);
   QString backup_wallet_keys(const QString& obj);
   QString reset_wallet_password(const QString& param);
-
+  QString is_autosrtart_enabled();
+  QString togle_autostart(const QString& param);
 
 
   void message_box(const QString& msg);

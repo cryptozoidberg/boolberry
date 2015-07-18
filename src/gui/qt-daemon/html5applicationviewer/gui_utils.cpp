@@ -80,8 +80,6 @@ namespace gui_tools
     return fs::path("");
   }
 #endif
-
-
 #ifdef WIN32
   boost::filesystem::path static StartupShortcutPath()
   {
@@ -180,7 +178,7 @@ namespace gui_tools
 
   boost::filesystem::path static GetAutostartFilePath()
   {
-    return GetAutostartDir() / "bitcoin.desktop";
+    return GetAutostartDir() / GUI_LINK_NAME ".desktop";
   }
 
   bool GetStartOnSystemStartup()
@@ -221,13 +219,8 @@ namespace gui_tools
       // Write a bitcoin.desktop file to the autostart directory:
       optionFile << "[Desktop Entry]\n";
       optionFile << "Type=Application\n";
-      if (GetBoolArg("-testnet", false))
-        optionFile << "Name=Bitcoin (testnet)\n";
-      else if (GetBoolArg("-regtest", false))
-        optionFile << "Name=Bitcoin (regtest)\n";
-      else
-        optionFile << "Name=Bitcoin\n";
-      optionFile << "Exec=" << pszExePath << strprintf(" -min -testnet=%d -regtest=%d\n", GetBoolArg("-testnet", false), GetBoolArg("-regtest", false));
+      optionFile << "Name=" << CURRENCY_NAME_BASE << "\n";
+      optionFile << "Exec=" << pszExePath << "\n";
       optionFile << "Terminal=false\n";
       optionFile << "Hidden=false\n";
       optionFile.close();
