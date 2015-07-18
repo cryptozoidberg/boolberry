@@ -140,11 +140,11 @@ namespace tools
       END_SERIALIZE()
     };
     void assign_account(const currency::account_base& acc);
-    void generate(const std::string& wallet, const std::string& password);
-    void restore(const std::string& path, const std::string& pass, const std::string& restore_key);
-    void load(const std::string& wallet, const std::string& password);    
+    void generate(const std::wstring& wallet, const std::string& password);
+    void restore(const std::wstring& path, const std::string& pass, const std::string& restore_key);
+    void load(const std::wstring& wallet, const std::string& password);    
     void store();
-    std::string get_wallet_path(){ return m_wallet_file; }
+    std::wstring get_wallet_path(){ return m_wallet_file; }
     currency::account_base& get_account(){return m_account;}
 
     void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
@@ -301,7 +301,7 @@ private:
     bool is_coin_age_okay_for_pos(const transfer_details& tr);
 
     currency::account_base m_account;
-    std::string m_wallet_file;
+    std::wstring m_wallet_file;
     std::string m_password;
     std::vector<crypto::hash> m_blockchain;
     std::atomic<uint64_t> m_local_bc_height; //temporary workaround 

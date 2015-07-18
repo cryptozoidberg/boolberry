@@ -2,6 +2,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <codecvt>
 
 #include "daemon_backend.h"
 #include "currency_core/alias_helper.h"
@@ -473,7 +474,7 @@ void daemon_backend::init_wallet_entry(wallet_vs_options& wo, uint64_t id)
   wo.pview = m_pview;  
 }
 
-std::string daemon_backend::open_wallet(const std::string& path, const std::string& password, view::open_wallet_response& owr)
+std::string daemon_backend::open_wallet(const std::wstring& path, const std::string& password, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
   owr.wallet_id = m_wallet_id_counter++;
@@ -546,7 +547,7 @@ std::string daemon_backend::get_recent_transfers(size_t wallet_id, view::transfe
   return API_RETURN_CODE_OK;
 }
 */
-std::string daemon_backend::generate_wallet(const std::string& path, const std::string& password, view::open_wallet_response& owr)
+std::string daemon_backend::generate_wallet(const std::wstring& path, const std::string& password, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
   owr.wallet_id = m_wallet_id_counter++;
@@ -593,7 +594,7 @@ std::string daemon_backend::is_pos_allowed()
     return API_RETURN_CODE_FALSE;
 }
 
-std::string daemon_backend::restore_wallet(const std::string& path, const std::string& password, const std::string& restore_key, view::open_wallet_response& owr)
+std::string daemon_backend::restore_wallet(const std::wstring& path, const std::string& password, const std::string& restore_key, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
   owr.wallet_id = m_wallet_id_counter++;
@@ -898,7 +899,8 @@ std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_
   wi.tracking_hey = string_tools::pod_to_hex(wo.w->get()->get_account().get_keys().m_view_secret_key);
   wi.balance = wo.w->get()->balance();
   wi.unlocked_balance = wo.w->get()->unlocked_balance();
-  wi.path = wo.w->get()->get_wallet_path();
+  std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+  wi.path = conv.to_bytes(wo.w->get()->get_wallet_path());
   return API_RETURN_CODE_OK;
 }
 

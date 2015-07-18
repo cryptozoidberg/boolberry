@@ -856,10 +856,9 @@ QString Html5ApplicationViewer::generate_wallet(const QString& param)
     view::open_wallet_response owr = AUTO_VAL_INIT(owr);
 
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-    //std::string s = conv.to_bytes(uchars);
-    std::wstring ws2 = conv.from_bytes(owd.path);
+    std::wstring path_w = conv.from_bytes(owd.path);
 
-    ar.error_code = m_backend.generate_wallet(owd.path, owd.pass, owr);
+    ar.error_code = m_backend.generate_wallet(path_w, owd.pass, owr);
     dispatch(ar, owr);
   });
 }
@@ -869,7 +868,10 @@ QString Html5ApplicationViewer::restore_wallet(const QString& param)
 {
   return que_call2<view::restore_wallet_request>("restore_wallet", param, [this](const view::restore_wallet_request& owd, view::api_response& ar){
     view::open_wallet_response owr = AUTO_VAL_INIT(owr);
-    ar.error_code = m_backend.restore_wallet(owd.path, owd.pass, owd.restore_key, owr);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    std::wstring path_w = conv.from_bytes(owd.path);
+
+    ar.error_code = m_backend.restore_wallet(path_w, owd.pass, owd.restore_key, owr);
     dispatch(ar, owr);
   });
 }
@@ -879,7 +881,10 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
   return que_call2<view::open_wallet_request>("open_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
 
     view::open_wallet_response owr = AUTO_VAL_INIT(owr);
-    ar.error_code = m_backend.open_wallet(owd.path, owd.pass, owr);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    std::wstring path_w = conv.from_bytes(owd.path);
+
+    ar.error_code = m_backend.open_wallet(path_w, owd.pass, owr);
     dispatch(ar, owr);
   });
 }
@@ -896,16 +901,6 @@ QString Html5ApplicationViewer::run_wallet(const QString& param)
   ar.error_code = m_backend.run_wallet(wio.wallet_id);
   return epee::serialization::store_t_to_json(ar).c_str();
 }
-
-/*QString Html5ApplicationViewer::get_wallet_info(const QString& param)
-{
-  return que_call2<view::wallet_id_obj>("get_wallet_info", param, [this](const view::wallet_id_obj& a, view::api_response& ar){
-
-    view::wallet_info wi = AUTO_VAL_INIT(wi);
-    ar.error_code = m_backend.get_wallet_info(a.wallet_id, wi);
-    dispatch(ar, wi);
-  });
-}*/
 
 QString Html5ApplicationViewer::resync_wallet(const QString& param)
 {

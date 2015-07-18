@@ -10,6 +10,7 @@
 #include "include_base_utils.h"
 using namespace epee;
 
+#include "string_coding.h"
 #include "wallet2.h"
 #include "currency_core/currency_format_utils.h"
 #include "rpc/core_rpc_server_commands_defs.h"
@@ -651,26 +652,26 @@ void wallet2::assign_account(const currency::account_base& acc)
   m_account_public_address = m_account.get_keys().m_account_address;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::generate(const std::string& path, const std::string& pass)
+void wallet2::generate(const std::wstring& path, const std::string& pass)
 {
   clear();
   m_wallet_file = path;
   m_password = pass;
   m_account.generate();
   boost::system::error_code ignored_ec;
-  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, epee::string_encoding::convert_to_ansii(m_wallet_file));
   store();
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::restore(const std::string& path, const std::string& pass, const std::string& restore_key)
+void wallet2::restore(const std::wstring& path, const std::string& pass, const std::string& restore_key)
 {
   clear();
   m_wallet_file = path;
   m_password = pass;
   bool r = m_account.restore_keys_from_braindata(restore_key);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, epee::string_encoding::convert_to_ansii(m_wallet_file));
   boost::system::error_code ignored_ec;
-  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, epee::string_encoding::convert_to_ansii(m_wallet_file));
   store();
 }
 //----------------------------------------------------------------------------------------------------
@@ -679,7 +680,7 @@ bool wallet2::check_connection()
   return m_core_proxy->check_connection();
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::load(const std::string& wallet_, const std::string& password)
+void wallet2::load(const std::wstring& wallet_, const std::string& password)
 {
   clear();
   m_wallet_file = wallet_;
@@ -691,22 +692,22 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
 
   boost::system::error_code e;
   bool exists = boost::filesystem::exists(m_wallet_file, e);
-  CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
 
   std::ifstream data_file;
   data_file.open(m_wallet_file, std::ios_base::binary | std::ios_base::in);
-  CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_not_found, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
 
   wallet_file_binary_header wbh = AUTO_VAL_INIT(wbh);
   //wbh//WALLET_FILE_SIGNATURE;
 
 
   data_file.read((char*)&wbh, sizeof(wbh));
-  CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_not_found, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
 
-  CHECK_AND_THROW_WALLET_EX(wbh.m_signature != WALLET_FILE_SIGNATURE, error::file_not_found, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(wbh.m_signature != WALLET_FILE_SIGNATURE, error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
   CHECK_AND_THROW_WALLET_EX(wbh.m_cb_body > WALLET_FILE_MAX_BODY_SIZE || 
-    wbh.m_cb_keys > WALLET_FILE_MAX_KEYS_SIZE, error::file_not_found, m_wallet_file);
+    wbh.m_cb_keys > WALLET_FILE_MAX_KEYS_SIZE, error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
 
 
   keys_buff.resize(wbh.m_cb_keys);
@@ -722,7 +723,7 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
     reset_history();
   }
   m_local_bc_height = m_blockchain.size();
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_load_notice_wallet_restored, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_load_notice_wallet_restored, epee::string_encoding::convert_to_ansii(m_wallet_file));
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::drop_offer_keys()
@@ -742,13 +743,13 @@ void wallet2::store()
   //prepare data
   std::string keys_buff;
   bool r = store_keys(keys_buff, m_password);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, epee::string_encoding::convert_to_ansii(m_wallet_file));
 
   wallet_file_binary_header wbh = AUTO_VAL_INIT(wbh);
 
   std::stringstream ss;
   r = tools::portble_serialize_obj_to_stream(*this, ss);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, epee::string_encoding::convert_to_ansii(m_wallet_file));
   std::string body_buff = ss.str();
 
   //store data
@@ -762,7 +763,7 @@ void wallet2::store()
 
   std::ofstream data_file;
   data_file.open(m_wallet_file, std::ios_base::binary | std::ios_base::out | std::ios::trunc);
-  CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_save_error, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_save_error, epee::string_encoding::convert_to_ansii(m_wallet_file));
   data_file << header_buff << keys_buff << body_buff;
   data_file.flush();
   data_file.close();
@@ -1015,7 +1016,7 @@ bool wallet2::try_mint_pos()
 bool wallet2::reset_history()
 {
   std::string pass = m_password;
-  std::string file_path = m_wallet_file;
+  std::wstring file_path = m_wallet_file;
   account_base acc_tmp = m_account;
   clear();
   m_account = acc_tmp;
