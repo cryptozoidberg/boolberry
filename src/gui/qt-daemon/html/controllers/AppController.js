@@ -259,6 +259,7 @@
             // informer.info(JSON.stringify(settings.system.fav_offers_hash));
             if(settings){
                 $rootScope.settings = settings;
+                $rootScope.settings.system.app_autoload = backend.isAutostartEnabled();
             } 
             console.log('SHOULD USE APP PASS ::');
             console.log($rootScope.settings.security.is_use_app_pass);

@@ -31,6 +31,11 @@
                 }
             };
 
+            $scope.toggleAutostart = function(value) {
+                // informer.info(value);
+                backend.toggleAutostart(value);
+            };
+
             $scope.requestPass = function(){
                 PassDialogs.requestMPDialog(function(){
                     $rootScope.settings.security.is_pass_required_on_transfer = true;

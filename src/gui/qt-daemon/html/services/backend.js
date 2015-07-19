@@ -31,6 +31,24 @@
                 this.runCommand('webkit_launched_script',{});
             },
 
+            toggleAutostart: function(value) {
+                var params = {
+                    v: value
+                };
+                this.runCommand('toggle_autostart',params);
+            },
+
+            isAutostartEnabled: function() {
+                if(!this.shouldUseEmulator()){
+                    var res = Qt_parent['is_autostart_enabled']();
+                }else{
+                    var res = {
+                      "error_code": true
+                    };
+                }
+                return res.error_code;
+            },
+
             saveFileDialog : function(caption, filemask) {
                 var dir = '/';
                 if(angular.isDefined($rootScope.settings.system.default_user_path)){

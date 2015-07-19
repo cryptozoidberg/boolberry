@@ -262,11 +262,16 @@
                     <div class="collapse-off in collapse-off31-1">
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <div class="btn-group pull-right" data-toggle="buttons">
-                                    <label class="btn btn-default"><input type="radio" name="options1_1_1" id="option1" autocomplete="off" checked><i class="fa fa-lg fa-check"></i></label>
-                                    <label class="btn btn-default active"><i class="fa fa-lg fa-times"></i><input type="radio" name="options1_1_1" id="option2" autocomplete="off"></label>
+                                <div class="btn-group pull-right">
+                                    <label class="btn btn-default" btn-radio="true" ng-change="toggleAutostart(true)" ng-model="settings.system.app_autoload">
+                                        <i class="fa fa-lg fa-check"></i>
+                                    </label>
+                                    <label class="btn btn-default" btn-radio="false" ng-change="toggleAutostart(false)" ng-model="settings.system.app_autoload">
+                                        <i class="fa fa-lg fa-times"></i>
+                                    </label>
                                 </div>
-                                <em>Автоматически запускать приложение при включении компьютера</em> &nbsp;<i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
+                                <em>Автоматически запускать приложение при включении компьютера</em> &nbsp;
+                                    <i class="fa fa-lg fa-question-circle text-info" tooltip-placement="right" tooltip="Подсказка"></i>
                             </li>
 
                             <li class="list-group-item">
