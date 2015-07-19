@@ -1063,7 +1063,7 @@ void Html5ApplicationViewer::dispatch(const QString& status, const QString& para
   m_d->do_dispatch(status, param);
 }
 
-QString Html5ApplicationViewer::is_autosrtart_enabled()
+QString Html5ApplicationViewer::is_autostart_enabled()
 {
   view::api_response ar;
   
@@ -1074,7 +1074,7 @@ QString Html5ApplicationViewer::is_autosrtart_enabled()
 
   return epee::serialization::store_t_to_json(ar).c_str();
 }
-QString Html5ApplicationViewer::togle_autostart(const QString& param)
+QString Html5ApplicationViewer::toggle_autostart(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::struct_with_one_t_type<bool>, as);
 
