@@ -9,7 +9,7 @@ fi
 
 rm -rf build; mkdir -p build/release; cd build/release;
 
-cmake -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH=/Users/roky/Qt/5.3/clang_64 -D CMAKE_BUILD_TYPE=Release ../..
+cmake -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH=/Users/roky/Qt5.5.0/5.5/clang_64 -D CMAKE_BUILD_TYPE=Release ../..
 if [ $? -ne 0 ]; then
     echo "Failed to cmake"
     exit $?
@@ -30,7 +30,7 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 
-/Users/roky/Qt/5.3/clang_64/bin/macdeployqt qt-lui.app
+/Users/roky/Qt5.5.0/5.5/clang_64/bin/macdeployqt qt-lui.app
 if [ $? -ne 0 ]; then
     echo "Failed to macdeployqt qt-lui.app"
     exit $?
