@@ -76,12 +76,22 @@ set_property(TARGET daemon simplewallet simpleminer connectivity_tool PROPERTY F
 set_property(TARGET daemon PROPERTY OUTPUT_NAME "luid")
 
 if(BUILD_GUI)
+
+  if(APPLE)
+    FIND_LIBRARY(COCOA_LIBRARY Cocoa)
+  endif()
+
   set(CMAKE_AUTOMOC ON)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
   SET(MACOSX_BUNDLE_ICON_FILE app.icns)
   add_executable(qt-lui WIN32 MACOSX_BUNDLE ${QTDAEMON} )	  
   QT5_USE_MODULES(qt-lui WebKit WebKitWidgets)
-  target_link_libraries(qt-lui wallet rpc currency_core crypto common Qt5::Widgets ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} )
+  target_link_libraries(qt-lui wallet rpc currency_core crypto common Qt5::Widgets ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+
+  if(APPLE)
+    target_link_libraries(qt-lui ${COCOA_LIBRARY})
+  endif()
+
   set_property(TARGET qt-lui PROPERTY FOLDER "prog")
   set(CMAKE_AUTOMOC OFF)
 endif()

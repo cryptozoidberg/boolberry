@@ -5,7 +5,8 @@
 
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
-
+#include <boost/filesystem/fstream.hpp>
+#include <iostream>
 #include <boost/utility/value_init.hpp>
 #include "include_base_utils.h"
 using namespace epee;
@@ -695,14 +696,16 @@ void wallet2::load(const std::wstring& wallet_, const std::string& password)
   CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
 
   std::ifstream data_file;
-  data_file.open(m_wallet_file, std::ios_base::binary | std::ios_base::in);
+  boost::filesystem::path p(m_wallet_file);
+  //boost::filesystem::ofstream data_file;
+  data_file.open(p.string(), std::ios_base::binary | std::ios_base::in);
   CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
 
   wallet_file_binary_header wbh = AUTO_VAL_INIT(wbh);
   //wbh//WALLET_FILE_SIGNATURE;
 
 
-  data_file.read((char*)&wbh, sizeof(wbh));
+  data_file.  read((char*)&wbh, sizeof(wbh));
   CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
 
   CHECK_AND_THROW_WALLET_EX(wbh.m_signature != WALLET_FILE_SIGNATURE, error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
@@ -761,7 +764,8 @@ void wallet2::store()
   std::string header_buff((const char*)&wbh, sizeof(wbh));
 
 
-  std::ofstream data_file;
+  //std::ofstream data_file;
+  boost::filesystem::ofstream data_file;
   data_file.open(m_wallet_file, std::ios_base::binary | std::ios_base::out | std::ios::trunc);
   CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_save_error, epee::string_encoding::convert_to_ansii(m_wallet_file));
   data_file << header_buff << keys_buff << body_buff;
