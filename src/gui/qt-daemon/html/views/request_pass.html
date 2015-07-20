@@ -3,7 +3,7 @@
     <h4 class="modal-title text-center">Введите пароль для входа в приложение</h4>
 </div>
 <div class="modal-body">
-    <form name="app_pass_form" novalidate >
+    <form name="app_pass_form" novalidate ng-submit="submit(pass)">
         <div class="form-group">
             <input id="create-safe_safe-name-input" ng-model="pass" type="password" required name="app_pass" class="input-lg form-control">
         </div>
@@ -12,21 +12,21 @@
         </div>
         <div class="row" ng-if="canReset">
             <div class="col-xs-4 col-sm-4">
-                <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-disabled="!app_pass_form.app_pass.$valid" ng-click="submit(pass)"> Продолжить</a>
+                <button class="btn btn-default btn-block btn-lg" type="submit" ng-disabled="!app_pass_form.app_pass.$valid" > Продолжить</button>
             </div>
             <div class="col-xs-4 col-sm-4" ng-if="canCancel">
-                <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-click="cancel()"> Отменить</a>
+                <button class="btn btn-default btn-block btn-lg" type="button" ng-click="cancel()"> Отменить</button>
             </div>
             <div class="col-xs-4 col-sm-4">
-                <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-click="reset()"> Переустановить</a>
+                <button class="btn btn-default btn-block btn-lg" type="button" ng-click="reset()"> Переустановить</button>
             </div>
         </div>
         <div class="row"  ng-if="!canReset">
             <div class="col-xs-6 col-sm-6">
-                <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-disabled="!app_pass_form.app_pass.$valid" ng-click="submit(pass)"> Продолжить</a>
+                <button class="btn btn-default btn-block btn-lg" type="submit" ng-disabled="!app_pass_form.app_pass.$valid" > Продолжить</button>
             </div>
             <div class="col-xs-6 col-sm-6" ng-if="canCancel">
-                <a class="btn btn-default btn-block btn-lg" type="button" href="" ng-click="cancel()"> Отменить</a>
+                <button class="btn btn-default btn-block btn-lg" type="button" ng-click="cancel()"> Отменить</button>
             </div>
         </div>
     </form>
