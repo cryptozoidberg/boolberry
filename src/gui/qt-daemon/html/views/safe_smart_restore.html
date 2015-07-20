@@ -5,10 +5,12 @@
 </div>
 
 <div class="modal-body">
-    <form name="smartSafeRestoreForm">
+    <form name="smartSafeRestoreForm" novalidate>
         <div class="owl-carousel" data-owl-carousel data-options="owl_options">
             
             <div class="item" data-hash="screen11">
+                
+
                 <div class="form-group">
                     <label class="requred">
                         Имя для обозначения сейфа в приложении<!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
@@ -25,47 +27,23 @@
                         <a type="button" ng-click="close()" class="btn btn-default btn-block btn-lg"> Отменить</a>
                     </div>
                     <div class="col-xs-6 col-sm-6">
-                        <a class="btn btn-primary btn-block btn-lg owl-next"  type="button">Продолжить</a>
+                        <a ng-disabled="!safe.name.length" class="btn btn-primary btn-block btn-lg owl-next" type="button">Продолжить</a>
                     </div>
                 </div>
             </div>
 
             <div class="item" data-hash="screen12">
+                <alert ng-show="!safe.restore_key_valid" type="danger">Фраза не валидна</alert>
                 <div class="form-group clearfix">
                     <label class="requred">Фраза, шифрующая сейф</label>
                     <div class="help-block">Случайный набор букв, сгенерированный компьютером, при создании smartsafe бекапа сейфа.</div>
                 </div>
                 <div class="form-group clearfix">
                     <div class="col-xs-12 col-sm-12">
-                        <input type="text" ng-model="safe.restore_key" class="form-control">
+                        <input type="text" ng-model="safe.restore_key" ng-change="checkRestoreKey(safe.restore_key)" class="form-control">
                     </div>
-                    <!-- <div class="col-xs-3 col-sm-3">
-                        <input type="text" value="" class="form-control">
-                    </div>
-                    <div class="col-xs-3 col-sm-3">
-                        <input type="text" value="" class="form-control">
-                    </div>
-                    <div class="col-xs-3 col-sm-3">
-                        <input type="text" value="" class="form-control">
-                    </div> -->
-
                 </div>
-                <!-- <div class="form-group clearfix">
-                    <div class="col-xs-3 col-sm-3">
-                        <input type="text" value="" class="form-control">
-                    </div>
-                    <div class="col-xs-3 col-sm-3">
-                        <input type="text" value="" class="form-control">
-                    </div>
-                    <div class="col-xs-3 col-sm-3">
-                        <input type="text" value="" class="form-control">
-                    </div>
-                    <div class="col-xs-3 col-sm-3">
-                        <input type="text" value="" class="form-control">
-                    </div>
-
-                </div>
-     -->
+                
                 <a class="btn btn-link text-muted owl-prev" type="button"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
 
                 <div class="form-group">
@@ -73,7 +51,7 @@
                         <a ng-click="close()" type="button" class="btn btn-default btn-block btn-lg"> Отменить</a>
                     </div>
                     <div class="col-xs-6 col-sm-6">
-                        <a class="btn btn-primary btn-block btn-lg owl-next" type="button" ng-disabled="!safe.restore_key.length">Продолжить</a>
+                        <a class="btn btn-primary btn-block btn-lg owl-next" type="button" ng-disabled="!safe.restore_key_valid || !safe.restore_key.length">Продолжить</a>
                     </div>
                 </div>
             </div>
@@ -125,17 +103,15 @@
                     <input class="form-control" ng-model="safe.pass2" name="pass2" type="password" match="safe.pass">
                 </div>
 
-                <a class="btn btn-success btn-block btn-lg" type="button" ng-click="saveWalletFile()">
+                <a class="btn btn-success btn-block btn-lg" ng-disabled="!smartSafeRestoreForm.pass2.$valid" type="button" ng-click="saveWalletFile(safe)">
                     Сохранить файл сейфа 
-                    <i class="fa fa-lg fa-check"  id="savestatesuccess0" style="display:none"></i>
+                    <i class="fa fa-lg fa-check" ng-show="safe.file_saved"></i>
                 </a>
 
                 <hr>
                 <h5>Чтобы не потерять и надежно защитить файл сейфа, вам необходимо создать  бекап файла сейфа на следующем шаге</h5>
 
-
-                <!-- <button type="button" class="btn btn-primary btn-block btn-lg" disabled="" id="gotoBackups0">Продолжить</button> -->
-                <a class="btn btn-primary btn-block btn-lg owl-next" ng-disabled="!smartSafeRestoreForm.pass2.$valid">Продолжить</a>
+                <a class="btn btn-primary btn-block btn-lg owl-next" ng-disabled="!safe.file_saved">Продолжить</a>
 
             </div>
 
@@ -148,14 +124,14 @@
                     <div class="help-block">Скопируйте созданный файл сейфа в другое надежное место, не храните бекап на том же компьютере.</div>
                 </div>
                 <div class="form-group">
-                    <a class="btn btn-success btn-block btn-lg" type="button" >
+                    <a class="btn btn-success btn-block btn-lg" type="button" ng-click="safeBackup(safe)">
                         Сохранить копию файла на компьютере
                         <i class="fa fa-lg fa-check savefilesuccess0" style="display:none"></i>
                     </a>
                 </div>
 
                 <div class="form-group">
-                    <button type="button" ng-click="changeRestoreKey(safe)" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn0">Восстановить сейф</button>
+                    <button type="button" ng-click="changeRestoreKey(safe)" class="btn btn-primary btn-block btn-lg" type="button" id="startsafeBtn0">Начать использовать сейф</button>
                 </div>
             </div>
 

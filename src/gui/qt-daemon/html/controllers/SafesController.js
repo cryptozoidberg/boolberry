@@ -472,29 +472,50 @@
             };
 
             $scope.safe = {
-                restore_key : '',  
+                restore_key : '', 
+                restore_key_valid : true,
+                file_saved: false,
                 pass : '',
                 path : '',
                 name : ''
             }
 
-            $scope.saveWalletFile = function(){
+            $scope.checkRestoreKey = function (key) {
+                if(backend.isValidRestoreWalletText(key) || !key.length){
+                    $scope.safe.restore_key_valid = true;
+                }else{
+                    $scope.safe.restore_key_valid = false;
+                }
+            }
+
+            $scope.safeBackup = function(safe){
+                var caption      = "Please, choose the file";
+                var filemask     = CONFIG.filemask;
+                var result       = backend.saveFileDialog(caption, filemask); // TODO digest angular error fix
+                var original_dir = result.path.substr(0,result.path.lastIndexOf('/'));
+                var new_dir      = safe.path.substr(0,safe.path.lastIndexOf('/'));
+                
+                if(original_dir == new_dir){
+                    informer.error('Вы не можете сохранить копию в ту же директорию');
+                    //$scope.safeBackup();
+                }else{
+                    var res = backend.backupWalletKeys(safe.wallet_id, result.path);
+                    informer.success('Копия создана');
+                }
+            };
+
+            $scope.saveWalletFile = function(safe){
                 var caption = "Please, choose the file";
                 var filemask = CONFIG.filemask;
                 var result;
                 if(result = backend.saveFileDialog(caption, filemask)){
                     $scope.safe.path = result.path;
                 }
-            }
-
-            $scope.close = function(){
-                $modalInstance.close();
-            }
-
-            $scope.changeRestoreKey = function(safe){
                 backend.restoreWallet(safe.path,safe.pass,safe.restore_key,function(data){
                     
                     var exists = $filter('filter')($rootScope.safes, {address: data.wi.address});
+
+                    $scope.safe.file_saved = true;
                     
                     if(exists.length){
                         informer.warning('Сейф с таким адресом уже открыт');
@@ -512,7 +533,7 @@
                             new_safe.history = data.recent_history.history;
                         }
                         
-                        $modalInstance.close();
+                        
                         $timeout(function(){
                             $rootScope.safes.unshift(new_safe); 
                             backend.runWallet(data.wallet_id);
@@ -522,8 +543,14 @@
                     }
                     
                 });
-                    
-                
+            }
+
+            $scope.close = function(){
+                $modalInstance.close();
+            }
+
+            $scope.changeRestoreKey = function(safe){
+                $modalInstance.close();
             }
         }
     ]);

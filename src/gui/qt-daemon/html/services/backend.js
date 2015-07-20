@@ -141,6 +141,14 @@
 
             },
 
+            isValidRestoreWalletText : function(text) {
+                if(!this.shouldUseEmulator()){
+                    return Qt_parent['is_valid_restore_wallet_text'](text);
+                }else{
+                    return text.length == 20 ? true : false;
+                }
+            },
+
             registerAlias: function(wallet_id, alias, address, fee, comment, reward, callback) {
                 var params = {
                     "wallet_id": wallet_id,
@@ -705,7 +713,8 @@
                     break;
                 case 'restore_wallet' :
                     result = {
-                        'wallet_id' : '14'
+                        "wallet_id" : this.getWalletId(),
+                        "wi" : this.getWalletInfo()
                     };
                     break;
                 case 'show_savefile_dialog' : 
