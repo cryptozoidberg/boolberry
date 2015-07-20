@@ -80,9 +80,6 @@ if(BUILD_GUI)
   if(APPLE)
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
   endif()
-  if(MSVC)
-    FIND_LIBRARY(SHLWAPI_LIBRARY Shlwapi)
-  endif()
 
   set(CMAKE_AUTOMOC ON)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -95,7 +92,7 @@ if(BUILD_GUI)
     target_link_libraries(qt-lui ${COCOA_LIBRARY})
   endif()
   if(MSVC)
-    target_link_libraries(qt-lui ${SHLWAPI_LIBRARY})
+    target_link_libraries(qt-lui shlwapi.lib)
   endif()
 
 
