@@ -2392,6 +2392,12 @@ bool blockchain_storage::check_block_timestamp(std::vector<uint64_t> timestamps,
   if(timestamps.size() < BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW)
     return true;
 
+  if (is_pos_block(b) && b.timestamp > get_adjusted_time() + CURRENCY_POS_BLOCK_FUTURE_TIME_LIMIT)
+  {
+    LOG_PRINT_L0("Timestamp of PoS block with id: " << get_block_hash(b) << ", " << b.timestamp << ", bigger than adjusted time + 4 minutes: " << get_adjusted_time() << " (" << b.timestamp - get_adjusted_time() << ")");
+    return false;
+  }
+
   uint64_t median_ts = epee::misc_utils::median(timestamps);
 
   if(b.timestamp < median_ts)
