@@ -682,7 +682,7 @@ namespace currency
       return false;
     }
     block blk = AUTO_VAL_INIT(blk);
-    bool r = m_core.get_blockchain_storage().get_block_by_height(req.height, blk);
+    m_core.get_blockchain_storage().get_block_by_height(req.height, blk);
     
     bool responce_filled = fill_block_header_responce(blk, false, res.block_header);
     if (!responce_filled)
