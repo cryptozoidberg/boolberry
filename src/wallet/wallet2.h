@@ -457,6 +457,7 @@ namespace tools
       std::vector<currency::tx_destination_entry>& splitted_dsts, uint64_t& dust)
     {
       splitted_dsts = dsts;
+      splitted_dsts.push_back(change_dst);
     }
     //----------------------------------------------------------------------------------------------------
     inline void print_source_entry(const currency::tx_source_entry& src)
