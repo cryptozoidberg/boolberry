@@ -1078,7 +1078,7 @@ QString Html5ApplicationViewer::toggle_autostart(const QString& param)
 }
 QString Html5ApplicationViewer::is_valid_restore_wallet_text(const QString& param)
 {
-  return m_backend.is_valid_brain_restore_data(param.toStdString());
+  return m_backend.is_valid_brain_restore_data(param.toStdString()).c_str();
 }
 
 
