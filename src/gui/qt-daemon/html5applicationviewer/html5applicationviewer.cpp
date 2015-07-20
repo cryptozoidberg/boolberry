@@ -1061,7 +1061,7 @@ QString Html5ApplicationViewer::is_autostart_enabled()
   if (gui_tools::GetStartOnSystemStartup())
     ar.error_code = API_RETURN_CODE_TRUE;
   else
-    ar.error_code = API_RETURN_CODE_TRUE;
+    ar.error_code = API_RETURN_CODE_FALSE;
 
   return epee::serialization::store_t_to_json(ar).c_str();
 }
