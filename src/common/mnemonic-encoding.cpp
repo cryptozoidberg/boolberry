@@ -3270,8 +3270,9 @@ namespace tools
 			"weary"
 		};
 
-		// convert text to binary data, 3 words -> 4 bytes
-		vector<unsigned char> text2binary(const string& text)
+
+    // convert text to binary data, 3 words -> 4 bytes
+		vector<unsigned char> text2binary_throw(const string& text)
 		{
 			int n = NUMWORDS;
 			vector<string> tokens;
@@ -3299,6 +3300,17 @@ namespace tools
 			return res;
 		}
 
+    vector<unsigned char> text2binary(const string& text)
+    {
+      try
+      {
+        return text2binary_throw(text);
+      }
+      catch (...)
+      {
+        return vector<unsigned char>();
+      }
+    }
 		// convert binary data to text, 4 bytes => 3 words
 		string binary2text(const vector<unsigned char>& binary)
 		{

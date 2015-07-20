@@ -95,6 +95,7 @@ public:
   void toggle_pos_mining();
   std::string transfer(size_t wallet_id, const view::transfer_params& tp, currency::transaction& res_tx);
   std::string get_config_folder();
+  std::string is_valid_brain_restore_data(const std::string& brain_text);
 
 private:
   void main_worker(const po::variables_map& vm);

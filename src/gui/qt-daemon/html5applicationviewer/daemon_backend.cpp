@@ -591,7 +591,14 @@ std::string daemon_backend::is_pos_allowed()
   else 
     return API_RETURN_CODE_FALSE;
 }
-
+std::string daemon_backend::is_valid_brain_restore_data(const std::string& brain_text)
+{
+  currency::account_base acc;
+  if (acc.restore_keys_from_braindata(brain_text))
+    return API_RETURN_CODE_TRUE;
+  else
+    return API_RETURN_CODE_FALSE;
+}
 std::string daemon_backend::restore_wallet(const std::wstring& path, const std::string& password, const std::string& restore_key, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());

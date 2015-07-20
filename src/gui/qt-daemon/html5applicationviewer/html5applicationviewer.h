@@ -99,6 +99,7 @@ protected:
   QString reset_wallet_password(const QString& param);
   QString is_autostart_enabled();
   QString toggle_autostart(const QString& param);
+  QString is_valid_restore_wallet_text(const QString& param);
 
 
   void message_box(const QString& msg);

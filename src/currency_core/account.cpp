@@ -79,7 +79,11 @@ DISABLE_VS_WARNINGS(4244 4345)
   //-----------------------------------------------------------------
   bool account_base::restore_keys_from_braindata(const std::string& restore_data)
   {
+    
     std::vector<unsigned char> bin = tools::mnemonic_encoding::text2binary(restore_data);
+    if (!bin.size())
+      return false;
+
     std::string restore_buff((const char*)&bin[0], bin.size());
     return restore_keys(restore_buff);
   }

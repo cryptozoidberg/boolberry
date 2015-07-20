@@ -589,6 +589,13 @@ resposne:
 {
   "error_code": "OK"
 }
+============================================================================
+============================================================================
+[sync] is_valid_restore_wallet_text()
+
+param: "some brain bla string bla string bla string bla string bla string "
+
+resposne: "TRUE" //or "FALSE" 
 
 
 
