@@ -543,7 +543,13 @@
               autoplayHoverPause: true,
             };
 
-            var filename = path.substr(path.lastIndexOf('/')+1, path.lastIndexOf('.')-1-path.lastIndexOf('/'));
+            
+            if(path.lastIndexOf('.') == -1){
+                var filename = path.substr(path.lastIndexOf('/')+1);
+            }else{
+                var filename = path.substr(path.lastIndexOf('/')+1, path.lastIndexOf('.')-1-path.lastIndexOf('/'));
+            }
+
             var folder = path.substr(0,path.lastIndexOf('/'));
 
             $rootScope.settings.system.default_user_path = folder;
