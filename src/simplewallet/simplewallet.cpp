@@ -17,6 +17,7 @@
 #include "rpc/core_rpc_server_commands_defs.h"
 #include "wallet/wallet_rpc_server.h"
 #include "version.h"
+#include "string_coding.h"
 
 #if defined(WIN32)
 #include <crtdbg.h>
@@ -251,7 +252,7 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
   }
   else
   {
-    bool r = open_wallet(m_wallet_file, pwd_container.password());
+    bool r = open_wallet(epee::string_encoding::convert_to_ansii(m_wallet_file), pwd_container.password());
     CHECK_AND_ASSERT_MES(r, false, "could not open account");
   }
 
@@ -295,7 +296,7 @@ bool simple_wallet::new_wallet(const string &wallet_file, const std::string& pas
   m_wallet->callback(this->shared_from_this());
   try
   {
-    m_wallet->generate(wallet_file, password);
+    m_wallet->generate(epee::string_encoding::convert_to_unicode(m_wallet_file), password);
     message_writer(epee::log_space::console_color_white, true) << "Generated new wallet: " << m_wallet->get_account().get_public_address_str() << std::endl << "view key: " << string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
   }
   catch (const std::exception& e)
@@ -328,7 +329,7 @@ bool simple_wallet::open_wallet(const string &wallet_file, const std::string& pa
   {
     try
     {
-      m_wallet->load(m_wallet_file, password);
+      m_wallet->load(epee::string_encoding::convert_to_unicode(m_wallet_file), password);
       message_writer(epee::log_space::console_color_white, true) << "Opened wallet: " << m_wallet->get_account().get_public_address_str();
       break;
     }
@@ -999,7 +1000,7 @@ int main(int argc, char* argv[])
       try
       {
         LOG_PRINT_L0("Loading wallet...");
-        wal.load(wallet_file, wallet_password);
+        wal.load(epee::string_encoding::convert_to_unicode(wallet_file), wallet_password);
       }
       catch (const tools::error::wallet_load_notice_wallet_restored& e)
       {
