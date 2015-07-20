@@ -40,13 +40,13 @@
 
             isAutostartEnabled: function() {
                 if(!this.shouldUseEmulator()){
-                    var res = Qt_parent['is_autostart_enabled']();
+                    var res = JSON.parse(Qt_parent['is_autostart_enabled']());
                 }else{
                     var res = {
-                      "error_code": true
+                      "error_code": "TRUE"
                     };
                 }
-                return res.error_code;
+                return res.error_code == "TRUE" ? true : false;
             },
 
             saveFileDialog : function(caption, filemask) {
