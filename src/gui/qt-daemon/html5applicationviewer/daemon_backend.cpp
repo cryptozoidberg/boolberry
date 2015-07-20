@@ -5,7 +5,7 @@
 #include "daemon_backend.h"
 #include "currency_core/alias_helper.h"
 #include "core_fast_rpc_proxy.h"
-
+#include "string_coding.h"
 
 #define GET_WALLET_OPT_BY_ID(wallet_id, name)       \
   CRITICAL_REGION_LOCAL(m_wallets_lock);    \
@@ -898,7 +898,7 @@ std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_
   wi.balance = wo.w->get()->balance();
   wi.unlocked_balance = wo.w->get()->unlocked_balance();
 
-  wi.path = string_encoding::wstring_to_utf8(wo.w->get()->get_wallet_path());
+  wi.path = epee::string_encoding::wstring_to_utf8(wo.w->get()->get_wallet_path());
   return API_RETURN_CODE_OK;
 }
 

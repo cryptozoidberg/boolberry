@@ -24,6 +24,7 @@
 #include "warnings.h"
 #include "net/http_client.h"
 #include "gui_utils.h"
+#include "string_coding.h"
 
 #define PREPARE_ARG_FROM_JSON(arg_type, var_name)   \
   arg_type var_name = AUTO_VAL_INIT(var_name); \
@@ -855,7 +856,7 @@ QString Html5ApplicationViewer::generate_wallet(const QString& param)
   return que_call2<view::open_wallet_request>("generate_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
     view::open_wallet_response owr = AUTO_VAL_INIT(owr);
 
-    ar.error_code = m_backend.generate_wallet(string_encoding::utf8_to_wstring(owd.path), owd.pass, owr);
+    ar.error_code = m_backend.generate_wallet(epee::string_encoding::utf8_to_wstring(owd.path), owd.pass, owr);
     dispatch(ar, owr);
   });
 }
@@ -865,7 +866,7 @@ QString Html5ApplicationViewer::restore_wallet(const QString& param)
 {
   return que_call2<view::restore_wallet_request>("restore_wallet", param, [this](const view::restore_wallet_request& owd, view::api_response& ar){
     view::open_wallet_response owr = AUTO_VAL_INIT(owr);
-    ar.error_code = m_backend.restore_wallet(string_encoding::utf8_to_wstring(owd.path), owd.pass, owd.restore_key, owr);
+    ar.error_code = m_backend.restore_wallet(epee::string_encoding::utf8_to_wstring(owd.path), owd.pass, owd.restore_key, owr);
     dispatch(ar, owr);
   });
 }
@@ -875,7 +876,7 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
   return que_call2<view::open_wallet_request>("open_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
 
     view::open_wallet_response owr = AUTO_VAL_INIT(owr);
-    ar.error_code = m_backend.open_wallet(string_encoding::utf8_to_wstring(owd.path), owd.pass, owr);
+    ar.error_code = m_backend.open_wallet(epee::string_encoding::utf8_to_wstring(owd.path), owd.pass, owr);
     dispatch(ar, owr);
   });
 }
