@@ -53,7 +53,9 @@
 #endif
 #include <boost/scoped_array.hpp>
 
-
+#ifndef MAX_PATH
+#define MAX_PATH 1000
+#endif
 
 #if BOOST_FILESYSTEM_VERSION >= 3
 static boost::filesystem::detail::utf8_codecvt_facet utf8;
