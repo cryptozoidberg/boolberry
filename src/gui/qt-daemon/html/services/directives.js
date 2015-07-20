@@ -98,17 +98,17 @@
       };
   }]);
 
-  // module.directive('historyBack', ['$window',function($window) {
-  //     return {
-  //         restrict: 'A',
-  //         link: function(scope, element) {
-  //           element.on('click', function() {
-  //             $window.history.back();
-  //             return false;
-  //           });
-  //         }
-  //     };
-  // }]);
+  module.directive('historyBack', ['$window',function($window) {
+      return {
+          restrict: 'A',
+          link: function(scope, element) {
+            element.on('click', function() {
+              $window.history.back();
+              return false;
+            });
+          }
+      };
+  }]);
 
   module.directive('disabledLink', ['informer',function(informer) {
       return {
