@@ -29,38 +29,30 @@
 #define _STRING_CODING_H_
 
 #include <string>
-//#include "md5_l.h"
+#include <boost/locale/encoding_utf.hpp>
+
+
 namespace epee
 {
 namespace string_encoding
 {
+
+  std::wstring utf8_to_wstring(const std::string& str)
+  {
+    return boost::locale::conv::utf_to_utf<wchar_t>(str.c_str(), str.c_str() + str.size());
+  }
+
+  std::string wstring_to_utf8(const std::wstring& str)
+  {
+    return boost::locale::conv::utf_to_utf<char>(str.c_str(), str.c_str() + str.size());
+  }
+
+
 	inline std::string convert_to_ansii(const std::wstring& str_from)
 	{
 		
 		std::string res(str_from.begin(), str_from.end());
 		return res;
-		/*
-		std::string result;
-		std::locale loc;
-		for(unsigned int i= 0; i < str_from.size(); ++i)
-		{
-			result += std::use_facet<std::ctype<wchar_t> >(loc).narrow(str_from[i]);
-		}
-		return result;
-		*/
-		
-		//return boost::lexical_cast<std::string>(str_from);
-		/*
-		std::string str_trgt;
-		if(!str_from.size())
-			return str_trgt;
-		int cb = ::WideCharToMultiByte( code_page, 0, str_from.data(), (__int32)str_from.size(), 0, 0, 0, 0  );
-		if(!cb)
-			return str_trgt;
-		str_trgt.resize(cb);
-		::WideCharToMultiByte(  code_page, 0, str_from.data(), (int)str_from.size(), 
-			                        (char*)str_trgt.data(), (int)str_trgt.size(), 0, 0);
-		return str_trgt;*/
 	}
 #ifdef WINDOWS_PLATFORM_EX
 	inline std::string convert_to_ansii_win(const std::wstring& str_from)

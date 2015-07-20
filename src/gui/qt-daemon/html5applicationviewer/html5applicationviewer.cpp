@@ -3,7 +3,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "html5applicationviewer.h"
-#include <codecvt>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -856,10 +855,7 @@ QString Html5ApplicationViewer::generate_wallet(const QString& param)
   return que_call2<view::open_wallet_request>("generate_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
     view::open_wallet_response owr = AUTO_VAL_INIT(owr);
 
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-    std::wstring path_w = conv.from_bytes(owd.path);
-
-    ar.error_code = m_backend.generate_wallet(path_w, owd.pass, owr);
+    ar.error_code = m_backend.generate_wallet(string_encoding::utf8_to_wstring(owd.path), owd.pass, owr);
     dispatch(ar, owr);
   });
 }
@@ -869,10 +865,7 @@ QString Html5ApplicationViewer::restore_wallet(const QString& param)
 {
   return que_call2<view::restore_wallet_request>("restore_wallet", param, [this](const view::restore_wallet_request& owd, view::api_response& ar){
     view::open_wallet_response owr = AUTO_VAL_INIT(owr);
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-    std::wstring path_w = conv.from_bytes(owd.path);
-
-    ar.error_code = m_backend.restore_wallet(path_w, owd.pass, owd.restore_key, owr);
+    ar.error_code = m_backend.restore_wallet(string_encoding::utf8_to_wstring(owd.path), owd.pass, owd.restore_key, owr);
     dispatch(ar, owr);
   });
 }
@@ -882,10 +875,7 @@ QString Html5ApplicationViewer::open_wallet(const QString& param)
   return que_call2<view::open_wallet_request>("open_wallet", param, [this](const view::open_wallet_request& owd, view::api_response& ar){
 
     view::open_wallet_response owr = AUTO_VAL_INIT(owr);
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-    std::wstring path_w = conv.from_bytes(owd.path);
-
-    ar.error_code = m_backend.open_wallet(path_w, owd.pass, owr);
+    ar.error_code = m_backend.open_wallet(string_encoding::utf8_to_wstring(owd.path), owd.pass, owr);
     dispatch(ar, owr);
   });
 }

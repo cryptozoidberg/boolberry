@@ -2,8 +2,6 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <codecvt>
-
 #include "daemon_backend.h"
 #include "currency_core/alias_helper.h"
 #include "core_fast_rpc_proxy.h"
@@ -899,8 +897,8 @@ std::string daemon_backend::get_wallet_info(wallet_vs_options& wo, view::wallet_
   wi.tracking_hey = string_tools::pod_to_hex(wo.w->get()->get_account().get_keys().m_view_secret_key);
   wi.balance = wo.w->get()->balance();
   wi.unlocked_balance = wo.w->get()->unlocked_balance();
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-  wi.path = conv.to_bytes(wo.w->get()->get_wallet_path());
+
+  wi.path = string_encoding::wstring_to_utf8(wo.w->get()->get_wallet_path());
   return API_RETURN_CODE_OK;
 }
 
