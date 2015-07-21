@@ -87,7 +87,14 @@
                     <input id="create-safe_safe-password-input-2" class="form-control" required ng-model="safe.confirm_password" match="safe.password" name="safe_password_confirm" type="password">
                 </div>
 
-                <a href="" type="button" class="btn btn-link text-muted create-safe_step-1-button owl-prev"><i class="fa fa-lg fa-arrow-circle-left text-muted"></i> <span class="text-muted">Назад</span></a>
+                <a 
+                    type="button" 
+                    class="btn btn-link text-muted create-safe_step-1-button owl-prev"
+                    ng-show="!safe.fileSaved"
+                >
+                    <i class="fa fa-lg fa-arrow-circle-left text-muted"></i> 
+                    <span class="text-muted">Назад</span>
+                </a>
 
                 <a 
                     class="btn btn-success btn-block btn-lg" 
@@ -119,10 +126,7 @@
                     <div class="help-block">Скопируйте созданный файл сейфа в другое надежное место, не храните бекап на том же компьютере.</div>
                 </div>
 
-                <a href="" type="button" class="btn btn-link text-muted create-safe_step-1-button owl-prev">
-                    <i class="fa fa-lg fa-arrow-circle-left text-muted"></i> 
-                    <span class="text-muted">Назад</span>
-                </a>
+                
 
                 <div class="form-group">
                     <a class="btn btn-success btn-block btn-lg" type="button" ng-click="safeBackup(safe)">Сохранить копию файла на компьютере
