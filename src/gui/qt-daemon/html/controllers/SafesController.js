@@ -8,7 +8,8 @@
                 name : '',
                 fee : CONFIG.standart_fee,
                 reward: '0',
-                comment: ''
+                comment: '',
+                exists: false
             };
 
             $scope.close = function(){
@@ -18,13 +19,19 @@
             $scope.not_enought = false;
 
             $scope.getAliasCoast = function(alias){
-                var result = alias.length ? backend.getAliasCoast(alias) : {coast:0};
-                
-                $scope.not_enought = (result.coast + $filter('gulden_to_int')($scope.alias.fee)) > safe.balance;
+                if(angular.isDefined(alias)){
+                    var result = alias.length ? backend.getAliasCoast(alias) : {coast:0};
 
-                $timeout(function(){
-                    $scope.alias.reward = $filter('gulden')(result.coast,false);    
-                });
+                    var exists = $filter('filter')($rootScope.aliases,{name : alias});
+                    $scope.alias.exists = exists.length ? true : false;
+                
+                    $scope.not_enought = (result.coast + $filter('gulden_to_int')($scope.alias.fee)) > safe.balance;
+
+                    $timeout(function(){
+                        $scope.alias.reward = $filter('gulden')(result.coast,false);    
+                    });
+                }
+                
             };
 
             $scope.register = function(alias){

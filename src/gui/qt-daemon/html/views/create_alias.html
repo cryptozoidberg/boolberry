@@ -4,33 +4,46 @@
     <h4 class="modal-title" id="aliasLabel">Создание нового алиаса для счета сейфа</h4>
 </div>
 <div class="modal-body">
-    <alert type="danger" ng-show="not_enought">
-        У вас не достаточно средств для создания данного алиаса
-    </alert>
-
     <form name="create_alias_form">
+
+        <alert type="danger" ng-show="not_enought">
+            У вас не достаточно средств для создания данного алиаса
+        </alert>
+
+        <alert type="danger" ng-show="create_alias_form.alias_name.$error.pattern">
+            Алиас может состоять только из латинских букв (a-z), цифр (0-9), знаков "-" и "."
+        </alert>
 
         <div class="form-group has-success has-feedback">
             <label class="requred">Уникальное имя</label>
-            <div style="color: rgb(115, 115, 115);" class="help-block">
+            <!-- <div style="color: rgb(115, 115, 115);" class="help-block">
                 Алиас может состоять только из латинской букв, цифр, начинается всегда с символа "@".
-            </div>
+            </div> -->
 
              <div class="input-group">
                 <span class="input-group-addon">@</span>
-                <input type="text" class="form-control input-lg" ng-change="getAliasCoast(alias.name)" ng-model="alias.name">
+                <input 
+                    type="text" 
+                    class="form-control input-lg" 
+                    ng-change="getAliasCoast(alias.name)"
+                    name="alias_name"
+                    ng-model="alias.name"
+                    ng-pattern="/^[a-z0-9.-]{1,255}$/"
+                >
                 
             </div>
             
-            <span style="top:auto; bottom:20px" class="fa fa-lg fa-check form-control-feedback"></span>
+            <!-- <span style="top:auto; bottom:20px" class="fa fa-lg fa-check form-control-feedback"></span> -->
             
-            <div class="help-block">
+            <div class="help-block" ng-show="alias.name.length && !alias.exists">
                 <em>это имя свободно</em>
             </div>
         </div>
 
         <div class="form-group clearfix">
-            <label class="requred col-xs-4 col-sm-4" style="padding-left:0; padding-top:5px">Цена создания алиаса</label>
+            <label class="requred col-xs-4 col-sm-4" style="padding-left:0; padding-top:5px">
+                Цена создания алиаса
+            </label>
 
             <div class="col-xs-4 col-sm-4">
                 <div class="input-group">
