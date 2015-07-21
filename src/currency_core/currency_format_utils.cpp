@@ -1160,7 +1160,7 @@ namespace currency
   bool validate_alias_name(const std::string& al)
   {
     CHECK_AND_ASSERT_MES(al.size() <= MAX_ALIAS_LEN, false, "Too long alias name, please use name no longer than " << MAX_ALIAS_LEN );
-    /*allowed symbols "a-z", "-", "." */
+    /*allowed symbols "0-9", "a-z", "-", "." */
     static bool alphabet[256] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                                  0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,
                                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

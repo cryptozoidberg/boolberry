@@ -1898,6 +1898,9 @@ bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
   CHECK_AND_ASSERT_MES(r, false, "failed to validate transaction extra");
   if(ei.m_alias.m_alias.size())
   {
+    r = validate_alias_name(ei.m_alias.m_alias);
+    CHECK_AND_ASSERT_MES(r, false, "failed to validate alias name!");
+
     r = validate_alias_reward(tx, ei.m_alias.m_alias);
     CHECK_AND_ASSERT_MES(r, false, "failed to validate_alias_reward");
 

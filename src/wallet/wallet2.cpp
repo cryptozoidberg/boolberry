@@ -1215,6 +1215,11 @@ void wallet2::update_offer_by_id(const crypto::hash& tx_id, uint64_t of_ind, con
 //----------------------------------------------------------------------------------------------------
 void wallet2::request_alias_registration(const currency::alias_info& ai, currency::transaction& res_tx, uint64_t fee, uint64_t reward)
 {
+  if (!validate_alias_name(ai.m_alias))
+  {
+    throw std::runtime_error(std::string("wrong alias characters: ") + ai.m_alias);
+  }
+
   std::vector<currency::tx_destination_entry> destinations;
   std::vector<currency::extra_v> extra;
   std::vector<currency::attachment_v> attachments;
