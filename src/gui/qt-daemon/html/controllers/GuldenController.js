@@ -18,8 +18,12 @@
                         return;
                     }
                 }
-                backend.makeSend(tr);
-                $modalInstance.close();
+                backend.makeSend(tr,function(){
+                    tr.is_send = true;
+                    informer.success('Транзакция поступила в обработку');
+                    $modalInstance.close();
+                });
+                
             };
 
             $scope.close = function(){
@@ -32,27 +36,49 @@
 
     module.controller('guldenSendCtrl',['CONFIG', 'backend','$rootScope','$scope','informer','$routeParams','$filter','$location','$modal','txHistory',
         function(CONFIG, backend,$rootScope,$scope,informer,$routeParams,$filter,$location, $modal, txHistory){
-            $scope.transaction = {
-                from: $rootScope.safes.length ? $rootScope.safes[0].wallet_id : '',
-                to: '',
-                push_payer: $rootScope.settings.security.is_hide_sender,
-                is_delay : false,
-                lock_time: new Date(),
-                fee: CONFIG.standart_fee,
-                is_valid_address: false,
-                is_mixin : $rootScope.settings.security.is_mixin
+            $scope.sendGForm = {};
+            $scope.reset = function(){
+                $scope.transaction = {
+                    from: $rootScope.safes.length ? $rootScope.safes[0].wallet_id : '',
+                    to: '',
+                    push_payer: $rootScope.settings.security.is_hide_sender,
+                    is_delay : false,
+                    lock_time: new Date(),
+                    fee: CONFIG.standart_fee,
+                    is_valid_address: false,
+                    is_mixin : $rootScope.settings.security.is_mixin,
+                    is_send: false
+                };
+                $scope.$broadcast('angucomplete-alt:clearInput'); // clear autocomplete input
+                
+                $scope.sendGForm.$submitted = false;
+
+                if($routeParams.wallet_id){
+                    $scope.transaction.from = parseInt($routeParams.wallet_id);
+                }
+
+                if($routeParams.address){
+                    $scope.transaction.is_valid_address = true;
+                    $scope.transaction.to = $routeParams.address;
+                }
             };
+
+            $scope.reset();
+
+            $scope.$watch(
+                function(){
+                    return $scope.transaction.is_send;
+                },
+                function(v){
+                    if(v === true){
+                        $scope.reset();
+                    }
+                }
+            );
 
             $scope.txHistory = txHistory.reloadHistory();
 
-            if($routeParams.wallet_id){
-                $scope.transaction.from = parseInt($routeParams.wallet_id);
-            }
-
-            if($routeParams.address){
-                $scope.transaction.is_valid_address = true;
-                $scope.transaction.to = $routeParams.address;
-            }
+            
             
             $scope.selectAlias = function(obj){
                 if(angular.isDefined(obj)){

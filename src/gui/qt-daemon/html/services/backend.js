@@ -478,7 +478,7 @@
                 
             },
 
-            makeSend : function(tr) {
+            makeSend : function(tr, callback) {
                 var TS = 0;
                 var mkTS = 0;
                 if(tr.is_delay){
@@ -487,7 +487,10 @@
                 }
                 
                 this.transfer(tr.from, tr.to, tr.ammount, tr.fee, tr.comment, tr.push_payer, TS, tr.is_mixin, function(data){
-                    informer.success('Транзакция поступила в обработку');
+                    if(angular.isFunction(callback)){
+                        callback();
+                    }
+                    
                 });
             },
 
