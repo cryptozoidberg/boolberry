@@ -694,18 +694,20 @@ void wallet2::load(const std::wstring& wallet_, const std::string& password)
   boost::system::error_code e;
   bool exists = boost::filesystem::exists(m_wallet_file, e);
   CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
-
   std::ifstream data_file;
+#ifdef WIN32 
+  data_file.open(m_wallet_file, std::ios_base::binary | std::ios_base::in);
+#else
   boost::filesystem::path p(m_wallet_file);
-  //boost::filesystem::ofstream data_file;
   data_file.open(p.string(), std::ios_base::binary | std::ios_base::in);
+#endif  
   CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
 
   wallet_file_binary_header wbh = AUTO_VAL_INIT(wbh);
-  //wbh//WALLET_FILE_SIGNATURE;
 
-
-  data_file.  read((char*)&wbh, sizeof(wbh));
+  boost::filesystem::ifstream data_filef;
+  data_filef.read((char*)&wbh, sizeof(wbh));
+  data_file.read((char*)&wbh, sizeof(wbh));
   CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
 
   CHECK_AND_THROW_WALLET_EX(wbh.m_signature != WALLET_FILE_SIGNATURE, error::file_not_found, epee::string_encoding::convert_to_ansii(m_wallet_file));
