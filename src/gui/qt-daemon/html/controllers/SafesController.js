@@ -481,6 +481,7 @@
             }
 
             $scope.checkRestoreKey = function (key) {
+                console.log(backend.isValidRestoreWalletText(key));
                 if(backend.isValidRestoreWalletText(key) || !key.length){
                     $scope.safe.restore_key_valid = true;
                 }else{

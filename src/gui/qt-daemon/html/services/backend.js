@@ -143,7 +143,7 @@
 
             isValidRestoreWalletText : function(text) {
                 if(!this.shouldUseEmulator()){
-                    return Qt_parent['is_valid_restore_wallet_text'](text);
+                    return (Qt_parent['is_valid_restore_wallet_text'](text)=="TRUE")?true:false;
                 }else{
                     return text.length == 20 ? true : false;
                 }
