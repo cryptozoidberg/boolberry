@@ -141,18 +141,31 @@
                                     popover-placement="left"  
                                     popover-template="'recepientHistory'"
                                     popover-title="История платежей по контакту" 
-                                    ng-disabled = "!transaction.is_valid_address"
+                                    ng-disabled = "sendGForm.to.$error.wallet_address"
                                 > 
                                     <i class="fa fa-lg fa-history"></i>
                                 </button>
                             </div>
-                            <div class="btn-group">
-                                <button aria-expanded="false" data-toggle="dropdown" class="btn btn-default dropdown-toggle" type="button">
+                            <div class="btn-group" dropdown  auto-close="outsideClick">
+                                <button ng-disabled="sendGForm.to.$error.wallet_address" dropdown-toggle class="btn btn-default dropdown-toggle" type="button">
                                     <i class="fa fa-lg fa-save"></i> <span class="caret"></span>
                                 </button>
                                 <ul role="menu" class="dropdown-menu dropdown-menu-right">
-                                    <li><a href="">Добавить новый контакт</a></li>
-                                    <li><a href="">Добавить в существующий контакт</a></li>
+                                    <li>
+                                        <a href="#addContact/{{transaction.to}}">Добавить новый контакт</a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a ng-click="collapse_contacts = !collapse_contacts">
+                                            Добавить в существующий контакт
+                                        </a>
+                                    </li>
+
+                                    <li ng-repeat="contact in settings.contacts" collapse="!collapse_contacts">
+                                        <a href="#contact/{{contact.id}}/{{transaction.to}}">
+                                            {{contact.name}}
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>

@@ -153,6 +153,12 @@
                 }
             }
 
+            if($routeParams.address){
+                if($scope.contact.addresses.indexOf($routeParams.address) == -1){
+                    $scope.contact.addresses.push($routeParams.address);
+                }
+            }
+
             $scope.im = {
                 name: '',
                 nickname: ''

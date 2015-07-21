@@ -68,8 +68,10 @@
             {route: '/addOfferSell',               template: 'views/addOffer.html'},
             {route: '/addOfferSell/:offer_hash',   template: 'views/addOffer.html'},
 
-            {route: '/addContact',                 template: 'views/addContact.html'},
-            {route: '/contact/:contact_id',        template: 'views/addContact.html'},
+            {route: '/addContact',                   template: 'views/addContact.html'},
+            {route: '/addContact/:address',          template: 'views/addContact.html'},
+            {route: '/contact/:contact_id',          template: 'views/addContact.html'},
+            {route: '/contact/:contact_id/:address', template: 'views/addContact.html'},
             
         ];
 
