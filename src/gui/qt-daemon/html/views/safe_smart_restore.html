@@ -58,10 +58,25 @@
 
             <div class="item" data-hash="screen13">
                 <div class="form-group clearfix">
+                    <alert 
+                        type="danger" 
+                        ng-show="smartSafeRestoreForm.pass.$error.wallet_password"
+                    >
+                        Данный пароль не соответствует требованиям
+                    </alert>
                     <label class="requred">Новый пароль для сейфа</label>
-                    <div class="help-block">Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы. Для надежности используйте автоматический генератор с
-                        установкой сложности пароля</div>
-                    <input type="password" placeholder="" ng-model="safe.pass" name="pass" class="input-lg form-control">
+                    <div class="help-block">
+                        Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы. 
+                        <!-- Для надежности используйте автоматический генератор с установкой сложности пароля -->
+                    </div>
+                    <input 
+                        type="password" 
+                        placeholder="" 
+                        ng-model="safe.pass" 
+                        name="pass" 
+                        class="input-lg form-control"
+                        wallet-password
+                    >
 
                 </div>
 

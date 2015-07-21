@@ -258,6 +258,27 @@
     };
   }]);
 
+  module.directive('walletPassword', ['informer',function(informer) {
+    return {
+      require: 'ngModel',
+      link: function(scope, elm, attrs, ctrl) {
+        
+        ctrl.$validators.wallet_password = function(modelValue, viewValue) {
+          if (ctrl.$isEmpty(modelValue)) {
+            return true;
+          }else{
+            var pattern  = new RegExp('^([a-zA-Z0-9\!@#\$%\^&\*\(\)-_=+]){1,255}$');
+            var pattern_passed = pattern.test(viewValue);
+
+            var upper_case_search = viewValue.search(/[A-Z]{1,}/); // At least one Upper case letter
+
+            return (pattern_passed && (upper_case_search != -1));
+          }
+        };
+      }
+    };
+  }]);
+
   // module.directive('selectText', ['$window',function ($window){
   //   return {
   //     restrict: 'A',

@@ -8,11 +8,22 @@
             <div class="item create-safe_screen-1 create-safe_screen">
                 <div class="form-group">
                     <label class="requred">
-                        Имя для обозначения сейфа в приложении<!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
+                        Имя для обозначения сейфа в приложении
+                        <!-- <button title=" " data-placement="right" data-toggle="tooltip" class="btn btn-link" type="button"><i class="fa fa-lg fa-question-circle text-muted"></i></button> -->
                     </label>
-                    <div class="help-block">Вы сможете создать сколько угодно сейфов.  Имя для сейфа &ndash; это любое слово или словосочетание для
-                        обозначения этого сейфа в списке</div>
-                    <input id="create-safe_safe-name-input" ng-model="safe.name" type="text" required name="safe_name" class="input-lg form-control" placeholder="любое слово или словосочетание">
+                    <div class="help-block">
+                        Вы сможете создать сколько угодно сейфов.  Имя для сейфа &ndash; это любое слово или словосочетание для
+                        обозначения этого сейфа в списке
+                    </div>
+                    <input 
+                        id="create-safe_safe-name-input" 
+                        ng-model="safe.name" 
+                        type="text" 
+                        required 
+                        name="safe_name" 
+                        class="input-lg form-control" 
+                        placeholder="любое слово или словосочетание"
+                    >
                 </div>
                 <div class="row">
                     <div class="col-xs-6 col-sm-6">
@@ -25,9 +36,25 @@
             </div>
             <div class="item create-safe_screen-2 create-safe_screen">
                 <div class="form-group clearfix">
+                    <alert 
+                        type="danger" 
+                        ng-show="new_safe_form.safe_password.$error.wallet_password"
+                    >
+                        Данный пароль не соответствует требованиям
+                    </alert>
                     <label class="requred">Пароль для сейфа</label>
-                    <div class="help-block">Пароль может содержать латинские буквы, должно быть не менее одной прописной, цифры и символы.</div>
-                    <input id="create-safe_safe-password-input-1" ng-model="safe.password" required name="safe_password" type="password" class="input-lg form-control">
+                    <div class="help-block">
+                        Пароль может содержать латинские буквы, 
+                        должно быть не менее одной прописной, цифры и символы.
+                    </div>
+                    <input 
+                        ng-model="safe.password" 
+                        required 
+                        name="safe_password" 
+                        type="password" 
+                        class="input-lg form-control"
+                        wallet-password
+                    >
                 </div>
                 <!-- <div class="form-group clearfix">
                     <label>Надежность</label>
