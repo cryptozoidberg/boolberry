@@ -125,7 +125,8 @@
                         <div class="form-group has-feedback group-hover inline-edit-field" ng-repeat="im in contact.ims">
                             <label class="col-xs-4 col-sm-4 control-label">{{im.name}}</label>
                             <div class="col-xs-7 col-sm-7">
-                                <input type="text" ng-model="im.nickname" readonly="true" class="form-control flat-input">
+                                <input type="text" ng-model="im.nickname" class="form-control flat-input">
+                                <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                             </div>
 
                         </div>
@@ -192,8 +193,18 @@
                             
                             <thead>
                                 <tr>
-                                    <th class="col-sm-6"><span class="nowrap">Счет сейфа <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                                    <th class="col-sm-6"><span class="nowrap">Алиасы <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                                    <th class="col-sm-6">
+                                        <span class="nowrap">
+                                            Счет сейфа 
+                                            <i class="fa fa-chevron-down" style="opacity:0.3"></i>
+                                        </span>
+                                    </th>
+                                    <th class="col-sm-6">
+                                        <span class="nowrap">
+                                            Алиасы 
+                                            <i class="fa fa-chevron-down" style="opacity:0.3"></i>
+                                        </span>
+                                    </th>
                                 </tr>
                             </thead>
 
