@@ -184,15 +184,22 @@
             }
 
             $scope.selectAlias = function(obj){
-                var alias = obj.originalObject;
-                // $scope.contact.addresses[0] = alias.address;
-                $scope.contact.is_valid_address = true;
-                $scope.new_address = alias.address;
+                if(angular.isDefined(obj)){
+                    var alias = obj.originalObject;
+                    // $scope.contact.addresses[0] = alias.address;
+                    $scope.contact.is_valid_address = true;
+                    $scope.new_address = alias.address;
+                }
             }
 
             $scope.addAddress = function(){
-                if($scope.new_address.length && $scope.contact.is_valid_address && $scope.contact.addresses.indexOf($scope.address) == -1){
-                    $scope.contact.addresses.push($scope.new_address);
+                if($scope.new_address.length && $scope.contact.is_valid_address){
+                    if($scope.contact.addresses.indexOf($scope.new_address) == -1){
+                        $scope.contact.addresses.push($scope.new_address);
+                    }else{
+                        informer.info('Адрес уже присутствует в списке');
+                    }
+                    
                     $scope.$broadcast('angucomplete-alt:clearInput'); // clear autocomplete input
                     $scope.collapse.new_address = false;
                     $scope.contact.is_valid_address = false;
