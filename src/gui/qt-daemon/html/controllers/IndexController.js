@@ -4,8 +4,8 @@
 
 
 
-    module.controller('indexController', ['utils', 'backend', '$scope', '$modal','$timeout','emulator','$rootScope', 'informer', 'txHistory',
-        function(utils, backend, $scope, $modal, $timeout, emulator, $rootScope, informer, txHistory) {
+    module.controller('indexController', ['utils', 'backend', '$scope', '$modal','$timeout','emulator','$rootScope', 'informer', 'txHistory', '$filter',
+        function(utils, backend, $scope, $modal, $timeout, emulator, $rootScope, informer, txHistory, $filter) {
             $scope.db_settings = {
                 maxWidgets: 12,
                 userSettings: {
@@ -40,6 +40,13 @@
             };
             
             setUpWidgets();
+
+            $scope.row = 'wallet_id'; //sort by default
+
+            $scope.order = function(key){
+                $scope.row = key;
+                $rootScope.safes = $filter('orderBy')($rootScope.safes,key);
+            };
 
             function setUpWidgets() {
                 

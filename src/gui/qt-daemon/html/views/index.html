@@ -125,11 +125,35 @@
         <table class="table table-condensed table-hover data-table safes-table">
             <thead>
                 <tr>
-                    <th class="col-sm-3"><span class="nowrap">Сейф <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                    <th class="col-sm-2"><span class="nowrap">Счет сейфа <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                    <th class="col-sm-2"><span class="nowrap">Состояние <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                    <th class="col-sm-2"><span class="nowrap">Доступно<i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
-                    <th class="col-sm-2"><span class="nowrap">Баланс <i class="fa fa-chevron-down" style="opacity:0.3"></i></span></th>
+                    <th class="col-sm-3">
+                        <span class="nowrap">Сейф 
+                            <i class="fa fa-chevron-down" ng-click="order('name')" style="opacity:0.3"></i>
+                            <i class="fa fa-chevron-up" ng-click="order('-name')" style="opacity:0.3"></i>
+                        </span>
+                    </th>
+                    <th class="col-sm-2">
+                        <span class="nowrap">Счет сейфа 
+                            <i class="fa fa-chevron-down" ng-click="order('address')" style="opacity:0.3"></i>
+                            <i class="fa fa-chevron-up" ng-click="order('-address')" style="opacity:0.3"></i>
+                        </span>
+                    </th>
+                    <th class="col-sm-2">
+                        <span class="nowrap">Состояние 
+                            
+                        </span>
+                    </th>
+                    <th class="col-sm-2">
+                        <span class="nowrap">Доступно
+                            <i class="fa fa-chevron-down" ng-click="order('unlocked_balance')" style="opacity:0.3"></i>
+                            <i class="fa fa-chevron-up" ng-click="order('-unlocked_balance')" style="opacity:0.3"></i>
+                        </span>
+                    </th>
+                    <th class="col-sm-2">
+                        <span class="nowrap">Баланс 
+                            <i class="fa fa-chevron-down" ng-click="order('balance')" style="opacity:0.3"></i>
+                            <i class="fa fa-chevron-up" ng-click="order('-balance')" style="opacity:0.3"></i>
+                        </span>
+                    </th>
                     <th class="col-sm-1"></th>
                 </tr>
             </thead>

@@ -94,6 +94,14 @@
                 name: ''
             };
 
+            $scope.row = 'wallet_id'; //sort by default
+
+            $scope.order = function(key){
+                
+                $scope.row = key;
+                $scope.f_safes = $filter('orderBy')($rootScope.safes,key);
+            };
+
             $scope.filterChange = function(){
                 $scope.f_safes = $rootScope.safes;
                 if($scope.filter.name.length){
