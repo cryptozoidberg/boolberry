@@ -740,7 +740,7 @@ void wallet2::store()
   store(m_wallet_file);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::store(const std::string path_to_save)
+void wallet2::store(const std::wstring& path_to_save)
 {
   drop_offer_keys();
   //prepare data

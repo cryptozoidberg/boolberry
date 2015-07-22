@@ -94,11 +94,15 @@ Source: "{#BinariesPath}\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\Qt5WinExtras.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\Qt5Xml.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\Qt5XmlPatterns.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BinariesPath}\qt-lui.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#BinariesPath}\simplewallet.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qminimal.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qoffscreen.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qwindows.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
+
+Source: "{#BinariesPath}\ssleay32.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
+Source: "{#BinariesPath}\libeay32.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
+
+Source: "{#BinariesPath}\qt-lui.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\simplewallet.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\gui\qt-daemon\html\*"; DestDir: "{app}\html"; Flags: ignoreversion recursesubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

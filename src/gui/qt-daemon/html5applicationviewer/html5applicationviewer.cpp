@@ -1043,7 +1043,7 @@ QString Html5ApplicationViewer::get_mining_estimate(const QString& param)
 QString Html5ApplicationViewer::backup_wallet_keys(const QString& param)
 {
   PREPARE_ARG_FROM_JSON(view::backup_keys_request, me);
-  ar.error_code = m_backend.backup_wallet(me.wallet_id, me.path);
+  ar.error_code = m_backend.backup_wallet(me.wallet_id, epee::string_encoding::utf8_to_wstring(me.path));
   return epee::serialization::store_t_to_json(ar).c_str();
 }
 QString Html5ApplicationViewer::reset_wallet_password(const QString& param)

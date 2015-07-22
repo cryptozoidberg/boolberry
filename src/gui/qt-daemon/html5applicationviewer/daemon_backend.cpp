@@ -829,7 +829,7 @@ std::string daemon_backend::get_wallet_info(size_t wallet_id, view::wallet_info&
   return get_wallet_info(w, wi);
 }
 
-std::string daemon_backend::backup_wallet(uint64_t wallet_id, std::string& path)
+std::string daemon_backend::backup_wallet(uint64_t wallet_id, const std::wstring& path)
 {
   GET_WALLET_OPT_BY_ID(wallet_id, w);
   if (w.w->get()->store(path))
