@@ -57,18 +57,41 @@
                             </div>
                         </div>
 
+                        <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="contactForm.$submitted || contactForm.contact_phone.$touched">
+                            <div ng-show="contactForm.contact_phone.$error.pattern">
+                                Телефон введен не корректно
+                            </div>
+                        </div>
+
                         <div class="form-group has-feedback group-hover inline-edit-field">
                             <label class="col-xs-4 col-sm-4 control-label">Телефон</label>
                             <div class="col-xs-7 col-sm-7">
-                                <input type="text" class="form-control flat-input" ng-model="contact.phone" placeholder="0891234567">
+                                <input 
+                                    type="text" 
+                                    class="form-control flat-input" 
+                                    ng-model="contact.phone" 
+                                    placeholder="0891234567"
+                                    name="contact_phone"
+                                    ng-pattern="/^[0-9-\(\)\+]{1,100}$/"
+                                >
                                 <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                             </div>
+                        </div>
+
+                        <div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-4 text-danger"  ng-show="contactForm.$submitted || contactForm.contact_email.$touched">
+                            <div ng-show="contactForm.contact_email.$error.email">Email введен не корректно</div>
                         </div>
 
                         <div class="form-group has-feedback group-hover inline-edit-field collapse in email1">
                             <label class="col-xs-4 col-sm-4 control-label">Email</label>
                             <div class="col-xs-7 col-sm-7">
-                                <input type="text" class="form-control flat-input" ng-model="contact.email" placeholder="email">
+                                <input 
+                                    type="email" 
+                                    class="form-control flat-input" 
+                                    ng-model="contact.email" 
+                                    name="contact_email"
+                                    placeholder="email"
+                                >
                                 <i class="fa fa-lg fa-pencil form-control-feedback"></i>
                             </div>
                            
