@@ -20,6 +20,10 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QTimer>
+#include <QPrinter>
+#include <QPrintDialog>
+#include <QPainter>
+#include <QTextDocument>
 
 #include "warnings.h"
 #include "net/http_client.h"
@@ -1067,6 +1071,7 @@ QString Html5ApplicationViewer::is_autostart_enabled()
 }
 QString Html5ApplicationViewer::toggle_autostart(const QString& param)
 {
+
   PREPARE_ARG_FROM_JSON(view::struct_with_one_t_type<bool>, as);
 
   if(gui_tools::SetStartOnSystemStartup(as.v))
@@ -1079,6 +1084,45 @@ QString Html5ApplicationViewer::toggle_autostart(const QString& param)
 QString Html5ApplicationViewer::is_valid_restore_wallet_text(const QString& param)
 {
   return m_backend.is_valid_brain_restore_data(param.toStdString()).c_str();
+}
+
+QString Html5ApplicationViewer::print_text(const QString& param)
+{
+  PREPARE_ARG_FROM_JSON(view::print_text_param, ptp);
+
+  //in >> htmlContent;
+
+  QTextDocument *document = new QTextDocument();
+  document->setHtml(ptp.html_text.c_str());
+
+  QPrinter printer;
+  ar.error_code = API_RETURN_CODE_CANCELED;
+
+  QPrintDialog *dialog = new QPrintDialog(&printer, this);
+  if (dialog->exec() != QDialog::Accepted)
+    return epee::serialization::store_t_to_json(ar).c_str();
+
+  document->print(&printer);
+
+  delete document;
+  ar.error_code = API_RETURN_CODE_OK;
+  return epee::serialization::store_t_to_json(ar).c_str();
+
+//   QPrinter printer;
+// 
+//   QPrintDialog *dialog = new QPrintDialog(&printer);
+//   dialog->setWindowTitle("Print Document");
+// 
+//   if (dialog->exec() != QDialog::Accepted)
+//     return -1;
+// 
+//   QPainter painter;
+//   painter.begin(&printer);
+// 
+//   painter.drawText(100, 100, 500, 500, Qt::AlignHCenter | Qt::AlignTop, text);
+// 
+//   painter.end();
+
 }
 
 

@@ -500,6 +500,17 @@ public:
     END_KV_SERIALIZE_MAP()
   };
 
+
+  struct print_text_param
+  {
+    std::string html_text;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(html_text)
+    END_KV_SERIALIZE_MAP()
+  };
+
+
   struct api_response
   {
     std::string request_id;

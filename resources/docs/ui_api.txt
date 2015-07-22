@@ -597,6 +597,20 @@ param: "some brain bla string bla string bla string bla string bla string "
 
 resposne: "TRUE" //or "FALSE" 
 
+============================================================================
+============================================================================
+[sync] print_text()
+
+param:
+{
+  "html_text": "<!DOCTYPE html><html><head><title>Hi there</title></head><body><H1>This is a page a simple page</H1></body></html>" 
+}
+
+resposne:
+{
+  "error_code": "OK"//or "CANCELED"
+}
+
 
 
 

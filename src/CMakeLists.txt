@@ -86,7 +86,9 @@ if(BUILD_GUI)
   SET(MACOSX_BUNDLE_ICON_FILE app.icns)
   add_executable(qt-lui WIN32 MACOSX_BUNDLE ${QTDAEMON} )	  
   QT5_USE_MODULES(qt-lui WebKit WebKitWidgets)
-  target_link_libraries(qt-lui wallet rpc currency_core crypto common Qt5::Widgets ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+  find_package(Qt5PrintSupport REQUIRED)
+
+  target_link_libraries(qt-lui wallet rpc currency_core crypto common Qt5::Widgets Qt5::PrintSupport ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
   if(APPLE)
     target_link_libraries(qt-lui ${COCOA_LIBRARY})
