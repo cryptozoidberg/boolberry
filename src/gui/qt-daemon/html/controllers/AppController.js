@@ -323,7 +323,12 @@
         $scope.progress_value = function(){
             var max = $scope.deamon_state.max_net_seen_height - $scope.deamon_state.synchronization_start_height;
             var current = $scope.deamon_state.height - $scope.deamon_state.synchronization_start_height;
-            return Math.floor(current*100/max);
+            if(max == 0){
+                return 100;
+            }else{
+                return Math.floor(current*100/max);
+            }
+            
         }
         
         $scope.storeAppData = function(){
@@ -401,6 +406,42 @@
                         return safe;
                     }
                 }
+            });
+        };
+
+        $rootScope.openSmartSafeForm = function(safe) {
+            var modalInstance = $modal.open({
+                templateUrl: "views/safe_smartsafe_new.html",
+                controller: 'smartSafeAddCtrl',
+                size: 'md',
+                windowClass: 'modal fade in out',
+                resolve : {
+                    safe : function(){
+                        return safe;
+                    }
+                }
+            });
+        };
+
+        $scope.openSmartSafeRestoreForm = function(path) {
+            var modalInstance = $modal.open({
+                templateUrl: "views/safe_smart_restore.html",
+                controller: 'safeSmartRestoreCtrl',
+                size: 'md',
+                windowClass: 'modal fade in out',
+                resolve: {
+                    path: function(){
+                        return path;
+                    },
+                    safes: function(){
+                        return $rootScope.safes;
+                    }
+                }
+            });
+            modalInstance.result.then((function() {
+                // console.log('Safe form closed');
+            }), function() {
+                // console.log('Safe form dismissed');
             });
         };
 

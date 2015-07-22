@@ -350,27 +350,7 @@
             });
         };
 
-        $scope.openSmartSafeRestoreForm = function(path) {
-            var modalInstance = $modal.open({
-                templateUrl: "views/safe_smart_restore.html",
-                controller: 'safeSmartRestoreCtrl',
-                size: 'md',
-                windowClass: 'modal fade in out',
-                resolve: {
-                    path: function(){
-                        return path;
-                    },
-                    safes: function(){
-                        return $scope.safes;
-                    }
-                }
-            });
-            modalInstance.result.then((function() {
-                // console.log('Safe form closed');
-            }), function() {
-                // console.log('Safe form dismissed');
-            });
-        };
+        
     }]);
 
     module.controller('safeAddCtrl', ['CONFIG', '$scope','backend', '$modalInstance', '$modal', '$timeout','$rootScope', 'informer',
@@ -441,24 +421,7 @@
                 $modalInstance.close();
             };
 
-            $scope.openSmartSafeForm = function() {
-                var modalInstance = $modal.open({
-                    templateUrl: "views/safe_smartsafe_new.html",
-                    controller: 'smartSafeAddCtrl',
-                    size: 'md',
-                    windowClass: 'modal fade in out',
-                    resolve : {
-                        safe : function(){
-                            return $scope.safe;
-                        }
-                    }
-                });
-                modalInstance.result.then((function() {
-                    //console.log('Safe form closed');
-                }), function() {
-                    //console.log('Safe form dismissed');
-                });
-            };
+            
         }
     ]);
 
@@ -636,8 +599,8 @@
         }
     ]);
 
-    module.controller('smartSafeAddCtrl', ['$scope','backend', '$modalInstance', 'safe', 'informer', '$window',
-        function($scope, backend, $modalInstance, safe, informer, $window) {
+    module.controller('smartSafeAddCtrl', ['$scope','backend', '$modalInstance', 'safe', 'informer', '$window', '$timeout',
+        function($scope, backend, $modalInstance, safe, informer, $window, $timeout) {
             
             var data = backend.getSmartSafeInfo(safe.wallet_id);
 
@@ -657,7 +620,9 @@
 
             } 
 
-            $scope.restore_key = data.restore_key;
+            $timeout(function(){
+                $scope.restore_key = data.restore_key;
+            });
 
             $scope.closeSmartSafeForm = function(){
                 $modalInstance.close();
