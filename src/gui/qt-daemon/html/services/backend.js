@@ -478,6 +478,13 @@
                 
             },
 
+            printText : function(content){
+                var params = {
+                    html_text: content
+                };
+                return this.runCommand('print_text', params);
+            },
+
             makeSend : function(tr, callback) {
                 var TS = 0;
                 var mkTS = 0;
