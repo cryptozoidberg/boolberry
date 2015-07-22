@@ -603,6 +603,7 @@
         function($scope, backend, $modalInstance, safe, informer, $window, $timeout) {
             
             var data = backend.getSmartSafeInfo(safe.wallet_id);
+            console.log(data);
 
             $scope.printPhrase = function(phrase) {
                 // var printContents ="<h1>"+phrase+"</h1>";//document.getElementById(divName).innerHTML;
