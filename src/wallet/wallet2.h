@@ -144,6 +144,7 @@ namespace tools
     void restore(const std::wstring& path, const std::string& pass, const std::string& restore_key);
     void load(const std::wstring& wallet, const std::string& password);    
     void store();
+    void store(const std::wstring& path);
     std::wstring get_wallet_path(){ return m_wallet_file; }
     currency::account_base& get_account(){return m_account;}
 

@@ -734,8 +734,13 @@ void wallet2::drop_offer_keys()
       it++;
   }  
 }
-//-------------------------
+//----------------------------------------------------------------------------------------------------
 void wallet2::store()
+{
+  store(m_wallet_file);
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::store(const std::string path_to_save)
 {
   drop_offer_keys();
   //prepare data
@@ -761,7 +766,7 @@ void wallet2::store()
 
   //std::ofstream data_file;
   boost::filesystem::ofstream data_file;
-  data_file.open(m_wallet_file, std::ios_base::binary | std::ios_base::out | std::ios::trunc);
+  data_file.open(path_to_save, std::ios_base::binary | std::ios_base::out | std::ios::trunc);
   CHECK_AND_THROW_WALLET_EX(data_file.fail(), error::file_save_error, epee::string_encoding::convert_to_ansii(m_wallet_file));
   data_file << header_buff << keys_buff << body_buff;
   data_file.flush();

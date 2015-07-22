@@ -832,7 +832,7 @@ std::string daemon_backend::get_wallet_info(size_t wallet_id, view::wallet_info&
 std::string daemon_backend::backup_wallet(uint64_t wallet_id, std::string& path)
 {
   GET_WALLET_OPT_BY_ID(wallet_id, w);
-  if (w.w->get()->backup_keys(path))
+  if (w.w->get()->store(path))
     return API_RETURN_CODE_OK;
   else
     return API_RETURN_CODE_FAIL;
