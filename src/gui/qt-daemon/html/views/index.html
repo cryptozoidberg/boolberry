@@ -756,14 +756,16 @@
                 </div>
             </div>
 
-            <button class="btn btn-link buttonAddWidget" ng-class="$even ? '' : 'pull-right'" ng-click="addWidget($even ? 'left' : 'right')" type="button"><i class="fa fa-lg fa-plus-circle"></i> Добавить виджет</button>
+            
         </div>
 
-        <div class="col-xs-6 col-sm-6">
-            <div class="widget-container" ng-repeat="widget in rightWidgetColumn">
-                <div ng-bind-html="widget.html" compile-template></div>
-            </div>
-        </div>
+       <button 
+            class="btn btn-link buttonAddWidget pull-right" 
+            ng-click="addWidget()" 
+            type="button"
+        >
+            <i class="fa fa-lg fa-plus-circle"></i> Добавить виджет
+        </button>
 
     </div>
 

@@ -59,10 +59,22 @@
                 }
                 
 
-                $scope.addWidget = function(col) {
+                $scope.addWidget = function() {
                     var widget_number = $scope.getWidgetCount() + '_' + utils.getRandomInt(0, 1000000); // getWidgetCount to avoid auto-sorting by angular
                     var widget = { id: widget_number, type: '', name: $scope.getWidgetNameByType('') };
-                    var col = (col=='left') ? $rootScope.settings.widgetColumns.left : $rootScope.settings.widgetColumns.right;
+                    
+                    
+                    var col_left    = $rootScope.settings.widgetColumns.left;
+                    var col_right   = $rootScope.settings.widgetColumns.right;
+                    var count_left  = Object.size(col_left);
+                    var count_right = Object.size(col_right);
+
+                    var col = col_left;
+
+                    if(count_left > count_right){
+                        col = col_right;
+                    }
+
                     col[widget_number] = widget;
                 };
                 $scope.removeWidget = function(id) {
