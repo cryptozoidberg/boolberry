@@ -261,6 +261,15 @@ void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
 {
 
   bool r = QSslSocket::supportsSsl();
+  if (r)
+  {
+    LOG_PRINT_GREEN("[Support SSL]: YES", LOG_LEVEL_0);
+  }
+  else
+  {
+    QMessageBox::question(this, "OpenSSL support disabled.", "OpenSSL support disabled.",QMessageBox::Ok);
+    LOG_PRINT_RED("[Support SSL]: NO", LOG_LEVEL_0);
+  }
 
   if (!QSystemTrayIcon::isSystemTrayAvailable())
     return;
