@@ -87,7 +87,7 @@
                 if(!this.shouldUseEmulator()){
                     var res = Qt_parent['get_version']();
                 }else{
-                    var res = '0.0.0.0';
+                    var res = '4.23.12.1';
                 }
                 return res;
             },
@@ -668,7 +668,7 @@
                         "type": "PoW"
                     }
                 ],
-                "last_build_available": "4.23.12.2",
+                "last_build_available": "4.23.12.1",
                 "last_build_displaymode": 1,
 
                 "out_connections_count": 2,

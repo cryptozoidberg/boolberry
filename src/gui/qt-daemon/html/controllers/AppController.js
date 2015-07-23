@@ -208,7 +208,7 @@
                 is_pass_required_on_transfer: false,
                 is_backup_reminder: false,
                 backup_reminder_interval: 0,
-                is_use_app_pass: true,
+                is_use_app_pass: false,
                 password_required_interval: $rootScope.pass_required_intervals[1]
             },
             mining: {
@@ -527,12 +527,7 @@
                 }
             };
 
-            // data.last_build_displaymode = 4;
-            // data.last_build_available   = '4.0.0.1';
-            // var current_v = '4.0.0.0';
             var current_v = backend.getVersion();
-
-            //informer.info(current_v + ' --->>>> '+data.last_build_available);
 
             $timeout(function(){
             	$rootScope.deamon_state = data;	
