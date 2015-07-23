@@ -14,7 +14,7 @@
                                 <button data-content="Сейф зашифрован" data-toggle="popover" data-trigger="hover" class="btn btn-link popover-name" type="button" data-original-title="" title=""><i class="fa fa-1x fa-lock text-primary"></i></button>
                             </h2>
 
-                            <span  ng-repeat="alias in aliases | filter : {address: safe.address}"><span class="label label-info">@{{alias.alias}}</span>&nbsp;</span>
+                            <span  ng-repeat="alias in safe_aliases = (aliases | filter : {address: safe.address})"><span class="label label-info">@{{alias.alias}}</span>&nbsp;</span>
 
                             <div style="position: relative; margin: 15px 0px 0px;" class="rel">
                                 <!-- <button style="position:absolute; bottom:0; right:0" class="btn btn-sm btn-default pull-right">скопировать</button> -->
@@ -67,7 +67,16 @@
                                             <li ng-if="safe.is_mining"><a href="" ng-click="stopMining(safe.wallet_id)">Остановить добычу</a></li>
 
                                             <li class="divider"></li>
-                                            <li><a href="" ng-click="registerAlias(safe)">Присвоить алиас</a></li>
+                                            
+                                            <li>
+                                                <a 
+                                                    disabled-link="safe_aliases.length" 
+                                                    ng-click="registerAlias(safe)"
+                                                >
+                                                    Присвоить алиас
+                                                </a>
+                                            </li>
+
                                             <li><a href="" ng-click="closeWallet(safe.wallet_id)">Отключить сейф</a></li>
                                             <li><a href="" ng-click="safeBackup(safe)">Сделать бекап</a></li>
 
@@ -144,7 +153,12 @@
                                     </div>
 
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-warning" ng-click="registerAlias(safe)">
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-sm btn-warning" 
+                                            ng-click="registerAlias(safe)"
+                                            ng-disabled="safe_aliases.length" 
+                                        >
                                             <i class="fa fa-lg fa-plus"></i> Присвоить новый алиас
                                         </button>
                                     </div>

@@ -150,6 +150,11 @@
             },
 
             registerAlias: function(wallet_id, alias, address, fee, comment, reward, callback) {
+                var safe_aliases = $filter('filter')($rootScope.aliases,{address: address});
+                if(safe_aliases.length){
+                    informer.warning('Вы можете создать только один алиас для каждого сейфа');
+                    return;
+                }
                 var params = {
                     "wallet_id": wallet_id,
                     "alias": {
@@ -608,7 +613,7 @@
             }
 
             var object = {
-                "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVok"+Math.floor(Math.random() * 100),
+                "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVok88",
                 "balance": 0,//random_balance(),
                 "do_mint": 1,
                 "mint_is_in_progress": 0,
@@ -792,6 +797,18 @@
                     result = {
                         "wallet_id" : 1,
                         "wi" : this.getWalletInfo()
+                    }
+                    break;
+                case 'get_all_aliases' :
+                    result = {
+                        "aliases": [
+                            {
+                                "alias": "some_alias_name",
+                                "address": "HcTjqL7yLMuFEieHCJ4buWf3GdAtLkkYjbDFRB4BiWquFYhA39Ccigg76VqGXnsXYMZqiWds6C6D8hF5qycNttjMMBVok88",
+                                "tracking_key": "",
+                                "comment": "best ever service bla bla bla"
+                            }
+                        ]
                     }
                     break;
                 case 'get_all_offers':

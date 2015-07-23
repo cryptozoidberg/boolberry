@@ -486,7 +486,7 @@
                                     comment: alias.comment
                                 };
                                 $rootScope.aliases.push(new_alias);
-                            });    
+                            });   
                         }
                     });
                 };

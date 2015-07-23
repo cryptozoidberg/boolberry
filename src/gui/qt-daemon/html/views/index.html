@@ -172,7 +172,7 @@
                         <button type="button" class="btn btn-link popover-name" data-trigger="hover" data-toggle="popover"  data-content="Сейф зашифрован">
                             <i class="fa fa-1x fa-lock text-primary"></i>
                         </button>
-                        <span  ng-repeat="alias in aliases | filter : {address: safe.address}"><span class="label label-info">@{{alias.alias}}</span><span>
+                        <span  ng-repeat="alias in safe_aliases = (aliases | filter : {address: safe.address})"><span class="label label-info">@{{alias.alias}}</span><span>
                     </td>
 
                     <td>
@@ -245,9 +245,23 @@
                                 <li ng-if="safe.is_mining"><a ng-click="stopMining(safe.wallet_id)">Остановить добычу</a></li>
 
                                 <li class="divider"></li>
-                                <li><a href="" ng-click="registerAlias(safe)">Присвоить алиас</a></li>
-                                <li><a href="" ng-click="closeWallet(safe.wallet_id)">Отключить сейф</a></li>
-                                <li><a href="" ng-click="safeBackup(safe)">Сделать бекап</a></li>
+                                
+                                <li>
+                                    <a 
+                                        disabled-link="safe_aliases.length" 
+                                        ng-click="registerAlias(safe)
+                                    ">
+                                        Присвоить алиас
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="" ng-click="closeWallet(safe.wallet_id)">Отключить сейф</a>
+                                </li>
+
+                                <li>
+                                    <a href="" ng-click="safeBackup(safe)">Сделать бекап</a>
+                                </li>
 
                                 <li>
                                     <a ng-click="openSmartSafeForm(safe)">Создать Smartsafe</a>
@@ -756,7 +770,7 @@
                 </div>
             </div>
 
-            
+
         </div>
 
        <button 
