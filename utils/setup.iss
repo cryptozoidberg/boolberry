@@ -98,8 +98,8 @@ Source: "{#BinariesPath}\platforms\qminimal.dll"; DestDir: "{app}\platforms"; Fl
 Source: "{#BinariesPath}\platforms\qoffscreen.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 Source: "{#BinariesPath}\platforms\qwindows.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
 
-Source: "{#BinariesPath}\ssleay32.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
-Source: "{#BinariesPath}\libeay32.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
+Source: "{#BinariesPath}\ssleay32.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinariesPath}\libeay32.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 Source: "{#BinariesPath}\qt-lui.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#BinariesPath}\simplewallet.exe"; DestDir: "{app}"; Flags: ignoreversion
