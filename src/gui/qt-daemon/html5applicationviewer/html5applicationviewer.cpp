@@ -71,10 +71,21 @@ signals:
 
 public:
   QGraphicsWebView *m_webView;
-#ifdef TOUCH_OPTIMIZED_NAVIGATION
-  NavigationController *m_controller;
-#endif // TOUCH_OPTIMIZED_NAVIGATION
+  
+private slots:
+  void handleSslErrors(QNetworkReply* reply, const QList<QSslError> &errors);
 };
+
+void Html5ApplicationViewerPrivate::handleSslErrors(QNetworkReply* reply, const QList<QSslError> &errors)
+{
+  qDebug() << "handleSslErrors: ";
+  foreach (QSslError e, errors)
+  {
+    qDebug() << "ssl error: " << e;
+  }
+  
+  reply->ignoreSslErrors();
+}
 
 void Html5ApplicationViewerPrivate::closeEvent(QCloseEvent *event)
 {
@@ -103,6 +114,11 @@ Html5ApplicationViewerPrivate::Html5ApplicationViewerPrivate(QWidget *parent)
 #endif // TOUCH_OPTIMIZED_NAVIGATION
   connect(m_webView->page()->mainFrame(),
     SIGNAL(javaScriptWindowObjectCleared()), SLOT(addToJavaScript()));
+  
+  connect(m_webView->page()->networkAccessManager(),
+          SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )),
+          this,
+          SLOT(handleSslErrors(QNetworkReply*, const QList<QSslError> & )));
 }
 
 void Html5ApplicationViewerPrivate::resizeEvent(QResizeEvent *event)
