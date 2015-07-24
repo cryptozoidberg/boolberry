@@ -3,8 +3,8 @@
 
     var module = angular.module('app.backendServices', [])
 
-    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer','$rootScope', '$filter',
-        function($interval, $timeout, emulator, loader, informer, $rootScope, $filter) {
+    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer','$rootScope', '$filter','errors',
+        function($interval, $timeout, emulator, loader, informer, $rootScope, $filter, errors) {
         
         var callbacks = {};
 
