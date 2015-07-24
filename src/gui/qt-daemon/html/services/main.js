@@ -449,7 +449,7 @@
             "FILE_NOT_FOUND"             : {'ru' : 'Файл не найден'},
             "ALREADY_EXISTS"             : {'ru' : 'Файл уже существует'},
             "CANCELED"                   : {'ru' : 'Отменено'},
-            "FILE_RESTORED"              : {'ru' : 'Файл восстановлен'},
+            "FILE_RESTORED"              : {'ru' : 'Мы определили что ваш файл кошелька был поврежден и восстановили ключи истории транзакций, синхронизация может занять какое-то время'},
             "TRUE"                       : {'ru' : 'Выполнено'}, // ??
             "FALSE"                      : {'ru' : 'Не выполнено'}, // ??
             "CORE_BUSY"                  : {'ru' : 'Ядро занято'},
@@ -461,11 +461,18 @@
 
         return {
             get_error : function(error){
+                var suberror = '';
+                if(error.indexOf(':') != -1){
+                    suberror = error.substr(error.indexOf(':')+1);
+                    error = error.substr(0,error.indexOf(':'));
+                }
+
+
                 if(angular.isDefined(errors[error])){
                     if(angular.isDefined(errors[error][lang])){
-                        return errors[error][lang];
+                        return errors[error][lang]+' '+suberror;
                     }else{
-                        return errors[error][lang_def];
+                        return errors[error][lang_def]+' '+suberror;
                     }
                 }else{
                     if(angular.isDefined(error_by_default[lang])){
@@ -474,7 +481,6 @@
                         return error_by_default[lang_def]
                     }
                 }
-                errors[error][lang]
             }
         };
     }]);
