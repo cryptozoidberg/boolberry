@@ -267,7 +267,8 @@ void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
   }
   else
   {
-    QMessageBox::question(this, "OpenSSL support disabled.", "OpenSSL support disabled.",QMessageBox::Ok);
+    QMessageBox::question(this, "OpenSSL support disabled.", "OpenSSL support disabled.",
+QMessageBox::Ok);
     LOG_PRINT_RED("[Support SSL]: NO", LOG_LEVEL_0);
   }
 

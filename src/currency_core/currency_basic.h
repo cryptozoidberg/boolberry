@@ -465,7 +465,7 @@ namespace currency
     uint64_t index_in_tx;
     uint64_t timestamp;        //this is not kept by transaction, info filled by corresponding transaction
     uint64_t fee;              //value of fee to pay(or paid in case of existing offers) to rank it
-    bool stopped;              //value of fee to pay(or paid in case of existing offers) to rank it
+    bool stopped;              
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(offer_type)

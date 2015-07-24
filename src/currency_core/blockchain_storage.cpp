@@ -1926,6 +1926,7 @@ bool blockchain_storage::process_blockchain_tx_attachments(const transaction& tx
       odl.back().index_in_tx = count++;
       odl.back().tx_hash = string_tools::pod_to_hex(tx_hash);
       odl.back().stopped = false;
+      odl.back().fee = get_tx_fee(tx);
     }
     else if (at.type() == typeid(cancel_offer))
     {
@@ -2062,6 +2063,7 @@ bool blockchain_storage::process_update_offer(const update_offer& co, const cryp
   odl.back().index_in_tx = no;
   odl.back().tx_hash = string_tools::pod_to_hex(tx_id);
   odl.back().stopped = false;
+  odl.back().fee = it->second.fee;
 
   //remove old order
   m_offers.erase(it);
