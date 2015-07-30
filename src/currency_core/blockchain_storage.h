@@ -325,7 +325,7 @@ namespace currency
     bool enum_blockchain(visitor_t& v, const alt_chain_type& alt_chain = alt_chain_type(), uint64_t split_height = 0);
     bool process_cancel_offer(const cancel_offer& co);
     bool unprocess_cancel_offer(const cancel_offer& co);
-    bool process_update_offer(const update_offer& co, const crypto::hash& tx_id, uint64_t no, uint64_t timestamp);
+    bool process_update_offer(const update_offer& co, const crypto::hash& tx_id, uint64_t no, uint64_t timestamp, uint64_t fee);
     bool unprocess_update_offer(const update_offer& co, const crypto::hash& tx_id);
 
 

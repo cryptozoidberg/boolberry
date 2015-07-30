@@ -1935,7 +1935,7 @@ bool blockchain_storage::process_blockchain_tx_attachments(const transaction& tx
     }
     else if (at.type() == typeid(update_offer))
     {
-      bool r = process_update_offer(boost::get<update_offer>(at), tx_hash, count++, timestamp);
+      bool r = process_update_offer(boost::get<update_offer>(at), tx_hash, count++, timestamp, get_tx_fee(tx));
       CHECK_AND_ASSERT_MES(r, false, "process_update_offer failed");
     }
   }
@@ -2048,7 +2048,7 @@ bool blockchain_storage::unprocess_cancel_offer(const cancel_offer& co)
   return true;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::process_update_offer(const update_offer& co, const crypto::hash& tx_id, uint64_t no, uint64_t timestamp)
+bool blockchain_storage::process_update_offer(const update_offer& co, const crypto::hash& tx_id, uint64_t no, uint64_t timestamp, uint64_t fee)
 {
   bool r = validate_modify_order_signature(co);
   CHECK_AND_ASSERT_MES(r, false, "failed to validate order");
@@ -2063,7 +2063,7 @@ bool blockchain_storage::process_update_offer(const update_offer& co, const cryp
   odl.back().index_in_tx = no;
   odl.back().tx_hash = string_tools::pod_to_hex(tx_id);
   odl.back().stopped = false;
-  odl.back().fee = it->second.fee;
+  odl.back().fee = fee;
 
   //remove old order
   m_offers.erase(it);
