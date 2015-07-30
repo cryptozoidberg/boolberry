@@ -33,7 +33,8 @@
     app.constant('CONFIG',{
         filemask : "*;;*.lui",
         CDDP : 8, //CURRENCY_DISPLAY_DECIMAL_POINT,
-        standart_fee : 0.1
+        standart_fee : 0.1,
+        default_lang : 'ru'
     });
 
     app.config(['$routeProvider', 'IdleProvider', 'KeepaliveProvider', function($routeProvider, IdleProvider, KeepaliveProvider) {

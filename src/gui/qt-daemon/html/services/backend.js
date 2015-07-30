@@ -3,8 +3,8 @@
 
     var module = angular.module('app.backendServices', [])
 
-    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer','$rootScope', '$filter',
-        function($interval, $timeout, emulator, loader, informer, $rootScope, $filter) {
+    module.factory('backend', ['$interval', '$timeout', 'emulator', 'loader', 'informer','$rootScope', '$filter','errors',
+        function($interval, $timeout, emulator, loader, informer, $rootScope, $filter, errors) {
         
         var callbacks = {};
 
@@ -527,22 +527,23 @@
                 console.log('DISPATCH: got result from backend request id = '+request_id);
                 console.log(result);
 
-                var warningCodes = {
-                    'FILE_RESTORED' : 'Мы определили что ваш файл кошелька был поврежден и восстановили ключи истории транзакций, синхронизация может занять какое-то время',
-                    // some other warning codes
-                };
-                var is_warning = warningCodes.hasOwnProperty(error_code);
+                // var warningCodes = {
+                //     'FILE_RESTORED' : 'Мы определили что ваш файл кошелька был поврежден и восстановили ключи истории транзакций, синхронизация может занять какое-то время',
+                //     // some other warning codes
+                // };
+                // var is_warning = warningCodes.hasOwnProperty(error_code);
 
-                if(error_code == 'OK' || error_code == '' || is_warning){
-                    if(is_warning){
-                        informer.warning(warningCodes[error_code]);
-                    }
+                if(error_code == 'OK' || error_code == ''){
+                    // if(is_warning){
+                    //     informer.warning(warningCodes[error_code]);
+                    // }
                     $timeout(function(){
                         callbacks[request_id](result.param); 
                     });
                     
                 }else{
-                    informer.error(result.status.error_code);
+                    var error = errors.get_error(result.status.error_code);
+                    informer.warning(error);
                     console.log(result.status.error_code);
                 }
                 

@@ -429,6 +429,63 @@
     }]);
 
 
+    module.service('errors',['CONFIG',function(CONFIG){
+        var lang     = CONFIG.default_lang; // language, chosen by user
+        var lang_def = 'ru'; // default language
+
+        var errors = {
+            "FAIL"                       : {'ru' : 'Не удалось'},
+            "ACCESS_DENIED"              : {'ru' : 'Доступ запрещен'},
+            "INTERNAL_ERROR"             : {'ru' : 'Внутренняя ошибка'},
+            "INTERNAL_ERROR_QUE_FULL"    : {'ru' : 'Доступ запрещен'},
+            "BAD_ARG"                    : {'ru' : 'Неверно заданы параметры'},
+            "BAD_ARG_EMPTY_DESTINATIONS" : {'ru' : 'Не задан получатель'},
+            "BAD_ARG_WRONG_FEE"          : {'ru' : 'Неверно задана комиссия'},
+            "BAD_ARG_INVALID_ADDRESS"    : {'ru' : 'Неверный адрес'},
+            "BAD_ARG_WRONG_AMOUNT"       : {'ru' : 'Неверная сумма'},
+            "BAD_ARG_WRONG_PAYMENT_ID"   : {'ru' : 'Неверный идентификатор платежа'},
+            "WRONG_PASSWORD"             : {'ru' : 'Неверный пароль'},
+            "WALLET_WRONG_ID"            : {'ru' : 'Неверный идентификатор кошелька'},
+            "FILE_NOT_FOUND"             : {'ru' : 'Файл не найден'},
+            "ALREADY_EXISTS"             : {'ru' : 'Файл уже существует'},
+            "CANCELED"                   : {'ru' : 'Отменено'},
+            "FILE_RESTORED"              : {'ru' : 'Мы определили что ваш файл кошелька был поврежден и восстановили ключи истории транзакций, синхронизация может занять какое-то время'},
+            "TRUE"                       : {'ru' : 'Выполнено'}, // ??
+            "FALSE"                      : {'ru' : 'Не выполнено'}, // ??
+            "CORE_BUSY"                  : {'ru' : 'Ядро занято'},
+        };
+
+        var error_by_default = {
+            'ru' : 'Ошибка'
+        };
+
+        return {
+            get_error : function(error){
+                var suberror = '';
+                if(error.indexOf(':') != -1){
+                    suberror = error.substr(error.indexOf(':')+1);
+                    error = error.substr(0,error.indexOf(':'));
+                }
+
+
+                if(angular.isDefined(errors[error])){
+                    if(angular.isDefined(errors[error][lang])){
+                        return errors[error][lang]+' '+suberror;
+                    }else{
+                        return errors[error][lang_def]+' '+suberror;
+                    }
+                }else{
+                    if(angular.isDefined(error_by_default[lang])){
+                        return error_by_default[lang];
+                    }else{
+                        return error_by_default[lang_def]
+                    }
+                }
+            }
+        };
+    }]);
+
+
     module.factory('contacts', ['backend', '$rootScope',function(backend, $rootScope) { // work with $rootScope.settings.contacts
 
         if(angular.isUndefined($rootScope.settings.contacts)){

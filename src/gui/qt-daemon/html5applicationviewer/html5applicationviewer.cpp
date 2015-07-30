@@ -71,10 +71,21 @@ signals:
 
 public:
   QGraphicsWebView *m_webView;
-#ifdef TOUCH_OPTIMIZED_NAVIGATION
-  NavigationController *m_controller;
-#endif // TOUCH_OPTIMIZED_NAVIGATION
+  
+private slots:
+  void handleSslErrors(QNetworkReply* reply, const QList<QSslError> &errors);
 };
+
+void Html5ApplicationViewerPrivate::handleSslErrors(QNetworkReply* reply, const QList<QSslError> &errors)
+{
+  qDebug() << "handleSslErrors: ";
+  foreach (QSslError e, errors)
+  {
+    qDebug() << "ssl error: " << e;
+  }
+  
+  reply->ignoreSslErrors();
+}
 
 void Html5ApplicationViewerPrivate::closeEvent(QCloseEvent *event)
 {
@@ -103,6 +114,11 @@ Html5ApplicationViewerPrivate::Html5ApplicationViewerPrivate(QWidget *parent)
 #endif // TOUCH_OPTIMIZED_NAVIGATION
   connect(m_webView->page()->mainFrame(),
     SIGNAL(javaScriptWindowObjectCleared()), SLOT(addToJavaScript()));
+  
+  connect(m_webView->page()->networkAccessManager(),
+          SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> & )),
+          this,
+          SLOT(handleSslErrors(QNetworkReply*, const QList<QSslError> & )));
 }
 
 void Html5ApplicationViewerPrivate::resizeEvent(QResizeEvent *event)
@@ -236,24 +252,36 @@ void Html5ApplicationViewer::changeEvent(QEvent *e)
 {
   switch (e->type())
   {
-  case QEvent::WindowStateChange:
-  {
-                                  if (this->windowState() & Qt::WindowMinimized)
-                                  {
-                                    if (m_trayIcon)
-                                    {
-                                      QTimer::singleShot(250, this, SLOT(hide()));
-                                      m_trayIcon->showMessage("Lui app is minimized to tray",
-                                        "You can restore it with double-click or context menu");
-                                    }
-                                  }
+    case QEvent::WindowStateChange:
+    {
+      QWindowStateChangeEvent* event = static_cast< QWindowStateChangeEvent* >( e );
+      
+      if( event->oldState() & Qt::WindowMinimized && !(this->windowState() & Qt::WindowMinimized) )
+      {
+        qDebug() << "Window restored (to normal or maximized state)!";
+        if (m_trayIcon)
+        {
+          QTimer::singleShot(250, this, SLOT(show()));
+        }
 
-                                  break;
-  }
-  default:
-    break;
-  }
+      }
+      else if ( !(event->oldState() & Qt::WindowMinimized) && (this->windowState() & Qt::WindowMinimized) )
+      {
+        qDebug() << "Window minimized";
+        if (m_trayIcon)
+        {
+          QTimer::singleShot(250, this, SLOT(hide()));
+          m_trayIcon->showMessage("Lui app is minimized to tray",
+                                  "You can restore it with double-click or context menu");
+        }
 
+      }
+      break;
+    }
+    default:
+      break;
+  }
+  
   QWidget::changeEvent(e);
 }
 
