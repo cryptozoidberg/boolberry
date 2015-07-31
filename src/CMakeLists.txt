@@ -84,7 +84,8 @@ if(BUILD_GUI)
   set(CMAKE_AUTOMOC ON)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
   SET(MACOSX_BUNDLE_ICON_FILE app.icns)
-  add_executable(qt-lui WIN32 MACOSX_BUNDLE ${QTDAEMON} )	  
+  add_executable(qt-lui WIN32 MACOSX_BUNDLE ${QTDAEMON} )
+	  
   QT5_USE_MODULES(qt-lui WebKit WebKitWidgets)
   find_package(Qt5PrintSupport REQUIRED)
 
@@ -99,6 +100,8 @@ if(BUILD_GUI)
 
 
   set_property(TARGET qt-lui PROPERTY FOLDER "prog")
+  set_target_properties(qt-lui PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/src/gui/qt-daemon/Info.plist.in)
+
   set(CMAKE_AUTOMOC OFF)
 endif()
 
