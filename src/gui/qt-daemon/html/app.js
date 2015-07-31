@@ -34,6 +34,7 @@
         filemask : "*;;*.lui",
         CDDP : 8, //CURRENCY_DISPLAY_DECIMAL_POINT,
         standart_fee : 0.1,
+        premium_fee : 6,
         default_lang : 'ru'
     });
 

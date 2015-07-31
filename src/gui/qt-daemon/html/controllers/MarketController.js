@@ -2,8 +2,10 @@
     'use strict';
     var module = angular.module('app.market',[]);
 
-    module.controller('marketCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','market','$timeout', 'gProxy', '$http',
-        function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market, $timeout, gProxy, $http){
+    module.controller('marketCtrl',['CONFIG', 'backend','$rootScope','$scope','informer','$routeParams','$filter','$location','market','$timeout', 'gProxy', '$http',
+        function(CONFIG,backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market, $timeout, gProxy, $http){
+            
+            $scope.config = CONFIG;
             
             var is_currency_offer = function(offer){
                 if(offer.offer_type == 2 || offer.offer_type == 3){
@@ -509,7 +511,7 @@
                 expiration_time : $scope.intervals[3],
                 is_standart : false,
                 is_premium : true,
-                fee_premium : '6.00',
+                fee_premium : CONFIG.premium_fee,
                 fee_standart : CONFIG.standart_fee,
                 location: {country : '', city: ''},
                 contacts: {phone : '', email : ''},
@@ -808,7 +810,7 @@
                 expiration_time : $scope.intervals[3],
                 is_standart : false,
                 is_premium : true,
-                fee_premium : '6.00',
+                fee_premium : CONFIG.premium_fee,
                 fee_standart : CONFIG.standart_fee,
                 bonus: '',
                 location: {country : '', city: ''},

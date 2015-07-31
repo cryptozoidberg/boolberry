@@ -583,8 +583,8 @@
 
     }]);
 
-    module.factory('emulator', ['$interval', '$timeout', 'loader','informer',
-        function($interval, $timeout, loader, informer){
+    module.factory('emulator', ['CONFIG', '$interval', '$timeout', 'loader','informer',
+        function(CONFIG, $interval, $timeout, loader, informer){
         var callbacks = {};
 
         var wallet_id = 0;
@@ -827,6 +827,7 @@
                             "payment_types": "EPS,BC,cash",
                             "expiration_time":3,
                             'timestamp': 1429715920,
+                            'fee' : CONFIG.standart_fee,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b1"
                         }, 
                         {
@@ -841,6 +842,7 @@
                             "payment_types": "EPS,BC,Qiwi",
                             "expiration_time":5,
                             'timestamp': 1429715920,
+                            'fee' : CONFIG.standart_fee,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b2"
                         }, 
                         {
@@ -855,6 +857,7 @@
                             "payment_types": "EPS,BC,Qiwi",
                             "expiration_time":5,
                             'timestamp': 1430715920,
+                            'fee' : CONFIG.standart_fee,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b3"
                         },
                         {
@@ -869,6 +872,7 @@
                             "payment_types": "CSH,BT",
                             "expiration_time":5,
                             'timestamp': 1429715920,
+                            'fee' : CONFIG.premium_fee,
                             'tx_hash' : "514fa3ba101df74bb4ce2c8f8653cd5a9d7c9d5777a4a587878bb5b6cd5954b9"
                         }
                       ]

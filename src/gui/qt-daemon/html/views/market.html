@@ -299,7 +299,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_currency_offers">
+                        <tr ng-class="{'success' : offer.fee == config.premium_fee , 'new':false, 'disable':false}" ng-repeat="offer in f_currency_offers">
                             <td>
                                 {{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}
                             </td>
@@ -547,7 +547,7 @@
 
                     <tbody>
 
-                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_goods_offers">
+                        <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':false}" ng-repeat="offer in f_goods_offers">
                             <td>
                                 {{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}
                             </td>
@@ -706,7 +706,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_my_currency_offers">
+                        <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':false}" ng-repeat="offer in f_my_currency_offers">
 
                             <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
                             <td>
@@ -821,7 +821,7 @@
                     </thead>
 
                     <tbody>
-                    <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_my_goods_offers">
+                    <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':false}" ng-repeat="offer in f_my_goods_offers">
 
                         <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
                         <td>
@@ -976,7 +976,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_fav_currency_offers">
+                        <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':false}" ng-repeat="offer in f_fav_currency_offers">
 
                             <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
                             <td>
@@ -1064,7 +1064,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-class="{'success':true, 'new':false, 'disable':false}" ng-repeat="offer in f_fav_goods_offers">
+                    <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':false}" ng-repeat="offer in f_fav_goods_offers">
 
                         <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
                         <td>
