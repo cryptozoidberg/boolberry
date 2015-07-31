@@ -100,7 +100,7 @@ if(BUILD_GUI)
 
 
   set_property(TARGET qt-lui PROPERTY FOLDER "prog")
-  set_target_properties(qt-lui PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/src/gui/qt-daemon/Info.plist.in)
+  set_target_properties(qt-lui PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/gui/qt-daemon/Info.plist.in)
 
   set(CMAKE_AUTOMOC OFF)
 endif()
