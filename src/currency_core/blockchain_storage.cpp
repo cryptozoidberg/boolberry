@@ -37,7 +37,8 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool):m_tx_pool(tx_poo
                                                                 m_is_blockchain_storing(false), 
                                                                 m_current_pruned_rs_height(0), 
                                                                 m_core_runtime_config(get_default_core_runtime_config()),
-                                                                m_bei_stub(AUTO_VAL_INIT(m_bei_stub))
+                                                                m_bei_stub(AUTO_VAL_INIT(m_bei_stub)),
+                                                                m_event_handler(&m_event_handler_stub)
 {}
 //------------------------------------------------------------------
 bool blockchain_storage::have_tx(const crypto::hash &id)
@@ -1867,6 +1868,11 @@ bool blockchain_storage::put_alias_info(const alias_info& ai)
   return true;
 }
 //------------------------------------------------------------------
+void blockchain_storage::set_event_handler(i_core_event_handler* event_handler)
+{
+  m_event_handler = event_handler;
+}
+//------------------------------------------------------------------
 uint64_t blockchain_storage::validate_alias_reward(const transaction& tx, const std::string& alias)
 {
   //validate alias coast
@@ -1927,6 +1933,7 @@ bool blockchain_storage::process_blockchain_tx_attachments(const transaction& tx
       odl.back().tx_hash = string_tools::pod_to_hex(tx_hash);
       odl.back().stopped = false;
       odl.back().fee = get_tx_fee(tx);
+      rise_core_event(CORE_EVENT_ADD_OFFER, odl.back());
     }
     else if (at.type() == typeid(cancel_offer))
     {

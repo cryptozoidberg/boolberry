@@ -26,7 +26,7 @@
 #include "crypto/hash.h"
 #include "checkpoints.h"
 #include "core_runtime_config.h"
-
+#include "dispatch_core_events.h"
 POD_MAKE_HASHABLE(currency, account_public_address);
 
 namespace currency
@@ -136,8 +136,8 @@ namespace currency
     bool is_pos_allowed();
     bool trim_offers();
     uint64_t get_tx_fee_median();
-    uint64_t validate_alias_reward(const transaction& tx, const std::string& ai);
-
+    uint64_t validate_alias_reward(const transaction& tx, const std::string& ai);    
+    void set_event_handler(i_core_event_handler* event_handler);
 
     bool is_storing_blockchain(){return m_is_blockchain_storing;}
     wide_difficulty_type block_difficulty(size_t i);
@@ -186,7 +186,12 @@ namespace currency
     //this function mostly made for debug purposes
     bool get_all_offers(std::list<offer_details_ex>& offers);
 
-
+    template<class t_event_details>
+    void rise_core_event(const std::string& event_name, const t_event_details& ed)
+    {
+      core_event_v e(ed);
+      m_event_handler->on_core_event(event_name, e);
+    }
 
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
     bool get_blocks(const t_ids_container& block_ids, t_blocks_container& blocks, t_missed_container& missed_bs)
@@ -281,6 +286,9 @@ namespace currency
     //offers
     offers_container m_offers; //offers indexed by 
 
+    //events
+    i_core_event_handler* m_event_handler;
+    i_core_event_handler m_event_handler_stub;
 
     bool switch_to_alternative_blockchain(alt_chain_type& alt_chain);
     bool pop_block_from_blockchain();

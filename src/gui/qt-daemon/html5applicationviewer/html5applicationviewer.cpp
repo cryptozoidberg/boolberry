@@ -40,11 +40,16 @@ if (!epee::serialization::load_t_from_json(var_name, param.toStdString())) \
 }
 
 
-class Html5ApplicationViewerPrivate : public QGraphicsView
+class Html5ApplicationViewerPrivate : public QGraphicsView, 
+                                      public currency::i_core_event_handler
 {
   Q_OBJECT
 public:
   Html5ApplicationViewerPrivate(QWidget *parent = 0);
+
+  //--------------------  i_core_event_handler --------------------
+  virtual void on_core_event(const std::string event_name, const currency::core_event_v& e);
+
 
   void resizeEvent(QResizeEvent *event);
   static QString adjustPath(const QString &path);
@@ -66,6 +71,9 @@ signals:
   void handle_internal_callback(const QString str, const QString callback_name);
   void update_pos_mining_text(const QString str);
   void do_dispatch(const QString status, const QString params);  //general function
+  void on_core_event(const QString method_name, const QString params);  //general function
+
+
 
 
 
@@ -76,6 +84,28 @@ private slots:
   void handleSslErrors(QNetworkReply* reply, const QList<QSslError> &errors);
 };
 
+struct serialize_variant_visitor : public boost::static_visitor<std::string>
+{
+  template<class t_type>
+  std::string operator()(const t_type& v) const
+  {
+    return epee::serialization::store_t_to_json(v);
+  }
+};
+
+
+template <class t_variant>
+std::string serialize_variant(const t_variant& v)
+{
+
+  return boost::apply_visitor(serialize_variant_visitor(), v);
+}
+
+
+void Html5ApplicationViewerPrivate::on_core_event(const std::string event_name, const currency::core_event_v& e)
+{
+  this->on_core_event(QString(event_name.c_str()), QString(serialize_variant(e).c_str()));
+}
 void Html5ApplicationViewerPrivate::handleSslErrors(QNetworkReply* reply, const QList<QSslError> &errors)
 {
   qDebug() << "handleSslErrors: ";
