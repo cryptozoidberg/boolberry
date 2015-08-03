@@ -2011,6 +2011,7 @@ bool blockchain_storage::process_cancel_offer(const cancel_offer& co)
 
   it->second[co.offer_index].stopped = true;
   LOG_PRINT_MAGENTA("Offer " << co.tx_id << ":" << co.offer_index << " cancelled", LOG_LEVEL_0);
+  rise_core_event(CORE_EVENT_REMOVE_OFFER, it->second[co.offer_index]);
   return true;
 }
 //------------------------------------------------------------------
@@ -2051,7 +2052,7 @@ bool blockchain_storage::unprocess_cancel_offer(const cancel_offer& co)
   CHECK_AND_ASSERT_MES(oit->second[co.offer_index].stopped, false, "Cancel offer command unprocess: tx "
     << co.tx_id << ": co.offer_index " << co.offer_index << ": not stopped yet");
   oit->second[co.offer_index].stopped = false;
-  
+  rise_core_event(CORE_EVENT_ADD_OFFER, oit->second[co.offer_index]);
   return true;
 }
 //------------------------------------------------------------------
@@ -2075,6 +2076,13 @@ bool blockchain_storage::process_update_offer(const update_offer& co, const cryp
   //remove old order
   m_offers.erase(it);
 
+  //notify
+  update_offer_details uop;
+  uop.od = odl.back();
+  uop.tx_hash = string_tools::pod_to_hex(co.tx_id);
+  uop.no = co.offer_index;
+  rise_core_event(CORE_EVENT_UPDATE_OFFER, uop);
+
   return true;
 }
 //------------------------------------------------------------------
@@ -2084,7 +2092,9 @@ bool blockchain_storage::unprocess_update_offer(const update_offer& co, const cr
   CHECK_AND_ASSERT_MES(it != m_offers.end(), false, "Unprocess update offer command: tx " << tx_id << " not found in offers");
   
   CHECK_AND_ASSERT_MES(it->second.size(), false, "Unprocess update offer command: tx " << tx_id << ", size() is empty ");
+  rise_core_event(CORE_EVENT_REMOVE_OFFER, it->second.back());
   it->second.pop_back();
+  rise_core_event(CORE_EVENT_ADD_OFFER, it->second.back());
 
   if (!it->second.size())
     m_offers.erase(it);
@@ -2104,6 +2114,11 @@ bool blockchain_storage::unprocess_blockchain_tx_attachments(const transaction& 
 
     CHECK_AND_ASSERT_MES(it->second.size() != cnt_offers, false, "wrong pffers size ("
       << it->second.size() << ") in unprocess_blockchain_tx_offers with tx " << get_transaction_hash(tx) << ", expected " << cnt_offers);
+
+    for (const auto& od : it->second)
+    {
+      rise_core_event(CORE_EVENT_REMOVE_OFFER, od);
+    }
 
     m_offers.erase(it);
   }

@@ -216,7 +216,7 @@ namespace currency
       VALUE(offer_index)
       VALUE(sig)
       FIELD(of)
-      END_SERIALIZE()
+    END_SERIALIZE()
   };
 
   struct tx_comment
@@ -484,6 +484,21 @@ namespace currency
       KV_SERIALIZE(index_in_tx)
       KV_SERIALIZE(timestamp)
       KV_SERIALIZE(fee)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct update_offer_details
+  {
+    uint64_t wallet_id;
+    std::string tx_hash;
+    uint64_t no;
+    currency::offer_details_ex od;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallet_id)
+      KV_SERIALIZE(tx_hash)
+      KV_SERIALIZE(no)
+      KV_SERIALIZE(od)
     END_KV_SERIALIZE_MAP()
   };
 

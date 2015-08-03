@@ -7,6 +7,8 @@
 #include "currency_basic.h"
 
 #define CORE_EVENT_ADD_OFFER         "CORE_EVENT_ADD_OFFER"
+#define CORE_EVENT_REMOVE_OFFER      "CORE_EVENT_REMOVE_OFFER"
+#define CORE_EVENT_UPDATE_OFFER      "CORE_EVENT_UPDATE_OFFER"
 
 
 namespace currency
@@ -24,7 +26,7 @@ namespace currency
 
   };
 
-  typedef boost::variant<offer_details_ex> core_event_v;
+  typedef boost::variant<offer_details_ex, update_offer_details> core_event_v;
 
   /************************************************************************/
   /*                                                                      */

@@ -13,6 +13,8 @@ param =
   "progress": 10
 }
 
+============================================================================
+============================================================================
 
 upate_daemon_state()
 
@@ -56,6 +58,8 @@ possible "daemon_network_state" codes:
       daemon_network_state_internal_error = 4,
       daemon_network_state_unloading_core = 5
 
+============================================================================
+============================================================================
 
 update_wallet_status()
 
@@ -71,6 +75,55 @@ param:
 wallet_state_synchronizing = 1,
 wallet_state_ready = 2, 
 wallet_state_error = 3
+
+
+============================================================================
+============================================================================
+[sync] on_core_event(method_name, params)
+method_name:
+         "CORE_EVENT_ADD_OFFER"
+         "CORE_EVENT_REMOVE_OFFER" 
+         "CORE_EVENT_UPDATE_OFFER"
+
+
+param("CORE_EVENT_ADD_OFFER" or "CORE_EVENT_REMOVE_OFFER"):
+{
+      "offer_type": 0,
+      "amount_lui": 2300000000,
+      "amount_etc": 2,
+      "target": "EUR",
+      "location": "USA, NYC",
+      "contacts": "+89876782342",
+      "comment": "Best ever service",
+      "payment_types": "cash",
+      "expiration_time": "two days",
+      "tx_hash": "2fb43b50d0edf7824ba95c414832d324ff5e91287f28929677df3682e4c8bc0c",
+      "index_in_tx": 0
+}
+param("CORE_EVENT_UPDATE_OFFER"):
+{
+  "wallet_id": 0,
+  "tx_hash": "28696b9e505f1666daf5989ee4b677d694c97b055f029f48f0f5a57f25a68503",
+  "no": 0, 
+  "od":
+    {
+      "offer_type": 0,
+      "amount_lui": 2300000000,
+      "amount_etc": 2,
+      "target": "EUR",
+      "location_country": "USA",
+      "location_city": "NYC",
+      "contacts": "+89876782342",
+      "comment": "Best ever service",
+      "payment_types": "cash",
+      "expiration_time": 5,
+      "tx_hash": "2fb43b50d0edf7824ba95c414832d324ff5e91287f28929677df3682e4c8bc0c",
+      "index_in_tx": 0
+    }
+}
+
+
+
 
 
 //----------------------------------
@@ -610,6 +663,7 @@ resposne:
 {
   "error_code": "OK"//or "CANCELED"
 }
+
 
 
 
