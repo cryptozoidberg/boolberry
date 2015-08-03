@@ -73,7 +73,7 @@ public:
   std::string close_wallet(size_t wallet_id);
   std::string push_offer(size_t wallet_id, const currency::offer_details_ex& od, currency::transaction& res_tx);
   std::string cancel_offer(const view::cancel_offer_param& co, currency::transaction& res_tx);
-  std::string push_update_offer(const view::update_offer_param& uo, currency::transaction& res_tx);
+  std::string push_update_offer(const currency::update_offer_details& uo, currency::transaction& res_tx);
   std::string get_all_offers(currency::COMMAND_RPC_GET_ALL_OFFERS::response& od);
   std::string get_aliases(view::alias_set& al_set);
   std::string request_alias_registration(const currency::alias_rpc_details& al, uint64_t wallet_id, uint64_t fee, currency::transaction& res_tx, uint64_t reward);
@@ -96,7 +96,7 @@ public:
   std::string transfer(size_t wallet_id, const view::transfer_params& tp, currency::transaction& res_tx);
   std::string get_config_folder();
   std::string is_valid_brain_restore_data(const std::string& brain_text);
-
+  void subscribe_to_core_events(currency::i_core_event_handler* pevents_handler);
 private:
   void main_worker(const po::variables_map& vm);
   bool update_state_info();

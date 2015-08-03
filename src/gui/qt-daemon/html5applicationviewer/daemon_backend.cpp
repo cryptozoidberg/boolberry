@@ -599,6 +599,11 @@ std::string daemon_backend::is_valid_brain_restore_data(const std::string& brain
   else
     return API_RETURN_CODE_FALSE;
 }
+void daemon_backend::subscribe_to_core_events(currency::i_core_event_handler* pevents_handler)
+{
+  m_ccore.get_blockchain_storage().set_event_handler(pevents_handler);
+}
+
 std::string daemon_backend::restore_wallet(const std::wstring& path, const std::string& password, const std::string& restore_key, view::open_wallet_response& owr)
 {
   std::shared_ptr<tools::wallet2> w(new tools::wallet2());
@@ -962,7 +967,7 @@ std::string daemon_backend::cancel_offer(const view::cancel_offer_param& co, cur
   }
 }
 
-std::string daemon_backend::push_update_offer(const view::update_offer_param& uo, currency::transaction& res_tx)
+std::string daemon_backend::push_update_offer(const currency::update_offer_details& uo, currency::transaction& res_tx)
 {
   GET_WALLET_BY_ID(uo.wallet_id, w);
   crypto::hash tx_id = currency::null_hash;

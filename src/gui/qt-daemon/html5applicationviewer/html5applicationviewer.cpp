@@ -318,6 +318,8 @@ void Html5ApplicationViewer::changeEvent(QEvent *e)
 void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
 {
 
+  m_backend.subscribe_to_core_events(m_d);
+
   bool r = QSslSocket::supportsSsl();
   if (r)
   {
@@ -329,6 +331,7 @@ void Html5ApplicationViewer::initTrayIcon(const std::string& htmlPath)
 QMessageBox::Ok);
     LOG_PRINT_RED("[Support SSL]: NO", LOG_LEVEL_0);
   }
+
 
   if (!QSystemTrayIcon::isSystemTrayAvailable())
     return;
@@ -1043,7 +1046,7 @@ QString Html5ApplicationViewer::cancel_offer(const QString& param)
 
 QString Html5ApplicationViewer::push_update_offer(const QString& param)
 {
-  return que_call2<view::update_offer_param>("cancel_offer", param, [this](const view::update_offer_param& a, view::api_response& ar){
+  return que_call2<currency::update_offer_details>("cancel_offer", param, [this](const currency::update_offer_details& a, view::api_response& ar){
 
     view::transfer_response tr = AUTO_VAL_INIT(tr);
     currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
