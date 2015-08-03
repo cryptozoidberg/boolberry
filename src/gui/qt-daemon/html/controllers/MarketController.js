@@ -6,7 +6,7 @@
         function(CONFIG,backend,$rootScope,$scope,informer,$routeParams,$filter,$location, market, $timeout, gProxy, $http){
             
             $scope.config = CONFIG;
-            
+
             var is_currency_offer = function(offer){
                 if(offer.offer_type == 2 || offer.offer_type == 3){
                     return true;
@@ -126,22 +126,25 @@
                         break;
                 }
             };
-            
-            // GET LIST OF OFFERS
-            backend.get_all_offers(function(data){
-                
-                if(angular.isUndefined($rootScope.gplaces)){
-                    $rootScope.gplaces = {};
-                }
-                if(angular.isUndefined($rootScope.countryList)){
-                    $http.get('all.json').then(
-                        function(res){
-                          $rootScope.countryList = res.data;
-                        }
-                    );
-                }
-                if(angular.isDefined(data.offers)){
-                    $rootScope.offers = $filter('orderBy')(data.offers,'-timestamp');
+
+
+            $scope.$watch(
+                function(){
+                    return $rootScope.offers;
+                },
+                function(){
+                    if(angular.isUndefined($rootScope.gplaces)){
+                        $rootScope.gplaces = {};
+                    }
+                    if(angular.isUndefined($rootScope.countryList)){
+                        $http.get('all.json').then(
+                            function(res){
+                              $rootScope.countryList = res.data;
+                            }
+                        );
+                    }
+                    
+                    $rootScope.offers = $filter('orderBy')($rootScope.offers,'-timestamp');
 
                     $scope.my_offers = [];
 
@@ -150,8 +153,7 @@
 
                         var not_found = 'City not found';
 
-                        if((angular.isUndefined($rootScope.gplaces[placeId]) || (angular.isDefined(
-                            ) && $rootScope.gplaces[placeId].name==not_found)) && placeId.length == 27){
+                        if((angular.isUndefined($rootScope.gplaces[placeId]) || ($rootScope.gplaces[placeId].name==not_found)) && placeId.length == 27){
                             $rootScope.gplaces[placeId] = {name : 'Loading...'};
                             gProxy.getDetails(placeId,function(place){
                                 $timeout(function(){
@@ -184,7 +186,12 @@
                     $scope.f_my_goods_offers = $scope.my_goods_offers;
 
                     loadFavorites();
-                }
+                },
+                true
+            );
+            // GET LIST OF OFFERS
+            backend.get_all_offers(function(data){
+                $rootScope.offers = data.offers;
             });
 
             $scope.saveMyOffers = function(){

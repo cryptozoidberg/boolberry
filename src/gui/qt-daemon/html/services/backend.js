@@ -688,19 +688,114 @@
         this.subscribe = function(command, callback) {
             var data = {};
             var commandData = false;
-            if(commandData = this.getData(command)){
-                data = commandData;
-            }
 
-            var interval = $interval(function(){
-                //data.daemon_network_state = Math.floor(Math.random()*3);
-                callback(data);
-            },3000);
+            if(command == 'on_core_event'){
+                this.coreEvent(callback);
+            }else{
+                if(commandData = this.getData(command)){
+                    data = commandData;
+                }
+
+                var interval = $interval(function(){
+                    //data.daemon_network_state = Math.floor(Math.random()*3);
+                    callback(data);
+                },3000);
+            }
         };
+
+        var core_event_counter = 0;
+
+        this.coreEvent = function(callback){
+            var events = [
+                'CORE_EVENT_ADD_OFFER',
+                'CORE_EVENT_UPDATE_OFFER',
+                'CORE_EVENT_REMOVE_OFFER'
+            ];
+
+            var instance = this;
+            
+            var interval = $interval(function(){
+                // callback(data);
+                var index = core_event_counter; //Math.floor(Math.random() * events.length);
+                var method = events[index];
+
+                if(core_event_counter == 2){
+                    core_event_counter = 0;
+                }else{
+                    core_event_counter++;
+                }
+
+                // informer.info(method);
+                var data = instance.getData(method);
+                callback(method, data);
+            },3000);
+            
+        };
+
         this.getData = function(command,params){
             var result = false;
 
             switch (command){
+                case 'CORE_EVENT_ADD_OFFER' :
+                    result = {
+                        "offer_type": 0,
+                        "amount_lui": 2300000000,
+                        "amount_etc": 2,
+                        "target": "Шляпа крутая",
+                        "location_country": "US",
+                        "location_city": "ChIJybDUc_xKtUYRTM9XV8zWRD0",
+                        "contacts": "test@test.ru,+89876782342",
+                        "comment": "Best ever service",
+                        "payment_types": "EPS,BC,cash",
+                        "expiration_time":3,
+                        'timestamp': 1429715920,
+                        'fee' : CONFIG.premium_fee,
+                        "tx_hash": "2fb43b50d0edf7824ba95c414832d324ff5e91287f28929677df3682e4c8bc0c",
+                        "index_in_tx": 0
+                    };
+                    break;
+                case 'CORE_EVENT_REMOVE_OFFER' : 
+                    result = {
+                        "offer_type": 0,
+                        "amount_lui": 2300000000,
+                        "amount_etc": 2,
+                        "target": "Шляпа крутая",
+                        "location_country": "US",
+                        "location_city": "ChIJybDUc_xKtUYRTM9XV8zWRD0",
+                        "contacts": "test@test.ru,+89876782342",
+                        "comment": "Best ever service",
+                        "payment_types": "EPS,BC,cash",
+                        "expiration_time":3,
+                        'timestamp': 1429715920,
+                        'fee' : CONFIG.premium_fee,
+                        "tx_hash": "28696b9e505f1666daf5989ee4b677d694c97b055f029f48f0f5a57f25a68503",
+                        "index_in_tx": 0
+                    };
+                    break;
+                case 'CORE_EVENT_UPDATE_OFFER' : 
+                    result = {
+                      "wallet_id": 0,
+                      "tx_hash": "2fb43b50d0edf7824ba95c414832d324ff5e91287f28929677df3682e4c8bc0c", // old
+                      "no": 0, 
+                      "od":
+                        {
+                            "offer_type": 0,
+                            "amount_lui": 2300000000,
+                            "amount_etc": 2,
+                            "target": "Шляпа обычная",
+                            "location_country": "US",
+                            "location_city": "ChIJybDUc_xKtUYRTM9XV8zWRD0",
+                            "contacts": "test@test.ru,+89876782342",
+                            "comment": "Best ever service",
+                            "payment_types": "EPS,BC,cash",
+                            "expiration_time":3,
+                            'timestamp': 1429715920,
+                            'fee' : CONFIG.standart_fee,
+                            "tx_hash": "28696b9e505f1666daf5989ee4b677d694c97b055f029f48f0f5a57f25a68503", // new
+                            "index_in_tx": 0
+                        }
+                    };
+                    break;
                 case 'show_openfile_dialog' : 
                     result = { 
                         "error_code": "OK",

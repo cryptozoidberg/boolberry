@@ -141,6 +141,10 @@
             //informer.info('IdleStart');
         });
 
+        if(angular.isUndefined($rootScope.offers)){
+            $rootScope.offers = [];
+        }
+
         $scope.$on('IdleWarn', function(e, countdown) {
             // follows after the IdleStart event, but includes a countdown until the user is considered timed out
             // the countdown arg is the number of seconds remaining until then.
@@ -634,6 +638,28 @@
         var transfer_balance_time_out = 0;
         var transfer_tx_time_out      = 0;
         var tx_temp = {};
+
+        backend.subscribe('on_core_event', function(method, data){
+            switch(method){
+                case 'CORE_EVENT_ADD_OFFER':
+                    $timeout(function(){
+                       $rootScope.offers.push(data); 
+                    });
+                    break;
+                case 'CORE_EVENT_UPDATE_OFFER':
+                    var offers = $filter('filter')($rootScope.offers, {tx_hash : data.tx_hash});
+                    if(offers.length){
+                        $rootScope.offers[$rootScope.offers.indexOf(offers[0])] = data.od;
+                    }
+                    break;
+                case 'CORE_EVENT_REMOVE_OFFER':
+                    var offers = $filter('filter')($rootScope.offers, {tx_hash : data.tx_hash});
+                    if(offers.length){
+                        $rootScope.offers.splice($rootScope.offers.indexOf(offers[0]),1);
+                    }
+                    break;
+            }
+        });
 
         backend.subscribe('money_transfer', function(data){
             console.log('money_transfer');
