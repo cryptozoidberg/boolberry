@@ -104,6 +104,8 @@ std::string serialize_variant(const t_variant& v)
 
 void Html5ApplicationViewerPrivate::on_core_event(const std::string event_name, const currency::core_event_v& e)
 {
+  //LOG_PRINT_L0("[]")
+  LOG_PRINT_L0("SENDING SIGNAL -> [CORE_EVENT]: " << event_name);
   this->on_core_event(QString(event_name.c_str()), QString(serialize_variant(e).c_str()));
 }
 void Html5ApplicationViewerPrivate::handleSslErrors(QNetworkReply* reply, const QList<QSslError> &errors)
