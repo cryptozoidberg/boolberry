@@ -22,7 +22,7 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 
-@echo "---------------- BUILDING GUI ---------------------------------"
+@echo "---------------- BUILDING ---------------------------------"
 @echo "---------------------------------------------------------------"
 
 rmdir build /s /q
@@ -42,12 +42,43 @@ setLocal
 call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86_amd64
 
 msbuild version.vcxproj  /p:Configuration=Release /t:Build
-
 echo 'errorlevel=%ERRORLEVEL%'
 
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
+
+
+@echo "---------------- BUILDING TOOLS ---------------------------------"
+
+
+msbuild src/daemon.vcxproj  /p:Configuration=Release /t:Build
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
+msbuild src/simplewallet.vcxproj  /p:Configuration=Release /t:Build
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
+ 
+set cmd=src\Release\simplewallet.exe --version
+FOR /F "tokens=3" %%a IN ('%cmd%') DO set version=%%a  
+set version=%version:~0,-2%
+echo '%version%'
+
+cd src\release
+zip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%.zip luid.exe simplewallet.exe 
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
+
+cd ..\..\..
+
+@echo "---------------- BUILDING GUI ---------------------------------"
+
 
 msbuild src/qt-lui.vcxproj  /p:Configuration=Release /t:Build
 
