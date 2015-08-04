@@ -25,8 +25,8 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "---------------- BUILDING ---------------------------------"
 @echo "---------------------------------------------------------------"
 
-rem rmdir build /s /q
-rem mkdir build
+rmdir build /s /q
+mkdir build
 cd build
 
 set BOOST_ROOT=%LOCAL_BOOST_PATH_32%
@@ -41,7 +41,7 @@ setLocal
 
 call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86_amd64
 
-rem msbuild version.vcxproj  /p:Configuration=Release /t:Build
+msbuild version.vcxproj  /p:Configuration=Release /t:Build
 echo 'errorlevel=%ERRORLEVEL%'
 
 IF %ERRORLEVEL% NEQ 0 (
@@ -52,12 +52,12 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "---------------- BUILDING TOOLS ---------------------------------"
 
 
-rem msbuild src/daemon.vcxproj  /p:Configuration=Release /t:Build
+msbuild src/daemon.vcxproj  /p:Configuration=Release /t:Build
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
-rem msbuild src/simplewallet.vcxproj  /p:Configuration=Release /t:Build
+msbuild src/simplewallet.vcxproj  /p:Configuration=Release /t:Build
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -87,7 +87,7 @@ cd ..\..
 @echo "---------------- BUILDING GUI ---------------------------------"
 
 
-rem msbuild src/qt-lui.vcxproj  /p:Configuration=Release /t:Build
+msbuild src/qt-lui.vcxproj  /p:Configuration=Release /t:Build
 
 IF %ERRORLEVEL% NEQ 0 (
   goto error
