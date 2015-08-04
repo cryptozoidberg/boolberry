@@ -184,6 +184,7 @@ exit /B %ERRORLEVEL%
 :success
 echo "BUILD SUCCESS"
 
+cd ../..
 pause
 
 
