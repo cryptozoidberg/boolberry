@@ -6,6 +6,11 @@ SET QT32_BINARIES_PATH=C:\home\deploy\qt-binaries-32
 SET BUILDS_PATH=C:\home\deploy\lui
 SET ACHIVE_NAME_PREFIX=lui-win-x64-
 SET SOURCES_PATH=C:\home\deploy\lui\src
+SET LOCAL_BOOST_PATH=C:\local\boost_1_56_0
+SET LOCAL_BOOST_LIB_PATH=C:\local\boost_1_56_0\stage
+SET LOCAL_BOOST_PATH_32=C:\local\boost_1_56_0_32
+SET LOCAL_BOOST_LIB_PATH_32=C:\local\boost_1_56_0_32\lib32-msvc-12.0
+
 
 
 @echo on
@@ -23,6 +28,10 @@ IF %ERRORLEVEL% NEQ 0 (
 rmdir build /s /q
 mkdir build
 cd build
+
+set BOOST_ROOT="%LOCAL_BOOST_PATH_32%"
+set BOOST_LIBRARYDIR_32="%LOCAL_BOOST_LIB_PATH_32%"
+
 cmake -D CMAKE_PREFIX_PATH="%QT32_PREFIX_PATH%" -D BUILD_GUI=TRUE  -D STATIC=FALSE -G "Visual Studio 12" ..
 IF %ERRORLEVEL% NEQ 0 (
   goto error
