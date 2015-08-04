@@ -4,7 +4,7 @@ SET INNOSETUP_PATH=C:\Program Files (x86)\Inno Setup 5\ISCC.exe
 SET QT_BINARIES_PATH=C:\home\deploy\qt-binaries
 SET QT32_BINARIES_PATH=C:\home\deploy\qt-binaries-32
 SET BUILDS_PATH=C:\home\deploy\lui
-SET ACHIVE_NAME_PREFIX=lui-win-
+SET ACHIVE_NAME_PREFIX=lui-win
 SET SOURCES_PATH=C:\home\deploy\lui\src
 SET LOCAL_BOOST_PATH=C:\local\boost_1_56_0
 SET LOCAL_BOOST_LIB_PATH=C:\local\boost_1_56_0\stage
@@ -25,8 +25,8 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "---------------- BUILDING ---------------------------------"
 @echo "---------------------------------------------------------------"
 
-rmdir build /s /q
-mkdir build
+rem rmdir build /s /q
+rem mkdir build
 cd build
 
 set BOOST_ROOT=%LOCAL_BOOST_PATH_32%
@@ -41,7 +41,7 @@ setLocal
 
 call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86_amd64
 
-msbuild version.vcxproj  /p:Configuration=Release /t:Build
+rem msbuild version.vcxproj  /p:Configuration=Release /t:Build
 echo 'errorlevel=%ERRORLEVEL%'
 
 IF %ERRORLEVEL% NEQ 0 (
@@ -52,12 +52,12 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "---------------- BUILDING TOOLS ---------------------------------"
 
 
-msbuild src/daemon.vcxproj  /p:Configuration=Release /t:Build
+rem msbuild src/daemon.vcxproj  /p:Configuration=Release /t:Build
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
-msbuild src/simplewallet.vcxproj  /p:Configuration=Release /t:Build
+rem msbuild src/simplewallet.vcxproj  /p:Configuration=Release /t:Build
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -74,7 +74,7 @@ IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
-cd src\release
+
 zip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%-x86-%version%.zip simplewallet.exe
 IF %ERRORLEVEL% NEQ 0 (
   goto error
@@ -87,18 +87,16 @@ cd ..\..
 @echo "---------------- BUILDING GUI ---------------------------------"
 
 
-msbuild src/qt-lui.vcxproj  /p:Configuration=Release /t:Build
+rem msbuild src/qt-lui.vcxproj  /p:Configuration=Release /t:Build
 
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
-endlocal
 
 @echo on
 cd src\release
-
-
+echo '%version%'
 zip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%-x86-%version%.zip qt-lui.exe
 IF %ERRORLEVEL% NEQ 0 (
   goto error
@@ -106,7 +104,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 
 @echo "Add html"
-
+echo '%version%'
 cd %SOURCES_PATH%\src\gui\qt-daemon\
 zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%-x86-%version%.zip html
 IF %ERRORLEVEL% NEQ 0 (
@@ -115,7 +113,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 
 @echo "Add qt stuff"
-
+echo '%version%'
 cd %QT32_BINARIES_PATH%
 zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%-x86-%version%.zip *.*
 IF %ERRORLEVEL% NEQ 0 (
@@ -127,6 +125,7 @@ cd %SOURCES_PATH%\build
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
+
 
 
 @echo "---------------------------------------------------------------"
@@ -151,6 +150,7 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "---------------------------------------------------------------"
 @echo "---------------------------------------------------------------"
 
+endlocal
 
 
 goto success
