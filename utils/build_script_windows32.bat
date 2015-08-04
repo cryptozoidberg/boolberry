@@ -4,7 +4,7 @@ SET INNOSETUP_PATH=C:\Program Files (x86)\Inno Setup 5\ISCC.exe
 SET QT_BINARIES_PATH=C:\home\deploy\qt-binaries
 SET QT32_BINARIES_PATH=C:\home\deploy\qt-binaries-32
 SET BUILDS_PATH=C:\home\deploy\lui
-SET ACHIVE_NAME_PREFIX=lui-win-x64-
+SET ACHIVE_NAME_PREFIX=lui-win-
 SET SOURCES_PATH=C:\home\deploy\lui\src
 SET LOCAL_BOOST_PATH=C:\local\boost_1_56_0
 SET LOCAL_BOOST_LIB_PATH=C:\local\boost_1_56_0\stage
@@ -69,10 +69,17 @@ set version=%version:~0,-2%
 echo '%version%'
 
 cd src\release
-zip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%.zip luid.exe simplewallet.exe 
+zip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%-x86-%version%.zip luid.exe 
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
+
+cd src\release
+zip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%-x86-%version%.zip simplewallet.exe
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
 
 
 cd ..\..
@@ -92,7 +99,7 @@ endlocal
 cd src\release
 
 
-zip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%_32bit_%version%.zip qt-lui.exe
+zip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%-x86-%version%.zip qt-lui.exe
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -101,7 +108,7 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "Add html"
 
 cd %SOURCES_PATH%\src\gui\qt-daemon\
-zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%_32bit_%version%.zip html
+zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%-x86-%version%.zip html
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -110,7 +117,7 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "Add qt stuff"
 
 cd %QT32_BINARIES_PATH%
-zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%_32bit_%version%.zip *.*
+zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%-x86-%version%.zip *.*
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -129,13 +136,13 @@ IF %ERRORLEVEL% NEQ 0 (
 mkdir installer_src
 
 
-unzip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%_32bit_%version%.zip -d installer_src
+unzip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%-x86-%version%.zip -d installer_src
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
 
-"%INNOSETUP_PATH%"  /dBinariesPath=../build/installer_src /DMyAppVersion=%version% /o%BUILDS_PATH%\builds\ /f%ACHIVE_NAME_PREFIX%_32bit_%version%-installer ..\utils\setup.iss 
+"%INNOSETUP_PATH%"  /dBinariesPath=../build/installer_src /DMyAppVersion=%version% /o%BUILDS_PATH%\builds\ /f%ACHIVE_NAME_PREFIX%-x86-%version%-installer ..\utils\setup.iss 
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
