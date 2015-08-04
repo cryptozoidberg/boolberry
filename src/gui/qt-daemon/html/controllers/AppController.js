@@ -640,6 +640,7 @@
         var tx_temp = {};
 
         backend.subscribe('on_core_event', function(method, data){
+            console.log('on_core_event');
             switch(method){
                 case 'CORE_EVENT_ADD_OFFER':
                     $timeout(function(){

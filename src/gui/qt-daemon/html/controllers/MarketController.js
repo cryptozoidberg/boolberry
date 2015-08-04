@@ -127,42 +127,45 @@
                 }
             };
 
+            if(angular.isUndefined($rootScope.gplaces)){
+                $rootScope.gplaces = {};
+            }
+
+            if(angular.isUndefined($rootScope.countryList)){
+                $http.get('all.json').then(
+                    function(res){
+                      $rootScope.countryList = res.data;
+                    }
+                );
+            }
 
             $scope.$watch(
                 function(){
                     return $rootScope.offers;
                 },
                 function(){
-                    if(angular.isUndefined($rootScope.gplaces)){
-                        $rootScope.gplaces = {};
-                    }
-                    if(angular.isUndefined($rootScope.countryList)){
-                        $http.get('all.json').then(
-                            function(res){
-                              $rootScope.countryList = res.data;
-                            }
-                        );
-                    }
                     
                     $rootScope.offers = $filter('orderBy')($rootScope.offers,'-timestamp');
 
                     $scope.my_offers = [];
 
                     angular.forEach($rootScope.offers,function(item){
+                        
                         var placeId = item.location_city;
 
                         var not_found = 'City not found';
 
-                        if((angular.isUndefined($rootScope.gplaces[placeId]) || ($rootScope.gplaces[placeId].name==not_found)) && placeId.length == 27){
+                        if( angular.isUndefined($rootScope.gplaces[placeId]) ) {
                             $rootScope.gplaces[placeId] = {name : 'Loading...'};
                             gProxy.getDetails(placeId,function(place){
                                 $timeout(function(){
                                     $rootScope.gplaces[placeId] = place;    
                                 });
                             });
-                        }else{
-                            $rootScope.gplaces[placeId] = {name : not_found};
                         }
+                        // else{
+                        //     $rootScope.gplaces[placeId] = {name : not_found};
+                        // }
                         
                         var result = $filter('filter')($rootScope.safes, item.tx_hash);
 
@@ -781,6 +784,7 @@
             
 
             if(angular.isUndefined($rootScope.countryList)){
+                $rootScope.countryList = [];
                 $http.get('all.json').then(
                     function(res){
                       $rootScope.countryList = res.data;
