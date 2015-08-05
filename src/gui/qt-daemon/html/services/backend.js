@@ -562,11 +562,18 @@
             },
             // need to link some repeating function from backend to our system
             subscribe : function(command, callback) {
+                // informer.info(command);
+                // informer.info(JSON.stringify(command));
                 if (this.shouldUseEmulator()) {
                     emulator.subscribe(command,callback);
                 } else {
                     console.log(command);
-                    Qt[command].connect(this.callbackStrToObj.bind({callback: callback}));
+                    if(command == 'on_core_event'){
+                        Qt[command].connect(callback);
+                    }else{
+                        Qt[command].connect(this.callbackStrToObj.bind({callback: callback}));
+                    }
+                    
                 }
                 
             },

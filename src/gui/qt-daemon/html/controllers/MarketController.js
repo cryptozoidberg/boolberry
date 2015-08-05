@@ -192,10 +192,7 @@
                 },
                 true
             );
-            // GET LIST OF OFFERS
-            backend.get_all_offers(function(data){
-                $rootScope.offers = data.offers;
-            });
+            
 
             $scope.saveMyOffers = function(){
                 var caption = "Please, choose the path";

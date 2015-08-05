@@ -265,6 +265,12 @@
                 $rootScope.settings = settings;
                 $rootScope.settings.system.app_autoload = backend.isAutostartEnabled();
             } 
+
+            //GET LIST OF OFFERS
+            backend.get_all_offers(function(data){
+                $rootScope.offers = data.offers;
+            });
+
             console.log('SHOULD USE APP PASS ::');
             console.log($rootScope.settings.security.is_use_app_pass);
             if($rootScope.settings.security.is_use_app_pass){ // if setings contain "require password"
@@ -640,11 +646,12 @@
         var tx_temp = {};
 
         backend.subscribe('on_core_event', function(method, data){
-            console.log('on_core_event');
+            //informer.info('on_core_event');
             switch(method){
                 case 'CORE_EVENT_ADD_OFFER':
                     $timeout(function(){
-                       $rootScope.offers.push(data); 
+                       $rootScope.offers.push(JSON.parse(data)); 
+                       // informer.info();
                     });
                     break;
                 case 'CORE_EVENT_UPDATE_OFFER':
