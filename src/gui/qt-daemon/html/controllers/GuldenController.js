@@ -154,8 +154,8 @@
         }
     ]);
 
-    module.controller('trHistoryCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','txHistory',
-       function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, txHistory){
+    module.controller('trHistoryCtrl',['backend','$rootScope','$scope','informer','$routeParams','$filter','$location','txHistory','$timeout',
+       function(backend,$rootScope,$scope,informer,$routeParams,$filter,$location, txHistory, $timeout){
             
             $scope.my_safes = angular.copy($rootScope.safes);
             $scope.my_safes.unshift({name: 'Все сейфы', wallet_id : -1});
@@ -163,13 +163,16 @@
             $scope.contact = false;
 
             var init = function(){
-                if($routeParams.contact_id){
-                    var contact = $filter('filter')($rootScope.settings.contacts, {id: $routeParams.contact_id});
-                    $scope.contact = contact[0];
-                    $scope.tx_history = txHistory.contactHistory($scope.contact);
-                }else{
-                    $scope.tx_history = txHistory.reloadHistory();
-                }
+                $timeout(function(){
+                    if($routeParams.contact_id){
+                        var contact = $filter('filter')($rootScope.settings.contacts, {id: $routeParams.contact_id});
+                        $scope.contact = contact[0];
+                        $scope.tx_history = txHistory.contactHistory($scope.contact);
+                    }else{
+                        $scope.tx_history = txHistory.reloadHistory();
+                    }  
+                    $scope.filterChange();  
+                });
             };
 
             init();

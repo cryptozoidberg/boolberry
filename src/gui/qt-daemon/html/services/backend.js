@@ -734,7 +734,7 @@
 
                 // informer.info(method);
                 var data = instance.getData(method);
-                callback(method, data);
+                callback(method, JSON.stringify(data));
             },3000);
             
         };

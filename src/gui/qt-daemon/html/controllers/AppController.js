@@ -541,6 +541,7 @@
 
             $timeout(function(){
             	$rootScope.deamon_state = data;	
+                // informer.info($rootScope.deamon_state.height);
                 if(data.last_build_displaymode > 0 && current_v != data.last_build_available && newVersionShown.indexOf(data.last_build_available) == -1){
                     var modalInstance = $modal.open({
                         templateUrl: "views/new_version.html",
@@ -646,11 +647,11 @@
         var tx_temp = {};
 
         backend.subscribe('on_core_event', function(method, data){
-            //informer.info('on_core_event');
+            data = JSON.parse(data);
             switch(method){
                 case 'CORE_EVENT_ADD_OFFER':
                     $timeout(function(){
-                       $rootScope.offers.push(JSON.parse(data)); 
+                       $rootScope.offers.push(data); 
                        // informer.info();
                     });
                     break;
