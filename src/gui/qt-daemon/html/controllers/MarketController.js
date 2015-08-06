@@ -66,9 +66,9 @@
                     var data = backend.cancelOffer(safe.wallet_id, offer.tx_hash , function(result){
                         // {"success":true,"tx_blob_size":775,"tx_hash":"82dc10c91658ff425c8aaf1809e5259ce5269f280429689e195cfbb4be4f6e65"}
                         // informer.info(result.tx_hash);
-                        angular.forEach($scope.f_my_goods_offers,function(item, key){
+                        angular.forEach($rootScope.offers,function(item, key){
                             if(item.tx_hash == offer.tx_hash){
-                                $scope.f_my_goods_offers.splice(key, 1);
+                                $rootScope.offers[key].is_deleted = true;
                             }
                         });
                         

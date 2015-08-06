@@ -299,7 +299,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <tr ng-class="{'success' : offer.fee == config.premium_fee , 'new':false, 'disable':false}" ng-repeat="offer in f_currency_offers">
+                        <tr ng-class="{'success' : offer.fee == config.premium_fee , 'new':false, 'disable':offer.is_deleted}" ng-repeat="offer in f_currency_offers">
                             <td>
                                 {{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}
                             </td>
@@ -547,7 +547,7 @@
 
                     <tbody>
 
-                        <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':false}" ng-repeat="offer in f_goods_offers">
+                        <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':offer.is_deleted}" ng-repeat="offer in f_goods_offers">
                             <td>
                                 {{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}
                             </td>
@@ -667,12 +667,12 @@
                             </span>
                         </th>
                         
-                        <!-- <th>
-                            <span class="nowrap">Курс, $ 
+                        <th>
+                            <span class="nowrap">Предложение 
                                 <i style="opacity:0.3" ng-click="order('timestamp','my_currency')" class="fa fa-chevron-down"></i>
                                 <i style="opacity:0.3" ng-click="order('-timestamp','my_currency')" class="fa fa-chevron-up"></i>
                             </span>
-                        </th> -->
+                        </th>
                         
                         <th>
                             <span class="nowrap">Сумма, G 
@@ -706,7 +706,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':false}" ng-repeat="offer in f_my_currency_offers">
+                        <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':offer.is_deleted}" ng-repeat="offer in f_my_currency_offers">
 
                             <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
                             <td>
@@ -714,7 +714,9 @@
                                 <span ng-if="offer.offer_type == 3">Продажа</span>
                             </td>
 
-                            <!-- <td><span class="nowrap"></span></td> -->
+                            <td>
+                                <span class="nowrap">{{offer.amount_etc}} {{offer.target}}</span>
+                            </td>
 
                             <td>
                                 {{offer.amount_lui | gulden : false }}
@@ -821,7 +823,7 @@
                     </thead>
 
                     <tbody>
-                    <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':false}" ng-repeat="offer in f_my_goods_offers">
+                    <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':offer.is_deleted}" ng-repeat="offer in f_my_goods_offers">
 
                         <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
                         <td>
@@ -976,7 +978,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':false}" ng-repeat="offer in f_fav_currency_offers">
+                        <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':offer.is_deleted}" ng-repeat="offer in f_fav_currency_offers">
 
                             <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
                             <td>
@@ -1064,7 +1066,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':false}" ng-repeat="offer in f_fav_goods_offers">
+                    <tr ng-class="{'success' : offer.fee == config.premium_fee, 'new':false, 'disable':offer.is_deleted}" ng-repeat="offer in f_fav_goods_offers">
 
                         <td>{{offer.timestamp  | intToDate | date:'dd.MM.yy hh:mm'}}</td>
                         <td>
