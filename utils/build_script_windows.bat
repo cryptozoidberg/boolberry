@@ -4,9 +4,18 @@ SET QT_BINARIES_PATH=C:\home\deploy\qt-binaries
 SET BUILDS_PATH=C:\home\deploy\lui
 SET ACHIVE_NAME_PREFIX=lui-win-x64-
 SET SOURCES_PATH=C:\home\deploy\lui\src
+SET LOCAL_BOOST_PATH=C:\local\boost_1_56_0
+SET LOCAL_BOOST_LIB_PATH=C:\local\boost_1_56_0\stage
+SET LOCAL_BOOST_PATH_32=C:\local\boost_1_56_0_32
+SET LOCAL_BOOST_LIB_PATH_32=C:\local\boost_1_56_0_32\lib32-msvc-12.0
 
 
 @echo on
+
+set BOOST_ROOT=%LOCAL_BOOST_PATH%
+set BOOST_LIBRARYDIR=%LOCAL_BOOST_LIB_PATH%
+
+
 
 cd %SOURCES_PATH%
 git pull
