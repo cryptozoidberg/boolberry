@@ -298,6 +298,20 @@ namespace currency
     {
       uint64_t total_check_count_loaded = 0;
       ar & total_check_count_loaded;
+      if (total_check_count != total_check_count_loaded && archive_t::is_loading::value && version > 27)
+      {
+        LOG_ERROR("Blockchain storage data corruption detected. total_count loaded from file = " << total_check_count_loaded << ", expected = " << total_check_count);
+        LOG_PRINT_L0("Assuming daemon crash since total_count lower than expected. Attempting database rollback...");
+        size_t rollback_amount = m_blocks.size() - m_blocks_index.size();
+        if(total_check_count_loaded < total_check_count)
+        {
+          for(size_t i = 0; i < rollback_amount; i++)
+          {
+            m_blocks.pop_back();
+          }
+          total_check_count = m_blocks.size() + m_blocks_index.size() + m_transactions.size() + m_spent_keys.size() + m_outputs.size() + m_invalid_blocks.size() + m_current_block_cumul_sz_limit;
+        }
+      }
       if(total_check_count != total_check_count_loaded)
       {
         LOG_ERROR("Blockchain storage data corruption detected. total_count loaded from file = " << total_check_count_loaded << ", expected = " << total_check_count);
