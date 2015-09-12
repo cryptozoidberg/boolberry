@@ -114,7 +114,7 @@ struct response_schema
       ss << "    ]" << ENDL << "  }" << ENDL;
     }
     ss << "}";
-    return std::move(ss.str());
+    return ss.str();
   }
 //---------------------------------------------------------------------------------------------------------------
 bool print_COMMAND_REQUEST_STAT_INFO(const COMMAND_REQUEST_STAT_INFO::response& si)

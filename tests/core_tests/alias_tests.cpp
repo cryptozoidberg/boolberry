@@ -85,7 +85,7 @@ bool gen_alias_tests::generate(std::vector<test_event_entry>& events) const
 
 bool gen_alias_tests::check_first_alias_added(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  const currency::account_base& first_acc = boost::get<const currency::account_base&>(events[1]);
+  const currency::account_base& first_acc = boost::get<const currency::account_base>(events[1]);
   //currency::account_base& second_acc = boost::get<currency::account_base&>(events[2]);
   //currency::account_base& third_acc = boost::get<currency::account_base&>(events[3]);
 
@@ -98,7 +98,7 @@ bool gen_alias_tests::check_first_alias_added(currency::core& c, size_t ev_index
 }
 bool gen_alias_tests::check_second_alias_added(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  const currency::account_base& second_acc = boost::get<const currency::account_base&>(events[2]);
+  const currency::account_base& second_acc = boost::get<const currency::account_base>(events[2]);
 
   currency::alias_info_base ai = AUTO_VAL_INIT(ai);
   bool r = c.get_blockchain_storage().get_alias_info(SECOND_ALIAS_NAME, ai);
@@ -124,7 +124,7 @@ bool gen_alias_tests::check_splitted_back(currency::core& c, size_t ev_index, co
 
 bool gen_alias_tests::check_alias_changed(currency::core& c, size_t ev_index, const std::vector<test_event_entry>& events)
 {
-  const currency::account_base& third_acc = boost::get<const currency::account_base&>(events[3]);
+  const currency::account_base& third_acc = boost::get<const currency::account_base>(events[3]);
 
   currency::alias_info_base ai = AUTO_VAL_INIT(ai);
   bool r = c.get_blockchain_storage().get_alias_info(FIRST_ALIAS_NAME, ai);
