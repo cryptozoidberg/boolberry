@@ -156,12 +156,14 @@ namespace wallet_rpc
 
   struct payment_details
   {
+    std::string payment_id;
     std::string tx_hash;
     uint64_t amount;
     uint64_t block_height;
     uint64_t unlock_time;
 
     BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(payment_id)      
       KV_SERIALIZE(tx_hash)
       KV_SERIALIZE(amount)
       KV_SERIALIZE(block_height)
@@ -189,7 +191,28 @@ namespace wallet_rpc
       END_KV_SERIALIZE_MAP()
     };
   };
+  struct COMMAND_RPC_GET_BULK_PAYMENTS
+  {
+    struct request
+    {
+      std::vector<std::string> payment_ids;
+      uint64_t min_block_height;
 
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(payment_ids)
+        KV_SERIALIZE(min_block_height)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::list<payment_details> payments;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(payments)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
   /*stay-alone instance*/
   struct telepod
   {
