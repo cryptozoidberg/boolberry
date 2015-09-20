@@ -182,7 +182,7 @@ namespace epee
       if(!pentry)
       {
         if(!create_if_notexist)
-          return nullptr;
+          return (hsection) nullptr;
         return insert_new_section(section_name, hparent_section);
       }
       CHECK_AND_ASSERT(pentry , nullptr);
@@ -192,7 +192,7 @@ namespace epee
         if(create_if_notexist)
           *pentry = storage_entry(section());//replace
         else
-          return nullptr;
+          return (hsection) nullptr;
       }
       return &boost::get<section>(*pentry);
       CATCH_ENTRY("portable_storage::open_section", nullptr);
@@ -264,7 +264,7 @@ namespace epee
       CHECK_AND_ASSERT(psection, nullptr);
       auto it = psection->m_entries.find(pentry_name);
       if(it == psection->m_entries.end())
-        return nullptr;
+        return (storage_entry*) nullptr;
 
       return &it->second;
       CATCH_ENTRY("portable_storage::find_storage_entry", nullptr);
@@ -427,7 +427,7 @@ namespace epee
       TRY_ENTRY();
       CHECK_AND_ASSERT(hsec_array, false);
       if(hsec_array->type() != typeid(array_entry_t<section>))
-        return nullptr;
+        return false;
       array_entry_t<section>& sec_array = boost::get<array_entry_t<section>>(*hsec_array);
       h_child_section = sec_array.get_next_val();
       if(!h_child_section)
