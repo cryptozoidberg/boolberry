@@ -1,4 +1,4 @@
-2016, September 07: v0.3.1-RUNESHINE
+2016, September 07: v0.3.1-RUNE
 Project is separated from CryptoZoidberg's stewardship, client version differientated to network as RUNE to track adoption
 Additional checkpoints added
 
