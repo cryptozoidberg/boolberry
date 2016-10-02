@@ -34,7 +34,7 @@ namespace currency
     const command_line::arg_descriptor<std::string>   arg_extra_messages =     {"extra-messages-file", "Specify file for extra messages to include into coinbase transactions", "", true};
     const command_line::arg_descriptor<std::string>   arg_start_mining =       {"start-mining", "Specify wallet address to mining for", "", true};
     const command_line::arg_descriptor<uint32_t>      arg_mining_threads =     {"mining-threads", "Specify mining threads count", 0, true};
-    const command_line::arg_descriptor<std::string>   arg_set_donation_mode =  {"donation-vote", "Select one of two options for donations vote: \"true\"(to vote fore donation) or \"false\"(to vote against)", "", true};
+    const command_line::arg_descriptor<std::string>   arg_set_donation_mode =  {"donation-vote", "Select one of two options for donations vote: \"true\"(to vote fore donation) or \"false\"(to vote against)", "", false};
   }
 
 
@@ -263,11 +263,11 @@ namespace currency
         << "If you support the project, leave donations enabled. If you disagree with the actions of the team,"
         << "vote against donations (by entering command \"set_donations false\")."  << ENDL 
         << ENDL 
-        << "By default, if you don't disable them explicitly, donations will be enabled." << ENDL 
+        << "By default, if you don't disable them explicitly, donations will not be enabled." << ENDL
         << ENDL
         << "**********************************************************************");
       LOG_PRINT_CYAN("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", LOG_LEVEL_0);
-      m_config.donation_decision = true;
+      m_config.donation_decision = false;
     }
 
     m_mine_address = adr;
