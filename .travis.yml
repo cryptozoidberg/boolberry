@@ -3,15 +3,6 @@ language: cpp
 sudo: required
 dist: trusty
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    - boost-latest
-    packages:
-    - libboost-all-dev
-    - cmake
-
 script: make test-debug
 
 matrix:
@@ -21,14 +12,18 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - boost-latest
           packages:
             - g++-4.9
+            - libboost-all-dev
       env: COMPILER=g++-4.9
     - compiler: gcc
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - boost-latest
           packages:
             - g++-5
+            - libboost-all-dev
       env: COMPILER=g++-5
