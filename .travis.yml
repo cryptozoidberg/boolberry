@@ -1,8 +1,7 @@
 language: cpp
 
-compiler:
-  - gcc
-  - g++
+sudo: required
+dist: trusty
 
 addons:
   apt:
@@ -10,14 +9,26 @@ addons:
     - ubuntu-toolchain-r-test
     - boost-latest
     packages:
-    - gcc-4.8
-    - g++-4.8
-    - libboost1.55-all-dev
+    - libboost-all-dev
     - cmake
 
-before_script:
-  - mkdir build
-  - cd build
-  - cmake ..
+script: make test-debug
 
-script: make
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env: COMPILER=g++-4.9
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env: COMPILER=g++-5
