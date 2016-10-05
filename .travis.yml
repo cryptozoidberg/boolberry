@@ -4,6 +4,7 @@ matrix:
   include:
     - language: cpp
       compiler: gcc
+      sudo: required
       addons:
         apt:
           sources:
