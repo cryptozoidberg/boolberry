@@ -1,3 +1,6 @@
+Boolberry [![Build Status](https://travis-ci.org/mbe24/boolberry.svg?branch=master)](https://travis-ci.org/mbe24/boolberry)
+=========
+
 Building
 --------
 

@@ -1,0 +1,30 @@
+script: make test-debug
+
+matrix:
+  include:
+    - language: cpp
+      compiler: gcc
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:apokluda/boost1.53'
+          packages:
+            - g++-4.8
+            - libboost1.53-all-dev
+      env: COMPILER=g++-4.8
+    
+    - language: cpp
+      compiler: gcc
+      sudo: required
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - boost-latest
+          packages:
+            - g++-5
+            - libboost-all-dev
+      env: COMPILER=g++-5
