@@ -11,7 +11,7 @@ matrix:
       addons:
         apt:
           sources:
-            - apokluda/boost1.53
+            - sourceline: 'ppa:apokluda/boost1.53'
           packages:
             - g++-4.8
             - libboost1.53-all-dev
