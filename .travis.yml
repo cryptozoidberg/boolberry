@@ -1,13 +1,9 @@
-language: cpp
-
-sudo: required
-dist: trusty
-
 script: make test-debug
 
 matrix:
   include:
-    - compiler: gcc
+    - language: cpp
+      compiler: gcc
       addons:
         apt:
           sources:
@@ -16,7 +12,11 @@ matrix:
             - g++-4.8
             - libboost1.53-all-dev
       env: COMPILER=g++-4.8
-    - compiler: gcc
+    
+    - language: cpp
+      compiler: gcc
+      sudo: required
+      dist: trusty
       addons:
         apt:
           sources:
