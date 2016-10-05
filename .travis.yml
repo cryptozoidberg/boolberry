@@ -8,6 +8,7 @@ matrix:
       addons:
         apt:
           sources:
+            - ubuntu-toolchain-r-test
             - sourceline: 'ppa:apokluda/boost1.53'
           packages:
             - g++-4.8
