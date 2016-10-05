@@ -12,10 +12,10 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - boost-latest
+            - boost1.53
           packages:
             - g++-4.9
-            - libboost-all-dev
+            - libboost1.53-all-dev
       env: COMPILER=g++-4.9
     - compiler: gcc
       addons:
