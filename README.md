@@ -1,4 +1,4 @@
-Boolberry [![Build Status](https://travis-ci.org/BlockchainDevelopmentCompany/boolberry.svg?branch=master)](https://travis-ci.org/mbe24/boolberry)
+Boolberry [![Build Status](https://travis-ci.org/BlockchainDevelopmentCompany/boolberry.svg?branch=master)](https://travis-ci.org/BlockchainDevelopmentCompany/boolberry)
 =========
 
 Building
