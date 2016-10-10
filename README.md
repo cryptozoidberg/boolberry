@@ -38,7 +38,7 @@ Download and install Boost from: https://sourceforge.net/projects/boost/files/bo
  - Specifically for Boost, download and install at least version 1.53 or later (but not 1.54 or 1.55) (Boost 1.56 will be used in this    tutorial)
  - Install Boost to C:\boost\boost_1_56_0 or some other directory you wish to put it in
 
-Next you need to opn up the VS2013 Command Prompt found here: "C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Tools\Shortcuts\VS2013 x64 Cross Tools Command Prompt"
+Next you need to open up the VS2013 Command Prompt found here: "C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Tools\Shortcuts\VS2013 x64 Cross Tools Command Prompt"
 
 Inside the command prompt navigate to the home directory of the Boolberry source code.
 
