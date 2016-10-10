@@ -31,7 +31,9 @@ Building with Clang: it may be possible to use Clang instead of GCC, but this ma
 ### Windows
 
 Download and install Microsoft Visual Studio 2013 from: https://www.microsoft.com/en-us/download/details.aspx?id=44914
-Download and install CMAKE from: https://cmake.org/download/
+
+Download and install CMAKE from: https://cmake.org/download/ 
+
 Download and install Boost from: https://sourceforge.net/projects/boost/files/boost-binaries/
  - Specifically for Boost, download and install at least version 1.53 or later (but not 1.54 or 1.55) (Boost 1.56 will be used in this    tutorial)
  - Install Boost to C:\boost\boost_1_56_0 or some other directory you wish to put it in
