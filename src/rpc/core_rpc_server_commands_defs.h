@@ -451,7 +451,7 @@ namespace currency
     };
   };
   
-  struct block_header_responce
+  struct block_header_response
   {
       uint8_t major_version;
       uint8_t minor_version;
@@ -487,7 +487,7 @@ namespace currency
     struct response
     {
       std::string status;
-      block_header_responce block_header;
+      block_header_response block_header;
       
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(block_header)
@@ -511,7 +511,7 @@ namespace currency
     struct response
     {
       std::string status;
-      block_header_responce block_header;
+      block_header_response block_header;
       
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(block_header)
@@ -535,13 +535,45 @@ namespace currency
     struct response
     {
       std::string status;
-      block_header_responce block_header;
+      block_header_response block_header;
       
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(block_header)
         KV_SERIALIZE(status)
       END_KV_SERIALIZE_MAP()
     };
+
+  };
+
+  struct COMMAND_RPC_GET_BLOCK
+  {
+     struct request
+     {
+       std::string hash;
+       uint64_t height;
+
+       BEGIN_KV_SERIALIZE_MAP()
+         KV_SERIALIZE(hash)
+         KV_SERIALIZE(height)
+       END_KV_SERIALIZE_MAP()
+     };
+
+     struct response
+     {
+       std::string status;
+       block_header_response block_header;
+       std::vector<std::string> tx_hashes;
+       std::string blob;
+       std::string json;
+
+       BEGIN_KV_SERIALIZE_MAP()
+         KV_SERIALIZE(block_header)
+         KV_SERIALIZE(tx_hashes)
+         KV_SERIALIZE(status)
+         KV_SERIALIZE(blob)
+         KV_SERIALIZE(json)
+       END_KV_SERIALIZE_MAP()
+     };
 
   };
 
@@ -616,7 +648,6 @@ namespace currency
     {
       std::string status;
       std::list<mining::addendum> addms;
-
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
