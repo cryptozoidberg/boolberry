@@ -1,4 +1,4 @@
-Boolberry [![Build Status](https://travis-ci.org/mbe24/boolberry.svg?branch=master)](https://travis-ci.org/mbe24/boolberry)
+Boolberry [![Build Status](https://travis-ci.org/BlockchainDevelopmentCompany/boolberry.svg?branch=master)](https://travis-ci.org/BlockchainDevelopmentCompany/boolberry)
 =========
 
 Building
@@ -33,17 +33,23 @@ Building with Clang: it may be possible to use Clang instead of GCC, but this ma
 
 ### Windows
 
-Dependencies: MSVC 2012 or later, CMake 2.8.6 or later, and Boost 1.53(but don't use 1.54) or later. You may download them from:
-http://www.microsoft.com/
-http://www.cmake.org/
-http://www.boost.org/
+Download and install Microsoft Visual Studio 2013 from: https://www.microsoft.com/en-us/download/details.aspx?id=44914
 
-To build, change to a directory where this file is located, and run this commands: 
+Download and install CMAKE from: https://cmake.org/download/ 
+
+Download and install Boost from: https://sourceforge.net/projects/boost/files/boost-binaries/
+ - Specifically for Boost, download and install at least version 1.53 or later (but not 1.54 or 1.55) (Boost 1.56 will be used in this    tutorial)
+ - Install Boost to C:\boost\boost_1_56_0 or some other directory you wish to put it in
+
+Next you need to open up the VS2013 Command Prompt found here: "C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Tools\Shortcuts\VS2013 x64 Cross Tools Command Prompt"
+
+Inside the command prompt navigate to the home directory of the Boolberry source code.
+
+Next run the following commands:
 ```bash
  mkdir build
  cd build
- cmake -G "Visual Studio 11 Win64" ..
+ cmake -DBOOST_ROOT=C:\boost\boost_1_56_0 -G "Visual Studio 12 Win64" ..
+ msbuild.exe boolberry.sln /p:Configuration=Release
 ```
-
-And then do Build.
-Good luck!
+This resulting executables can be found here: \build\src\Release
