@@ -1,4 +1,4 @@
-Boolberry [![Build Status](https://travis-ci.org/BlockchainDevelopmentCompany/boolberry.svg?branch=master)](https://travis-ci.org/BlockchainDevelopmentCompany/boolberry)
+Boolberry [![Build Status](https://travis-ci.org/BlockchainDevelopmentCompany/boolberry.svg?branch=master)](https://travis-ci.org/BlockchainDevelopmentCompany/boolberry) [![Slack Status](https://boolberry.herokuapp.com/badge.svg)](https://boolberry.herokuapp.com/)
 =========
 
 Building
