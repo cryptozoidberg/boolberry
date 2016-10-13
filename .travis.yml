@@ -1,30 +1,32 @@
 script: make test-debug
-
 matrix:
   include:
-    - language: cpp
-      compiler: gcc
-      sudo: required
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:apokluda/boost1.53'
-          packages:
-            - g++-4.8
-            - libboost1.53-all-dev
-      env: COMPILER=g++-4.8
-    
-    - language: cpp
-      compiler: gcc
-      sudo: required
-      dist: trusty
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - boost-latest
-          packages:
-            - g++-5
-            - libboost-all-dev
-      env: COMPILER=g++-5
+  - language: cpp
+    compiler: gcc
+    sudo: required
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - sourceline: ppa:apokluda/boost1.53
+        packages:
+        - g++-4.8
+        - libboost1.53-all-dev
+    env: COMPILER=g++-4.8
+  - language: cpp
+    compiler: gcc
+    sudo: required
+    dist: trusty
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - boost-latest
+        packages:
+        - g++-5
+        - libboost-all-dev
+    env: COMPILER=g++-5
+
+notifications:
+  slack:
+    secure: pYvPWYdwdxDutogHYQkoXloYYEebvHmc/iVIGU0dqllliOgszKIWuUg9PUiJlhrtePVGk4TX2RJaVYWDOUeksD3+Bu/057EujGzZncfgit0cHYnsZ7UR7p/HlglFi7kHIVFis8Z6LpVx+RNbv/bAnLggJfd+N6OMuUQAD6Ioygdb7zxa9M3ML7ByHLYBy2X07tLHNBA+4YtkDzeE/r2quiz8j33jaEf0WHsnVz6DXlB6erQRp7S8QARJpUmG8ciUl7PTMGE2MSWKpT7C4IIlvFwN33T2IylDh5n12o2FpoaK3wglSpTcmgybJS8uG2hA3+8rFqTYXqIdtvd2cWTOi03cDhWZMCkn3wrRyKC3PLqUhWngrt4znibyAORgI5VvRfbO/+9vunl7wFMMCAZFcoO57dAM3eYKuk5Je850qjgHSXEwG46GsNVUlkXKLpt0jFuvkj+wj0zDBDr70qDIiPkkea4jrFItmy1zix0bxhK0Ge1avmH14OeygESbYx2umXOOpOlz5GcGPgcR0tACZGzxlCyC7fkk9uC6SSrEt2ZC//A24jT1peJ+7jnqpKtobHbSlHQ9Q6Ig/2x4GL8PRzB28dErBcmXYQeF3UBSOo8ZaX+rwLzYqHYivkX1KrAsyl71Sf/XCDEkNMjB5ATl0QAQJgy5Fa7u7OD5uqqvVD0=
