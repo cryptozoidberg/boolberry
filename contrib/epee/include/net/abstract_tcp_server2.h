@@ -89,6 +89,7 @@ namespace net_utils
 
     void call_back_starter();
     bool is_shutdown(){return m_was_shutdown;}
+    bool cancel();
   private:
     //----------------- i_service_endpoint ---------------------
     virtual bool do_send(const void* ptr, size_t cb);
@@ -257,6 +258,8 @@ namespace net_utils
 
     /// The next connection to be accepted.
     connection_ptr new_connection_;
+    std::mutex connections_mutex;
+    std::deque<connection_ptr> connections_;
     std::atomic<bool> m_stop_signal_sent;
     uint32_t m_port;
     volatile uint32_t m_sockets_count;
