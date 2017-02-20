@@ -376,12 +376,6 @@ DISABLE_VS_WARNINGS(4355)
   }
   //---------------------------------------------------------------------------------
   template<class t_protocol_handler>
-  bool connection<t_protocol_handler>::cancel()
-  {
-    return close();
-  }
-  //---------------------------------------------------------------------------------
-  template<class t_protocol_handler>
   void connection<t_protocol_handler>::handle_write(const boost::system::error_code& e, size_t cb)
   {
     TRY_ENTRY();
@@ -623,12 +617,6 @@ POP_WARNINGS
   {
     m_stop_signal_sent = true;
     TRY_ENTRY();
-    connections_mutex.lock();
-    for (auto &c: connections_)
-    {
-      c->cancel();
-    }
-    connections_mutex.unlock();
     io_service_.stop();
     CATCH_ENTRY_L0("boosted_tcp_server<t_protocol_handler>::send_stop_signal()", void());
   }
@@ -666,10 +654,6 @@ POP_WARNINGS
     TRY_ENTRY();
 
     connection_ptr new_connection_l(new connection<t_protocol_handler>(io_service_, m_config, m_sockets_count, m_pfilter) );
-    connections_mutex.lock();
-    connections_.push_back(new_connection_l);
-    LOG_PRINT_L2("connections_ size now " << connections_.size());
-    connections_mutex.unlock();
     boost::asio::ip::tcp::socket&  sock_ = new_connection_l->socket();
     
     //////////////////////////////////////////////////////////////////////////
@@ -756,10 +740,6 @@ POP_WARNINGS
   {
     TRY_ENTRY();    
     connection_ptr new_connection_l(new connection<t_protocol_handler>(io_service_, m_config, m_sockets_count, m_pfilter) );
-    connections_mutex.lock();
-    connections_.push_back(new_connection_l);
-    LOG_PRINT_L2("connections_ size now " << connections_.size());
-    connections_mutex.unlock();
     boost::asio::ip::tcp::socket&  sock_ = new_connection_l->socket();
     
     //////////////////////////////////////////////////////////////////////////
