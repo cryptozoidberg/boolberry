@@ -18,6 +18,12 @@
 
 namespace crypto {
 
+  const ec_point I_ = { { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+  const ec_point L_ = { { 0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10 } };
+
+  const key_image I = *reinterpret_cast<const key_image*>(&I_);
+  const key_image L = *reinterpret_cast<const key_image*>(&L_);
+
 	struct random_init_singleton
 	{
 		random_init_singleton()
@@ -105,8 +111,37 @@ namespace crypto {
     ge_p3 point;
     return ge_frombytes_vartime(&point, &key) == 0;
   }
+  
+  /***************************************************************************/
+  /* 
+     Fix discovered by Monero Lab and suggested by "fluffypony" (bitcointalk.org)
+     Special thanks to "slb"(bitcointalk.org) for sharing code and cooperation.
+  */
+  key_image scalarmult_key(const key_image & P, const key_image & a)
+  {
+    ge_p3 A = ge_p3();
+    ge_p2 R = ge_p2();
+    // maybe use assert instead?
+    ge_frombytes_vartime(&A, reinterpret_cast<const unsigned char*>(&P));
+    ge_scalarmult(&R, reinterpret_cast<const unsigned char*>(&a), &A);
+    key_image a_p = key_image();
+    ge_tobytes(reinterpret_cast<unsigned char*>(&a_p), &R);
+    return a_p;
+  }
 
-  bool crypto_ops::secret_key_to_public_key(const secret_key &sec, public_key &pub) {
+  bool crypto_ops::validate_key_image(const key_image& ki)
+  {
+    if (!(scalarmult_key(ki, L) == I))
+    {
+      return false;
+    }
+    return true;
+  }
+  /***************************************************************************/
+
+
+  bool crypto_ops::secret_key_to_public_key(const secret_key &sec, public_key &pub) 
+  {
     ge_p3 point;
     if (sc_check(&sec) != 0) {
       return false;

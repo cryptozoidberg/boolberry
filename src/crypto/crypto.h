@@ -97,6 +97,9 @@ namespace crypto {
       const public_key *const *, std::size_t, const signature *);
     friend bool check_ring_signature(const hash &, const key_image &,
       const public_key *const *, std::size_t, const signature *);
+    friend bool validate_key_image(const key_image& ki);
+    static bool validate_key_image(const key_image& ki);
+
   };
 
   /* Generate a value filled with random bytes.
@@ -132,6 +135,11 @@ namespace crypto {
    */
   inline bool check_key(const public_key &key) {
     return crypto_ops::check_key(key);
+  }
+  /* Check a key image. Returns true if it is valid, false otherwise.
+  */
+  inline bool validate_key_image(const key_image& ki){
+    return crypto_ops::validate_key_image(ki);
   }
 
   /* Checks a private key and computes the corresponding public key.
