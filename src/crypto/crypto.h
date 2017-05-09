@@ -46,7 +46,7 @@ namespace crypto {
     friend class crypto_ops;
   };
 
-  POD_CLASS key_image: ec_point {
+  POD_CLASS key_image: public ec_point {
     friend class crypto_ops;
   };
 
