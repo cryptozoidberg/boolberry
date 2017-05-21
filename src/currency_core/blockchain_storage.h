@@ -175,6 +175,7 @@ namespace currency
     void print_blockchain(uint64_t start_index, uint64_t end_index);
     void print_blockchain_index();
     void print_blockchain_outs(const std::string& file);
+    bool lookfor_donation(const transaction& tx, uint64_t& donation, uint64_t& royalty);
 
   private:
     typedef std::unordered_map<crypto::hash, size_t> blocks_by_id_index;
@@ -246,7 +247,6 @@ namespace currency
     uint64_t get_adjusted_time();
     bool complete_timestamps_vector(uint64_t start_height, std::vector<uint64_t>& timestamps);
     bool update_next_comulative_size_limit();
-    bool lookfor_donation(const transaction& tx, uint64_t& donation, uint64_t& royalty);
     bool get_block_for_scratchpad_alt(uint64_t connection_height, uint64_t block_index, std::list<blockchain_storage::blocks_ext_by_hash::iterator>& alt_chain, block & b);
     bool process_blockchain_tx_extra(const transaction& tx);
     bool unprocess_blockchain_tx_extra(const transaction& tx);

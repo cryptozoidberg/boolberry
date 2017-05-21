@@ -521,10 +521,21 @@ namespace currency
   uint64_t core_rpc_server::get_block_reward(const block& blk)
   {
     uint64_t reward = 0;
+    uint64_t royalty = 0;
+    uint64_t donation = 0;
+    uint64_t h = get_block_height(blk);
     BOOST_FOREACH(const tx_out& out, blk.miner_tx.vout)
     {
       reward += out.amount;
     }
+  
+  if(h && !(h%CURRENCY_DONATIONS_INTERVAL) /*&& h > 21600*/)
+  {
+    bool r = m_core.get_blockchain_storage().lookfor_donation(blk.miner_tx, donation, royalty);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to lookfor_donation");
+    reward -= donation + royalty;
+  }
+
     return reward;
   }
   //------------------------------------------------------------------------------------------------------------------------------
