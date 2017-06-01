@@ -2045,15 +2045,7 @@ bool blockchain_storage::check_tx_input(const txin_to_key& txin, const crypto::h
   if (!crypto::validate_key_image(txin.k_image))
   {
     LOG_ERROR("Invalid key image: " << txin.k_image << ", amount: " << print_money(txin.amount) << ", tx: " << tx_prefix_hash);
-<<<<<<< HEAD
     if (m_blocks.size() > 780000) // unfortunately, there are invalid keyimages in blockchain, skip the checking for them
-=======
-    size_t top_block_height = 0;
-    CRITICAL_REGION_BEGIN(m_blockchain_lock);
-    top_block_height = m_blocks.size() - 1;
-    CRITICAL_REGION_END();
-    if (top_block_height > 780000) // unfortunately, there are invalid keyimages in blockchain, skip the checking for them
->>>>>>> eddc2390a6d9594b2b79f91929128f36c2c84f5c
       return false;
   }
 
