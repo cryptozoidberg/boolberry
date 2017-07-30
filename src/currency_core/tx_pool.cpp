@@ -389,7 +389,10 @@ namespace currency
           << "last_failed_height: " << txd.last_failed_height << ENDL
           << "last_failed_id: " << txd.last_failed_id << ENDL
           << "live_time: " << epee::misc_utils::get_time_interval_string(time(nullptr) - txd.receive_time) << ENDL
-          << "decline_reason: " << txd.decline_reason << ENDL;
+          << "decline_reason: " << txd.decline_reason << ENDL
+          << "amount_out: " << get_outs_money_amount(txd.tx)  << ENDL
+          << "received_timestamp: " << txd.receive_time << ENDL
+          << "received: " << std::ctime(&txd.receive_time) <<  ENDL;
       }else
       {
         tx_details& txd = txe.second;
