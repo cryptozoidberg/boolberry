@@ -55,8 +55,8 @@
 
 #define MAP_URI_AUTO_XML2(s_pattern, callback_f, command_type) //TODO: don't think i ever again will use xml - ambiguous and "overtagged" format
 
-#define MAP_URI_AUTO_JON2(s_pattern, callback_f, command_type) \
-    else if(query_info.m_URI == s_pattern) \
+#define MAP_URI_AUTO_JON2_IF(s_pattern, callback_f, command_type, cond) \
+    else if((query_info.m_URI == s_pattern) && (cond)) \
     { \
       handled = true; \
       uint64_t ticks = misc_utils::get_tick_count(); \
@@ -79,6 +79,8 @@
       response_info.m_header_info.m_content_type = " application/json"; \
       LOG_PRINT( s_pattern << " processed with " << ticks1-ticks << "/"<< ticks2-ticks1 << "/" << ticks3-ticks2 << "ms", LOG_LEVEL_2); \
     }
+
+#define MAP_URI_AUTO_JON2(s_pattern, callback_f, command_type) MAP_URI_AUTO_JON2_IF(s_pattern, callback_f, command_type, true)
 
 #define MAP_URI_AUTO_BIN2(s_pattern, callback_f, command_type) \
     else if(query_info.m_URI == s_pattern) \
@@ -259,8 +261,8 @@ namespace epee
   response_info.m_header_info.m_content_type = " application/json"; \
   LOG_PRINT( query_info.m_URI << "[" << method_name << "] processed with " << ticks1-ticks << "/"<< ticks2-ticks1 << "/" << ticks3-ticks2 << "ms", LOG_LEVEL_2);
 
-#define MAP_JON_RPC_WE(method_name, callback_f, command_type) \
-    else if(callback_name == method_name) \
+#define MAP_JON_RPC_WE_IF(method_name, callback_f, command_type, cond) \
+    else if((callback_name == method_name) && (cond)) \
 { \
   PREPARE_OBJECTS_FROM_JSON(command_type) \
   epee::json_rpc::error_response fail_resp = AUTO_VAL_INIT(fail_resp); \
@@ -274,6 +276,8 @@ namespace epee
   FINALIZE_OBJECTS_TO_JSON(method_name) \
   return true;\
 }
+
+#define MAP_JON_RPC_WE(method_name, callback_f, command_type) MAP_JON_RPC_WE_IF(method_name, callback_f, command_type, true)
 
 #define MAP_JON_RPC_WERI(method_name, callback_f, command_type) \
     else if(callback_name == method_name) \
@@ -291,8 +295,8 @@ namespace epee
   return true;\
 }
 
-#define MAP_JON_RPC(method_name, callback_f, command_type) \
-    else if(callback_name == method_name) \
+#define MAP_JON_RPC_IF(method_name, callback_f, command_type, cond) \
+    else if((callback_name == method_name) && (cond)) \
 { \
   PREPARE_OBJECTS_FROM_JSON(command_type) \
   if(!callback_f(req.params, resp.result, m_conn_context)) \
@@ -308,6 +312,8 @@ namespace epee
   FINALIZE_OBJECTS_TO_JSON(method_name) \
   return true;\
 }
+
+#define MAP_JON_RPC(method_name, callback_f, command_type) MAP_JON_RPC_IF(method_name, callback_f, command_type, true)
 
 #define MAP_JON_RPC_N(callback_f, command_type) MAP_JON_RPC(command_type::methodname(), callback_f, command_type)
 

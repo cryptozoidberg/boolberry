@@ -358,6 +358,24 @@ struct EMPTY_STRUCT {
     };
   };    
   //-----------------------------------------------
+  struct COMMAND_RPC_STOP_DAEMON
+  {
+	  struct request
+	  {
+		  BEGIN_KV_SERIALIZE_MAP()
+		  END_KV_SERIALIZE_MAP()
+	  };
+
+	  struct response
+	  {
+		  std::string status;
+
+		  BEGIN_KV_SERIALIZE_MAP()
+			  KV_SERIALIZE(status)
+		  END_KV_SERIALIZE_MAP()
+	  };
+  };
+  //-----------------------------------------------
   struct COMMAND_RPC_STOP_MINING
   {
     struct request
