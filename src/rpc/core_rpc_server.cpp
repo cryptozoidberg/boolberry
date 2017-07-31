@@ -747,6 +747,8 @@ bool core_rpc_server::f_on_block_json(const F_COMMAND_RPC_GET_BLOCK_DETAILS::req
   res.block.prev_hash = block_header.prev_hash;
   res.block.nonce = block_header.nonce;
   res.block.hash = string_tools::pod_to_hex(hash);
+  res.block.depth = m_core.get_current_blockchain_height() - res.block.height - 1;
+  res.block.difficulty = block_header.difficulty;
 
   res.block.reward = block_header.reward;
 
@@ -764,7 +766,7 @@ bool core_rpc_server::f_on_block_json(const F_COMMAND_RPC_GET_BLOCK_DETAILS::req
     error_resp.message = "Internal error: no block sizes";
     return false;
   }
-  res.block.transactionsCumulativeSize = blockSize;
+  res.block.transactionsCumulativeSize = misc_utils::median(blocks_sizes);
 
   size_t blokBlobSize = get_object_blobsize(blk);
   size_t minerTxBlobSize = get_object_blobsize(blk.miner_tx);
@@ -824,7 +826,7 @@ bool core_rpc_server::f_on_block_json(const F_COMMAND_RPC_GET_BLOCK_DETAILS::req
   transaction_short.hash =  string_tools::pod_to_hex(get_transaction_hash(blk.miner_tx));
   transaction_short.fee = 0;
   transaction_short.amount_out = get_outs_money_amount(blk.miner_tx);
-  transaction_short.blockSize = get_object_blobsize(blk.miner_tx);
+  transaction_short.size = get_object_blobsize(blk.miner_tx);
   res.block.transactions.push_back(transaction_short);
 
 
@@ -843,7 +845,7 @@ bool core_rpc_server::f_on_block_json(const F_COMMAND_RPC_GET_BLOCK_DETAILS::req
     transaction_short.hash =  string_tools::pod_to_hex(get_transaction_hash(tx));
     transaction_short.fee = amount_in - amount_out;
     transaction_short.amount_out = amount_out;
-    transaction_short.blockSize = get_object_blobsize(tx);
+    transaction_short.size = get_object_blobsize(tx);
     res.block.transactions.push_back(transaction_short);
 
     res.block.totalFeeAmount += transaction_short.fee;
@@ -922,7 +924,6 @@ bool core_rpc_server::f_on_transaction_json(const F_COMMAND_RPC_GET_TRANSACTION_
       block_short.timestamp = blk.timestamp;
       block_short.height = blockHeight;
       block_short.hash = string_tools::pod_to_hex(blockHash);
-      block_short.cumul_size = blokBlobSize + tx_cumulative_block_size - minerTxBlobSize;
       block_short.tx_count = blk.tx_hashes.size() + 1;
       res.ablock = block_short;
     }
@@ -934,6 +935,8 @@ bool core_rpc_server::f_on_transaction_json(const F_COMMAND_RPC_GET_TRANSACTION_
 
   res.txDetails.hash = string_tools::pod_to_hex(get_transaction_hash(restx));
   res.txDetails.fee = amount_in - amount_out;
+  if (amount_in == 0)
+    res.txDetails.fee = 0;
   res.txDetails.amount_out = amount_out;
   res.txDetails.size = get_object_blobsize(restx);
 

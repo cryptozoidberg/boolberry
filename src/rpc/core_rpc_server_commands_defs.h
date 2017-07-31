@@ -682,13 +682,13 @@ struct f_transaction_short_response {
   std::string hash;
   uint64_t fee;
   uint64_t amount_out;
-  uint64_t blockSize;
+  uint64_t size;
 
   BEGIN_KV_SERIALIZE_MAP()
     KV_SERIALIZE(hash)
     KV_SERIALIZE(fee)
     KV_SERIALIZE(amount_out)
-    KV_SERIALIZE(blockSize)
+    KV_SERIALIZE(size)
   END_KV_SERIALIZE_MAP()
 };
 
