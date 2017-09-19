@@ -288,9 +288,6 @@ DISABLE_VS_WARNINGS(4200)
   struct rs_comm {
     hash h;
     struct ec_point_pair ab[];
-    struct {
-      ec_point a, b;
-    } ab[];
   };
 POP_WARNINGS
 
