@@ -111,7 +111,7 @@ namespace tools
     };
 
     std::vector<unsigned char> generate(const std::string& wallet, const std::string& password);
-	void restore(const std::string& wallet, const std::vector<unsigned char>& restore_seed, const std::string& password);
+    void restore(const std::string& wallet, const std::vector<unsigned char>& restore_seed, const std::string& password);
     void load(const std::string& wallet, const std::string& password);    
     void store();
     std::string get_wallet_path(){ return m_keys_file; }
@@ -137,13 +137,14 @@ namespace tools
     std::shared_ptr<i_core_proxy> get_core_proxy();
     uint64_t balance();
     uint64_t unlocked_balance();
-	int64_t unconfirmed_balance();
+    int64_t unconfirmed_balance();
     template<typename T>
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy);
     template<typename T>
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx);
+    bool get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) const;
     bool check_connection();
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
     void get_payments(const crypto::hash& payment_id, std::list<payment_details>& payments, uint64_t min_height = 0) const;
@@ -167,6 +168,9 @@ namespace tools
       if (ver < 8)
         return;
       a & m_transfer_history;
+      if (ver < 9)
+          return;
+      a & m_tx_keys;
 
     }
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
@@ -210,12 +214,14 @@ namespace tools
     std::vector<wallet_rpc::wallet_transfer_info> m_transfer_history;
     std::unordered_map<crypto::hash, currency::transaction> m_unconfirmed_in_transfers;
     uint64_t m_unconfirmed_balance;
-    std::shared_ptr<i_core_proxy> m_core_proxy;    i_wallet2_callback* m_callback;
+    std::shared_ptr<i_core_proxy> m_core_proxy;
+    i_wallet2_callback* m_callback;
+    std::unordered_map<crypto::hash, crypto::secret_key> m_tx_keys;
   };
 }
 
 
-BOOST_CLASS_VERSION(tools::wallet2, 8)
+BOOST_CLASS_VERSION(tools::wallet2, 9)
 BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 3)
 BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 3)
 
@@ -483,7 +489,8 @@ namespace tools
       splitted_dsts.push_back(currency::tx_destination_entry(dust, dust_policy.addr_for_dust));
     }
 
-    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, tx, unlock_time);
+    keypair txkey;
+    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, tx, txkey, unlock_time);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
     //update_current_tx_limit();
     CHECK_AND_THROW_WALLET_EX(CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
@@ -513,6 +520,10 @@ namespace tools
       recipient += get_account_address_as_str(d.addr);
     }
     add_sent_unconfirmed_tx(tx, change_dts.amount, recipient);
+
+    crypto::hash txid = get_transaction_hash(tx);
+    m_tx_keys.insert(std::make_pair(txid, txkey.sec));
+    
 
     LOG_PRINT_L2("transaction " << get_transaction_hash(tx) << " generated ok and sent to daemon, key_images: [" << key_images << "]");
 
