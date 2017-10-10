@@ -323,7 +323,8 @@ bool gen_block_miner_tx_has_2_in::generate(std::vector<test_event_entry>& events
   destinations.push_back(de);
 
   transaction tmp_tx;
-  if (!construct_tx(miner_account.get_keys(), sources, destinations, tmp_tx, 0))
+  keypair txkey;
+  if (!construct_tx(miner_account.get_keys(), sources, destinations, tmp_tx, txkey, 0))
     return false;
 
   MAKE_MINER_TX_MANUALLY(miner_tx, blk_0);
@@ -365,7 +366,8 @@ bool gen_block_miner_tx_with_txin_to_key::generate(std::vector<test_event_entry>
   destinations.push_back(de);
 
   transaction tmp_tx;
-  if (!construct_tx(miner_account.get_keys(), sources, destinations, tmp_tx, 0))
+  keypair txkey;
+  if (!construct_tx(miner_account.get_keys(), sources, destinations, tmp_tx, txkey, 0))
     return false;
 
   MAKE_MINER_TX_MANUALLY(miner_tx, blk_1);

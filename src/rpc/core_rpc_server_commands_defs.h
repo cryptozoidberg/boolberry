@@ -422,7 +422,46 @@ struct EMPTY_STRUCT {
     typedef std::string response;
   };
 
+  struct transfer_rpc_details {
+      std::string tx_hash;
+      std::string recipient;
+      uint64_t amount;
+      std::string payment_id;
 
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_hash)
+        KV_SERIALIZE(recipient)
+        KV_SERIALIZE(amount)
+        KV_SERIALIZE(payment_id)
+      END_KV_SERIALIZE_MAP()
+  };
+
+  struct COMMAND_RPC_GETBLOCK
+  {
+      struct request {
+          
+          uint64_t height;
+          
+          BEGIN_KV_SERIALIZE_MAP()
+            KV_SERIALIZE(height)
+          END_KV_SERIALIZE_MAP()
+      };
+      
+      struct response
+      {
+          std::string block_hash;
+          uint64_t block_time;
+          std::list<transfer_rpc_details> transfers;
+          
+          BEGIN_KV_SERIALIZE_MAP()
+            KV_SERIALIZE(block_hash)
+            KV_SERIALIZE(block_time)
+            KV_SERIALIZE(transfers)  
+          END_KV_SERIALIZE_MAP()
+      };
+
+  };
+      
   struct COMMAND_RPC_GETBLOCKTEMPLATE
   {
     struct request

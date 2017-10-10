@@ -70,7 +70,11 @@ namespace epee
         }
         ~recursuion_limitation_guard()
         {
-          CHECK_AND_ASSERT_THROW_MES(m_counter_ref != 0, "Internal error: m_counter_ref == 0 while ~recursuion_limitation_guard()");
+            try {
+                CHECK_AND_ASSERT_THROW_MES(m_counter_ref != 0, "Internal error: m_counter_ref == 0 while ~recursuion_limitation_guard()");
+            } catch (...) {
+                std::terminate();
+            }
           --m_counter_ref;
         }
       };

@@ -1030,6 +1030,65 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_getblock(const COMMAND_RPC_GETBLOCK::request& req, COMMAND_RPC_GETBLOCK::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
+  {
+      if(!check_core_ready())
+      {
+          error_resp.code = CORE_RPC_ERROR_CODE_CORE_BUSY;
+          error_resp.message = "Core is busy";
+          return false;
+      }
+
+      currency::block b;
+      if (!m_core.get_blockchain_storage().get_block_by_height(req.height, b)) {
+          error_resp.code = CORE_RPC_ERROR_CODE_TOO_BIG_HEIGHT;
+          error_resp.message = "Invalid block height";
+          return false;
+      }
+      res.block_hash = string_tools::pod_to_hex(get_block_hash(b));
+      res.block_time = b.timestamp;
+          
+      std::vector<crypto::hash> txs_ids;
+      txs_ids.reserve(b.tx_hashes.size());
+      for(const auto& tx: b.tx_hashes) {
+          txs_ids.push_back(tx);
+      }
+
+      std::list<crypto::hash> missed_ids;
+      std::list<transaction> txs;
+      m_core.get_transactions(txs_ids, txs, missed_ids);
+      if (missed_ids.size()) {
+          //can't find transaction from block. Major boo-boo
+          error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
+          error_resp.message = "Can't find transaction in block";
+          return false;
+      }
+
+      size_t idx = 0;
+      for(const auto& tx: txs) {
+          std::string payment_id;
+          get_payment_id_from_tx_extra(tx, payment_id);
+          crypto::hash hash;
+          get_transaction_hash(tx, hash);
+
+          transfer_rpc_details transfer;
+          transfer.tx_hash = string_tools::pod_to_hex(hash);
+          transfer.payment_id = string_tools::pod_to_hex(payment_id);
+          
+          for (const auto& vout: tx.vout) {
+              const txout_to_key* key_out = boost::get<txout_to_key>(&vout.target);
+              if (!key_out) {
+                  LOG_PRINT_L0("Found tx_out with target != txout_to_key... skipping");
+                  continue;
+              }
+              transfer.amount = vout.amount;
+              transfer.recipient = string_tools::pod_to_hex(key_out->key);
+              res.transfers.push_back(transfer);
+          }
+      }
+      return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::get_addendum_for_hi(const mining::height_info& hi, std::list<mining::addendum>& res)
   {
     if(!hi.height || hi.height + 1 == m_core.get_current_blockchain_height())
