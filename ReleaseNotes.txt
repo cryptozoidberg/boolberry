@@ -1,3 +1,12 @@
+2016, October 02: v0.3.2-RUNE
+Miner's tax is disabled by default. The more people using the RUNE edition, the lower the miner's tax becomes. No rule changes have been made, this leveraged the existing voting mechanism CryptoZoidberg implemented.
+
+Note: If you vote to enable the miner's tax, the proceeds still go to an account controlled by Zoidberg
+
+2016, September 07: v0.3.1-RUNE
+Project is separated from CryptoZoidberg's stewardship, client version differientated to network as RUNE to track adoption
+Additional checkpoints added
+
 2014, April 20: v0.1.1.9
 Project is separated from Cryptonote(forked bytecoin), moved to GitHub.
 
