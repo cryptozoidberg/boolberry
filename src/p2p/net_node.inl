@@ -181,7 +181,8 @@ namespace nodetool
       }
     }
     if(command_line::has_arg(vm, arg_p2p_hide_my_port))
-      m_hide_my_port = true;    return true;
+        m_hide_my_port = true;    
+    return true;              
   }
   //-----------------------------------------------------------------------------------
   namespace

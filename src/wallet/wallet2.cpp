@@ -393,7 +393,6 @@ void wallet2::scan_tx_pool()
     //check if we have spendings
     uint64_t tx_money_spent_in_ins = 0;
     // check all outputs for spending (compare key images)
-    size_t i = 0;
     for(auto& in: tx.vin)
     {
       if (in.type() != typeid(currency::txin_to_key))
@@ -943,4 +942,14 @@ void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, 
   transfer(dsts, fake_outputs_count, unlock_time, fee, extra, tx);
 }
 //----------------------------------------------------------------------------------------------------
+bool wallet2::get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) const
+{
+  const std::unordered_map<crypto::hash, crypto::secret_key>::const_iterator i = m_tx_keys.find(txid);
+  if (i == m_tx_keys.end())
+    return false;
+  tx_key = i->second;
+  return true;
 }
+
+}
+

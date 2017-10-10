@@ -504,16 +504,18 @@ namespace currency
   //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
-                                                             transaction& tx, 
+                                                             transaction& tx,
+                                                             keypair& txkey,
                                                              uint64_t unlock_time, 
                                                              uint8_t tx_outs_attr)
   {
-    return construct_tx(sender_account_keys, sources, destinations, std::vector<uint8_t>(), tx, unlock_time, tx_outs_attr);
+    return construct_tx(sender_account_keys, sources, destinations, std::vector<uint8_t>(), tx, txkey, unlock_time, tx_outs_attr);
   }
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
                                                              const std::vector<uint8_t>& extra,
-                                                             transaction& tx, 
+                                                             transaction& tx,
+                                                             keypair& txkey,
                                                              uint64_t unlock_time,
                                                              uint8_t tx_outs_attr)
   {
@@ -525,7 +527,7 @@ namespace currency
     tx.version = CURRENT_TRANSACTION_VERSION;
     tx.unlock_time = unlock_time;
 
-    keypair txkey = keypair::generate();
+    txkey = keypair::generate();
     add_tx_pub_key_to_extra(tx, txkey.pub);
 
     struct input_generation_context_data
