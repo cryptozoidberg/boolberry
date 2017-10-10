@@ -148,6 +148,7 @@ namespace tools
     bool check_connection();
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
     void get_payments(const crypto::hash& payment_id, std::list<payment_details>& payments, uint64_t min_height = 0) const;
+    void get_payments(std::list<std::pair<crypto::hash,wallet2::payment_details>>& payments, uint64_t min_height, uint64_t max_height = (uint64_t)-1) const;
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
     uint64_t get_blockchain_current_height() const { return m_local_bc_height; }
     template <class t_archive>

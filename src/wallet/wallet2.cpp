@@ -726,6 +726,17 @@ void wallet2::get_payments(const crypto::hash& payment_id, std::list<wallet2::pa
   });
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::get_payments(std::list<std::pair<crypto::hash, wallet2::payment_details>>& payments, uint64_t min_height, uint64_t max_height) const
+{
+	auto range = std::make_pair(m_payments.begin(), m_payments.end());
+	std::for_each(range.first, range.second, [&payments, &min_height, &max_height](const payment_container::value_type& x) {
+		if (min_height < x.second.m_block_height && max_height >= x.second.m_block_height)
+		{
+			payments.push_back(x);
+		}
+	});
+}
+//----------------------------------------------------------------------------------------------------
 void wallet2::get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count)
 {
   if (offset >= m_transfer_history.size())
