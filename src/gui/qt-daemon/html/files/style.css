@@ -1,0 +1,473 @@
+html {
+    margin: 0;
+    height: 100%;
+}
+
+@font-face {
+    font-family: UbuntuMedium;
+    src: url(Ubuntu-M.ttf);
+}
+
+@font-face {
+    font-family: UbuntuCond;
+    src: url(Ubuntu-C.ttf);
+}
+
+body {
+     font-family: UbuntuMedium;/*, Arial, sans-serif;*/
+     color: #34495e;
+     background-color: #ffffff;
+     margin: 0em 0 0em 0;
+     height:100%;
+     -webkit-font-smoothing: antialiased;
+     background: rgb(231, 231, 231);
+ }
+
+#container{
+    height:100%;
+}
+
+#wallet_welcome_screen_area
+{
+    text-align: center;
+    margin-top: 80px;
+}
+
+#id_wallet_or_text
+{
+    font-size: 30px;
+}
+
+#wallet_workspace_area
+{
+    display: none;
+}
+
+
+h1 {
+    color: #555;
+    font-size: 64px;
+    font-weight: 200;
+    letter-spacing: -2px;
+    white-space: nowrap;
+    margin-top: 20px;
+    margin-bottom: 80px;
+}
+
+h1,
+h2 {
+    text-rendering: optimizeLegibility;
+}
+
+
+.top_menu_bar
+{
+    background: rgb(25, 26, 51);
+}
+
+.inline_menu_bar
+{
+    /*height: 45px;*/
+    line-height: 36px;
+    padding: 0;
+    position: relative;
+    display: inline-block;
+    background: rgb(25, 26, 51);
+    vertical-align: top;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+.menu_bar_logo, .menu_bar_tabs
+{
+    display: inline-block;
+    color: #ffffff;
+}
+
+
+.wallet_separator
+{
+    /*font-weight: bold;*/
+    font-size: 20px;
+    color: #ffffff;
+    padding: 5px;
+    padding-left: 20px;
+
+    background: rgb(25, 26, 51);
+}
+
+.inline_menu_bar_item
+{
+    color: #ffffff;
+    font-size: 20px;
+    /*font-family: arial,sans-serif;*/
+    font-weight: bold;
+    display: inline-block;
+    margin: 0 8px;
+    padding: 0 8px;
+    cursor:pointer;
+}
+
+.inline_menu_bar_item:hover
+{
+    color: rgb(0, 152, 218);
+}
+
+.inline_menu_bar_selected_item
+{
+    border-bottom: 3px solid #FFFFFF;
+    color: #ffffff;
+    font-weight: bold;
+    /*height: 41px;*/
+    margin: 2px 8px 0;
+    padding: 0 8px;
+}
+#daemon_state_internal_panel
+{
+    padding-left: 110px;
+}
+
+.inline_menu_bar_selected_item:hover
+{
+    color: #ffffff;
+}
+
+
+.menu_brackets_text
+{
+    /*font-weight: normal;*/
+    color: #6c98a5;
+}
+
+.view_hidden
+{
+    display: none;
+}
+
+.inline_menu_bar_item_disabled
+{
+    color: #777;
+    cursor: default;
+}
+
+.inline_menu_bar_item_disabled:hover
+{
+    color: #777;
+}
+
+.menu_view_inner_area
+{
+    /*padding-top: 12px;
+    padding-left: 12px;*/
+}
+
+/*dashboard styles*/
+
+span.daemon_view_general_status_value_success_text
+{
+    color: #1a9d00;
+    font-weight:bold;
+}
+
+span.daemon_view_general_status_value_fail_text
+{
+    color: #a91308;
+    font-weight:bold;
+}
+
+
+.daemon_view_general_status_block
+{
+    color: rgb(55,52,53);
+    padding-top: 20px;
+    font-size: 30px;
+}
+
+#daemon_status_text
+{
+    font-weight:bold;
+    margin-left: 20px;
+}
+
+.daemon_view_general_status_text
+{
+    color: rgb(55,52,53);
+    margin-left: 40px;
+    font-weight:bold;
+}
+
+.daemon_view_param_title
+{
+    font-size: 17px;
+    color: rgb(55,52,53);
+}
+
+.daemon_view_param_value
+{
+    position: absolute;
+    left:360px;
+    font-weight:bold;
+    color: #6c6c6c;
+    font-size: 17px;
+}
+
+.buttons_group
+{
+    margin-top: 25px;
+    margin-left: 30px;
+}
+
+#logo_entry
+{
+    margin-top: 5px;
+    margin-right: 5px;
+    float: right;
+    display: block;
+    width: 200px;
+    text-align: right;
+}
+
+#synchronization_progressbar_block
+{
+    padding-top: 25px;
+    padding-left: 15px;
+}
+
+.daemon_view_details_block
+{
+    padding-top: 20px;
+}
+
+
+.daemon_view_details_status_block
+{
+    font: 14px;
+    margin-top: 5px;
+}
+
+/*----- wallet ------*/
+
+.active_panel
+{
+    margin:15px;
+    margin-top: 0px;
+    padding:10px;
+    background: rgb(247, 247, 247);
+}
+.wallet_panet_transparent
+{
+    padding-top: 2px;
+    margin:15px;
+    margin-top: 0px;
+}
+.transfer_entry_line
+{
+    font-family: UbuntuCond;
+    padding-left: 10px;
+    padding-top: 0px;
+    padding-bottom: 4px;
+    margin-top: 2px;
+    background: rgb(247, 247, 247);
+}
+.transfer_entry_line_details
+{
+    display: none;
+    margin-top: 7px;
+    margin-left: 60px;
+    /*color: rgb(95, 95, 95);*/
+}
+
+.wallet_secondary_text
+{
+    margin-top: 20px;
+    color: rgb(95, 95, 95);
+    font-size: 80%;
+    font-weight: bold;
+}
+
+.wallet_balance
+{
+    padding-right: 10px;
+}
+.balance_text
+{
+    margin-top: 20px;
+    padding-right: 10px;
+    color: rgb(95, 95, 95);
+    font-weight: bold;
+}
+
+.tx_details_text
+{
+    margin-top: 20px;
+    padding-right: 10px;
+    font-weight: bold;
+}
+
+#wallet_transfer_panel
+{
+    background: rgb(230, 233, 242);
+    padding: 5px;
+    margin:10px;
+    border: 1px solid rgba(149, 149, 149, 0.62);
+    /*margin-left:220px;*/
+}
+
+.transfer_text_img_span
+{
+    margin-top: 4px;
+    margin-bottom: -2px;
+}
+.transfer_text_time_span
+{
+    position: absolute;
+    left: 50px;
+}
+
+.transfer_text_status_span
+{
+    position: absolute;
+    left: 180px;
+}
+.transfer_text_amount_span
+{
+    position: absolute;
+    left: 340px;
+}
+
+.transfer_text_recipient_span
+{
+    position: absolute;
+    left: 480px;
+}
+
+.transfer_text_details_span
+{
+    position: absolute;
+    left: 280px;
+}
+
+.daemon_view_param_value_last_ver_info
+{
+    display: none;
+}
+
+.daemon_view_param_value_last_ver_info_new
+{
+    color: cornflowerblue;
+}
+
+.daemon_view_param_value_last_ver_info_calm
+{
+    color: #2b01f2;
+}
+
+.daemon_view_param_value_last_ver_info_urgent
+{
+    color: #7143a9;
+}
+
+@keyframes blinker {
+    0% { visibility: visible; }
+    50% { visibility: hidden; }
+    100% { visibility: visible; }
+}
+
+@-moz-keyframes blinker {
+    0% { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}
+
+@-webkit-keyframes blinker {
+    0% { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}
+
+@keyframes blinker {
+    0% { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}
+
+.daemon_view_param_value_last_ver_info_critical
+{
+    color: #a91308;
+    -webkit-animation-name: blinker;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-timing-function: linear;
+    -webkit-animation-iteration-count: infinite;
+
+    animation-name: blinker;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+
+
+#transfer_address_id
+{
+    height: 16px;
+    margin-left:2px;
+    width: 570px;
+    font-size: 10px;
+}
+#transfer_button_id,#close_wallet_button_id,#payment_id,#mixin_count_id,#tx_fee
+{
+    font-size: 12px;
+    margin-left: 2px;
+}
+
+#close_wallet_button_id
+{
+    margin-left: 480px;
+}
+
+.options_link_text
+{
+    font-size: 90%;
+    color:  #666666;
+}
+
+.transfer_extra_options
+{
+    color: #8f8f8f;
+    display: none;
+}
+
+.transfer_extra_options_hint
+{
+    font-size: 70%;
+    font-weight: normal;
+}
+
+
+#wallet_recent_transfers_panel
+{
+    /*background: rgb(241, 241, 241);*/
+    background: rgb(241, 241, 241);
+    padding: 5px;
+    margin:10px;
+    border: 1px solid rgba(149, 149, 149, 0.62);
+    height: 100%;
+    /*margin-left: 220px;*/
+}
+
+#synchronized_wallet_block
+{
+    color: #1a9d00;
+    font-weight:bold;
+}
+
+h2
+{
+    color: #6c6c6c;
+}
+
+
+.my_addres_text
+{
+    font-size: 80%;
+    color:  #666666;
+}
