@@ -1,7 +1,9 @@
+set -x #echo on
 
-export PROJECT_ROOT="/Users/roky/projects/boolberry"
+export PROJECT_ROOT="/Users/roky/projects/boolberry/repo"
 export QT_PATH="/Users/roky/Qt5.5.0/5.5"
 export LOCAL_BOOST_LIBS_PATH="/Users/roky/projects/boolberry/deploy/boost_libs"
+
 
 
 cd "$PROJECT_ROOT"
@@ -32,6 +34,11 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 
+make -j connectivity_tool
+if [ $? -ne 0 ]; then
+    echo "Failed to make connectivity_tool"
+    exit $?
+fi
 
 cd src/
 if [ $? -ne 0 ]; then
@@ -82,7 +89,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-cp ../../../../Applications package_folder 
+ln -s /Applications package_folder/Applications 
 if [ $? -ne 0 ]; then
     echo "Failed to copy applications link"
     exit 1
