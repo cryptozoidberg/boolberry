@@ -412,6 +412,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_params, arg_get_daemon_info);
   command_line::add_arg(desc_params, arg_get_aliases);
   command_line::add_arg(desc_params, arg_upate_maintainers_info);
+  command_line::add_arg(desc_params, command_line::arg_version);
 
   po::options_description desc_all;
   desc_all.add(desc_general).add(desc_params);
@@ -434,6 +435,12 @@ int main(int argc, char* argv[])
   if (!r)
     return 1;
 
+
+  if (command_line::get_arg(vm, command_line::arg_version))
+  {
+    std::cout << CURRENCY_NAME << " v" << PROJECT_VERSION_LONG << ENDL;
+    return 0;
+  }
   if(command_line::has_arg(vm, arg_request_stat_info) || command_line::has_arg(vm, arg_request_net_state))
   {
     return handle_request_stat(vm, command_line::get_arg(vm, arg_peer_id)) ? 0:1;
