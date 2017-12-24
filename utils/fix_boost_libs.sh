@@ -11,7 +11,7 @@ function get_relative_path() # $1 - path to a file, $2 - base dir
   python -c "import os.path; print os.path.relpath('$1', os.path.dirname('$2'))"
 }
 
-function update_links_in_boost_libs_in_libs() # $1 - path to boost libs, $2 - path to libs folder
+function update_links_in_boost_libs() # $1 - path to boost libs, $2 - path to libs folder
 {
   install_name_tool -change libboost_system.dylib          $1/libboost_system.dylib          $2/libboost_thread.dylib
   install_name_tool -change libboost_system.dylib          $1/libboost_system.dylib          $2/libboost_filesystem.dylib
@@ -20,7 +20,7 @@ function update_links_in_boost_libs_in_libs() # $1 - path to boost libs, $2 - pa
 
 }
 
-function update_links_in_boost_libs_in_binary() # $1 - path to boost libs, $2 - binary to update
+function update_links_in_boost_binary() # $1 - path to boost libs, $2 - binary to update
 {
   if [ -z "$1" ] || [ -z "$2" ]
   then
@@ -54,7 +54,7 @@ fi
 path_to_library=$1
 path_to_bin=$2
 relative_bin_to_lib=$(get_relative_path $path_to_library $path_to_bin)
-update_links_in_boost_libs_in_binary @executable_path/$relative_bin_to_lib $path_to_bin
-update_links_in_boost_libs_in_libs @executable_path/$relative_bin_to_lib $path_to_library
+update_links_in_boost_binary @executable_path/$relative_bin_to_lib $path_to_bin
+update_links_in_boost_libs @executable_path/$relative_bin_to_lib $path_to_library
 
 exit 0

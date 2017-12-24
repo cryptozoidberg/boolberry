@@ -48,6 +48,7 @@ fi
 
 
 # copy boost files
+echo "Copying boost files...."
 mkdir -p qt-boolb.app/Contents/Frameworks/boost_libs
 cp -R "$LOCAL_BOOST_LIBS_PATH/" qt-boolb.app/Contents/Frameworks/boost_libs/
 if [ $? -ne 0 ]; then
@@ -55,6 +56,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+
+# fix boost links
+echo "Fixing boost library links...."
+source ../../../utils/fix_boost_libs.sh
+update_links_in_boost_binary @executable_path/../Frameworks/boost_libs qt-boolb.app/Contents/MacOS/qt-boolb
+update_links_in_boost_libs @executable_path/../Frameworks/boost_libs qt-boolb.app/Contents/Frameworks/boost_libs
 
 
 
