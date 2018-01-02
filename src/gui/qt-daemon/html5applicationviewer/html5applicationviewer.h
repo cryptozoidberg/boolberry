@@ -46,9 +46,8 @@ protected:
     bool on_request_quit();
   public slots:
 	QString browse_wallet(bool existing);
-    void open_wallet(const QString& path, const QString& pwd);
-    QString generate_wallet(const QString& name, const QString& pwd, 
-		const QString& path);
+    void open_wallet();
+    void generate_wallet();
 	void restore_wallet(const QString& restore_text, const QString& password, 
 		const QString& path);
     void close_wallet();

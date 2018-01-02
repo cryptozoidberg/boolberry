@@ -9,6 +9,11 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 enable_testing()
 
+if(APPLE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET 10.10.5)          
+endif()
+
+
 include_directories(src contrib contrib/epee/include "${CMAKE_BINARY_DIR}/version")
 add_definitions(-DSTATICLIB)
 
