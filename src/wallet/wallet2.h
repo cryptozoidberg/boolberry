@@ -62,9 +62,9 @@ namespace tools
 
   class wallet2
   {
-    wallet2(const wallet2&) : m_run(true), m_callback(0), m_unconfirmed_balance(0) {};
+    wallet2(const wallet2&) : m_run(true), m_is_view_only(false), m_callback(0), m_unconfirmed_balance(0) {};
   public:
-    wallet2() : m_run(true), m_callback(0), m_core_proxy(new default_http_core_proxy()), m_unconfirmed_balance(0)
+    wallet2() : m_run(true), m_callback(0), m_is_view_only(false), m_core_proxy(new default_http_core_proxy()), m_unconfirmed_balance(0)
     {};
     struct transfer_details
     {
@@ -132,6 +132,8 @@ namespace tools
     void refresh(size_t & blocks_fetched);
     void refresh(size_t & blocks_fetched, bool& received_money);
     bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok);
+
+	bool generate_view_wallet(const std::string new_name);
     
     bool set_core_proxy(std::shared_ptr<i_core_proxy>& proxy);
     std::shared_ptr<i_core_proxy> get_core_proxy();
@@ -175,7 +177,7 @@ namespace tools
     }
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
   private:
-    bool store_keys(const std::string& keys_file_name, const std::string& password);
+    bool store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet = false);
     void load_keys(const std::string& keys_file_name, const std::string& password);
     void process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b);
     void process_new_blockchain_entry(const currency::block& b, currency::block_complete_entry& bche, crypto::hash& bl_id, uint64_t height);
@@ -198,6 +200,7 @@ namespace tools
     
 
     currency::account_base m_account;
+    bool m_is_view_only;
     std::string m_wallet_file;
     std::string m_keys_file;
     std::vector<crypto::hash> m_blockchain;

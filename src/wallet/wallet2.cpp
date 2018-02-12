@@ -344,6 +344,11 @@ void wallet2::refresh(size_t & blocks_fetched)
   refresh(blocks_fetched, received_money);
 }
 //----------------------------------------------------------------------------------------------------
+bool wallet2::generate_view_wallet(const std::string new_name)
+{  
+  
+}
+//----------------------------------------------------------------------------------------------------
 void wallet2::update_current_tx_limit()
 {
   currency::COMMAND_RPC_GET_INFO::request req = AUTO_VAL_INIT(req);
@@ -516,10 +521,21 @@ bool wallet2::clear()
   return true;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::store_keys(const std::string& keys_file_name, const std::string& password)
+bool wallet2::store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet)
 {
   std::string account_data;
-  bool r = epee::serialization::store_t_to_binary(m_account, account_data);
+  bool r = false;
+  if (save_as_view_wallet)
+  {
+    currency::account_base view_account(m_account);
+    view_account.make_account_view_only();
+    r = epee::serialization::store_t_to_binary(view_account, account_data);
+  }
+  else
+  {
+    r = epee::serialization::store_t_to_binary(m_account, account_data);
+  }
+
   CHECK_AND_ASSERT_MES(r, false, "failed to serialize wallet keys");
   wallet2::keys_file_data keys_file_data = boost::value_initialized<wallet2::keys_file_data>();
 
@@ -535,7 +551,6 @@ bool wallet2::store_keys(const std::string& keys_file_name, const std::string& p
   r = ::serialization::dump_binary(keys_file_data, buf);
   r = r && epee::file_io_utils::save_string_to_file(keys_file_name, buf); //and never touch wallet_keys_file again, only read
   CHECK_AND_ASSERT_MES(r, false, "failed to generate wallet keys file " << keys_file_name);
-
   return true;
 }
 //----------------------------------------------------------------------------------------------------
@@ -567,7 +582,14 @@ void wallet2::load_keys(const std::string& keys_file_name, const std::string& pa
   const currency::account_keys& keys = m_account.get_keys();
   r = epee::serialization::load_t_from_binary(m_account, account_data);
   r = r && verify_keys(keys.m_view_secret_key,  keys.m_account_address.m_view_public_key);
-  r = r && verify_keys(keys.m_spend_secret_key, keys.m_account_address.m_spend_public_key);
+  if (keys.m_spend_secret_key == currency::null_skey)
+  {
+    m_is_view_only = true;
+  }else
+  {
+    m_is_view_only = false;
+    r = r && verify_keys(keys.m_spend_secret_key, keys.m_account_address.m_spend_public_key);
+  }
   CHECK_AND_THROW_WALLET_EX(!r, error::invalid_password);
 }
 //----------------------------------------------------------------------------------------------------
