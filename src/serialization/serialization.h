@@ -94,6 +94,18 @@ inline bool do_serialize(Archive &ar, T &v)
     if (!ar.stream().good()) return false; \
   } while(0);
 
+
+template<typename first_type, typename second_type>
+class serializable_pair : public std::pair<first_type, second_type>
+{
+public:
+  BEGIN_SERIALIZE_OBJECT()
+  FIELD(first)
+  FIELD(second)
+  END_SERIALIZE()
+};
+
+
 namespace serialization {
   namespace detail
   {

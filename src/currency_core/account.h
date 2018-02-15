@@ -22,6 +22,12 @@ namespace currency
       KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(m_spend_secret_key)
       KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(m_view_secret_key)
     END_KV_SERIALIZE_MAP()
+
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(m_account_address)
+      FIELD(m_spend_secret_key)
+      FIELD(m_view_secret_key)
+    END_SERIALIZE()
   };
 
   /************************************************************************/

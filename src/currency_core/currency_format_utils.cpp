@@ -501,6 +501,10 @@ namespace currency
     tx.vout.push_back(out);
     return true;
   }
+  bool construct_tx(const create_tx_arg& arg, create_tx_res& rsp)
+  {
+    return construct_tx(arg.sender_account_keys, arg.sources, arg.splitted_dsts, rsp.tx, rsp.txkey, arg.unlock_time, arg.tx_outs_attr);
+  }
   //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 

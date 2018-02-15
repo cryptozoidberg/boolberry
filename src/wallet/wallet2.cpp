@@ -344,9 +344,9 @@ void wallet2::refresh(size_t & blocks_fetched)
   refresh(blocks_fetched, received_money);
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::generate_view_wallet(const std::string new_name)
+bool wallet2::generate_view_wallet(const std::string new_name, const std::string& password)
 {  
-  
+  return store_keys(new_name, password, true);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::update_current_tx_limit()
