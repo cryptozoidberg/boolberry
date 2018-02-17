@@ -282,6 +282,11 @@ namespace currency
       generate_keys(k.pub, k.sec);
       return k;
     }
+
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(pub)
+      FIELD(sec)
+    END_SERIALIZE()
   };
   //---------------------------------------------------------------
 

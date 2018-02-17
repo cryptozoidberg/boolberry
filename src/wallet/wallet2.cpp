@@ -540,7 +540,7 @@ bool wallet2::store_keys(const std::string& keys_file_name, const std::string& p
   wallet2::keys_file_data keys_file_data = boost::value_initialized<wallet2::keys_file_data>();
 
   crypto::chacha8_key key;
-  crypto::generate_chacha8_key(password, key);
+  crypto::generate_chacha8_key_helper(password, key);
   std::string cipher;
   cipher.resize(account_data.size());
   keys_file_data.iv = crypto::rand<crypto::chacha8_iv>();
@@ -574,7 +574,7 @@ void wallet2::load_keys(const std::string& keys_file_name, const std::string& pa
   CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, "internal error: failed to deserialize \"" + keys_file_name + '\"');
 
   crypto::chacha8_key key;
-  crypto::generate_chacha8_key(password, key);
+  crypto::generate_chacha8_key_helper(password, key);
   std::string account_data;
   account_data.resize(keys_file_data.account_data.size());
   crypto::chacha8(keys_file_data.account_data.data(), keys_file_data.account_data.size(), key, keys_file_data.iv, &account_data[0]);
@@ -746,6 +746,110 @@ void wallet2::get_payments(const crypto::hash& payment_id, std::list<wallet2::pa
       payments.push_back(x.second);
     }
   });
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::sign_transfer(const std::string& tx_sources_file, const std::string& signed_tx_file)
+{
+
+  std::string blob;
+  bool r = epee::file_io_utils::load_file_to_string(tx_sources_file, blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to open file");
+
+  crypto::do_chacha_crypt(blob, m_account.get_keys().m_view_secret_key);
+
+  create_tx_arg create_tx_param = AUTO_VAL_INIT(create_tx_param);
+  r = t_unserializable_object_from_blob(create_tx_param, blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt unsigned file");
+  
+  create_tx_res create_tx_result = AUTO_VAL_INIT(create_tx_result);
+
+  if (create_tx_param.spend_pub_key != m_account.get_keys().m_account_address.m_spend_public_key)
+  {
+    CHECK_AND_THROW_WALLET_EX(true, error::wallet_common_error, "The tx_sources file was created with the different wallet");
+  }
+  
+  r = currency::construct_tx(m_account.get_keys(), create_tx_param, create_tx_result);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "failed to construct_tx at sign_transfer");
+
+  blob = t_serializable_object_to_blob(create_tx_result);
+  crypto::do_chacha_crypt(blob, m_account.get_keys().m_view_secret_key);
+
+  r = epee::file_io_utils::save_string_to_file(signed_tx_file, blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "failed to store signed tx to file");
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::submit_transfer(const std::string& tx_sources_file, const std::string& target_file)
+{
+  //decrypt sources
+  std::string blob;
+  bool r = epee::file_io_utils::load_file_to_string(tx_sources_file, blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to open file");
+  crypto::do_chacha_crypt(blob, m_account.get_keys().m_view_secret_key);
+  create_tx_arg create_tx_param = AUTO_VAL_INIT(create_tx_param);
+  r = t_unserializable_object_from_blob(create_tx_param, blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt unsigned tx file");
+
+  //decrypt result
+  r = epee::file_io_utils::load_file_to_string(target_file, blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to open file");
+  crypto::do_chacha_crypt(blob, m_account.get_keys().m_view_secret_key);
+  create_tx_res create_tx_result = AUTO_VAL_INIT(create_tx_result);
+  r = t_unserializable_object_from_blob(create_tx_result, blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt signed tx file");
+
+  finalize_transaction(create_tx_param, create_tx_result);
+
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result)
+{
+  using namespace currency;
+  const transaction& tx = create_tx_result.tx;
+  //update_current_tx_limit();
+  CHECK_AND_THROW_WALLET_EX(CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
+
+  std::string key_images;
+  bool all_are_txin_to_key = std::all_of(tx.vin.begin(), tx.vin.end(), [&](const txin_v& s_e) -> bool
+  {
+    CHECKED_GET_SPECIFIC_VARIANT(s_e, const txin_to_key, in, false);
+    key_images += boost::to_string(in.k_image) + " ";
+    return true;
+  });
+  CHECK_AND_THROW_WALLET_EX(!all_are_txin_to_key, error::unexpected_txin_type, tx);
+
+  COMMAND_RPC_SEND_RAW_TX::request req;
+  req.tx_as_hex = epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(tx));
+  COMMAND_RPC_SEND_RAW_TX::response daemon_send_resp;
+  bool r = m_core_proxy->call_COMMAND_RPC_SEND_RAW_TX(req, daemon_send_resp);
+  if (daemon_send_resp.status != CORE_RPC_STATUS_OK)
+  {
+    //unlock funds if transaction rejected
+    for (auto& s : create_tx_param.sources)
+      m_transfers[s.transfer_index].m_spent = false;
+  }
+  CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "sendrawtransaction");
+  CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
+  CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status != CORE_RPC_STATUS_OK, error::tx_rejected, tx, daemon_send_resp.status);
+
+  std::string recipient;
+  for (const auto& r : create_tx_param.recipients)
+  {
+    if (recipient.size())
+      recipient += ", ";
+    recipient += get_account_address_as_str(r);
+  }
+  add_sent_unconfirmed_tx(tx, create_tx_param.change_amount, recipient);
+
+  crypto::hash txid = get_transaction_hash(tx);
+  m_tx_keys.insert(std::make_pair(txid, create_tx_result.txkey.sec));
+
+  LOG_PRINT_L2("transaction " << get_transaction_hash(tx) << " generated ok and sent to daemon, key_images: [" << key_images << "]");
+
+  LOG_PRINT_L0("Transaction successfully sent. <" << get_transaction_hash(tx) << ">" << ENDL
+    << "Commission: " << print_money(get_tx_fee(tx)) << " (dust: " << print_money(create_tx_param.dust) << ")" << ENDL
+    << "Balance: " << print_money(balance()) << ENDL
+    << "Unlocked: " << print_money(unlocked_balance()) << ENDL
+    << "Please, wait for confirmation for your balance to be unlocked.");
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count)
