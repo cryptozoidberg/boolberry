@@ -44,7 +44,7 @@ inline bool do_serialize(Archive &ar, T &v)
   return ::serializer<Archive, T>::serialize(ar, v);
 }
 
-#ifndef __GNUC__
+#if ( !defined(__GNUC__) && !(defined(_MSC_VER) && (_MSC_VER >= 1900)))
 #ifndef constexpr
 #define constexpr
 #endif
