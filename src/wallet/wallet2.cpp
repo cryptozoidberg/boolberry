@@ -748,7 +748,7 @@ void wallet2::get_payments(const crypto::hash& payment_id, std::list<wallet2::pa
   });
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::sign_transfer(const std::string& tx_sources_file, const std::string& signed_tx_file)
+void wallet2::sign_transfer(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx)
 {
 
   std::string blob;
@@ -770,6 +770,7 @@ void wallet2::sign_transfer(const std::string& tx_sources_file, const std::strin
   
   r = currency::construct_tx(m_account.get_keys(), create_tx_param, create_tx_result);
   CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "failed to construct_tx at sign_transfer");
+  tx = create_tx_result.tx;
 
   blob = t_serializable_object_to_blob(create_tx_result);
   crypto::do_chacha_crypt(blob, m_account.get_keys().m_view_secret_key);
@@ -778,7 +779,7 @@ void wallet2::sign_transfer(const std::string& tx_sources_file, const std::strin
   CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "failed to store signed tx to file");
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::submit_transfer(const std::string& tx_sources_file, const std::string& target_file)
+void wallet2::submit_transfer(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx)
 {
   //decrypt sources
   std::string blob;
@@ -798,7 +799,7 @@ void wallet2::submit_transfer(const std::string& tx_sources_file, const std::str
   CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt signed tx file");
 
   finalize_transaction(create_tx_param, create_tx_result);
-
+  tx = create_tx_result.tx;
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result)

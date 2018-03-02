@@ -835,7 +835,11 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   {
     currency::transaction tx;
     m_wallet->transfer(dsts, fake_outs_count, 0, DEFAULT_FEE, extra, tx);
-    success_msg_writer(true) << "Money successfully sent, transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
+    if (!m_wallet->is_view_only() )
+      success_msg_writer(true) << "Money successfully sent, transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
+    else
+      success_msg_writer(true) << "Transaction prepared for signing and saved into \"unsigned_boolberry_tx\" file, use offline wallet top sign transfer and then use command \"submit_transfer\" on this wallet to transfer transaction into the network";
+
   }
   catch (const tools::error::daemon_busy&)
   {
@@ -955,8 +959,9 @@ bool simple_wallet::sign_transfer(const std::vector<std::string> &args)
   }
   try
   {
-    m_wallet->sign_transfer(args[0], args[1]);
-    success_msg_writer() << "transaction signed and stored to file: " << args[1];
+    currency::transaction res_tx;
+    m_wallet->sign_transfer(args[0], args[1], res_tx);
+    success_msg_writer() << "transaction signed and stored to file: " << args[1] << ", transaction " << get_transaction_hash(res_tx) << ", " << get_object_blobsize(res_tx) << " bytes";
   }
   catch (const std::exception& e)
   {
@@ -979,8 +984,9 @@ bool simple_wallet::submit_transfer(const std::vector<std::string> &args)
   }
   try
   {
-    m_wallet->submit_transfer(args[0], args[1]);
-    success_msg_writer() << "transaction submitted";
+    currency::transaction res_tx;
+    m_wallet->submit_transfer(args[0], args[1], res_tx);
+    success_msg_writer() << "transaction submitted, " << get_transaction_hash(res_tx) << ", " << get_object_blobsize(res_tx) << " bytes";
   }
   catch (const std::exception& e)
   {

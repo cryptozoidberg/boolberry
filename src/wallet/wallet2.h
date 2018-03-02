@@ -133,8 +133,8 @@ namespace tools
     void refresh(size_t & blocks_fetched, bool& received_money);
     bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok);
 
-    void sign_transfer(const std::string& tx_sources_file, const std::string& signed_tx_file);
-    void submit_transfer(const std::string& tx_sources_file, const std::string& target_file);
+    void sign_transfer(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
+    void submit_transfer(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
 
     bool generate_view_wallet(const std::string new_name, const std::string& password);
     bool is_view_only(){ return m_is_view_only;}
