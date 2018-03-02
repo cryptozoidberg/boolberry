@@ -33,20 +33,13 @@ namespace currency
   //---------------------------------------------------------------
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx)
   {
-    std::stringstream ss;
-    ss << tx_blob;
-    binary_archive<false> ba(ss);
-    bool r = ::serialization::serialize(ba, tx);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to parse transaction from blob");
-    return true;
+    return t_unserializable_object_from_blob(tx, tx_blob);
   }
   //---------------------------------------------------------------
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx, crypto::hash& tx_hash, crypto::hash& tx_prefix_hash)
   {
-    std::stringstream ss;
-    ss << tx_blob;
-    binary_archive<false> ba(ss);
-    bool r = ::serialization::serialize(ba, tx);
+
+    bool r = t_unserializable_object_from_blob(tx, tx_blob);
     CHECK_AND_ASSERT_MES(r, false, "Failed to parse transaction from blob");
     //TODO: validate tx
 
@@ -501,19 +494,25 @@ namespace currency
     tx.vout.push_back(out);
     return true;
   }
+  bool construct_tx(const account_keys& keys, const create_tx_arg& arg, create_tx_res& rsp)
+  {
+    return construct_tx(keys, arg.sources, arg.splitted_dsts, rsp.tx, rsp.txkey, arg.unlock_time, arg.tx_outs_attr);
+  }
   //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
-                                                             transaction& tx, 
+                                                             transaction& tx,
+                                                             keypair& txkey,
                                                              uint64_t unlock_time, 
                                                              uint8_t tx_outs_attr)
   {
-    return construct_tx(sender_account_keys, sources, destinations, std::vector<uint8_t>(), tx, unlock_time, tx_outs_attr);
+    return construct_tx(sender_account_keys, sources, destinations, std::vector<uint8_t>(), tx, txkey, unlock_time, tx_outs_attr);
   }
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
                                                              const std::vector<tx_destination_entry>& destinations, 
                                                              const std::vector<uint8_t>& extra,
-                                                             transaction& tx, 
+                                                             transaction& tx,
+                                                             keypair& txkey,
                                                              uint64_t unlock_time,
                                                              uint8_t tx_outs_attr)
   {
@@ -525,7 +524,7 @@ namespace currency
     tx.version = CURRENT_TRANSACTION_VERSION;
     tx.unlock_time = unlock_time;
 
-    keypair txkey = keypair::generate();
+    txkey = keypair::generate();
     add_tx_pub_key_to_extra(tx, txkey.pub);
 
     struct input_generation_context_data

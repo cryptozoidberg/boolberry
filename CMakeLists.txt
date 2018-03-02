@@ -9,6 +9,11 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 enable_testing()
 
+if(APPLE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET 10.10.5)          
+endif()
+
+
 include_directories(src contrib contrib/epee/include "${CMAKE_BINARY_DIR}/version")
 add_definitions(-DSTATICLIB)
 
@@ -49,10 +54,15 @@ else()
     set(WARNINGS "${WARNINGS} -Wlogical-op -Wno-error=maybe-uninitialized")
   endif()
 
-  # Since gcc 4.9 the LTO format is non-standard (slim), so we need the gcc-specific ar and ranlib binaries
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9.0))
-    set(CMAKE_AR "gcc-ar")
-    set(CMAKE_RANLIB "gcc-ranlib")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # Since gcc 4.9 the LTO format is non-standard (slim), so we need the gcc-specific ar and ranlib binaries
+    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9.0)
+      set(CMAKE_AR "gcc-ar")
+      set(CMAKE_RANLIB "gcc-ranlib")
+      if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.0.0)
+        set(WARNINGS "${WARNINGS} -Wno-error=terminate -Wno-error=unused-but-set-variable")
+      endif()
+    endif()
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT APPLE)
     set(CMAKE_AR "llvm-ar")
     set(CMAKE_RANLIB "llvm-ranlib")

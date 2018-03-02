@@ -41,8 +41,8 @@ namespace currency
 
     bool new_wallet(const std::string &wallet_file, const std::string& password);
     bool open_wallet(const std::string &wallet_file, const std::string& password);
-	bool restore_wallet(const std::string &wallet_file, const std::string &restore_seed, const std::string& password);
-	bool close_wallet();
+    bool restore_wallet(const std::string &wallet_file, const std::string &restore_seed, const std::string& password);
+    bool close_wallet();
 
     bool help(const std::vector<std::string> &args = std::vector<std::string>());
     bool start_mining(const std::vector<std::string> &args);
@@ -54,6 +54,13 @@ namespace currency
     bool show_payments(const std::vector<std::string> &args);
     bool show_blockchain_height(const std::vector<std::string> &args);
     bool transfer(const std::vector<std::string> &args);
+    bool save_watch_only(const std::vector<std::string> &args);
+    bool sign_transfer(const std::vector<std::string> &args);
+    bool submit_transfer(const std::vector<std::string> &args);
+
+    bool get_tx_key(const std::vector<std::string> &args_);
+    bool check_tx_key(const std::vector<std::string> &args);
+    bool check_tx_key_helper(const crypto::hash &txid, const currency::account_public_address &address, const crypto::key_derivation &derivation);
     bool print_address(const std::vector<std::string> &args = std::vector<std::string>());
     bool save(const std::vector<std::string> &args);
     bool set_log(const std::vector<std::string> &args);

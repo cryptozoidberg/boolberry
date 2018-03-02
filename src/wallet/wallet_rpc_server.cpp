@@ -371,7 +371,8 @@ namespace tools
 
     //generate transaction
     const std::vector<uint8_t> extra;
-    bool r = currency::construct_tx(acc.get_keys(), sources, dsts, extra, tx2, 0);
+    currency::keypair txkey;
+    bool r = currency::construct_tx(acc.get_keys(), sources, dsts, extra, tx2, txkey, 0);
     if (!r)
     {
       LOG_ERROR("Problem with construct_tx(....) ");

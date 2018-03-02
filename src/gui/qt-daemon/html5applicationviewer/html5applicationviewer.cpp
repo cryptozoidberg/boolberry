@@ -566,20 +566,30 @@ void Html5ApplicationViewer::message_box(const QString& msg)
   show_msg_box(msg.toStdString());
 }
 
-QString Html5ApplicationViewer::generate_wallet(const QString& name, const QString& pwd,
-	const QString& path)
+void Html5ApplicationViewer::generate_wallet()
 {
+	QFileDialog dialogFile(this);
+	std::string default_file = (tools::get_current_username() + "_wallet.bbr").c_str();
+	QString path = dialogFile.getSaveFileName(this, tr("Wallet file to store"),
+		(m_config.wallets_last_used_dir + "/" + default_file).c_str(),
+		tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
+
 	if (!path.length())
-	{
-		show_msg_box("Empty wallet path");
-		return "";
-	}
+		return;
 
-  m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
+	m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
 
-  std::string restore_seed;
-  m_backend.generate_wallet(path.toStdString(), pwd.toStdString(), restore_seed);
-  return restore_seed.c_str();
+	//read password
+	bool ok;
+	QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
+		tr("Password:"), QLineEdit::Password,
+		QString(), &ok);
+
+	if (!ok)
+		return;
+
+	std::string seed; //not used yet
+	m_backend.generate_wallet(path.toStdString(), pass.toStdString(), seed);
 }
 
 void Html5ApplicationViewer::restore_wallet(const QString& restore_text, 
@@ -618,16 +628,26 @@ QString Html5ApplicationViewer::browse_wallet(bool existing)
 		tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
 }
 
-void Html5ApplicationViewer::open_wallet(const QString& path, const QString& pwd)
+void Html5ApplicationViewer::open_wallet()
 {
+	QString path = QFileDialog::getOpenFileName(this, tr("Open wallet File"),
+		m_config.wallets_last_used_dir.c_str(),
+		tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
 	if (!path.length())
-	{
-		show_msg_box("Empty wallet path");
 		return;
-	}
 
-  m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
-  m_backend.open_wallet(path.toStdString(), pwd.toStdString());
+	m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
+
+
+	//read password
+	bool ok;
+	QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
+		tr("Password:"), QLineEdit::Password,
+		QString(), &ok);
+	if (!ok)
+		return;
+
+	m_backend.open_wallet(path.toStdString(), pass.toStdString());
 }
 
 #include "html5applicationviewer.moc"

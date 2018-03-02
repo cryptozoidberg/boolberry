@@ -7,6 +7,7 @@ file(GLOB_RECURSE FUNC_TESTS functional_tests/*)
 file(GLOB_RECURSE PERFORMANCE_TESTS performance_tests/*)
 file(GLOB_RECURSE CORE_PROXY core_proxy/*)
 file(GLOB_RECURSE UNIT_TESTS unit_tests/*)
+file(GLOB_RECURSE EXCHANGE_TESTS exchange_tests/*)
 
 source_group(core_tests FILES ${CORE_TESTS})
 source_group(crypto_tests FILES ${CRYPTO_TESTS})
@@ -28,6 +29,7 @@ add_executable(core_proxy ${CORE_PROXY})
 add_executable(unit_tests ${UNIT_TESTS})
 add_executable(net_load_tests_clt net_load_tests/clt.cpp)
 add_executable(net_load_tests_srv net_load_tests/srv.cpp)
+add_executable(exchange_test ${EXCHANGE_TESTS})
 
 add_dependencies(coretests version)
 
@@ -41,6 +43,7 @@ target_link_libraries(performance_tests currency_core common crypto ${CMAKE_THRE
 target_link_libraries(unit_tests currency_core common wallet crypto gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(net_load_tests_clt currency_core common crypto gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(net_load_tests_srv currency_core common crypto gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_link_libraries(exchange_test ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
 if(NOT MSVC)
   set_property(TARGET gtest gtest_main unit_tests net_load_tests_clt net_load_tests_srv APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-undef -Wno-sign-compare")

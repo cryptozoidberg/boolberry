@@ -20,13 +20,23 @@ namespace currency
 
   struct tx_source_entry
   {
-    typedef std::pair<uint64_t, crypto::public_key> output_entry;
+    typedef serializable_pair<uint64_t, crypto::public_key> output_entry;
 
     std::vector<output_entry> outputs;  //index + key
     uint64_t real_output;               //index in outputs vector of real output_entry
     crypto::public_key real_out_tx_key; //real output's transaction's public key
     size_t real_output_in_tx_index;     //index in transaction outputs vector
     uint64_t amount;                    //money
+    uint64_t transfer_index;            //money
+
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(outputs)
+      FIELD(real_output)
+      FIELD(real_out_tx_key)
+      FIELD(real_output_in_tx_index)
+      FIELD(amount)
+      FIELD(transfer_index)
+    END_SERIALIZE()
   };
 
   struct tx_destination_entry
@@ -36,6 +46,12 @@ namespace currency
 
     tx_destination_entry() : amount(0), addr(AUTO_VAL_INIT(addr)) { }
     tx_destination_entry(uint64_t a, const account_public_address &ad) : amount(a), addr(ad) { }
+
+    
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(amount)
+      FIELD(addr)
+    END_SERIALIZE()
   };
 
   struct alias_info_base
@@ -56,6 +72,43 @@ namespace currency
     crypto::public_key m_tx_pub_key;
     alias_info m_alias;
     std::string m_user_data_blob;
+  };
+
+  struct create_tx_arg
+  {
+    crypto::public_key spend_pub_key;  //for validations
+    std::vector<currency::tx_source_entry> sources;
+    std::vector<currency::tx_destination_entry> splitted_dsts;
+    std::vector<uint8_t> extra;
+    uint64_t unlock_time;
+    uint8_t tx_outs_attr;
+    uint64_t change_amount;
+    std::vector<account_public_address> recipients;
+    uint64_t dust;
+      
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(spend_pub_key)
+      FIELD(sources)
+      FIELD(splitted_dsts)
+      FIELD(extra)
+      FIELD(unlock_time)
+      FIELD(tx_outs_attr)
+      FIELD(change_amount)
+      FIELD(recipients)
+      FIELD(dust)
+    END_SERIALIZE()
+
+  };
+
+  struct create_tx_res
+  {
+    currency::transaction tx;
+    keypair txkey;
+
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(tx)
+      FIELD(txkey)
+    END_SERIALIZE()
   };
 
   //---------------------------------------------------------------
@@ -88,8 +141,9 @@ namespace currency
   //---------------------------------------------------------------
   bool construct_tx_out(const account_public_address& destination_addr, const crypto::secret_key& tx_sec_key, size_t output_index, uint64_t amount, transaction& tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool validate_alias_name(const std::string& al);
-  bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, transaction& tx, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
-  bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, const std::vector<uint8_t>& extra, transaction& tx, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
+  bool construct_tx(const account_keys& keys, const create_tx_arg& arg, create_tx_res& rsp);
+  bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, transaction& tx, keypair& txkey, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
+  bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, const std::vector<uint8_t>& extra, transaction& tx, keypair& txkey, uint64_t unlock_time, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
   bool sign_update_alias(alias_info& ai, const crypto::public_key& pkey, const crypto::secret_key& skey);
   bool make_tx_extra_alias_entry(std::string& buff, const alias_info& alinfo, bool make_buff_to_sign = false);
   bool add_tx_extra_alias(transaction& tx, const alias_info& alinfo);
@@ -247,6 +301,18 @@ namespace currency
     binary_archive<true> ba(ss);
     bool r = ::serialization::serialize(ba, const_cast<t_object&>(to));
     b_blob = ss.str();
+    return r;
+  }
+  //---------------------------------------------------------------
+  template<class t_object>
+  bool t_unserializable_object_from_blob(t_object& to, const blobdata& b_blob)
+  {
+    std::stringstream ss;
+    ss << b_blob;
+    binary_archive<false> ba(ss);
+    bool r = ::serialization::serialize(ba, to);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to unserialize object from blob: " << typeid(to).name());
+
     return r;
   }
   //---------------------------------------------------------------

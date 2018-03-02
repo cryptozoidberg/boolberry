@@ -1,122 +1,110 @@
-SET QT_PREFIX_PATH=C:\Qt\Qt5.3.0\5.3\msvc2013_64
+SET QT_PREFIX_PATH=C:\Qt\Qt5.5.0\5.5\msvc2013_64
 SET INNOSETUP_PATH=C:\Program Files (x86)\Inno Setup 5\ISCC.exe
 SET QT_BINARIES_PATH=C:\home\projects\binaries\qt-daemon
 SET ACHIVE_NAME_PREFIX=bbr-win-x64-
+SET BUILDS_PATH=C:\home\deploy\boolberry
+SET SOURCES_PATH=C:\home\projects\boolberry
+set BOOST_ROOT=C:\local\boost_1_56_0
+set BOOST_LIBRARYDIR=C:\local\boost_1_56_0\lib64-msvc-12.0
+set EXTRA_FILES_PATH=C:\home\deploy\boolberry\extra_files
 
+cd %SOURCES_PATH%
 
-cd boolberry
 git pull
+
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
-
+@echo on
 
 @echo "---------------- BUILDING CONSOLE APPLICATIONS ----------------"
 @echo "---------------------------------------------------------------"
-
-rmdir build /s /q
-mkdir build
-cd build
-cmake -G "Visual Studio 11 Win64" ..
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
-
-setLocal 
-call "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\vcvarsall.bat" x86_amd64
-
-msbuild version.vcxproj  /p:Configuration=Release /t:Build
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
-
-msbuild src/daemon.vcxproj  /p:Configuration=Release /t:Build
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
-
-msbuild src/simplewallet.vcxproj  /p:Configuration=Release /t:Build
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
-
-msbuild src/simpleminer.vcxproj  /p:Configuration=Release /t:Build
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
-endlocal
-
- 
-set cmd=src\Release\simplewallet.exe --version
-FOR /F "tokens=3" %%a IN ('%cmd%') DO set version=%%a  
-set version=%version:~0,-2%
-echo '%version%'
-
-cd src\release
-zip ..\..\..\..\builds\%ACHIVE_NAME_PREFIX%%version%.zip boolbd.exe simplewallet.exe simpleminer.exe
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
-
-cd ..\..\..
-
-@echo "---------------- BUILDING GUI ---------------------------------"
-@echo "---------------------------------------------------------------"
-
-rmdir build /s /q
-mkdir build
-cd build
-cmake -D CMAKE_PREFIX_PATH="%QT_PREFIX_PATH%" -D BUILD_GUI=TRUE  -D STATIC=FALSE -G "Visual Studio 12 Win64" ..
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
 
 setLocal 
 
 call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86_amd64
 
-msbuild version.vcxproj  /p:Configuration=Release /t:Build
+IF "%1"=="skip_build" GOTO skip_build
 
-echo 'errorlevel=%ERRORLEVEL%'
+rmdir build /s /q
+mkdir build
+cd build
+cmake -D CMAKE_PREFIX_PATH="%QT_PREFIX_PATH%" -D BUILD_GUI=TRUE -D STATIC=FALSE -G "Visual Studio 12 Win64" ..
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
+
+msbuild version.vcxproj /p:SubSystem="CONSOLE,5.02"  /p:Configuration=Release /t:Build
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
+msbuild src/daemon.vcxproj /p:SubSystem="CONSOLE,5.02"  /p:Configuration=Release /t:Build
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
+msbuild src/simplewallet.vcxproj /p:SubSystem="CONSOLE,5.02"  /p:Configuration=Release /t:Build
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
+msbuild src/qt-boolb.vcxproj /p:SubSystem="WINDOWS,5.02" /p:Configuration=Release /t:Build
 
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
-msbuild src/qt-boolb.vcxproj  /p:Configuration=Release /t:Build
+:skip_build
 
+cd %SOURCES_PATH%\build\src\release
+
+@echo "Version: "
+
+set cmd=simplewallet.exe --version
+FOR /F "tokens=3" %%a IN ('%cmd%') DO set version=%%a  
+set version=%version:~0,-2%
+echo '%version%'
+
+
+
+
+mkdir bunch
+copy /Y qt-boolb.exe bunch
+copy /Y boolbd.exe bunch
+copy /Y simplewallet.exe bunch
+
+%QT_PREFIX_PATH%\bin\windeployqt.exe bunch\qt-boolb.exe
+
+
+cd bunch
+
+zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%.zip *.*
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
-endlocal
-
-cd src\release
-zip ..\..\..\..\builds\%ACHIVE_NAME_PREFIX%%version%.zip qt-boolb.exe
-
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
 
 @echo "Add html"
 
-cd ..\..\..\src\gui\qt-daemon\
-zip -r ..\..\..\..\builds\%ACHIVE_NAME_PREFIX%%version%.zip html
+
+cd %SOURCES_PATH%\src\gui\qt-daemon\
+zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%.zip html
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
+
+@echo "Other stuff"
+
+cd %ETC_BINARIES_PATH%
+zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%.zip *.*
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
 
-@echo "Add qt stuff"
-
-cd %QT_BINARIES_PATH%
-zip -r C:\jenkins\workdir\builds\%ACHIVE_NAME_PREFIX%%version%.zip *.*
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
-
-
-cd ..\..\..\build
+cd %SOURCES_PATH%\build
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -129,12 +117,13 @@ IF %ERRORLEVEL% NEQ 0 (
 mkdir installer_src
 
 
-unzip C:\jenkins\workdir\builds\%ACHIVE_NAME_PREFIX%%version%.zip -d installer_src
+unzip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%.zip -d installer_src
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
-"%INNOSETUP_PATH%" /DMyAppVersion=%version% /DBinariesPath=../build/installer_src /oC:\jenkins\workdir\builds\ /f%ACHIVE_NAME_PREFIX%%version%-installer ..\utils\setup.iss 
+
+"%INNOSETUP_PATH%"  /dBinariesPath=../build/installer_src /DMyAppVersion=%version% /o%BUILDS_PATH%\builds\ /f%ACHIVE_NAME_PREFIX%%version%-installer ..\utils\setup.iss 
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
