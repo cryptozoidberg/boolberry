@@ -98,6 +98,7 @@ inline bool do_serialize(Archive &ar, T &v)
 template<typename first_type, typename second_type>
 class serializable_pair : public std::pair<first_type, second_type>
 {
+  typedef std::pair<first_type, second_type> base;
 public:
   serializable_pair()
   {}
@@ -107,8 +108,8 @@ public:
   {}
 
   BEGIN_SERIALIZE_OBJECT()
-    FIELD(first)
-    FIELD(second)
+    FIELD(base::first)
+    FIELD(base::second)
   END_SERIALIZE()
 };
 

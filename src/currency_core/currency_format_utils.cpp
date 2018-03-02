@@ -1000,7 +1000,7 @@ namespace currency
 
     uint64_t already_generated_coins = 0;
     uint64_t already_donated_coins = 0;
-    uint64_t emission_supply = EMISSION_SUPPLY;
+    
     uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
     for(uint64_t day = 0; day != 365*10; ++day)
     {

@@ -611,7 +611,7 @@ namespace currency
       error_resp.message = "Internal error: coinbase transaction in the block has the wrong type";
       return false;
     }
-    uint64_t block_height = boost::get<txin_gen>(blk.miner_tx.vin.front()).height;
+
     bool responce_filled = fill_block_header_responce(blk, false, res.block_header);
     if (!responce_filled)
     {
@@ -637,7 +637,7 @@ namespace currency
       return false;
     }
     block blk = AUTO_VAL_INIT(blk);
-    bool r = m_core.get_blockchain_storage().get_block_by_height(req.height, blk);
+    m_core.get_blockchain_storage().get_block_by_height(req.height, blk);
     
     bool responce_filled = fill_block_header_responce(blk, false, res.block_header);
     if (!responce_filled)
@@ -736,7 +736,6 @@ namespace currency
           return false;
       }
 
-      size_t idx = 0;
       for(const auto& tx: txs) {
           std::string payment_id;
           get_payment_id_from_tx_extra(tx, payment_id);
