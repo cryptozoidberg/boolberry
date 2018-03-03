@@ -941,6 +941,7 @@ bool simple_wallet::save_watch_only(const std::vector<std::string> &args)
     LOG_ERROR("Unknown error");
     fail_msg_writer() << "unknown error";
   }
+  return true;
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::sign_transfer(const std::vector<std::string> &args)
@@ -973,6 +974,7 @@ bool simple_wallet::sign_transfer(const std::vector<std::string> &args)
     LOG_ERROR("Unknown error");
     fail_msg_writer() << "unknown error";
   }
+  return true;
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::submit_transfer(const std::vector<std::string> &args)
@@ -998,6 +1000,7 @@ bool simple_wallet::submit_transfer(const std::vector<std::string> &args)
     LOG_ERROR("Unknown error");
     fail_msg_writer() << "unknown error";
   }
+  return true;
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::get_tx_key(const std::vector<std::string> &args_)
