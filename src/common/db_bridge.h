@@ -1,0 +1,114 @@
+// Copyright (c) 2012-2018 The Boolberry developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+#pragma once
+
+#include "misc_language.h"
+#include "misc_log_ex.h"
+
+namespace db
+{
+  typedef uint64_t table_id;
+
+  // interface for database implementation
+  class i_db_adapter
+  {
+  public:
+    virtual bool open(const std::string& db_name) = 0;
+    virtual bool open_table(const std::string& table_name, const table_id h) = 0;
+    virtual bool clear_table(const table_id tid) = 0;
+    virtual uint64_t get_table_size(const table_id tid) = 0;
+    virtual bool close() = 0;
+
+    virtual bool begin_transaction() = 0;
+    virtual bool commit_transaction() = 0;
+    virtual void abort_transaction() = 0;
+    
+    virtual ~i_db_adapter()
+    {};
+  };
+
+
+  // POD table keys accessors
+  template<class tkey_pod_t>
+  const char* tkey_to_pointer(const tkey_pod_t& tkey, size_t& len_out) 
+  {
+    static_assert(std::is_pod<t_pod_key>::value, "pod type expected");
+    len_out = sizeof(tkey);
+    return reinterpret_cast<const char*>(&tkey);
+  }
+
+  template<class tkey_pod_t>
+  void tkey_from_pointer(tkey_pod_t& tkey_out, const void* pointer, const uint64_t len)
+  {
+    static_assert(std::is_pod<t_pod_key>::value, "pod type expected");
+    CHECK_AND_ASSERT_THROW_MES(sizeof(t_pod_key) == len, "wrong size");
+    CHECK_AND_ASSERT_THROW_MES(pointer != nullptr, "pointer is null");
+    tkey_out = *static_cast<t_pod_key*>(pointer);
+  }
+
+  
+  class db_bridge_base
+  {
+  public:
+    explicit db_bridge_base(i_db_adapter *p_backend)
+      : m_db_adapter(p_backend)
+    {}
+
+    ~db_bridge_base()
+    {
+    }
+
+    void begin_db_transaction()
+    {
+      // TODO
+    }
+
+    void commit_db_transaction()
+    {
+      // TODO
+    }
+
+    void abort_db_transaction()
+    {
+      // TODO
+    }
+
+    i_db_adapter* get_adapter() const
+    {
+      return m_db_adapter;
+    }
+
+    bool open(const std::string& db_name)
+    {
+      return m_db_adapter->open(db_name);
+    }
+
+    bool close()
+    {
+      return m_db_adapter->close();
+    }
+
+    bool clear(const table_id tid)
+    {
+      return m_db_adapter->clear_table(tid);
+    }
+
+    uint64_t size(const table_id tid) const
+    {
+      return m_db_adapter->get_table_size(tid);
+    }
+
+    template<class tkey_pod_t>
+    bool erase(table_id tid, const tkey_pod_t& tkey)
+    {
+      // todo
+      return true;
+    }
+
+    protected:
+      i_db_adapter* m_db_adapter;
+  };
+    
+
+} // namespace db
