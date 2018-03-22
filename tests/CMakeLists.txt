@@ -40,7 +40,7 @@ target_link_libraries(functional_tests currency_core wallet common crypto upnpc-
 target_link_libraries(hash-tests crypto)
 target_link_libraries(hash-target-tests crypto currency_core)
 target_link_libraries(performance_tests currency_core common crypto ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
-target_link_libraries(unit_tests currency_core common wallet crypto gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_link_libraries(unit_tests currency_core common wallet crypto gtest_main lmdb ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(net_load_tests_clt currency_core common crypto gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(net_load_tests_srv currency_core common crypto gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(exchange_test ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
