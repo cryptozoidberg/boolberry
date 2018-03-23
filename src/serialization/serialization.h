@@ -116,7 +116,7 @@ public:
 template<typename first_type, typename second_type>
 serializable_pair<first_type, second_type> make_serializable_pair(const first_type& first_value, const second_type& second_value)
 {
-  return serializable_pair(first_value, second_value);
+  return serializable_pair<first_type, second_type>(first_value, second_value);
 }
 
 
