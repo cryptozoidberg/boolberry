@@ -168,6 +168,8 @@ namespace currency
   bool pop_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
   bool apply_scratchpad_patch(std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
   bool is_mixattr_applicable_for_fake_outs_counter(uint8_t mix_attr, uint64_t fake_attr_count);
+  serializable_pair<uint64_t, crypto::public_key> make_output_entry(uint64_t index, const crypto::public_key& key);
+
 
   crypto::hash get_transaction_hash(const transaction& t);
   bool get_transaction_hash(const transaction& t, crypto::hash& res);
@@ -366,6 +368,11 @@ namespace currency
     bool r = ::serialization::serialize(ar, obj);
     CHECK_AND_ASSERT_MES(r, "", "obj_to_json_str failed: serialization::serialize returned false");
     return ss.str();
+  }
+  //---------------------------------------------------------------
+  inline serializable_pair<uint64_t, crypto::public_key> make_output_entry(uint64_t index, const crypto::public_key& key)
+  {
+    return serializable_pair<uint64_t, crypto::public_key>(index, key);
   }
   //---------------------------------------------------------------
   // 62387455827 -> 455827 + 7000000 + 80000000 + 300000000 + 2000000000 + 60000000000, where 455827 <= dust_threshold
