@@ -69,6 +69,11 @@ namespace tools
       return m_rpc.on_get_alias_details(req, res, m_err_stub, m_cntxt_stub);
     }
     //------------------------------------------------------------------------------------------------------------------------------
+    bool call_COMMAND_RPC_VALIDATE_SIGNED_TEXT(const currency::COMMAND_RPC_VALIDATE_SIGNED_TEXT::request& req, currency::COMMAND_RPC_VALIDATE_SIGNED_TEXT::response& res)
+    {
+      return m_rpc.on_validate_signed_text(req, res, m_cntxt_stub);
+    }
+    //------------------------------------------------------------------------------------------------------------------------------
     bool call_COMMAND_RPC_GET_TRANSACTIONS(const currency::COMMAND_RPC_GET_TRANSACTIONS::request& req, currency::COMMAND_RPC_GET_TRANSACTIONS::response& rsp)
     {
       return m_rpc.on_get_transactions(req, rsp, m_cntxt_stub);

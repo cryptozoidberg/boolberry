@@ -15,6 +15,7 @@ using namespace epee;
 #include "misc_language.h"
 #include "crypto/hash.h"
 #include "core_rpc_server_error_codes.h"
+#include "currency_core/alias_helper.h"
 
 namespace currency
 {
@@ -1027,6 +1028,40 @@ namespace currency
   {
     m_core.get_tx_pool().purge_transactions();
     res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_validate_signed_text(const COMMAND_RPC_VALIDATE_SIGNED_TEXT::request& req, COMMAND_RPC_VALIDATE_SIGNED_TEXT::response& res, connection_context& cntx)
+  {
+
+    crypto::signature sig = AUTO_VAL_INIT(sig);
+    if (!epee::string_tools::parse_tpod_from_hex_string(req.signature, sig))
+    {
+      res.status = CORE_RPC_STATUS_INVALID_ARGUMENT;
+      return true;
+    }
+     
+    currency::account_public_address ac_adr = AUTO_VAL_INIT(ac_adr);
+    if (!tools::get_transfer_address_t(req.address, ac_adr, *this))
+    {
+      res.status = CORE_RPC_STATUS_INVALID_ARGUMENT;
+      return true;
+    }
+
+    crypto::hash h = currency::null_hash;
+    crypto::cn_fast_hash(req.text.data(), req.text.size(), h);
+    bool r = crypto::check_signature(h, ac_adr.m_spend_public_key, sig);
+    if (!r)
+    {
+      res.status = CORE_RPC_STATUS_FAILED;
+      LOG_PRINT_MAGENTA("Failed to validate signature" 
+        << ENDL << "text: \"" << req.text << "\"(h=" << h << ")" 
+        << ENDL << "address: " << ac_adr.m_spend_public_key
+        << ENDL << "signature: " << epee::string_tools::pod_to_hex(sig), LOG_LEVEL_0);
+    }      
+    else
+      res.status = CORE_RPC_STATUS_OK;
+
     return true;
   }
 }

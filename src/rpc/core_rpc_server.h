@@ -57,6 +57,7 @@ namespace currency
     bool on_alias_by_address(const COMMAND_RPC_GET_ALIASES_BY_ADDRESS::request& req, COMMAND_RPC_GET_ALIASES_BY_ADDRESS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
     bool on_get_addendums(const COMMAND_RPC_GET_ADDENDUMS::request& req, COMMAND_RPC_GET_ADDENDUMS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
     bool on_reset_transaction_pool(const COMMAND_RPC_RESET_TX_POOL::request& req, COMMAND_RPC_RESET_TX_POOL::response& res, connection_context& cntx);
+    bool on_validate_signed_text(const COMMAND_RPC_VALIDATE_SIGNED_TEXT::request& req, COMMAND_RPC_VALIDATE_SIGNED_TEXT::response& res, connection_context& cntx);
 
     
     //mining rpc
@@ -100,6 +101,7 @@ namespace currency
         MAP_JON_RPC_WE("get_alias_by_address",   on_alias_by_address,           COMMAND_RPC_GET_ALIASES_BY_ADDRESS)
         MAP_JON_RPC_WE("get_addendums",          on_get_addendums,              COMMAND_RPC_GET_ADDENDUMS)
         MAP_JON_RPC_WE("getblock",               on_getblock,                   COMMAND_RPC_GETBLOCK)
+        MAP_JON_RPC("validate_signed_text",      on_validate_signed_text,       COMMAND_RPC_VALIDATE_SIGNED_TEXT)
         MAP_JON_RPC("reset_transaction_pool",    on_reset_transaction_pool,     COMMAND_RPC_RESET_TX_POOL)
         //remote miner rpc
         MAP_JON_RPC_N(on_login,            mining::COMMAND_RPC_LOGIN)

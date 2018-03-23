@@ -80,6 +80,11 @@ namespace tools
     return epee::net_utils::invoke_http_json_rpc("/json_rpc", "get_all_alias_details", req, res, m_http_client);
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool default_http_core_proxy::call_COMMAND_RPC_VALIDATE_SIGNED_TEXT(const currency::COMMAND_RPC_VALIDATE_SIGNED_TEXT::request& req, currency::COMMAND_RPC_VALIDATE_SIGNED_TEXT::response& rsp)
+  {
+    return epee::net_utils::invoke_http_json_rpc("/json_rpc", "validate_signed_text", req, rsp, m_http_client);
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
   bool default_http_core_proxy::call_COMMAND_RPC_GET_ALIAS_DETAILS(const currency::COMMAND_RPC_GET_ALIAS_DETAILS::request& req, currency::COMMAND_RPC_GET_ALIAS_DETAILS::response& res)
   {
     return epee::net_utils::invoke_http_json_rpc("/json_rpc", "get_alias_details", req, res, m_http_client);

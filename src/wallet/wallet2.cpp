@@ -344,6 +344,26 @@ void wallet2::refresh(size_t & blocks_fetched)
   refresh(blocks_fetched, received_money);
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::sign_text(const std::string& text, crypto::signature& sig)
+{
+  crypto::hash h = currency::null_hash;
+  crypto::cn_fast_hash(text.data(), text.size(), h);
+  crypto::generate_signature(h, m_account.get_keys().m_account_address.m_spend_public_key, m_account.get_keys().m_spend_secret_key, sig);
+  //TODO: remove it 
+}
+//----------------------------------------------------------------------------------------------------
+std::string wallet2::validate_signed_text(const std::string& addr, const std::string& text, const crypto::signature& sig)
+{
+  currency::COMMAND_RPC_VALIDATE_SIGNED_TEXT::request req = AUTO_VAL_INIT(req);
+  currency::COMMAND_RPC_VALIDATE_SIGNED_TEXT::response res = AUTO_VAL_INIT(res);
+  req.address = addr;
+  req.signature = epee::string_tools::pod_to_hex(sig);
+  req.text = text;
+
+  m_core_proxy->call_COMMAND_RPC_VALIDATE_SIGNED_TEXT(req, res);
+  return res.status;
+}
+//----------------------------------------------------------------------------------------------------
 bool wallet2::generate_view_wallet(const std::string new_name, const std::string& password)
 {  
   return store_keys(new_name, password, true);
