@@ -9,7 +9,7 @@
 // TODO: estimate correct size
 #define LMDB_MEMORY_MAP_SIZE (16ull * 1024 * 1024 * 1024)
 
-#define CHECK_LOCAL(result, return_value, msg) \
+#define CHECK_DB_CALL_RESULT(result, return_value, msg) \
   CHECK_AND_ASSERT_MES(result == MDB_SUCCESS,  \
     return_value, "LMDB error " << result << ", " << mdb_strerror(result) << ", " << msg)
 
@@ -21,7 +21,19 @@ namespace db
       : p_mdb_env(nullptr)
     {}
 
+    MDB_txn* get_current_transaction() const
+    {
+      CHECK_AND_ASSERT_MES(!m_transaction_stack.empty(), nullptr, "m_transaction_stack is empty");
+      return m_transaction_stack.back();
+    }
+
+    bool has_active_transaction() const
+    {
+      return !m_transaction_stack.empty();
+    }
+
     MDB_env* p_mdb_env;
+    std::list<MDB_txn*> m_transaction_stack;
   };
 
 
@@ -42,21 +54,21 @@ namespace db
   bool lmdb_adapter::open(const std::string& db_name)
   {
     int r = mdb_env_create(&m_p_impl->p_mdb_env);
-    CHECK_LOCAL(r, false, "mdb_env_create failed");
+    CHECK_DB_CALL_RESULT(r, false, "mdb_env_create failed");
       
     r = mdb_env_set_maxdbs(m_p_impl->p_mdb_env, 15);
-    CHECK_LOCAL(r, false, "mdb_env_set_maxdbs failed");
+    CHECK_DB_CALL_RESULT(r, false, "mdb_env_set_maxdbs failed");
 
     r = mdb_env_set_mapsize(m_p_impl->p_mdb_env, LMDB_MEMORY_MAP_SIZE);
-    CHECK_LOCAL(r, false, "mdb_env_set_mapsize failed");
+    CHECK_DB_CALL_RESULT(r, false, "mdb_env_set_mapsize failed");
       
     m_db_folder = db_name;
     // TODO: any UTF-8 checks?
-    r = tools::create_directories_if_necessary(m_db_folder);
-    CHECK_AND_ASSERT_MES(r, false, "create_directories_if_necessary failed");
+    bool br = tools::create_directories_if_necessary(m_db_folder);
+    CHECK_AND_ASSERT_MES(br, false, "create_directories_if_necessary failed");
 
     r = mdb_env_open(m_p_impl->p_mdb_env, m_db_folder.c_str(), MDB_NORDAHEAD , 0644);
-    CHECK_LOCAL(r, false, "mdb_env_open failed, m_db_folder = " << m_db_folder);
+    CHECK_DB_CALL_RESULT(r, false, "mdb_env_open failed, m_db_folder = " << m_db_folder);
 
     return true;
   }
@@ -71,13 +83,23 @@ namespace db
     return true;
   }
 
-  bool lmdb_adapter::open_table(const std::string& table_name, const table_id h)
+  bool lmdb_adapter::open_table(const std::string& table_name, table_id &tid)
   {
+    MDB_dbi dbi = AUTO_VAL_INIT(dbi);
+
+    begin_transaction();
+    int r = mdb_dbi_open(m_p_impl->get_current_transaction(), table_name.c_str(), MDB_CREATE, &dbi);
+    CHECK_DB_CALL_RESULT(r, false, "mdb_dbi_open failed to open table " << table_name);
+    commit_transaction();
+
+    tid = static_cast<table_id>(dbi);
     return true;
   }
   
   bool lmdb_adapter::clear_table(const table_id tid)
   {
+    int r = mdb_drop(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), 0);
+    CHECK_DB_CALL_RESULT(r, false, "mdb_drop failed");
     return true;
   }
 
@@ -88,16 +110,77 @@ namespace db
   
   bool lmdb_adapter::begin_transaction()
   {
+    MDB_txn* p_parent_tx = nullptr;
+    MDB_txn* p_new_tx = nullptr;
+    if (m_p_impl->has_active_transaction())
+      p_parent_tx = m_p_impl->get_current_transaction();
+
+    unsigned int flags = 0;
+    int r = mdb_txn_begin(m_p_impl->p_mdb_env, p_parent_tx, flags, &p_new_tx);
+    CHECK_DB_CALL_RESULT(r, false, "mdb_txn_begin");
+
+    m_p_impl->m_transaction_stack.push_back(p_new_tx);
+
     return true;
   }
 
   bool lmdb_adapter::commit_transaction()
   {
+    CHECK_AND_ASSERT_MES(m_p_impl->has_active_transaction(), false, "no active transaction");
+
+    MDB_txn* txn = m_p_impl->m_transaction_stack.back();
+    m_p_impl->m_transaction_stack.pop_back();
+          
+    int r = 0;
+    r = mdb_txn_commit(txn);
+    CHECK_DB_CALL_RESULT(r, false, "mdb_txn_commit failed");
+
     return true;
   }
 
   void lmdb_adapter::abort_transaction()
   {
+    CHECK_AND_ASSERT_MES_NO_RET(m_p_impl->has_active_transaction(), "no active transaction");
+
+    MDB_txn* txn = m_p_impl->m_transaction_stack.back();
+    m_p_impl->m_transaction_stack.pop_back();
+          
+    mdb_txn_abort(txn);
   }
+  
+  bool lmdb_adapter::get(const table_id tid, const char* key_data, size_t key_size, std::string& out_buffer)
+  {
+    int r = 0;
+    MDB_val key = AUTO_VAL_INIT(key);
+    MDB_val data = AUTO_VAL_INIT(data);
+    key.mv_data = const_cast<char*>(key_data);
+    key.mv_size = key_size;
+    
+    r = mdb_get(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &key, &data);
+    
+    if (r == MDB_NOTFOUND)
+      return false;
+
+    CHECK_DB_CALL_RESULT(r, false, "mdb_get failed");
+
+    out_buffer.assign(reinterpret_cast<const char*>(data.mv_data), data.mv_size);
+    return true;
+  }
+
+  bool lmdb_adapter::set(const table_id tid, const char* key_data, size_t key_size, const char* value_data, size_t value_size)
+  {
+    int r = 0;
+    MDB_val key = AUTO_VAL_INIT(key);
+    MDB_val data = AUTO_VAL_INIT(data);
+    key.mv_data = const_cast<char*>(key_data);
+    key.mv_size = key_size;
+    data.mv_data = const_cast<char*>(value_data);
+    data.mv_size = value_size;
+
+    r = mdb_put(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &key, &data, 0);
+    CHECK_DB_CALL_RESULT(r, false, "mdb_put failed");
+    return true;
+  }
+
 
 } // namespace db

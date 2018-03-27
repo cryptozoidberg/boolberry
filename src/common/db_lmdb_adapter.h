@@ -15,14 +15,16 @@ namespace db
     virtual ~lmdb_adapter();
 
     // interface i_db_adapter
-    virtual bool open(const std::string& db_name);
-    virtual bool open_table(const std::string& table_name, const table_id h);
-    virtual bool clear_table(const table_id tid);
-    virtual uint64_t get_table_size(const table_id tid);
-    virtual bool close();
-    virtual bool begin_transaction();
-    virtual bool commit_transaction();
-    virtual void abort_transaction();
+    virtual bool open(const std::string& db_name) override;
+    virtual bool open_table(const std::string& table_name, table_id &tid) override;
+    virtual bool clear_table(const table_id tid) override;
+    virtual uint64_t get_table_size(const table_id tid) override;
+    virtual bool close() override;
+    virtual bool begin_transaction() override;
+    virtual bool commit_transaction() override;
+    virtual void abort_transaction() override;
+    virtual bool get(const table_id tid, const char* key_data, size_t key_size, std::string& out_buffer) override;
+    virtual bool set(const table_id tid, const char* key_data, size_t key_size, const char* value_data, size_t value_size) override;
 
   private:
     lmdb_adapter_impl* m_p_impl;

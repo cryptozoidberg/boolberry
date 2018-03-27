@@ -15,7 +15,7 @@ namespace db
   {
   public:
     virtual bool open(const std::string& db_name) = 0;
-    virtual bool open_table(const std::string& table_name, const table_id h) = 0;
+    virtual bool open_table(const std::string& table_name, table_id &tid) = 0;
     virtual bool clear_table(const table_id tid) = 0;
     virtual uint64_t get_table_size(const table_id tid) = 0;
     virtual bool close() = 0;
@@ -23,6 +23,9 @@ namespace db
     virtual bool begin_transaction() = 0;
     virtual bool commit_transaction() = 0;
     virtual void abort_transaction() = 0;
+
+    virtual bool get(const table_id tid, const char* k, size_t s, std::string& res_buff) = 0;
+    virtual bool set(const table_id tid, const char* k, size_t s, const char* v, size_t vs) = 0;
     
     virtual ~i_db_adapter()
     {};
@@ -51,8 +54,9 @@ namespace db
   class db_bridge_base
   {
   public:
-    explicit db_bridge_base(i_db_adapter *p_backend)
-      : m_db_adapter(p_backend)
+    explicit db_bridge_base(std::shared_ptr<i_db_adapter> adapter_ptr)
+      : m_db_adapter_ptr(adapter_ptr)
+      , m_db_opened(false)
     {}
 
     ~db_bridge_base()
@@ -74,29 +78,36 @@ namespace db
       // TODO
     }
 
-    i_db_adapter* get_adapter() const
+    bool is_open() const
     {
-      return m_db_adapter;
+      return m_db_opened;
+    }
+
+    std::shared_ptr<i_db_adapter> get_adapter() const
+    {
+      return m_db_adapter_ptr;
     }
 
     bool open(const std::string& db_name)
     {
-      return m_db_adapter->open(db_name);
+      m_db_opened = m_db_adapter_ptr->open(db_name);
+      return m_db_opened;
     }
 
     bool close()
     {
-      return m_db_adapter->close();
+      m_db_opened = false;
+      return m_db_adapter_ptr->close();
     }
 
     bool clear(const table_id tid)
     {
-      return m_db_adapter->clear_table(tid);
+      return m_db_adapter_ptr->clear_table(tid);
     }
 
     uint64_t size(const table_id tid) const
     {
-      return m_db_adapter->get_table_size(tid);
+      return m_db_adapter_ptr->get_table_size(tid);
     }
 
     template<class tkey_pod_t>
@@ -107,7 +118,8 @@ namespace db
     }
 
     protected:
-      i_db_adapter* m_db_adapter;
+      std::shared_ptr<i_db_adapter> m_db_adapter_ptr;
+      bool m_db_opened;
   };
     
 
