@@ -57,6 +57,17 @@ namespace tools
     });
   }
 
+  template<typename core_rpc_server_t>
+  bool get_transfer_address_t(const std::string& adr_str, currency::account_public_address& addr, core_rpc_server_t& srv)
+  {
+    return get_transfer_address_cb(adr_str, addr, [&srv](currency::COMMAND_RPC_GET_ALIAS_DETAILS::request& req_alias_info,
+      currency::COMMAND_RPC_GET_ALIAS_DETAILS::response& alias_info)
+    {
+      epee::json_rpc::error stub; epee::net_utils::connection_context_base stub2;
+      return srv.on_get_alias_details(req_alias_info, alias_info, stub, stub2);
+    });
+  }
+
   /*
   inline
   bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, epee::net_utils::http::http_simple_client& http_client, const std::string& daemon_address)

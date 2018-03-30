@@ -186,6 +186,8 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("check_tx_key", boost::bind(&simple_wallet::check_tx_key, this, _1), "Check amount going to <address> in <txid>");
   m_cmd_binder.set_handler("set_log", boost::bind(&simple_wallet::set_log, this, _1), "set_log <level> - Change current log detalization level, <level> is a number 0-4");
   m_cmd_binder.set_handler("address", boost::bind(&simple_wallet::print_address, this, _1), "Show current wallet public address");
+  m_cmd_binder.set_handler("sign_text", boost::bind(&simple_wallet::sign_text, this, _1), "Sign some random text as a proof");
+  m_cmd_binder.set_handler("validate_text_signature", boost::bind(&simple_wallet::validate_text_signature, this, _1), "Validate signed text's proof: validate_text_signature <text> <address> <signature>");
   m_cmd_binder.set_handler("save", boost::bind(&simple_wallet::save, this, _1), "Save wallet synchronized data");
   m_cmd_binder.set_handler("help", boost::bind(&simple_wallet::help, this, _1), "Show this help");
 }
@@ -1032,6 +1034,40 @@ bool simple_wallet::get_tx_key(const std::vector<std::string> &args_)
     fail_msg_writer() << "no tx keys found for this txid";
     return true;
   }
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::sign_text(const std::vector<std::string> &args)
+{
+  if (args.size() != 1) 
+  {
+    fail_msg_writer() << "usage: sign_text <text>";
+    return true;
+  }
+  crypto::signature sig = AUTO_VAL_INIT(sig);
+  m_wallet->sign_text(args[0], sig);
+
+  success_msg_writer() << "Signature: " << epee::string_tools::pod_to_hex(sig);
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::validate_text_signature(const std::vector<std::string> &args)
+{
+  if (args.size() != 3)
+  {
+    fail_msg_writer() << "usage: validate_text_signature <text> <address> <signature>";
+    return true;
+  }
+  crypto::signature sig = AUTO_VAL_INIT(sig);
+  if (!epee::string_tools::parse_tpod_from_hex_string(args[2], sig))
+  {
+    fail_msg_writer() << "wrong signature format" << ENDL << "usage: validate_text_signature <text> <address> <signature>";
+    return true;
+  }
+
+  std::string r = m_wallet->validate_signed_text(args[1], args[0], sig);
+
+  success_msg_writer() << "Validation result: " << r;
+  return true;
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::check_tx_key(const std::vector<std::string> &args_)

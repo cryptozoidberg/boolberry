@@ -136,6 +136,9 @@ namespace tools
     void sign_transfer(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
     void submit_transfer(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
 
+
+    void sign_text(const std::string& text, crypto::signature& sig);
+    std::string validate_signed_text(const std::string& addr, const std::string& text, const crypto::signature& sig);
     bool generate_view_wallet(const std::string new_name, const std::string& password);
     bool is_view_only(){ return m_is_view_only;}
     
