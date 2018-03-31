@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "1.0",
+  "id": "12",
+  "method": "validate_signed_text",
+  "params": {
+    "address": "1EYwtnWJ6KUVgimquuzYsCfvM5hd2DMVD5qF8vRyNGcG2zac8K3Cq7kYn8YnaN43DuB8jqAsb6woCZir953QVrf61RH6cf1",
+    "text": "sefsdfsdfsdf",
+    "signature": "13f1c06008b7a4f789c3a1cd2acda963b82d43575958010a44b0149394725f0f315bfc8186939fb8c30bbd05299050a6b739ffda9f0bdc115cdff9831745ea0d"
+  }
+}

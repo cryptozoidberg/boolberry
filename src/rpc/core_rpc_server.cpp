@@ -1037,6 +1037,7 @@ namespace currency
     crypto::signature sig = AUTO_VAL_INIT(sig);
     if (!epee::string_tools::parse_tpod_from_hex_string(req.signature, sig))
     {
+      LOG_PRINT_RED_L0("Failed to parse signature: " << req.signature);
       res.status = CORE_RPC_STATUS_INVALID_ARGUMENT;
       return true;
     }
@@ -1044,6 +1045,7 @@ namespace currency
     currency::account_public_address ac_adr = AUTO_VAL_INIT(ac_adr);
     if (!tools::get_transfer_address_t(req.address, ac_adr, *this))
     {
+      LOG_PRINT_RED_L0("Failed to parse address: " << req.address);
       res.status = CORE_RPC_STATUS_INVALID_ARGUMENT;
       return true;
     }
