@@ -25,6 +25,7 @@ namespace db
     virtual void abort_transaction() override;
     virtual bool get(const table_id tid, const char* key_data, size_t key_size, std::string& out_buffer) override;
     virtual bool set(const table_id tid, const char* key_data, size_t key_size, const char* value_data, size_t value_size) override;
+    virtual bool erase(const table_id tid, const char* key_data, size_t key_size) override;
 
   private:
     lmdb_adapter_impl* m_p_impl;

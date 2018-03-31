@@ -26,6 +26,7 @@ namespace db
 
     virtual bool get(const table_id tid, const char* k, size_t s, std::string& res_buff) = 0;
     virtual bool set(const table_id tid, const char* k, size_t s, const char* v, size_t vs) = 0;
+    virtual bool erase(const table_id tid, const char* key_data, size_t key_size) = 0;
     
     virtual ~i_db_adapter()
     {};

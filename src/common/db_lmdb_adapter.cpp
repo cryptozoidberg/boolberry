@@ -105,7 +105,18 @@ namespace db
 
   uint64_t lmdb_adapter::get_table_size(const table_id tid)
   {
-    return 0;
+    MDB_stat table_stat = AUTO_VAL_INIT(table_stat);
+    bool local_transaction = false;
+    if (!m_p_impl->has_active_transaction())
+    {
+      local_transaction = true;
+      begin_transaction();
+    }
+    int r = mdb_stat(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &table_stat);
+    if (local_transaction)
+      commit_transaction();
+    CHECK_DB_CALL_RESULT(r, false, "Unable to mdb_stat");
+    return table_stat.ms_entries;
   }
   
   bool lmdb_adapter::begin_transaction()
@@ -179,6 +190,21 @@ namespace db
 
     r = mdb_put(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &key, &data, 0);
     CHECK_DB_CALL_RESULT(r, false, "mdb_put failed");
+    return true;
+  }
+
+  bool lmdb_adapter::erase(const table_id tid, const char* key_data, size_t key_size)
+  {
+    int r = 0;
+    MDB_val key = AUTO_VAL_INIT(key);
+    key.mv_data = const_cast<char*>(key_data);
+    key.mv_size = key_size;
+
+    r = mdb_del(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &key, nullptr);
+    if (r == MDB_NOTFOUND)
+      return false;
+
+    CHECK_DB_CALL_RESULT(r, false, "mdb_del failed");
     return true;
   }
 
