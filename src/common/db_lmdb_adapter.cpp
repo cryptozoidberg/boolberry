@@ -2,9 +2,12 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "db_lmdb_adapter.h"
+#include <thread>
+#include <mutex>
 #include "misc_language.h"
 #include "db/liblmdb/lmdb.h"
 #include "common/util.h"
+#include "boost/thread/recursive_mutex.hpp"
 
 // TODO: estimate correct size
 #define LMDB_MEMORY_MAP_SIZE (16ull * 1024 * 1024 * 1024)
@@ -15,6 +18,12 @@
 
 namespace db
 {
+  struct stack_entry_t
+  {
+    explicit stack_entry_t(MDB_txn* txn) : txn(txn) {}
+    MDB_txn* txn;
+  };
+
   struct lmdb_adapter_impl
   {
     lmdb_adapter_impl()
@@ -23,17 +32,23 @@ namespace db
 
     MDB_txn* get_current_transaction() const
     {
-      CHECK_AND_ASSERT_MES(!m_transaction_stack.empty(), nullptr, "m_transaction_stack is empty");
-      return m_transaction_stack.back();
+      std::lock_guard<boost::recursive_mutex> guard(m_transaction_stack_mutex);
+      auto it = m_transaction_stack.find(std::this_thread::get_id());
+      CHECK_AND_ASSERT_MES(it != m_transaction_stack.end(), nullptr, "m_transaction_stack is not found for thread id " << std::this_thread::get_id());
+      CHECK_AND_ASSERT_MES(!it->second.empty(), nullptr, "m_transaction_stack is empty for thread id " << std::this_thread::get_id());
+      return it->second.back().txn;
     }
 
     bool has_active_transaction() const
     {
-      return !m_transaction_stack.empty();
+      std::lock_guard<boost::recursive_mutex> guard(m_transaction_stack_mutex);
+      auto it = m_transaction_stack.find(std::this_thread::get_id());
+      return it != m_transaction_stack.end() && !it->second.empty();
     }
 
     MDB_env* p_mdb_env;
-    std::list<MDB_txn*> m_transaction_stack;
+    std::map<std::thread::id, std::list<stack_entry_t>> m_transaction_stack; // thread_id -> (tx_entry, tx_entry, ...)
+    mutable boost::recursive_mutex m_transaction_stack_mutex; // protects m_transaction_stack
   };
 
 
@@ -121,26 +136,39 @@ namespace db
   
   bool lmdb_adapter::begin_transaction()
   {
+    std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
+    std::list<stack_entry_t>& tx_stack = m_p_impl->m_transaction_stack[std::this_thread::get_id()]; // get or create empty list
+
     MDB_txn* p_parent_tx = nullptr;
     MDB_txn* p_new_tx = nullptr;
-    if (m_p_impl->has_active_transaction())
-      p_parent_tx = m_p_impl->get_current_transaction();
+    if (!tx_stack.empty())
+      p_parent_tx = tx_stack.back().txn;
 
     unsigned int flags = 0;
+    // TODO: review the following check thorughly
+    CHECK_AND_ASSERT_MES(m_p_impl != nullptr, false, "db env is null");
     int r = mdb_txn_begin(m_p_impl->p_mdb_env, p_parent_tx, flags, &p_new_tx);
     CHECK_DB_CALL_RESULT(r, false, "mdb_txn_begin");
 
-    m_p_impl->m_transaction_stack.push_back(p_new_tx);
+    tx_stack.push_back(stack_entry_t(p_new_tx));
 
     return true;
   }
 
   bool lmdb_adapter::commit_transaction()
   {
-    CHECK_AND_ASSERT_MES(m_p_impl->has_active_transaction(), false, "no active transaction");
+    std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
+    auto it = m_p_impl->m_transaction_stack.find(std::this_thread::get_id());
+    CHECK_AND_ASSERT_MES(it != m_p_impl->m_transaction_stack.end(), false, "m_transaction_stack is not found for thread id " << std::this_thread::get_id());
+    CHECK_AND_ASSERT_MES(!it->second.empty(), false, "m_transaction_stack is empty for thread id " << std::this_thread::get_id());
+    std::list<stack_entry_t>& tx_stack = it->second;
 
-    MDB_txn* txn = m_p_impl->m_transaction_stack.back();
-    m_p_impl->m_transaction_stack.pop_back();
+    MDB_txn* txn = tx_stack.back().txn;
+
+    tx_stack.pop_back();
+    if (tx_stack.empty())
+      m_p_impl->m_transaction_stack.erase(it);
+    // tx_stack could be invalid after this point 
           
     int r = 0;
     r = mdb_txn_commit(txn);
@@ -151,10 +179,18 @@ namespace db
 
   void lmdb_adapter::abort_transaction()
   {
-    CHECK_AND_ASSERT_MES_NO_RET(m_p_impl->has_active_transaction(), "no active transaction");
+    std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
+    auto it = m_p_impl->m_transaction_stack.find(std::this_thread::get_id());
+    CHECK_AND_ASSERT_MES_NO_RET(it != m_p_impl->m_transaction_stack.end(), "m_transaction_stack is not found for thread id " << std::this_thread::get_id());
+    CHECK_AND_ASSERT_MES_NO_RET(!it->second.empty(), "m_transaction_stack is empty for thread id " << std::this_thread::get_id());
+    std::list<stack_entry_t>& tx_stack = it->second;
 
-    MDB_txn* txn = m_p_impl->m_transaction_stack.back();
-    m_p_impl->m_transaction_stack.pop_back();
+    MDB_txn* txn = tx_stack.back().txn;
+
+    tx_stack.pop_back();
+    if (tx_stack.empty())
+      m_p_impl->m_transaction_stack.erase(it);
+    // tx_stack could be invalid after this point 
           
     mdb_txn_abort(txn);
   }
