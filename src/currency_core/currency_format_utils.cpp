@@ -496,7 +496,7 @@ namespace currency
   }
   bool construct_tx(const account_keys& keys, const create_tx_arg& arg, create_tx_res& rsp)
   {
-    return construct_tx(keys, arg.sources, arg.splitted_dsts, rsp.tx, rsp.txkey, arg.unlock_time, arg.tx_outs_attr);
+    return construct_tx(keys, arg.sources, arg.splitted_dsts, arg.extra, rsp.tx, rsp.txkey, arg.unlock_time, arg.tx_outs_attr);
   }
   //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 

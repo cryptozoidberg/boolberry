@@ -526,6 +526,7 @@ namespace tools
     }
     bool r = currency::construct_tx(m_account.get_keys(), create_tx_param, create_tx_result);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
+    tx = create_tx_result.tx;
 
     finalize_transaction(create_tx_param, create_tx_result);
   }
