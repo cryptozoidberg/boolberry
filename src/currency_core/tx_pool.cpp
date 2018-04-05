@@ -442,7 +442,7 @@ namespace currency
     {
       txv &tx(*txs[i]);
 
-      if (tx_count > 125 || !is_transaction_ready_to_go(tx.second) || have_key_images(k_images, tx.second.tx))
+      if (tx_count > 124 || !is_transaction_ready_to_go(tx.second) || have_key_images(k_images, tx.second.tx))
       {
         txs[i] = NULL;
         continue;
