@@ -410,7 +410,8 @@ namespace currency
     return ss.str();
   }
   //---------------------------------------------------------------------------------
-  bool tx_memory_pool::fill_block_template(block &bl, size_t median_size, uint64_t already_generated_coins, uint64_t already_donated_coins, size_t &total_size, uint64_t &fee) {
+  bool tx_memory_pool::fill_block_template(block &bl, size_t median_size, uint64_t already_generated_coins, uint64_t already_donated_coins, size_t &total_size, uint64_t &fee) 
+  {
     typedef transactions_container::value_type txv;
     CRITICAL_REGION_LOCAL(m_transactions_lock);
 
@@ -433,27 +434,34 @@ namespace currency
     size_t best_position = 0;
     total_size = 0;
     fee = 0;
+    size_t tx_count = 0;
 
     std::unordered_set<crypto::key_image> k_images;
 
-    for (size_t i = 0; i < txs.size(); i++) {
+    for (size_t i = 0; i < txs.size(); i++) 
+    {
       txv &tx(*txs[i]);
 
-      if(!is_transaction_ready_to_go(tx.second) || have_key_images(k_images, tx.second.tx)) {
+      if (tx_count > 124 || !is_transaction_ready_to_go(tx.second) || have_key_images(k_images, tx.second.tx))
+      {
         txs[i] = NULL;
         continue;
       }
+      ++tx_count;
       append_key_images(k_images, tx.second.tx);
+     
 
       current_size += tx.second.blob_size;
       current_fee += tx.second.fee;
 
       uint64_t current_reward;
-      if (!get_block_reward(median_size, current_size + CURRENCY_COINBASE_BLOB_RESERVED_SIZE, already_generated_coins, already_donated_coins, current_reward, max_donation)) {
+      if (!get_block_reward(median_size, current_size + CURRENCY_COINBASE_BLOB_RESERVED_SIZE, already_generated_coins, already_donated_coins, current_reward, max_donation)) 
+      {
         break;
       }
 
-      if (best_money < current_reward + current_fee) {
+      if (best_money < current_reward + current_fee)
+      {
         best_money = current_reward + current_fee;
         best_position = i + 1;
         total_size = current_size;
@@ -461,8 +469,10 @@ namespace currency
       }
     }
 
-    for (size_t i = 0; i < best_position; i++) {
-      if (txs[i]) {
+    for (size_t i = 0; i < best_position; i++) 
+    {
+      if (txs[i]) 
+      {
         bl.tx_hashes.push_back(txs[i]->first);
       }
     }
