@@ -575,6 +575,33 @@ bool daemon_backend::get_aliases(view::alias_set& al_set)
   return false;
 }
 
+bool daemon_backend::sign_text(const std::string& text, const std::string& signature_hex)
+{
+
+  try
+  {
+    //set transaction unlock time if it was specified by user 
+    crypto::signature sig = currency::null_sig;
+    m_wallet->sign_text(text, sig);
+    signature_hex = epee::string_tools::pod_to_hex(sig);
+    return true;
+  }
+  catch (const std::exception& e)
+  {
+    LOG_ERROR("Sign error: " << e.what());
+    m_pview->show_msg_box(std::string("Failed to send transaction: ") + e.what());
+    return false;
+  }
+  catch (...)
+  {
+    LOG_ERROR("Sign error: unknown error");
+    m_pview->show_msg_box("Failed to send transaction: unknown error");
+    return false;
+  }
+
+  return true;
+}
+
 
 bool daemon_backend::transfer(const view::transfer_params& tp, currency::transaction& res_tx)
 {

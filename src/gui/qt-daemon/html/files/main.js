@@ -460,6 +460,13 @@ function parse_and_get_locktime()
 }
 
 
+function on_sign()
+{	
+	var sign_res_str  = Qt_parent.sign_text($('#sign_text_id').val());
+	var aign_res_obj = jQuery.parseJSON(sign_res_str);
+	$('#signature_id').text(aign_res_obj.signature_hex);
+}
+
 function on_transfer()
 {
     var transfer_obj = {

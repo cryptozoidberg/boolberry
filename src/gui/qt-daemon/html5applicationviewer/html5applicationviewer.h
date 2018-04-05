@@ -59,6 +59,7 @@ protected:
 	void place_to_clipboard(const QString& data);
     QString get_version();
     QString transfer(const QString& json_transfer_object);
+    QString sign_text(const QString& text_to_sign);
     void message_box(const QString& msg);
   QString request_uri(const QString& url_str, const QString& params, const QString& callbackname);
     QString request_aliases();
