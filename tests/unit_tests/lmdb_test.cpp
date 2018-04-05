@@ -124,10 +124,11 @@ namespace
 
     void adder_thread(std::atomic<bool>& stop_flag)
     {
+      epee::log_space::log_singletone::set_thread_log_prefix("[ adder ] ");
       //epee::misc_utils::sleep_no_w(1000);
 
       size_t i = 0;
-      for(size_t n = 0; n < 10000; ++n)
+      for(size_t n = 0; n < 1000; ++n)
       {
         // get pseudorandom key index
         size_t key_index = m_randomly_mixed_indexes_1[i];
@@ -166,6 +167,7 @@ namespace
 
     void deleter_thread(std::atomic<bool>& stop_flag)
     {
+      epee::log_space::log_singletone::set_thread_log_prefix("[deleter] ");
       epee::misc_utils::sleep_no_w(1000);
 
       // get pseudorandom key index
