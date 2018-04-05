@@ -10,11 +10,11 @@ extern "C"
   #include "crypto/random.h"
 }
 
+#include "epee/include/include_base_utils.h"
 #include "crypto/crypto.h"
 #include "gtest/gtest.h"
 #include "common/db_bridge.h"
 #include "common/db_lmdb_adapter.h"
-
 
 namespace
 {
