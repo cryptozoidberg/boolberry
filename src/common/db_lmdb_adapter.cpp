@@ -8,6 +8,7 @@
 #include "db/liblmdb/lmdb.h"
 #include "common/util.h"
 #include "boost/thread/recursive_mutex.hpp"
+#include "epee/include/misc_language.h"
 
 // TODO: estimate correct size
 #define LMDB_MEMORY_MAP_SIZE (16ull * 1024 * 1024 * 1024)
@@ -49,6 +50,7 @@ namespace db
     MDB_env* p_mdb_env;
     std::map<std::thread::id, std::list<stack_entry_t>> m_transaction_stack; // thread_id -> (tx_entry, tx_entry, ...)
     mutable boost::recursive_mutex m_transaction_stack_mutex; // protects m_transaction_stack
+    mutable boost::recursive_mutex m_begin_commit_abort_mutex; // protects db transaction sequence
   };
 
 
@@ -136,6 +138,8 @@ namespace db
   
   bool lmdb_adapter::begin_transaction()
   {
+    m_p_impl->m_begin_commit_abort_mutex.lock();
+
     std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
     std::list<stack_entry_t>& tx_stack = m_p_impl->m_transaction_stack[std::this_thread::get_id()]; // get or create empty list
 
@@ -144,19 +148,25 @@ namespace db
     if (!tx_stack.empty())
       p_parent_tx = tx_stack.back().txn;
 
+    tx_stack.push_back(stack_entry_t(p_new_tx)); // new stack entry should be added in ANY case, don't return before this line
+    auto& new_stack_entry = tx_stack.back();
+
     unsigned int flags = 0;
     // TODO: review the following check thorughly
     CHECK_AND_ASSERT_MES(m_p_impl != nullptr, false, "db env is null");
     int r = mdb_txn_begin(m_p_impl->p_mdb_env, p_parent_tx, flags, &p_new_tx);
     CHECK_DB_CALL_RESULT(r, false, "mdb_txn_begin");
 
-    tx_stack.push_back(stack_entry_t(p_new_tx));
+    new_stack_entry.txn = p_new_tx; // update stack entry with correct txn
 
     return true;
   }
 
   bool lmdb_adapter::commit_transaction()
   {
+    // unlock m_begin_commit_abort_mutex at the end of the function in ANY case
+    auto unlocker = epee::misc_utils::create_scope_leave_handler([this](){ m_p_impl->m_begin_commit_abort_mutex.unlock(); });
+
     std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
     auto it = m_p_impl->m_transaction_stack.find(std::this_thread::get_id());
     CHECK_AND_ASSERT_MES(it != m_p_impl->m_transaction_stack.end(), false, "m_transaction_stack is not found for thread id " << std::this_thread::get_id());
@@ -179,6 +189,9 @@ namespace db
 
   void lmdb_adapter::abort_transaction()
   {
+    // unlock m_begin_commit_abort_mutex at the end of the function in ANY case
+    auto unlocker = epee::misc_utils::create_scope_leave_handler([this](){ m_p_impl->m_begin_commit_abort_mutex.unlock(); });
+
     std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
     auto it = m_p_impl->m_transaction_stack.find(std::this_thread::get_id());
     CHECK_AND_ASSERT_MES_NO_RET(it != m_p_impl->m_transaction_stack.end(), "m_transaction_stack is not found for thread id " << std::this_thread::get_id());
