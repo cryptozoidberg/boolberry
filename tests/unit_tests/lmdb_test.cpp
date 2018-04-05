@@ -82,7 +82,7 @@ namespace
   //////////////////////////////////////////////////////////////////////////////
   // multithread_test_1
   //////////////////////////////////////////////////////////////////////////////
-  struct multithread_test_1_t
+  struct multithread_test_1_t : public db::i_db_visitor
   {
     enum { c_keys_count = 128 };
     crypto::hash m_keys[c_keys_count];
@@ -91,11 +91,13 @@ namespace
     std::shared_ptr<db::lmdb_adapter> m_lmdb_adapter;
     db::db_bridge_base m_dbb;
     db::table_id m_table_id;
+    size_t m_counter;
 
     multithread_test_1_t()
       : m_lmdb_adapter(std::make_shared<db::lmdb_adapter>())
       , m_dbb(m_lmdb_adapter)
       , m_table_id(0)
+      , m_counter(0)
     {
       for (size_t i = 0; i < c_keys_count; ++i)
       {
@@ -197,7 +199,7 @@ namespace
           CHECK_AND_ASSERT_MES_NO_RET(r, "commit_transaction");
 
           LOG_PRINT_L1("erased key index " << key_index << ", table size: " << table_size);
-          if (table_size == 0)
+          if (table_size == 2)
             break;
         }
         else
@@ -212,8 +214,46 @@ namespace
 
     bool check()
     {
-      return true;
+      uint64_t table_size = m_lmdb_adapter->get_table_size(m_table_id);
+      CHECK_AND_ASSERT_MES(table_size == 2, false, "2 elements are expected to left");
+
+      m_counter = 0;
+      bool r = m_lmdb_adapter->begin_transaction();
+      CHECK_AND_ASSERT_MES(r, false, "begin_transaction");
+
+      m_lmdb_adapter->visit_table(m_table_id, this);
+
+      r = m_lmdb_adapter->commit_transaction();
+      CHECK_AND_ASSERT_MES(r, false, "commit_transaction");
+      
+      return m_counter == 2;
     }
+
+    // class i_db_visitor
+    virtual bool on_visit_db_item(size_t i, const void* key_data, size_t key_size, const void* value_data, size_t value_size) override
+    {
+      CHECK_AND_ASSERT_MES(key_size == sizeof crypto::hash, false, "invalid key size: " << key_size);
+      const crypto::hash *p_key = reinterpret_cast<const crypto::hash*>(key_data);
+
+      size_t key_index = SIZE_MAX;
+      for(size_t i = 0; i < c_keys_count && key_index == SIZE_MAX; ++i)
+        if (m_keys[i] == *p_key)
+          key_index = i;
+
+      CHECK_AND_ASSERT_MES(key_index != SIZE_MAX, false, "visitor gets a non-existing key");
+
+      LOG_PRINT_L1("visitor: #" << i << ", key index: " << key_index);
+      if (i != m_counter)
+      {
+        LOG_ERROR("invalid visitor index i: " << i << ", m_counter: " << m_counter);
+        m_counter = SIZE_MAX;
+        return false;
+      }
+      ++m_counter;
+
+      return true;
+    };
+
 
     bool run()
     {

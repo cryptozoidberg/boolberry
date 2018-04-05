@@ -120,7 +120,7 @@ namespace db
     return true;
   }
 
-  uint64_t lmdb_adapter::get_table_size(const table_id tid)
+  size_t lmdb_adapter::get_table_size(const table_id tid)
   {
     MDB_stat table_stat = AUTO_VAL_INIT(table_stat);
     bool local_transaction = false;
@@ -256,6 +256,42 @@ namespace db
     CHECK_DB_CALL_RESULT(r, false, "mdb_del failed");
     return true;
   }
+
+  bool lmdb_adapter::visit_table(const table_id tid, i_db_visitor* visitor)
+  {
+    CHECK_AND_ASSERT_MES(visitor != nullptr, false, "visitor is null");
+    MDB_val key = AUTO_VAL_INIT(key);
+    MDB_val data = AUTO_VAL_INIT(data);
+
+    bool local_transaction = false;
+    if (m_p_impl->has_active_transaction())
+    {
+      local_transaction = true;
+      begin_transaction();
+    }
+    MDB_cursor* p_cursor = nullptr;
+    int r = mdb_cursor_open(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &p_cursor);
+    CHECK_DB_CALL_RESULT(r, false, "mdb_cursor_open failed");
+    CHECK_AND_ASSERT_MES(p_cursor != nullptr, false, "p_cursor == nullptr");
+
+    size_t count = 0;
+    do
+    {
+      int res = mdb_cursor_get(p_cursor, &key, &data, MDB_NEXT);
+      if (res == MDB_NOTFOUND)
+        break;
+      if (!visitor->on_visit_db_item(count, key.mv_data, key.mv_size, data.mv_data, data.mv_size))
+        break;
+      ++count;
+    }
+    while (p_cursor);
+
+    mdb_cursor_close(p_cursor);
+    if (local_transaction)
+      commit_transaction();
+    return true;
+  }
+
 
 
 } // namespace db
