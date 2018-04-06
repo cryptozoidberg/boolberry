@@ -46,7 +46,7 @@ namespace db
   template<class tkey_pod_t>
   const char* tkey_to_pointer(const tkey_pod_t& tkey, size_t& len_out) 
   {
-    static_assert(std::is_pod<t_pod_key>::value, "pod type expected");
+    static_assert(std::is_pod<tkey_pod_t>::value, "pod type expected");
     len_out = sizeof(tkey);
     return reinterpret_cast<const char*>(&tkey);
   }
@@ -54,10 +54,10 @@ namespace db
   template<class tkey_pod_t>
   void tkey_from_pointer(tkey_pod_t& tkey_out, const void* pointer, const uint64_t len)
   {
-    static_assert(std::is_pod<t_pod_key>::value, "pod type expected");
-    CHECK_AND_ASSERT_THROW_MES(sizeof(t_pod_key) == len, "wrong size");
+    static_assert(std::is_pod<tkey_pod_t>::value, "pod type expected");
+    CHECK_AND_ASSERT_THROW_MES(sizeof(tkey_pod_t) == len, "wrong size");
     CHECK_AND_ASSERT_THROW_MES(pointer != nullptr, "pointer is null");
-    tkey_out = *static_cast<t_pod_key*>(pointer);
+    tkey_out = *static_cast<tkey_pod_t*>(pointer);
   }
 
   
