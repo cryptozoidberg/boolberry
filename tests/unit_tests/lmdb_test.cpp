@@ -319,8 +319,9 @@ namespace lmdb_test
     END_SERIALIZE()
   };
 
-  inline bool operator==(const simple_serializable_t &_v1, const simple_serializable_t &_v2) {
-    return std::memcmp(&_v1, &_v2, sizeof(simple_serializable_t)) == 0;
+  inline bool operator==(const simple_serializable_t &lhs, const simple_serializable_t &rhs) {
+    return lhs.name == rhs.name &&
+      lhs.number == rhs.number;
   }
 
   TEST(lmdb, bridge_basic_test)
