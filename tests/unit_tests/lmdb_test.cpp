@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include <thread>
 #include <atomic>
+#include <memory>
 
 extern "C"
 {
@@ -15,8 +16,9 @@ extern "C"
 #include "gtest/gtest.h"
 #include "common/db_bridge.h"
 #include "common/db_lmdb_adapter.h"
+#include "serialization/serialization.h"
 
-namespace
+namespace lmdb_test
 {
   crypto::hash null_hash = AUTO_VAL_INIT(null_hash);
 
@@ -303,5 +305,74 @@ namespace
     ASSERT_TRUE(result);
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  // bridge_basic_test
+  //////////////////////////////////////////////////////////////////////////////
+  struct simple_serializable_t
+  {
+    std::string name;
+    uint64_t number;
+
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(name)
+      FIELD(number)
+    END_SERIALIZE()
+  };
+
+  inline bool operator==(const simple_serializable_t &_v1, const simple_serializable_t &_v2) {
+    return std::memcmp(&_v1, &_v2, sizeof(simple_serializable_t)) == 0;
+  }
+
+  TEST(lmdb, bridge_basic_test)
+  {
+    std::shared_ptr<db::lmdb_adapter> lmdb_ptr = std::make_shared<db::lmdb_adapter>();
+    db::db_bridge_base dbb(lmdb_ptr);
+
+    bool r = false;
+    
+    r = dbb.open("bridge_basic_test");
+    ASSERT_TRUE(r);
+
+    db::table_id tid_decapod;
+    r = lmdb_ptr->open_table("decapod", tid_decapod);
+    ASSERT_TRUE(r);
+
+    ASSERT_TRUE(dbb.begin_db_transaction());
+
+    ASSERT_TRUE(dbb.clear(tid_decapod));
+
+    const char key[] = "nxjdu47flrp20soam19e7nfhxbcy48owks03of92sbf31n1oqkanmdb47";
+    simple_serializable_t s_object;
+    s_object.number = 1001100102;
+    s_object.name = "bender";
+
+    r = dbb.set_serializable_object(tid_decapod, key, s_object);
+    ASSERT_TRUE(r);
+
+    dbb.commit_db_transaction();
+
+    ASSERT_TRUE(dbb.begin_db_transaction());
+
+    simple_serializable_t s_object2;
+    r = dbb.get_serializable_object(tid_decapod, key, s_object2);
+    ASSERT_TRUE(r);
+    ASSERT_EQ(s_object, s_object2);
+
+    // del object by key and make sure it does not exist anymore
+    r = dbb.erase(tid_decapod, key);
+    ASSERT_TRUE(r);
+
+    r = dbb.get_serializable_object(tid_decapod, key, s_object2);
+    ASSERT_FALSE(r);
+
+    // second erase shoud also fail
+    r = dbb.erase(tid_decapod, key);
+    ASSERT_FALSE(r);
+
+    dbb.commit_db_transaction();
+
+    r = dbb.close();
+    ASSERT_TRUE(r);
+  }
 
 }

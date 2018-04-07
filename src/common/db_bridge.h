@@ -5,6 +5,7 @@
 
 #include "misc_language.h"
 #include "misc_log_ex.h"
+#include "currency_core/currency_format_utils.h"
 
 namespace db
 {
@@ -47,7 +48,7 @@ namespace db
   const char* tkey_to_pointer(const tkey_pod_t& tkey, size_t& len_out) 
   {
     static_assert(std::is_pod<tkey_pod_t>::value, "pod type expected");
-    len_out = sizeof(tkey);
+    len_out = sizeof tkey;
     return reinterpret_cast<const char*>(&tkey);
   }
 
@@ -55,7 +56,7 @@ namespace db
   void tkey_from_pointer(tkey_pod_t& tkey_out, const void* pointer, const uint64_t len)
   {
     static_assert(std::is_pod<tkey_pod_t>::value, "pod type expected");
-    CHECK_AND_ASSERT_THROW_MES(sizeof(tkey_pod_t) == len, "wrong size");
+    CHECK_AND_ASSERT_THROW_MES(sizeof tkey_pod_t == len, "wrong size");
     CHECK_AND_ASSERT_THROW_MES(pointer != nullptr, "pointer is null");
     tkey_out = *static_cast<tkey_pod_t*>(pointer);
   }
@@ -71,21 +72,27 @@ namespace db
 
     ~db_bridge_base()
     {
+      close();
     }
 
-    void begin_db_transaction()
+    bool begin_db_transaction()
     {
-      // TODO
+      // TODO     !!!
+      bool r = m_db_adapter_ptr->begin_transaction();
+      return r;
     }
 
     void commit_db_transaction()
     {
-      // TODO
+      // TODO    !!!
+      bool r = m_db_adapter_ptr->commit_transaction();
+      CHECK_AND_ASSERT_THROW_MES(r, "commit_transaction failed");
     }
 
     void abort_db_transaction()
     {
-      // TODO
+      // TODO     !!!
+      m_db_adapter_ptr->abort_transaction();
     }
 
     bool is_open() const
@@ -123,8 +130,33 @@ namespace db
     template<class tkey_pod_t>
     bool erase(table_id tid, const tkey_pod_t& tkey)
     {
-      // todo
-      return true;
+      size_t key_size = 0;
+      const char* key_data = tkey_to_pointer(tkey, key_size);
+      return m_db_adapter_ptr->erase(tid, key_data, key_size);
+    }
+
+    template<class tkey_pod_t, class t_object>
+    bool get_serializable_object(const table_id tid, const tkey_pod_t& tkey, t_object& obj) const
+    {
+      std::string buffer;
+      size_t key_size = 0;
+      const char* key_data = tkey_to_pointer(tkey, key_size);
+
+      if (!m_db_adapter_ptr->get(tid, key_data, key_size, buffer))
+        return false;
+
+      return currency::t_unserializable_object_from_blob(obj, buffer);
+    }
+
+    template<class tkey_pod_t, class t_object>
+    bool set_serializable_object(const table_id tid, const tkey_pod_t& tkey, const t_object& obj)
+    {
+      std::string buffer;
+      currency::t_serializable_object_to_blob(obj, buffer);
+
+      size_t key_size = 0;
+      const char* key_data = tkey_to_pointer(tkey, key_size);
+      return m_db_adapter_ptr->set(tid, key_data, key_size, buffer.data(), buffer.size());
     }
 
     protected:
