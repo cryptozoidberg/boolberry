@@ -7,10 +7,10 @@ add_subdirectory(db)
 
 set_property(TARGET upnpc-static PROPERTY FOLDER "contrib")
 set_property(TARGET lmdb PROPERTY FOLDER "contrib")
-set_property(TARGET lmdb APPEND PROPERTY COMPILE_FLAGS "-Wno-error")
 
 if(MSVC)
   set_property(TARGET upnpc-static APPEND_STRING PROPERTY COMPILE_FLAGS " -wd4244 -wd4267")
 elseif(NOT MSVC)
   set_property(TARGET upnpc-static APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-undef -Wno-unused-result -Wno-unused-value -Wno-format-truncation")
+  set_property(TARGET lmdb APPEND PROPERTY COMPILE_FLAGS "-Wno-error")
 endif()
