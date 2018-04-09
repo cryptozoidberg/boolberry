@@ -319,9 +319,22 @@ namespace lmdb_test
     END_SERIALIZE()
   };
 
-  inline bool operator==(const simple_serializable_t &lhs, const simple_serializable_t &rhs) {
+  inline bool operator==(const simple_serializable_t &lhs, const simple_serializable_t &rhs)
+  {
     return lhs.name == rhs.name &&
       lhs.number == rhs.number;
+  }
+
+  struct simple_pod_t
+  {
+    char c;
+    uint64_t u;
+    float f;
+  };
+
+  inline bool operator==(const simple_pod_t &_v1, const simple_pod_t &_v2)
+  {
+    return std::memcmp(&_v1, &_v2, sizeof simple_pod_t) == 0;
   }
 
   TEST(lmdb, bridge_basic_test)
@@ -371,6 +384,34 @@ namespace lmdb_test
     ASSERT_FALSE(r);
 
     dbb.commit_db_transaction();
+
+
+   // POD type
+    const char key_pod[] = "alqocyfu7sbxhaoo5kdnrt77tgwderhjs9a9sdjf324nfjksd9f0s90f2";
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    simple_pod_t p_object1 = {' ', 0xf7f7f7f7d3d3d3d3ull, 2.002319f};
+    r = dbb.set_pod_object(tid_decapod, key_pod, p_object1);
+    ASSERT_TRUE(r);
+    dbb.commit_db_transaction();
+
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    simple_pod_t p_object2;
+    r = dbb.get_pod_object(tid_decapod, key_pod, p_object2);
+    ASSERT_TRUE(r);
+    ASSERT_EQ(p_object1, p_object2);
+
+    // del object by key and make sure it does not exist anymore
+    r = dbb.erase(tid_decapod, key_pod);
+    ASSERT_TRUE(r);
+
+    r = dbb.get_pod_object(tid_decapod, key_pod, p_object2);
+    ASSERT_FALSE(r);
+
+    // second erase shoud also fail
+    r = dbb.erase(tid_decapod, key_pod);
+    ASSERT_FALSE(r);
+    dbb.commit_db_transaction();
+
 
     r = dbb.close();
     ASSERT_TRUE(r);

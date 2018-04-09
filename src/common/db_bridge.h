@@ -159,6 +159,40 @@ namespace db
       return m_db_adapter_ptr->set(tid, key_data, key_size, buffer.data(), buffer.size());
     }
 
+    template<class tkey_pod_t, class t_object_pod_t>
+    bool get_pod_object(const table_id tid, const tkey_pod_t& tkey, t_object_pod_t& obj) const
+    {
+      static_assert(std::is_pod<t_object_pod_t>::value, "POD type expected");
+
+      std::string buffer;
+      size_t key_size = 0;
+      const char* key_data = tkey_to_pointer(tkey, key_size);
+
+      if (!m_db_adapter_ptr->get(tid, key_data, key_size, buffer))
+        return false;
+
+      CHECK_AND_ASSERT_MES(sizeof t_object_pod_t == buffer.size(), false,
+        "DB returned object with size " << buffer.size() << " bytes, while " << sizeof t_object_pod_t << " bytes object is expected");
+
+      obj = *reinterpret_cast<const t_object_pod_t*>(buffer.data());
+      return true;
+    }
+
+    template<class tkey_pod_t, class t_object_pod_t>
+    bool set_pod_object(const table_id tid, const tkey_pod_t& tkey, const t_object_pod_t& obj)
+    {
+      static_assert(std::is_pod<t_object_pod_t>::value, "POD type expected");
+
+      size_t key_size = 0;
+      const char* key_data = tkey_to_pointer(tkey, key_size);
+
+      if (!m_db_adapter_ptr->set(tid, key_data, key_size, reinterpret_cast<const char*>(&obj), sizeof obj))
+        return false;
+
+      return true;
+    }
+
+
     protected:
       std::shared_ptr<i_db_adapter> m_db_adapter_ptr;
       bool m_db_opened;
