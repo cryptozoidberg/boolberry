@@ -10,6 +10,8 @@
 namespace db
 {
   typedef uint64_t table_id;
+  constexpr bool tx_read_write = false;
+  constexpr bool tx_read_only = true;
 
   class i_db_visitor
   {
@@ -29,7 +31,7 @@ namespace db
     virtual size_t get_table_size(const table_id tid) = 0;
     virtual bool close() = 0;
 
-    virtual bool begin_transaction() = 0;
+    virtual bool begin_transaction(bool read_only_access = false) = 0;
     virtual bool commit_transaction() = 0;
     virtual void abort_transaction() = 0;
 
@@ -75,10 +77,10 @@ namespace db
       close();
     }
 
-    bool begin_db_transaction()
+    bool begin_db_transaction(bool read_only_access = false)
     {
       // TODO     !!!
-      bool r = m_db_adapter_ptr->begin_transaction();
+      bool r = m_db_adapter_ptr->begin_transaction(read_only_access);
       return r;
     }
 

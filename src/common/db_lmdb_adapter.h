@@ -20,7 +20,7 @@ namespace db
     virtual bool clear_table(const table_id tid) override;
     virtual size_t get_table_size(const table_id tid) override;
     virtual bool close() override;
-    virtual bool begin_transaction() override;
+    virtual bool begin_transaction(bool read_only_access = false) override;
     virtual bool commit_transaction() override;
     virtual void abort_transaction() override;
     virtual bool get(const table_id tid, const char* key_data, size_t key_size, std::string& out_buffer) override;
