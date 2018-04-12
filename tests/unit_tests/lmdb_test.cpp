@@ -190,8 +190,6 @@ namespace lmdb_test
         if (m_lmdb_adapter->get(m_table_id, (const char*)&key, sizeof key, value))
         {
           // if key exists in the table -- remove it
-          char buffer[128];
-          generate_random_bytes(sizeof buffer, buffer);
           r = m_lmdb_adapter->erase(m_table_id, (const char*)&key, sizeof key);
           CHECK_AND_ASSERT_MES_NO_RET(r, "erase");
 
@@ -212,6 +210,47 @@ namespace lmdb_test
         epee::misc_utils::sleep_no_w(1);
       }
       LOG_PRINT_L0("deleter_thread stopped");
+    }
+
+    void reader_thread()
+    {
+      epee::log_space::log_singletone::set_thread_log_prefix("[reader ] ");
+      epee::misc_utils::sleep_no_w(1000);
+
+      // get pseudorandom key index
+      size_t i = 17;
+      uint64_t sum = 0; // just for fun
+
+      for(;;)
+      {
+        size_t key_index = m_randomly_mixed_indexes_2[i];
+        i = (i + 1) % c_keys_count;
+        const crypto::hash& key = m_keys[key_index];
+        bool r = m_lmdb_adapter->begin_transaction(db::tx_read_only); // request Read-Only transaction
+        CHECK_AND_ASSERT_MES_NO_RET(r, "begin_transaction(RO=true)");
+
+        // get a value by the given key
+        std::string value;
+        if (m_lmdb_adapter->get(m_table_id, (const char*)&key, sizeof key, value))
+        {
+          sum += *reinterpret_cast<const uint64_t*>(value.data());
+
+          uint64_t table_size = m_lmdb_adapter->get_table_size(m_table_id);
+
+          r = m_lmdb_adapter->commit_transaction();
+          CHECK_AND_ASSERT_MES_NO_RET(r, "commit_transaction");
+
+          if (table_size == 2)
+            break;
+        }
+        else
+        {
+          // if no such key exists in the table - do nothing
+          m_lmdb_adapter->abort_transaction();
+        }
+        epee::misc_utils::sleep_no_w(1);
+      }
+      LOG_PRINT_L0("reader_thread stopped, sum = " << sum);
     }
 
     bool check()
@@ -273,6 +312,15 @@ namespace lmdb_test
       std::atomic<bool> stop_adder(false), stop_deleter(false);
       std::thread adder_t(&multithread_test_1_t::adder_thread, this, std::ref(stop_adder));
       std::thread deleter_t(&multithread_test_1_t::deleter_thread, this, std::ref(stop_deleter));
+
+      std::vector<std::thread> readers_t;
+      const size_t reader_threads_count = 2;
+      for (size_t i = 0; i < reader_threads_count; ++i)
+        readers_t.emplace_back(std::thread(&multithread_test_1_t::reader_thread, this));
+
+      for (auto& t : readers_t)
+        t.join();
+
       adder_t.join();
       //stop_deleter = true;
       deleter_t.join();
