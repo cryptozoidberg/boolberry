@@ -103,7 +103,7 @@ namespace lmdb_test
     {
       for (size_t i = 0; i < c_keys_count; ++i)
       {
-        m_keys[i] = i == 0 ? null_hash : crypto::cn_fast_hash(&m_keys[i - 1], sizeof crypto::hash);
+        m_keys[i] = i == 0 ? null_hash : crypto::cn_fast_hash(&m_keys[i - 1], sizeof(crypto::hash));
         m_randomly_mixed_indexes_1[i] = i;
         m_randomly_mixed_indexes_2[i] = i;
       }
@@ -234,7 +234,7 @@ namespace lmdb_test
     // class i_db_visitor
     virtual bool on_visit_db_item(size_t i, const void* key_data, size_t key_size, const void* value_data, size_t value_size) override
     {
-      CHECK_AND_ASSERT_MES(key_size == sizeof crypto::hash, false, "invalid key size: " << key_size);
+      CHECK_AND_ASSERT_MES(key_size == sizeof(crypto::hash), false, "invalid key size: " << key_size);
       const crypto::hash *p_key = reinterpret_cast<const crypto::hash*>(key_data);
 
       size_t key_index = SIZE_MAX;
@@ -334,7 +334,7 @@ namespace lmdb_test
 
   inline bool operator==(const simple_pod_t &_v1, const simple_pod_t &_v2)
   {
-    return std::memcmp(&_v1, &_v2, sizeof simple_pod_t) == 0;
+    return std::memcmp(&_v1, &_v2, sizeof _v1) == 0;
   }
 
   TEST(lmdb, bridge_basic_test)

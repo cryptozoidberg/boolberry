@@ -56,7 +56,7 @@ namespace db
   void tkey_from_pointer(tkey_pod_t& tkey_out, const void* pointer, const uint64_t len)
   {
     static_assert(std::is_pod<tkey_pod_t>::value, "pod type expected");
-    CHECK_AND_ASSERT_THROW_MES(sizeof tkey_pod_t == len, "wrong size");
+    CHECK_AND_ASSERT_THROW_MES(sizeof(tkey_pod_t) == len, "wrong size");
     CHECK_AND_ASSERT_THROW_MES(pointer != nullptr, "pointer is null");
     tkey_out = *static_cast<tkey_pod_t*>(pointer);
   }
@@ -171,8 +171,8 @@ namespace db
       if (!m_db_adapter_ptr->get(tid, key_data, key_size, buffer))
         return false;
 
-      CHECK_AND_ASSERT_MES(sizeof t_object_pod_t == buffer.size(), false,
-        "DB returned object with size " << buffer.size() << " bytes, while " << sizeof t_object_pod_t << " bytes object is expected");
+      CHECK_AND_ASSERT_MES(sizeof(t_object_pod_t) == buffer.size(), false,
+        "DB returned object with size " << buffer.size() << " bytes, while " << sizeof(t_object_pod_t) << " bytes object is expected");
 
       obj = *reinterpret_cast<const t_object_pod_t*>(buffer.data());
       return true;
