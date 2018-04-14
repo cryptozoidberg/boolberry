@@ -33,20 +33,13 @@ namespace currency
   //---------------------------------------------------------------
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx)
   {
-    std::stringstream ss;
-    ss << tx_blob;
-    binary_archive<false> ba(ss);
-    bool r = ::serialization::serialize(ba, tx);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to parse transaction from blob");
-    return true;
+    return t_unserializable_object_from_blob(tx, tx_blob);
   }
   //---------------------------------------------------------------
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx, crypto::hash& tx_hash, crypto::hash& tx_prefix_hash)
   {
-    std::stringstream ss;
-    ss << tx_blob;
-    binary_archive<false> ba(ss);
-    bool r = ::serialization::serialize(ba, tx);
+
+    bool r = t_unserializable_object_from_blob(tx, tx_blob);
     CHECK_AND_ASSERT_MES(r, false, "Failed to parse transaction from blob");
     //TODO: validate tx
 
@@ -500,6 +493,10 @@ namespace currency
     out.target = tk;
     tx.vout.push_back(out);
     return true;
+  }
+  bool construct_tx(const account_keys& keys, const create_tx_arg& arg, create_tx_res& rsp)
+  {
+    return construct_tx(keys, arg.sources, arg.splitted_dsts, arg.extra, rsp.tx, rsp.txkey, arg.unlock_time, arg.tx_outs_attr);
   }
   //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 
@@ -1003,7 +1000,7 @@ namespace currency
 
     uint64_t already_generated_coins = 0;
     uint64_t already_donated_coins = 0;
-    uint64_t emission_supply = EMISSION_SUPPLY;
+    
     uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
     for(uint64_t day = 0; day != 365*10; ++day)
     {

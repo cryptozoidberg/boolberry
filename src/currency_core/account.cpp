@@ -28,6 +28,12 @@ DISABLE_VS_WARNINGS(4244 4345)
     set_null();
   }
   //-----------------------------------------------------------------
+  account_base::account_base(const account_base& ab)
+  {
+    m_keys = ab.m_keys;
+    m_creation_timestamp = ab.m_creation_timestamp;
+  }
+  //-----------------------------------------------------------------
   void account_base::set_null()
   {
     m_keys = account_keys();
@@ -56,6 +62,11 @@ DISABLE_VS_WARNINGS(4244 4345)
   const account_keys& account_base::get_keys() const
   {
     return m_keys;
+  }
+  //-----------------------------------------------------------------
+  void account_base::make_account_view_only()
+  {
+    m_keys.m_spend_secret_key = currency::null_skey;
   }
   //-----------------------------------------------------------------
   std::string account_base::get_public_address_str()

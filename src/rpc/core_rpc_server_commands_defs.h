@@ -14,10 +14,11 @@
 namespace currency
 {
   //-----------------------------------------------
-#define CORE_RPC_STATUS_OK          "OK"
-#define CORE_RPC_STATUS_BUSY        "BUSY"
-#define CORE_RPC_STATUS_NOT_FOUND   "NOT FOUND"
-#define CORE_RPC_STATUS_FAILED        "FAILED"
+#define CORE_RPC_STATUS_OK                  "OK"
+#define CORE_RPC_STATUS_BUSY                "BUSY"
+#define CORE_RPC_STATUS_NOT_FOUND           "NOT FOUND"
+#define CORE_RPC_STATUS_FAILED              "FAILED"
+#define CORE_RPC_STATUS_INVALID_ARGUMENT    "INVALID_ARGUMENT"
 
 struct EMPTY_STRUCT {
   BEGIN_KV_SERIALIZE_MAP()
@@ -977,5 +978,30 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
     END_KV_SERIALIZE_MAP()
   };
 };
+  struct COMMAND_RPC_VALIDATE_SIGNED_TEXT
+  {
+    struct request
+    {
+      std::string address;
+      std::string text;
+      std::string signature;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(address)
+        KV_SERIALIZE(text)
+        KV_SERIALIZE(signature)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
 }
 

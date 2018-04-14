@@ -177,10 +177,17 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("payments", boost::bind(&simple_wallet::show_payments, this, _1), "payments <payment_id_1> [<payment_id_2> ... <payment_id_N>] - Show payments <payment_id_1>, ... <payment_id_N>");
   m_cmd_binder.set_handler("bc_height", boost::bind(&simple_wallet::show_blockchain_height, this, _1), "Show blockchain height");
   m_cmd_binder.set_handler("transfer", boost::bind(&simple_wallet::transfer, this, _1), "transfer <mixin_count> <addr_1> <amount_1> [<addr_2> <amount_2> ... <addr_N> <amount_N>] [payment_id] - Transfer <amount_1>,... <amount_N> to <address_1>,... <address_N>, respectively. <mixin_count> is the number of transactions yours is indistinguishable from (from 0 to maximum available)");
+  
+  m_cmd_binder.set_handler("save_watch_only", boost::bind(&simple_wallet::save_watch_only, this, _1), "Save a watch-only keys file <filename> <password>.");
+  m_cmd_binder.set_handler("sign_transfer", boost::bind(&simple_wallet::sign_transfer, this, _1), "Sign_transfer <tx_sources_file> <result_file>");
+  m_cmd_binder.set_handler("submit_transfer", boost::bind(&simple_wallet::submit_transfer, this, _1), "Submit a signed transaction from a file <tx_sources_file> <result_file>");
+
   m_cmd_binder.set_handler("get_tx_key", boost::bind(&simple_wallet::get_tx_key, this, _1), "Get transaction key (r) for a given <txid>");
   m_cmd_binder.set_handler("check_tx_key", boost::bind(&simple_wallet::check_tx_key, this, _1), "Check amount going to <address> in <txid>");
   m_cmd_binder.set_handler("set_log", boost::bind(&simple_wallet::set_log, this, _1), "set_log <level> - Change current log detalization level, <level> is a number 0-4");
   m_cmd_binder.set_handler("address", boost::bind(&simple_wallet::print_address, this, _1), "Show current wallet public address");
+  m_cmd_binder.set_handler("sign_text", boost::bind(&simple_wallet::sign_text, this, _1), "Sign some random text as a proof");
+  m_cmd_binder.set_handler("validate_text_signature", boost::bind(&simple_wallet::validate_text_signature, this, _1), "Validate signed text's proof: validate_text_signature <text> <address> <signature>");
   m_cmd_binder.set_handler("save", boost::bind(&simple_wallet::save, this, _1), "Save wallet synchronized data");
   m_cmd_binder.set_handler("help", boost::bind(&simple_wallet::help, this, _1), "Show this help");
 }
@@ -384,7 +391,7 @@ bool simple_wallet::open_wallet(const string &wallet_file, const std::string& pa
   try
   {
     m_wallet->load(m_wallet_file, password);
-    message_writer(epee::log_space::console_color_white, true) << "Opened wallet: " << m_wallet->get_account().get_public_address_str();
+    message_writer(epee::log_space::console_color_white, true) << "Opened wallet" << (m_wallet->is_view_only() ? "watch-only" : "" ) << ": " << m_wallet->get_account().get_public_address_str();
   }
   catch (const std::exception& e)
   {
@@ -830,7 +837,11 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   {
     currency::transaction tx;
     m_wallet->transfer(dsts, fake_outs_count, 0, DEFAULT_FEE, extra, tx);
-    success_msg_writer(true) << "Money successfully sent, transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
+    if (!m_wallet->is_view_only() )
+      success_msg_writer(true) << "Money successfully sent, transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
+    else
+      success_msg_writer(true) << "Transaction prepared for signing and saved into \"unsigned_boolberry_tx\" file, use offline wallet top sign transfer and then use command \"submit_transfer\" on this wallet to transfer transaction into the network";
+
   }
   catch (const tools::error::daemon_busy&)
   {
@@ -910,6 +921,90 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+bool simple_wallet::save_watch_only(const std::vector<std::string> &args)
+{
+  if (args.size() < 2)
+  {
+    fail_msg_writer() << "wrong parameters, expected filename and password";
+    return true;
+  }
+  try
+  {
+    m_wallet->store_keys(args[0], args[1], true);
+    success_msg_writer() << "Keys stored to " << args[0];
+  }
+  catch (const std::exception& e)
+  {
+    LOG_ERROR("unexpected error: " << e.what());
+    fail_msg_writer() << "unexpected error: " << e.what();
+  }
+  catch (...)
+  {
+    LOG_ERROR("Unknown error");
+    fail_msg_writer() << "unknown error";
+  }
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::sign_transfer(const std::vector<std::string> &args)
+{
+  if (m_wallet->is_view_only())
+  {
+    fail_msg_writer() << "You can't sign transaction in view-only wallet";
+    return true;
+
+  }
+
+  if (args.size() < 1)
+  {
+    fail_msg_writer() << "wrong parameters, expected filename";
+    return true;
+  }
+  try
+  {
+    currency::transaction res_tx;
+    m_wallet->sign_transfer(args[0], args[1], res_tx);
+    success_msg_writer() << "transaction signed and stored to file: " << args[1] << ", transaction " << get_transaction_hash(res_tx) << ", " << get_object_blobsize(res_tx) << " bytes";
+  }
+  catch (const std::exception& e)
+  {
+    LOG_ERROR("unexpected error: " << e.what());
+    fail_msg_writer() << "unexpected error: " << e.what();
+  }
+  catch (...)
+  {
+    LOG_ERROR("Unknown error");
+    fail_msg_writer() << "unknown error";
+  }
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::submit_transfer(const std::vector<std::string> &args)
+{
+  if (args.size() < 1)
+  {
+    fail_msg_writer() << "wrong parameters, expected filename";
+    return true;
+  }
+  try
+  {
+    currency::transaction res_tx;
+    m_wallet->submit_transfer(args[0], args[1], res_tx);
+    success_msg_writer() << "transaction submitted, " << get_transaction_hash(res_tx) << ", " << get_object_blobsize(res_tx) << " bytes";
+  }
+  catch (const std::exception& e)
+  {
+    LOG_ERROR("unexpected error: " << e.what());
+    fail_msg_writer() << "unexpected error: " << e.what();
+  }
+  catch (...)
+  {
+    LOG_ERROR("Unknown error");
+    fail_msg_writer() << "unknown error";
+  }
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
 bool simple_wallet::get_tx_key(const std::vector<std::string> &args_)
 {
   std::vector<std::string> local_args = args_;
@@ -939,6 +1034,40 @@ bool simple_wallet::get_tx_key(const std::vector<std::string> &args_)
     fail_msg_writer() << "no tx keys found for this txid";
     return true;
   }
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::sign_text(const std::vector<std::string> &args)
+{
+  if (args.size() != 1) 
+  {
+    fail_msg_writer() << "usage: sign_text <text>";
+    return true;
+  }
+  crypto::signature sig = AUTO_VAL_INIT(sig);
+  m_wallet->sign_text(args[0], sig);
+
+  success_msg_writer() << "Signature: " << epee::string_tools::pod_to_hex(sig);
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::validate_text_signature(const std::vector<std::string> &args)
+{
+  if (args.size() != 3)
+  {
+    fail_msg_writer() << "usage: validate_text_signature <text> <address> <signature>";
+    return true;
+  }
+  crypto::signature sig = AUTO_VAL_INIT(sig);
+  if (!epee::string_tools::parse_tpod_from_hex_string(args[2], sig))
+  {
+    fail_msg_writer() << "wrong signature format" << ENDL << "usage: validate_text_signature <text> <address> <signature>";
+    return true;
+  }
+
+  std::string r = m_wallet->validate_signed_text(args[1], args[0], sig);
+
+  success_msg_writer() << "Validation result: " << r;
+  return true;
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::check_tx_key(const std::vector<std::string> &args_)

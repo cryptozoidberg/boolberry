@@ -62,9 +62,9 @@ namespace tools
 
   class wallet2
   {
-    wallet2(const wallet2&) : m_run(true), m_callback(0), m_unconfirmed_balance(0) {};
+    wallet2(const wallet2&) : m_run(true), m_is_view_only(false), m_callback(0), m_unconfirmed_balance(0) {};
   public:
-    wallet2() : m_run(true), m_callback(0), m_core_proxy(new default_http_core_proxy()), m_unconfirmed_balance(0)
+    wallet2() : m_run(true), m_callback(0), m_is_view_only(false), m_core_proxy(new default_http_core_proxy()), m_unconfirmed_balance(0)
     {};
     struct transfer_details
     {
@@ -132,6 +132,15 @@ namespace tools
     void refresh(size_t & blocks_fetched);
     void refresh(size_t & blocks_fetched, bool& received_money);
     bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok);
+
+    void sign_transfer(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
+    void submit_transfer(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
+
+
+    void sign_text(const std::string& text, crypto::signature& sig);
+    std::string validate_signed_text(const std::string& addr, const std::string& text, const crypto::signature& sig);
+    bool generate_view_wallet(const std::string new_name, const std::string& password);
+    bool is_view_only(){ return m_is_view_only;}
     
     bool set_core_proxy(std::shared_ptr<i_core_proxy>& proxy);
     std::shared_ptr<i_core_proxy> get_core_proxy();
@@ -149,6 +158,7 @@ namespace tools
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
     void get_payments(const crypto::hash& payment_id, std::list<payment_details>& payments, uint64_t min_height = 0) const;
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
+    bool store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet = false);
     uint64_t get_blockchain_current_height() const { return m_local_bc_height; }
     template <class t_archive>
     inline void serialize(t_archive &a, const unsigned int ver)
@@ -175,7 +185,7 @@ namespace tools
     }
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
   private:
-    bool store_keys(const std::string& keys_file_name, const std::string& password);
+
     void load_keys(const std::string& keys_file_name, const std::string& password);
     void process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b);
     void process_new_blockchain_entry(const currency::block& b, currency::block_complete_entry& bche, crypto::hash& bl_id, uint64_t height);
@@ -195,9 +205,11 @@ namespace tools
     void handle_money_spent2(const currency::block& b, const currency::transaction& in_tx, uint64_t amount, const money_transfer2_details& td, const std::string& recipient, const std::string& recipient_alias);
     std::string get_alias_for_address(const std::string& addr);
     void wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& utd, wallet_rpc::wallet_transfer_info& wti);
-    
+    void finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result);
+
 
     currency::account_base m_account;
+    bool m_is_view_only;
     std::string m_wallet_file;
     std::string m_keys_file;
     std::vector<crypto::hash> m_blockchain;
@@ -381,6 +393,15 @@ namespace tools
     using namespace currency;
     CHECK_AND_THROW_WALLET_EX(dsts.empty(), error::zero_destination);
 
+    create_tx_arg create_tx_param = AUTO_VAL_INIT(create_tx_param);
+    create_tx_param.extra = extra;
+    create_tx_param.unlock_time = unlock_time;
+    create_tx_param.tx_outs_attr = tx_outs_attr;
+    create_tx_param.spend_pub_key = m_account.get_keys().m_account_address.m_spend_public_key;
+    create_tx_res create_tx_result = AUTO_VAL_INIT(create_tx_result);
+    for (auto& d : dsts)
+      create_tx_param.recipients.push_back(d.addr);
+
     uint64_t needed_money = fee;
     BOOST_FOREACH(auto& dt, dsts)
     {
@@ -431,12 +452,13 @@ namespace tools
  
     //prepare inputs
     size_t i = 0;
-    std::vector<currency::tx_source_entry> sources;
+    std::vector<currency::tx_source_entry>& sources = create_tx_param.sources;
     BOOST_FOREACH(transfer_container::iterator it, selected_transfers)
     {
       sources.resize(sources.size()+1);
       currency::tx_source_entry& src = sources.back();
       transfer_details& td = *it;
+      src.transfer_index = it - m_transfers.begin();
       src.amount = td.amount();
       //paste mixin transaction
       if(daemon_resp.outs.size())
@@ -464,9 +486,9 @@ namespace tools
       tx_output_entry real_oe;
       real_oe.first = td.m_global_output_index;
       real_oe.second = boost::get<txout_to_key>(td.m_tx.vout[td.m_internal_output_index].target).key;
-      auto interted_it = src.outputs.insert(it_to_insert, real_oe);
+      auto inserted_it = src.outputs.insert(it_to_insert, real_oe);
       src.real_out_tx_key = get_tx_pub_key_from_extra(td.m_tx);
-      src.real_output = interted_it - src.outputs.begin();
+      src.real_output = inserted_it - src.outputs.begin();
       src.real_output_in_tx_index = td.m_internal_output_index;
       detail::print_source_entry(src);
       ++i;
@@ -477,10 +499,11 @@ namespace tools
     {
       change_dts.addr = m_account.get_keys().m_account_address;
       change_dts.amount = found_money - needed_money;
+      create_tx_param.change_amount = change_dts.amount;
     }
 
-    uint64_t dust = 0;
-    std::vector<currency::tx_destination_entry> splitted_dsts;
+    uint64_t& dust = create_tx_param.dust;
+    std::vector<currency::tx_destination_entry>& splitted_dsts = create_tx_param.splitted_dsts;
     destination_split_strategy(dsts, change_dts, dust_policy.dust_threshold, splitted_dsts, dust);
     CHECK_AND_THROW_WALLET_EX(dust_policy.dust_threshold < dust, error::wallet_internal_error, "invalid dust value: dust = " +
       std::to_string(dust) + ", dust_threshold = " + std::to_string(dust_policy.dust_threshold));
@@ -488,52 +511,25 @@ namespace tools
     {
       splitted_dsts.push_back(currency::tx_destination_entry(dust, dust_policy.addr_for_dust));
     }
-
-    keypair txkey;
-    bool r = currency::construct_tx(m_account.get_keys(), sources, splitted_dsts, extra, tx, txkey, unlock_time);
-    CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
-    //update_current_tx_limit();
-    CHECK_AND_THROW_WALLET_EX(CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
-
-    std::string key_images;
-    bool all_are_txin_to_key = std::all_of(tx.vin.begin(), tx.vin.end(), [&](const txin_v& s_e) -> bool
-    {
-      CHECKED_GET_SPECIFIC_VARIANT(s_e, const txin_to_key, in, false);
-      key_images += boost::to_string(in.k_image) + " ";
-      return true;
-    });
-    CHECK_AND_THROW_WALLET_EX(!all_are_txin_to_key, error::unexpected_txin_type, tx);
-
-    COMMAND_RPC_SEND_RAW_TX::request req;
-    req.tx_as_hex = epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(tx));
-    COMMAND_RPC_SEND_RAW_TX::response daemon_send_resp;
-    r = m_core_proxy->call_COMMAND_RPC_SEND_RAW_TX(req, daemon_send_resp);  
-    CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "sendrawtransaction");
-    CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
-    CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status != CORE_RPC_STATUS_OK, error::tx_rejected, tx, daemon_send_resp.status);
     
-    std::string recipient;
-    for (const auto& d : dsts)
+    if (m_is_view_only)
     {
-      if (recipient.size())
-        recipient += ", ";
-      recipient += get_account_address_as_str(d.addr);
+      //mark outputs as spent 
+      BOOST_FOREACH(transfer_container::iterator it, selected_transfers)
+        it->m_spent = true;
+      //do offline sig
+      blobdata bl = t_serializable_object_to_blob(create_tx_param);
+      crypto::do_chacha_crypt(bl, m_account.get_keys().m_view_secret_key);
+      epee::file_io_utils::save_string_to_file("unsigned_boolberry_tx", bl);
+      LOG_PRINT_L0("Transaction stored to unsigned_boolberry_tx. Take this file to offline wallet to sign it and then transfer it usign this wallet");
+      return;
     }
-    add_sent_unconfirmed_tx(tx, change_dts.amount, recipient);
+    bool r = currency::construct_tx(m_account.get_keys(), create_tx_param, create_tx_result);
+    CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
+    tx = create_tx_result.tx;
 
-    crypto::hash txid = get_transaction_hash(tx);
-    m_tx_keys.insert(std::make_pair(txid, txkey.sec));
-    
-
-    LOG_PRINT_L2("transaction " << get_transaction_hash(tx) << " generated ok and sent to daemon, key_images: [" << key_images << "]");
-
-    BOOST_FOREACH(transfer_container::iterator it, selected_transfers)
-      it->m_spent = true;
-
-    LOG_PRINT_L0("Transaction successfully sent. <" << get_transaction_hash(tx) << ">" << ENDL 
-                  << "Commission: " << print_money(fee+dust) << " (dust: " << print_money(dust) << ")" << ENDL
-                  << "Balance: " << print_money(balance()) << ENDL
-                  << "Unlocked: " << print_money(unlocked_balance()) << ENDL
-                  << "Please, wait for confirmation for your balance to be unlocked.");
+    finalize_transaction(create_tx_param, create_tx_result);
   }
+
+
 }

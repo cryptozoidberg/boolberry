@@ -22,6 +22,12 @@ namespace currency
       KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(m_spend_secret_key)
       KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(m_view_secret_key)
     END_KV_SERIALIZE_MAP()
+
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(m_account_address)
+      FIELD(m_spend_secret_key)
+      FIELD(m_view_secret_key)
+    END_SERIALIZE()
   };
 
   /************************************************************************/
@@ -30,11 +36,13 @@ namespace currency
   class account_base
   {
   public:
+    account_base(const account_base& ab);
     account_base();
     // return restore seed
     std::vector<unsigned char> generate();
     void restore(const std::vector<unsigned char>& restore_seed);
     const account_keys& get_keys() const;
+    void make_account_view_only();
     std::string get_public_address_str();
 
     uint64_t get_createtime() const { return m_creation_timestamp; }
