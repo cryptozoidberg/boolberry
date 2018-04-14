@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "1.0",
+  "id": "12",
+  "method": "get_bulk_payments",
+  "params": {
+    "payment_ids": ["9e9baed005e99640d900e9ba1fc64b92895161983ae94d6d37358e3f9eea78f8"],
+    "min_block_height": 0
+  }
+}

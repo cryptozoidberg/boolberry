@@ -191,6 +191,7 @@ namespace wallet_rpc
       END_KV_SERIALIZE_MAP()
     };
   };
+
   struct COMMAND_RPC_GET_BULK_PAYMENTS
   {
     struct request
@@ -213,6 +214,7 @@ namespace wallet_rpc
       END_KV_SERIALIZE_MAP()
     };
   };
+
   /*stay-alone instance*/
   struct telepod
   {

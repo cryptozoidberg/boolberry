@@ -888,20 +888,26 @@ bool blockchain_storage::create_block_template(block& b, const account_public_ad
 
     CHECK_AND_ASSERT_MES(r, false, "Failed to construc miner tx, second chance");
     size_t coinbase_blob_size = get_object_blobsize(b.miner_tx);
-    if (coinbase_blob_size > cumulative_size - txs_size) {
+    if (coinbase_blob_size > cumulative_size - txs_size) 
+    {
       cumulative_size = txs_size + coinbase_blob_size;
       continue;
     }
 
-    if (coinbase_blob_size < cumulative_size - txs_size) {
+    if (coinbase_blob_size < cumulative_size - txs_size) 
+    {
       size_t delta = cumulative_size - txs_size - coinbase_blob_size;
+      LOG_PRINT_L1("Inserting to extra(" << b.miner_tx.extra .size() << ") " << delta << " of 00");
       b.miner_tx.extra.insert(b.miner_tx.extra.end(), delta, 0);
       //here  could be 1 byte difference, because of extra field counter is varint, and it can become from 1-byte len to 2-bytes len.
-      if (cumulative_size != txs_size + get_object_blobsize(b.miner_tx)) {
+      if (cumulative_size != txs_size + get_object_blobsize(b.miner_tx))
+      {
         CHECK_AND_ASSERT_MES(cumulative_size + 1 == txs_size + get_object_blobsize(b.miner_tx), false, "unexpected case: cumulative_size=" << cumulative_size << " + 1 is not equal txs_cumulative_size=" << txs_size << " + get_object_blobsize(b.miner_tx)=" << get_object_blobsize(b.miner_tx));
+        LOG_PRINT_L1("Resizing extra " << b.miner_tx.extra.size() << " -->>" << b.miner_tx.extra.size() - 1);
         b.miner_tx.extra.resize(b.miner_tx.extra.size() - 1);
-        if (cumulative_size != txs_size + get_object_blobsize(b.miner_tx)) {
-          //fuck, not lucky, -1 makes varint-counter size smaller, in that case we continue to grow with cumulative_size
+        if (cumulative_size != txs_size + get_object_blobsize(b.miner_tx)) 
+        {
+          //unlucky, -1 makes varint-counter size smaller, in that case we continue to grow with cumulative_size
           LOG_PRINT_RED("Miner tx creation have no luck with delta_extra size = " << delta << " and " << delta - 1 , LOG_LEVEL_2);
           cumulative_size += delta - 1;
           continue;
