@@ -471,26 +471,7 @@ namespace currency
       LOG_ERROR("Failed to create block template");
       return false;
     }
-    //self validating code for alias registration problem(reported bny Clintar)
-    if (ai.m_alias.size())
-    {
-      tx_extra_info tei = AUTO_VAL_INIT(tei);
-      bool r = parse_and_validate_tx_extra(b.miner_tx, tei);
-      if (!r)
-      {
-        error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
-        error_resp.message = "Internal error: failed to create block template, self extra_info validation failed";
-        LOG_ERROR("Failed to validate extra");
-        return false;
-      }
-      if (!tei.m_alias.m_alias.size())
-      {
-        error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
-        error_resp.message = "Internal error: failed to create block template, self extra_info validation failed: alias not found in extra";
-        LOG_ERROR("Failed to validate extra: alias not found");
-        return false;
-      }
-    }
+
 
     res.difficulty = dt.convert_to<uint64_t>();
     blobdata block_blob = t_serializable_object_to_blob(b);
@@ -512,6 +493,33 @@ namespace currency
     }
     res.blocktemplate_blob = string_tools::buff_to_hex_nodelimer(block_blob);
     res.status = CORE_RPC_STATUS_OK;
+
+
+    //self validating code for alias registration problem(reported by Clintar)
+    if (ai.m_alias.size())
+    {
+      tx_extra_info tei = AUTO_VAL_INIT(tei);
+      bool r = parse_and_validate_tx_extra(b.miner_tx, tei);
+      if (!r)
+      {
+        error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
+        error_resp.message = "Internal error: failed to create block template, self extra_info validation failed";
+        LOG_ERROR("Failed to validate extra");
+        return false;
+      }
+      if (!tei.m_alias.m_alias.size())
+      {
+        error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
+        error_resp.message = "Internal error: failed to create block template, self extra_info validation failed: alias not found in extra";
+        LOG_ERROR("Failed to validate extra: alias not found");
+        return false;
+      }
+      LOG_PRINT_L0("BLOCK_WITH_ALIAS( " << tei.m_alias.m_alias << "): " << ENDL
+        << currency::obj_to_json_str(b) << ENDL
+        << res.blocktemplate_blob
+        );
+    }
+
 
     return true;
   }
