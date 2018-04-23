@@ -3,9 +3,12 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #pragma once
 
+#include <set>
+#include <memory>
 #include "misc_language.h"
 #include "misc_log_ex.h"
 #include "currency_core/currency_format_utils.h"
+#include "epee/include/db_helpers.h"
 
 namespace db
 {
@@ -19,6 +22,14 @@ namespace db
     // visitor callback, would be called for each item in a table
     // return value: false to stop the process, true - to continue
     virtual bool on_visit_db_item(size_t i, const void* key_data, size_t key_size, const void* value_data, size_t value_size) = 0;
+  };
+
+  class i_db_write_tx_notification_receiver
+  {
+  public:
+    virtual void on_write_transaction_begin() = 0;
+    virtual void on_write_transaction_commit() = 0;
+    virtual void on_write_transaction_abort() = 0;
   };
 
   // interface for database implementation
@@ -63,7 +74,23 @@ namespace db
     tkey_out = *static_cast<tkey_pod_t*>(pointer);
   }
 
-  
+  // std::string table keys accessors
+  inline const char* tkey_to_pointer(const std::string& key, size_t& len) 
+  {
+    len = key.size();
+    return key.data();
+  }
+
+  inline void tkey_from_pointer(std::string& key_out, const void* pointer, uint64_t len)
+  {
+    CHECK_AND_ASSERT_THROW_MES(pointer, "pointer is null");
+    key_out.assign(reinterpret_cast<const char*>(pointer), static_cast<size_t>(len));
+  }
+
+
+  ////////////////////////////////////////////////////////////
+  // db_bridge_base
+  ////////////////////////////////////////////////////////////
   class db_bridge_base
   {
   public:
@@ -81,6 +108,12 @@ namespace db
     {
       // TODO     !!!
       bool r = m_db_adapter_ptr->begin_transaction(read_only_access);
+
+      {
+        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);        for (auto c : m_attached_container_receivers)
+          c->on_write_transaction_begin();
+      }
+
       return r;
     }
 
@@ -89,12 +122,22 @@ namespace db
       // TODO    !!!
       bool r = m_db_adapter_ptr->commit_transaction();
       CHECK_AND_ASSERT_THROW_MES(r, "commit_transaction failed");
+
+      {
+        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);        for (auto c : m_attached_container_receivers)
+          c->on_write_transaction_commit();
+      }
     }
 
     void abort_db_transaction()
     {
       // TODO     !!!
       m_db_adapter_ptr->abort_transaction();
+
+      {
+        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);        for (auto c : m_attached_container_receivers)
+          c->on_write_transaction_abort();
+      }
     }
 
     bool is_open() const
@@ -130,7 +173,7 @@ namespace db
     }
 
     template<class tkey_pod_t>
-    bool erase(table_id tid, const tkey_pod_t& tkey)
+    bool erase(const table_id tid, const tkey_pod_t& tkey)
     {
       size_t key_size = 0;
       const char* key_data = tkey_to_pointer(tkey, key_size);
@@ -194,11 +237,262 @@ namespace db
       return true;
     }
 
+    void attach_container_receiver(i_db_write_tx_notification_receiver *receiver)
+    {
+      CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);      bool r = m_attached_container_receivers.insert(receiver).second;      CHECK_AND_ASSERT_THROW_MES(r, "failed, container already attached");    }
+
+    void detach_container_receiver(i_db_write_tx_notification_receiver *receiver)
+    {
+      CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);      bool r = m_attached_container_receivers.erase(receiver) == 1;      CHECK_AND_ASSERT_THROW_MES(r, "failed, container has never been attached");    }
 
     protected:
       std::shared_ptr<i_db_adapter> m_db_adapter_ptr;
       bool m_db_opened;
+
+    private:
+      epee::critical_section m_attached_container_receivers_lock;
+      std::set<i_db_write_tx_notification_receiver*> m_attached_container_receivers;
+
+  }; // db_bridge_base
+
+
+  class pod_object_value_helper
+  {
+  public:
+    template<class value_t>
+    static bool tvalue_from_pointer(const void* p, uint64_t s, value_t& v)
+    {
+      // TODO
+      return true;
+    }
+
+    template<class key_t, class value_t>
+    static std::shared_ptr<const value_t> get(const table_id tid, db_bridge_base& dbb, const key_t& k)
+    {
+      // TODO
+      return nullptr;
+    }
+
+    template<class key_t, class value_t>
+    static void set(const table_id tid, db_bridge_base& dbb, const key_t& k, const value_t& v)
+    {
+      // TODO
+    }
   };
+
+  class serializable_object_value_helper
+  {
+  public:
+    template<class value_t>
+    static bool tvalue_from_pointer(const void* p, uint64_t s, value_t& v)
+    {
+      // TODO
+      return true;
+    }
+
+    template<class key_t, class value_t>
+    static std::shared_ptr<const value_t> get(const table_id tid, db_bridge_base& dbb, const key_t& k)
+    {
+      // TODO
+      return nullptr;
+    }
+
+    template<class key_t, class value_t>
+    static void set(const table_id tid, db_bridge_base& dbb, const key_t& k, const value_t& v)
+    {
+      // TODO
+    }
+  };
+
+  template<bool value_type_serializable>
+  class value_type_helper_selector;
+
+  template<>
+  class value_type_helper_selector<true>: public serializable_object_value_helper
+  {};
+
+  template<>
+  class value_type_helper_selector<false>: public pod_object_value_helper
+  {};
+
+
+  ////////////////////////////////////////////////////////////
+  // key_value_accessor_base
+  ////////////////////////////////////////////////////////////
+  template<class key_t, class value_t, bool value_type_serializable>
+  class key_value_accessor_base : public i_db_write_tx_notification_receiver
+  {
+  public:
+    typedef value_t t_value_type;
+
+    key_value_accessor_base(db_bridge_base& dbb)
+      : m_dbb(dbb)
+      , m_tid(AUTO_VAL_INIT(m_tid))
+      , m_cached_size(0)
+      , m_cached_size_is_valid(false)
+    {
+      m_dbb.attach_container_receiver(this);
+    }
+
+    ~key_value_accessor_base()
+    {
+      m_dbb.dettach_container_receiver(this);
+    }
+
+    bool begin_transaction(bool read_only = false)
+    {
+      return m_dbb.begin_transaction(read_only);
+    }
+
+    // interface i_db_write_tx_notification_receiver
+    virtual void on_write_transaction_begin() override
+    {
+      m_exclusive_runner.set_exclusive_mode_for_this_thread();
+    }
+
+    // interface i_db_write_tx_notification_receiver
+    virtual void on_write_transaction_abort() override
+    {
+      m_exclusive_runner.clear_exclusive_mode_for_this_thread();
+    }
+
+    // interface i_db_write_tx_notification_receiver
+    virtual void on_write_transaction_commit() override
+    {
+      m_exclusive_runner.clear_exclusive_mode_for_this_thread();
+    }
+
+    
+    void commit_transaction()
+    {
+      try
+      {
+        m_dbb.commit_transaction();
+      }
+      catch (...)
+      {
+        m_cached_size_is_valid = false;
+        throw;
+      }
+    }
+
+    void abort_transaction()
+    {
+      m_cached_size_is_valid = false;
+      m_dbb.abort_transaction();
+    }
+
+    bool init(const std::string& table_name)
+    {
+      return m_dbb.get_adapter()->open_table(table_name, m_tid);
+    }
+
+    template<class callback_t>
+    void enumerate_keys(callback_t callback) const 
+    {
+      // TODO
+    }
+
+    template<class callback_t>
+    void enumerate_items(callback_t callback)const 
+    {
+      // TODO
+    }
+
+    void set(const key_t& key, const value_t& value)
+    {
+      m_cached_size_is_valid = false;
+      value_type_helper_selector<value_type_serializable>::set(m_tid, m_dbb, key, value);
+    }
+
+    std::shared_ptr<const value_t> get(const key_t& key) const
+    {
+      return value_type_helper_selector<value_type_serializable>::template get<key_t, value_t>(m_tid, m_dbb, key);
+    }
+
+    template<class explicit_key_t, class explicit_value_t, class object_value_helper_t>
+    void explicit_set(const explicit_key_t& key, const explicit_value_t& value)
+    {
+      m_cached_size_is_valid = false;
+      object_value_helper_t::set(m_tid, m_dbb, key, value);
+    }
+
+    template<class explicit_key_t, class explicit_value_t, class object_value_helper_t>
+    std::shared_ptr<const explicit_value_t> explicit_get(const explicit_key_t& key)
+    {
+      return object_value_helper_t::template get<explicit_key_t, explicit_value_t>(m_tid, m_dbb, key);
+    }
+
+    uint64_t size() const
+    {
+      return m_exclusive_runner.run<uint64_t>([this](bool exclusive_mode)
+      {
+        if (exclusive_mode && m_cached_size_is_valid)
+          return m_cached_size;
+
+        uint64_t size = m_dbb.size(m_tid);
+        if (exclusive_mode)
+        {
+          m_cached_size = size;
+          m_cached_size_is_valid = true;
+        }
+        return size;
+      });
+    }
+
+    uint64_t size_no_cache() const
+    {
+      return m_dbb.size(m_tid);
+    }
+
+    size_t clear()
+    {
+      m_dbb.clear(m_tid);
+      m_exclusive_runner.run_exclusively<bool>([this](){
+        m_cached_size_is_valid = false;
+        return true;
+      });
+      return true;
+    }
+
+    bool erase_validate(const key_t& k)
+    {
+      auto res_ptr = this->get(k);
+      m_dbb.erase(m_tid, k);
+      m_exclusive_runner.run_exclusively<bool>([&](){
+        m_cached_size_is_valid = false;
+        return true;
+      });
+      return static_cast<bool>(res_ptr);
+    }
+
+
+    void erase(const key_t& k)
+    {
+      m_dbb.erase(m_tid, k);
+      m_exclusive_runner.run_exclusively<bool>([&](){
+        m_cached_size_is_valid = false;
+        return true;
+      });
+    }
+
+    std::shared_ptr<const value_t> operator[] (const key_t& k) const
+    {
+      auto r = this->get(k);
+      CHECK_AND_ASSERT_THROW(r.get(), std::out_of_range("Out of range"));
+      return r;
+    }
+
+  protected:
+    table_id m_tid;
+    db_bridge_base& m_dbb;
+    epee::misc_utils::exclusive_access_helper m_exclusive_runner;
+
+  private:
+    mutable uint64_t m_cached_size;
+    mutable bool m_cached_size_is_valid;
+  }; // class key_value_accessor_base
+
     
 
 } // namespace db
