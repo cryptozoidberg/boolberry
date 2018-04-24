@@ -66,7 +66,7 @@ namespace db
   }
 
   template<class tkey_pod_t>
-  void tkey_from_pointer(tkey_pod_t& tkey_out, const void* pointer, const uint64_t len)
+  void tkey_from_pointer(tkey_pod_t& tkey_out, const void* pointer, const size_t len)
   {
     static_assert(std::is_pod<tkey_pod_t>::value, "pod type expected");
     CHECK_AND_ASSERT_THROW_MES(sizeof(tkey_pod_t) == len, "wrong size");
@@ -81,7 +81,7 @@ namespace db
     return key.data();
   }
 
-  inline void tkey_from_pointer(std::string& key_out, const void* pointer, uint64_t len)
+  inline void tkey_from_pointer(std::string& key_out, const void* pointer, size_t len)
   {
     CHECK_AND_ASSERT_THROW_MES(pointer, "pointer is null");
     key_out.assign(reinterpret_cast<const char*>(pointer), static_cast<size_t>(len));
@@ -167,7 +167,7 @@ namespace db
       return m_db_adapter_ptr->clear_table(tid);
     }
 
-    uint64_t size(const table_id tid) const
+    size_t size(const table_id tid) const
     {
       return m_db_adapter_ptr->get_table_size(tid);
     }
@@ -260,23 +260,30 @@ namespace db
   {
   public:
     template<class value_t>
-    static bool tvalue_from_pointer(const void* p, uint64_t s, value_t& v)
+    static bool tvalue_from_pointer(const void* p, size_t s, value_t& v)
     {
-      // TODO
+      CHECK_AND_ASSERT_THROW_MES(s == sizeof(value_t), "wrong argument s = " << s << "expected: " << sizeof(value_t));
+      v = *reinterpret_cast<value_t*>(v);
       return true;
     }
 
     template<class key_t, class value_t>
     static std::shared_ptr<const value_t> get(const table_id tid, db_bridge_base& dbb, const key_t& k)
     {
-      // TODO
+      static_assert(std::is_pod<value_t>::value, "POD type expected");
+
+      std::shared_ptr<const value_t> result = std::make_shared<value_t>();
+      if (dbb.get_pod_object(tid, k, *result.get()))
+        return result;
+      
       return nullptr;
     }
 
     template<class key_t, class value_t>
     static void set(const table_id tid, db_bridge_base& dbb, const key_t& k, const value_t& v)
     {
-      // TODO
+      static_assert(std::is_pod<value_t>::value, "POD type expected");
+      dbb.set_pod_object(tid, k, v);
     }
   };
 
@@ -284,23 +291,26 @@ namespace db
   {
   public:
     template<class value_t>
-    static bool tvalue_from_pointer(const void* p, uint64_t s, value_t& v)
+    static bool tvalue_from_pointer(const void* p, size_t s, value_t& v)
     {
-      // TODO
-      return true;
+      std::string buffer(static_cast<const char*>(p), s);
+      return t_unserializable_object_from_blob(v, src_blob);
     }
 
     template<class key_t, class value_t>
     static std::shared_ptr<const value_t> get(const table_id tid, db_bridge_base& dbb, const key_t& k)
     {
-      // TODO
+      std::shared_ptr<const value_t> result = std::make_shared<value_t>();
+      if (dbb.get_serializable_object(tid, k, *result.get()))
+        return result;
+      
       return nullptr;
     }
 
     template<class key_t, class value_t>
     static void set(const table_id tid, db_bridge_base& dbb, const key_t& k, const value_t& v)
     {
-      // TODO
+      dbb.set_serializable_object(tid, k, v);
     }
   };
 
@@ -314,6 +324,42 @@ namespace db
   template<>
   class value_type_helper_selector<false>: public pod_object_value_helper
   {};
+
+
+  template<typename callback_t, typename key_t>
+  struct table_keys_visitor : public i_db_visitor
+  {
+    callback_t& m_callback;
+    table_keys_visitor(callback_t& cb) : m_callback(cb)
+    {}
+
+    virtual bool on_visit_db_item(size_t i, const void* key_data, size_t key_size, const void* value_data, size_t value_size) override
+    {
+      key_t key = AUTO_VAL_INIT(key);
+      tkey_from_pointer(key, key_data, key_size);
+      return m_callback(i, key);
+    }
+  };
+
+  template<typename callback_t, typename key_t, typename value_t, bool value_type_serializable>
+  struct table_keys_and_values_visitor : public i_db_visitor
+  {
+    callback_t& m_callback;
+    table_keys_and_values_visitor(callback_t& cb) : m_callback(cb)
+    {}
+
+    virtual bool on_visit_db_item(size_t i, const void* key_data, size_t key_size, const void* value_data, size_t value_size) override
+    {
+      key_t key = AUTO_VAL_INIT(key);
+      tkey_from_pointer(key, key_data, key_size);
+
+      value_t value = AUTO_VAL_INIT(value);
+      value_type_helper_selector<value_type_serializable>::tvalue_from_pointer(value_data, value_size, value);
+
+      return m_callback(i, key, value);
+    }
+  };
+
 
 
   ////////////////////////////////////////////////////////////
@@ -390,13 +436,15 @@ namespace db
     template<class callback_t>
     void enumerate_keys(callback_t callback) const 
     {
-      // TODO
+      table_keys_visitor<callback_t, key_t> visitor(callback);
+      m_dbb.get_adapter()->visit_table(m_tid, &visitor);
     }
 
     template<class callback_t>
-    void enumerate_items(callback_t callback)const 
+    void enumerate_items(callback_t callback) const 
     {
-      // TODO
+      table_keys_and_values_visitor<callback_t, key_t, value_t, value_type_serializable> visitor(callback);
+      m_dbb.get_adapter()->visit_table(m_tid, &visitor);
     }
 
     void set(const key_t& key, const value_t& value)
@@ -423,14 +471,14 @@ namespace db
       return object_value_helper_t::template get<explicit_key_t, explicit_value_t>(m_tid, m_dbb, key);
     }
 
-    uint64_t size() const
+    size_t size() const
     {
-      return m_exclusive_runner.run<uint64_t>([this](bool exclusive_mode)
+      return m_exclusive_runner.run<size_t>([this](bool exclusive_mode)
       {
         if (exclusive_mode && m_cached_size_is_valid)
           return m_cached_size;
 
-        uint64_t size = m_dbb.size(m_tid);
+        size_t size = m_dbb.size(m_tid);
         if (exclusive_mode)
         {
           m_cached_size = size;
@@ -440,7 +488,7 @@ namespace db
       });
     }
 
-    uint64_t size_no_cache() const
+    size_t size_no_cache() const
     {
       return m_dbb.size(m_tid);
     }
@@ -489,7 +537,7 @@ namespace db
     epee::misc_utils::exclusive_access_helper m_exclusive_runner;
 
   private:
-    mutable uint64_t m_cached_size;
+    mutable size_t m_cached_size;
     mutable bool m_cached_size_is_valid;
   }; // class key_value_accessor_base
 
