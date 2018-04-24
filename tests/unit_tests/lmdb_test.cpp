@@ -152,7 +152,7 @@ namespace lmdb_test
           r = m_lmdb_adapter->set(m_table_id, (const char*)&key, sizeof key, buffer, sizeof buffer);
           CHECK_AND_ASSERT_MES_NO_RET(r, "set");
 
-          uint64_t table_size = m_lmdb_adapter->get_table_size(m_table_id);
+          size_t table_size = m_lmdb_adapter->get_table_size(m_table_id);
 
           r = m_lmdb_adapter->commit_transaction();
           CHECK_AND_ASSERT_MES_NO_RET(r, "commit_transaction");
@@ -193,7 +193,7 @@ namespace lmdb_test
           r = m_lmdb_adapter->erase(m_table_id, (const char*)&key, sizeof key);
           CHECK_AND_ASSERT_MES_NO_RET(r, "erase");
 
-          uint64_t table_size = m_lmdb_adapter->get_table_size(m_table_id);
+          size_t table_size = m_lmdb_adapter->get_table_size(m_table_id);
 
           r = m_lmdb_adapter->commit_transaction();
           CHECK_AND_ASSERT_MES_NO_RET(r, "commit_transaction");
@@ -235,7 +235,7 @@ namespace lmdb_test
         {
           sum += *reinterpret_cast<const uint64_t*>(value.data());
 
-          uint64_t table_size = m_lmdb_adapter->get_table_size(m_table_id);
+          size_t table_size = m_lmdb_adapter->get_table_size(m_table_id);
 
           r = m_lmdb_adapter->commit_transaction();
           CHECK_AND_ASSERT_MES_NO_RET(r, "commit_transaction");
@@ -255,7 +255,7 @@ namespace lmdb_test
 
     bool check()
     {
-      uint64_t table_size = m_lmdb_adapter->get_table_size(m_table_id);
+      size_t table_size = m_lmdb_adapter->get_table_size(m_table_id);
       CHECK_AND_ASSERT_MES(table_size == 2, false, "2 elements are expected to left");
 
       m_counter = 0;
