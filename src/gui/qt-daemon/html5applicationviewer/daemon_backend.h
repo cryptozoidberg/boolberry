@@ -52,6 +52,7 @@ public:
 	  const std::string& password);
   bool close_wallet();
   bool transfer(const view::transfer_params& tp, currency::transaction& res_tx);
+  bool sign_text(const std::string& text, const std::string& signature_hex)
   bool get_aliases(view::alias_set& al_set);
   std::string get_config_folder();
 private:
