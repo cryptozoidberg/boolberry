@@ -393,11 +393,6 @@ namespace db
       m_dbb.detach_container_receiver(this);
     }
 
-    bool begin_transaction(bool read_only = false)
-    {
-      return m_dbb.begin_transaction(read_only);
-    }
-
     // interface i_db_write_tx_notification_receiver
     virtual void on_write_transaction_begin() override
     {
@@ -416,12 +411,16 @@ namespace db
       m_exclusive_runner.clear_exclusive_mode_for_this_thread();
     }
 
-    
+    bool begin_transaction(bool read_only = false)
+    {
+      return m_dbb.begin_db_transaction(read_only);
+    }
+
     void commit_transaction()
     {
       try
       {
-        m_dbb.commit_transaction();
+        m_dbb.commit_db_transaction();
       }
       catch (...)
       {
@@ -433,7 +432,7 @@ namespace db
     void abort_transaction()
     {
       m_cached_size_is_valid = false;
-      m_dbb.abort_transaction();
+      m_dbb.abort_db_transaction();
     }
 
     bool init(const std::string& table_name)
@@ -506,14 +505,14 @@ namespace db
       return m_dbb.size(m_tid);
     }
 
-    size_t clear()
+    bool clear()
     {
-      m_dbb.clear(m_tid);
+      bool r = m_dbb.clear(m_tid);
       m_exclusive_runner.run_exclusively<bool>([this](){
         m_cached_size_is_valid = false;
         return true;
       });
-      return true;
+      return r;
     }
 
     bool erase_validate(const key_t& k)
@@ -530,7 +529,8 @@ namespace db
 
     void erase(const key_t& k)
     {
-      m_dbb.erase(m_tid, k);
+      bool r = m_dbb.erase(m_tid, k);
+      CHECK_AND_ASSERT_THROW_MES(r, "trying to erase a non-existing element");
       m_exclusive_runner.run_exclusively<bool>([&](){
         m_cached_size_is_valid = false;
         return true;
@@ -697,7 +697,7 @@ namespace db
 
   private:
 
-    const uuid128_key array_counter_suffix_key = { 0x3243F6A8885A308D, 0x313198A2E0370734 };
+    const uuid128_key array_counter_suffix_key = { 0x3243F6A8885A308D, 0x313198A2E0370734 }; // just a number to store array counter using complex_key
 
     single_value<complex_key<array_key_t, uuid128_key>, size_t, super> get_counter_accessor(const array_key_t& array_key)
     {
@@ -712,8 +712,44 @@ namespace db
       complex_key<array_key_t, uuid128_key> cc = { array_key, array_counter_suffix_key };
       return const_single_value<complex_key<array_key_t, uuid128_key>, size_t, super >(cc, *this);
     }
-  };
+  }; // class key_to_array_accessor_base
 
+
+  template<class value_t, bool value_type_is_serializable>
+  class array_accessor : public key_value_accessor_base<size_t, value_t, value_type_is_serializable>
+  {
+  public: 
+    typedef key_value_accessor_base<size_t, value_t, value_type_is_serializable> super;
+
+    array_accessor(db_bridge_base& dbb)
+      : super(dbb)
+    {}
+
+    void push_back(const value_t& v)
+    {
+      set(size(), v);
+    }
+
+    void pop_back()
+    {
+      erase(size() - 1);
+    }
+
+    std::shared_ptr<const value_t> back() const
+    {
+      std::shared_ptr<const value_t> ptr = get(size() - 1);
+      CHECK_AND_ASSERT_THROW_MES(static_cast<bool>(ptr), "back() exceeding the limits: size() = " << size() << ", size_no_cache() = " << size_no_cache());
+      return ptr;
+    }
+
+    std::shared_ptr<const value_t> operator[] (size_t k) const
+    {
+      std::shared_ptr<const value_t> ptr = get(k);
+      CHECK_AND_ASSERT_THROW_MES(static_cast<bool>(ptr), "operator[] exceeding the limits with key " << k << ": size() = " << size() << ", size_no_cache() = " << size_no_cache());
+      return ptr;
+    }
+
+  }; // class array_accessor
     
 
 } // namespace db

@@ -678,5 +678,109 @@ namespace lmdb_test
     ASSERT_TRUE(dbb.close());
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  // array_accessor_test
+  //////////////////////////////////////////////////////////////////////////////
+  TEST(lmdb, array_accessor_test)
+  {
+    bool r = false;
+
+    const std::string array_table_name("array");
+    
+    std::shared_ptr<db::lmdb_adapter> lmdb_ptr = std::make_shared<db::lmdb_adapter>();
+    db::db_bridge_base dbb(lmdb_ptr);
+
+    db::array_accessor<serializable_string, true> db_array(dbb);
+
+    ASSERT_TRUE(dbb.open("array_accessor_test"));
+
+    // clear table
+    db::table_id tid;
+    ASSERT_TRUE(lmdb_ptr->open_table(array_table_name, tid));
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.clear(tid));
+    dbb.commit_db_transaction();
+
+    // check defaults
+    ASSERT_TRUE(db_array.init(array_table_name));
+    ASSERT_TRUE(db_array.begin_transaction(true));
+
+    size_t count = db_array.size();
+    ASSERT_EQ(count, 0);
+    count = db_array.size_no_cache();
+    ASSERT_EQ(count, 0);
+
+    std::shared_ptr<const serializable_string> ptr;
+    r = false;
+    try
+    {
+      ptr = db_array.back();
+    }
+    catch(...)
+    {
+      r = true;
+    }
+    ASSERT_TRUE(r);
+
+    ASSERT_FALSE(db_array.clear()); // clear() should fail on read-only transaction
+
+    r = false;
+    try
+    {
+      ptr = db_array[0];
+    }
+    catch(...)
+    {
+      r = true;
+    }
+    ASSERT_TRUE(r);
+
+    db_array.commit_transaction();
+
+
+
+    ASSERT_TRUE(db_array.begin_transaction());
+    db_array.push_back(serializable_string("A"));
+    db_array.push_back(serializable_string("B"));
+    db_array.push_back(serializable_string("C"));
+    db_array.push_back(serializable_string("D"));
+    db_array.push_back(serializable_string("E"));
+    db_array.commit_transaction();
+
+    ASSERT_TRUE(db_array.begin_transaction());
+    ptr = db_array[4];
+    ASSERT_EQ(ptr->v, "E");
+    db_array.pop_back();
+    ASSERT_EQ(db_array.size(), 4);
+
+    r = false;
+    try
+    {
+      ptr = db_array[4];
+    }
+    catch(...)
+    {
+      r = true;
+    }
+    ASSERT_TRUE(r);
+
+    ptr = db_array[3];
+    ASSERT_EQ(ptr->v, "D");
+
+    db_array.push_back(serializable_string("X"));
+
+    ptr = db_array[4];
+    ASSERT_EQ(ptr->v, "X");
+
+    ASSERT_TRUE(db_array.clear());
+
+    db_array.commit_transaction();
+
+
+    ASSERT_TRUE(db_array.begin_transaction(true));
+    count = db_array.size();
+    ASSERT_EQ(count, 0);
+    db_array.commit_transaction();
+  }
 
 }
