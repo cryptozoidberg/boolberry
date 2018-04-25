@@ -479,7 +479,7 @@ namespace db
     }
 
     template<class explicit_key_t, class explicit_value_t, class object_value_helper_t>
-    std::shared_ptr<const explicit_value_t> explicit_get(const explicit_key_t& key)
+    std::shared_ptr<const explicit_value_t> explicit_get(const explicit_key_t& key) const
     {
       return object_value_helper_t::template get<explicit_key_t, explicit_value_t>(m_tid, m_dbb, key);
     }
@@ -555,7 +555,10 @@ namespace db
   }; // class key_value_accessor_base
 
 
-  template<typename key_t, typename value_t, typename accessor_t, bool value_type_is_serializable>
+  ////////////////////////////////////////////////////////////
+  // single_value
+  ////////////////////////////////////////////////////////////
+  template<typename key_t, typename value_t, typename accessor_t, bool value_type_is_serializable = false>
   class single_value
   {
   public:
@@ -587,9 +590,130 @@ namespace db
     }
 
   private:
+    template<typename key_t, typename value_t, typename accessor_t, bool value_type_is_serializable>
+    friend class const_single_value;
+
     key_t m_key;
     accessor_t& m_accessor;
+  }; // single_value
+
+  template<typename key_t, typename value_t, typename accessor_t, bool value_type_is_serializable = false>
+  class const_single_value
+  {
+  public:
+    const_single_value(const key_t& key, const accessor_t& accessor)
+      : m_key(key)
+      , m_accessor(accessor)
+    {}
+
+    const_single_value(const const_single_value& rhs)
+      : m_key(rhs.m_key)
+      , m_accessor(rhs.m_accessor)
+    {}
+
+    const_single_value(const single_value<key_t, value_t, accessor_t, value_type_is_serializable>& rhs)
+      : m_key(rhs.m_key)
+      , m_accessor(rhs.m_accessor)
+    {}
+
+    const_single_value& operator=(const const_single_value&) = delete;
+
+    operator value_t() const 
+    {
+      std::shared_ptr<const value_t> value_ptr = m_accessor.template explicit_get<key_t, value_t, value_type_helper_selector<value_type_is_serializable> >(m_key);
+      if (value_ptr.get())
+        return *value_ptr.get();
+
+      return AUTO_VAL_INIT(value_t());
+    }
+
+  private:
+    key_t m_key;
+    const accessor_t& m_accessor;
+  }; // const_single_value
+
+
+  ////////////////////////////////////////////////////////////
+  // arrays
+  ////////////////////////////////////////////////////////////
+#pragma pack(push, 1)
+  template<typename key_a_t, typename key_b_t>
+  struct complex_key
+  {
+    key_a_t key_a;
+    key_b_t key_b;
   };
+  struct uuid128_key
+  {
+    uint64_t l;
+    uint64_t h;
+  };
+#pragma pack(pop)
+
+  template<class array_key_t, class value_t, bool value_type_is_serializable>
+  class key_to_array_accessor_base : public key_value_accessor_base<complex_key<array_key_t, size_t>, value_t, value_type_is_serializable>
+  {
+  public:
+    typedef key_value_accessor_base<complex_key<array_key_t, size_t>, value_t, value_type_is_serializable> super;
+
+    key_to_array_accessor_base(db_bridge_base& dbb)
+      : super(dbb)
+    {}
+
+    size_t get_array_size(const array_key_t& array_key) const
+    {
+      return get_const_counter_accessor(array_key);
+    }
+
+    std::shared_ptr<const value_t> get_item(const array_key_t& array_key, size_t i) const
+    {
+      size_t count = get_array_size(array_key);
+      CHECK_AND_ASSERT_THROW_MES(i < count, "array key " << array_key << ": item index " << i << " exceeds elements count == " << count);
+      complex_key<array_key_t, size_t> ck{ array_key, i };
+      return get(ck);
+    }
+
+    void push_back_item(const array_key_t& array_key, const value_t& v)
+    {
+      auto counter = get_counter_accessor(array_key);
+      size_t new_index = counter;
+      counter = new_index + 1;
+      complex_key<array_key_t, size_t> ck{ array_key, new_index };
+      set(ck, v);
+    }
+
+    void pop_back_item(const array_key_t& array_key)
+    { 
+      auto counter = get_counter_accessor(array_key);
+      size_t count = counter;
+
+      CHECK_AND_ASSERT_THROW_MES(count > 0, "array key " << array_key << ": no items for pop back");
+  
+      count = count - 1;
+      counter = count;
+      complex_key<array_key_t, size_t> ck{ array_key, count };
+      erase(ck);
+    }
+
+  private:
+
+    const uuid128_key array_counter_suffix_key = { 0x3243F6A8885A308D, 0x313198A2E0370734 };
+
+    single_value<complex_key<array_key_t, uuid128_key>, size_t, super> get_counter_accessor(const array_key_t& array_key)
+    {
+      static_assert(std::is_pod<array_key_t>::value, "POD type expected");
+      complex_key<array_key_t, uuid128_key> cc = { array_key, array_counter_suffix_key}; 
+      return single_value<complex_key<array_key_t, uuid128_key>, size_t, super >(cc, *this);
+    }
+
+    const_single_value<complex_key<array_key_t, uuid128_key>, size_t, super> get_const_counter_accessor(const array_key_t& array_key) const
+    {
+      static_assert(std::is_pod<array_key_t>::value, "POD type expected");
+      complex_key<array_key_t, uuid128_key> cc = { array_key, array_counter_suffix_key };
+      return const_single_value<complex_key<array_key_t, uuid128_key>, size_t, super >(cc, *this);
+    }
+  };
+
     
 
 } // namespace db

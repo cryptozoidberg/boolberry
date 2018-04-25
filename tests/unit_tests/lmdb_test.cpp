@@ -466,7 +466,7 @@ namespace lmdb_test
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  // 
+  // single_value_test
   //////////////////////////////////////////////////////////////////////////////
   struct serializable_string
   {
@@ -546,6 +546,132 @@ namespace lmdb_test
     h = option_hash;
     ASSERT_EQ(h, crypto::cn_fast_hash(options_table_name.c_str(), options_table_name.size()));
 
+    dbb.commit_db_transaction();
+
+
+    ASSERT_TRUE(dbb.close());
+  }
+
+
+  //////////////////////////////////////////////////////////////////////////////
+  // array_basic_test
+  //////////////////////////////////////////////////////////////////////////////
+  TEST(lmdb, array_basic_test)
+  {
+    bool r = false;
+
+    const std::string array_table_name("test_array");
+    
+    std::shared_ptr<db::lmdb_adapter> lmdb_ptr = std::make_shared<db::lmdb_adapter>();
+    db::db_bridge_base dbb(lmdb_ptr);
+
+    db::key_to_array_accessor_base<uint64_t, serializable_string, true> db_array(dbb);
+
+    ASSERT_TRUE(dbb.open("array_basic_test"));
+
+    // clear table
+    db::table_id tid;
+    ASSERT_TRUE(lmdb_ptr->open_table(array_table_name, tid));
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.clear(tid));
+    dbb.commit_db_transaction();
+
+    ASSERT_TRUE(db_array.init(array_table_name));
+
+    // check defaults
+    ASSERT_TRUE(dbb.begin_db_transaction());
+
+    size_t count = db_array.get_array_size(97);
+    ASSERT_EQ(count, 0);
+
+    std::shared_ptr<const serializable_string> ptr;
+    r = false;
+    try
+    {
+      ptr = db_array.get_item(97, 0);
+    }
+    catch (...)
+    {
+      r = true;
+    }
+    ASSERT_TRUE(r);
+
+    dbb.commit_db_transaction();
+
+
+
+    // write
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    db_array.push_back_item(97, serializable_string("507507507507507507507507"));
+    db_array.push_back_item(97, serializable_string("787878787878787878787878"));
+    db_array.push_back_item(97, serializable_string("ringing phone"));
+
+    count = db_array.get_array_size(97);
+    ASSERT_EQ(count, 3);
+
+    dbb.commit_db_transaction();
+
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    db_array.push_back_item(97, serializable_string("ring"));
+    db_array.push_back_item(97, serializable_string("ring"));
+    db_array.push_back_item(97, serializable_string("ring"));
+
+    count = db_array.get_array_size(97);
+    ASSERT_EQ(count, 6);
+    dbb.abort_db_transaction();
+
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    count = db_array.get_array_size(97);
+    ASSERT_EQ(count, 3);
+    dbb.commit_db_transaction();
+
+    ASSERT_TRUE(dbb.close());
+
+    
+    // reopen DB
+    ASSERT_TRUE(dbb.open("array_basic_test"));
+    ASSERT_TRUE(db_array.init(array_table_name));
+
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    count = db_array.get_array_size(97);
+    ASSERT_EQ(count, 3);
+
+    ptr = db_array.get_item(97, 0);
+    ASSERT_TRUE((bool)ptr);
+    ASSERT_EQ(ptr->v, "507507507507507507507507");
+
+    ptr = db_array.get_item(97, 1);
+    ASSERT_TRUE((bool)ptr);
+    ASSERT_EQ(ptr->v, "787878787878787878787878");
+
+    ptr = db_array.get_item(97, 2);
+    ASSERT_TRUE((bool)ptr);
+    ASSERT_EQ(ptr->v, "ringing phone");
+
+    r = false;
+    try
+    {
+      db_array.pop_back_item(555);
+    }
+    catch (...)
+    {
+      r = true;
+    }
+    ASSERT_TRUE(r);
+    db_array.pop_back_item(97);
+    db_array.pop_back_item(97);
+
+    dbb.commit_db_transaction();
+
+
+
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    count = db_array.get_array_size(97);
+    ASSERT_EQ(count, 1);
+
+    ptr = db_array.get_item(97, 0);
+    ASSERT_TRUE((bool)ptr);
+    ASSERT_EQ(ptr->v, "507507507507507507507507");
     dbb.commit_db_transaction();
 
 
