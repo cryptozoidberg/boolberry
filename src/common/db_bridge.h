@@ -216,8 +216,7 @@ namespace db
       if (!m_db_adapter_ptr->get(tid, key_data, key_size, buffer))
         return false;
 
-      CHECK_AND_ASSERT_MES(sizeof(t_object_pod_t) == buffer.size(), false,
-        "DB returned object with size " << buffer.size() << " bytes, while " << sizeof(t_object_pod_t) << " bytes object is expected");
+      CHECK_AND_ASSERT_MES(sizeof t_object_pod_t == buffer.size(), false, "get " << buffer.size() << " bytes of data, while " << sizeof t_object_pod_t << " bytes is expected as sizeof t_object_pod_t");
 
       obj = *reinterpret_cast<const t_object_pod_t*>(buffer.data());
       return true;
@@ -272,7 +271,7 @@ namespace db
     {
       static_assert(std::is_pod<value_t>::value, "POD type expected");
 
-      std::shared_ptr<const value_t> result = std::make_shared<value_t>();
+      std::shared_ptr<value_t> result = std::make_shared<value_t>();
       if (dbb.get_pod_object(tid, k, *result.get()))
         return result;
       
@@ -314,7 +313,7 @@ namespace db
     }
   };
 
-  template<bool value_type_serializable>
+  template<bool value_type_is_serializable>
   class value_type_helper_selector;
 
   template<>
@@ -341,7 +340,7 @@ namespace db
     }
   };
 
-  template<typename callback_t, typename key_t, typename value_t, bool value_type_serializable>
+  template<typename callback_t, typename key_t, typename value_t, bool value_type_is_serializable>
   struct table_keys_and_values_visitor : public i_db_visitor
   {
     callback_t& m_callback;
@@ -354,7 +353,7 @@ namespace db
       tkey_from_pointer(key, key_data, key_size);
 
       value_t value = AUTO_VAL_INIT(value);
-      value_type_helper_selector<value_type_serializable>::tvalue_from_pointer(value_data, value_size, value);
+      value_type_helper_selector<value_type_is_serializable>::tvalue_from_pointer(value_data, value_size, value);
 
       return m_callback(i, key, value);
     }
@@ -365,11 +364,11 @@ namespace db
   ////////////////////////////////////////////////////////////
   // key_value_accessor_base
   ////////////////////////////////////////////////////////////
-  template<class key_t, class value_t, bool value_type_serializable>
+  template<class key_t, class value_t, bool value_type_is_serializable>
   class key_value_accessor_base : public i_db_write_tx_notification_receiver
   {
   public:
-    typedef value_t t_value_type;
+    static const bool value_t_is_serializable = value_type_is_serializable;
 
     key_value_accessor_base(db_bridge_base& dbb)
       : m_dbb(dbb)
@@ -382,7 +381,7 @@ namespace db
 
     ~key_value_accessor_base()
     {
-      m_dbb.dettach_container_receiver(this);
+      m_dbb.detach_container_receiver(this);
     }
 
     bool begin_transaction(bool read_only = false)
@@ -433,6 +432,11 @@ namespace db
       return m_dbb.get_adapter()->open_table(table_name, m_tid);
     }
 
+    bool deinit()
+    {
+      return m_dbb.get_adapter()->close();
+    }
+
     template<class callback_t>
     void enumerate_keys(callback_t callback) const 
     {
@@ -443,19 +447,19 @@ namespace db
     template<class callback_t>
     void enumerate_items(callback_t callback) const 
     {
-      table_keys_and_values_visitor<callback_t, key_t, value_t, value_type_serializable> visitor(callback);
+      table_keys_and_values_visitor<callback_t, key_t, value_t, value_type_is_serializable> visitor(callback);
       m_dbb.get_adapter()->visit_table(m_tid, &visitor);
     }
 
     void set(const key_t& key, const value_t& value)
     {
       m_cached_size_is_valid = false;
-      value_type_helper_selector<value_type_serializable>::set(m_tid, m_dbb, key, value);
+      value_type_helper_selector<value_type_is_serializable>::set(m_tid, m_dbb, key, value);
     }
 
     std::shared_ptr<const value_t> get(const key_t& key) const
     {
-      return value_type_helper_selector<value_type_serializable>::template get<key_t, value_t>(m_tid, m_dbb, key);
+      return value_type_helper_selector<value_type_is_serializable>::template get<key_t, value_t>(m_tid, m_dbb, key);
     }
 
     template<class explicit_key_t, class explicit_value_t, class object_value_helper_t>
@@ -541,6 +545,42 @@ namespace db
     mutable bool m_cached_size_is_valid;
   }; // class key_value_accessor_base
 
+
+  template<typename key_t, typename value_t, typename accessor_t, bool value_type_is_serializable>
+  class single_value
+  {
+  public:
+    single_value(const key_t& key, accessor_t& accessor)
+      : m_key(key)
+      , m_accessor(accessor)
+    {}
+
+    single_value(const single_value& rhs)
+      : m_key(rhs.m_key)
+      , m_accessor(rhs.m_accessor)
+    {}
+
+    single_value& operator=(const single_value&) = delete;
+
+    value_t operator=(value_t v) 
+    {	
+      m_accessor.template explicit_set<key_t, value_t, value_type_helper_selector<value_type_is_serializable> >(m_key, v);
+      return v;
+    }
+
+    operator value_t() const 
+    {
+      std::shared_ptr<const value_t> value_ptr = m_accessor.template explicit_get<key_t, value_t, value_type_helper_selector<value_type_is_serializable> >(m_key);
+      if (value_ptr.get())
+        return *value_ptr.get();
+
+      return AUTO_VAL_INIT(value_t());
+    }
+
+  private:
+    key_t m_key;
+    accessor_t& m_accessor;
+  };
     
 
 } // namespace db

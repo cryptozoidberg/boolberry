@@ -465,4 +465,79 @@ namespace lmdb_test
     ASSERT_TRUE(r);
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  // 
+  //////////////////////////////////////////////////////////////////////////////
+  struct serializable_string
+  {
+    serializable_string() {}
+    explicit serializable_string(const std::string& v) : v(v) {}
+
+    std::string v;
+
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(v)
+    END_SERIALIZE()
+  };
+  
+  TEST(lmdb, single_value_test)
+  {
+    bool r = false;
+
+    const std::string options_table_name("options");
+    
+    std::shared_ptr<db::lmdb_adapter> lmdb_ptr = std::make_shared<db::lmdb_adapter>();
+    db::db_bridge_base dbb(lmdb_ptr);
+    db::key_value_accessor_base<uint64_t, uint64_t /* does not matter */, false /* doesn not matter */ > options_container(dbb);
+
+    db::single_value<uint64_t, uint64_t, decltype(options_container), false> option_uint64(0, options_container);
+    db::single_value<uint64_t, serializable_string, decltype(options_container), true> option_string(1, options_container);
+
+
+    ASSERT_TRUE(dbb.open("single_value_test"));
+
+    // clear
+    db::table_id options_tid;
+    ASSERT_TRUE(lmdb_ptr->open_table(options_table_name, options_tid));
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.clear(options_tid));
+    dbb.commit_db_transaction();
+    //ASSERT_TRUE(lmdb_ptr->close());
+
+    ASSERT_TRUE(options_container.init(options_table_name));
+
+    // check defaults
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    uint64_t v = option_uint64;
+    ASSERT_EQ(v, 0);
+    
+    //serializable_string s = option_string;
+    //ASSERT_EQ(s.v, std::string(""));
+    dbb.commit_db_transaction();
+
+    // set
+    ASSERT_TRUE(dbb.begin_db_transaction());
+    option_uint64 = 97;
+    option_string = serializable_string("New York advertising men");
+    dbb.commit_db_transaction();
+
+    ASSERT_TRUE(dbb.close());
+
+    // --
+
+    ASSERT_TRUE(dbb.open("single_value_test"));
+
+    ASSERT_TRUE(options_container.init(options_table_name));
+
+    // get
+    v = option_uint64;
+    ASSERT_EQ(v, 97);
+
+    //serializable_string s = option_string;
+    //ASSERT_EQ(s.v, "New York advertising men");
+
+    ASSERT_TRUE(dbb.close());
+  }
+
+
 }

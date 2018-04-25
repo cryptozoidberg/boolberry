@@ -155,7 +155,7 @@ namespace db
 
     unsigned int flags = read_only_access ? MDB_RDONLY : 0;
     // TODO: review the following check thorughly
-    CHECK_AND_ASSERT_MES(m_p_impl != nullptr, false, "db env is null");
+    CHECK_AND_ASSERT_MES(m_p_impl != nullptr && m_p_impl->p_mdb_env != nullptr, false, "db env is null");
     int r = mdb_txn_begin(m_p_impl->p_mdb_env, p_parent_tx, flags, &p_new_tx);
     CHECK_DB_CALL_RESULT(r, false, "mdb_txn_begin");
 
