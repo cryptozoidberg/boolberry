@@ -488,21 +488,20 @@ namespace lmdb_test
     
     std::shared_ptr<db::lmdb_adapter> lmdb_ptr = std::make_shared<db::lmdb_adapter>();
     db::db_bridge_base dbb(lmdb_ptr);
-    db::key_value_accessor_base<uint64_t, uint64_t /* does not matter */, false /* doesn not matter */ > options_container(dbb);
+    db::key_value_accessor_base<uint64_t, uint64_t /* does not matter */, false /* does not matter */ > options_container(dbb);
 
-    db::single_value<uint64_t, uint64_t, decltype(options_container), false> option_uint64(0, options_container);
-    db::single_value<uint64_t, serializable_string, decltype(options_container), true> option_string(1, options_container);
-
+    db::single_value<uint64_t, uint64_t, decltype(options_container),            false>   option_uint64(0, options_container);
+    db::single_value<uint64_t, serializable_string, decltype(options_container), true>    option_serializable_obj(1, options_container);
+    db::single_value<uint64_t, crypto::hash, decltype(options_container),        false>   option_hash(2, options_container);
 
     ASSERT_TRUE(dbb.open("single_value_test"));
 
-    // clear
+    // clear table
     db::table_id options_tid;
     ASSERT_TRUE(lmdb_ptr->open_table(options_table_name, options_tid));
     ASSERT_TRUE(dbb.begin_db_transaction());
     ASSERT_TRUE(dbb.clear(options_tid));
     dbb.commit_db_transaction();
-    //ASSERT_TRUE(lmdb_ptr->close());
 
     ASSERT_TRUE(options_container.init(options_table_name));
 
@@ -511,30 +510,44 @@ namespace lmdb_test
     uint64_t v = option_uint64;
     ASSERT_EQ(v, 0);
     
-    //serializable_string s = option_string;
-    //ASSERT_EQ(s.v, std::string(""));
+    serializable_string ss = option_serializable_obj;
+    ASSERT_EQ(ss.v, std::string(""));
+
+    crypto::hash h = option_hash;
+    ASSERT_EQ(h, null_hash);
+
     dbb.commit_db_transaction();
 
-    // set
+
+    // set single values
     ASSERT_TRUE(dbb.begin_db_transaction());
     option_uint64 = 97;
-    option_string = serializable_string("New York advertising men");
+    option_serializable_obj = serializable_string("New York advertising men");
+    option_hash = crypto::cn_fast_hash(options_table_name.c_str(), options_table_name.size());
     dbb.commit_db_transaction();
 
     ASSERT_TRUE(dbb.close());
 
-    // --
-
+    
+    // reopen DB
     ASSERT_TRUE(dbb.open("single_value_test"));
-
     ASSERT_TRUE(options_container.init(options_table_name));
 
-    // get
+
+    // get single value
+    ASSERT_TRUE(dbb.begin_db_transaction());
+
     v = option_uint64;
     ASSERT_EQ(v, 97);
 
-    //serializable_string s = option_string;
-    //ASSERT_EQ(s.v, "New York advertising men");
+    ss = option_serializable_obj;
+    ASSERT_EQ(ss.v, "New York advertising men");
+
+    h = option_hash;
+    ASSERT_EQ(h, crypto::cn_fast_hash(options_table_name.c_str(), options_table_name.size()));
+
+    dbb.commit_db_transaction();
+
 
     ASSERT_TRUE(dbb.close());
   }

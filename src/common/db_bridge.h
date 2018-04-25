@@ -110,7 +110,8 @@ namespace db
       bool r = m_db_adapter_ptr->begin_transaction(read_only_access);
 
       {
-        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);        for (auto c : m_attached_container_receivers)
+        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
+        for (auto c : m_attached_container_receivers)
           c->on_write_transaction_begin();
       }
 
@@ -124,7 +125,8 @@ namespace db
       CHECK_AND_ASSERT_THROW_MES(r, "commit_transaction failed");
 
       {
-        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);        for (auto c : m_attached_container_receivers)
+        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
+        for (auto c : m_attached_container_receivers)
           c->on_write_transaction_commit();
       }
     }
@@ -135,7 +137,8 @@ namespace db
       m_db_adapter_ptr->abort_transaction();
 
       {
-        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);        for (auto c : m_attached_container_receivers)
+        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
+        for (auto c : m_attached_container_receivers)
           c->on_write_transaction_abort();
       }
     }
@@ -238,11 +241,17 @@ namespace db
 
     void attach_container_receiver(i_db_write_tx_notification_receiver *receiver)
     {
-      CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);      bool r = m_attached_container_receivers.insert(receiver).second;      CHECK_AND_ASSERT_THROW_MES(r, "failed, container already attached");    }
+      CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
+      bool r = m_attached_container_receivers.insert(receiver).second;
+      CHECK_AND_ASSERT_THROW_MES(r, "failed, container already attached");
+    }
 
     void detach_container_receiver(i_db_write_tx_notification_receiver *receiver)
     {
-      CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);      bool r = m_attached_container_receivers.erase(receiver) == 1;      CHECK_AND_ASSERT_THROW_MES(r, "failed, container has never been attached");    }
+      CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
+      bool r = m_attached_container_receivers.erase(receiver) == 1;
+      CHECK_AND_ASSERT_THROW_MES(r, "failed, container has never been attached");
+    }
 
     protected:
       std::shared_ptr<i_db_adapter> m_db_adapter_ptr;
@@ -299,7 +308,7 @@ namespace db
     template<class key_t, class value_t>
     static std::shared_ptr<const value_t> get(const table_id tid, db_bridge_base& dbb, const key_t& k)
     {
-      std::shared_ptr<const value_t> result = std::make_shared<value_t>();
+      std::shared_ptr<value_t> result = std::make_shared<value_t>();
       if (dbb.get_serializable_object(tid, k, *result.get()))
         return result;
       
