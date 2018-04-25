@@ -3,25 +3,42 @@ html {
     height: 100%;
 }
 
+/*@font-face {*/
+    /*font-family: UbuntuMedium;*/
+    /*src: url(Ubuntu-M.ttf);*/
+/*}*/
+
+/*@font-face {*/
+    /*font-family: UbuntuCond;*/
+    /*src: url(Ubuntu-C.ttf);*/
+/*}*/
+
 @font-face {
-    font-family: UbuntuMedium;
-    src: url(Ubuntu-M.ttf);
+    font-family: OpenSans-Semibold;
+    src: url(OpenSans-Semibold.ttf);
 }
 
 @font-face {
-    font-family: UbuntuCond;
-    src: url(Ubuntu-C.ttf);
+    font-family: OpenSans-Light;
+    src: url(OpenSans-Light.ttf);
 }
 
 body {
-     font-family: UbuntuMedium;/*, Arial, sans-serif;*/
-     color: #34495e;
-     background-color: #ffffff;
+    font-family: 'OpenSans-Regular', sans-serif;
+     /*font-family: UbuntuMedium;!*, Arial, sans-serif;*!*/
+     color: #3a3a3a;
+     background-color: #d5d9dd;
      margin: 0em 0 0em 0;
      height:100%;
      -webkit-font-smoothing: antialiased;
-     background: rgb(231, 231, 231);
+     font-size: 14px;
+     /*background: rgb(231, 231, 231);*/
  }
+
+.container {
+    margin: 15px;
+    margin-top: 0;
+}
 
 #container{
     height:100%;
@@ -60,66 +77,116 @@ h2 {
 }
 
 
-.top_menu_bar
-{
-    background: rgb(25, 26, 51);
+.top_menu_bar {
+    padding: 0 25px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-image: url('../files/bg.jpg');
+
 }
 
-.inline_menu_bar
-{
-    /*height: 45px;*/
-    line-height: 36px;
-    padding: 0;
+.menu_bar_logo img {
+    width: 160px;
+}
+.menu_bar_logo, .menu_bar_tabs {
+    display: inline-block;
+    color: #ffffff;
+}
+
+.wallet_separator {
     position: relative;
-    display: inline-block;
-    background: rgb(25, 26, 51);
-    vertical-align: top;
-    margin-top: 20px;
-    margin-left: 20px;
-}
-.menu_bar_logo, .menu_bar_tabs
-{
-    display: inline-block;
+    font-size: 16px;
+    font-family: 'OpenSans-Semibold', sans-serif;
     color: #ffffff;
-}
-
-
-.wallet_separator
-{
-    /*font-weight: bold;*/
-    font-size: 20px;
-    color: #ffffff;
-    padding: 5px;
-    padding-left: 20px;
-
-    background: rgb(25, 26, 51);
+    padding: 0 15px;
+    height: 44px;
+    line-height: 44px;
+    background-image: url("../files/bg.jpg");
+    background-size: cover;
+    box-sizing: border-box;
 }
 
-.inline_menu_bar_item
-{
+.wallet_sync {
+    display: flex;
+    align-items: center;
+}
+
+.wallet_img {
+    margin-right: 7px;
+}
+
+/*.wallet_separator:after,*/
+/*.wallet_separator:before {*/
+    /*position: absolute;*/
+    /*content: "";*/
+    /*top: 50%;*/
+    /*right: 20px;*/
+    /*width: 1px;*/
+    /*height: 6px;*/
+    /*background-color: #fff;*/
+/*}*/
+
+/*.wallet_separator:after {*/
+    /*transform: rotate(45deg);*/
+/*}*/
+
+/*.wallet_separator:before {*/
+    /*transform: rotate(-45deg);*/
+/*}*/
+
+
+/*.ico_arrow_down {*/
+    /*display: inline-block;*/
+    /*position: absolute;*/
+    /*top: 15px;*/
+    /*right: 6px;*/
+    /*width: 14px;*/
+    /*height: 10px;*/
+/*}*/
+
+/*.ico_arrow_down:after,*/
+/*.ico_arrow_down:before {*/
+    /*position: absolute;*/
+    /*content: "";*/
+    /*top: 50%;*/
+    /*right: 20px;*/
+    /*width: 1px;*/
+    /*height: 6px;*/
+    /*background-color: #fff;*/
+/*}*/
+
+/*.ico_arrow_down:after {*/
+    /*left: -3px;*/
+    /*transform: rotate(45deg);*/
+/*}*/
+
+/*.ico_arrow_down:before {*/
+    /*transform: rotate(-45deg);*/
+/*}*/
+
+.inline_menu_bar_item {
+    margin-right: 35px;
     color: #ffffff;
-    font-size: 20px;
-    /*font-family: arial,sans-serif;*/
-    font-weight: bold;
+    font-size: 17px;
     display: inline-block;
-    margin: 0 8px;
-    padding: 0 8px;
     cursor:pointer;
+}
+
+.inline_menu_bar_item:last-child {
+    margin-right: 0;
 }
 
 .inline_menu_bar_item:hover
 {
-    color: rgb(0, 152, 218);
+    color: #65ffe7;
+    text-decoration: none;
 }
 
 .inline_menu_bar_selected_item
 {
-    border-bottom: 3px solid #FFFFFF;
-    color: #ffffff;
-    font-weight: bold;
-    /*height: 41px;*/
-    margin: 2px 8px 0;
-    padding: 0 8px;
+    color: #65ffe7;
 }
 #daemon_state_internal_panel
 {
@@ -128,7 +195,8 @@ h2 {
 
 .inline_menu_bar_selected_item:hover
 {
-    color: #ffffff;
+    color: #65ffe7;
+    text-decoration: none;
 }
 
 
@@ -248,59 +316,68 @@ span.daemon_view_general_status_value_fail_text
 
 .active_panel
 {
-    margin:15px;
-    margin-top: 0px;
-    padding:10px;
-    background: rgb(247, 247, 247);
+    margin-bottom: 15px;
+    padding: 25px;
+    background: #fff;
 }
-.wallet_panet_transparent
-{
-    padding-top: 2px;
-    margin:15px;
-    margin-top: 0px;
+
+.active_form {
+    display: flex;
+    flex-direction: row;
 }
+
+.active_form input {
+    border-right: none;
+}
+/*.wallet_panet_transparent*/
+/*{*/
+    /*padding-top: 2px;*/
+    /*margin:15px;*/
+    /*margin-top: 0px;*/
+/*}*/
 .transfer_entry_line
 {
-    font-family: UbuntuCond;
-    padding-left: 10px;
-    padding-top: 0px;
-    padding-bottom: 4px;
-    margin-top: 2px;
-    background: rgb(247, 247, 247);
+    /*font-family: UbuntuCond;*/
+    /*padding-left: 10px;*/
+    padding: 8px 13px;
+    background-color: #fff;
+    border-bottom: 1px solid #e8e6e6;
+    /*margin-top: 1px;*/
 }
+
 .transfer_entry_line_details
 {
     display: none;
-    margin-top: 7px;
-    margin-left: 60px;
+    margin-top: 10px;
+    margin-left: 27px;
     /*color: rgb(95, 95, 95);*/
 }
 
 .wallet_secondary_text
 {
     margin-top: 20px;
-    color: rgb(95, 95, 95);
-    font-size: 80%;
-    font-weight: bold;
+    font-size: 14px;
+    font-family: 'OpenSans-Semibold', sans-serif;
 }
 
 .wallet_balance
 {
-    padding-right: 10px;
+    font-size: 16px;
+    padding-right: 16px;
 }
-.balance_text
-{
+.balance_text {
+    font-size: 16px;
     margin-top: 20px;
-    padding-right: 10px;
-    color: rgb(95, 95, 95);
-    font-weight: bold;
+    color: #3a3a3a;
+    font-family: 'OpenSans-Semibold', sans-serif;
 }
 
 .tx_details_text
 {
-    margin-top: 20px;
-    padding-right: 10px;
-    font-weight: bold;
+    display: inline-block;
+    font-family: 'OpenSans-Semibold', sans-serif;
+    /*margin-top: 20px;*/
+    margin-bottom: 3px;
 }
 
 #wallet_transfer_panel
@@ -314,36 +391,37 @@ span.daemon_view_general_status_value_fail_text
 
 .transfer_text_img_span
 {
-    margin-top: 4px;
-    margin-bottom: -2px;
+    /*margin-top: 4px;*/
+    /*margin-bottom: -2px;*/
 }
 .transfer_text_time_span
 {
     position: absolute;
-    left: 50px;
+    left: 51px;
 }
 
 .transfer_text_status_span
 {
     position: absolute;
-    left: 180px;
+    left: 200px;
+    letter-spacing: .6px;
 }
 .transfer_text_amount_span
 {
     position: absolute;
-    left: 340px;
+    left: 420px;
 }
 
 .transfer_text_recipient_span
 {
     position: absolute;
-    left: 480px;
+    left: 560px;
 }
 
 .transfer_text_details_span
 {
     position: absolute;
-    left: 280px;
+    left: 322px;
 }
 
 .daemon_view_param_value_last_ver_info
@@ -408,38 +486,78 @@ span.daemon_view_general_status_value_fail_text
 
 #transfer_address_id
 {
-    height: 16px;
-    margin-left:2px;
-    width: 570px;
-    font-size: 10px;
+    /*padding: 0 10px;*/
+    /*height: 37px;*/
+    /*line-height: 37px;*/
+    /*box-sizing: border-box;*/
+    /*!*margin-left:2px;*!*/
+    /*width: 100%;*/
+    /*font-size: 14px;*/
+    /*color: #3e3e3e;*/
+    /*margin: 0;*/
+    /*border: 1px solid #bdbdbd;*/
 }
-#transfer_button_id,#close_wallet_button_id,#payment_id,#mixin_count_id,#tx_fee
-{
-    font-size: 12px;
-    margin-left: 2px;
-}
+/*#transfer_button_id,#close_wallet_button_id,#payment_id,#mixin_count_id,#tx_fee*/
+/*{*/
+    /*font-size: 12px;*/
+    /*margin-left: 2px;*/
+/*}*/
+
+/*#mixin_count_id {*/
+    /*margin-right: 12px;*/
+/*}*/
 
 #close_wallet_button_id
 {
     margin-left: 480px;
 }
 
+.details {
+    margin-top: 35px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e8e6e6;
+}
+
 .options_link_text
 {
-    font-size: 90%;
-    color:  #666666;
+    position: relative;
+    padding-left: 16px;
+    font-size: 14px;
+    letter-spacing: .5px;
+    color:  #3a3a3a;
+    text-decoration: none;
+}
+
+.details .options_link_text:after,
+.details .options_link_text:before {
+    position: absolute;
+    content: "";
+    top: 5px;
+    left: 3px;
+    width: 1px;
+    height: 5px;
+    background-color: #3a3a3a;
+}
+
+.details .options_link_text:after {
+    left: 6px;
+    transform: rotate(45deg);
+}
+
+.details .options_link_text:before {
+    transform: rotate(-45deg);
 }
 
 .transfer_extra_options
 {
-    color: #8f8f8f;
+    color: #757575;
     display: none;
 }
 
 .transfer_extra_options_hint
 {
-    font-size: 70%;
-    font-weight: normal;
+    font-size: 12px;
 }
 
 
@@ -456,8 +574,11 @@ span.daemon_view_general_status_value_fail_text
 
 #synchronized_wallet_block
 {
-    color: #1a9d00;
-    font-weight:bold;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    color: #2ebb35;
 }
 
 h2
@@ -468,6 +589,132 @@ h2
 
 .my_addres_text
 {
-    font-size: 80%;
-    color:  #666666;
+    font-size: 14px;
 }
+
+
+.path {
+    margin-bottom: 5px;
+}
+
+.balance {
+    margin-bottom: 18px;
+}
+
+.wallet_left_panel_entry {
+    margin-bottom: 20px;
+}
+
+.ui-button-text {
+    font-size: 14px;
+    color: #3a3a3a;
+    /*background-color: #eeeeee;*/
+    /*border: 1px solid #eeeeee;*/
+    border-radius: 0;
+    transition: all .3s ease-in-out;
+}
+
+.payment-wrap {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-wrap__input,
+.payment-wrap__descr {
+    width: 50%;
+    margin-right: 12px;
+}
+
+.payment-wrap input {
+    margin-right: 12px;
+}
+
+.payment-wrap input:last-child{
+    margin-right: 0;
+}
+
+input {
+    width: 100%;
+    padding: 0 10px;
+    height: 38px;
+    line-height: 38px;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: #3e3e3e;
+    margin: 0;
+    border: 1px solid #bdbdbd;
+}
+
+input:focus {
+    outline: none;
+}
+
+.btn {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    width: 120px;
+    min-width: 120px;
+    height: 38px;
+    line-height: 38px;
+    font-size: 14px;
+    color: #fff;
+    padding: 0;
+    background-color: #209bff;
+    border: 1px solid #209bff;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all .3s ease-in-out;
+}
+
+.btn:hover {
+    color: #3a3a3a;
+    background-color: #65ffe7;
+    border-color: #65ffe7;
+}
+
+.btn-grey {
+    background-color: #eeeeee;
+    border: 1px solid #eeeeee;
+}
+
+.wrap {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 50%;
+}
+
+.wrap__flex {
+    width: 100%;
+    margin-right: 12px;
+}
+
+.active_panel_button {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.active_panel_button #transfer_button_id .btn{
+    display: flex;
+    justify-content: center;
+}
+
+.active_panel_button #transfer_button_id .ui-button-text {
+    color: #fff;
+}
+
+::-webkit-input-placeholder,
+::-moz-placeholder,
+:-ms-input-placeholder,
+:-moz-placeholder {
+    color: #3e3e3e;
+}
+
+::placeholder {
+    color: #3e3e3e;
+}
+
