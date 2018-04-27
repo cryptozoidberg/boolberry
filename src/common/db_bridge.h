@@ -670,7 +670,7 @@ namespace db
       size_t count = get_array_size(array_key);
       CHECK_AND_ASSERT_THROW_MES(i < count, "array key " << array_key << ": item index " << i << " exceeds elements count == " << count);
       complex_key<array_key_t, size_t> ck{ array_key, i };
-      return get(ck);
+      return super::get(ck);
     }
 
     void push_back_item(const array_key_t& array_key, const value_t& v)
@@ -679,7 +679,7 @@ namespace db
       size_t new_index = counter;
       counter = new_index + 1;
       complex_key<array_key_t, size_t> ck{ array_key, new_index };
-      set(ck, v);
+      super::set(ck, v);
     }
 
     void pop_back_item(const array_key_t& array_key)
@@ -692,7 +692,7 @@ namespace db
       count = count - 1;
       counter = count;
       complex_key<array_key_t, size_t> ck{ array_key, count };
-      erase(ck);
+      super::erase(ck);
     }
 
   private:
@@ -727,17 +727,17 @@ namespace db
 
     void push_back(const value_t& v)
     {
-      set(super::size(), v);
+      super::set(super::size(), v);
     }
 
     void pop_back()
     {
-      erase(super::size() - 1);
+      super::erase(super::size() - 1);
     }
 
     std::shared_ptr<const value_t> back() const
     {
-      std::shared_ptr<const value_t> ptr = get(super::size() - 1);
+      std::shared_ptr<const value_t> ptr = super::get(super::size() - 1);
       CHECK_AND_ASSERT_THROW_MES(static_cast<bool>(ptr), "back() exceeding the limits: size() = " << super::size() << ", size_no_cache() = " << super::size_no_cache());
       return ptr;
     }
