@@ -219,7 +219,7 @@ namespace db
       if (!m_db_adapter_ptr->get(tid, key_data, key_size, buffer))
         return false;
 
-      CHECK_AND_ASSERT_MES(sizeof t_object_pod_t == buffer.size(), false, "get " << buffer.size() << " bytes of data, while " << sizeof t_object_pod_t << " bytes is expected as sizeof t_object_pod_t");
+      CHECK_AND_ASSERT_MES(sizeof(t_object_pod_t) == buffer.size(), false, "get " << buffer.size() << " bytes of data, while " << sizeof(t_object_pod_t) << " bytes is expected as sizeof(t_object_pod_t)");
 
       obj = *reinterpret_cast<const t_object_pod_t*>(buffer.data());
       return true;
@@ -302,7 +302,7 @@ namespace db
     static bool tvalue_from_pointer(const void* p, size_t s, value_t& v)
     {
       std::string buffer(static_cast<const char*>(p), s);
-      return t_unserializable_object_from_blob(v, src_blob);
+      return t_unserializable_object_from_blob(v, buffer);
     }
 
     template<class key_t, class value_t>
@@ -590,7 +590,7 @@ namespace db
     }
 
   private:
-    template<typename key_t, typename value_t, typename accessor_t, bool value_type_is_serializable>
+    template<typename, typename, typename, bool>
     friend class const_single_value;
 
     key_t m_key;
@@ -727,25 +727,25 @@ namespace db
 
     void push_back(const value_t& v)
     {
-      set(size(), v);
+      set(super::size(), v);
     }
 
     void pop_back()
     {
-      erase(size() - 1);
+      erase(super::size() - 1);
     }
 
     std::shared_ptr<const value_t> back() const
     {
-      std::shared_ptr<const value_t> ptr = get(size() - 1);
-      CHECK_AND_ASSERT_THROW_MES(static_cast<bool>(ptr), "back() exceeding the limits: size() = " << size() << ", size_no_cache() = " << size_no_cache());
+      std::shared_ptr<const value_t> ptr = get(super::size() - 1);
+      CHECK_AND_ASSERT_THROW_MES(static_cast<bool>(ptr), "back() exceeding the limits: size() = " << super::size() << ", size_no_cache() = " << super::size_no_cache());
       return ptr;
     }
 
     std::shared_ptr<const value_t> operator[] (size_t k) const
     {
-      std::shared_ptr<const value_t> ptr = get(k);
-      CHECK_AND_ASSERT_THROW_MES(static_cast<bool>(ptr), "operator[] exceeding the limits with key " << k << ": size() = " << size() << ", size_no_cache() = " << size_no_cache());
+      std::shared_ptr<const value_t> ptr = super::get(k);
+      CHECK_AND_ASSERT_THROW_MES(static_cast<bool>(ptr), "operator[] exceeding the limits with key " << k << ": size() = " << super::size() << ", size_no_cache() = " << super::size_no_cache());
       return ptr;
     }
 
