@@ -45,6 +45,11 @@ target_link_libraries(net_load_tests_clt currency_core common crypto gtest_main 
 target_link_libraries(net_load_tests_srv currency_core common crypto gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(exchange_test ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
+if(MSVC)
+  add_definitions("/Zi")
+endif()
+
+
 if(NOT MSVC)
   set_property(TARGET gtest gtest_main unit_tests net_load_tests_clt net_load_tests_srv APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-undef -Wno-sign-compare")
   if(APPLE)

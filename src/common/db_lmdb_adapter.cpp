@@ -8,6 +8,7 @@
 #include "db/liblmdb/lmdb.h"
 #include "common/util.h"
 #include "boost/thread/recursive_mutex.hpp"
+#include "epee/include/misc_language.h"
 
 // TODO: estimate correct size
 #define LMDB_MEMORY_MAP_SIZE (16ull * 1024 * 1024 * 1024)
@@ -20,8 +21,9 @@ namespace db
 {
   struct stack_entry_t
   {
-    explicit stack_entry_t(MDB_txn* txn) : txn(txn) {}
-    MDB_txn* txn;
+    explicit stack_entry_t(MDB_txn* txn, bool ro_access) : txn(txn), ro_access(ro_access) {}
+    MDB_txn* txn;         // lmdb transaction handle
+    bool     ro_access;   // if true: this db transaction is declared by user as Read-Only
   };
 
   struct lmdb_adapter_impl
@@ -49,6 +51,7 @@ namespace db
     MDB_env* p_mdb_env;
     std::map<std::thread::id, std::list<stack_entry_t>> m_transaction_stack; // thread_id -> (tx_entry, tx_entry, ...)
     mutable boost::recursive_mutex m_transaction_stack_mutex; // protects m_transaction_stack
+    mutable boost::recursive_mutex m_begin_commit_abort_mutex; // protects db transaction sequence
   };
 
 
@@ -118,7 +121,7 @@ namespace db
     return true;
   }
 
-  uint64_t lmdb_adapter::get_table_size(const table_id tid)
+  size_t lmdb_adapter::get_table_size(const table_id tid)
   {
     MDB_stat table_stat = AUTO_VAL_INIT(table_stat);
     bool local_transaction = false;
@@ -134,8 +137,11 @@ namespace db
     return table_stat.ms_entries;
   }
   
-  bool lmdb_adapter::begin_transaction()
+  bool lmdb_adapter::begin_transaction(bool read_only_access)
   {
+    if (!read_only_access)
+      m_p_impl->m_begin_commit_abort_mutex.lock(); // lock db tx sequence guard only for write-enabled transactions
+
     std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
     std::list<stack_entry_t>& tx_stack = m_p_impl->m_transaction_stack[std::this_thread::get_id()]; // get or create empty list
 
@@ -144,26 +150,38 @@ namespace db
     if (!tx_stack.empty())
       p_parent_tx = tx_stack.back().txn;
 
-    unsigned int flags = 0;
+    tx_stack.push_back(stack_entry_t(p_new_tx, read_only_access)); // new stack entry should be added in ANY case, don't return before this line
+    auto& new_stack_entry = tx_stack.back();
+
+    unsigned int flags = read_only_access ? MDB_RDONLY : 0;
     // TODO: review the following check thorughly
-    CHECK_AND_ASSERT_MES(m_p_impl != nullptr, false, "db env is null");
+    CHECK_AND_ASSERT_MES(m_p_impl != nullptr && m_p_impl->p_mdb_env != nullptr, false, "db env is null");
     int r = mdb_txn_begin(m_p_impl->p_mdb_env, p_parent_tx, flags, &p_new_tx);
     CHECK_DB_CALL_RESULT(r, false, "mdb_txn_begin");
 
-    tx_stack.push_back(stack_entry_t(p_new_tx));
+    new_stack_entry.txn = p_new_tx; // update stack entry with correct txn
 
     return true;
   }
 
   bool lmdb_adapter::commit_transaction()
   {
+    // unlock m_begin_commit_abort_mutex at the end of the function in ANY case (for write-enabled transactions)
+    bool read_only_access = false; // will be set later
+    auto unlocker = epee::misc_utils::create_scope_leave_handler([this, &read_only_access](){
+      if (!read_only_access)
+        m_p_impl->m_begin_commit_abort_mutex.unlock();
+    });
+
     std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
     auto it = m_p_impl->m_transaction_stack.find(std::this_thread::get_id());
+    // TODO: consider changing the following two checks to CHECK_AND_ASSERT_THROW_MES
     CHECK_AND_ASSERT_MES(it != m_p_impl->m_transaction_stack.end(), false, "m_transaction_stack is not found for thread id " << std::this_thread::get_id());
     CHECK_AND_ASSERT_MES(!it->second.empty(), false, "m_transaction_stack is empty for thread id " << std::this_thread::get_id());
     std::list<stack_entry_t>& tx_stack = it->second;
 
     MDB_txn* txn = tx_stack.back().txn;
+    read_only_access = tx_stack.back().ro_access; // set actual value for unlocker
 
     tx_stack.pop_back();
     if (tx_stack.empty())
@@ -179,13 +197,22 @@ namespace db
 
   void lmdb_adapter::abort_transaction()
   {
+    // unlock m_begin_commit_abort_mutex at the end of the function in ANY case (for write-enabled transactions)
+    bool read_only_access = false; // will be set later
+    auto unlocker = epee::misc_utils::create_scope_leave_handler([this, &read_only_access](){
+      if (!read_only_access)
+        m_p_impl->m_begin_commit_abort_mutex.unlock();
+    });
+
     std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
     auto it = m_p_impl->m_transaction_stack.find(std::this_thread::get_id());
+    // TODO: consider changing the following two checks to CHECK_AND_ASSERT_THROW_MES
     CHECK_AND_ASSERT_MES_NO_RET(it != m_p_impl->m_transaction_stack.end(), "m_transaction_stack is not found for thread id " << std::this_thread::get_id());
     CHECK_AND_ASSERT_MES_NO_RET(!it->second.empty(), "m_transaction_stack is empty for thread id " << std::this_thread::get_id());
     std::list<stack_entry_t>& tx_stack = it->second;
 
     MDB_txn* txn = tx_stack.back().txn;
+    read_only_access = tx_stack.back().ro_access; // set actual value for unlocker
 
     tx_stack.pop_back();
     if (tx_stack.empty())
@@ -243,6 +270,42 @@ namespace db
     CHECK_DB_CALL_RESULT(r, false, "mdb_del failed");
     return true;
   }
+
+  bool lmdb_adapter::visit_table(const table_id tid, i_db_visitor* visitor)
+  {
+    CHECK_AND_ASSERT_MES(visitor != nullptr, false, "visitor is null");
+    MDB_val key = AUTO_VAL_INIT(key);
+    MDB_val data = AUTO_VAL_INIT(data);
+
+    bool local_transaction = false;
+    if (m_p_impl->has_active_transaction())
+    {
+      local_transaction = true;
+      begin_transaction();
+    }
+    MDB_cursor* p_cursor = nullptr;
+    int r = mdb_cursor_open(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &p_cursor);
+    CHECK_DB_CALL_RESULT(r, false, "mdb_cursor_open failed");
+    CHECK_AND_ASSERT_MES(p_cursor != nullptr, false, "p_cursor == nullptr");
+
+    size_t count = 0;
+    do
+    {
+      int res = mdb_cursor_get(p_cursor, &key, &data, MDB_NEXT);
+      if (res == MDB_NOTFOUND)
+        break;
+      if (!visitor->on_visit_db_item(count, key.mv_data, key.mv_size, data.mv_data, data.mv_size))
+        break;
+      ++count;
+    }
+    while (p_cursor);
+
+    mdb_cursor_close(p_cursor);
+    if (local_transaction)
+      commit_transaction();
+    return true;
+  }
+
 
 
 } // namespace db
