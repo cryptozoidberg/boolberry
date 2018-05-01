@@ -59,6 +59,18 @@ namespace epee
 #define TIME_MEASURE_START(var_name)    uint64_t var_name = misc_utils::get_tick_count();
 #define TIME_MEASURE_FINISH(var_name)   var_name = misc_utils::get_tick_count() - var_name;
 
+  inline std::string print_mcsec(uint64_t am)
+  {
+    const uint64_t MCSEC_TO_MS_POINT = 3;
+    std::string s = std::to_string(am);
+    if (s.size() < MCSEC_TO_MS_POINT + 1)
+    {
+      s.insert(0, MCSEC_TO_MS_POINT + 1 - s.size(), '0');
+    }
+    s.insert(s.size() - MCSEC_TO_MS_POINT, ".");
+    return s;
+  }
+
 namespace profile_tools
 {
 	struct local_call_account

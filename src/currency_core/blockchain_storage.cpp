@@ -9,7 +9,7 @@
 #include <boost/archive/binary_iarchive.hpp>
 
 #include "include_base_utils.h"
-#include "common/db_backend_lmdb.h"
+#include "common/db_lmdb_adapter.h"
 #include "currency_basic_impl.h"
 #include "blockchain_storage.h"
 #include "currency_format_utils.h"
@@ -53,8 +53,9 @@ using namespace currency;
 DISABLE_VS_WARNINGS(4267)
 
 
+
 //------------------------------------------------------------------
-blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) :m_db(std::shared_ptr<tools::db::i_db_backend>(new todo_backend)),
+blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) :m_db(std::shared_ptr<db::i_db_adapter>(new db::lmdb_adapter())),
                                                                  m_db_blocks(m_db),
                                                                  m_db_blocks_index(m_db),
                                                                  m_db_transactions(m_db),
@@ -63,7 +64,8 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) :m_db(std::share
                                                                  m_db_solo_options(m_db),
                                                                  m_db_aliases(m_db),
                                                                  m_db_addr_to_alias(m_db), 
-                                                                 m_db_scratchpad(m_db),
+                                                                 m_db_scratchpad_internal(m_db),
+                                                                 m_scratchpad_wr(m_db_scratchpad_internal),
                                                                  m_db_current_block_cumul_sz_limit(BLOCKCHAIN_OPTIONS_ID_CURRENT_BLOCK_CUMUL_SZ_LIMIT, m_db_solo_options),
                                                                  m_db_current_pruned_rs_height(BLOCKCHAIN_OPTIONS_ID_CURRENT_PRUNED_RS_HEIGHT, m_db_solo_options),
                                                                  m_db_last_worked_version(BLOCKCHAIN_OPTIONS_ID_LAST_WORKED_VERSION, m_db_solo_options),
@@ -147,10 +149,11 @@ bool blockchain_storage::init(const std::string& config_folder)
   CHECK_AND_ASSERT_MES(res, false, "Unable to init db container");
   res = m_db_addr_to_alias.init(BLOCKCHAIN_CONTAINER_ADDR_TO_ALIAS);
   CHECK_AND_ASSERT_MES(res, false, "Unable to init db container");
-  res = m_db_scratchpad.init(BLOCKCHAIN_CONTAINER_SCRATCHPAD);
+  res = m_db_scratchpad_internal.init(BLOCKCHAIN_CONTAINER_SCRATCHPAD);
   CHECK_AND_ASSERT_MES(res, false, "Unable to init db container");
 
-  
+  res = m_scratchpad_wr.init();
+  CHECK_AND_ASSERT_MES(res, false, "Unable to init scratchpad wrapper");
 
   bool need_reinit = false;
   if (!m_db_blocks.size())
@@ -205,9 +208,11 @@ bool blockchain_storage::pop_block_from_blockchain()
   auto vptr = m_db_blocks[h];
   CHECK_AND_ASSERT_MES(vptr.get(), false, "pop_block_from_blockchain: can't pop from blockchain");
   block_extended_info bei = *vptr;
+  
+  bool r = m_scratchpad_wr.pop_block_scratchpad_data(bei.bl);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to pop_block_scratchpad_data for block " << get_block_hash(bei.bl) << " on height " << h);
 
-
-  bool r = purge_block_data_from_blockchain(bei.bl, bei.bl.tx_hashes.size());
+  r = purge_block_data_from_blockchain(bei.bl, bei.bl.tx_hashes.size());
   CHECK_AND_ASSERT_MES(r, false, "Failed to purge_block_data_from_blockchain for block " << get_block_hash(bei.bl) << " on height " << h);
 
   //remove from index
@@ -325,43 +330,43 @@ bool blockchain_storage::reset_and_set_genesis_block(const block& b)
 }
 //------------------------------------------------------------------
 //TODO: not the best way, add later update method instead of full copy
-bool blockchain_storage::copy_scratchpad(std::vector<crypto::hash>& scr)
-{
-  CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  scr.resize(m_db_scratchpad.size());
-  for (size_t i = 0; i != m_db_scratchpad.size(); i++)
-  {
-    scr[i] = *m_db_scratchpad[i];
-  }
-  
-  return true;
-}
+// bool blockchain_storage::copy_scratchpad(std::vector<crypto::hash>& scr)
+// {
+//   CRITICAL_REGION_LOCAL(m_blockchain_lock);
+//   scr.resize(m_db_scratchpad.size());
+//   for (size_t i = 0; i != m_db_scratchpad.size(); i++)
+//   {
+//     scr[i] = *m_db_scratchpad[i];
+//   }
+//   
+//   return true;
+// }
 //------------------------------------------------------------------
-bool blockchain_storage::set_scratchpad(const std::vector<crypto::hash>& scr)
-{
-  CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  m_db_scratchpad.clear();
-  for (size_t i = 0; i != scr.size(); i++)
-  {
-    m_db_scratchpad.push_back(scr[i]);
-  }
-
-  return true;
-}
-bool blockchain_storage::copy_scratchpad(std::string& dst)
-{
-
-  //TODO here:
-  CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  std::vector<crypto::hash> scr;
-  copy_scratchpad(scr);
-
-  if (scr.size())
-  {
-    dst.append(reinterpret_cast<const char*>(&scr[0]), scr.size() * 32);
-  }
-  return true;
-}
+// bool blockchain_storage::set_scratchpad(const std::vector<crypto::hash>& scr)
+// {
+//   CRITICAL_REGION_LOCAL(m_blockchain_lock);
+//   m_db_scratchpad.clear();
+//   for (size_t i = 0; i != scr.size(); i++)
+//   {
+//     m_db_scratchpad.push_back(scr[i]);
+//   }
+// 
+//   return true;
+// }
+// bool blockchain_storage::copy_scratchpad(std::string& dst)
+// {
+// 
+//   //TODO here:
+//   CRITICAL_REGION_LOCAL(m_blockchain_lock);
+//   std::vector<crypto::hash> scr;
+//   copy_scratchpad(scr);
+// 
+//   if (scr.size())
+//   {
+//     dst.append(reinterpret_cast<const char*>(&scr[0]), scr.size() * 32);
+//   }
+//   return true;
+// }
 //------------------------------------------------------------------
 bool blockchain_storage::purge_transaction_keyimages_from_blockchain(const transaction& tx, bool strict_check)
 {
@@ -1189,7 +1194,7 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
       }
       else
       {
-        res = *m_db_scratchpad[offset];
+        res = m_scratchpad_wr.get_scratchpad()[offset];
       }
       auto it = alt_scratchppad_patch.find(offset);
       if (it != alt_scratchppad_patch.end())
@@ -1385,8 +1390,7 @@ bool blockchain_storage::extport_scratchpad_to_file(const std::string& path)
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   export_scratchpad_file_header fh;
   memset(&fh, 0, sizeof(fh));
-  std::vector<crypto::hash> scr_vector;
-  copy_scratchpad(scr_vector);
+  const std::vector<crypto::hash>& scr_vector = m_scratchpad_wr.get_scratchpad();
 
   fh.current_hi.prevhash = currency::get_block_hash(m_db_blocks.back()->bl);
   fh.current_hi.height = m_db_blocks.size() - 1;
@@ -1890,7 +1894,7 @@ uint64_t blockchain_storage::get_aliases_count()
 uint64_t blockchain_storage::get_scratchpad_size()
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  return m_db_scratchpad.size() * 32;
+  return m_scratchpad_wr.get_scratchpad().size() * 32;
 }
 //------------------------------------------------------------------
 bool blockchain_storage::get_all_aliases(std::list<alias_info>& aliases)
@@ -2164,10 +2168,10 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
     << "tx_id: " << tx_id << ENDL
     << "inputs: " << tx.vin.size() << ", outs: " << tx.vout.size() << ", spend money: " << print_money(get_outs_money_amount(tx)) << "(fee: " << (is_coinbase(tx) ? "0[coinbase]" : print_money(get_tx_fee(tx))) << ")" << ENDL
     << "Profile details: " << ENDL
-    << "process_tx_extra_time: " << print_microsec(process_tx_extra_time) << ENDL
-    << "process_tx_inputs_time: " << print_microsec(process_tx_inputs_time) << ENDL
-    << "push_tx_to_global_index_time: " << print_microsec(push_tx_to_global_index_time) << ENDL
-    << "store_to_db_time: " << print_microsec(store_to_db_time) << ENDL
+    << "process_tx_extra_time: " << print_mcsec(process_tx_extra_time) << ENDL
+    << "process_tx_inputs_time: " << print_mcsec(process_tx_inputs_time) << ENDL
+    << "push_tx_to_global_index_time: " << print_mcsec(push_tx_to_global_index_time) << ENDL
+    << "store_to_db_time: " << print_mcsec(store_to_db_time) << ENDL
     );
 
   return true;
@@ -2444,7 +2448,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
 
   proof_of_work = get_block_longhash(bl, m_db_blocks.size(), [&](uint64_t index) -> crypto::hash
   {
-    return *m_db_scratchpad[index%m_db_scratchpad.size()];
+    return m_scratchpad_wr.get_scratchpad()[index%m_scratchpad_wr.get_scratchpad().size()];
   });
 
   if (!check_hash(proof_of_work, current_diffic))
@@ -2565,7 +2569,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   TIME_MEASURE_START(update_blocks_table_time1);
   block_extended_info bei = boost::value_initialized<block_extended_info>();
   bei.bl = bl;
-  bei.scratch_offset = m_db_scratchpad.size();
+  bei.scratch_offset = m_scratchpad_wr.get_scratchpad().size();
   bei.block_cumulative_size = cumulative_block_size;
   bei.cumulative_difficulty = current_diffic;
   bei.already_generated_coins = already_generated_coins + base_reward;
@@ -2587,20 +2591,16 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   TIME_MEASURE_FINISH(update_blocks_table_time1);
 
   TIME_MEASURE_START(update_scratchpad_time);
-  //append to scratchpad  
-  std::vector<crypto::hash> scr_local;
-  copy_scratchpad(scr_local);
-  if (!push_block_scratchpad_data(bl, scr_local))
+  if (!m_scratchpad_wr.push_block_scratchpad_data(bl))
   {
     LOG_ERROR("Internal error for block id: " << id << ": failed to put_block_scratchpad_data");
     purge_block_data_from_blockchain(bl, tx_processed_count);
     bvc.m_verifivation_failed = true;
     return false;
   }
-  set_scratchpad(scr_local);
 
 #ifdef ENABLE_HASHING_DEBUG  
-  LOG_PRINT_L3("SCRATCHPAD_SHOT FOR H=" << bei.height + 1 << ENDL << dump_scratchpad(m_db_scratchpad));
+  LOG_PRINT_L3("SCRATCHPAD_SHOT FOR H=" << bei.height + 1 << ENDL << dump_scratchpad(m_scratchpad_wr.get_scratchpad()));
 #endif
   TIME_MEASURE_FINISH(update_scratchpad_time);
 
@@ -2615,20 +2615,20 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     << ENDL << "HEIGHT " << bei.height << ", difficulty:\t" << current_diffic
     << ENDL << "block reward: " << print_money(fee_summary + base_reward) << "(" << print_money(base_reward) << " + " << print_money(fee_summary)
     << ")" << ((bei.height%CURRENCY_DONATIONS_INTERVAL) ? std::string("") : std::string("donation: ") + print_money(donation_total)) << ", coinbase_blob_size: " << coinbase_blob_size << ", cumulative size: " << cumulative_block_size
-    << ", " << print_microsec(block_processing_time)
-    << "(" << print_microsec(target_calculating_time)
-    << "/" << print_microsec(longhash_calculating_time) << ")ms" << ENDL
+    << ", " << print_mcsec(block_processing_time)
+    << "(" << print_mcsec(target_calculating_time)
+    << "/" << print_mcsec(longhash_calculating_time) << ")ms" << ENDL
     << "Full profiling: " << ENDL
-    << "timestamp_check_time: " << print_microsec(timestamp_check_time) << ENDL
-    << "target_calculating_time: " << print_microsec(target_calculating_time) << ENDL
-    << "longhash_calculating_time: " << print_microsec(longhash_calculating_time) << ENDL
-    << "prevalidate_miner_tx_time: " << print_microsec(prevalidate_miner_tx_time) << ENDL
-    << "add_miner_tx_time: " << print_microsec(add_miner_tx_time) << ENDL
-    << "process_transactions_time: " << print_microsec(process_transactions_time) << ENDL
-    << "validate_miner_tx_time: " << print_microsec(validate_miner_tx_time) << ENDL
-    << "update_blocks_table_time1: " << print_microsec(update_blocks_table_time1) << ENDL
-    << "update_scratchpad_time: " << print_microsec(update_scratchpad_time) << ENDL
-    << "update_blocks_table_time2: " << print_microsec(update_blocks_table_time2)
+    << "timestamp_check_time: " << print_mcsec(timestamp_check_time) << ENDL
+    << "target_calculating_time: " << print_mcsec(target_calculating_time) << ENDL
+    << "longhash_calculating_time: " << print_mcsec(longhash_calculating_time) << ENDL
+    << "prevalidate_miner_tx_time: " << print_mcsec(prevalidate_miner_tx_time) << ENDL
+    << "add_miner_tx_time: " << print_mcsec(add_miner_tx_time) << ENDL
+    << "process_transactions_time: " << print_mcsec(process_transactions_time) << ENDL
+    << "validate_miner_tx_time: " << print_mcsec(validate_miner_tx_time) << ENDL
+    << "update_blocks_table_time1: " << print_mcsec(update_blocks_table_time1) << ENDL
+    << "update_scratchpad_time: " << print_mcsec(update_scratchpad_time) << ENDL
+    << "update_blocks_table_time2: " << print_mcsec(update_blocks_table_time2)
     );
 
   bvc.m_added_to_main_chain = true;

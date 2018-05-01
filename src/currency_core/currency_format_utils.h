@@ -60,6 +60,13 @@ namespace currency
     crypto::secret_key m_view_key;
     crypto::signature m_sign;     //is this field set no nonzero - that means update alias operation
     std::string m_text_comment;
+
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(m_address)
+      FIELD(m_view_key)
+      FIELD(m_sign)
+      FIELD(m_text_comment)
+    END_SERIALIZE()
   };
 
   struct alias_info: public alias_info_base
@@ -161,12 +168,12 @@ namespace currency
   void get_blob_hash(const blobdata& blob, crypto::hash& res);
   crypto::hash get_blob_hash(const blobdata& blob);
   std::string short_hash_str(const crypto::hash& h);
-  bool get_block_scratchpad_addendum(const block& b, std::vector<crypto::hash>& res);
-  bool get_scratchpad_patch(size_t global_start_entry, size_t local_start_entry, size_t local_end_entry, const std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
-  bool push_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
-  bool push_block_scratchpad_data(size_t global_start_entry, const block& b, std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
-  bool pop_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
-  bool apply_scratchpad_patch(std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
+  //bool get_block_scratchpad_addendum(const block& b, std::vector<crypto::hash>& res);
+  //bool get_scratchpad_patch(size_t global_start_entry, size_t local_start_entry, size_t local_end_entry, const std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
+  //bool push_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
+  //bool push_block_scratchpad_data(size_t global_start_entry, const block& b, std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
+  //bool pop_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd);
+  //bool apply_scratchpad_patch(std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch);
   bool is_mixattr_applicable_for_fake_outs_counter(uint8_t mix_attr, uint64_t fake_attr_count);
   serializable_pair<uint64_t, crypto::public_key> make_output_entry(uint64_t index, const crypto::public_key& key);
 
@@ -228,39 +235,39 @@ namespace currency
      return true;
   }
   //---------------------------------------------------------------
-  bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector);
-  struct get_scratchpad_param
-  {
-    uint64_t selectors[4];
-  };
-  //---------------------------------------------------------------
-  template<typename callback_t>
-  bool make_scratchpad_from_selector(const get_scratchpad_param& prm, blobdata& bd, uint64_t height, callback_t get_blocks_accessor)
-  {
-    /*lets genesis block with mock scratchpad*/
-    if(!height)
-    {
-      bd = "GENESIS";
-      return true;
-    }
-    //lets get two transactions outs
-    uint64_t index_a = prm.selectors[0]%height;
-    uint64_t index_b = prm.selectors[1]%height;
-    
-    
-    block ba = AUTO_VAL_INIT(ba);
-    block bb = AUTO_VAL_INIT(bb);
-    bool r = get_blocks_accessor(index_a, ba);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to get block \"a\" from block accessor, index=" << index_a);
-    r = get_blocks_accessor(index_a, bb);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to get block \"b\" from block accessor, index=" << index_b);
-
-    r = get_block_scratchpad_data(ba, bd, prm.selectors[2]);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for a, index=" << index_a);
-    r = get_block_scratchpad_data(bb, bd, prm.selectors[3]);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for b, index=" << index_b);
-    return true;
-  }
+//   bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector);
+//   struct get_scratchpad_param
+//   {
+//     uint64_t selectors[4];
+//   };
+//---------------------------------------------------------------
+//   template<typename callback_t>
+//   bool make_scratchpad_from_selector(const get_scratchpad_param& prm, blobdata& bd, uint64_t height, callback_t get_blocks_accessor)
+//   {
+//     /*lets genesis block with mock scratchpad*/
+//     if(!height)
+//     {
+//       bd = "GENESIS";
+//       return true;
+//     }
+//     //lets get two transactions outs
+//     uint64_t index_a = prm.selectors[0]%height;
+//     uint64_t index_b = prm.selectors[1]%height;
+//     
+//     
+//     block ba = AUTO_VAL_INIT(ba);
+//     block bb = AUTO_VAL_INIT(bb);
+//     bool r = get_blocks_accessor(index_a, ba);
+//     CHECK_AND_ASSERT_MES(r, false, "Failed to get block \"a\" from block accessor, index=" << index_a);
+//     r = get_blocks_accessor(index_a, bb);
+//     CHECK_AND_ASSERT_MES(r, false, "Failed to get block \"b\" from block accessor, index=" << index_b);
+// 
+//     r = get_block_scratchpad_data(ba, bd, prm.selectors[2]);
+//     CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for a, index=" << index_a);
+//     r = get_block_scratchpad_data(bb, bd, prm.selectors[3]);
+//     CHECK_AND_ASSERT_MES(r, false, "Failed to get_block_scratchpad_data for b, index=" << index_b);
+//     return true;
+//   }
   //---------------------------------------------------------------
   template<typename callback_t>
   bool get_blob_longhash(const blobdata& bd, crypto::hash& res, uint64_t height, callback_t accessor)

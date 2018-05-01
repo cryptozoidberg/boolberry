@@ -9,7 +9,6 @@ using namespace epee;
 #include "currency_basic_impl.h"
 #include "string_tools.h"
 #include "serialization/binary_utils.h"
-#include "serialization/vector.h"
 #include "currency_format_utils.h"
 #include "currency_config.h"
 #include "misc_language.h"

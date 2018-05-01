@@ -37,6 +37,7 @@ struct binary_archive_base
   void end_object() { }
   void begin_variant() { }
   void end_variant() { }
+  bool is_saving_arch(){ return IsSaving; }
   stream_type &stream() { return stream_; }
 protected:
   stream_type &stream_;

@@ -3,6 +3,9 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #pragma once
 
+#include <boost/optional.hpp>
+#include <thread>
+
 namespace epee
 {
   namespace misc_utils  
