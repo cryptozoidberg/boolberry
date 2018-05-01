@@ -34,7 +34,7 @@ add_executable(exchange_test ${EXCHANGE_TESTS})
 add_dependencies(coretests version)
 
 target_link_libraries(core_proxy currency_core common crypto ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
-target_link_libraries(coretests currency_core common crypto ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_link_libraries(coretests currency_core common crypto lmdb ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(difficulty-tests currency_core)
 target_link_libraries(functional_tests currency_core wallet common crypto upnpc-static ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(hash-tests crypto)
