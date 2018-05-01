@@ -329,18 +329,12 @@ bool blockchain_storage::reset_and_set_genesis_block(const block& b)
   return true;
 }
 //------------------------------------------------------------------
-//TODO: not the best way, add later update method instead of full copy
-// bool blockchain_storage::copy_scratchpad(std::vector<crypto::hash>& scr)
-// {
-//   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-//   scr.resize(m_db_scratchpad.size());
-//   for (size_t i = 0; i != m_db_scratchpad.size(); i++)
-//   {
-//     scr[i] = *m_db_scratchpad[i];
-//   }
-//   
-//   return true;
-// }
+bool blockchain_storage::copy_scratchpad(std::vector<crypto::hash>& scr)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  scr = m_scratchpad_wr.get_scratchpad();
+  return true;
+}
 //------------------------------------------------------------------
 // bool blockchain_storage::set_scratchpad(const std::vector<crypto::hash>& scr)
 // {
