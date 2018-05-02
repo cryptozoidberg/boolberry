@@ -31,6 +31,11 @@
 #include <limits>
 #include <boost/thread.hpp>
 #include <boost/utility/value_init.hpp>
+
+
+#define MAKE_POD_C11(type) namespace std {template<> struct is_pod< type > {static const bool value = true; };}
+
+
 namespace epee
 {
 #define STD_TRY_BEGIN() try {

@@ -13,8 +13,8 @@
 namespace db
 {
   typedef uint64_t table_id;
-  constexpr bool tx_read_write = false;
-  constexpr bool tx_read_only = true;
+  static constexpr bool tx_read_write = false;
+  static constexpr bool tx_read_only = true;
 
   class i_db_visitor
   {
@@ -104,7 +104,7 @@ namespace db
       close();
     }
 
-    bool begin_db_transaction(bool read_only_access = false)
+    bool begin_transaction(bool read_only_access = false)
     {
       // TODO     !!!
       bool r = m_db_adapter_ptr->begin_transaction(read_only_access);
@@ -118,7 +118,7 @@ namespace db
       return r;
     }
 
-    void commit_db_transaction()
+    void commit_transaction()
     {
       // TODO    !!!
       bool r = m_db_adapter_ptr->commit_transaction();
@@ -131,7 +131,7 @@ namespace db
       }
     }
 
-    void abort_db_transaction()
+    void abort_transaction()
     {
       // TODO     !!!
       m_db_adapter_ptr->abort_transaction();
@@ -378,6 +378,7 @@ namespace db
   {
   public:
     static const bool value_t_is_serializable = value_type_is_serializable;
+    typedef value_t t_value_type;
 
     key_value_accessor_base(db_bridge_base& dbb)
       : m_dbb(dbb)
@@ -470,6 +471,16 @@ namespace db
       return value_type_helper_selector<value_type_is_serializable>::template get<key_t, value_t>(m_tid, m_dbb, key);
     }
 
+    std::shared_ptr<const value_t> find(const key_t& key) const
+    {
+      return get(key);
+    }
+
+    std::shared_ptr<const value_t> end() const
+    {
+      return std::shared_ptr<const value_t>(nullptr);
+    }
+
     template<class explicit_key_t, class explicit_value_t, class object_value_helper_t>
     void explicit_set(const explicit_key_t& key, const explicit_value_t& value)
     {
@@ -499,6 +510,16 @@ namespace db
         return size;
       });
     }
+
+
+    uint64_t count(const key_t& k) const
+    {
+      if (get(k))
+        return 1;
+      else
+        return 0;
+    }
+
 
     size_t size_no_cache() const
     {
@@ -540,7 +561,7 @@ namespace db
     std::shared_ptr<const value_t> operator[] (const key_t& k) const
     {
       auto r = this->get(k);
-      CHECK_AND_ASSERT_THROW(r.get(), std::out_of_range("Out of range"));
+      if (!r.get()) throw  std::out_of_range("Out of range");
       return r;
     }
 
@@ -645,8 +666,9 @@ namespace db
   };
   struct uuid128_key
   {
-    uint64_t l;
-    uint64_t h;
+    uint64_t d[2];
+//     uint64_t l;
+//     uint64_t h;
   };
 #pragma pack(pop)
 
@@ -660,14 +682,14 @@ namespace db
       : super(dbb)
     {}
 
-    size_t get_array_size(const array_key_t& array_key) const
+    size_t get_item_size(const array_key_t& array_key) const
     {
       return get_const_counter_accessor(array_key);
     }
 
-    std::shared_ptr<const value_t> get_item(const array_key_t& array_key, size_t i) const
+    std::shared_ptr<const value_t> get_subitem(const array_key_t& array_key, size_t i) const
     {
-      size_t count = get_array_size(array_key);
+      size_t count = get_item_size(array_key);
       CHECK_AND_ASSERT_THROW_MES(i < count, "array key " << array_key << ": item index " << i << " exceeds elements count == " << count);
       complex_key<array_key_t, size_t> ck{ array_key, i };
       return super::get(ck);
@@ -696,8 +718,7 @@ namespace db
     }
 
   private:
-
-    const uuid128_key array_counter_suffix_key = { 0x3243F6A8885A308D, 0x313198A2E0370734 }; // just a number to store array counter using complex_key
+    const uuid128_key array_counter_suffix_key = { { 0xe005d3c8c9e94c2e, 0xb94ca40ec25550ad } }; // just a number to store array counter using complex_key
 
     single_value<complex_key<array_key_t, uuid128_key>, size_t, super> get_counter_accessor(const array_key_t& array_key)
     {
@@ -735,6 +756,25 @@ namespace db
       super::erase(super::size() - 1);
     }
 
+    void resize(uint64_t new_size)
+    {
+      uint64_t current_size = super::size();
+      if (current_size > new_size)
+      {
+        uint64_t count = current_size - new_size;
+        //trim
+        for (uint64_t i = 0; i != count; i++)
+          this->pop_back();
+      }
+      else if (current_size < new_size)
+      {
+        uint64_t count = new_size - current_size;
+        //trim
+        for (uint64_t i = 0; i != count; i++)
+          this->push_back(value_t());
+      }
+    }
+
     std::shared_ptr<const value_t> back() const
     {
       std::shared_ptr<const value_t> ptr = super::get(super::size() - 1);
@@ -750,6 +790,20 @@ namespace db
     }
 
   }; // class array_accessor
+
+  template<class value_t, bool value_type_is_serializable>
+  class array_accessor_native : public array_accessor<value_t, value_type_is_serializable>
+  {
+  public:
+    array_accessor_native(db_bridge_base& dbb):array_accessor<value_t, value_type_is_serializable>(dbb)
+    {}
+
+    value_t operator[](const size_t& k) const
+    {
+      return *array_accessor<value_t, value_type_is_serializable>::super::operator [](k);
+    }
+  };
+
     
 
 } // namespace db
