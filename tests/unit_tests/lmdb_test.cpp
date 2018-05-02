@@ -399,7 +399,7 @@ namespace lmdb_test
     r = lmdb_ptr->open_table("decapod", tid_decapod);
     ASSERT_TRUE(r);
 
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
 
     ASSERT_TRUE(dbb.clear(tid_decapod));
 
@@ -411,9 +411,9 @@ namespace lmdb_test
     r = dbb.set_serializable_object(tid_decapod, key, s_object);
     ASSERT_TRUE(r);
 
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
 
     simple_serializable_t s_object2;
     r = dbb.get_serializable_object(tid_decapod, key, s_object2);
@@ -431,18 +431,18 @@ namespace lmdb_test
     r = dbb.erase(tid_decapod, key);
     ASSERT_FALSE(r);
 
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
 
    // POD type
     const char key_pod[] = "alqocyfu7sbxhaoo5kdnrt77tgwderhjs9a9sdjf324nfjksd9f0s90f2";
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
     simple_pod_t p_object1 = {' ', 0xf7f7f7f7d3d3d3d3ull, 2.002319f};
     r = dbb.set_pod_object(tid_decapod, key_pod, p_object1);
     ASSERT_TRUE(r);
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
     simple_pod_t p_object2;
     r = dbb.get_pod_object(tid_decapod, key_pod, p_object2);
     ASSERT_TRUE(r);
@@ -458,7 +458,7 @@ namespace lmdb_test
     // second erase shoud also fail
     r = dbb.erase(tid_decapod, key_pod);
     ASSERT_FALSE(r);
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
 
     r = dbb.close();
@@ -499,14 +499,14 @@ namespace lmdb_test
     // clear table
     db::table_id options_tid;
     ASSERT_TRUE(lmdb_ptr->open_table(options_table_name, options_tid));
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
     ASSERT_TRUE(dbb.clear(options_tid));
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
     ASSERT_TRUE(options_container.init(options_table_name));
 
     // check defaults
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
     uint64_t v = option_uint64;
     ASSERT_EQ(v, 0);
     
@@ -516,15 +516,15 @@ namespace lmdb_test
     crypto::hash h = option_hash;
     ASSERT_EQ(h, null_hash);
 
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
 
     // set single values
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
     option_uint64 = 97;
     option_serializable_obj = serializable_string("New York advertising men");
     option_hash = crypto::cn_fast_hash(options_table_name.c_str(), options_table_name.size());
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
     ASSERT_TRUE(dbb.close());
 
@@ -535,7 +535,7 @@ namespace lmdb_test
 
 
     // get single value
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
 
     v = option_uint64;
     ASSERT_EQ(v, 97);
@@ -546,7 +546,7 @@ namespace lmdb_test
     h = option_hash;
     ASSERT_EQ(h, crypto::cn_fast_hash(options_table_name.c_str(), options_table_name.size()));
 
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
 
     ASSERT_TRUE(dbb.close());
@@ -572,23 +572,23 @@ namespace lmdb_test
     // clear table
     db::table_id tid;
     ASSERT_TRUE(lmdb_ptr->open_table(array_table_name, tid));
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
     ASSERT_TRUE(dbb.clear(tid));
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
     ASSERT_TRUE(db_array.init(array_table_name));
 
     // check defaults
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
 
-    size_t count = db_array.get_array_size(97);
+    size_t count = db_array.get_item_size(97);
     ASSERT_EQ(count, 0);
 
     std::shared_ptr<const serializable_string> ptr;
     r = false;
     try
     {
-      ptr = db_array.get_item(97, 0);
+      ptr = db_array.get_subitem(97, 0);
     }
     catch (...)
     {
@@ -596,34 +596,34 @@ namespace lmdb_test
     }
     ASSERT_TRUE(r);
 
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
 
 
     // write
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
     db_array.push_back_item(97, serializable_string("507507507507507507507507"));
     db_array.push_back_item(97, serializable_string("787878787878787878787878"));
     db_array.push_back_item(97, serializable_string("ringing phone"));
 
-    count = db_array.get_array_size(97);
+    count = db_array.get_item_size(97);
     ASSERT_EQ(count, 3);
 
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
     db_array.push_back_item(97, serializable_string("ring"));
     db_array.push_back_item(97, serializable_string("ring"));
     db_array.push_back_item(97, serializable_string("ring"));
 
-    count = db_array.get_array_size(97);
+    count = db_array.get_item_size(97);
     ASSERT_EQ(count, 6);
-    dbb.abort_db_transaction();
+    dbb.abort_transaction();
 
-    ASSERT_TRUE(dbb.begin_db_transaction());
-    count = db_array.get_array_size(97);
+    ASSERT_TRUE(dbb.begin_transaction());
+    count = db_array.get_item_size(97);
     ASSERT_EQ(count, 3);
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
     ASSERT_TRUE(dbb.close());
 
@@ -632,19 +632,19 @@ namespace lmdb_test
     ASSERT_TRUE(dbb.open("array_basic_test"));
     ASSERT_TRUE(db_array.init(array_table_name));
 
-    ASSERT_TRUE(dbb.begin_db_transaction());
-    count = db_array.get_array_size(97);
+    ASSERT_TRUE(dbb.begin_transaction());
+    count = db_array.get_item_size(97);
     ASSERT_EQ(count, 3);
 
-    ptr = db_array.get_item(97, 0);
+    ptr = db_array.get_subitem(97, 0);
     ASSERT_TRUE((bool)ptr);
     ASSERT_EQ(ptr->v, "507507507507507507507507");
 
-    ptr = db_array.get_item(97, 1);
+    ptr = db_array.get_subitem(97, 1);
     ASSERT_TRUE((bool)ptr);
     ASSERT_EQ(ptr->v, "787878787878787878787878");
 
-    ptr = db_array.get_item(97, 2);
+    ptr = db_array.get_subitem(97, 2);
     ASSERT_TRUE((bool)ptr);
     ASSERT_EQ(ptr->v, "ringing phone");
 
@@ -661,18 +661,18 @@ namespace lmdb_test
     db_array.pop_back_item(97);
     db_array.pop_back_item(97);
 
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
 
 
-    ASSERT_TRUE(dbb.begin_db_transaction());
-    count = db_array.get_array_size(97);
+    ASSERT_TRUE(dbb.begin_transaction());
+    count = db_array.get_item_size(97);
     ASSERT_EQ(count, 1);
 
-    ptr = db_array.get_item(97, 0);
+    ptr = db_array.get_subitem(97, 0);
     ASSERT_TRUE((bool)ptr);
     ASSERT_EQ(ptr->v, "507507507507507507507507");
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
 
     ASSERT_TRUE(dbb.close());
@@ -697,9 +697,9 @@ namespace lmdb_test
     // clear table
     db::table_id tid;
     ASSERT_TRUE(lmdb_ptr->open_table(array_table_name, tid));
-    ASSERT_TRUE(dbb.begin_db_transaction());
+    ASSERT_TRUE(dbb.begin_transaction());
     ASSERT_TRUE(dbb.clear(tid));
-    dbb.commit_db_transaction();
+    dbb.commit_transaction();
 
     // check defaults
     ASSERT_TRUE(db_array.init(array_table_name));

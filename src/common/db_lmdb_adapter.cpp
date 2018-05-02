@@ -95,6 +95,24 @@ namespace db
   {
     if (m_p_impl->p_mdb_env)
     {
+      {
+        std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
+        bool unlock_begin_commit_abort_mutex = false;
+        for (auto& pair_id_tx_stack : m_p_impl->m_transaction_stack)
+        {
+          for(auto& tx_stack : pair_id_tx_stack.second)
+          {
+            int result = mdb_txn_commit(tx_stack.txn);
+            if (result != MDB_SUCCESS)
+              LOG_ERROR("mdb_txn_commit: mdb_txn_commit() failed : " << mdb_strerror(result));
+            if (!tx_stack.ro_access)
+              unlock_begin_commit_abort_mutex = true;
+          }
+        }
+        if (unlock_begin_commit_abort_mutex)
+          m_p_impl->m_begin_commit_abort_mutex.lock();
+      } // lock_guard : m_p_impl->m_transaction_stack_mutex
+
       mdb_env_close(m_p_impl->p_mdb_env);
       m_p_impl->p_mdb_env = nullptr;
     }
@@ -229,8 +247,15 @@ namespace db
     MDB_val data = AUTO_VAL_INIT(data);
     key.mv_data = const_cast<char*>(key_data);
     key.mv_size = key_size;
+
+    bool local_transaction = !m_p_impl->has_active_transaction();
+    if (local_transaction)
+      begin_transaction(true);
     
     r = mdb_get(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &key, &data);
+
+    if (local_transaction)
+      commit_transaction();
     
     if (r == MDB_NOTFOUND)
       return false;
@@ -289,7 +314,7 @@ namespace db
     CHECK_AND_ASSERT_MES(p_cursor != nullptr, false, "p_cursor == nullptr");
 
     size_t count = 0;
-    do
+    for(;;)
     {
       int res = mdb_cursor_get(p_cursor, &key, &data, MDB_NEXT);
       if (res == MDB_NOTFOUND)
@@ -298,7 +323,6 @@ namespace db
         break;
       ++count;
     }
-    while (p_cursor);
 
     mdb_cursor_close(p_cursor);
     if (local_transaction)
