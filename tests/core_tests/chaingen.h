@@ -477,7 +477,7 @@ inline bool do_replay_events(std::vector<test_event_entry>& events)
 
   currency::currency_protocol_stub pr; //TODO: stub only for this kind of test, make real validation of relayed objects
   currency::core c(&pr);
-  std::string config_path = epee::string_tools::get_current_module_folder() + "/"TEST_SUBFOLDER;
+  std::string config_path = epee::string_tools::get_current_module_folder() + "/" TEST_SUBFOLDER;
   boost::system::error_code ec;
   boost::filesystem::remove_all(config_path, ec);
   tools::create_directories_if_necessary(config_path);
