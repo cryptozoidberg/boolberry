@@ -21,6 +21,7 @@ namespace currency
 
     scratchpad_wrapper(scratchpad_container& m_db_scratchpad);
     bool init();
+    void clear();
     const std::vector<crypto::hash>& get_scratchpad();
     void set_scratchpad(const std::vector<crypto::hash>& sc);
     bool push_block_scratchpad_data(const block& b);

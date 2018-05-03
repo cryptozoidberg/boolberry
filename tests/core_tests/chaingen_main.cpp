@@ -7,6 +7,9 @@
 #include "common/command_line.h"
 #include "transaction_tests.h"
 
+#include "crypto/random.h"
+
+
 
 namespace po = boost::program_options;
 
@@ -73,88 +76,90 @@ int main(int argc, char* argv[])
   }
   else //if (command_line::get_arg(vm, arg_generate_and_play_test_data))
   {    
-    
-    GENERATE_AND_PLAY(prun_ring_signatures);
-    GENERATE_AND_PLAY(get_random_outs_test);
+    crypto::random_prng_initialize_with_seed(0);
     GENERATE_AND_PLAY(mix_attr_tests);
-    GENERATE_AND_PLAY(gen_simple_chain_001);
-    GENERATE_AND_PLAY(gen_simple_chain_split_1);
-    GENERATE_AND_PLAY(one_block);
-    GENERATE_AND_PLAY(gen_chain_switch_1);
-    GENERATE_AND_PLAY(gen_ring_signature_1);
-    GENERATE_AND_PLAY(gen_ring_signature_2);
-    //GENERATE_AND_PLAY(gen_ring_signature_big); // Takes up to XXX hours (if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 10)
 
-    // Block verification tests
-    GENERATE_AND_PLAY(gen_block_big_major_version);
-    GENERATE_AND_PLAY(gen_block_big_minor_version);
-    GENERATE_AND_PLAY(gen_block_ts_not_checked);
-    GENERATE_AND_PLAY(gen_block_ts_in_past);
-    GENERATE_AND_PLAY(gen_block_ts_in_future);
-    //GENERATE_AND_PLAY(gen_block_invalid_prev_id); disabled becouse impossible to generate text chain with wrong prev_id - pow hash not works without chaining
-    GENERATE_AND_PLAY(gen_block_invalid_nonce);
-    GENERATE_AND_PLAY(gen_block_no_miner_tx);
-    GENERATE_AND_PLAY(gen_block_unlock_time_is_low);
-    GENERATE_AND_PLAY(gen_block_unlock_time_is_high);
-    GENERATE_AND_PLAY(gen_block_unlock_time_is_timestamp_in_past);
-    GENERATE_AND_PLAY(gen_block_unlock_time_is_timestamp_in_future);
-    GENERATE_AND_PLAY(gen_block_height_is_low);
-    GENERATE_AND_PLAY(gen_block_height_is_high);
-    GENERATE_AND_PLAY(gen_block_miner_tx_has_2_tx_gen_in);
-    GENERATE_AND_PLAY(gen_block_miner_tx_has_2_in);
-    GENERATE_AND_PLAY(gen_block_miner_tx_with_txin_to_key);
-    GENERATE_AND_PLAY(gen_block_miner_tx_out_is_small);
-    GENERATE_AND_PLAY(gen_block_miner_tx_out_is_big);
-    GENERATE_AND_PLAY(gen_block_miner_tx_has_no_out);
-    GENERATE_AND_PLAY(gen_block_miner_tx_has_out_to_alice);
-    GENERATE_AND_PLAY(gen_block_has_invalid_tx);
-    GENERATE_AND_PLAY(gen_block_is_too_big);
-    GENERATE_AND_PLAY(gen_block_invalid_binary_format); // Takes up to 3 hours, if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 500, up to 30 minutes, if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 10
-    GENERATE_AND_PLAY(gen_alias_tests); 
-
-    
-    // Transaction verification tests
-    GENERATE_AND_PLAY(gen_tx_big_version);
-    GENERATE_AND_PLAY(gen_tx_unlock_time);
-    GENERATE_AND_PLAY(gen_tx_input_is_not_txin_to_key);
-    GENERATE_AND_PLAY(gen_tx_no_inputs_no_outputs);
-    GENERATE_AND_PLAY(gen_tx_no_inputs_has_outputs);
-    GENERATE_AND_PLAY(gen_tx_has_inputs_no_outputs);
-    GENERATE_AND_PLAY(gen_tx_invalid_input_amount);
-    GENERATE_AND_PLAY(gen_tx_input_wo_key_offsets);
-    GENERATE_AND_PLAY(gen_tx_sender_key_offest_not_exist);
-    GENERATE_AND_PLAY(gen_tx_key_offest_points_to_foreign_key);
-    GENERATE_AND_PLAY(gen_tx_mixed_key_offest_not_exist);
-    GENERATE_AND_PLAY(gen_tx_key_image_not_derive_from_tx_key);
-    GENERATE_AND_PLAY(gen_tx_key_image_is_invalid);
-    GENERATE_AND_PLAY(gen_tx_check_input_unlock_time);
-    GENERATE_AND_PLAY(gen_tx_txout_to_key_has_invalid_key);
-    GENERATE_AND_PLAY(gen_tx_output_with_zero_amount);
-    GENERATE_AND_PLAY(gen_tx_output_is_not_txout_to_key);
-    GENERATE_AND_PLAY(gen_tx_signatures_are_invalid);
-
-    // Double spend
-    GENERATE_AND_PLAY(gen_double_spend_in_tx<false>);
-    GENERATE_AND_PLAY(gen_double_spend_in_tx<true>);
-    GENERATE_AND_PLAY(gen_double_spend_in_the_same_block<false>);
-    GENERATE_AND_PLAY(gen_double_spend_in_the_same_block<true>);
-    GENERATE_AND_PLAY(gen_double_spend_in_different_blocks<false>);
-    GENERATE_AND_PLAY(gen_double_spend_in_different_blocks<true>);
-    GENERATE_AND_PLAY(gen_double_spend_in_different_chains);
-    GENERATE_AND_PLAY(gen_double_spend_in_alt_chain_in_the_same_block<false>);
-    GENERATE_AND_PLAY(gen_double_spend_in_alt_chain_in_the_same_block<true>);
-    GENERATE_AND_PLAY(gen_double_spend_in_alt_chain_in_different_blocks<false>);
-    GENERATE_AND_PLAY(gen_double_spend_in_alt_chain_in_different_blocks<true>);
-
-    GENERATE_AND_PLAY(gen_uint_overflow_1);
-    GENERATE_AND_PLAY(gen_uint_overflow_2);
+//     GENERATE_AND_PLAY(prun_ring_signatures);
+//     GENERATE_AND_PLAY(get_random_outs_test);
+//     GENERATE_AND_PLAY(mix_attr_tests);
+//     GENERATE_AND_PLAY(gen_simple_chain_001);
+//     GENERATE_AND_PLAY(gen_simple_chain_split_1);
+//     GENERATE_AND_PLAY(one_block);
+//     GENERATE_AND_PLAY(gen_chain_switch_1);
+//     GENERATE_AND_PLAY(gen_ring_signature_1);
+//     GENERATE_AND_PLAY(gen_ring_signature_2);
+//     //GENERATE_AND_PLAY(gen_ring_signature_big); // Takes up to XXX hours (if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 10)
+// 
+//     // Block verification tests
+//     GENERATE_AND_PLAY(gen_block_big_major_version);
+//     GENERATE_AND_PLAY(gen_block_big_minor_version);
+//     GENERATE_AND_PLAY(gen_block_ts_not_checked);
+//     GENERATE_AND_PLAY(gen_block_ts_in_past);
+//     GENERATE_AND_PLAY(gen_block_ts_in_future);
+//     //GENERATE_AND_PLAY(gen_block_invalid_prev_id); disabled becouse impossible to generate text chain with wrong prev_id - pow hash not works without chaining
+//     GENERATE_AND_PLAY(gen_block_invalid_nonce);
+//     GENERATE_AND_PLAY(gen_block_no_miner_tx);
+//     GENERATE_AND_PLAY(gen_block_unlock_time_is_low);
+//     GENERATE_AND_PLAY(gen_block_unlock_time_is_high);
+//     GENERATE_AND_PLAY(gen_block_unlock_time_is_timestamp_in_past);
+//     GENERATE_AND_PLAY(gen_block_unlock_time_is_timestamp_in_future);
+//     GENERATE_AND_PLAY(gen_block_height_is_low);
+//     GENERATE_AND_PLAY(gen_block_height_is_high);
+//     GENERATE_AND_PLAY(gen_block_miner_tx_has_2_tx_gen_in);
+//     GENERATE_AND_PLAY(gen_block_miner_tx_has_2_in);
+//     GENERATE_AND_PLAY(gen_block_miner_tx_with_txin_to_key);
+//     GENERATE_AND_PLAY(gen_block_miner_tx_out_is_small);
+//     GENERATE_AND_PLAY(gen_block_miner_tx_out_is_big);
+//     GENERATE_AND_PLAY(gen_block_miner_tx_has_no_out);
+//     GENERATE_AND_PLAY(gen_block_miner_tx_has_out_to_alice);
+//     GENERATE_AND_PLAY(gen_block_has_invalid_tx);
+//     GENERATE_AND_PLAY(gen_block_is_too_big);
+//     GENERATE_AND_PLAY(gen_block_invalid_binary_format); // Takes up to 3 hours, if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 500, up to 30 minutes, if CURRENCY_MINED_MONEY_UNLOCK_WINDOW == 10
+//     GENERATE_AND_PLAY(gen_alias_tests); 
+// 
+//     
+//     // Transaction verification tests
+//     GENERATE_AND_PLAY(gen_tx_big_version);
+//     GENERATE_AND_PLAY(gen_tx_unlock_time);
+//     GENERATE_AND_PLAY(gen_tx_input_is_not_txin_to_key);
+//     GENERATE_AND_PLAY(gen_tx_no_inputs_no_outputs);
+//     GENERATE_AND_PLAY(gen_tx_no_inputs_has_outputs);
+//     GENERATE_AND_PLAY(gen_tx_has_inputs_no_outputs);
+//     GENERATE_AND_PLAY(gen_tx_invalid_input_amount);
+//     GENERATE_AND_PLAY(gen_tx_input_wo_key_offsets);
+//     GENERATE_AND_PLAY(gen_tx_sender_key_offest_not_exist);
+//     GENERATE_AND_PLAY(gen_tx_key_offest_points_to_foreign_key);
+//     GENERATE_AND_PLAY(gen_tx_mixed_key_offest_not_exist);
+//     GENERATE_AND_PLAY(gen_tx_key_image_not_derive_from_tx_key);
+//     GENERATE_AND_PLAY(gen_tx_key_image_is_invalid);
+//     GENERATE_AND_PLAY(gen_tx_check_input_unlock_time);
+//     GENERATE_AND_PLAY(gen_tx_txout_to_key_has_invalid_key);
+//     GENERATE_AND_PLAY(gen_tx_output_with_zero_amount);
+//     GENERATE_AND_PLAY(gen_tx_output_is_not_txout_to_key);
+//     GENERATE_AND_PLAY(gen_tx_signatures_are_invalid);
+// 
+//     // Double spend
+//     GENERATE_AND_PLAY(gen_double_spend_in_tx<false>);
+//     GENERATE_AND_PLAY(gen_double_spend_in_tx<true>);
+//     GENERATE_AND_PLAY(gen_double_spend_in_the_same_block<false>);
+//     GENERATE_AND_PLAY(gen_double_spend_in_the_same_block<true>);
+//     GENERATE_AND_PLAY(gen_double_spend_in_different_blocks<false>);
+//     GENERATE_AND_PLAY(gen_double_spend_in_different_blocks<true>);
+//     GENERATE_AND_PLAY(gen_double_spend_in_different_chains);
+//     GENERATE_AND_PLAY(gen_double_spend_in_alt_chain_in_the_same_block<false>);
+//     GENERATE_AND_PLAY(gen_double_spend_in_alt_chain_in_the_same_block<true>);
+//     GENERATE_AND_PLAY(gen_double_spend_in_alt_chain_in_different_blocks<false>);
+//     GENERATE_AND_PLAY(gen_double_spend_in_alt_chain_in_different_blocks<true>);
+// 
+//     GENERATE_AND_PLAY(gen_uint_overflow_1);
+//     GENERATE_AND_PLAY(gen_uint_overflow_2);
 
     //GENERATE_AND_PLAY(gen_block_reward);
-
-    std::cout << (failed_tests.empty() ? concolor::green : concolor::magenta);
-    std::cout << "\nREPORT:\n";
-    std::cout << "  Test run: " << tests_count << '\n';
-    std::cout << "  Failures: " << failed_tests.size() << '\n';
+    std::stringstream ss;
+    ss << (failed_tests.empty() ? concolor::green : concolor::magenta);
+    ss << "\nREPORT:\n";
+    ss << "  Test run: " << tests_count << '\n';
+    ss << "  Failures: " << failed_tests.size() << '\n';
     if (!failed_tests.empty())
     {
       std::cout << "FAILED TESTS:\n";
@@ -163,7 +168,8 @@ int main(int argc, char* argv[])
         std::cout << "  " << test_name << '\n';
       }
     }
-    std::cout << concolor::normal << std::endl;
+    ss << concolor::normal << std::endl;
+    LOG_PRINT_MAGENTA(ss.str(), LOG_LEVEL_0);
   }
 
   /*{

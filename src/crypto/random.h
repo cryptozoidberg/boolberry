@@ -17,7 +17,6 @@ void grant_random_initialize(void);
 
 // explicitly define USE_INSECURE_RANDOM_RPNG_ROUTINES for using random_initialize_with_seed
 #ifdef USE_INSECURE_RANDOM_RPNG_ROUTINES
-
 // reinitializes PRNG with the given seed
 // !!!ATTENTION!!!! Improper use of this routine may lead to SECURITY BREACH!
 // Use with care and ONLY for tests or debug purposes!

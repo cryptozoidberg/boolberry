@@ -26,6 +26,11 @@ namespace currency
     LOG_PRINT_MAGENTA("Scratchpad loaded OK(" << (i * 32) / 1024 << "kB)", LOG_LEVEL_0);
     return true;
   }
+  void scratchpad_wrapper::clear()
+  {
+    m_scratchpad_cache.clear();
+    m_rdb_scratchpad.clear();
+  }
 
   const std::vector<crypto::hash>& scratchpad_wrapper::get_scratchpad()
   {

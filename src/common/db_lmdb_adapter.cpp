@@ -104,7 +104,9 @@ namespace db
           {
             int result = mdb_txn_commit(tx_stack.txn);
             if (result != MDB_SUCCESS)
+            {
               LOG_ERROR("mdb_txn_commit: mdb_txn_commit() failed : " << mdb_strerror(result));
+            }
             if (!tx_stack.ro_access)
               unlock_begin_commit_abort_mutex = true;
           }

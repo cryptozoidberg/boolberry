@@ -311,6 +311,7 @@ bool blockchain_storage::clear()
   m_invalid_blocks.clear(); 
   m_db_aliases.clear();
   m_db_addr_to_alias.clear();
+  m_scratchpad_wr.clear();
   m_db.commit_transaction();
   return true;
 }
