@@ -3,10 +3,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #pragma once
 
-
 #include <set>
 #include <memory>
-
 #include "misc_language.h"
 #include "misc_log_ex.h"
 #include "currency_core/currency_format_utils.h"
@@ -110,13 +108,6 @@ namespace db
     {
       // TODO     !!!
       bool r = m_db_adapter_ptr->begin_transaction(read_only_access);
-
-//       {
-//         CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
-//         for (auto c : m_attached_container_receivers)
-//           c->on_write_transaction_begin();
-//       }
-
       return r;
     }
 
@@ -125,24 +116,12 @@ namespace db
       // TODO    !!!
       bool r = m_db_adapter_ptr->commit_transaction();
       CHECK_AND_ASSERT_THROW_MES(r, "commit_transaction failed");
-// 
-//       {
-//         CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
-//         for (auto c : m_attached_container_receivers)
-//           c->on_write_transaction_commit();
-//       }
     }
 
     void abort_transaction()
     {
       // TODO     !!!
       m_db_adapter_ptr->abort_transaction();
-
-//       {
-//         CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
-//         for (auto c : m_attached_container_receivers)
-//           c->on_write_transaction_abort();
-//       }
     }
 
     bool is_open() const
@@ -416,14 +395,14 @@ namespace db
 
     bool begin_transaction(bool read_only = false)
     {
-      return m_dbb.begin_db_transaction(read_only);
+      return m_dbb.begin_transaction(read_only);
     }
 
     void commit_transaction()
     {
       try
       {
-        m_dbb.commit_db_transaction();
+        m_dbb.commit_transaction();
       }
       catch (...)
       {
@@ -435,7 +414,7 @@ namespace db
     void abort_transaction()
     {
       m_cached_size_is_valid = false;
-      m_dbb.abort_db_transaction();
+      m_dbb.abort_transaction();
     }
 
     bool init(const std::string& table_name)
