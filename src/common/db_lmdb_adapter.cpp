@@ -230,7 +230,16 @@ namespace db
     key.mv_data = const_cast<char*>(key_data);
     key.mv_size = key_size;
     
+    bool have_to_commit = false;
+    if (!m_p_impl->has_active_transaction())
+    {
+      have_to_commit = true;
+      begin_transaction(true);
+    }
+
     r = mdb_get(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &key, &data);
+    if (have_to_commit)
+      commit_transaction();
     
     if (r == MDB_NOTFOUND)
       return false;

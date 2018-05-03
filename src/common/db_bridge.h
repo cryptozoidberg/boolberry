@@ -111,11 +111,11 @@ namespace db
       // TODO     !!!
       bool r = m_db_adapter_ptr->begin_transaction(read_only_access);
 
-      {
-        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
-        for (auto c : m_attached_container_receivers)
-          c->on_write_transaction_begin();
-      }
+//       {
+//         CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
+//         for (auto c : m_attached_container_receivers)
+//           c->on_write_transaction_begin();
+//       }
 
       return r;
     }
@@ -125,12 +125,12 @@ namespace db
       // TODO    !!!
       bool r = m_db_adapter_ptr->commit_transaction();
       CHECK_AND_ASSERT_THROW_MES(r, "commit_transaction failed");
-
-      {
-        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
-        for (auto c : m_attached_container_receivers)
-          c->on_write_transaction_commit();
-      }
+// 
+//       {
+//         CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
+//         for (auto c : m_attached_container_receivers)
+//           c->on_write_transaction_commit();
+//       }
     }
 
     void abort_transaction()
@@ -138,11 +138,11 @@ namespace db
       // TODO     !!!
       m_db_adapter_ptr->abort_transaction();
 
-      {
-        CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
-        for (auto c : m_attached_container_receivers)
-          c->on_write_transaction_abort();
-      }
+//       {
+//         CRITICAL_REGION_LOCAL(m_attached_container_receivers_lock);
+//         for (auto c : m_attached_container_receivers)
+//           c->on_write_transaction_abort();
+//       }
     }
 
     bool is_open() const
