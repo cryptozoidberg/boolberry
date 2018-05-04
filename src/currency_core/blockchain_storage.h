@@ -163,6 +163,7 @@ namespace currency
     bool is_storing_blockchain(){ return m_is_blockchain_storing; }
     wide_difficulty_type block_difficulty(size_t i);
     bool copy_scratchpad(std::vector<crypto::hash>& dst);//TODO: not the best way, add later update method instead of full copy    
+    bool copy_scratchpad_as_blob(std::string& dst);
     bool prune_aged_alt_blocks();
     bool get_transactions_daily_stat(uint64_t& daily_cnt, uint64_t& daily_volume);
     bool check_keyimages(const std::list<crypto::key_image>& images, std::list<bool>& images_stat);//true - unspent, false - spent

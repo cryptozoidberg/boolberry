@@ -209,6 +209,16 @@ namespace crypto {
     const signature *sig) {
     return check_ring_signature(prefix_hash, image, pubs.data(), pubs.size(), sig);
   }
+
+  inline bool check_ring_signature(const hash &prefix_hash, const key_image &image,
+    const std::vector<public_key> &pubs, const signature *sig) 
+  {
+    std::vector<const public_key*> vect_ptrs;
+    for (auto& p : pubs)
+      vect_ptrs.push_back(&p);
+
+    return check_ring_signature(prefix_hash, image, vect_ptrs.data(), vect_ptrs.size(), sig);
+  }
 }
 
 POD_MAKE_COMPARABLE(crypto, public_key)

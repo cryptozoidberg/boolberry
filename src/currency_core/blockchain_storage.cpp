@@ -348,20 +348,20 @@ bool blockchain_storage::copy_scratchpad(std::vector<crypto::hash>& scr)
 // 
 //   return true;
 // }
-// bool blockchain_storage::copy_scratchpad(std::string& dst)
-// {
-// 
-//   //TODO here:
-//   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-//   std::vector<crypto::hash> scr;
-//   copy_scratchpad(scr);
-// 
-//   if (scr.size())
-//   {
-//     dst.append(reinterpret_cast<const char*>(&scr[0]), scr.size() * 32);
-//   }
-//   return true;
-// }
+bool blockchain_storage::copy_scratchpad_as_blob(std::string& dst)
+{
+
+  //TODO here:
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  std::vector<crypto::hash> scr;
+  copy_scratchpad(scr);
+
+  if (scr.size())
+  {
+    dst.append(reinterpret_cast<const char*>(&scr[0]), scr.size() * 32);
+  }
+  return true;
+}
 //------------------------------------------------------------------
 bool blockchain_storage::purge_transaction_keyimages_from_blockchain(const transaction& tx, bool strict_check)
 {
@@ -2161,12 +2161,12 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
   TIME_MEASURE_FINISH(store_to_db_time);
   LOG_PRINT_L2("Added transaction to blockchain history:" << ENDL
     << "tx_id: " << tx_id << ENDL
-    << "inputs: " << tx.vin.size() << ", outs: " << tx.vout.size() << ", spend money: " << print_money(get_outs_money_amount(tx)) << "(fee: " << (is_coinbase(tx) ? "0[coinbase]" : print_money(get_tx_fee(tx))) << ")" << ENDL
-    << "Profile details: " << ENDL
-    << "process_tx_extra_time: " << print_mcsec(process_tx_extra_time) << ENDL
-    << "process_tx_inputs_time: " << print_mcsec(process_tx_inputs_time) << ENDL
-    << "push_tx_to_global_index_time: " << print_mcsec(push_tx_to_global_index_time) << ENDL
-    << "store_to_db_time: " << print_mcsec(store_to_db_time) << ENDL
+    << "inputs: " << tx.vin.size() << ", outs: " << tx.vout.size() << ", spend money: " << print_money(get_outs_money_amount(tx)) << "(fee: " << (is_coinbase(tx) ? "0[coinbase]" : print_money(get_tx_fee(tx))) << ")" //<< ENDL
+//     << "Profile details: " << ENDL
+//     << "process_tx_extra_time: " << print_mcsec(process_tx_extra_time) << ENDL
+//     << "process_tx_inputs_time: " << print_mcsec(process_tx_inputs_time) << ENDL
+//     << "push_tx_to_global_index_time: " << print_mcsec(push_tx_to_global_index_time) << ENDL
+//     << "store_to_db_time: " << print_mcsec(store_to_db_time) << ENDL
     );
 
   return true;
@@ -2285,9 +2285,9 @@ bool blockchain_storage::check_tx_input(const txin_to_key& txin, const crypto::h
 
   struct outputs_visitor
   {
-    std::vector<const crypto::public_key *>& m_results_collector;
+    std::vector<crypto::public_key>& m_results_collector;
     blockchain_storage& m_bch;
-    outputs_visitor(std::vector<const crypto::public_key *>& results_collector, blockchain_storage& bch) :m_results_collector(results_collector), m_bch(bch)
+    outputs_visitor(std::vector<crypto::public_key>& results_collector, blockchain_storage& bch) :m_results_collector(results_collector), m_bch(bch)
     {}
     bool handle_output(const transaction& tx, const tx_out& out)
     {
@@ -2304,13 +2304,13 @@ bool blockchain_storage::check_tx_input(const txin_to_key& txin, const crypto::h
         return false;
       }
 
-      m_results_collector.push_back(&boost::get<txout_to_key>(out.target).key);
+      m_results_collector.push_back(boost::get<txout_to_key>(out.target).key);
       return true;
     }
   };
 
   //check ring signature
-  std::vector<const crypto::public_key *> output_keys;
+  std::vector<crypto::public_key> output_keys;
   outputs_visitor vi(output_keys, *this);
   if (!scan_outputkeys_for_indexes(txin, vi, pmax_related_block_height))
   {
@@ -2612,18 +2612,18 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     << ")" << ((bei.height%CURRENCY_DONATIONS_INTERVAL) ? std::string("") : std::string("donation: ") + print_money(donation_total)) << ", coinbase_blob_size: " << coinbase_blob_size << ", cumulative size: " << cumulative_block_size
     << ", " << print_mcsec(block_processing_time)
     << "(" << print_mcsec(target_calculating_time)
-    << "/" << print_mcsec(longhash_calculating_time) << ")ms" << ENDL
-    << "Full profiling: " << ENDL
-    << "timestamp_check_time: " << print_mcsec(timestamp_check_time) << ENDL
-    << "target_calculating_time: " << print_mcsec(target_calculating_time) << ENDL
-    << "longhash_calculating_time: " << print_mcsec(longhash_calculating_time) << ENDL
-    << "prevalidate_miner_tx_time: " << print_mcsec(prevalidate_miner_tx_time) << ENDL
-    << "add_miner_tx_time: " << print_mcsec(add_miner_tx_time) << ENDL
-    << "process_transactions_time: " << print_mcsec(process_transactions_time) << ENDL
-    << "validate_miner_tx_time: " << print_mcsec(validate_miner_tx_time) << ENDL
-    << "update_blocks_table_time1: " << print_mcsec(update_blocks_table_time1) << ENDL
-    << "update_scratchpad_time: " << print_mcsec(update_scratchpad_time) << ENDL
-    << "update_blocks_table_time2: " << print_mcsec(update_blocks_table_time2)
+    << "/" << print_mcsec(longhash_calculating_time) << ")ms" //<< ENDL
+//    << "Full profiling: " << ENDL
+//     << "timestamp_check_time: " << print_mcsec(timestamp_check_time) << ENDL
+//     << "target_calculating_time: " << print_mcsec(target_calculating_time) << ENDL
+//     << "longhash_calculating_time: " << print_mcsec(longhash_calculating_time) << ENDL
+//     << "prevalidate_miner_tx_time: " << print_mcsec(prevalidate_miner_tx_time) << ENDL
+//     << "add_miner_tx_time: " << print_mcsec(add_miner_tx_time) << ENDL
+//     << "process_transactions_time: " << print_mcsec(process_transactions_time) << ENDL
+//     << "validate_miner_tx_time: " << print_mcsec(validate_miner_tx_time) << ENDL
+//     << "update_blocks_table_time1: " << print_mcsec(update_blocks_table_time1) << ENDL
+//     << "update_scratchpad_time: " << print_mcsec(update_scratchpad_time) << ENDL
+//     << "update_blocks_table_time2: " << print_mcsec(update_blocks_table_time2)
     );
 
   bvc.m_added_to_main_chain = true;

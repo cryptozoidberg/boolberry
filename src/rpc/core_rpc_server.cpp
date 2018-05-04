@@ -1000,7 +1000,7 @@ namespace currency
     uint32_t str_len = static_cast<uint32_t>(json_hi.size());
     response_info.m_body.append(reinterpret_cast<const char*>(&str_len), sizeof(str_len));
     response_info.m_body.append(json_hi.data(), json_hi.size());
-    m_core.get_blockchain_storage().copy_scratchpad(response_info.m_body);    
+    m_core.get_blockchain_storage().copy_scratchpad_as_blob(response_info.m_body);    
 
     //TODO: remove this code
     LOG_PRINT_L0("[getfullscratchpad2]: json prefix len: " << str_len << ", JSON: " << json_hi);
