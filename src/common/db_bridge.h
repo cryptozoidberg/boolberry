@@ -773,10 +773,10 @@ namespace db
   }; // class array_accessor
 
   template<class value_t, bool value_type_is_serializable>
-  class array_accessor_native : public array_accessor<value_t, value_type_is_serializable>
+  class array_accessor_adapter_to_native : public array_accessor<value_t, value_type_is_serializable>
   {
   public:
-    array_accessor_native(db_bridge_base& dbb):array_accessor<value_t, value_type_is_serializable>(dbb)
+    array_accessor_adapter_to_native(db_bridge_base& dbb):array_accessor<value_t, value_type_is_serializable>(dbb)
     {}
 
     value_t operator[](const size_t& k) const

@@ -5,10 +5,21 @@
 #pragma once
 
 #include "scratchpad_helpers.h"
-
-
+//#define SELF_VALIDATE_SCRATCHPAD
 namespace currency
 {
+  bool load_scratchpad_from_db(const scratchpad_wrapper::scratchpad_container& m_db_scratchpad, std::vector<crypto::hash>& scratchpad_cache)
+  {
+    size_t count = m_db_scratchpad.size();
+    scratchpad_cache.resize(count);
+    size_t i = 0;
+    for (; i != count; i++)
+    {
+      scratchpad_cache[i] = m_db_scratchpad[i];
+    }
+    return true;
+  }
+
 
   scratchpad_wrapper::scratchpad_wrapper(scratchpad_container& m_db_scratchpad) :m_rdb_scratchpad(m_db_scratchpad)
   {}
@@ -16,14 +27,8 @@ namespace currency
   {
     LOG_PRINT_MAGENTA("Loading scratchpad cache...", LOG_LEVEL_0);
     //load scratchpad from db to cache
-    size_t count = m_rdb_scratchpad.size();
-    m_scratchpad_cache.resize(count);
-    size_t i = 0;
-    for (; i != count; i++)
-    {
-      m_scratchpad_cache[i] = m_rdb_scratchpad[i];
-    }
-    LOG_PRINT_MAGENTA("Scratchpad loaded OK(" << (i * 32) / 1024 << "kB)", LOG_LEVEL_0);
+    load_scratchpad_from_db(m_rdb_scratchpad, m_scratchpad_cache);
+    LOG_PRINT_MAGENTA("Scratchpad loaded OK(" << (m_scratchpad_cache.size() * 32) / 1024 << "kB)", LOG_LEVEL_0);
     return true;
   }
   void scratchpad_wrapper::clear()
@@ -48,6 +53,17 @@ namespace currency
   {
     bool res = currency::push_block_scratchpad_data(b, m_scratchpad_cache);
     res &= currency::push_block_scratchpad_data(b, m_rdb_scratchpad);
+#ifdef SELF_VALIDATE_SCRATCHPAD
+    std::vector<crypto::hash> scratchpad_cache;
+    load_scratchpad_from_db(m_rdb_scratchpad, scratchpad_cache);
+    if (scratchpad_cache != m_scratchpad_cache)
+    {
+      LOG_PRINT_L0("scratchpads mismatch, memory version: "
+        << ENDL << dump_scratchpad(m_scratchpad_cache)
+        << ENDL << "db version:" << ENDL << dump_scratchpad(scratchpad_cache)
+        );
+    }
+#endif
     return res;
   }
 

@@ -85,7 +85,7 @@ namespace db
     bool br = tools::create_directories_if_necessary(m_db_folder);
     CHECK_AND_ASSERT_MES(br, false, "create_directories_if_necessary failed");
 
-    r = mdb_env_open(m_p_impl->p_mdb_env, m_db_folder.c_str(), MDB_NORDAHEAD , 0644);
+    r = mdb_env_open(m_p_impl->p_mdb_env, m_db_folder.c_str(), MDB_NORDAHEAD | MDB_NOSYNC, 0644);
     CHECK_DB_CALL_RESULT(r, false, "mdb_env_open failed, m_db_folder = " << m_db_folder);
 
     return true;

@@ -17,7 +17,7 @@ namespace currency
   class scratchpad_wrapper
   {
   public:
-    typedef db::array_accessor_native<crypto::hash, false> scratchpad_container;
+    typedef db::array_accessor_adapter_to_native<crypto::hash, false> scratchpad_container;
 
     scratchpad_wrapper(scratchpad_container& m_db_scratchpad);
     bool init();
@@ -90,12 +90,23 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------
+  inline void update_container_item(std::vector<crypto::hash>& cont, uint64_t i, const crypto::hash& h)
+  {
+    cont[i] = h;
+  }
+  template<class container_t>
+  void update_container_item(container_t& cont, uint64_t i, const crypto::hash& h)
+  {
+    cont.set(i, h);
+  }
+
   template<class t_container>
   bool apply_scratchpad_patch(t_container& scratchpd, std::map<uint64_t, crypto::hash>& patch)
   {
     for (auto& p : patch)
     {
-      scratchpd[p.first] = crypto::xor_pod(scratchpd[p.first], p.second);
+      //scratchpd[p.first] = crypto::xor_pod(scratchpd[p.first], p.second);
+      update_container_item(scratchpd, p.first, crypto::xor_pod(scratchpd[p.first], p.second));
     }
     return true;
   }

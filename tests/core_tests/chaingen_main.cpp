@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
   }
   else //if (command_line::get_arg(vm, arg_generate_and_play_test_data))
   {    
-//     crypto::random_prng_initialize_with_seed(0);
+     crypto::random_prng_initialize_with_seed(0);
 //     GENERATE_AND_PLAY(mix_attr_tests);
 
     GENERATE_AND_PLAY(prun_ring_signatures);
