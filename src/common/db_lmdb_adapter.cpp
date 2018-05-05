@@ -11,7 +11,7 @@
 #include "epee/include/misc_language.h"
 
 // TODO: estimate correct size
-#define LMDB_MEMORY_MAP_SIZE (16ull * 1024 * 1024 * 1024)
+#define LMDB_MEMORY_MAP_SIZE (128ull * 1024 * 1024 * 1024)
 
 #define CHECK_DB_CALL_RESULT(result, return_value, msg) \
   CHECK_AND_ASSERT_MES(result == MDB_SUCCESS,  \

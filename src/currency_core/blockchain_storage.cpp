@@ -173,7 +173,6 @@ bool blockchain_storage::init(const std::string& config_folder)
   }
   initialize_db_solo_options_values();
 
-
   //print information message
   uint64_t timestamp_diff = time(nullptr) - m_db_blocks.back()->bl.timestamp;
   if (!m_db_blocks.back()->bl.timestamp)
@@ -233,6 +232,14 @@ bool blockchain_storage::set_checkpoints(checkpoints&& chk_pts)
     m_db.begin_transaction();
     prune_ring_signatures_if_need();
     m_db.commit_transaction();
+    if (!m_checkpoints.is_in_checkpoint_zone(get_current_blockchain_height()))
+    {
+      m_is_in_checkpoint_zone = false;
+    }
+    else
+    {
+      m_is_in_checkpoint_zone = true;
+    }
     return true;
   }
   catch (const std::exception& ex)
