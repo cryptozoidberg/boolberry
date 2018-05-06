@@ -13,31 +13,20 @@ html {
     /*src: url(Ubuntu-C.ttf);*/
 /*}*/
 
-@font-face {
-    font-family: OpenSans-Semibold;
-    src: url(OpenSans-Semibold.ttf);
-}
-
-@font-face {
-    font-family: OpenSans-Light;
-    src: url(OpenSans-Light.ttf);
-}
-
 body {
-    font-family: 'OpenSans-Regular', sans-serif;
-     /*font-family: UbuntuMedium;!*, Arial, sans-serif;*!*/
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
      color: #3a3a3a;
      background-color: #d5d9dd;
-     margin: 0em 0 0em 0;
+     margin: 0 0;
      height:100%;
      -webkit-font-smoothing: antialiased;
      font-size: 14px;
-     /*background: rgb(231, 231, 231);*/
  }
 
 .container {
-    margin: 15px;
-    margin-top: 0;
+    padding: 15px;
+    padding-top: 0;
 }
 
 #container{
@@ -60,7 +49,6 @@ body {
     display: none;
 }
 
-
 h1 {
     color: #555;
     font-size: 64px;
@@ -76,18 +64,29 @@ h2 {
     text-rendering: optimizeLegibility;
 }
 
+.clearfix {
+    display: block;
+    zoom: 1;
+}
+
+.clearfix:after {
+    content: " ";
+    display: block;
+    font-size: 0;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
 
 .top_menu_bar {
     padding: 0 25px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    height: 80px;
+    line-height: 80px;
     background-image: url('../files/bg.jpg');
-
 }
 
 .menu_bar_logo img {
+    float: left;
     width: 160px;
 }
 .menu_bar_logo, .menu_bar_tabs {
@@ -98,7 +97,8 @@ h2 {
 .wallet_separator {
     position: relative;
     font-size: 16px;
-    font-family: 'OpenSans-Semibold', sans-serif;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
     color: #ffffff;
     padding: 0 15px;
     height: 44px;
@@ -108,63 +108,19 @@ h2 {
     box-sizing: border-box;
 }
 
-.wallet_sync {
-    display: flex;
-    align-items: center;
-}
+/*.wallet_sync {*/
+    /*display: flex;*/
+    /*align-items: center;*/
+/*}*/
 
 .wallet_img {
     margin-right: 7px;
+    vertical-align: middle;
 }
 
-/*.wallet_separator:after,*/
-/*.wallet_separator:before {*/
-    /*position: absolute;*/
-    /*content: "";*/
-    /*top: 50%;*/
-    /*right: 20px;*/
-    /*width: 1px;*/
-    /*height: 6px;*/
-    /*background-color: #fff;*/
-/*}*/
-
-/*.wallet_separator:after {*/
-    /*transform: rotate(45deg);*/
-/*}*/
-
-/*.wallet_separator:before {*/
-    /*transform: rotate(-45deg);*/
-/*}*/
-
-
-/*.ico_arrow_down {*/
-    /*display: inline-block;*/
-    /*position: absolute;*/
-    /*top: 15px;*/
-    /*right: 6px;*/
-    /*width: 14px;*/
-    /*height: 10px;*/
-/*}*/
-
-/*.ico_arrow_down:after,*/
-/*.ico_arrow_down:before {*/
-    /*position: absolute;*/
-    /*content: "";*/
-    /*top: 50%;*/
-    /*right: 20px;*/
-    /*width: 1px;*/
-    /*height: 6px;*/
-    /*background-color: #fff;*/
-/*}*/
-
-/*.ico_arrow_down:after {*/
-    /*left: -3px;*/
-    /*transform: rotate(45deg);*/
-/*}*/
-
-/*.ico_arrow_down:before {*/
-    /*transform: rotate(-45deg);*/
-/*}*/
+.inline_menu_bar {
+    float: right;
+}
 
 .inline_menu_bar_item {
     margin-right: 35px;
@@ -202,7 +158,6 @@ h2 {
 
 .menu_brackets_text
 {
-    /*font-weight: normal;*/
     color: #6c98a5;
 }
 
@@ -220,12 +175,6 @@ h2 {
 .inline_menu_bar_item_disabled:hover
 {
     color: #777;
-}
-
-.menu_view_inner_area
-{
-    /*padding-top: 12px;
-    padding-left: 12px;*/
 }
 
 /*dashboard styles*/
@@ -252,7 +201,8 @@ span.daemon_view_general_status_value_fail_text
 
 #daemon_status_text
 {
-    font-weight:bold;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
     margin-left: 20px;
 }
 
@@ -260,7 +210,7 @@ span.daemon_view_general_status_value_fail_text
 {
     color: rgb(55,52,53);
     margin-left: 40px;
-    font-weight:bold;
+    font-weight: 600;
 }
 
 .daemon_view_param_title
@@ -273,7 +223,7 @@ span.daemon_view_general_status_value_fail_text
 {
     position: absolute;
     left:360px;
-    font-weight:bold;
+    font-weight: 600;
     color: #6c6c6c;
     font-size: 17px;
 }
@@ -308,7 +258,6 @@ span.daemon_view_general_status_value_fail_text
 
 .daemon_view_details_status_block
 {
-    font: 14px;
     margin-top: 5px;
 }
 
@@ -321,28 +270,19 @@ span.daemon_view_general_status_value_fail_text
     background: #fff;
 }
 
-.active_form {
-    display: flex;
-    flex-direction: row;
-}
-
 .active_form input {
+    width: calc(100% - 120px);
     border-right: none;
 }
-/*.wallet_panet_transparent*/
-/*{*/
-    /*padding-top: 2px;*/
-    /*margin:15px;*/
-    /*margin-top: 0px;*/
-/*}*/
-.transfer_entry_line
-{
-    /*font-family: UbuntuCond;*/
-    /*padding-left: 10px;*/
+
+.active_form .btn {
+    float: right;
+}
+
+.transfer_entry_line {
     padding: 8px 13px;
     background-color: #fff;
     border-bottom: 1px solid #e8e6e6;
-    /*margin-top: 1px;*/
 }
 
 .transfer_entry_line_details
@@ -350,14 +290,14 @@ span.daemon_view_general_status_value_fail_text
     display: none;
     margin-top: 10px;
     margin-left: 27px;
-    /*color: rgb(95, 95, 95);*/
 }
 
 .wallet_secondary_text
 {
     margin-top: 20px;
     font-size: 14px;
-    font-family: 'OpenSans-Semibold', sans-serif;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
 }
 
 .wallet_balance
@@ -369,14 +309,13 @@ span.daemon_view_general_status_value_fail_text
     font-size: 16px;
     margin-top: 20px;
     color: #3a3a3a;
-    font-family: 'OpenSans-Semibold', sans-serif;
+    font-weight: 600;
 }
 
 .tx_details_text
 {
     display: inline-block;
-    font-family: 'OpenSans-Semibold', sans-serif;
-    /*margin-top: 20px;*/
+    font-weight: 600;
     margin-bottom: 3px;
 }
 
@@ -386,14 +325,8 @@ span.daemon_view_general_status_value_fail_text
     padding: 5px;
     margin:10px;
     border: 1px solid rgba(149, 149, 149, 0.62);
-    /*margin-left:220px;*/
 }
 
-.transfer_text_img_span
-{
-    /*margin-top: 4px;*/
-    /*margin-bottom: -2px;*/
-}
 .transfer_text_time_span
 {
     position: absolute;
@@ -482,77 +415,52 @@ span.daemon_view_general_status_value_fail_text
     animation-iteration-count: infinite;
 }
 
-
-
-#transfer_address_id
-{
-    /*padding: 0 10px;*/
-    /*height: 37px;*/
-    /*line-height: 37px;*/
-    /*box-sizing: border-box;*/
-    /*!*margin-left:2px;*!*/
-    /*width: 100%;*/
-    /*font-size: 14px;*/
-    /*color: #3e3e3e;*/
-    /*margin: 0;*/
-    /*border: 1px solid #bdbdbd;*/
-}
-/*#transfer_button_id,#close_wallet_button_id,#payment_id,#mixin_count_id,#tx_fee*/
-/*{*/
-    /*font-size: 12px;*/
-    /*margin-left: 2px;*/
-/*}*/
-
-/*#mixin_count_id {*/
-    /*margin-right: 12px;*/
-/*}*/
-
 #close_wallet_button_id
 {
+    float: right;
     margin-left: 480px;
 }
 
 .details {
     margin-top: 35px;
-    margin-bottom: 12px;
     padding-bottom: 12px;
-    border-bottom: 1px solid #e8e6e6;
+}
+
+.additional-details {
+    position: relative;
+}
+
+.active_panel_button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
 }
 
 .options_link_text
 {
     position: relative;
-    padding-left: 16px;
+    padding-left: 17px;
     font-size: 14px;
     letter-spacing: .5px;
     color:  #3a3a3a;
     text-decoration: none;
 }
 
-.details .options_link_text:after,
-.details .options_link_text:before {
+.options_link_text:focus {
+    outline: none;
+}
+
+.details__arrow {
     position: absolute;
-    content: "";
-    top: 5px;
-    left: 3px;
-    width: 1px;
-    height: 5px;
-    background-color: #3a3a3a;
+    top: 7px;
+    left: 0;
 }
 
-.details .options_link_text:after {
-    left: 6px;
-    transform: rotate(45deg);
-}
-
-.details .options_link_text:before {
-    transform: rotate(-45deg);
-}
-
-.transfer_extra_options
-{
+.dropdown {
     color: #757575;
     display: none;
+    padding: 10px 0;
+    border-top: 1px solid #e8e6e6;
 }
 
 .transfer_extra_options_hint
@@ -563,21 +471,14 @@ span.daemon_view_general_status_value_fail_text
 
 #wallet_recent_transfers_panel
 {
-    /*background: rgb(241, 241, 241);*/
     background: rgb(241, 241, 241);
     padding: 5px;
     margin:10px;
     border: 1px solid rgba(149, 149, 149, 0.62);
     height: 100%;
-    /*margin-left: 220px;*/
 }
 
-#synchronized_wallet_block
-{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+#synchronized_wallet_block {
     color: #2ebb35;
 }
 
@@ -608,18 +509,24 @@ h2
 .ui-button-text {
     font-size: 14px;
     color: #3a3a3a;
-    /*background-color: #eeeeee;*/
-    /*border: 1px solid #eeeeee;*/
     border-radius: 0;
     transition: all .3s ease-in-out;
 }
 
 .payment-wrap {
     margin-top: 12px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    margin-bottom: 45px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e8e6e6;
+}
+#transfer_amount_id {
+    float: left;
+    width: 50%;
+}
+
+#payment_id {
+    float: right;
+    width: 49%;
 }
 
 .payment-wrap__input,
@@ -628,12 +535,14 @@ h2
     margin-right: 12px;
 }
 
-.payment-wrap input {
-    margin-right: 12px;
+#mixin_count_id {
+    float: left;
+    width: 50%;
 }
 
-.payment-wrap input:last-child{
-    margin-right: 0;
+#tx_fee {
+    float: right;
+    width: 49%;
 }
 
 input {
@@ -653,7 +562,7 @@ input:focus {
 }
 
 .btn {
-    display: flex;
+    display: inline-block;
     justify-content: center;
     text-align: center;
     width: 120px;
@@ -676,15 +585,39 @@ input:focus {
     border-color: #65ffe7;
 }
 
+.btn-big {
+    display: inline-block;
+    justify-content: center;
+    text-align: center;
+    width: 160px;
+    min-width: 160px;
+    height: 38px;
+    line-height: 38px;
+    font-size: 14px;
+    color: #fff;
+    padding: 0;
+    background-color: #209bff;
+    border: 1px solid #209bff;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all .3s ease-in-out;
+}
+
+.btn-big:hover {
+    color: #3a3a3a;
+    background-color: #65ffe7;
+    border-color: #65ffe7;
+}
+
 .btn-grey {
     background-color: #eeeeee;
     border: 1px solid #eeeeee;
 }
 
+.btn:focus {
+   outline: none;
+}
 .wrap {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
     width: 50%;
 }
 
@@ -693,15 +626,15 @@ input:focus {
     margin-right: 12px;
 }
 
-.active_panel_button {
-    display: flex;
-    justify-content: flex-end;
-}
+/*.active_panel_button {*/
+    /*display: flex;*/
+    /*justify-content: flex-end;*/
+/*}*/
 
-.active_panel_button #transfer_button_id .btn{
-    display: flex;
-    justify-content: center;
-}
+/*.active_panel_button #transfer_button_id .btn{*/
+    /*display: flex;*/
+    /*justify-content: center;*/
+/*}*/
 
 .active_panel_button #transfer_button_id .ui-button-text {
     color: #fff;

@@ -5,6 +5,7 @@
 
     <!--  <link rel="stylesheet" href="files/jquery-ui-1.10.2.custom.css" /> -->
     <link rel="stylesheet" href="files/css/start/jquery-ui-1.10.4.custom.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="files/style.css" />
 
     <!--  <script src="files/http_code.jquery.com_jquery-latest.js"></script> -->
@@ -29,7 +30,7 @@
 <body>
 
 <div id="container">
-    <div class="top_menu_bar">
+    <div class="top_menu_bar clearfix">
         <div class="menu_bar_logo"><img src="files/logo.svg" height="80px" /></div>
         <div class="inline_menu_bar">
             <div class="menu_bar_tabs">
@@ -83,8 +84,8 @@
     </div>
     <div id="wallet_view" class="view_hidden menu_view_inner_area" >
         <div id="wallet_welcome_screen_area">
-            <div id="open_wallet_button" class="common_button">Open wallet</div><br><br><span id="id_wallet_or_text">or</span> <br><br>
-            <div id="generate_wallet_button" class="common_button">Generate new wallet</div>
+            <div id="open_wallet_button" class="common_button btn-big btn-grey">Open wallet</div><br><br><span id="id_wallet_or_text">or</span> <br><br>
+            <div id="generate_wallet_button" class="common_button btn-big btn-grey">Generate new wallet</div>
         </div>
         <div id="wallet_workspace_area">
             <div class="container">
@@ -109,7 +110,7 @@
                         Synchronizing wallet...
                         <div style="width: 150px; height: 20px;" id="wallet_progressbar"></div>
                     </div>
-                    <div id="synchronized_wallet_block" style="display: none">
+                    <div class="clearfix" id="synchronized_wallet_block" style="display: none">
                         <span class="wallet_sync">
                             <img class="wallet_img" src="files/done_icon.png" alt="done-icon">
                             Synced</span>
@@ -119,62 +120,63 @@
 
                 <div class="wallet_separator">Sign something</div>
                 <div class="active_panel">
-                    <div class="active_form">
-                        <input id="" type="text" placeholder="Text">
-                        <button class="btn" type="submit">Sign</button>
+                    <div class="active_form clearfix">
+                        <input id="sign_text_id" type="text" placeholder="Text">
+                        <button id="sign_button_id" class="btn" type="submit">Sign</button>
                     </div>
+                    <div id='signature_id'></div>
                 </div>
 
                 <div class="wallet_separator">
                     Send payment
-                    <!--<span class="ico_arrow_down"></span>-->
                 </div>
                 <div class="active_panel">
                     <div>
                         <input id="transfer_address_id" type="text" placeholder="Address">
                     </div>
-                    <div class="payment-wrap">
+                    <div class="payment-wrap clearfix">
                         <input pattern="[0-9]+(\.[0-9]{1,12})?" placeholder="Amount" id="transfer_amount_id">
-                        <input id="payment_id" placeholder="Payment ID">
+                        <input style="float: right" id="payment_id" placeholder="Payment ID">
                     </div>
-                    <div>
+                    <div class="additional-details">
                         <div class="details">
-                            <a href="javascript:;" onclick="jQuery('.transfer_extra_options').toggle('fast');" class="options_link_text">Additional details</a>
+                            <a href="javascript:;" onclick="jQuery('.dropdown').toggle('fast');" class="options_link_text">
+                                <img class="details__arrow" src="files/icon-arrow-down.png" alt="icon-arrow" style="vertical-align: middle;">
+                                Additional details
+                            </a>
+                            <div class="active_panel_button">
+                                <div id="transfer_button_id" class="common_button btn">Send</div>
+                            </div>
                         </div>
-                        <div class="wrap">
-                            <div class="wrap__flex">
+                        <div class="dropdown">
+                            <div class="wrap clearfix">
                                 <span class="transfer_extra_options"><input type="number" id="mixin_count_id" placeholder="Mixin" value="Mixin"></span>
+                                <span class="transfer_extra_options"><input id="tx_fee" placeholder="Fee"></span>
                             </div>
-                            <div class="wrap__flex">
-                                <span class="transfer_extra_options"><input id="tx_fee" value="Fee"></span>
+                            <div class="payment-wrap clearfix">
+                                <span class="transfer_extra_options"><input id="lock_time" style="width: 50%" placeholder="Unlock time"></span>
+                                <span class="transfer_extra_options transfer_extra_options_hint" style="float: right; width: 49%"> Use "1d" or "1h" or n, where n is the number of blocks within which the transaction must be blocked.</span>
                             </div>
+                            <!--<div class="active_panel_button">-->
+                                <!--<div id="transfer_button_id" class="common_button btn">Send</div>-->
+                            <!--</div>-->
                         </div>
-                        <div class="payment-wrap">
-                            <div class="payment-wrap__input">
-                                <span class="transfer_extra_options" style="width: 100%"><input id="lock_time" style="width: 100%" value="Unlock time"></span>
-                            </div>
-                            <div class="payment-wrap__descr">
-                                <span class="transfer_extra_options transfer_extra_options_hint"> Use "1d" or "1h" or n, where n is the number of blocks within which the transaction must be blocked.</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="active_panel_button">
-                        <div id="transfer_button_id" class="common_button btn">Send</div>
+
                     </div>
 
-                    <!--<div>-->
-                        <!--<div id="transfer_result_zone" style="display: none">-->
-                        <!--<span id="transfer_result_span">-->
+                    <div>
+                        <div id="transfer_result_zone" style="display: none">
+                        <span id="transfer_result_span">
 
-                        <!--</span>-->
-                            <!--<a href="javascript:;" onclick="jQuery('#transfer_result_zone').toggle('fast');" class="options_link_text">Hide</a>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                    <!---->
+                        </span>
+                            <a href="javascript:;" onclick="jQuery('#transfer_result_zone').toggle('fast');" class="options_link_text">Hide</a>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="wallet_separator">Recent transferts</div>
-                <div class="wallet_panet_transparent">
-                    <div class='transfer_entry_line' style='color: #3a3a3a; height: 36px; background: #f5f5f5; box-sizing: border-box; font-family: OpenSans-Semibold;'>
+                <div class="wallet_panel_transparent">
+                    <div class='transfer_entry_line' style='color: #3a3a3a; height: 36px; background: #f5f5f5; box-sizing: border-box; font-family: "Open Sans"; font-weight: 600'>
                         <span style='position: absolute; left: 51px;'>Date</span>
                         <span style='position: absolute; left: 200px;'>Status</span>
                         <span style='position: absolute; left: 310px;'>Transaction</span>

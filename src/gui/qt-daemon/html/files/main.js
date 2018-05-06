@@ -460,11 +460,12 @@ function parse_and_get_locktime()
 }
 
 
-function on_sign()
-{	
-	var sign_res_str  = Qt_parent.sign_text($('#sign_text_id').val());
-	var aign_res_obj = jQuery.parseJSON(sign_res_str);
-	$('#signature_id').text(aign_res_obj.signature_hex);
+function on_sign() {
+	var sign_res_str  = $('#sign_text_id').val();
+  console.log(sign_res_str);
+  var result = Qt_parent.sign_text(sign_res_str);
+	console.log(result);
+	$('#signature_id').text(result);
 }
 
 function on_transfer()
@@ -607,6 +608,8 @@ $(function()
     $('#transfer_button_id').on('click',  on_transfer);
     $('#generate_wallet_button').on('click',  on_generate_new_wallet);
     $('#close_wallet_button_id').on('click',  on_close_wallet);
+
+    $('#sign_button_id').on('click', on_sign);
 
     setTimeout(init_btc_exchange_rate, 100);
 
