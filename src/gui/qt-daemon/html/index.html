@@ -121,22 +121,22 @@
                 <div class="wallet_separator">Sign something</div>
                 <div class="active_panel">
                     <div class="active_form clearfix">
-                        <input id="" type="text" value="Text">
-                        <button class="btn" type="submit">Sign</button>
+                        <input id="sign_text_id" type="text" placeholder="Text">
+                        <button id="sign_button_id" class="btn" type="submit">Sign</button>
                     </div>
+                    <div id='signature_id'>test text</div>
                 </div>
 
                 <div class="wallet_separator">
                     Send payment
-                    <!--<span class="ico_arrow_down"></span>-->
                 </div>
                 <div class="active_panel">
                     <div>
-                        <input id="transfer_address_id" type="text" value="Address">
+                        <input id="transfer_address_id" type="text" placeholder="Address">
                     </div>
                     <div class="payment-wrap clearfix">
-                        <input pattern="[0-9]+(\.[0-9]{1,12})?" value="Amount" id="transfer_amount_id">
-                        <input style="float: right" id="payment_id" value="Payment ID">
+                        <input pattern="[0-9]+(\.[0-9]{1,12})?" placeholder="Amount" id="transfer_amount_id">
+                        <input style="float: right" id="payment_id" placeholder="Payment ID">
                     </div>
                     <div class="additional-details">
                         <div class="details">
@@ -151,10 +151,10 @@
                         <div class="dropdown">
                             <div class="wrap clearfix">
                                 <span class="transfer_extra_options"><input type="number" id="mixin_count_id" placeholder="Mixin" value="Mixin"></span>
-                                <span class="transfer_extra_options"><input id="tx_fee" value="Fee"></span>
+                                <span class="transfer_extra_options"><input id="tx_fee" placeholder="Fee"></span>
                             </div>
                             <div class="payment-wrap clearfix">
-                                <span class="transfer_extra_options"><input id="lock_time" style="width: 50%" value="Unlock time"></span>
+                                <span class="transfer_extra_options"><input id="lock_time" style="width: 50%" placeholder="Unlock time"></span>
                                 <span class="transfer_extra_options transfer_extra_options_hint" style="float: right; width: 49%"> Use "1d" or "1h" or n, where n is the number of blocks within which the transaction must be blocked.</span>
                             </div>
                             <!--<div class="active_panel_button">-->
@@ -164,18 +164,18 @@
 
                     </div>
 
-                    <!--<div>-->
-                        <!--<div id="transfer_result_zone" style="display: none">-->
-                        <!--<span id="transfer_result_span">-->
+                    <div>
+                        <div id="transfer_result_zone" style="display: none">
+                        <span id="transfer_result_span">
 
-                        <!--</span>-->
-                            <!--<a href="javascript:;" onclick="jQuery('#transfer_result_zone').toggle('fast');" class="options_link_text">Hide</a>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                    <!---->
+                        </span>
+                            <a href="javascript:;" onclick="jQuery('#transfer_result_zone').toggle('fast');" class="options_link_text">Hide</a>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="wallet_separator">Recent transferts</div>
-                <div class="wallet_panet_transparent">
+                <div class="wallet_panel_transparent">
                     <div class='transfer_entry_line' style='color: #3a3a3a; height: 36px; background: #f5f5f5; box-sizing: border-box; font-family: "Open Sans"; font-weight: 600'>
                         <span style='position: absolute; left: 51px;'>Date</span>
                         <span style='position: absolute; left: 200px;'>Status</span>

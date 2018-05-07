@@ -25,8 +25,8 @@ body {
  }
 
 .container {
-    margin: 15px;
-    margin-top: 0;
+    padding: 15px;
+    padding-top: 0;
 }
 
 #container{
@@ -277,6 +277,11 @@ span.daemon_view_general_status_value_fail_text
 
 .active_form .btn {
     float: right;
+}
+
+#signature_id {
+    margin-top: 20px;
+    color: #2ebb35
 }
 
 .transfer_entry_line {
@@ -614,6 +619,9 @@ input:focus {
     border: 1px solid #eeeeee;
 }
 
+.btn:focus {
+   outline: none;
+}
 .wrap {
     width: 50%;
 }
