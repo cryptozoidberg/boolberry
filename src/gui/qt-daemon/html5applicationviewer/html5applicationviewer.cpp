@@ -561,13 +561,6 @@ QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
   return epee::serialization::store_t_to_json(tr).c_str();
 }
 
-QString Html5ApplicationViewer::sign_text(const QString& text_to_sign)
-{
-  view::sign_response sr = AUTO_VAL_INIT(sr);
-  sr.success = m_backend.sign_text(text_to_sign.toStdString(), sr.signature_hex);
-  return epee::serialization::store_t_to_json(sr).c_str();
-}
-
 void Html5ApplicationViewer::message_box(const QString& msg)
 {
   show_msg_box(msg.toStdString());

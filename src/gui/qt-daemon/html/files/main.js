@@ -193,10 +193,10 @@ function print_money(amount)
 function get_details_block(td, div_id_str, transaction_id, blob_size, payment_id, fee, unlock_time)
 {
     var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='tx_details_text'>Transaction id:</span> " +  transaction_id
-        + "<br><span class='tx_details_text'>size</span>: " + blob_size.toString()  + " bytes"
-        +  "<br><span class='tx_details_text'>fee</span>: " + print_money(fee)
-        + "<br><span class='tx_details_text'>unlock_time</span>: " + unlock_time
-        +  "<br><span class='tx_details_text'>split transfers</span>: <br>";
+        + "<br><b>size</b>: " + blob_size.toString()  + " bytes"
+        +  "<br><b>fee</b>: " + print_money(fee)
+        + "<br><b>unlock_time</b>: " + unlock_time
+        +  "<br><b>split transfers</b>: <br>";
 
     if(payment_id !== '' && payment_id !== undefined)
     {
@@ -248,14 +248,14 @@ function get_transfer_html_entry(tr, is_recent)
         color_str = "#6c6c6c";
     }else
     {
-        color_str = "#3a3a3a";
+        color_str = "#008DD2";
     }
 
     if(tr.height != 0)
     {
         if(tr.is_income)
         {
-            img_ref = "files/income_ico.png";
+            img_ref = "files/income_ico.png"
             action_text = "Received";
         }
         else
@@ -460,14 +460,6 @@ function parse_and_get_locktime()
 }
 
 
-function on_sign() {
-	var sign_res_str = Qt_parent.sign_text($('#sign_text_id').val());
-	console.log(sign_res_str);
-  var aign_res_obj = jQuery.parseJSON(sign_res_str);
-  console.log(aign_res_obj.signature_hex);
-  $('#signature_id').text(aign_res_obj.signature_hex);
-}
-
 function on_transfer()
 {
     var transfer_obj = {
@@ -608,8 +600,6 @@ $(function()
     $('#transfer_button_id').on('click',  on_transfer);
     $('#generate_wallet_button').on('click',  on_generate_new_wallet);
     $('#close_wallet_button_id').on('click',  on_close_wallet);
-
-    $('#sign_button_id').on('click', on_sign);
 
     setTimeout(init_btc_exchange_rate, 100);
 
