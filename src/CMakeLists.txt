@@ -40,10 +40,12 @@ endif()
 
 add_library(common ${COMMON})
 add_library(crypto ${CRYPTO})
+
 add_library(currency_core ${CURRENCY_CORE})
 add_dependencies(currency_core version)
-add_library(rpc ${RPC})
+target_link_libraries(currency_core lmdb)
 
+add_library(rpc ${RPC})
 add_dependencies(rpc version)
 
 add_library(wallet ${WALLET})
@@ -51,7 +53,7 @@ add_dependencies(wallet version)
 
 add_executable(daemon ${DAEMON} ${P2P} ${CURRENCY_PROTOCOL})
 add_dependencies(daemon version)
-target_link_libraries(daemon lmdb rpc currency_core crypto common upnpc-static ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_link_libraries(daemon rpc currency_core crypto common upnpc-static ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
                      
 add_executable(connectivity_tool ${CONN_TOOL})
 add_dependencies(connectivity_tool version)
