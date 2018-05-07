@@ -180,7 +180,7 @@ namespace serialization {
   }
 }
 
+#include "serialize_basic_types.h"
 #include "multiprecision.h"
 #include "stl.h"
 #include "string.h"
-#include "serialize_basic_types.h"
