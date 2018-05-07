@@ -279,6 +279,11 @@ span.daemon_view_general_status_value_fail_text
     float: right;
 }
 
+#signature_id {
+    margin-top: 20px;
+    color: #2ebb35
+}
+
 .transfer_entry_line {
     padding: 8px 13px;
     background-color: #fff;
