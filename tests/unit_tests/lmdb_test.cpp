@@ -277,9 +277,9 @@ namespace lmdb_test
       const crypto::hash *p_key = reinterpret_cast<const crypto::hash*>(key_data);
 
       size_t key_index = SIZE_MAX;
-      for(size_t i = 0; i < c_keys_count && key_index == SIZE_MAX; ++i)
-        if (m_keys[i] == *p_key)
-          key_index = i;
+      for(size_t j = 0; j < c_keys_count && key_index == SIZE_MAX; ++j)
+        if (m_keys[j] == *p_key)
+          key_index = j;
 
       CHECK_AND_ASSERT_MES(key_index != SIZE_MAX, false, "visitor gets a non-existing key");
 
