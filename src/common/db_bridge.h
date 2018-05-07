@@ -648,8 +648,6 @@ namespace db
   struct uuid128_key
   {
     uint64_t d[2];
-//     uint64_t l;
-//     uint64_t h;
   };
 #pragma pack(pop)
 
@@ -661,6 +659,7 @@ namespace db
 
     key_to_array_accessor_base(db_bridge_base& dbb)
       : super(dbb)
+      , array_counter_suffix_key({ { 0xe005d3c8c9e94c2e, 0xb94ca40ec25550ad } })
     {}
 
     size_t get_item_size(const array_key_t& array_key) const
@@ -699,7 +698,7 @@ namespace db
     }
 
   private:
-    const uuid128_key array_counter_suffix_key = { { 0xe005d3c8c9e94c2e, 0xb94ca40ec25550ad } }; // just a number to store array counter using complex_key
+    const uuid128_key array_counter_suffix_key; // just a number to store array counter using complex_key
 
     single_value<complex_key<array_key_t, uuid128_key>, size_t, super> get_counter_accessor(const array_key_t& array_key)
     {
