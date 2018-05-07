@@ -48,7 +48,8 @@ namespace currency
       return true;
     for (size_t i = local_start_entry; i != local_end_entry; i++)
     {
-      size_t rnd_upd_ind = reinterpret_cast<const uint64_t*>(&scratchpd[i])[0] % global_start_entry;
+      crypto::hash v = scratchpd[i];
+      size_t rnd_upd_ind = reinterpret_cast<const uint64_t*>(&v)[0] % global_start_entry;
       patch[rnd_upd_ind] = crypto::xor_pod(patch[rnd_upd_ind], scratchpd[i]);
     }
     return true;
