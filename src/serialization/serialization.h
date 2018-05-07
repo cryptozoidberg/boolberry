@@ -181,6 +181,6 @@ namespace serialization {
 }
 
 #include "serialize_basic_types.h"
+#include "string.h"
 #include "multiprecision.h"
 #include "stl.h"
-#include "string.h"
