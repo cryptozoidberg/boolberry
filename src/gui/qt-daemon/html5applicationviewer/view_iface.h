@@ -66,17 +66,6 @@ namespace view
   };
 
 
-  struct sign_response
-  {
-    bool success;
-    std::string signature_hex;
-
-    BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(success)
-      KV_SERIALIZE(signature_hex)
-    END_KV_SERIALIZE_MAP()
-  };
-
   enum ui_last_build_displaymode
   {
     ui_lb_dm_actual = 0,
