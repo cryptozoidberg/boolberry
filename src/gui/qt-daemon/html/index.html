@@ -124,7 +124,12 @@
                         <input id="sign_text_id" type="text" placeholder="Text">
                         <button id="sign_button_id" class="btn" type="submit">Sign</button>
                     </div>
-                    <div id='signature_id'></div>
+                    <div id='signature_id' style='display: none'>
+
+                        <div>
+                            <a href="javascript:;" onclick="jQuery('#signature_id').hide('fast');" class="options_link_text signature">Hide</a>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="wallet_separator">
@@ -150,12 +155,18 @@
                         </div>
                         <div class="dropdown">
                             <div class="wrap clearfix">
-                                <span class="transfer_extra_options"><input type="number" id="mixin_count_id" placeholder="Mixin" value="Mixin"></span>
-                                <span class="transfer_extra_options"><input id="tx_fee" placeholder="Fee"></span>
+                                <div class="transfer_extra_options mixin" data-label='Mixin'>
+                                    <input class='input_with_label' type="number" id="mixin_count_id"value="0">
+                                </div>
+                                <div class="transfer_extra_options fee" data-label='Fee'>
+                                    <input class='input_with_label' id="tx_fee" value='0.001'>
+                                </div>
                             </div>
                             <div class="payment-wrap clearfix">
-                                <span class="transfer_extra_options"><input id="lock_time" style="width: 50%" placeholder="Unlock time"></span>
-                                <span class="transfer_extra_options transfer_extra_options_hint" style="float: right; width: 49%"> Use "1d" or "1h" or n, where n is the number of blocks within which the transaction must be blocked.</span>
+                                <div class="transfer_extra_options unlock" data-label="Unlock time">
+                                    <input class='input_with_label'  id="lock_time">
+                                </div>
+                                <div class="transfer_extra_options transfer_extra_options_hint" style="float: right; width: 49%;"> Use "1d" or "1h" or n, where n is the number of blocks within which the transaction must be blocked.</div>
                             </div>
                             <!--<div class="active_panel_button">-->
                                 <!--<div id="transfer_button_id" class="common_button btn">Send</div>-->
