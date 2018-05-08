@@ -281,7 +281,8 @@ span.daemon_view_general_status_value_fail_text
 
 #signature_id {
     margin-top: 20px;
-    color: #2ebb35
+    color: #2ebb35;
+    overflow-wrap: break-word;
 }
 
 .transfer_entry_line {
@@ -443,12 +444,16 @@ span.daemon_view_general_status_value_fail_text
 
 .options_link_text
 {
-    position: relative;
-    padding-left: 17px;
-    font-size: 14px;
-    letter-spacing: .5px;
-    color:  #3a3a3a;
-    text-decoration: none;
+position: relative;
+padding-left: 17px;
+font-size: 14px;
+letter-spacing: .5px;
+color:  #3a3a3a;
+text-decoration: none;
+}
+
+.options_link_text.signature {
+    padding-left: 0;
 }
 
 .options_link_text:focus {
@@ -473,6 +478,36 @@ span.daemon_view_general_status_value_fail_text
     font-size: 12px;
 }
 
+
+.transfer_extra_options {
+    position: relative;
+    display: inline-block;
+    padding-top: 20px;
+}
+
+.transfer_extra_options.mixin {
+    float: left;
+    width: 50%;
+}
+
+.transfer_extra_options.fee {
+    float: right;
+    width: 49%;
+}
+
+.transfer_extra_options.unlock {
+    float: left;
+    width: 50%;
+}
+
+.transfer_extra_options:after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: attr(data-label);
+    font-size: 12px;
+    color: #757575;
+}
 
 #wallet_recent_transfers_panel
 {
@@ -520,34 +555,24 @@ h2
 
 .payment-wrap {
     margin-top: 12px;
-    margin-bottom: 45px;
+    margin-bottom: 34px;
     padding-bottom: 12px;
     border-bottom: 1px solid #e8e6e6;
 }
 #transfer_amount_id {
     float: left;
-    width: 50%;
+    width: 25%;
 }
 
 #payment_id {
     float: right;
-    width: 49%;
+    width: 74%;
 }
 
 .payment-wrap__input,
 .payment-wrap__descr {
     width: 50%;
     margin-right: 12px;
-}
-
-#mixin_count_id {
-    float: left;
-    width: 50%;
-}
-
-#tx_fee {
-    float: right;
-    width: 49%;
 }
 
 input {

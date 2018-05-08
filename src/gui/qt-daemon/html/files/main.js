@@ -462,10 +462,17 @@ function parse_and_get_locktime()
 
 function on_sign() {
 	var sign_res_str = Qt_parent.sign_text($('#sign_text_id').val());
-	console.log(sign_res_str);
   var aign_res_obj = jQuery.parseJSON(sign_res_str);
-  console.log(aign_res_obj.signature_hex);
+
   $('#signature_id').text(aign_res_obj.signature_hex);
+  $('#signature_id').html("<span id='signature_id_text'>" + aign_res_obj.signature_hex + "</span>");
+
+  if(last_timerId !== undefined) {
+    clearTimeout(last_timerId);
+  }
+
+  $("#signature_id").show("fast");
+  last_timerId = setTimeout(function(){$("#signature_id").hide("fast");}, 15000);
 }
 
 function on_transfer()
