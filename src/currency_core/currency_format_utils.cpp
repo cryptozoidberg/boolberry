@@ -1129,7 +1129,11 @@ namespace currency
     bl.major_version = CURRENT_BLOCK_MAJOR_VERSION;
     bl.minor_version = CURRENT_BLOCK_MINOR_VERSION;
     bl.timestamp = 0;
+#ifndef TESTNET
     bl.nonce = 1010101020; //bender's nightmare
+#else
+    bl.nonce = 1010101012; //another bender's nightmare
+#endif
     //miner::find_nonce_for_given_block(bl, 1, 0,);
     return true;
   }
