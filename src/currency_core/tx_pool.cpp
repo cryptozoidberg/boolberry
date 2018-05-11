@@ -488,9 +488,18 @@ namespace currency
     if(!boost::filesystem::exists(state_file_path, ec))
       return true;
     bool res = tools::unserialize_obj_from_file(*this, state_file_path);
-    if(!res)
+    if (res)
     {
-      LOG_PRINT_L0("Failed to load memory pool from file " << state_file_path);
+      // mem pool has just been successfully loaded from file
+      // delete pool file to avoid loading outdated data on the next load (in case a crash happen for ex.)
+      if (!boost::filesystem::remove_all(state_file_path))
+      {
+        LOG_ERROR("failed to remove pool file " << state_file_path << " after a successful load");
+      }
+    }
+    else
+    {
+      LOG_ERROR("Failed to load memory pool from file " << state_file_path);
     }
     return res;
   }
