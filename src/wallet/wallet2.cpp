@@ -848,6 +848,12 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
     for (auto& s : create_tx_param.sources)
       m_transfers[s.transfer_index].m_spent = false;
   }
+  else
+  {
+    //unlock funds if transaction rejected
+    for (auto& s : create_tx_param.sources)
+      m_transfers[s.transfer_index].m_spent = true;
+  }
   CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "sendrawtransaction");
   CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
   CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status != CORE_RPC_STATUS_OK, error::tx_rejected, tx, daemon_send_resp.status);

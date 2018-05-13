@@ -145,7 +145,7 @@ namespace net_utils
 			std::string       m_http_method_str;
 			std::string       m_full_request_str;
 			std::string       m_replace_html;
-            std::string       m_request_head;
+      std::string       m_request_head;
 			int               m_http_ver_hi;
 			int               m_http_ver_lo;
             bool		      m_have_to_block;

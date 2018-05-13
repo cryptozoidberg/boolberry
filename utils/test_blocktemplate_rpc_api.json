@@ -1,0 +1,15 @@
+{
+  "jsonrpc": "1.0",
+  "id": "12",
+  "method": "getblocktemplate",
+  "params": {
+    "reserve_size": 0,
+    "wallet_address": "1EYwtnWJ6KUVgimquuzYsCfvM5hd2DMVD5qF8vRyNGcG2zac8K3Cq7kYn8YnaN43DuB8jqAsb6woCZir953QVrf61RH6cf1",
+    "alias_details": {
+       "alias":"sometestalias",
+       "address":"1EYwtnWJ6KUVgimquuzYsCfvM5hd2DMVD5qF8vRyNGcG2zac8K3Cq7kYn8YnaN43DuB8jqAsb6woCZir953QVrf61RH6cf1",
+       "tracking_key":"",
+       "comment":"Some comment"
+     }
+  }
+}

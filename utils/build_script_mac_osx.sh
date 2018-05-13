@@ -34,7 +34,7 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 
-make -j connectivity_tool
+make -j connectivity_tool simplewallet daemon
 if [ $? -ne 0 ]; then
     echo "Failed to make connectivity_tool"
     exit $?
@@ -80,6 +80,18 @@ fi
 cp ../../../src/gui/qt-daemon/app.icns qt-boolb.app/Contents/Resources
 if [ $? -ne 0 ]; then
     echo "Failed to cp app.icns to resources"
+    exit $?
+fi
+
+cp simplewallet qt-boolb.app/Contents/MacOS
+if [ $? -ne 0 ]; then
+    echo "Failed to cp simplewallet to MacOS"
+    exit $?
+fi
+
+cp boolbd qt-boolb.app/Contents/MacOS
+if [ $? -ne 0 ]; then
+    echo "Failed to cp boolbd to MacOS"
     exit $?
 fi
 
