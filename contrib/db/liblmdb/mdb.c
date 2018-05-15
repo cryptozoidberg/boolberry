@@ -38,18 +38,20 @@
 #if defined(MDB_VL32) || defined(__WIN64__)
 #define _FILE_OFFSET_BITS	64
 #endif
-#ifdef _WIN32
-#include <malloc.h>
-#include <windows.h>
-#include <wchar.h>				/* get wcscpy() */
-#include <inttypes.h>
-
 
 #ifdef _WIN32
 typedef int64_t off64_t;
 #else
 typedef off_t off64_t;
 #endif
+
+
+#ifdef _WIN32
+#include <malloc.h>
+#include <windows.h>
+#include <wchar.h>				/* get wcscpy() */
+#include <inttypes.h>
+
 
 #ifndef _NTDEF_
 typedef _Return_type_success_(return >= 0) LONG NTSTATUS;
