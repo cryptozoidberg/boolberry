@@ -6,51 +6,55 @@
 
 #include "serialization/keyvalue_serialization.h"
 
-
-struct gui_config
+namespace gui
 {
-  std::string wallets_last_used_dir;
 
   struct addressbook_entry
   {
-	  std::string name;
-	  std::string address;
-	  std::string alias;
-	  std::string paymentId;
+    std::string name;
+    std::string address;
+    std::string alias;
+    std::string paymentId;
 
-	  bool operator==(const addressbook_entry& abe) const
-	  {
-		  return (
-			  (name == abe.name) && (address == abe.address) &&
-			  (alias == abe.alias) && (paymentId == abe.paymentId)
-			  );
-	  }
+    bool operator==(const addressbook_entry& abe) const
+    {
+      return (
+        (name == abe.name) && (address == abe.address) &&
+        (alias == abe.alias) && (paymentId == abe.paymentId)
+        );
+    }
 
-	  bool operator!=(const addressbook_entry& abe) const
-	  {
-		  return !(operator==(abe));
-	  }
+    bool operator!=(const addressbook_entry& abe) const
+    {
+      return !(operator==(abe));
+    }
 
-	  BEGIN_KV_SERIALIZE_MAP()
-		  KV_SERIALIZE(name)
-		  KV_SERIALIZE(address)
-		  KV_SERIALIZE(alias)
-		  KV_SERIALIZE(paymentId)
-	  END_KV_SERIALIZE_MAP()
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(name)
+      KV_SERIALIZE(address)
+      KV_SERIALIZE(alias)
+      KV_SERIALIZE(paymentId)
+    END_KV_SERIALIZE_MAP()
   };
 
   struct addressbookstorage
   {
-	  std::vector<addressbook_entry> entries;
-	  BEGIN_KV_SERIALIZE_MAP()
-		  KV_SERIALIZE(entries)
-	  END_KV_SERIALIZE_MAP()
+    std::vector<addressbook_entry> entries;
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(entries)
+    END_KV_SERIALIZE_MAP()
   };
-  
-  addressbookstorage address_book;
 
-  BEGIN_KV_SERIALIZE_MAP()
-	  KV_SERIALIZE(wallets_last_used_dir)
-	  KV_SERIALIZE(address_book)
-  END_KV_SERIALIZE_MAP()
-};
+  struct gui_config
+  {
+    std::string wallets_last_used_dir;
+    addressbookstorage address_book;
+    std::string gui_lang;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(wallets_last_used_dir)
+      KV_SERIALIZE(address_book)
+      KV_SERIALIZE(gui_lang)
+    END_KV_SERIALIZE_MAP()
+  };
+}
