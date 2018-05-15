@@ -139,12 +139,6 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
 
   LOG_PRINT("Module folder: " << argv[0], LOG_LEVEL_0);
 
-  bool res = true;
-  currency::checkpoints checkpoints;
-  res = currency::create_checkpoints(checkpoints);
-  CHECK_AND_ASSERT_MES(res, false, "Failed to initialize checkpoints");
-  m_ccore.set_checkpoints(std::move(checkpoints));
-
   m_main_worker_thread = std::thread([this, vm](){main_worker(vm);});
 
   return true;
@@ -221,6 +215,12 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   res = m_ccore.init(vm);
   CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize core");
   LOG_PRINT_L0("Core initialized OK");
+
+  bool res = true;
+  currency::checkpoints checkpoints;
+  res = currency::create_checkpoints(checkpoints);
+  CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize checkpoints");
+  m_ccore.set_checkpoints(std::move(checkpoints));
 
   LOG_PRINT_L0("Starting core rpc server...");
   dsi.text_state = "Starting core rpc server";
