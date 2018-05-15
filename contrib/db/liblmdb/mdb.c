@@ -39,11 +39,6 @@
 #define _FILE_OFFSET_BITS	64
 #endif
 
-#ifdef _WIN32
-typedef int64_t off64_t;
-#else
-typedef off_t off64_t;
-#endif
 
 
 #ifdef _WIN32
@@ -117,6 +112,12 @@ NtClose(HANDLE h);
 #include <sys/file.h>
 #endif
 #include <fcntl.h>
+#endif
+
+#ifdef _WIN32
+typedef int64_t off64_t;
+#else
+typedef off_t off64_t;
 #endif
 
 #if defined(__mips) && defined(__linux)
