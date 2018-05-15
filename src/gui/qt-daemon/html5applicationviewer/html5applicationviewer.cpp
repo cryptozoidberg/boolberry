@@ -440,7 +440,7 @@ void Html5ApplicationViewer::close_wallet()
 void Html5ApplicationViewer::add_address(const QString& name, const QString& address,
 	const QString& alias, const QString& paymentId)
 {
-	gui_config::addressbook_entry row({ name.toStdString(), 
+  gui::addressbook_entry row({ name.toStdString(),
 		address.toStdString(), alias.toStdString(), paymentId.toStdString() });
 	m_config.address_book.entries.push_back(row);
 }
@@ -448,7 +448,7 @@ void Html5ApplicationViewer::add_address(const QString& name, const QString& add
 void Html5ApplicationViewer::delete_address(const QString& name, const QString& address,
 	const QString& alias, const QString& paymentId)
 {
-	gui_config::addressbook_entry row({ name.toStdString(),
+	gui::addressbook_entry row({ name.toStdString(),
 		address.toStdString(), alias.toStdString(), paymentId.toStdString() });
 	m_config.address_book.entries.erase(
 		std::remove(m_config.address_book.entries.begin(),
@@ -649,5 +649,16 @@ void Html5ApplicationViewer::open_wallet()
 
 	m_backend.open_wallet(path.toStdString(), pass.toStdString());
 }
+
+QString Html5ApplicationViewer::get_gui_lang()
+{
+  return m_config.gui_lang.c_str();
+}
+
+void Html5ApplicationViewer::set_gui_lang(const QString& str_config)
+{
+  m_config.gui_lang = str_config.toStdString();
+}
+
 
 #include "html5applicationviewer.moc"
