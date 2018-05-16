@@ -97,6 +97,13 @@ namespace levin
 #define LEVIN_ERROR_CONNECTION_NO_DUPLEX_PROTOCOL      -5
 #define LEVIN_ERROR_CONNECTION_HANDLER_NOT_DEFINED     -6
 #define LEVIN_ERROR_FORMAT                             -7
+#define LEVIN_ERROR_EXCEPTION                          -8
+#define LEVIN_ERROR_UNKNOWN_ERROR                      -9
+#define LEVIN_ERROR_INTERNAL                           -10
+#define LEVIN_ERROR_PROTOCOL_INCONSISTENT              -11
+#define LEVIN_ERROR_NET_ERROR                          -12
+#define LEVIN_ERROR_SIGNATURE_MISMATCH                 -13
+
 
 #define DESCRIBE_RET_CODE(code) case code: return #code;
   inline

@@ -48,7 +48,7 @@
 #include "syncobj.h"
 
 
-#define ABSTRACT_SERVER_SEND_QUE_MAX_COUNT 100
+#define ABSTRACT_SERVER_SEND_QUE_MAX_COUNT 2000
 
 namespace epee
 {
@@ -89,6 +89,7 @@ namespace net_utils
 
     void call_back_starter();
     bool is_shutdown(){return m_was_shutdown;}
+    bool cancel();
   private:
     //----------------- i_service_endpoint ---------------------
     virtual bool do_send(const void* ptr, size_t cb);
@@ -223,8 +224,16 @@ namespace net_utils
     bool global_timer_handler(/*const boost::system::error_code& err, */boost::shared_ptr<idle_callback_conext_base> ptr)
     {
       //if handler return false - he don't want to be called anymore
-      if(!ptr->call_handler())
+      try{
+        if (!ptr->call_handler())
+          return true;
+      }
+      catch (...)
+      {
         return true;
+      }
+
+
       ptr->m_timer.expires_from_now(boost::posix_time::milliseconds(ptr->m_period));
       ptr->m_timer.async_wait(boost::bind(&boosted_tcp_server<t_protocol_handler>::global_timer_handler, this, ptr));
       return true;
@@ -257,6 +266,8 @@ namespace net_utils
 
     /// The next connection to be accepted.
     connection_ptr new_connection_;
+    //std::mutex connections_mutex;
+    //std::deque<connection_ptr> connections_;
     std::atomic<bool> m_stop_signal_sent;
     uint32_t m_port;
     volatile uint32_t m_sockets_count;
