@@ -72,7 +72,8 @@ namespace currency
     //bool get_payload_sync_data(HANDSHAKE_DATA::request& hshd, currency_connection_context& context);
     bool request_missing_objects(currency_connection_context& context, bool check_having_blocks);
     size_t get_synchronizing_connections_count();
-    bool on_connection_synchronized();    
+    bool on_connection_synchronized();  
+    bool check_stop_flag_and_exit(currency_connection_context& context);
     t_core& m_core;
 
     nodetool::p2p_endpoint_stub<connection_context> m_p2p_stub;
@@ -81,6 +82,7 @@ namespace currency
     std::atomic<bool> m_synchronized;
     std::atomic<uint64_t> m_max_height_seen;
     std::atomic<uint64_t> m_core_inital_height;
+    std::atomic<bool> m_want_stop;
 
     template<class t_parametr>
       bool post_notify(typename t_parametr::request& arg, currency_connection_context& context)

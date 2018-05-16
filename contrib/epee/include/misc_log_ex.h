@@ -823,7 +823,11 @@ namespace log_space
       CRITICAL_REGION_END();
       return true;
     }
-
+    std::string get_thread_prefix()
+    {
+      CRITICAL_REGION_LOCAL(m_critical_sec);
+      return m_thr_prefix_strings[misc_utils::get_thread_string_id()];
+    }
 
     std::string get_default_log_file()
     {
@@ -1097,6 +1101,13 @@ POP_WARNINGS
       return plogger->set_thread_prefix(prefix);
     }
 
+
+    static std::string get_thread_log_prefix()
+    {
+      logger* plogger = get_or_create_instance();
+      if (!plogger) return "";
+      return plogger->get_thread_prefix();
+    }
 
     static std::string get_prefix_entry()
     {

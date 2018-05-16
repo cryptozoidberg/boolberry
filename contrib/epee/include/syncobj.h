@@ -36,6 +36,19 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
+
+
+#define VALIDATE_MUTEX_IS_FREE(mutex_mame)    \
+  if (mutex_mame.try_lock()) \
+  { \
+    mutex_mame.unlock(); \
+    return; \
+  } \
+  else \
+  { \
+    LOG_ERROR("MUTEX IS NOT FREE ON DESTRUCTOR: " << #mutex_mame); \
+  }
+
 namespace epee
 {
 
@@ -98,7 +111,8 @@ namespace epee
       m_section.unlock();
     }
 
-    bool tryLock()
+
+    bool try_lock()
     {
       return m_section.try_lock();
     }

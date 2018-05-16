@@ -26,6 +26,7 @@ namespace nodetool
     virtual void for_each_connection(std::function<bool(t_connection_context&, peerid_type)> f)=0;
     virtual bool block_ip(uint32_t adress)=0;
     virtual bool add_ip_fail(uint32_t adress)=0;
+    virtual bool is_stop_signal_sent()=0;
   };
 
   template<class t_connection_context>
@@ -55,7 +56,10 @@ namespace nodetool
     {
 
     }
-
+    virtual bool is_stop_signal_sent()
+    {
+      return false;
+    }
     virtual uint64_t get_connections_count()    
     {
       return false;

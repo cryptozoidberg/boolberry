@@ -216,7 +216,6 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize core");
   LOG_PRINT_L0("Core initialized OK");
 
-  bool res = true;
   currency::checkpoints checkpoints;
   res = currency::create_checkpoints(checkpoints);
   CHECK_AND_ASSERT_AND_SET_GUI(res, void(), "Failed to initialize checkpoints");
