@@ -127,12 +127,12 @@ void Html5ApplicationViewerPrivate::addToJavaScript()
   m_webView->page()->mainFrame()->addToJavaScriptWindowObject("Qt", this);
 }
 
-Html5ApplicationViewer::Html5ApplicationViewer(QWidget *parent)
-: QWidget(parent)
-, m_d(new Html5ApplicationViewerPrivate(this)),
-m_quit_requested(false),
-m_deinitialize_done(false),
-m_backend_stopped(false)
+Html5ApplicationViewer::Html5ApplicationViewer(QWidget *parent): QWidget(parent),
+                                                                  m_d(new Html5ApplicationViewerPrivate(this)),
+                                                                  m_quit_requested(false),
+                                                                  m_deinitialize_done(false),
+                                                                  m_backend_stopped(false),
+                                                                  m_request_uri_threads_count(0)
 {
   //connect(m_d, SIGNAL(quitRequested()), SLOT(close()));
 
