@@ -43,11 +43,7 @@ if [ $? -ne 0 ]; then
     echo "Failed to make!"
     exit 1
 fi
-make -j simpleminer;
-if [ $? -ne 0 ]; then
-    echo "Failed to make!"
-    exit 1
-fi
+
 make -j connectivity_tool;
 if [ $? -ne 0 ]; then
     echo "Failed to make!"
@@ -91,9 +87,6 @@ cp $QT_PREFIX_PATH/resources/qtwebengine_resources.pak ./boolberry
 cp $QT_PREFIX_PATH/resources/qtwebengine_resources_100p.pak ./boolberry
 cp $QT_PREFIX_PATH/resources/qtwebengine_resources_200p.pak ./boolberry
 cp $QT_PREFIX_PATH/resources/icudtl.dat ./boolberry
-
-
-cp -Rv src/boolbd src/qt-boolb src/simplewallet src/simpleminer src/connectivity_tool ./boolberry
 
 
 tar -cjvf bbr-linux-x64-$version_str.tar.bz2 boolberry
