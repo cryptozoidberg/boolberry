@@ -3,25 +3,24 @@ html {
     height: 100%;
 }
 
-/*@font-face {*/
-    /*font-family: UbuntuMedium;*/
-    /*src: url(Ubuntu-M.ttf);*/
-/*}*/
+@font-face {
+    font-family: OpenSansRegular;
+    src: url(../files/fonts/opensans-regular.ttf);
+}
 
-/*@font-face {*/
-    /*font-family: UbuntuCond;*/
-    /*src: url(Ubuntu-C.ttf);*/
-/*}*/
+@font-face {
+    font-family: OpenSansSemibold;
+    src: url(../files/fonts/opensans-semibold.ttf);
+}
 
 body {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-     color: #3a3a3a;
-     background-color: #d5d9dd;
-     margin: 0 0;
-     height:100%;
-     -webkit-font-smoothing: antialiased;
-     font-size: 14px;
+    font-family: OpenSansRegular, sans-serif;
+    color: #3a3a3a;
+    background-color: #d5d9dd;
+    margin: 0 0;
+    height:100%;
+    -webkit-font-smoothing: antialiased;
+    font-size: 14px;
  }
 
 .container {
@@ -97,8 +96,7 @@ h2 {
 .wallet_separator {
     position: relative;
     font-size: 16px;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
+    font-family: OpenSansSemibold, sans-serif;
     color: #ffffff;
     padding: 0 15px;
     height: 44px;
@@ -201,8 +199,7 @@ span.daemon_view_general_status_value_fail_text
 
 #daemon_status_text
 {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
+    font-family: OpenSansSemibold, sans-serif;
     margin-left: 20px;
 }
 
@@ -279,12 +276,6 @@ span.daemon_view_general_status_value_fail_text
     float: right;
 }
 
-#signature_id {
-    margin-top: 20px;
-    color: #2ebb35;
-    overflow-wrap: break-word;
-}
-
 .transfer_entry_line {
     padding: 8px 13px;
     background-color: #fff;
@@ -302,8 +293,7 @@ span.daemon_view_general_status_value_fail_text
 {
     margin-top: 20px;
     font-size: 14px;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
+    font-family: OpenSansSemibold, sans-serif;
 }
 
 .wallet_balance
@@ -444,16 +434,12 @@ span.daemon_view_general_status_value_fail_text
 
 .options_link_text
 {
-position: relative;
-padding-left: 17px;
-font-size: 14px;
-letter-spacing: .5px;
-color:  #3a3a3a;
-text-decoration: none;
-}
-
-.options_link_text.signature {
-    padding-left: 0;
+    position: relative;
+    padding-left: 17px;
+    font-size: 14px;
+    letter-spacing: .5px;
+    color:  #3a3a3a;
+    text-decoration: none;
 }
 
 .options_link_text:focus {
@@ -478,36 +464,6 @@ text-decoration: none;
     font-size: 12px;
 }
 
-
-.transfer_extra_options {
-    position: relative;
-    display: inline-block;
-    padding-top: 20px;
-}
-
-.transfer_extra_options.mixin {
-    float: left;
-    width: 50%;
-}
-
-.transfer_extra_options.fee {
-    float: right;
-    width: 49%;
-}
-
-.transfer_extra_options.unlock {
-    float: left;
-    width: 50%;
-}
-
-.transfer_extra_options:after {
-    position: absolute;
-    top: 0;
-    left: 0;
-    content: attr(data-label);
-    font-size: 12px;
-    color: #757575;
-}
 
 #wallet_recent_transfers_panel
 {
@@ -555,24 +511,34 @@ h2
 
 .payment-wrap {
     margin-top: 12px;
-    margin-bottom: 34px;
+    margin-bottom: 45px;
     padding-bottom: 12px;
     border-bottom: 1px solid #e8e6e6;
 }
 #transfer_amount_id {
     float: left;
-    width: 25%;
+    width: 50%;
 }
 
 #payment_id {
     float: right;
-    width: 74%;
+    width: 49%;
 }
 
 .payment-wrap__input,
 .payment-wrap__descr {
     width: 50%;
     margin-right: 12px;
+}
+
+#mixin_count_id {
+    float: left;
+    width: 50%;
+}
+
+#tx_fee {
+    float: right;
+    width: 49%;
 }
 
 input {
