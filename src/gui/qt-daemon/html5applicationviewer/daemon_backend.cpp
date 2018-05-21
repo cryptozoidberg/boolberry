@@ -574,7 +574,7 @@ bool daemon_backend::get_aliases(view::alias_set& al_set)
   return false;
 }
 
-bool daemon_backend::sign_text(const std::string& text, const std::string& signature_hex)
+bool daemon_backend::sign_text(const std::string& text, std::string& signature_hex)
 {
 
   try

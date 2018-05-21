@@ -53,8 +53,7 @@ public:
   bool close_wallet();
   bool transfer(const view::transfer_params& tp, currency::transaction& res_tx);
   bool get_aliases(view::alias_set& al_set);
-  bool sign_text(const std::string& text, const std::string& signature_hex)
-  bool get_aliases(view::alias_set& al_set);
+  bool sign_text(const std::string& text, std::string& signature_hex);
   std::string get_config_folder();
 private:
   void main_worker(const po::variables_map& vm);
