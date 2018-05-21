@@ -290,7 +290,7 @@ function get_transfer_html_entry(tr, is_recent)
     transfer_line_tamplate +=       "{5}";
     transfer_line_tamplate +=     "</div>";
 
-    var short_string = tr.recipient_alias.length ?  "@" + tr.recipient_alias : (tr.recipient.substr(0, 8) + "..." +  tr.recipient.substr(tr.recipient.length - 8, 8) );
+    var short_string = tr.destination_alias.length ?  "@" + tr.destination_alias : (tr.destinations.substr(0, 8) + "..." +  tr.destinations.substr(tr.destinations.length - 8, 8) );
     transfer_line_tamplate = transfer_line_tamplate.format(color_str,
         img_ref,
         dt.format("yyyy-mm-dd HH:MM"),
@@ -298,7 +298,7 @@ function get_transfer_html_entry(tr, is_recent)
         tr.tx_hash,
         get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash, tr.tx_blob_size, tr.payment_id, tr.fee, tr.unlock_time ? tr.unlock_time - tr.height: 0),
         action_text,
-        tr.recipient,
+        tr.destinations,
         short_string);
 
     return transfer_line_tamplate;
@@ -640,8 +640,8 @@ $(function()
                 rcv: [1000, 1000, 1000, 1000],//rcv: ["0.0000001000", "0.0000001000", "0.0000001000", "0.0000001000"],
                 spn: [1000, 1000]//spn: ["0.0000001000", "0.0000001000"]
             },
-            recipient: "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz",
-            recipient_alias: "just-mike"
+            destinations: "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz",
+            destination_alias: "just-mike"
         },
         balance: 1000,
         unlocked_balance: 1000
@@ -659,8 +659,8 @@ $(function()
     tttt.ti.fee = 1000000000;
     tttt.ti.payment_id = "";
     tttt.ti.amount =  10123000000000;
-    tttt.ti.recipient = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
-    tttt.ti.recipient_alias = "zoidberg";
+    tttt.ti.destinations = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
+    tttt.ti.destination_alias = "zoidberg";
 
 
     on_money_transfer(tttt);
@@ -668,8 +668,8 @@ $(function()
     tttt.ti.tx_hash = "u19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
     tttt.ti.payment_id = undefined;
-    tttt.ti.recipient = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
-    tttt.ti.recipient_alias = "tifozi";
+    tttt.ti.destinations = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
+    tttt.ti.destination_alias = "tifozi";
 
     on_money_transfer(tttt);
 
