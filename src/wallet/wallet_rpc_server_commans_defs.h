@@ -36,8 +36,8 @@ namespace wallet_rpc
     uint64_t      unlock_time;
     uint32_t      tx_blob_size;
     std::string   payment_id;
-    std::string   recipient;       //optional
-    std::string   recipient_alias; //optional
+    std::string   destinations;      //optional
+    std::string   destination_alias; //optional
     bool          is_income;
     uint64_t      fee;
     wallet_transfer_info_details td;
@@ -52,8 +52,8 @@ namespace wallet_rpc
       KV_SERIALIZE(unlock_time)
       KV_SERIALIZE(tx_blob_size)
       KV_SERIALIZE(payment_id)
-      KV_SERIALIZE(recipient)      
-      KV_SERIALIZE(recipient_alias)
+      KV_SERIALIZE(destinations)      
+      KV_SERIALIZE(destination_alias)
       KV_SERIALIZE(is_income)
       KV_SERIALIZE(timestamp)
       KV_SERIALIZE(td)
@@ -171,6 +171,8 @@ namespace wallet_rpc
     END_KV_SERIALIZE_MAP()
   };
 
+  
+  
   struct COMMAND_RPC_GET_PAYMENTS
   {
     struct request
@@ -211,6 +213,49 @@ namespace wallet_rpc
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(payments)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_GET_TRANSFERS
+  {
+    struct request
+    {
+      bool in;
+      bool out;
+      bool pending;
+      bool failed;
+      bool pool;
+      bool filter_by_height;
+      uint64_t min_height;
+      uint64_t max_height;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(in)
+        KV_SERIALIZE(out)
+        KV_SERIALIZE(pending)
+        KV_SERIALIZE(failed)
+        KV_SERIALIZE(pool)
+        KV_SERIALIZE(filter_by_height)
+        KV_SERIALIZE(min_height)
+        KV_SERIALIZE(max_height)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::list<wallet_transfer_info> in;
+      std::list<wallet_transfer_info> out;
+      std::list<wallet_transfer_info> pending;
+      std::list<wallet_transfer_info> failed;
+      std::list<wallet_transfer_info> pool;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(in)
+        KV_SERIALIZE(out)
+        KV_SERIALIZE(pending)
+        KV_SERIALIZE(failed)
+        KV_SERIALIZE(pool)
       END_KV_SERIALIZE_MAP()
     };
   };
