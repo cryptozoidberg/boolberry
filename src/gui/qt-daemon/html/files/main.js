@@ -59,6 +59,7 @@ function update_aliases_autocompletion()
 
 function on_update_daemon_state(info_obj)
 {
+    //var info_obj = jQuery.parseJSON(daemon_info_str);
 
     if(info_obj.daemon_network_state == 0)//daemon_network_state_connecting
     {
@@ -459,9 +460,8 @@ function parse_and_get_locktime()
 }
 
 
-function on_sign() 
-{
-  var sign_res_str = Qt_parent.sign_text($('#sign_text_id').val());
+function on_sign() {
+	var sign_res_str = Qt_parent.sign_text($('#sign_text_id').val());
   var aign_res_obj = jQuery.parseJSON(sign_res_str);
 
   $('#signature_id').text(aign_res_obj.signature_hex);
@@ -601,7 +601,6 @@ function str_to_obj(str)
 
 $(function()
 { // DOM ready
-	
     $( "#synchronization_progressbar" ).progressbar({value: false });
     $( "#wallet_progressbar" ).progressbar({value: false });
     $(".common_button").button();
