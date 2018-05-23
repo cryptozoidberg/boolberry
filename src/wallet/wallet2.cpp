@@ -875,7 +875,7 @@ void wallet2::submit_transfer(const std::string& tx_sources_file, const std::str
   tx = create_tx_result.tx;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result)
+void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result, bool do_not_relay)
 {
   using namespace currency;
   const transaction& tx = create_tx_result.tx;
@@ -891,15 +891,27 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
   });
   CHECK_AND_THROW_WALLET_EX(!all_are_txin_to_key, error::unexpected_txin_type, tx);
 
-  COMMAND_RPC_SEND_RAW_TX::request req;
-  req.tx_as_hex = epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(tx));
-  COMMAND_RPC_SEND_RAW_TX::response daemon_send_resp;
-  bool r = m_core_proxy->call_COMMAND_RPC_SEND_RAW_TX(req, daemon_send_resp);
-  if (daemon_send_resp.status != CORE_RPC_STATUS_OK)
+  if (!do_not_relay)
   {
-    //unlock funds if transaction rejected
-    for (auto& s : create_tx_param.sources)
-      m_transfers[s.transfer_index].m_spent = false;
+    COMMAND_RPC_SEND_RAW_TX::request req;
+    req.tx_as_hex = epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(tx));
+    COMMAND_RPC_SEND_RAW_TX::response daemon_send_resp;
+    bool r = m_core_proxy->call_COMMAND_RPC_SEND_RAW_TX(req, daemon_send_resp);
+    if (daemon_send_resp.status != CORE_RPC_STATUS_OK)
+    {
+      //unlock funds if transaction rejected
+      for (auto& s : create_tx_param.sources)
+        m_transfers[s.transfer_index].m_spent = false;
+    }
+    else
+    {
+      //unlock funds if transaction rejected
+      for (auto& s : create_tx_param.sources)
+        m_transfers[s.transfer_index].m_spent = true;
+    }
+    CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "sendrawtransaction");
+    CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
+    CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status != CORE_RPC_STATUS_OK, error::tx_rejected, tx, daemon_send_resp.status);
   }
   else
   {
@@ -907,9 +919,6 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
     for (auto& s : create_tx_param.sources)
       m_transfers[s.transfer_index].m_spent = true;
   }
-  CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "sendrawtransaction");
-  CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
-  CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status != CORE_RPC_STATUS_OK, error::tx_rejected, tx, daemon_send_resp.status);
 
   std::string recipient;
   for (const auto& r : create_tx_param.recipients)
@@ -1139,6 +1148,10 @@ void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, 
                        uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx)
 {
   transfer(dsts, fake_outputs_count, unlock_time, fee, extra, detail::digit_split_strategy, tx_dust_policy(fee), tx);
+}
+void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx, currency::blobdata& relay_blob, bool do_not_relay)
+{
+  transfer(dsts, fake_outputs_count, unlock_time, fee, extra, detail::digit_split_strategy, tx_dust_policy(fee), tx, CURRENCY_TO_KEY_OUT_RELAXED, relay_blob, do_not_relay);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,

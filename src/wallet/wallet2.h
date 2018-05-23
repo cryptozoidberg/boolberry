@@ -151,8 +151,12 @@ namespace tools
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy);
     template<typename T>
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
+    template<typename T>
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr, currency::blobdata& relay_blob, bool do_not_relay = false);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx, currency::blobdata& relay_blob, bool do_not_relay = false);
+    
     bool get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) const;
     bool check_connection();
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
@@ -206,7 +210,7 @@ namespace tools
     void handle_money_spent2(const currency::block& b, const currency::transaction& in_tx, uint64_t amount, const money_transfer2_details& td, const std::string& recipient, const std::string& recipient_alias);
     std::string get_alias_for_address(const std::string& addr);
     void wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& utd, wallet_rpc::wallet_transfer_info& wti)const;
-    void finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result);
+    void finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result, bool do_not_relay = false);
 
 
     currency::account_base m_account;
@@ -386,20 +390,29 @@ namespace tools
     currency::transaction tx;
     transfer(dsts, fake_outputs_count, unlock_time, fee, extra, destination_split_strategy, dust_policy, tx);
   }
-
+  //----------------------------------------------------------------------------------------------------
   template<typename T>
   void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
     uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr)
   {
+    blobdata dummy;
+    return transfer(dsts, fake_outputs_count, unlock_time, fee, extra, destination_split_strategy, dust_policy, tx, tx_outs_attr, dummy, false);
+  }
+  //----------------------------------------------------------------------------------------------------
+  template<typename T>
+  void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
+    uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr, currency::blobdata& relay_blob, bool do_not_relay)
+  {
     using namespace currency;
     CHECK_AND_THROW_WALLET_EX(dsts.empty(), error::zero_destination);
 
-    create_tx_arg create_tx_param = AUTO_VAL_INIT(create_tx_param);
+    create_tx_context ctc = AUTO_VAL_INIT(ctc);
+    create_tx_arg& create_tx_param = ctc.arg;
     create_tx_param.extra = extra;
     create_tx_param.unlock_time = unlock_time;
     create_tx_param.tx_outs_attr = tx_outs_attr;
     create_tx_param.spend_pub_key = m_account.get_keys().m_account_address.m_spend_public_key;
-    create_tx_res create_tx_result = AUTO_VAL_INIT(create_tx_result);
+    create_tx_res& create_tx_result = ctc.res;
     for (auto& d : dsts)
       create_tx_param.recipients.push_back(d.addr);
 
@@ -528,8 +541,15 @@ namespace tools
     bool r = currency::construct_tx(m_account.get_keys(), create_tx_param, create_tx_result);
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
     tx = create_tx_result.tx;
-
-    finalize_transaction(create_tx_param, create_tx_result);
+    
+    if (do_not_relay)
+    {
+      relay_blob = t_serializable_object_to_blob(tx);
+    }
+    else
+    {
+      finalize_transaction(create_tx_param, create_tx_result, do_not_relay);
+    }
   }
 
 

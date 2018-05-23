@@ -119,12 +119,14 @@ namespace wallet_rpc
       uint64_t mixin;
       uint64_t unlock_time;
       std::string payment_id_hex;
+      bool do_not_relay;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(destinations)
         KV_SERIALIZE(fee)
         KV_SERIALIZE(mixin)
         KV_SERIALIZE(unlock_time)
+        KV_SERIALIZE(do_not_relay)
         KV_SERIALIZE(payment_id_hex)
       END_KV_SERIALIZE_MAP()
     };
@@ -132,13 +134,42 @@ namespace wallet_rpc
     struct response
     {
       std::string tx_hash;
+      std::string tx_blob;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash)
+        KV_SERIALIZE(tx_blob)
       END_KV_SERIALIZE_MAP()
     };
   };
 
+  struct COMMAND_RPC_SUBMIT
+  {
+    struct request
+    {
+      std::string tx_blob;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(destinations)
+        KV_SERIALIZE(fee)
+        KV_SERIALIZE(mixin)
+        KV_SERIALIZE(unlock_time)
+        KV_SERIALIZE(do_not_relay)
+        KV_SERIALIZE(payment_id_hex)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string tx_hash;
+      std::string tx_blob;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_hash)
+        KV_SERIALIZE(tx_blob)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
   struct COMMAND_RPC_STORE
   {
     struct request

@@ -104,7 +104,6 @@ namespace currency
       FIELD(recipients)
       FIELD(dust)
     END_SERIALIZE()
-
   };
 
   struct create_tx_res
@@ -115,6 +114,17 @@ namespace currency
     BEGIN_SERIALIZE_OBJECT()
       FIELD(tx)
       FIELD(txkey)
+    END_SERIALIZE()
+  };
+
+  struct create_tx_context
+  {
+    create_tx_arg arg;
+    create_tx_res res;
+    
+    BEGIN_SERIALIZE_OBJECT()
+      FIELD(arg)
+      FIELD(res)
     END_SERIALIZE()
   };
 
