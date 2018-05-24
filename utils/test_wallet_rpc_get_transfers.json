@@ -1,0 +1,15 @@
+{
+  "jsonrpc": "1.0",
+  "id": "12",
+  "method": "get_transfers",
+  "params": {
+    "in": true,
+    "out": true,
+    "pending": true,
+    "failed": true,
+    "pool": true,
+    "filter_by_height": false,
+    "min_height": 0,
+    "max_height": 100
+  }
+}
