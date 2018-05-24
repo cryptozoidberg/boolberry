@@ -542,14 +542,9 @@ namespace tools
     CHECK_AND_THROW_WALLET_EX(!r, error::tx_not_constructed, sources, splitted_dsts, unlock_time);
     tx = create_tx_result.tx;
     
-    if (do_not_relay)
-    {
-      relay_blob = t_serializable_object_to_blob(tx);
-    }
-    else
-    {
-      finalize_transaction(create_tx_param, create_tx_result, do_not_relay);
-    }
+    relay_blob = t_serializable_object_to_blob(tx);
+    finalize_transaction(create_tx_param, create_tx_result, do_not_relay);
+  
   }
 
 

@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "1.0",
+  "id": "12",
+  "method": "transfer",
+  "params": {
+    "destinations": [{"amount": 1000000000, "address":"1JPrUTYiW5UQXt3X1hgCKYBhsw1Y3Cagjb3dfpc9tBZNEaRSxvdqo3J4JQDw286YuW1VwfZoZBY9uFFQe4CfY5xUTdEUcrd"}],
+    "fee": 1000000000,
+    "mixin": 0,
+    "unlock_time": 0,
+    "payment_id_hex": "sdfazsafaf",
+    "do_not_relay": true
+  }
+}

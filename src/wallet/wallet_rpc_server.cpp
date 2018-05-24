@@ -117,7 +117,7 @@ namespace tools
       currency::blobdata relay_blob;
       m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, extra, tx, relay_blob, req.do_not_relay);
       res.tx_hash = boost::lexical_cast<std::string>(currency::get_transaction_hash(tx));
-      res.tx_blob = epee::string_tools::buff_to_hex(relay_blob);
+      res.tx_blob = epee::string_tools::buff_to_hex_nodelimer(relay_blob);
       return true;
     }
     catch (const tools::error::daemon_busy& e)
