@@ -395,7 +395,7 @@ namespace tools
   void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
     uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr)
   {
-    blobdata dummy;
+    currency::blobdata dummy;
     return transfer(dsts, fake_outputs_count, unlock_time, fee, extra, destination_split_strategy, dust_policy, tx, tx_outs_attr, dummy, false);
   }
   //----------------------------------------------------------------------------------------------------
