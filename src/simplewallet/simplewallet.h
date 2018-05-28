@@ -58,6 +58,8 @@ namespace currency
     bool sign_transfer(const std::vector<std::string> &args);
     bool submit_transfer(const std::vector<std::string> &args);
 
+    bool integrated_address(const std::vector<std::string> &args);
+
     bool get_tx_key(const std::vector<std::string> &args_);
     bool check_tx_key(const std::vector<std::string> &args);
     bool sign_text(const std::vector<std::string> &args);

@@ -90,9 +90,9 @@ namespace tools
     return epee::net_utils::invoke_http_json_rpc("/json_rpc", "get_alias_details", req, res, m_http_client);
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  bool default_http_core_proxy::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
+  bool default_http_core_proxy::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id)
   {
-    return tools::get_transfer_address(adr_str, addr, this);
+    return tools::get_transfer_address(adr_str, addr, payment_id, this);
   }
 
 }

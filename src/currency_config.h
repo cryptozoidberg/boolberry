@@ -7,8 +7,8 @@
 #define CURRENCY_MAX_BLOCK_NUMBER                     500000000
 #define CURRENCY_MAX_BLOCK_SIZE                       500000000  // block header blob limit, never used!
 #define CURRENCY_MAX_TX_SIZE                          1000000000
-#define CURRENCY_PUBLIC_ADDRESS_TEXTBLOB_VER          0
 #define CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX         1 // addresses start with "1"
+#define CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX   0xE94E
 #define CURRENCY_MINED_MONEY_UNLOCK_WINDOW            10
 #define CURRENT_TRANSACTION_VERSION                   1
 #define CURRENT_BLOCK_MAJOR_VERSION                   1

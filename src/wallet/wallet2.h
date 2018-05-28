@@ -95,7 +95,7 @@ namespace tools
       uint64_t m_unlock_time;
     };
     
-    typedef std::unordered_multimap<crypto::hash, payment_details> payment_container;
+    typedef std::unordered_multimap<currency::payment_id_t, payment_details> payment_container;
 
     typedef std::vector<transfer_details> transfer_container;
 
@@ -161,8 +161,8 @@ namespace tools
     bool check_connection();
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
     bool get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANSFERS::request& req, wallet_rpc::COMMAND_RPC_GET_TRANSFERS::response& res) const;
-    void get_payments(const crypto::hash& payment_id, std::list<payment_details>& payments, uint64_t min_height = 0) const;
-    bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
+    void get_payments(const currency::payment_id_t& payment_id, std::list<payment_details>& payments, uint64_t min_height = 0) const;
+    bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id);
     bool store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet = false);
     uint64_t get_blockchain_current_height() const { return m_local_bc_height; }
     template <class t_archive>
@@ -238,7 +238,7 @@ namespace tools
 }
 
 
-BOOST_CLASS_VERSION(tools::wallet2, 9)
+BOOST_CLASS_VERSION(tools::wallet2, 10)
 BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 3)
 BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 3)
 

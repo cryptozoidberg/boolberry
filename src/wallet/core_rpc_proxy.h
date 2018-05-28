@@ -31,7 +31,7 @@ namespace tools
     
 
     virtual bool check_connection() = 0;
-    virtual bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)=0;
+    virtual bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id) = 0;
   };
 }
 

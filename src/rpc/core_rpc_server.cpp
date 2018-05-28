@@ -760,14 +760,14 @@ namespace currency
       }
 
       for(const auto& tx: txs) {
-          std::string payment_id;
+          payment_id_t payment_id;
           get_payment_id_from_tx_extra(tx, payment_id);
           crypto::hash hash;
           get_transaction_hash(tx, hash);
 
           transfer_rpc_details transfer;
           transfer.tx_hash = string_tools::pod_to_hex(hash);
-          transfer.payment_id = string_tools::pod_to_hex(payment_id);
+          transfer.payment_id = string_tools::buff_to_hex_nodelimer(payment_id);
           
           for (const auto& vout: tx.vout) {
               const txout_to_key* key_out = boost::get<txout_to_key>(&vout.target);
@@ -1065,7 +1065,8 @@ namespace currency
     }
      
     currency::account_public_address ac_adr = AUTO_VAL_INIT(ac_adr);
-    if (!tools::get_transfer_address_t(req.address, ac_adr, *this))
+    currency::payment_id_t payment_id_stub;
+    if (!tools::get_transfer_address_t(req.address, ac_adr, payment_id_stub, *this))
     {
       LOG_PRINT_RED_L0("Failed to parse address: " << req.address);
       res.status = CORE_RPC_STATUS_INVALID_ARGUMENT;

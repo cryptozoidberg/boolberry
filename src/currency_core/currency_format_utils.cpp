@@ -438,17 +438,9 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool parse_payment_id_from_hex_str(const std::string& payment_id_str, crypto::hash& payment_id)
+  bool parse_payment_id_from_hex_str(const std::string& payment_id_str, payment_id_t& payment_id)
   {
-    blobdata payment_id_data;
-    if(!string_tools::parse_hexstr_to_binbuff(payment_id_str, payment_id_data))
-      return false;
-
-    if(sizeof(crypto::hash) != payment_id_data.size())
-      return false;
-
-    payment_id = *reinterpret_cast<const crypto::hash*>(payment_id_data.data());
-    return true;
+    return string_tools::parse_hexstr_to_binbuff(payment_id_str, payment_id);
   }
   //---------------------------------------------------------------
   bool add_tx_pub_key_to_extra(transaction& tx, const crypto::public_key& tx_pub_key)
@@ -756,7 +748,7 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const std::string& payment_id)
+  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const payment_id_t& payment_id)
   {
     if(!payment_id.size() || payment_id.size() >= TX_MAX_PAYMENT_ID_SIZE)
       return false;
@@ -774,7 +766,7 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool get_payment_id_from_user_data(const std::string& user_data, std::string& payment_id)
+  bool get_payment_id_from_user_data(const std::string& user_data, payment_id_t& payment_id)
   {
     if(!user_data.size())
       return false;

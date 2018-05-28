@@ -30,7 +30,7 @@ namespace tools
     virtual bool call_COMMAND_RPC_COMMAND_RPC_CHECK_KEYIMAGES(const currency::COMMAND_RPC_CHECK_KEYIMAGES::request& req, currency::COMMAND_RPC_CHECK_KEYIMAGES::response& rsp);
 
     bool check_connection();
-    bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
+    bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id);
     
     epee::net_utils::http::http_simple_client m_http_client;
     std::string m_daemon_address;

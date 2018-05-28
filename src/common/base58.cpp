@@ -233,8 +233,8 @@ namespace tools
     {
       std::string addr_data;
       bool r = decode(addr, addr_data);
-      if (!r) return false;
-      if (addr_data.size() <= addr_checksum_size) return false;
+      if (!r || addr_data.size() <= addr_checksum_size)
+        return false; // invalid base64 or wrong size
 
       std::string checksum(addr_checksum_size, '\0');
       checksum = addr_data.substr(addr_data.size() - addr_checksum_size);
@@ -242,10 +242,12 @@ namespace tools
       addr_data.resize(addr_data.size() - addr_checksum_size);
       crypto::hash hash = crypto::cn_fast_hash(addr_data.data(), addr_data.size());
       std::string expected_checksum(reinterpret_cast<const char*>(&hash), addr_checksum_size);
-      if (expected_checksum != checksum) return false;
+      if (expected_checksum != checksum)
+        return false; // invalid checksum
 
       int read = tools::read_varint(addr_data.begin(), addr_data.end(), tag);
-      if (read <= 0) return false;
+      if (read <= 0)
+        return false; // tag reading error
 
       data = addr_data.substr(read);
       return true;

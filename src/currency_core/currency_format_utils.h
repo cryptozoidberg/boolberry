@@ -202,7 +202,7 @@ namespace currency
   bool check_outs_valid(const transaction& tx);
   blobdata get_block_hashing_blob(const block& b);
   bool parse_amount(uint64_t& amount, const std::string& str_amount);
-  bool parse_payment_id_from_hex_str(const std::string& payment_id_str, crypto::hash& payment_id);
+  bool parse_payment_id_from_hex_str(const std::string& payment_id_str, payment_id_t& payment_id);
 
   bool check_money_overflow(const transaction& tx);
   bool check_outs_overflow(const transaction& tx);
@@ -216,34 +216,13 @@ namespace currency
   
   bool addendum_to_hexstr(const std::vector<crypto::hash>& add, std::string& hex_buff);
   bool hexstr_to_addendum(const std::string& hex_buff, std::vector<crypto::hash>& add);
-  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const std::string& payment_id);
-  bool get_payment_id_from_tx_extra(const transaction& tx, std::string& payment_id);
+  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const payment_id_t& payment_id);
+  bool get_payment_id_from_tx_extra(const transaction& tx, payment_id_t& payment_id);
   crypto::hash get_blob_longhash(const blobdata& bd, uint64_t height, const std::vector<crypto::hash>& scratchpad);
   crypto::hash get_blob_longhash_opt(const blobdata& bd, const std::vector<crypto::hash>& scratchpad);
 
   void print_currency_details();
     
-  //---------------------------------------------------------------
-  template<class payment_id_type>
-  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const payment_id_type& payment_id)
-  {
-    std::string payment_id_blob;
-    epee::string_tools::apped_pod_to_strbuff(payment_id_blob, payment_id);
-    return set_payment_id_to_tx_extra(extra, payment_id_blob);
-  }
-  //---------------------------------------------------------------
-  template<class payment_id_type>
-  bool get_payment_id_from_tx_extra(const transaction& tx, payment_id_type& payment_id)
-  {
-     std::string payment_id_blob;
-     if(!get_payment_id_from_tx_extra(tx, payment_id_blob))
-       return false;
-
-     if(payment_id_blob.size() != sizeof(payment_id_type))
-       return false;
-     payment_id = *reinterpret_cast<const payment_id_type*>(payment_id_blob.data());
-     return true;
-  }
   //---------------------------------------------------------------
 //   bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector);
 //   struct get_scratchpad_param

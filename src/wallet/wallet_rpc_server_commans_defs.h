@@ -291,6 +291,27 @@ namespace wallet_rpc
     };
   };
 
+  struct COMMAND_RPC_CONVERT_ADDRESS
+  {
+    struct request
+    {
+      std::string address_str;
+      std::string payment_id_hex;
+      std::string integrated_address_str;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(address_str)
+        KV_SERIALIZE(payment_id_hex)
+        KV_SERIALIZE(integrated_address_str)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response : public request
+    {
+    };
+  };
+
+
   /*stay-alone instance*/
   struct telepod
   {

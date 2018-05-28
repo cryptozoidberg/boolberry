@@ -30,6 +30,7 @@ using boost::lexical_cast;
 namespace po = boost::program_options;
 
 #define EXTENDED_LOGS_FILE "wallet_details.log"
+#define DEFAULT_PAYMENT_ID_SIZE_BYTES 8
 
 
 namespace
@@ -181,6 +182,8 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("save_watch_only", boost::bind(&simple_wallet::save_watch_only, this, _1), "Save a watch-only keys file <filename> <password>.");
   m_cmd_binder.set_handler("sign_transfer", boost::bind(&simple_wallet::sign_transfer, this, _1), "Sign_transfer <tx_sources_file> <result_file>");
   m_cmd_binder.set_handler("submit_transfer", boost::bind(&simple_wallet::submit_transfer, this, _1), "Submit a signed transaction from a file <tx_sources_file> <result_file>");
+
+  m_cmd_binder.set_handler("integrated_address", boost::bind(&simple_wallet::integrated_address, this, _1), "integrated_address [payment_id|integrated_address] Encode given payment_id into an integrated address (for this waller public address). Uses random id if not provided. Decode given integrated address into payment id and standart address.");
 
   m_cmd_binder.set_handler("get_tx_key", boost::bind(&simple_wallet::get_tx_key, this, _1), "Get transaction key (r) for a given <txid>");
   m_cmd_binder.set_handler("check_tx_key", boost::bind(&simple_wallet::check_tx_key, this, _1), "Check amount going to <address> in <txid>");
@@ -709,14 +712,14 @@ bool simple_wallet::show_payments(const std::vector<std::string> &args)
   bool payments_found = false;
   for(std::string arg : args)
   {
-    crypto::hash payment_id;
+    payment_id_t payment_id;
     if(parse_payment_id_from_hex_str(arg, payment_id))
     {
       std::list<tools::wallet2::payment_details> payments;
       m_wallet->get_payments(payment_id, payments);
       if(payments.empty())
       {
-        success_msg_writer() << "No payments with id " << payment_id;
+        success_msg_writer() << "No payments with id " << arg;
         continue;
       }
 
@@ -727,7 +730,7 @@ bool simple_wallet::show_payments(const std::vector<std::string> &args)
           payments_found = true;
         }
         success_msg_writer(true) <<
-          payment_id << '\t' <<
+          std::left << std::setw(64) << arg << '\t' <<
           pd.m_tx_hash << '\t' <<
           std::setw(8)  << pd.m_block_height << '\t' <<
           std::setw(21) << print_money(pd.m_amount) << '\t' <<
@@ -768,6 +771,7 @@ bool simple_wallet::show_blockchain_height(const std::vector<std::string>& args)
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::transfer(const std::vector<std::string> &args_)
 {
+  bool r = false;
   if (!try_connect_to_daemon())
     return true;
 
@@ -787,13 +791,13 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   local_args.erase(local_args.begin());
 
   std::vector<uint8_t> extra;
+  payment_id_t payment_id;
   if (1 == local_args.size() % 2)
   {
     std::string payment_id_str = local_args.back();
     local_args.pop_back();
 
-    crypto::hash payment_id;
-    bool r = parse_payment_id_from_hex_str(payment_id_str, payment_id);
+    r = parse_payment_id_from_hex_str(payment_id_str, payment_id);
     if(r)
     {
       r = set_payment_id_to_tx_extra(extra, payment_id);
@@ -801,7 +805,7 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
 
     if(!r)
     {
-      fail_msg_writer() << "payment id has invalid format: \"" << payment_id_str << "\", expected 64-character string";
+      fail_msg_writer() << "payment id has invalid format: \"" << payment_id_str << "\", expected hex string";
       return true;
     }
   }
@@ -810,10 +814,31 @@ bool simple_wallet::transfer(const std::vector<std::string> &args_)
   for (size_t i = 0; i < local_args.size(); i += 2) 
   {
     currency::tx_destination_entry de;
-    if(!m_wallet->get_transfer_address(local_args[i], de.addr))
+    currency::payment_id_t integrated_payment_id;
+    if(!m_wallet->get_transfer_address(local_args[i], de.addr, integrated_payment_id))
     {
       fail_msg_writer() << "wrong address: " << local_args[i];
       return true;
+    }
+
+    // handle integrated payment id
+    if (!integrated_payment_id.empty())
+    {
+      if (!payment_id.empty())
+      {
+        fail_msg_writer() << "address " << local_args[i] << " has integrated payment id " << epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) <<
+          " which is incompatible with payment id " << epee::string_tools::buff_to_hex_nodelimer(payment_id) << " that was already assigned to this transfer";
+        return true;
+      }
+
+      if (!set_payment_id_to_tx_extra(extra, integrated_payment_id))
+      {
+        fail_msg_writer() << "address " << local_args[i] << " has invalid integrated payment id " << epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id);
+        return true;
+      }
+
+      payment_id = integrated_payment_id; // remember integrated payment id as the main payment id
+      success_msg_writer() << "NOTE: using payment id " << epee::string_tools::buff_to_hex_nodelimer(payment_id) << " from integrated address " << local_args[i];
     }
 
     if (local_args.size() <= i + 1)
@@ -1222,6 +1247,61 @@ bool simple_wallet::check_tx_key_helper(const crypto::hash &txid, const currency
     }
   }
   */
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::integrated_address(const std::vector<std::string> &args)
+{
+  if (args.size() > 1)
+  {
+    fail_msg_writer() << "usage: integrated_address [payment_id|integrated_address]";
+    return true;
+  }
+
+  account_public_address addr = AUTO_VAL_INIT(addr);
+  payment_id_t payment_id, integrated_payment_id;
+
+  if (args.size() == 0)
+  {
+    char random_pid[DEFAULT_PAYMENT_ID_SIZE_BYTES];
+    crypto::generate_random_bytes(sizeof random_pid, random_pid);
+    payment_id = random_pid;
+    success_msg_writer() << "Generated random payment id: " << epee::string_tools::buff_to_hex_nodelimer(payment_id);
+  }
+  else if (args.size() == 1)
+  {
+    if (currency::get_account_address_and_payment_id_from_str(addr, integrated_payment_id, args[0]))
+    {
+      if (integrated_payment_id.empty())
+      {
+        success_msg_writer() << args[0] << " is a standard address with no payment id encoded";
+      }
+      else
+      {
+        success_msg_writer() << args[0] << " is an integrated address:" << ENDL <<
+          "  encoded payment id:    " << epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) << ENDL <<
+          "  standard address:      " << currency::get_account_address_as_str(addr);
+      }
+      return true;
+    }
+
+    // arg[0] is not an address, tread it as hex-encoded payment id
+    if (!epee::string_tools::parse_hexstr_to_binbuff(args[0], payment_id))
+    {
+      fail_msg_writer() << args[0] << " is invalid payment id. A hex-encoded string is expected.";
+      return true;
+    }
+  }
+
+  // encode payment_id into current wallet's public address
+  std::string integrated_addr_str = currency::get_account_address_as_str(m_wallet->get_account().get_keys().m_account_address, payment_id);
+
+  success_msg_writer() <<
+    "    encoded payment id:    " << epee::string_tools::buff_to_hex_nodelimer(payment_id) << ENDL <<
+    "    your standard address: " << m_wallet->get_account().get_public_address_str();
+  
+  success_msg_writer(true) << "your integrated address is " << integrated_addr_str;
 
   return true;
 }

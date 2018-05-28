@@ -42,6 +42,7 @@ namespace tools
         MAP_JON_RPC_WE("get_payments", on_get_payments, wallet_rpc::COMMAND_RPC_GET_PAYMENTS)
         MAP_JON_RPC_WE("get_bulk_payments",  on_get_bulk_payments,  wallet_rpc::COMMAND_RPC_GET_BULK_PAYMENTS)
         MAP_JON_RPC_WE("get_transfers", on_get_transfers, wallet_rpc::COMMAND_RPC_GET_TRANSFERS)
+        MAP_JON_RPC_WE("convert_address", on_convert_address, wallet_rpc::COMMAND_RPC_CONVERT_ADDRESS)
         
         // supernet api
         MAP_JON_RPC_WE("maketelepod",   on_maketelepod,   wallet_rpc::COMMAND_RPC_MAKETELEPOD)
@@ -59,6 +60,7 @@ namespace tools
       bool on_get_payments(const wallet_rpc::COMMAND_RPC_GET_PAYMENTS::request& req, wallet_rpc::COMMAND_RPC_GET_PAYMENTS::response& res, epee::json_rpc::error& er, connection_context& cntx);
       bool on_get_bulk_payments(const wallet_rpc::COMMAND_RPC_GET_BULK_PAYMENTS::request& req, wallet_rpc::COMMAND_RPC_GET_BULK_PAYMENTS::response& res, epee::json_rpc::error& er, connection_context& cntx);
       bool on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANSFERS::request& req, wallet_rpc::COMMAND_RPC_GET_TRANSFERS::response& res, epee::json_rpc::error& er, connection_context& cntx);
+      bool on_convert_address(const wallet_rpc::COMMAND_RPC_CONVERT_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_CONVERT_ADDRESS::response& res, epee::json_rpc::error& er, connection_context& cntx);
 
 
       bool on_maketelepod(const wallet_rpc::COMMAND_RPC_MAKETELEPOD::request& req, wallet_rpc::COMMAND_RPC_MAKETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx);

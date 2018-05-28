@@ -86,7 +86,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       "transactions outputs size=" + std::to_string(tx.vout.size()) +
       " not match with COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES response size=" + std::to_string(res.o_indexes.size()));
 
-    BOOST_FOREACH(size_t o, outs)
+    for(size_t o : outs)
     {
       CHECK_AND_THROW_WALLET_EX(tx.vout.size() <= o, error::wallet_internal_error, "wrong out in transaction: internal index=" +
         std::to_string(o) + ", total_outs=" + std::to_string(tx.vout.size()));
@@ -115,7 +115,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
   uint64_t tx_money_spent_in_ins = 0;
   // check all outputs for spending (compare key images)
   size_t i = 0;
-  BOOST_FOREACH(auto& in, tx.vin)
+  for(auto& in : tx.vin)
   {
     if(in.type() != typeid(currency::txin_to_key))
       continue;
@@ -135,11 +135,11 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
     i++;
   }
 
-    crypto::hash payment_id;
+    payment_id_t payment_id;
     if (tx_money_got_in_outs && get_payment_id_from_tx_extra(tx, payment_id))
     {
       uint64_t received = (tx_money_spent_in_ins < tx_money_got_in_outs) ? tx_money_got_in_outs - tx_money_spent_in_ins : 0;
-      if (0 < received && null_hash != payment_id)
+      if (0 < received && payment_id.size() != 0)
       {
         payment_details payment;
         payment.m_tx_hash      = currency::get_transaction_hash(tx);
@@ -176,9 +176,9 @@ void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height
   wti.tx = tx;
   wti.amount = amount;
   wti.height = height;
-  crypto::hash pid;
+  payment_id_t pid;
   if(currency::get_payment_id_from_tx_extra(tx, pid))
-    wti.payment_id = string_tools::pod_to_hex(pid);
+    wti.payment_id = string_tools::buff_to_hex_nodelimer(pid);
   fill_transfer_details(tx, td, wti.td);
   wti.timestamp = timestamp;
   wti.fee = currency::is_coinbase(tx) ? 0:currency::get_tx_fee(tx);
@@ -810,7 +810,7 @@ bool wallet2::get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANSFERS::request
   return true;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::get_payments(const crypto::hash& payment_id, std::list<wallet2::payment_details>& payments, uint64_t min_height) const
+void wallet2::get_payments(const payment_id_t& payment_id, std::list<wallet2::payment_details>& payments, uint64_t min_height) const
 {
   auto range = m_payments.equal_range(payment_id);
   std::for_each(range.first, range.second, [&payments, &min_height](const payment_container::value_type& x) {
@@ -952,9 +952,9 @@ void wallet2::get_recent_transfers_history(std::vector<wallet_rpc::wallet_transf
   trs.insert(trs.end(), start, stop);
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
+bool wallet2::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id)
 {
-  return m_core_proxy->get_transfer_address(adr_str, addr);
+  return m_core_proxy->get_transfer_address(adr_str, addr, payment_id);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& u, wallet_rpc::wallet_transfer_info& wti)const 

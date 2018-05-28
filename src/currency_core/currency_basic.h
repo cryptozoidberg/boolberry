@@ -289,6 +289,8 @@ namespace currency
   };
   //---------------------------------------------------------------
 
+  typedef std::string payment_id_t;
+
 }
 
 BLOB_SERIALIZER(currency::txout_to_key);
