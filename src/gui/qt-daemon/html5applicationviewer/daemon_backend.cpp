@@ -644,7 +644,7 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
     {
       if (!payment_id.empty())
       {
-        m_pview->show_msg_box(std::string("Address ") + d.address + " has integrated payment id" + epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) +
+        m_pview->show_msg_box(std::string("Address ") + d.address + " has integrated payment id " + epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) +
           " which is incompatible with payment id " + epee::string_tools::buff_to_hex_nodelimer(payment_id) + " that was already assigned to this transfer");
         return false;
       }
