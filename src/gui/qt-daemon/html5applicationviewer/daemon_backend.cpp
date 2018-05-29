@@ -617,36 +617,47 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
     return false;
   }
 
+  currency::payment_id_t payment_id;
+  if (tp.payment_id.size() && !currency::parse_payment_id_from_hex_str(tp.payment_id, payment_id))
+  {
+    m_pview->show_msg_box("Failed to send transaction: wrong payment_id");
+    return false;
+  }
+
   for (auto& d : tp.destinations)
   {
+    currency::payment_id_t integrated_payment_id;
     dsts.push_back(currency::tx_destination_entry());
-    if (!tools::get_transfer_address(d.address, dsts.back().addr, m_rpc_proxy.get()))
+    if (!tools::get_transfer_address(d.address, dsts.back().addr, integrated_payment_id, m_rpc_proxy.get()))
     {
       m_pview->show_msg_box("Failed to send transaction: invalid address");
       return false;
     }
+    
     if (!currency::parse_amount(dsts.back().amount, d.amount))
     {
       m_pview->show_msg_box("Failed to send transaction: wrong amount");
       return false;
     }
+    
+    if (!integrated_payment_id.empty())
+    {
+      if (!payment_id.empty())
+      {
+        m_pview->show_msg_box(std::string("Address ") + d.address + " has integrated payment id" + epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) +
+          " which is incompatible with payment id " + epee::string_tools::buff_to_hex_nodelimer(payment_id) + " that was already assigned to this transfer");
+        return false;
+      }
+      payment_id = integrated_payment_id;
+    }
   }
-  //payment_id
+  
+  // extra
   std::vector<uint8_t> extra;
-  if (tp.payment_id.size())
+  if (!payment_id.empty() && !currency::set_payment_id_to_tx_extra(extra, payment_id))
   {
-
-    crypto::hash payment_id;
-    if (!currency::parse_payment_id_from_hex_str(tp.payment_id, payment_id))
-    {
-      m_pview->show_msg_box("Failed to send transaction: wrong payment_id");
-      return false;
-    }
-    if (!currency::set_payment_id_to_tx_extra(extra, payment_id))
-    {
-      m_pview->show_msg_box("Failed to send transaction: internal error, failed to set payment id");
-      return false;
-    }
+    m_pview->show_msg_box("Failed to send transaction: internal error, failed to set payment id");
+    return false;
   }
 
   try
