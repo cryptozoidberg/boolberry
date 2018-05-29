@@ -506,8 +506,30 @@ TEST(get_account_address_from_str, fails_on_invalid_address_view_key)
   ASSERT_FALSE(currency::get_account_address_from_str(addr, addr_str));
 }
 
-TEST(get_account_address_from_str, parses_old_address_format)
+TEST(integrated_address, parse_address)
 {
   currency::account_public_address addr;
-  ASSERT_TRUE(currency::get_account_address_from_str(addr, "002391bbbb24dea6fd95232e97594a27769d0153d053d2102b789c498f57a2b00b69cd6f2f5c529c1660f2f4a2b50178d6640c20ce71fe26373041af97c5b10236fc"));
+  ASSERT_TRUE(serialization::parse_binary(test_serialized_keys, addr));
+
+  currency::payment_id_t payment_id_0 = "";
+  std::string integrated_addr_str_0 = currency::get_account_address_as_str(addr, payment_id_0);
+  ASSERT_EQ(integrated_addr_str_0, "bbRAkbB62sDj74KgQDGKRKAjTfWJywnvM1ZRGv9yX9o89N8qGedHKLheKPmtkLpTmpBWGDT3ZuLUmNVvz3LmU5LrA3gGgAD9Xn");
+
+  currency::payment_id_t payment_id_1 = MAKE_STR("\x00");
+  std::string integrated_addr_str_1 = currency::get_account_address_as_str(addr, payment_id_1);
+  ASSERT_EQ(integrated_addr_str_1, "bbRAkbB62sDj74KgQDGKRKAjTfWJywnvM1ZRGv9yX9o89N8qGedHKLheKPmtkLpTmpBWGDT3ZuLUmNVvz3LmU5LrgvpKyxgqA6a");
+
+  currency::payment_id_t payment_id_2 = MAKE_STR("\x00\x01\x02\x03\x04\x05\x06\x07");
+  std::string integrated_addr_str_2 = currency::get_account_address_as_str(addr, payment_id_2);
+  ASSERT_EQ(integrated_addr_str_2, "bbRAkbB62sDj74KgQDGKRKAjTfWJywnvM1ZRGv9yX9o89N8qGedHKLheKPmtkLpTmpBWGDT3ZuLUmNVvz3LmU5LrgvpKyvjAXWK1C3QUKx492");
+
+  currency::payment_id_t payment_id_3 =
+    "4cb9c03e42e87df36a1e4eb5ad6094427ef3f57de93b65613d6932c28fa2adec670a2627f71f2d415222bc26d17589ee4208"
+    "aijwenr293joijv Lj29JS(#Jksfjw9j sdnjssdfnsd02j; lajoiajs8fj9283j8jj328j38jfjjsdddddnnn101 1!(*&@))1"
+    "NAKJASFD982UFLKFJASDFSA NSALKF JBSADFY93iejd#"
+    + MAKE_STR("\x00\x00\x00\x00\x00");
+  ASSERT_EQ(250, payment_id_3.size());
+  std::string integrated_addr_str_3 = currency::get_account_address_as_str(addr, payment_id_3);
+  ASSERT_EQ(integrated_addr_str_3, "bbRAkbB62sDj74KgQDGKRKAjTfWJywnvM1ZRGv9yX9o89N8qGedHKLheKPmtkLpTmpBWGDT3ZuLUmNVvz3LmU5LrgvpL5qWenup94cFa8sz9QzHnztudXLafVHxYo5aE1mjN9jShibi3bdP9uGQAJXpCvH9uDmBp7E89Y9RpfH1BsbExHny7L6JxTEHA4mhNAdFHahHm6ytDSfoAZHbKxVP4SXH9AbpCivERdyrJdfdrTF1MJp9boF8FhyGeFJmEh2m3dC25JyQckUBnRJXLJT6dvqMzjXKUWcgZ1GNMDK8Rm7hRrFycAS9mgxUrEhFASJZbm8xzczASJXiTnFo7HHnvvTSrsbJF9DaiXNxVH1H7tK7pqq9qLtEvsGmNnebKsDm9a6mH3xqTEvfyUeF1RhUCjK4L8YCy1XFvabELm75bG11111119iUf3j");
+
 }
