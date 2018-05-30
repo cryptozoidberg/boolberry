@@ -68,6 +68,7 @@ protected:
 
   QString get_gui_lang();
   void set_gui_lang(const QString& str_config);
+  QString is_address_valid(const QString& full_addr_string);
 
 private:
   void loadFile(const QString &fileName);

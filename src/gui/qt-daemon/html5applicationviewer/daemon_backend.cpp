@@ -165,6 +165,20 @@ std::string daemon_backend::get_config_folder()
   return m_data_dir;
 }
 
+bool daemon_backend::is_valid_address(const std::string& full_addr, std::string& payment_id_hex, std::string& original_addr)
+{
+  currency::account_public_address addr;
+  currency::payment_id_t payment_id;
+  if (!currency::get_account_address_and_payment_id_from_str(addr, payment_id, full_addr))
+  {
+    return false;
+  }
+
+  original_addr = currency::get_account_address_as_str(addr);
+  payment_id_hex = epee::string_tools::buff_to_hex_nodelimer(payment_id);
+  return true;
+}
+
 void daemon_backend::main_worker(const po::variables_map& vm)
 {
 

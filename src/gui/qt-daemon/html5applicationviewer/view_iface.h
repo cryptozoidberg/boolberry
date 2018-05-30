@@ -231,7 +231,18 @@ namespace view
     END_KV_SERIALIZE_MAP()
   };
 
+  struct address_details
+  {
+    bool valid;
+    std::string origianal_address;
+    std::string payment_id_hex;
 
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(valid)
+      KV_SERIALIZE(origianal_address)
+      KV_SERIALIZE(payment_id_hex)
+    END_KV_SERIALIZE_MAP()
+  };
 
 
   struct i_view

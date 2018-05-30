@@ -668,5 +668,11 @@ void Html5ApplicationViewer::set_gui_lang(const QString& str_config)
   m_config.gui_lang = str_config.toStdString();
 }
 
+QString Html5ApplicationViewer::is_address_valid(const QString& full_addr_string)
+{
+  view::address_details ad = AUTO_VAL_INIT(ad);
+  ad.valid = m_backend.is_valid_address(full_addr_string.toStdString(), ad.payment_id_hex, ad.origianal_address);
+  return epee::serialization::store_t_to_json(ad).c_str();
+}
 
 #include "html5applicationviewer.moc"
