@@ -115,7 +115,7 @@ namespace tools
         if (!payment_id.empty())
         {
           er.code = WALLET_RPC_ERROR_CODE_WRONG_PAYMENT_ID;
-          er.message = std::string("address ") + it->address + " has integrated payment id" + epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) +
+          er.message = std::string("address ") + it->address + " has integrated payment id " + epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) +
             " which is incompatible with payment id " + epee::string_tools::buff_to_hex_nodelimer(payment_id) + " that was already assigned to this transfer";
           return false;
         }
