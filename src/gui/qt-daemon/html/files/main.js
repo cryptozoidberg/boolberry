@@ -623,9 +623,13 @@ function on_address_change() {
             show_address_status('integrated');
         } else {
             show_address_status('valid');
+          $('#payment_id').val('').removeClass('is-disabled');
+          $('#payment_id').prop('disabled', false);
         }
     } else {
         show_address_status('invalid');
+        $('#payment_id').val('').removeClass('is-disabled');
+        $('#payment_id').prop('disabled', false);
     }
 
 }
@@ -679,6 +683,7 @@ $(function()
 
     $('#sign_button_id').on('click', on_sign);
 
+    $('#transfer_address_id').keyup(on_address_change);
     $('#transfer_address_id').on('change', on_address_change);
 
     setTimeout(init_btc_exchange_rate, 100);
