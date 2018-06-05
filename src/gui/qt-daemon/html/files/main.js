@@ -477,6 +477,8 @@ function on_sign() {
 
 function on_transfer()
 {
+    var addressInputVal = $('#transfer_address_id').val();
+    var addressValidation = $.parseJSON(Qt_parent.is_address_valid(addressInputVal));
     var transfer_obj = {
         destinations:[
             {
@@ -485,9 +487,12 @@ function on_transfer()
             }
         ],
         mixin_count: 0,
-        lock_time: 0,
-        payment_id: $('#payment_id').val()
+        lock_time: 0
     };
+
+    if (!addressValidation.valid) {
+      transfer_obj.payment_id = $('#payment_id').val();
+    }
 
     var lock_time = parse_and_get_locktime();
     if(lock_time === undefined)
@@ -515,6 +520,9 @@ function on_transfer()
         $('#transfer_address_id').val("");
         $('#transfer_amount_id').val("");
         $('#payment_id').val("");
+        $('#payment_id').removeClass('is-disabled');
+        $('#transfer_address_id_container').removeClass('integrated');
+        $('#payment_id').prop('disabled', false);
         $('#mixin_count_id').val(0);
         $("#transfer_result_span").html("<span style='color: #1b9700'> Money successfully sent, transaction " + transfer_res_obj.tx_hash + ", " + transfer_res_obj.tx_blob_size + " bytes</span><br>");
         if(last_timerId !== undefined)
@@ -522,6 +530,7 @@ function on_transfer()
 
         $("#transfer_result_zone").show("fast");
         last_timerId = setTimeout(function(){$("#transfer_result_zone").hide("fast");}, 15000);
+        hide_address_status();
     }
     else
         return;
@@ -599,6 +608,58 @@ function str_to_obj(str)
     this.cb(info_obj);
 }
 
+// address validation
+function on_address_change() {
+    console.log('address changed');
+    var addressInputVal =  $('#transfer_address_id').val();
+    var addressValidation = $.parseJSON(Qt_parent.is_address_valid(addressInputVal));
+
+    if (addressValidation.valid) {
+        if (addressValidation.payment_id_hex.length) {
+            $('#transfer_address_id_container').addClass('integrated');
+            $('#payment_id').val(addressValidation.payment_id_hex);
+            $('#payment_id').addClass('is-disabled');
+            $('#payment_id').prop('disabled', true);
+            show_address_status('integrated');
+        } else {
+            show_address_status('valid');
+        }
+    } else {
+        show_address_status('invalid');
+    }
+
+}
+
+function show_address_status(status) {
+    var newStatus = 'with-status' + ' ' + status;
+    $('.address-status').removeClass('with-status valid invalid integrated');
+    $('#transfer_address_id').removeClass('with-status');
+
+    $('.address-status').addClass(newStatus);
+    $('#transfer_address_id').addClass('with-status');
+
+    switch (status) {
+      case 'valid':
+        $('.address-status-text').text('Valid address');
+        break;
+      case 'invalid':
+        $('.address-status-text').text('Invalid address');
+        break;
+      case 'integrated':
+        $('.address-status-text').text('Integrated address');
+        break;
+      default:
+        break;
+    }
+}
+
+function hide_address_status() {
+    $('.address-status').removeClass('valid invalid integrated');
+    $('#transfer_address_id').removeClass('with-status');
+    $('.address-status-text').text('');
+
+}
+
 $(function()
 { // DOM ready
     $( "#synchronization_progressbar" ).progressbar({value: false });
@@ -617,6 +678,8 @@ $(function()
     $('#close_wallet_button_id').on('click',  on_close_wallet);
 
     $('#sign_button_id').on('click', on_sign);
+
+    $('#transfer_address_id').on('change', on_address_change);
 
     setTimeout(init_btc_exchange_rate, 100);
 
