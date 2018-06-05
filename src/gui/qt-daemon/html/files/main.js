@@ -686,6 +686,21 @@ $(function()
     $('#transfer_address_id').keyup(on_address_change);
     $('#transfer_address_id').on('change', on_address_change);
 
+    $('#toggle-section-sign').click(function () {
+      $(this).toggleClass('close');
+      $('#section-sign').toggle();
+    });
+
+    $('#toggle-section-payment').click(function () {
+      $(this).toggleClass('close');
+      $('#section-payment').toggle();
+    });
+
+    $('#toggle-section-history').click(function () {
+      $(this).toggleClass('close');
+      $('#section-history').toggle();
+    });
+
     setTimeout(init_btc_exchange_rate, 100);
 
 

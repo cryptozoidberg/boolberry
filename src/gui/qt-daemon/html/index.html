@@ -116,10 +116,10 @@
                             Synced</span>
                         <div id="close_wallet_button_id" class="common_button btn btn-grey">Close wallet</div>
                     </div>
-                </div>
+                </div id>
 
-                <div class="wallet_separator">Sign something</div>
-                <div class="active_panel">
+                <div class="wallet_separator" id="toggle-section-sign">Sign message</div>
+                <div class="active_panel" id="section-sign">
                     <div class="active_form clearfix">
                         <input id="sign_text_id" type="text" placeholder="Text">
                         <button id="sign_button_id" class="btn" type="submit">Sign</button>
@@ -132,10 +132,10 @@
                     </div>
                 </div>
 
-                <div class="wallet_separator">
+                <div class="wallet_separator" id="toggle-section-payment">
                     Send payment
                 </div>
-                <div class="active_panel">
+                <div class="active_panel" id="section-payment">
                     <div id="transfer_address_id_container">
                         <span class="address-status clearfix">
                             <span class="address-status-icon"></span>
@@ -166,12 +166,12 @@
                                     <input class='input_with_label' id="tx_fee" value='0.001'>
                                 </div>
                             </div>
-                            <div class="payment-wrap clearfix">
-                                <div class="transfer_extra_options unlock" data-label="Unlock time">
-                                    <input class='input_with_label'  id="lock_time">
-                                </div>
-                                <div class="transfer_extra_options transfer_extra_options_hint" style="float: right; width: 49%;"> Use "1d" or "1h" or n, where n is the number of blocks within which the transaction must be blocked.</div>
-                            </div>
+                            <!--<div class="payment-wrap clearfix">-->
+                                <!--<div class="transfer_extra_options unlock" data-label="Unlock time">-->
+                                    <!--<input class='input_with_label'  id="lock_time">-->
+                                <!--</div>-->
+                                <!--<div class="transfer_extra_options transfer_extra_options_hint" style="float: right; width: 49%;"> Use "1d" or "1h" or n, where n is the number of blocks within which the transaction must be blocked.</div>-->
+                            <!--</div>-->
                             <!--<div class="active_panel_button">-->
                                 <!--<div id="transfer_button_id" class="common_button btn">Send</div>-->
                             <!--</div>-->
@@ -189,8 +189,8 @@
                     </div>
 
                 </div>
-                <div class="wallet_separator">Recent transferts</div>
-                <div class="wallet_panel_transparent">
+                <div class="wallet_separator" id="toggle-section-history">Recent transferts</div>
+                <div class="wallet_panel_transparent" id="section-history">
                     <div class='transfer_entry_line' style='color: #3a3a3a; height: 36px; background: #f5f5f5; box-sizing: border-box; font-family: "Open Sans"; font-weight: 600'>
                         <span style='position: absolute; left: 51px;'>Date</span>
                         <span style='position: absolute; left: 200px;'>Status</span>

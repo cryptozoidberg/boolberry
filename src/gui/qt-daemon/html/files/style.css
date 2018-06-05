@@ -101,13 +101,35 @@ h2 {
     font-weight: 600;
     color: #ffffff;
     padding: 0 15px;
+    margin-bottom: 0;
     height: 44px;
     line-height: 44px;
     background-image: url("../files/bg.jpg");
     background-size: cover;
     box-sizing: border-box;
+    cursor: pointer;
 }
 
+.wallet_separator.close {
+    margin-bottom: 20px;
+}
+
+
+.wallet_separator:after {
+    position: absolute;
+    display: inline-block;
+    content: '';
+    width: 13px;
+    height: 8px;
+    top: 18px;
+    right: 16px;
+    background-size: cover;
+    background: url('../files/ico_toggle_arrow.png') no-repeat;
+}
+
+.wallet_separator.close:after {
+    -webkit-transform: rotate(180deg);
+}
 /*.wallet_sync {*/
     /*display: flex;*/
     /*align-items: center;*/
@@ -144,10 +166,6 @@ h2 {
 {
     color: #65ffe7;
 }
-#daemon_state_internal_panel
-{
-    padding-left: 110px;
-}
 
 .inline_menu_bar_selected_item:hover
 {
@@ -168,13 +186,13 @@ h2 {
 
 .inline_menu_bar_item_disabled
 {
-    color: #777;
+    color: #3e92ee;
     cursor: default;
 }
 
 .inline_menu_bar_item_disabled:hover
 {
-    color: #777;
+    color: #3e92ee;
 }
 
 /*dashboard styles*/
@@ -196,7 +214,7 @@ span.daemon_view_general_status_value_fail_text
 {
     color: rgb(55,52,53);
     padding-top: 20px;
-    font-size: 30px;
+    font-size: 16px;
 }
 
 #daemon_status_text
@@ -209,14 +227,17 @@ span.daemon_view_general_status_value_fail_text
 .daemon_view_general_status_text
 {
     color: rgb(55,52,53);
-    margin-left: 40px;
     font-weight: 600;
 }
 
 .daemon_view_param_title
 {
-    font-size: 17px;
+    font-size: 14px;
     color: rgb(55,52,53);
+}
+
+#daemon_state_internal_panel {
+    margin: 0 15px;
 }
 
 .daemon_view_param_value
@@ -225,7 +246,7 @@ span.daemon_view_general_status_value_fail_text
     left:360px;
     font-weight: 600;
     color: #6c6c6c;
-    font-size: 17px;
+    font-size: 14px;
 }
 
 .buttons_group
@@ -247,7 +268,6 @@ span.daemon_view_general_status_value_fail_text
 #synchronization_progressbar_block
 {
     padding-top: 25px;
-    padding-left: 15px;
 }
 
 .daemon_view_details_block
