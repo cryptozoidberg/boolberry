@@ -305,7 +305,7 @@ namespace db
     MDB_val data = AUTO_VAL_INIT(data);
 
     bool local_transaction = false;
-    if (m_p_impl->has_active_transaction())
+    if (!m_p_impl->has_active_transaction())
     {
       local_transaction = true;
       begin_transaction();
