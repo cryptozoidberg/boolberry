@@ -344,6 +344,10 @@ span.daemon_view_general_status_value_fail_text
     font-weight: 600;
     margin-bottom: 3px;
 }
+.tx_details_value {
+    overflow: auto;
+    overflow-wrap: break-word;
+}
 
 #wallet_transfer_panel
 {

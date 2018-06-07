@@ -200,7 +200,7 @@ function get_details_block(td, div_id_str, transaction_id, blob_size, payment_id
 
     if(payment_id !== '' && payment_id !== undefined)
     {
-        res += "<span class='tx_details_text'>Payment id:</span> " +  payment_id + "<br>";
+        res += "<span class='tx_details_text'>Payment id:</span> " + "<span class='tx_details_value'>" + payment_id + "</span>" + "<br>";
     }
 
     if(td.rcv !== undefined)
