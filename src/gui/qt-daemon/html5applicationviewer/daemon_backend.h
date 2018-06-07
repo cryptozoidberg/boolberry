@@ -55,7 +55,7 @@ public:
   bool get_aliases(view::alias_set& al_set);
   bool sign_text(const std::string& text, std::string& signature_hex);
   std::string get_config_folder();
-  bool is_valid_address(const std::string& addr, std::string& payment_id, std::string& original_addr);
+  bool parse_transfer_target(const std::string& transfer_target, std::string& payment_id_hex, std::string& standard_addr_str);
 private:
   void main_worker(const po::variables_map& vm);
   bool update_state_info();

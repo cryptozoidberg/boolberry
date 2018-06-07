@@ -637,7 +637,7 @@ QString Html5ApplicationViewer::browse_wallet(bool existing)
 }
 
 void Html5ApplicationViewer::open_wallet()
-{
+{                        
   QString path = QFileDialog::getOpenFileName(this, tr("Open wallet File"),
     m_config.wallets_last_used_dir.c_str(),
     tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
@@ -668,10 +668,10 @@ void Html5ApplicationViewer::set_gui_lang(const QString& str_config)
   m_config.gui_lang = str_config.toStdString();
 }
 
-QString Html5ApplicationViewer::is_address_valid(const QString& full_addr_string)
+QString Html5ApplicationViewer::parse_transfer_target(const QString& transfer_target_str)
 {
   view::address_details ad = AUTO_VAL_INIT(ad);
-  ad.valid = m_backend.is_valid_address(full_addr_string.toStdString(), ad.payment_id_hex, ad.origianal_address);
+  ad.valid = m_backend.parse_transfer_target(transfer_target_str.toStdString(), ad.payment_id_hex, ad.standard_address);
   return epee::serialization::store_t_to_json(ad).c_str();
 }
 

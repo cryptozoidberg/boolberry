@@ -478,7 +478,7 @@ function on_sign() {
 function on_transfer()
 {
     var addressInputVal = $('#transfer_address_id').val();
-    var addressValidation = $.parseJSON(Qt_parent.is_address_valid(addressInputVal));
+    var addressValidation = $.parseJSON(Qt_parent.parse_transfer_target(addressInputVal));
     var transfer_obj = {
         destinations:[
             {
@@ -612,7 +612,7 @@ function str_to_obj(str)
 function on_address_change() {
     console.log('address changed');
     var addressInputVal =  $('#transfer_address_id').val();
-    var addressValidation = $.parseJSON(Qt_parent.is_address_valid(addressInputVal));
+    var addressValidation = $.parseJSON(Qt_parent.parse_transfer_target(addressInputVal));
 
     if (addressValidation.valid) {
         if (addressValidation.payment_id_hex.length) {

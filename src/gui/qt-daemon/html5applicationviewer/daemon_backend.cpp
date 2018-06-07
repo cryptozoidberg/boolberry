@@ -165,17 +165,19 @@ std::string daemon_backend::get_config_folder()
   return m_data_dir;
 }
 
-bool daemon_backend::is_valid_address(const std::string& full_addr, std::string& payment_id_hex, std::string& original_addr)
+bool daemon_backend::parse_transfer_target(const std::string& transfer_target, std::string& payment_id_hex, std::string& standard_addr_str)
 {
-  currency::account_public_address addr;
-  currency::payment_id_t payment_id;
-  if (!currency::get_account_address_and_payment_id_from_str(addr, payment_id, full_addr))
-  {
+  if (transfer_target.empty())
     return false;
-  }
 
-  original_addr = currency::get_account_address_as_str(addr);
-  payment_id_hex = epee::string_tools::buff_to_hex_nodelimer(payment_id);
+  currency::account_public_address addr;
+  currency::payment_id_t integrated_payment_id;
+
+  bool r = tools::get_transfer_address(transfer_target, addr, integrated_payment_id, m_rpc_proxy.get());
+  CHECK_AND_ASSERT_MES(r, false, "can't parse transfer target: " << transfer_target);
+
+  standard_addr_str = currency::get_account_address_as_str(addr);
+  payment_id_hex = epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id);
   return true;
 }
 
