@@ -27,8 +27,8 @@ Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
 ArchitecturesInstallIn64BitMode=x64
-WizardImageFile=../resources/bg.bmp
-WizardSmallImageFile=../resources/icon.bmp
+WizardImageFile=../resources/bg.png
+WizardSmallImageFile=../resources/icon.png
 ;SetupIconFile=../resources/app.ico
 
 

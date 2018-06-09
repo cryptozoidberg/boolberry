@@ -33,7 +33,7 @@ if [ $? -ne 0 ]; then
     echo "Failed to make!"
     exit 1
 fi
-make -j qt-boolb;
+make -j Boolberry;
 if [ $? -ne 0 ]; then
     echo "Failed to make!"
     exit 1
@@ -57,8 +57,8 @@ echo $version_str
 mkdir -p boolberry;
 
 cp -Rv ../../src/gui/qt-daemon/html ./boolberry
-cp -Rv ../../utils/qt-boolb.sh ./boolberry
-chmod 777 ./boolberry/qt-boolb.sh
+cp -Rv ../../utils/Boolberry.sh ./boolberry
+chmod 777 ./boolberry/Boolberry.sh
 
 mkdir ./boolberry/lib
 cp $QT_PREFIX_PATH/lib/libicudata.so.56 ./boolberry/lib
