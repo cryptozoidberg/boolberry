@@ -494,7 +494,7 @@ function on_transfer()
       transfer_obj.payment_id = $('#payment_id').val();
     }
 
-    var lock_time = parse_and_get_locktime();
+    var lock_time = 0; //parse_and_get_locktime();
     if(lock_time === undefined)
     {
         Qt_parent.message_box("Wrong transaction lock time specified.");
