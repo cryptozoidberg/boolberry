@@ -5,7 +5,7 @@
 ;#define MyAppVersion "0.2.0.31"
 #define MyAppPublisher "Boolberry Team"
 #define MyAppURL "http://boolberry.com"
-#define MyAppExeName "qt-boolb.exe"
+#define MyAppExeName "Boolberry.exe"
 ;#define BinariesPath "C:\jenkins\workdir\builds\bbr-win-x64-v0.2.0.31(5d85ebf)"
 
 [Setup]
