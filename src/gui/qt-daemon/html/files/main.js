@@ -610,8 +610,14 @@ function str_to_obj(str)
 
 // address validation
 function on_address_change() {
-    console.log('address changed');
     var addressInputVal =  $('#transfer_address_id').val();
+
+    // not show status if address field empty
+    if (addressInputVal === '') {
+      hide_address_status();
+      return;
+    }
+
     var addressValidation = $.parseJSON(Qt_parent.parse_transfer_target(addressInputVal));
 
     if (addressValidation.valid) {
@@ -631,7 +637,6 @@ function on_address_change() {
         $('#payment_id').val('').removeClass('is-disabled');
         $('#payment_id').prop('disabled', false);
     }
-
 }
 
 function show_address_status(status) {
@@ -658,10 +663,9 @@ function show_address_status(status) {
 }
 
 function hide_address_status() {
-    $('.address-status').removeClass('valid invalid integrated');
+    $('.address-status').removeClass('with-status valid invalid integrated');
     $('#transfer_address_id').removeClass('with-status');
     $('.address-status-text').text('');
-
 }
 
 $(function()
