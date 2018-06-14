@@ -839,6 +839,11 @@ namespace log_space
       return m_default_log_folder;
     }
 
+    void set_default_log_folder(const std::string& folder)
+    {
+      m_default_log_folder = folder;
+    }
+
   protected:
   private:
     bool init()
@@ -973,6 +978,14 @@ namespace log_space
         return plogger->get_default_log_folder();
 
       return "";
+    }
+
+
+    static void set_default_log_folder(const std::string& dir)
+    {
+      logger* plogger = get_or_create_instance();
+      if(plogger)
+        return plogger->set_default_log_folder(dir);
     }
 
     static bool add_logger( ibase_log_stream* pstream, int log_level_limit = LOG_LEVEL_4 )

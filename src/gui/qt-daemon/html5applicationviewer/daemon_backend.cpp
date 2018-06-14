@@ -128,13 +128,15 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
 
   m_pview->set_html_path(path_to_html);
 
-  boost::filesystem::path log_file_path(command_line::get_arg(vm, command_line::arg_log_file));
-  if (log_file_path.empty())
-    log_file_path = log_space::log_singletone::get_default_log_file();
+  //set up logging options
   std::string log_dir;
-  log_dir = log_file_path.has_parent_path() ? log_file_path.parent_path().string() : log_space::log_singletone::get_default_log_folder();
+  std::string log_file_name = log_space::log_singletone::get_default_log_file();
+  //check if there was specific option
+  log_dir = command_line::get_arg(vm, command_line::arg_data_dir);
+  log_space::log_singletone::set_default_log_folder(log_dir);
 
-  log_space::log_singletone::add_logger(LOGGER_FILE, log_file_path.filename().string().c_str(), log_dir.c_str());
+
+  log_space::log_singletone::add_logger(LOGGER_FILE, log_file_name.c_str(), log_dir.c_str());
   LOG_PRINT_L0(CURRENCY_NAME << " v" << PROJECT_VERSION_LONG);
 
   LOG_PRINT("Module folder: " << argv[0], LOG_LEVEL_0);
