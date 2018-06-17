@@ -30,6 +30,7 @@
 #include "crypto/hash.h"
 #include "checkpoints.h"
 #include "scratchpad_helpers.h"
+#include "file_io_utils.h"
 
 MAKE_POD_C11(crypto::key_image);
 typedef std::pair<crypto::hash, uint64_t> macro_alias_1;
@@ -273,6 +274,8 @@ namespace currency
     //events
     checkpoints m_checkpoints;
 
+    epee::file_io_utils::native_filesystem_handle m_locker_file;
+
     // mutable members
     mutable critical_section m_blockchain_lock; // TODO: add here reader/writer lock
 
@@ -316,6 +319,7 @@ namespace currency
     //bool resync_spent_tx_flags();
     bool prune_ring_signatures_if_need();
     bool prune_ring_signatures(uint64_t height, uint64_t& transactions_pruned, uint64_t& signatures_pruned);
+    bool check_instance(const std::string& data_dir);
   };
 
   /************************************************************************/

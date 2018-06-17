@@ -20,7 +20,8 @@ namespace currency
     typedef db::array_accessor_adapter_to_native<crypto::hash, false> scratchpad_container;
 
     scratchpad_wrapper(scratchpad_container& m_db_scratchpad);
-    bool init();
+    bool init(const std::string& config_folder);
+    bool deinit();
     void clear();
     const std::vector<crypto::hash>& get_scratchpad();
     void set_scratchpad(const std::vector<crypto::hash>& sc);
@@ -30,6 +31,7 @@ namespace currency
   private:
     std::vector<crypto::hash> m_scratchpad_cache;
     scratchpad_container& m_rdb_scratchpad;
+    std::string m_config_folder;
   };
   //------------------------------------------------------------------
   template<typename pod_operand_a, typename pod_operand_b>

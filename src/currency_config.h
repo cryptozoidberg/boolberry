@@ -135,6 +135,8 @@
 //#define CURRENCY_BLOCKCHAINDATA_FILENAME                "blockchain.bin"
 //#define CURRENCY_BLOCKCHAINDATA_TEMP_FILENAME           "blockchain.bin.tmp"
 #define CURRENCY_BLOCKCHAINDATA_FOLDERNAME              "blockchain"
+#define CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE        "scratchpad.cache"
 #define P2P_NET_DATA_FILENAME                           "p2pstate.bin"
 #define MINER_CONFIG_FILENAME                           "miner_conf.json"
 #define GUI_CONFIG_FILENAME                             "gui_conf.json"
+#define CURRENCY_CORE_INSTANCE_LOCK_FILE                "lock.lck"

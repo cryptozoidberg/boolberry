@@ -549,6 +549,8 @@ namespace currency
 
     BOOST_FOREACH(auto& bl_id, arg.m_block_ids)
     {
+      if (check_stop_flag_and_exit(context))
+        return true;
       if(!m_core.have_block(bl_id))
         context.m_needed_objects.push_back(bl_id);
     }

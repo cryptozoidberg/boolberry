@@ -22,7 +22,7 @@ daemon_backend::daemon_backend():m_pview(&m_view_stub),
   m_wallet->callback(this);
 }
 
-const command_line::arg_descriptor<bool> arg_alloc_win_console = { "alloc-win-clonsole", "Allocates debug console with GUI", false };
+const command_line::arg_descriptor<bool> arg_alloc_win_console = { "alloc-win-console", "Allocates debug console with GUI", false };
 const command_line::arg_descriptor<std::string> arg_html_folder = { "html-path", "Manually set GUI html folder path", "", true };
 
 daemon_backend::~daemon_backend()
@@ -45,7 +45,7 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   //_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
   //#endif
 
-  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_0);
+  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_1);
   LOG_PRINT_L0("Initing...");
 
   TRY_ENTRY();
@@ -272,7 +272,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   dsi.text_state = "Stopping p2p network server";
   m_pview->update_daemon_status(dsi);
   m_p2psrv.send_stop_signal();
-  m_p2psrv.timed_wait_server_stop(10);
+  m_p2psrv.timed_wait_server_stop(60000);
 
   //stop components
   LOG_PRINT_L0("Stopping core rpc server...");
@@ -280,7 +280,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   m_pview->update_daemon_status(dsi);
 
   m_rpc_server.send_stop_signal();
-  m_rpc_server.timed_wait_server_stop(5000);
+  m_rpc_server.timed_wait_server_stop(60000);
 
   //deinitialize components
 

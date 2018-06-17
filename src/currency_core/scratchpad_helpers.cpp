@@ -2,18 +2,28 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "boost/filesystem.hpp"
 #include "scratchpad_helpers.h"
+#include "file_io_utils.h"
 //#define SELF_VALIDATE_SCRATCHPAD
 namespace currency
 {
   bool load_scratchpad_from_db(const scratchpad_wrapper::scratchpad_container& m_db_scratchpad, std::vector<crypto::hash>& scratchpad_cache)
   {
     size_t count = m_db_scratchpad.size();
+    size_t sz_no_cache = m_db_scratchpad.size_no_cache();
+
     scratchpad_cache.resize(count);
     size_t i = 0;
     for (; i != count; i++)
     {
       scratchpad_cache[i] = m_db_scratchpad[i];
+
+      size_t new_count = m_db_scratchpad.size();
+      //CHECK_AND_ASSERT_MES(count == new_count, false, "!!! achtung  #1, i = " << i << " : " << count << " != " << new_count);
+      size_t new_sz_no_cache = m_db_scratchpad.size_no_cache();
+      //CHECK_AND_ASSERT_MES(sz_no_cache == new_sz_no_cache, false, "!!! achtung #2, i = " << i << " : " << sz_no_cache << " != " << new_sz_no_cache);
+
     }
     return true;
   }
@@ -21,14 +31,56 @@ namespace currency
 
   scratchpad_wrapper::scratchpad_wrapper(scratchpad_container& m_db_scratchpad) :m_rdb_scratchpad(m_db_scratchpad)
   {}
-  bool scratchpad_wrapper::init()
+
+
+  bool scratchpad_wrapper::init(const std::string& config_folder)
   {
+    m_config_folder = config_folder;
     LOG_PRINT_MAGENTA("Loading scratchpad cache...", LOG_LEVEL_0);
-    //load scratchpad from db to cache
-    load_scratchpad_from_db(m_rdb_scratchpad, m_scratchpad_cache);
-    LOG_PRINT_MAGENTA("Scratchpad loaded OK(" << (m_scratchpad_cache.size() * 32) / 1024 << "kB)", LOG_LEVEL_0);
+    bool success_from_cache = false;
+    if (epee::file_io_utils::load_file_to_vector(config_folder + "/" + CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE, m_scratchpad_cache) && m_scratchpad_cache.size())
+    {
+      LOG_PRINT_MAGENTA("from " << config_folder << "/" << CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE << " have just been loaded loaded " << m_scratchpad_cache.size() << " elements", LOG_LEVEL_1);
+      size_t sz = m_rdb_scratchpad.size();
+      if (sz == m_scratchpad_cache.size() && m_scratchpad_cache[m_scratchpad_cache.size() - 1] == m_rdb_scratchpad[m_rdb_scratchpad.size() - 1])
+      {
+        success_from_cache = true;
+        LOG_PRINT_MAGENTA("Scratchpad loaded from cache file OK (" << m_scratchpad_cache.size() << " elements, " << (m_scratchpad_cache.size() * 32) / 1024 << " KB)", LOG_LEVEL_0);
+      }
+    }
+    boost::system::error_code ec;
+    boost::filesystem::remove(config_folder + "/" + CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE, ec); 
+    LOG_PRINT_MAGENTA(config_folder << "/" << CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE << " was removed, status: " << ec, LOG_LEVEL_1);
+
+    if (!success_from_cache)
+    {
+      LOG_PRINT_MAGENTA("Loading scratchpad db...", LOG_LEVEL_0);
+      //load scratchpad from db to cache
+      load_scratchpad_from_db(m_rdb_scratchpad, m_scratchpad_cache);
+      LOG_PRINT_MAGENTA("Scratchpad loaded from db OK (" << m_scratchpad_cache.size() << "elements, " << (m_scratchpad_cache.size() * 32) / 1024 << "KB)", LOG_LEVEL_0);
+    }
+
     return true;
   }
+
+  bool scratchpad_wrapper::deinit()
+  {
+#ifdef SELF_VALIDATE_SCRATCHPAD
+    std::vector<crypto::hash> scratchpad_cache;
+    load_scratchpad_from_db(m_rdb_scratchpad, scratchpad_cache);
+    if (scratchpad_cache != m_scratchpad_cache)
+    {
+      LOG_PRINT_L0("scratchpads mismatch, memory version: "
+        << ENDL << dump_scratchpad(m_scratchpad_cache)
+        << ENDL << "db version:" << ENDL << dump_scratchpad(scratchpad_cache)
+        );
+    }
+#endif
+    epee::file_io_utils::save_buff_to_file(m_config_folder + "/" + CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE, &m_scratchpad_cache[0], m_scratchpad_cache.size()*sizeof(m_scratchpad_cache[0]));
+    LOG_PRINT_MAGENTA(m_scratchpad_cache.size() << " elements (" << m_scratchpad_cache.size() * sizeof(m_scratchpad_cache[0]) << " bytes)" << " has just been saved to " << m_config_folder << " / " << CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE, LOG_LEVEL_1);
+    return true;
+  }
+
   void scratchpad_wrapper::clear()
   {
     m_scratchpad_cache.clear();

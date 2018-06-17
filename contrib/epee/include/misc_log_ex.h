@@ -55,7 +55,9 @@
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4100)
 
-
+#ifndef ENABLE_RELEASE_LOGGING
+  #define ENABLE_RELEASE_LOGGING
+#endif
 
 #include "static_initializer.h"
 #include "string_tools.h"

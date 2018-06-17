@@ -74,7 +74,8 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) :m_db(std::share
                                                                  m_is_in_checkpoint_zone(false), 
                                                                  m_donations_account(AUTO_VAL_INIT(m_donations_account)), 
                                                                  m_royalty_account(AUTO_VAL_INIT(m_royalty_account)),
-                                                                 m_is_blockchain_storing(false)
+                                                                 m_is_blockchain_storing(false), 
+                                                                 m_locker_file(0)
 {
   bool r = get_donation_accounts(m_donations_account, m_royalty_account);
   CHECK_AND_ASSERT_THROW_MES(r, "failed to load donation accounts");
@@ -152,7 +153,7 @@ bool blockchain_storage::init(const std::string& config_folder)
   res = m_db_scratchpad_internal.init(BLOCKCHAIN_CONTAINER_SCRATCHPAD);
   CHECK_AND_ASSERT_MES(res, false, "Unable to init db container");
 
-  res = m_scratchpad_wr.init();
+  res = m_scratchpad_wr.init(config_folder);
   CHECK_AND_ASSERT_MES(res, false, "Unable to init scratchpad wrapper");
 
   bool need_reinit = false;
@@ -194,7 +195,10 @@ void blockchain_storage::initialize_db_solo_options_values()
 //------------------------------------------------------------------
 bool blockchain_storage::deinit()
 {
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  m_scratchpad_wr.deinit();
   m_db.close();
+  epee::file_io_utils::unlock_and_close_file(m_locker_file);
   return true;
 }
 //------------------------------------------------------------------
@@ -283,6 +287,21 @@ bool blockchain_storage::prune_ring_signatures(uint64_t height, uint64_t& transa
   }
   return true;
 }
+//------------------------------------------------------------------
+bool blockchain_storage::check_instance(const std::string& path)
+{
+  std::string locker_name = path + "/" + std::string(CURRENCY_CORE_INSTANCE_LOCK_FILE);
+  bool r = epee::file_io_utils::open_and_lock_file(locker_name, m_locker_file);
+
+  if (r)
+    return true;
+  else
+  {
+    LOG_ERROR("Failed to initialize db: some other instance is already running");
+    return false;
+  }
+}
+
 //------------------------------------------------------------------
 bool blockchain_storage::prune_ring_signatures_if_need()
 {
@@ -1089,7 +1108,6 @@ bool blockchain_storage::handle_alternative_block(const block& b, const crypto::
     LOG_PRINT_RED_L0("Block with id: " << id << "[" << get_block_height(b) << "]" << ENDL << " for alternative chain, is under checkpoint zone, declined");
     bvc.m_verifivation_failed = true;
     return false;
-
   }
 
   TRY_ENTRY();
