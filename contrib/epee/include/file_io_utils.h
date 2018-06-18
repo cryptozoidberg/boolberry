@@ -48,7 +48,9 @@
 
 #endif
 
-
+#ifndef  WIN32
+#include <sys/file.h>
+#endif
 
 namespace epee
 {
