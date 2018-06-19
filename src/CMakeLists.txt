@@ -2,7 +2,8 @@ file(GLOB_RECURSE COMMON common/*)
 file(GLOB_RECURSE CRYPTO crypto/*)
 file(GLOB_RECURSE CURRENCY_CORE currency_core/*)
 file(GLOB_RECURSE CURRENCY_PROTOCOL currency_protocol/*)
-# file(GLOB_RECURSE DAEMON daemon/*)file(GLOB_RECURSE SIMPLEMINER miner/*)
+file(GLOB_RECURSE DAEMON daemon/*)
+# file(GLOB_RECURSE SIMPLEMINER miner/*)
 
 
 file(GLOB_RECURSE P2P p2p/*)
