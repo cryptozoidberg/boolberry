@@ -55,7 +55,9 @@
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4100)
 
-
+#ifndef ENABLE_RELEASE_LOGGING
+  #define ENABLE_RELEASE_LOGGING
+#endif
 
 #include "static_initializer.h"
 #include "string_tools.h"
@@ -823,7 +825,11 @@ namespace log_space
       CRITICAL_REGION_END();
       return true;
     }
-
+    std::string get_thread_prefix()
+    {
+      CRITICAL_REGION_LOCAL(m_critical_sec);
+      return m_thr_prefix_strings[misc_utils::get_thread_string_id()];
+    }
 
     std::string get_default_log_file()
     {
@@ -833,6 +839,11 @@ namespace log_space
     std::string get_default_log_folder()
     {
       return m_default_log_folder;
+    }
+
+    void set_default_log_folder(const std::string& folder)
+    {
+      m_default_log_folder = folder;
     }
 
   protected:
@@ -971,6 +982,14 @@ namespace log_space
       return "";
     }
 
+
+    static void set_default_log_folder(const std::string& dir)
+    {
+      logger* plogger = get_or_create_instance();
+      if(plogger)
+        return plogger->set_default_log_folder(dir);
+    }
+
     static bool add_logger( ibase_log_stream* pstream, int log_level_limit = LOG_LEVEL_4 )
     {
       logger* plogger = get_or_create_instance();
@@ -1097,6 +1116,13 @@ POP_WARNINGS
       return plogger->set_thread_prefix(prefix);
     }
 
+
+    static std::string get_thread_log_prefix()
+    {
+      logger* plogger = get_or_create_instance();
+      if (!plogger) return "";
+      return plogger->get_thread_prefix();
+    }
 
     static std::string get_prefix_entry()
     {

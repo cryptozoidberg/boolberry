@@ -37,7 +37,7 @@ namespace po = boost::program_options;
 //TODO: need refactoring here. (template classes can't be used in BOOST_CLASS_VERSION)
 BOOST_CLASS_VERSION(nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >, CURRENT_P2P_STORAGE_ARCHIVE_VER);
 
-class daemon_backend: public tools::i_wallet2_callback
+class daemon_backend : public tools::i_wallet2_callback
 {
 public:
   daemon_backend();
@@ -46,14 +46,16 @@ public:
   bool stop();
   bool send_stop_signal();
   bool open_wallet(const std::string& path, const std::string& password);
-  bool generate_wallet(const std::string& path, const std::string& password, 
-	  std::string& restore_seed);
-  bool restore_wallet(const std::string& path, const std::string& restore_text, 
-	  const std::string& password);
+  bool generate_wallet(const std::string& path, const std::string& password,
+    std::string& restore_seed);
+  bool restore_wallet(const std::string& path, const std::string& restore_text,
+    const std::string& password);
   bool close_wallet();
   bool transfer(const view::transfer_params& tp, currency::transaction& res_tx);
   bool get_aliases(view::alias_set& al_set);
+  bool sign_text(const std::string& text, std::string& signature_hex);
   std::string get_config_folder();
+  bool parse_transfer_target(const std::string& transfer_target, std::string& payment_id_hex, std::string& standard_addr_str);
 private:
   void main_worker(const po::variables_map& vm);
   bool update_state_info();

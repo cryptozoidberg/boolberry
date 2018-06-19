@@ -95,6 +95,18 @@ inline bool do_serialize(Archive &ar, T &v)
   } while(0);
 
 
+#define VERSION_ENTRY(f) \
+do { \
+  ar.tag(#f); \
+  if (ar.is_saving_arch())  \
+    f = this->get_serialization_veraion(); \
+  bool r = ::do_serialize(ar, f); \
+  if (!r || !ar.stream().good()) return false; \
+} while (0);
+
+#define DEFINE_SERIALIZATION_VERSION(v) inline static uint32_t get_serialization_veraion(){ return v; }
+
+
 template<typename first_type, typename second_type>
 class serializable_pair : public std::pair<first_type, second_type>
 {
@@ -168,5 +180,7 @@ namespace serialization {
   }
 }
 
+#include "serialize_basic_types.h"
 #include "string.h"
-#include "vector.h"
+#include "multiprecision.h"
+#include "stl.h"

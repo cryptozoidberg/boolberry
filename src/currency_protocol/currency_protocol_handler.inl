@@ -15,7 +15,8 @@ namespace currency
                                                                                                               m_syncronized_connections_count(0),
                                                                                                               m_synchronized(false),
                                                                                                               m_max_height_seen(0),
-                                                                                                              m_core_inital_height(0)
+                                                                                                              m_core_inital_height(0),
+                                                                                                              m_want_stop(false)
 
   {
     if(!m_p2p)
@@ -31,7 +32,7 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::deinit()
   {
-    
+    m_want_stop = true;
 
     return true;
   }
@@ -275,7 +276,20 @@ namespace currency
     post_notify<NOTIFY_RESPONSE_GET_OBJECTS>(rsp, context);
     return 1;
   }
+
   //------------------------------------------------------------------------------------------------------------------------
+  template<class t_core>
+  bool t_currency_protocol_handler<t_core>::check_stop_flag_and_exit(currency_connection_context& context)
+  {
+    if (m_p2p->is_stop_signal_sent() || m_want_stop)
+    {
+      m_p2p->drop_connection(context);
+      return true;
+    }
+    return false;
+  }
+  //------------------------------------------------------------------------------------------------------------------------
+#define CHECK_STOP_FLAG_EXIT_IF_SET(ret_v, msg) if (check_stop_flag_and_exit(context)) { LOG_PRINT_YELLOW("Stop flag detected within NOTIFY_RESPONSE_GET_OBJECTS. " << msg, LOG_LEVEL_0); return ret_v; }
   template<class t_core>
   int t_currency_protocol_handler<t_core>::handle_response_get_objects(int command, NOTIFY_RESPONSE_GET_OBJECTS::request& arg, currency_connection_context& context)
   {
@@ -293,6 +307,8 @@ namespace currency
     size_t count = 0;
     BOOST_FOREACH(const block_complete_entry& block_entry, arg.blocks)
     {
+      CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
+
       ++count;
       block b;
       if(!parse_and_validate_block_from_blob(block_entry.block, b))
@@ -350,10 +366,12 @@ namespace currency
 
       BOOST_FOREACH(const block_complete_entry& block_entry, arg.blocks)
       {
+        CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
         //process transactions
         TIME_MEASURE_START(transactions_process_time);
         BOOST_FOREACH(auto& tx_blob, block_entry.txs)
         {
+          CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
           tx_verification_context tvc = AUTO_VAL_INIT(tvc);
           m_core.handle_incoming_tx(tx_blob, tvc, true);
           if(tvc.m_verifivation_failed)
@@ -395,6 +413,7 @@ namespace currency
     request_missing_objects(context, true);
     return 1;
   }
+#undef CHECK_STOP_FLAG__DROP_AND_RETURN_IF_SET
   //------------------------------------------------------------------------------------------------------------------------
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::on_idle()
@@ -530,6 +549,8 @@ namespace currency
 
     BOOST_FOREACH(auto& bl_id, arg.m_block_ids)
     {
+      if (check_stop_flag_and_exit(context))
+        return true;
       if(!m_core.have_block(bl_id))
         context.m_needed_objects.push_back(bl_id);
     }

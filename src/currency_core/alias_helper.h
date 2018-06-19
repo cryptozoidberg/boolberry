@@ -12,7 +12,7 @@
 namespace tools
 {
   template<typename callback_t>
-  bool get_transfer_address_cb(const std::string& adr_str, currency::account_public_address& addr, callback_t cb)
+  bool get_transfer_address_cb(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id, callback_t cb)
   {
     if (!adr_str.size())
       return false;
@@ -41,16 +41,17 @@ namespace tools
       addr_str_local = alias_info.alias_details.address;
     }
 
-    if (!get_account_address_from_str(addr, addr_str_local))
+    if (!get_account_address_and_payment_id_from_str(addr, payment_id, addr_str_local))
     {
       return false;
     }
     return true;
   }
+
   inline 
-  bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, i_core_proxy* proxy)
+  bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id, i_core_proxy* proxy)
   {
-    return get_transfer_address_cb(adr_str, addr, [&proxy](currency::COMMAND_RPC_GET_ALIAS_DETAILS::request& req_alias_info,
+    return get_transfer_address_cb(adr_str, addr, payment_id, [&proxy](currency::COMMAND_RPC_GET_ALIAS_DETAILS::request& req_alias_info,
                                                                         currency::COMMAND_RPC_GET_ALIAS_DETAILS::response& alias_info)
     {
       return proxy->call_COMMAND_RPC_GET_ALIAS_DETAILS(req_alias_info, alias_info);
@@ -58,28 +59,15 @@ namespace tools
   }
 
   template<typename core_rpc_server_t>
-  bool get_transfer_address_t(const std::string& adr_str, currency::account_public_address& addr, core_rpc_server_t& srv)
+  bool get_transfer_address_t(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id, core_rpc_server_t& srv)
   {
-    return get_transfer_address_cb(adr_str, addr, [&srv](currency::COMMAND_RPC_GET_ALIAS_DETAILS::request& req_alias_info,
+    return get_transfer_address_cb(adr_str, addr, payment_id, [&srv](currency::COMMAND_RPC_GET_ALIAS_DETAILS::request& req_alias_info,
       currency::COMMAND_RPC_GET_ALIAS_DETAILS::response& alias_info)
     {
-      epee::json_rpc::error stub; epee::net_utils::connection_context_base stub2;
+      epee::json_rpc::error stub;
+      epee::net_utils::connection_context_base stub2;
       return srv.on_get_alias_details(req_alias_info, alias_info, stub, stub2);
     });
   }
 
-  /*
-  inline
-  bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, epee::net_utils::http::http_simple_client& http_client, const std::string& daemon_address)
-  {
-    return get_transfer_address_cb(adr_str, addr, [&http_client, &daemon_address](currency::COMMAND_RPC_GET_ALIAS_DETAILS::request& req_alias_info,
-                                                                                               currency::COMMAND_RPC_GET_ALIAS_DETAILS::response& alias_info)
-    {
-      return epee::net_utils::invoke_http_json_rpc(daemon_address + "/json_rpc", "get_alias_details", req_alias_info, alias_info, http_client);
-    });
-  }
-  */
 }
-
-
-

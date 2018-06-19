@@ -48,7 +48,9 @@
 
 #endif
 
-
+#ifndef  WIN32
+#include <sys/file.h>
+#endif
 
 namespace epee
 {
@@ -253,6 +255,50 @@ namespace file_io_utils
 		return false;
 	}*/
 
+#ifdef WIN32
+  typedef HANDLE native_filesystem_handle;
+#else
+  typedef int native_filesystem_handle;
+#endif
+
+  inline bool open_and_lock_file(const std::string file_path, native_filesystem_handle& h_file)
+  {
+#ifdef WIN32
+    h_file = ::CreateFileA(file_path.c_str(),                // name of the write
+      GENERIC_WRITE,          // open for writing
+      0,                      // do not share
+      NULL,                   // default security
+      OPEN_ALWAYS,             // create new file only
+      FILE_ATTRIBUTE_NORMAL,  // normal file
+      NULL);                  // no attr. template
+    if (h_file == INVALID_HANDLE_VALUE)
+      return false;
+    else
+      return true;
+#else
+    h_file = open(file_path.c_str(), O_RDWR | O_CREAT, 0666); // open or create lockfile
+    if (h_file < 0)
+      return false;
+    //check open success...
+    int rc = flock(h_file, LOCK_EX | LOCK_NB); // grab exclusive lock, fail if can't obtain.
+    if (rc < 0)
+    {
+      return false;
+    }
+    return true;
+#endif
+  }
+
+  inline bool unlock_and_close_file(native_filesystem_handle& h_file)
+  {
+#ifdef WIN32
+    ::CloseHandle(h_file);                  // no attr. template
+#else
+    flock(h_file, LOCK_UN); // grab exclusive lock, fail if can't obtain.
+    close(h_file);
+#endif
+    return true;
+  }
 
 
 	inline
@@ -274,6 +320,28 @@ namespace file_io_utils
 			return false;
 		}
 	}
+
+
+
+  inline
+    bool save_buff_to_file(const std::string& path_to_file, const void* pbuff, size_t counter)
+  {
+
+      try
+      {
+        std::ofstream fstream;
+        fstream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        fstream.open(path_to_file, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+        fstream.write((const char*)pbuff, counter);
+        fstream.close();
+        return true;
+      }
+
+      catch (...)
+      {
+        return false;
+      }
+    }
 
 	/*
 	inline
@@ -352,6 +420,41 @@ namespace file_io_utils
 			return false;
 		}
 	}
+
+  template<class t_value>
+  bool load_file_to_vector(const std::string& path_to_file, std::vector<t_value>& res)
+  {
+      try
+      {
+        std::ifstream fstream;
+        fstream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        fstream.open(path_to_file, std::ios_base::binary | std::ios_base::in | std::ios::ate);
+
+        std::ifstream::pos_type file_size = fstream.tellg();
+
+        if (file_size > 1000000000)
+          return false;//don't go crazy
+
+        if (file_size%sizeof(t_value) != 0)
+          return false;
+        
+        res.resize(file_size / sizeof(t_value));
+
+        size_t file_size_t = static_cast<size_t>(file_size);
+
+        fstream.seekg(0, std::ios::beg);
+        fstream.read((char*)&res[0], res.size()*sizeof(t_value));
+        fstream.close();
+        return true;
+      }
+
+      catch (...)
+      {
+        return false;
+      }
+    }
+
+
 
 	inline
 		bool append_string_to_file(const std::string& path_to_file, const std::string& str)

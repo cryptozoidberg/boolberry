@@ -4,8 +4,14 @@
 
 #include "gtest/gtest.h"
 
+extern "C"
+{
+  #include "crypto/random.h"
+}
+
 #include "common/util.h"
 #include "currency_core/currency_format_utils.h"
+
 
 TEST(parse_and_validate_tx_extra, is_correct_parse_and_validate_tx_extra)
 {
@@ -65,15 +71,16 @@ TEST(parse_and_validate_tx_extra, user_data_test)
 TEST(parse_and_validate_tx_extra, test_payment_ids)
 {
   currency::transaction tx = AUTO_VAL_INIT(tx);
-  crypto::hash h = crypto::rand<crypto::hash>();
-  bool r = currency::set_payment_id_to_tx_extra(tx.extra, h);
+  char h[100];
+  generate_random_bytes(sizeof h, h);
+  currency::payment_id_t payment_id(h, sizeof h);
+  bool r = currency::set_payment_id_to_tx_extra(tx.extra, payment_id);
   ASSERT_TRUE(r);
   
-  crypto::hash h2 = AUTO_VAL_INIT(h2);
-  r = currency::get_payment_id_from_tx_extra(tx, h2);
+  currency::payment_id_t payment_id_2;
+  r = currency::get_payment_id_from_tx_extra(tx, payment_id_2);
   ASSERT_TRUE(r);
-  ASSERT_EQ(h, h2);
-  
+  ASSERT_EQ(payment_id, payment_id_2);
 }
 
 template<int sz>

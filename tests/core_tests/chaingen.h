@@ -457,6 +457,8 @@ inline bool replay_events_through_core(currency::core& cr, const std::vector<tes
   CATCH_ENTRY_L0("replay_events_through_core", false);
 }
 //--------------------------------------------------------------------------
+#define TEST_SUBFOLDER "coretests_data"
+
 template<class t_test_class>
 inline bool do_replay_events(std::vector<test_event_entry>& events)
 {
@@ -475,6 +477,11 @@ inline bool do_replay_events(std::vector<test_event_entry>& events)
 
   currency::currency_protocol_stub pr; //TODO: stub only for this kind of test, make real validation of relayed objects
   currency::core c(&pr);
+  std::string config_path = epee::string_tools::get_current_module_folder() + "/" TEST_SUBFOLDER;
+  boost::system::error_code ec;
+  boost::filesystem::remove_all(config_path, ec);
+  tools::create_directories_if_necessary(config_path);
+  c.set_config_folder(config_path);
   if (!c.init(vm))
   {
     std::cout << concolor::magenta << "Failed to init core" << concolor::normal << std::endl;

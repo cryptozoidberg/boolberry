@@ -185,7 +185,7 @@ namespace net_utils
 				}
 
 			}
-			catch(const boost::system::system_error& er)
+			catch(const std::exception& er)
 			{
 				LOG_PRINT("Some problems at connect, message: " << er.what(), LOG_LEVEL_4);
 				return false;
@@ -213,7 +213,7 @@ namespace net_utils
 				}
 			}
 			
-			catch(const boost::system::system_error& /*er*/)
+			catch(const std::exception& /*er*/)
 			{
 				//LOG_ERROR("Some problems at disconnect, message: " << er.what());
 				return false;
@@ -265,7 +265,7 @@ namespace net_utils
 				}
 			}
 
-			catch(const boost::system::system_error& er)
+			catch(const std::exception& er)
 			{
 				LOG_ERROR("Some problems at connect, message: " << er.what());
 				return false;
@@ -323,7 +323,7 @@ namespace net_utils
 				}
 			}
 
-			catch(const boost::system::system_error& er)
+			catch(const std::exception& er)
 			{
 				LOG_ERROR("Some problems at send, message: " << er.what());
         m_connected = false;
@@ -411,7 +411,7 @@ namespace net_utils
 				return true;
 			}
 
-			catch(const boost::system::system_error& er)
+			catch(const std::exception& er)
 			{
 				LOG_ERROR("Some problems at read, message: " << er.what());
         m_connected = false;
@@ -486,7 +486,7 @@ namespace net_utils
 				return true;
 			}
 
-			catch(const boost::system::system_error& er)
+			catch(const std::exception& er)
 			{
 				LOG_ERROR("Some problems at read, message: " << er.what());
         m_connected = false;
@@ -638,7 +638,7 @@ namespace net_utils
 				}
 			}
 
-			catch(const boost::system::system_error& er)
+			catch(const std::exception& er)
 			{
 				LOG_ERROR("Some problems at connect, message: " << er.what());
 				return false;

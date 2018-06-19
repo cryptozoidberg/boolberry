@@ -73,6 +73,8 @@ DISABLE_VS_WARNINGS(4355)
 
     LOG_PRINT_L3("[sock " << socket_.native_handle() << "] Socket destroyed");
     boost::interprocess::ipcdetail::atomic_dec32(&m_ref_sockets_count);
+    VALIDATE_MUTEX_IS_FREE(m_send_que_lock);
+    VALIDATE_MUTEX_IS_FREE(m_self_refs_lock);
   }
   //---------------------------------------------------------------------------------
   template<class t_protocol_handler>
@@ -143,6 +145,7 @@ DISABLE_VS_WARNINGS(4355)
         boost::bind(&connection<t_protocol_handler>::handle_read, self,
           boost::asio::placeholders::error,
           boost::asio::placeholders::bytes_transferred)));
+
 
     return true;
 
@@ -311,7 +314,7 @@ DISABLE_VS_WARNINGS(4355)
     if(m_send_que.size() > ABSTRACT_SERVER_SEND_QUE_MAX_COUNT)
     {
       send_guard.unlock();
-      LOG_ERROR("send que size is more than ABSTRACT_SERVER_SEND_QUE_MAX_COUNT(" << ABSTRACT_SERVER_SEND_QUE_MAX_COUNT << "), shutting down connection");
+      LOG_ERROR("send to [" << print_connection_context_short(context) << ", (" << (void*)this << ")] que size is more than ABSTRACT_SERVER_SEND_QUE_MAX_COUNT(" << ABSTRACT_SERVER_SEND_QUE_MAX_COUNT << "), shutting down connection");
       close();
       return false;
     }
@@ -373,6 +376,12 @@ DISABLE_VS_WARNINGS(4355)
     
     return true;
     CATCH_ENTRY_L0("connection<t_protocol_handler>::close", false);
+  }
+  //---------------------------------------------------------------------------------
+  template<class t_protocol_handler>
+  bool connection<t_protocol_handler>::cancel()
+  {
+    return close();
   }
   //---------------------------------------------------------------------------------
   template<class t_protocol_handler>
@@ -617,6 +626,13 @@ POP_WARNINGS
   {
     m_stop_signal_sent = true;
     TRY_ENTRY();
+    m_config.on_send_stop_signal();
+//    connections_mutex.lock();
+//     for (auto &c : connections_)
+//     {
+//       c->cancel();
+//     }
+//     connections_mutex.unlock();
     io_service_.stop();
     CATCH_ENTRY_L0("boosted_tcp_server<t_protocol_handler>::send_stop_signal()", void());
   }
@@ -654,6 +670,10 @@ POP_WARNINGS
     TRY_ENTRY();
 
     connection_ptr new_connection_l(new connection<t_protocol_handler>(io_service_, m_config, m_sockets_count, m_pfilter) );
+//     connections_mutex.lock();
+//     connections_.push_back(new_connection_l);
+//     LOG_PRINT_L2("connections_ size now " << connections_.size());
+//     connections_mutex.unlock();
     boost::asio::ip::tcp::socket&  sock_ = new_connection_l->socket();
     
     //////////////////////////////////////////////////////////////////////////
@@ -704,7 +724,17 @@ POP_WARNINGS
     sock_.async_connect(remote_endpoint, boost::bind<void>(connect_callback, _1, local_shared_context));
     while(local_shared_context->ec == boost::asio::error::would_block)
     {
-      bool r = local_shared_context->cond.timed_wait(lock, boost::get_system_time() + boost::posix_time::milliseconds(conn_timeout));
+      bool r = false;
+      try{
+         r = local_shared_context->cond.timed_wait(lock, boost::get_system_time() + boost::posix_time::milliseconds(conn_timeout));
+      }
+      catch (...)
+      {
+        //timeout
+        sock_.close();
+        LOG_PRINT_L3("timed_wait throwed, " << adr << ":" << port << ", because of timeout (" << conn_timeout << ")");
+        return false;
+      }
       if(local_shared_context->ec == boost::asio::error::would_block && !r)
       {
         //timeout
@@ -741,7 +771,10 @@ POP_WARNINGS
     TRY_ENTRY();    
     connection_ptr new_connection_l(new connection<t_protocol_handler>(io_service_, m_config, m_sockets_count, m_pfilter) );
     boost::asio::ip::tcp::socket&  sock_ = new_connection_l->socket();
-    
+//     connections_mutex.lock();
+//     connections_.push_back(new_connection_l);
+//     LOG_PRINT_L2("connections_ size now " << connections_.size());
+//     connections_mutex.unlock();
     //////////////////////////////////////////////////////////////////////////
     boost::asio::ip::tcp::resolver resolver(io_service_);
     boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), adr, port);

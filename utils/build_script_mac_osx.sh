@@ -28,13 +28,13 @@ fi
 
 
 
-make -j qt-boolb
+make -j Boolberry
 if [ $? -ne 0 ]; then
-    echo "Failed to make qt-boolb"
+    echo "Failed to make Boolberry"
     exit $?
 fi
 
-make -j connectivity_tool
+make -j connectivity_tool simplewallet daemon
 if [ $? -ne 0 ]; then
     echo "Failed to make connectivity_tool"
     exit $?
@@ -49,8 +49,8 @@ fi
 
 # copy boost files
 echo "Copying boost files...."
-mkdir -p qt-boolb.app/Contents/Frameworks/boost_libs
-cp -R "$LOCAL_BOOST_LIBS_PATH/" qt-boolb.app/Contents/Frameworks/boost_libs/
+mkdir -p Boolberry.app/Contents/Frameworks/boost_libs
+cp -R "$LOCAL_BOOST_LIBS_PATH/" Boolberry.app/Contents/Frameworks/boost_libs/
 if [ $? -ne 0 ]; then
     echo "Failed to cp workaround to MacOS"
     exit 1
@@ -60,26 +60,38 @@ fi
 # fix boost links
 echo "Fixing boost library links...."
 source ../../../utils/fix_boost_libs.sh
-update_links_in_boost_binary @executable_path/../Frameworks/boost_libs qt-boolb.app/Contents/MacOS/qt-boolb
-update_links_in_boost_libs @executable_path/../Frameworks/boost_libs qt-boolb.app/Contents/Frameworks/boost_libs
+update_links_in_boost_binary @executable_path/../Frameworks/boost_libs Boolberry.app/Contents/MacOS/Boolberry
+update_links_in_boost_libs @executable_path/../Frameworks/boost_libs Boolberry.app/Contents/Frameworks/boost_libs
 
 
 
-$QT_PATH/clang_64/bin/macdeployqt qt-boolb.app
+$QT_PATH/clang_64/bin/macdeployqt Boolberry.app
 if [ $? -ne 0 ]; then
-    echo "Failed to macdeployqt qt-boolb.app"
+    echo "Failed to macdeployqt Boolberry.app"
     exit $?
 fi
 
-cp -R ../../../src/gui/qt-daemon/html qt-boolb.app/Contents/MacOS
+cp -R ../../../src/gui/qt-daemon/html Boolberry.app/Contents/MacOS
 if [ $? -ne 0 ]; then
     echo "Failed to cp html to MacOS"
     exit $?
 fi
 
-cp ../../../src/gui/qt-daemon/app.icns qt-boolb.app/Contents/Resources
+cp ../../../src/gui/qt-daemon/app.icns Boolberry.app/Contents/Resources
 if [ $? -ne 0 ]; then
     echo "Failed to cp app.icns to resources"
+    exit $?
+fi
+
+cp simplewallet Boolberry.app/Contents/MacOS
+if [ $? -ne 0 ]; then
+    echo "Failed to cp simplewallet to MacOS"
+    exit $?
+fi
+
+cp boolbd Boolberry.app/Contents/MacOS
+if [ $? -ne 0 ]; then
+    echo "Failed to cp boolbd to MacOS"
     exit $?
 fi
 
@@ -102,7 +114,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-mv qt-boolb.app package_folder 
+mv Boolberry.app package_folder 
 if [ $? -ne 0 ]; then
     echo "Failed to top app package"
     exit 1
@@ -116,7 +128,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-#zip -r -y "bbr-macos-x64-v0.2.0.zip" qt-boolb.app
+#zip -r -y "bbr-macos-x64-v0.2.0.zip" Boolberry.app
 #if [ $? -ne 0 ]; then
 #    echo "Failed to zip app"
 #    exit $?

@@ -31,6 +31,11 @@
 #include <limits>
 #include <boost/thread.hpp>
 #include <boost/utility/value_init.hpp>
+
+
+#define MAKE_POD_C11(type) namespace std {template<> struct is_pod< type > {static const bool value = true; };}
+
+
 namespace epee
 {
 #define STD_TRY_BEGIN() try {
@@ -180,3 +185,5 @@ namespace misc_utils
 
 }
 }
+
+#define ON_EXIT misc_utils::auto_scope_leave_caller scope_exit_handler = misc_utils::create_scope_leave_handler

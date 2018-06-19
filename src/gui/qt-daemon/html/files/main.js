@@ -193,14 +193,14 @@ function print_money(amount)
 function get_details_block(td, div_id_str, transaction_id, blob_size, payment_id, fee, unlock_time)
 {
     var res = "<div class='transfer_entry_line_details' id='" + div_id_str + "'> <span class='tx_details_text'>Transaction id:</span> " +  transaction_id
-        + "<br><b>size</b>: " + blob_size.toString()  + " bytes"
-        +  "<br><b>fee</b>: " + print_money(fee)
-        + "<br><b>unlock_time</b>: " + unlock_time
-        +  "<br><b>split transfers</b>: <br>";
+        + "<br><span class='tx_details_text'>size</span>: " + blob_size.toString()  + " bytes"
+        +  "<br><span class='tx_details_text'>fee</span>: " + print_money(fee)
+        + "<br><span class='tx_details_text'>unlock_time</span>: " + unlock_time
+        +  "<br><span class='tx_details_text'>split transfers</span>: <br>";
 
     if(payment_id !== '' && payment_id !== undefined)
     {
-        res += "<span class='tx_details_text'>Payment id:</span> " +  payment_id + "<br>";
+        res += "<span class='tx_details_text'>Payment id:</span> " + "<span class='tx_details_value'>" + payment_id + "</span>" + "<br>";
     }
 
     if(td.rcv !== undefined)
@@ -248,14 +248,14 @@ function get_transfer_html_entry(tr, is_recent)
         color_str = "#6c6c6c";
     }else
     {
-        color_str = "#008DD2";
+        color_str = "#3a3a3a";
     }
 
     if(tr.height != 0)
     {
         if(tr.is_income)
         {
-            img_ref = "files/income_ico.png"
+            img_ref = "files/income_ico.png";
             action_text = "Received";
         }
         else
@@ -290,7 +290,7 @@ function get_transfer_html_entry(tr, is_recent)
     transfer_line_tamplate +=       "{5}";
     transfer_line_tamplate +=     "</div>";
 
-    var short_string = tr.recipient_alias.length ?  "@" + tr.recipient_alias : (tr.recipient.substr(0, 8) + "..." +  tr.recipient.substr(tr.recipient.length - 8, 8) );
+    var short_string = tr.destination_alias.length ?  "@" + tr.destination_alias : (tr.destinations.substr(0, 8) + "..." +  tr.destinations.substr(tr.destinations.length - 8, 8) );
     transfer_line_tamplate = transfer_line_tamplate.format(color_str,
         img_ref,
         dt.format("yyyy-mm-dd HH:MM"),
@@ -298,7 +298,7 @@ function get_transfer_html_entry(tr, is_recent)
         tr.tx_hash,
         get_details_block(tr.td, tr.tx_hash + "_id", tr.tx_hash, tr.tx_blob_size, tr.payment_id, tr.fee, tr.unlock_time ? tr.unlock_time - tr.height: 0),
         action_text,
-        tr.recipient,
+        tr.destinations,
         short_string);
 
     return transfer_line_tamplate;
@@ -460,8 +460,25 @@ function parse_and_get_locktime()
 }
 
 
+function on_sign() {
+	var sign_res_str = Qt_parent.sign_text($('#sign_text_id').val());
+  var aign_res_obj = jQuery.parseJSON(sign_res_str);
+
+  $('#signature_id').text(aign_res_obj.signature_hex);
+  $('#signature_id').html("<span id='signature_id_text'>" + aign_res_obj.signature_hex + "</span>");
+
+  if(last_timerId !== undefined) {
+    clearTimeout(last_timerId);
+  }
+
+  $("#signature_id").show("fast");
+  last_timerId = setTimeout(function(){$("#signature_id").hide("fast");}, 15000);
+}
+
 function on_transfer()
 {
+    var addressInputVal = $('#transfer_address_id').val();
+    var addressValidation = $.parseJSON(Qt_parent.parse_transfer_target(addressInputVal));
     var transfer_obj = {
         destinations:[
             {
@@ -470,11 +487,14 @@ function on_transfer()
             }
         ],
         mixin_count: 0,
-        lock_time: 0,
-        payment_id: $('#payment_id').val()
+        lock_time: 0
     };
 
-    var lock_time = parse_and_get_locktime();
+    if (!addressValidation.valid) {
+      transfer_obj.payment_id = $('#payment_id').val();
+    }
+
+    var lock_time = 0; //parse_and_get_locktime();
     if(lock_time === undefined)
     {
         Qt_parent.message_box("Wrong transaction lock time specified.");
@@ -500,6 +520,9 @@ function on_transfer()
         $('#transfer_address_id').val("");
         $('#transfer_amount_id').val("");
         $('#payment_id').val("");
+        $('#payment_id').removeClass('is-disabled');
+        $('#transfer_address_id_container').removeClass('integrated');
+        $('#payment_id').prop('disabled', false);
         $('#mixin_count_id').val(0);
         $("#transfer_result_span").html("<span style='color: #1b9700'> Money successfully sent, transaction " + transfer_res_obj.tx_hash + ", " + transfer_res_obj.tx_blob_size + " bytes</span><br>");
         if(last_timerId !== undefined)
@@ -507,6 +530,7 @@ function on_transfer()
 
         $("#transfer_result_zone").show("fast");
         last_timerId = setTimeout(function(){$("#transfer_result_zone").hide("fast");}, 15000);
+        hide_address_status();
     }
     else
         return;
@@ -584,6 +608,66 @@ function str_to_obj(str)
     this.cb(info_obj);
 }
 
+// address validation
+function on_address_change() {
+    var addressInputVal =  $('#transfer_address_id').val();
+
+    // not show status if address field empty
+    if (addressInputVal === '') {
+      hide_address_status();
+      return;
+    }
+
+    var addressValidation = $.parseJSON(Qt_parent.parse_transfer_target(addressInputVal));
+
+    if (addressValidation.valid) {
+        if (addressValidation.payment_id_hex.length) {
+            $('#transfer_address_id_container').addClass('integrated');
+            $('#payment_id').val(addressValidation.payment_id_hex);
+            $('#payment_id').addClass('is-disabled');
+            $('#payment_id').prop('disabled', true);
+            show_address_status('integrated');
+        } else {
+            show_address_status('valid');
+          $('#payment_id').val('').removeClass('is-disabled');
+          $('#payment_id').prop('disabled', false);
+        }
+    } else {
+        show_address_status('invalid');
+        $('#payment_id').val('').removeClass('is-disabled');
+        $('#payment_id').prop('disabled', false);
+    }
+}
+
+function show_address_status(status) {
+    var newStatus = 'with-status' + ' ' + status;
+    $('.address-status').removeClass('with-status valid invalid integrated');
+    $('#transfer_address_id').removeClass('with-status');
+
+    $('.address-status').addClass(newStatus);
+    $('#transfer_address_id').addClass('with-status');
+
+    switch (status) {
+      case 'valid':
+        $('.address-status-text').text('Valid address');
+        break;
+      case 'invalid':
+        $('.address-status-text').text('Invalid address');
+        break;
+      case 'integrated':
+        $('.address-status-text').text('Integrated address');
+        break;
+      default:
+        break;
+    }
+}
+
+function hide_address_status() {
+    $('.address-status').removeClass('with-status valid invalid integrated');
+    $('#transfer_address_id').removeClass('with-status');
+    $('.address-status-text').text('');
+}
+
 $(function()
 { // DOM ready
     $( "#synchronization_progressbar" ).progressbar({value: false });
@@ -600,6 +684,26 @@ $(function()
     $('#transfer_button_id').on('click',  on_transfer);
     $('#generate_wallet_button').on('click',  on_generate_new_wallet);
     $('#close_wallet_button_id').on('click',  on_close_wallet);
+
+    $('#sign_button_id').on('click', on_sign);
+
+    $('#transfer_address_id').keyup(on_address_change);
+    $('#transfer_address_id').on('change', on_address_change);
+
+    $('#toggle-section-sign').click(function () {
+      $(this).toggleClass('close');
+      $('#section-sign').toggle();
+    });
+
+    $('#toggle-section-payment').click(function () {
+      $(this).toggleClass('close');
+      $('#section-payment').toggle();
+    });
+
+    $('#toggle-section-history').click(function () {
+      $(this).toggleClass('close');
+      $('#section-history').toggle();
+    });
 
     setTimeout(init_btc_exchange_rate, 100);
 
@@ -630,8 +734,8 @@ $(function()
                 rcv: [1000, 1000, 1000, 1000],//rcv: ["0.0000001000", "0.0000001000", "0.0000001000", "0.0000001000"],
                 spn: [1000, 1000]//spn: ["0.0000001000", "0.0000001000"]
             },
-            recipient: "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz",
-            recipient_alias: "just-mike"
+            destinations: "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz",
+            destination_alias: "just-mike"
         },
         balance: 1000,
         unlocked_balance: 1000
@@ -649,8 +753,8 @@ $(function()
     tttt.ti.fee = 1000000000;
     tttt.ti.payment_id = "";
     tttt.ti.amount =  10123000000000;
-    tttt.ti.recipient = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
-    tttt.ti.recipient_alias = "zoidberg";
+    tttt.ti.destinations = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
+    tttt.ti.destination_alias = "zoidberg";
 
 
     on_money_transfer(tttt);
@@ -658,8 +762,8 @@ $(function()
     tttt.ti.tx_hash = "u19670a07875c0239df165ec43958fdbf4fc258caf7456415eafabc281c21c2";
     tttt.ti.is_income = false;
     tttt.ti.payment_id = undefined;
-    tttt.ti.recipient = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
-    tttt.ti.recipient_alias = "tifozi";
+    tttt.ti.destinations = "1Htb4dS5vfR53S5RhQuHyz7hHaiKJGU3qfdG2fvz1pCRVf3jTJ12mia8SJsvCo1RSRZbHRC1rwNvJjkURreY7xAVUDtaumz";
+    tttt.ti.destination_alias = "tifozi";
 
     on_money_transfer(tttt);
 

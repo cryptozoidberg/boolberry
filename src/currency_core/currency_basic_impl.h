@@ -24,16 +24,6 @@ namespace currency
   };
 
 
-#pragma pack(push, 1)
-  struct public_address_outer_blob
-  {
-    uint8_t m_ver;
-    account_public_address m_address;
-    uint8_t check_sum;
-  };
-#pragma pack (pop)
-
-
   /************************************************************************/
   /* helper functions                                                     */
   /************************************************************************/
@@ -42,9 +32,10 @@ namespace currency
   bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t already_donated_coins, uint64_t &reward, uint64_t &max_donation);
   uint64_t get_donations_anount_for_day(uint64_t already_donated_coins, const std::vector<bool>& votes);
   void get_donation_parts(uint64_t total_donations, uint64_t& royalty, uint64_t& donation);
-  uint8_t get_account_address_checksum(const public_address_outer_blob& bl);
   std::string get_account_address_as_str(const account_public_address& adr);
+  std::string get_account_address_as_str(const account_public_address& addr, const payment_id_t& payment_id);
   bool get_account_address_from_str(account_public_address& adr, const std::string& str);
+  bool get_account_address_and_payment_id_from_str(account_public_address& adr, payment_id_t& payment_id, const std::string& str);
   bool is_coinbase(const transaction& tx);
 
   bool operator ==(const currency::transaction& a, const currency::transaction& b);

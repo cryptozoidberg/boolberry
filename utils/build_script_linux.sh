@@ -33,7 +33,7 @@ if [ $? -ne 0 ]; then
     echo "Failed to make!"
     exit 1
 fi
-make -j qt-boolb;
+make -j Boolberry;
 if [ $? -ne 0 ]; then
     echo "Failed to make!"
     exit 1
@@ -43,11 +43,7 @@ if [ $? -ne 0 ]; then
     echo "Failed to make!"
     exit 1
 fi
-make -j simpleminer;
-if [ $? -ne 0 ]; then
-    echo "Failed to make!"
-    exit 1
-fi
+
 make -j connectivity_tool;
 if [ $? -ne 0 ]; then
     echo "Failed to make!"
@@ -61,8 +57,8 @@ echo $version_str
 mkdir -p boolberry;
 
 cp -Rv ../../src/gui/qt-daemon/html ./boolberry
-cp -Rv ../../utils/qt-boolb.sh ./boolberry
-chmod 777 ./boolberry/qt-boolb.sh
+cp -Rv ../../utils/Boolberry.sh ./boolberry
+chmod 777 ./boolberry/Boolberry.sh
 
 mkdir ./boolberry/lib
 cp $QT_PREFIX_PATH/lib/libicudata.so.56 ./boolberry/lib
@@ -91,9 +87,6 @@ cp $QT_PREFIX_PATH/resources/qtwebengine_resources.pak ./boolberry
 cp $QT_PREFIX_PATH/resources/qtwebengine_resources_100p.pak ./boolberry
 cp $QT_PREFIX_PATH/resources/qtwebengine_resources_200p.pak ./boolberry
 cp $QT_PREFIX_PATH/resources/icudtl.dat ./boolberry
-
-
-cp -Rv src/boolbd src/qt-boolb src/simplewallet src/simpleminer src/connectivity_tool ./boolberry
 
 
 tar -cjvf bbr-linux-x64-$version_str.tar.bz2 boolberry

@@ -55,9 +55,26 @@ namespace epee
 #define WAY_POINT(name) {uint64_t delta = misc_utils::get_tick_count()-_____way_point_time; LOG_PRINT("Way point " << name << ": " << delta, LOG_LEVEL_2);_____way_point_time = misc_utils::get_tick_count();}
 #define WAY_POINT2(name, avrg_obj) {uint64_t delta = misc_utils::get_tick_count()-_____way_point_time; avrg_obj.push(delta); LOG_PRINT("Way point " << name << ": " << delta, LOG_LEVEL_2);_____way_point_time = misc_utils::get_tick_count();}
 
+#define TIME_MEASURE_START_MS(var_name)    uint64_t var_name = epee::misc_utils::get_tick_count();
+#define TIME_MEASURE_FINISH_MS(var_name)   var_name = epee::misc_utils::get_tick_count() - var_name;
 
-#define TIME_MEASURE_START(var_name)    uint64_t var_name = misc_utils::get_tick_count();
-#define TIME_MEASURE_FINISH(var_name)   var_name = misc_utils::get_tick_count() - var_name;
+
+
+#define TIME_MEASURE_START(var_name)  uint64_t var_name = 0;std::chrono::high_resolution_clock::time_point var_name##_chrono = std::chrono::high_resolution_clock::now();
+#define TIME_MEASURE_FINISH(var_name)   var_name = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - var_name##_chrono).count();
+
+
+  inline std::string print_mcsec(uint64_t am)
+  {
+    const uint64_t MCSEC_TO_MS_POINT = 3;
+    std::string s = std::to_string(am);
+    if (s.size() < MCSEC_TO_MS_POINT + 1)
+    {
+      s.insert(0, MCSEC_TO_MS_POINT + 1 - s.size(), '0');
+    }
+    s.insert(s.size() - MCSEC_TO_MS_POINT, ".");
+    return s;
+  }
 
 namespace profile_tools
 {

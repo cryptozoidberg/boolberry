@@ -24,7 +24,6 @@ using namespace currency;
 namespace tools
 {
 //----------------------------------------------------------------------------------------------------
-
 void fill_transfer_details(const currency::transaction& tx, const tools::money_transfer2_details& td, tools::wallet_rpc::wallet_transfer_info_details& res_td)
 {
   for (auto si : td.spent_indices)
@@ -39,8 +38,7 @@ void fill_transfer_details(const currency::transaction& tx, const tools::money_t
     res_td.rcv.push_back(tx.vout[ri].amount);
   }
 }
-
-
+//----------------------------------------------------------------------------------------------------
 void wallet2::init(const std::string& daemon_address)
 {
   m_upper_transaction_size_limit = 0;
@@ -88,7 +86,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       "transactions outputs size=" + std::to_string(tx.vout.size()) +
       " not match with COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES response size=" + std::to_string(res.o_indexes.size()));
 
-    BOOST_FOREACH(size_t o, outs)
+    for(size_t o : outs)
     {
       CHECK_AND_THROW_WALLET_EX(tx.vout.size() <= o, error::wallet_internal_error, "wrong out in transaction: internal index=" +
         std::to_string(o) + ", total_outs=" + std::to_string(tx.vout.size()));
@@ -117,7 +115,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
   uint64_t tx_money_spent_in_ins = 0;
   // check all outputs for spending (compare key images)
   size_t i = 0;
-  BOOST_FOREACH(auto& in, tx.vin)
+  for(auto& in : tx.vin)
   {
     if(in.type() != typeid(currency::txin_to_key))
       continue;
@@ -137,11 +135,11 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
     i++;
   }
 
-    crypto::hash payment_id;
+    payment_id_t payment_id;
     if (tx_money_got_in_outs && get_payment_id_from_tx_extra(tx, payment_id))
     {
       uint64_t received = (tx_money_spent_in_ins < tx_money_got_in_outs) ? tx_money_got_in_outs - tx_money_spent_in_ins : 0;
-      if (0 < received && null_hash != payment_id)
+      if (0 < received && payment_id.size() != 0)
       {
         payment_details payment;
         payment.m_tx_hash      = currency::get_transaction_hash(tx);
@@ -173,14 +171,14 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
     }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height, uint64_t timestamp, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td)
+void wallet2::prepare_wti(wallet_rpc::wallet_transfer_info& wti, uint64_t height, uint64_t timestamp, const currency::transaction& tx, uint64_t amount, const money_transfer2_details& td)const 
 {
   wti.tx = tx;
   wti.amount = amount;
   wti.height = height;
-  crypto::hash pid;
+  payment_id_t pid;
   if(currency::get_payment_id_from_tx_extra(tx, pid))
-    wti.payment_id = string_tools::pod_to_hex(pid);
+    wti.payment_id = string_tools::buff_to_hex_nodelimer(pid);
   fill_transfer_details(tx, td, wti.td);
   wti.timestamp = timestamp;
   wti.fee = currency::is_coinbase(tx) ? 0:currency::get_tx_fee(tx);
@@ -206,8 +204,8 @@ void wallet2::handle_money_spent2(const currency::block& b, const currency::tran
   wallet_rpc::wallet_transfer_info& wti = m_transfer_history.back();
   prepare_wti(wti, get_block_height(b), b.timestamp, in_tx, amount, td);
   wti.is_income = false;
-  wti.recipient = recipient;
-  wti.recipient_alias = recipient_alias;
+  wti.destinations = recipient;
+  wti.destination_alias = recipient_alias;
 
   if (m_callback)
     m_callback->on_transfer2(wti);
@@ -391,7 +389,7 @@ void wallet2::scan_tx_pool()
   CHECK_AND_THROW_WALLET_EX(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_tx_pool");
   CHECK_AND_THROW_WALLET_EX(res.status != CORE_RPC_STATUS_OK, error::get_blocks_error, res.status);
   
-  std::unordered_map<crypto::hash, currency::transaction> unconfirmed_in_transfers_local(std::move(m_unconfirmed_in_transfers));
+  std::unordered_map<crypto::hash, wallet_rpc::wallet_transfer_info> unconfirmed_in_transfers_local(std::move(m_unconfirmed_in_transfers));
   m_unconfirmed_balance = 0;
   for (const auto &tx_blob : res.txs)
   {
@@ -432,9 +430,10 @@ void wallet2::scan_tx_pool()
       wallet_rpc::wallet_transfer_info wti = AUTO_VAL_INIT(wti);
       wti.timestamp = time(NULL);
       wti.is_income = true;
-      m_unconfirmed_in_transfers[tx_hash] = tx;
+      wti.tx = tx;
       prepare_wti(wti, 0, 0, tx, tx_money_got_in_outs, money_transfer2_details());
-	  m_unconfirmed_balance += wti.amount;
+      m_unconfirmed_in_transfers[tx_hash] = wti;
+      m_unconfirmed_balance += wti.amount;
       if (m_callback)
         m_callback->on_transfer2(wti);
     }
@@ -757,7 +756,61 @@ void wallet2::get_transfers(wallet2::transfer_container& incoming_transfers) con
   incoming_transfers = m_transfers;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::get_payments(const crypto::hash& payment_id, std::list<wallet2::payment_details>& payments, uint64_t min_height) const
+bool wallet2::get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANSFERS::request& req, wallet_rpc::COMMAND_RPC_GET_TRANSFERS::response& res) const 
+{
+  uint64_t tr_count = m_transfer_history.size();
+  if (!tr_count)
+    return true;
+  uint64_t i = tr_count;
+
+  do
+  {
+    --i;
+    const wallet_rpc::wallet_transfer_info& thi = m_transfer_history[i];
+
+    // handle filter_by_height
+    if (req.filter_by_height)
+    {
+      if (!thi.height) // unconfirmed
+        continue;
+
+      if (thi.height < req.min_height)
+      {
+        //no need to scan more
+        break;
+      }
+      if (thi.height > req.max_height)
+      {
+        continue;
+      }
+    }
+    
+    if (thi.is_income && req.in)
+      res.in.push_back(thi);
+    if (!thi.is_income && req.out)
+      res.out.push_back(thi);   
+  } while (i != 0);
+
+  if (req.pool)
+  {
+    //handle unconfirmed
+    //outgoing transfers
+    for (auto outg : m_unconfirmed_txs)
+    {
+      wallet_rpc::wallet_transfer_info wti;
+      wallet_transfer_info_from_unconfirmed_transfer_details(outg.second, wti);
+      res.pool.push_back(wti);
+    }
+    //incoming transfers
+    for (auto inc : m_unconfirmed_in_transfers)
+    {
+      res.pool.push_back(inc.second);
+    }
+  }
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::get_payments(const payment_id_t& payment_id, std::list<wallet2::payment_details>& payments, uint64_t min_height) const
 {
   auto range = m_payments.equal_range(payment_id);
   std::for_each(range.first, range.second, [&payments, &min_height](const payment_container::value_type& x) {
@@ -822,7 +875,7 @@ void wallet2::submit_transfer(const std::string& tx_sources_file, const std::str
   tx = create_tx_result.tx;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result)
+void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result, bool do_not_relay)
 {
   using namespace currency;
   const transaction& tx = create_tx_result.tx;
@@ -838,15 +891,27 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
   });
   CHECK_AND_THROW_WALLET_EX(!all_are_txin_to_key, error::unexpected_txin_type, tx);
 
-  COMMAND_RPC_SEND_RAW_TX::request req;
-  req.tx_as_hex = epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(tx));
-  COMMAND_RPC_SEND_RAW_TX::response daemon_send_resp;
-  bool r = m_core_proxy->call_COMMAND_RPC_SEND_RAW_TX(req, daemon_send_resp);
-  if (daemon_send_resp.status != CORE_RPC_STATUS_OK)
+  if (!do_not_relay)
   {
-    //unlock funds if transaction rejected
-    for (auto& s : create_tx_param.sources)
-      m_transfers[s.transfer_index].m_spent = false;
+    COMMAND_RPC_SEND_RAW_TX::request req;
+    req.tx_as_hex = epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(tx));
+    COMMAND_RPC_SEND_RAW_TX::response daemon_send_resp;
+    bool r = m_core_proxy->call_COMMAND_RPC_SEND_RAW_TX(req, daemon_send_resp);
+    if (daemon_send_resp.status != CORE_RPC_STATUS_OK)
+    {
+      //unlock funds if transaction rejected
+      for (auto& s : create_tx_param.sources)
+        m_transfers[s.transfer_index].m_spent = false;
+    }
+    else
+    {
+      //unlock funds if transaction rejected
+      for (auto& s : create_tx_param.sources)
+        m_transfers[s.transfer_index].m_spent = true;
+    }
+    CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "sendrawtransaction");
+    CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
+    CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status != CORE_RPC_STATUS_OK, error::tx_rejected, tx, daemon_send_resp.status);
   }
   else
   {
@@ -854,9 +919,6 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
     for (auto& s : create_tx_param.sources)
       m_transfers[s.transfer_index].m_spent = true;
   }
-  CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "sendrawtransaction");
-  CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
-  CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status != CORE_RPC_STATUS_OK, error::tx_rejected, tx, daemon_send_resp.status);
 
   std::string recipient;
   for (const auto& r : create_tx_param.recipients)
@@ -890,19 +952,19 @@ void wallet2::get_recent_transfers_history(std::vector<wallet_rpc::wallet_transf
   trs.insert(trs.end(), start, stop);
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
+bool wallet2::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id)
 {
-  return m_core_proxy->get_transfer_address(adr_str, addr);
+  return m_core_proxy->get_transfer_address(adr_str, addr, payment_id);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& u, wallet_rpc::wallet_transfer_info& wti)
+void wallet2::wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& u, wallet_rpc::wallet_transfer_info& wti)const 
 {
   uint64_t outs = get_outs_money_amount(u.m_tx);
   uint64_t ins = 0;
   get_inputs_money_amount(u.m_tx, ins);
   prepare_wti(wti, 0, u.m_sent_time, u.m_tx, outs - u.m_change, money_transfer2_details());
-  wti.recipient = u.m_recipient;
-  wti.recipient_alias = u.m_recipient_alias;
+  wti.destinations = u.m_recipient;
+  wti.destination_alias = u.m_recipient_alias;
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::get_unconfirmed_transfers(std::vector<wallet_rpc::wallet_transfer_info>& trs)
@@ -1086,6 +1148,10 @@ void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, 
                        uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx)
 {
   transfer(dsts, fake_outputs_count, unlock_time, fee, extra, detail::digit_split_strategy, tx_dust_policy(fee), tx);
+}
+void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx, currency::blobdata& relay_blob, bool do_not_relay)
+{
+  transfer(dsts, fake_outputs_count, unlock_time, fee, extra, detail::digit_split_strategy, tx_dust_policy(fee), tx, CURRENCY_TO_KEY_OUT_RELAXED, relay_blob, do_not_relay);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,

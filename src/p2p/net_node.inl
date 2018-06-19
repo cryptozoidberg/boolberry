@@ -22,16 +22,15 @@ namespace nodetool
 {
   namespace
   {
-    const command_line::arg_descriptor<std::string>               arg_p2p_bind_ip        = {"p2p-bind-ip", "Interface for p2p network protocol", "0.0.0.0"};
-    const command_line::arg_descriptor<std::string>               arg_p2p_bind_port      = {"p2p-bind-port", "Port for p2p network protocol", boost::to_string(P2P_DEFAULT_PORT)};
-    const command_line::arg_descriptor<uint32_t>                  arg_p2p_external_port  = {"p2p-external-port", "External port for p2p network protocol (if port forwarding used with NAT)", 0};
-    const command_line::arg_descriptor<bool>                      arg_p2p_allow_local_ip = {"allow-local-ip", "Allow local ip add to peer list, mostly in debug purposes"};
-    const command_line::arg_descriptor<std::vector<std::string> > arg_p2p_add_peer   = {"add-peer", "Manually add peer to local peerlist"};
+    const command_line::arg_descriptor<std::string>               arg_p2p_bind_ip             = {"p2p-bind-ip", "Interface for p2p network protocol", "0.0.0.0"};
+    const command_line::arg_descriptor<std::string>               arg_p2p_bind_port           = {"p2p-bind-port", "Port for p2p network protocol", boost::to_string(P2P_DEFAULT_PORT)};
+    const command_line::arg_descriptor<uint32_t>                  arg_p2p_external_port       = {"p2p-external-port", "External port for p2p network protocol (if port forwarding used with NAT)", 0};
+    const command_line::arg_descriptor<bool>                      arg_p2p_allow_local_ip      = {"allow-local-ip", "Allow local ip add to peer list, mostly in debug purposes"};
+    const command_line::arg_descriptor<std::vector<std::string> > arg_p2p_add_peer            = {"add-peer", "Manually add peer to local peerlist"};
     const command_line::arg_descriptor<std::vector<std::string> > arg_p2p_add_priority_node   = {"add-priority-node", "Specify list of peers to connect to and attempt to keep the connection open"};
     const command_line::arg_descriptor<bool>                      arg_p2p_use_only_priority_nodes   = {"use-only-priority-nodes", "Try to connect only to priority nodes"};
-    const command_line::arg_descriptor<std::vector<std::string> > arg_p2p_seed_node   = {"seed-node", "Connect to a node to retrieve peer addresses, and disconnect"};
-    const command_line::arg_descriptor<bool> arg_p2p_hide_my_port   =    {"hide-my-port", "Do not announce yourself as peerlist candidate", false, true};  }
-
+    const command_line::arg_descriptor<std::vector<std::string> > arg_p2p_seed_node           = {"seed-node", "Connect to a node to retrieve peer addresses, and disconnect"};
+    const command_line::arg_descriptor<bool>                      arg_p2p_hide_my_port        = {"hide-my-port", "Do not announce yourself as peerlist candidate", false, true};  }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
   void node_server<t_payload_net_handler>::init_options(boost::program_options::options_description& desc)
@@ -99,6 +98,12 @@ namespace nodetool
       return true;
     }
     return false;
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::is_stop_signal_sent()
+  {
+    return m_net_server.is_stop_signal_sent();
   }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
@@ -234,7 +239,11 @@ namespace nodetool
 #ifndef TESTNET
     ADD_HARDCODED_SEED_NODE("88.99.193.104:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
     ADD_HARDCODED_SEED_NODE("138.201.126.98:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
+    ADD_HARDCODED_SEED_NODE("138.68.246.85:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
+    ADD_HARDCODED_SEED_NODE("45.55.62.251:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
 #else
+    ADD_HARDCODED_SEED_NODE("138.68.246.85:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
+    ADD_HARDCODED_SEED_NODE("45.55.62.251:" STRINGIFY_EXPAND(P2P_DEFAULT_PORT));
 #endif
 
     bool res = handle_command_line(vm);

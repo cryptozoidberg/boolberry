@@ -38,8 +38,8 @@ public:
     m_cmd_binder.set_handler("hide_hr", boost::bind(&daemon_cmmands_handler::hide_hr, this, _1), "Stop showing hash rate");
     m_cmd_binder.set_handler("make_alias", boost::bind(&daemon_cmmands_handler::make_alias, this, _1), "Puts alias reservation record into block template, if alias is free");
     m_cmd_binder.set_handler("set_donations", boost::bind(&daemon_cmmands_handler::set_donations, this, _1), "Set donations mode: true if you vote for donation, and false - if against");
-    m_cmd_binder.set_handler("save", boost::bind(&daemon_cmmands_handler::save, this, _1), "Save blockchain");
-    m_cmd_binder.set_handler("get_transactions_statics", boost::bind(&daemon_cmmands_handler::get_transactions_statistics, this, _1), "Calculates transactions statistics");
+    //m_cmd_binder.set_handler("save", boost::bind(&daemon_cmmands_handler::save, this, _1), "Save blockchain");
+    //m_cmd_binder.set_handler("get_transactions_statics", boost::bind(&daemon_cmmands_handler::get_transactions_statistics, this, _1), "Calculates transactions statistics");
   }
 
   bool start_handling()
@@ -100,18 +100,12 @@ private:
     m_srv.log_peerlist();
     return true;
   }
-  //--------------------------------------------------------------------------------
-  bool save(const std::vector<std::string>& args)
-  {
-    m_srv.get_payload_object().get_core().get_blockchain_storage().store_blockchain();
-    return true;
-  }
-  //--------------------------------------------------------------------------------
-  bool get_transactions_statistics(const std::vector<std::string>& args)
-  {
-    m_srv.get_payload_object().get_core().get_blockchain_storage().print_transactions_statistics();
-    return true;
-  }
+//   //--------------------------------------------------------------------------------
+//   bool get_transactions_statistics(const std::vector<std::string>& args)
+//   {
+//     m_srv.get_payload_object().get_core().get_blockchain_storage().print_transactions_statistics();
+//     return true;
+//   }
   //--------------------------------------------------------------------------------
   bool show_hr(const std::vector<std::string>& args)
   {

@@ -7,8 +7,8 @@
 #define CURRENCY_MAX_BLOCK_NUMBER                     500000000
 #define CURRENCY_MAX_BLOCK_SIZE                       500000000  // block header blob limit, never used!
 #define CURRENCY_MAX_TX_SIZE                          1000000000
-#define CURRENCY_PUBLIC_ADDRESS_TEXTBLOB_VER          0
 #define CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX         1 // addresses start with "1"
+#define CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX   0xE94E
 #define CURRENCY_MINED_MONEY_UNLOCK_WINDOW            10
 #define CURRENT_TRANSACTION_VERSION                   1
 #define CURRENT_BLOCK_MAJOR_VERSION                   1
@@ -92,6 +92,7 @@
 #define P2P_DEFAULT_INVOKE_TIMEOUT                      60*2*1000  //2 minutes
 #define P2P_DEFAULT_HANDSHAKE_INVOKE_TIMEOUT            5000       //5 seconds
 #define P2P_MAINTAINERS_PUB_KEY                         "d2f6bc35dc4e4a43235ae12620df4612df590c6e1df0a18a55c5e12d81502aa7"
+#define P2P_MAINTAINERS_PUB_KEY2                        "b92345cfdeeef9dd837614e85d66b145cce38360de52102a5fbf4ef8709e88ca"
 #define P2P_DEFAULT_WHITELIST_CONNECTIONS_PERCENT       70
 #define P2P_FAILED_ADDR_FORGET_SECONDS                  (60*60)     //1 hour
 
@@ -131,8 +132,11 @@
 #endif
 
 #define CURRENCY_POOLDATA_FILENAME                      "poolstate.bin"
-#define CURRENCY_BLOCKCHAINDATA_FILENAME                "blockchain.bin"
-#define CURRENCY_BLOCKCHAINDATA_TEMP_FILENAME           "blockchain.bin.tmp"
+//#define CURRENCY_BLOCKCHAINDATA_FILENAME                "blockchain.bin"
+//#define CURRENCY_BLOCKCHAINDATA_TEMP_FILENAME           "blockchain.bin.tmp"
+#define CURRENCY_BLOCKCHAINDATA_FOLDERNAME              "blockchain"
+#define CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE        "scratchpad.cache"
 #define P2P_NET_DATA_FILENAME                           "p2pstate.bin"
 #define MINER_CONFIG_FILENAME                           "miner_conf.json"
 #define GUI_CONFIG_FILENAME                             "gui_conf.json"
+#define CURRENCY_CORE_INSTANCE_LOCK_FILE                "lock.lck"

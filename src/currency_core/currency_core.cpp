@@ -55,9 +55,16 @@ namespace currency
     return m_config_folder;
   }
   //-----------------------------------------------------------------------------------------------
+  void core::set_config_folder(const std::string& folder)
+  {
+     m_config_folder = folder;
+  }
+  //-----------------------------------------------------------------------------------------------
   bool core::handle_command_line(const boost::program_options::variables_map& vm)
   {
-    m_config_folder = command_line::get_arg(vm, command_line::arg_data_dir);
+    if (!m_config_folder.size())
+        m_config_folder = command_line::get_arg(vm, command_line::arg_data_dir);
+
     return true;
   }
   //-----------------------------------------------------------------------------------------------
@@ -501,9 +508,9 @@ namespace currency
     return m_blockchain_storage.get_block_by_hash(h, blk);
   }
   //-----------------------------------------------------------------------------------------------
-  void core::get_all_known_block_ids(std::list<crypto::hash> &main, std::list<crypto::hash> &alt, std::list<crypto::hash> &invalid) {
-    m_blockchain_storage.get_all_known_block_ids(main, alt, invalid);
-  }
+//   void core::get_all_known_block_ids(std::list<crypto::hash> &main, std::list<crypto::hash> &alt, std::list<crypto::hash> &invalid) {
+//     m_blockchain_storage.get_all_known_block_ids(main, alt, invalid);
+//   }
   //-----------------------------------------------------------------------------------------------
   std::string core::print_pool(bool short_format)
   {
@@ -532,7 +539,7 @@ namespace currency
       m_starter_message_showed = true;
     }
 
-    m_store_blockchain_interval.do_call([this](){return m_blockchain_storage.store_blockchain();});
+    //m_store_blockchain_interval.do_call([this](){return m_blockchain_storage.store_blockchain();});
     m_prune_alt_blocks_interval.do_call([this](){return m_blockchain_storage.prune_aged_alt_blocks();});
     m_miner.on_idle();
     m_mempool.on_idle();

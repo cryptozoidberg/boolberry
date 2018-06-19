@@ -10,7 +10,6 @@
 #include <cstring>  // memcmp
 #include <sstream>
 #include "serialization/crypto.h"
-#include "serialization/vector.h"
 #include "serialization/serialization.h"
 #include "serialization/variant.h"
 #include "serialization/binary_archive.h"
@@ -289,6 +288,8 @@ namespace currency
     END_SERIALIZE()
   };
   //---------------------------------------------------------------
+
+  typedef std::string payment_id_t;
 
 }
 

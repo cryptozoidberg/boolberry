@@ -34,16 +34,21 @@ add_executable(exchange_test ${EXCHANGE_TESTS})
 add_dependencies(coretests version)
 
 target_link_libraries(core_proxy currency_core common crypto ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
-target_link_libraries(coretests currency_core common crypto ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_link_libraries(coretests currency_core common crypto lmdb ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(difficulty-tests currency_core)
 target_link_libraries(functional_tests currency_core wallet common crypto upnpc-static ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(hash-tests crypto)
 target_link_libraries(hash-target-tests crypto currency_core)
 target_link_libraries(performance_tests currency_core common crypto ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
-target_link_libraries(unit_tests currency_core common wallet crypto gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_link_libraries(unit_tests currency_core common wallet crypto gtest_main lmdb ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(net_load_tests_clt currency_core common crypto gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(net_load_tests_srv currency_core common crypto gtest_main ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 target_link_libraries(exchange_test ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+
+if(MSVC)
+  add_definitions("/Zi")
+endif()
+
 
 if(NOT MSVC)
   set_property(TARGET gtest gtest_main unit_tests net_load_tests_clt net_load_tests_srv APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-undef -Wno-sign-compare")

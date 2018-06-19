@@ -438,17 +438,9 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool parse_payment_id_from_hex_str(const std::string& payment_id_str, crypto::hash& payment_id)
+  bool parse_payment_id_from_hex_str(const std::string& payment_id_str, payment_id_t& payment_id)
   {
-    blobdata payment_id_data;
-    if(!string_tools::parse_hexstr_to_binbuff(payment_id_str, payment_id_data))
-      return false;
-
-    if(sizeof(crypto::hash) != payment_id_data.size())
-      return false;
-
-    payment_id = *reinterpret_cast<const crypto::hash*>(payment_id_data.data());
-    return true;
+    return string_tools::parse_hexstr_to_binbuff(payment_id_str, payment_id);
   }
   //---------------------------------------------------------------
   bool add_tx_pub_key_to_extra(transaction& tx, const crypto::public_key& tx_pub_key)
@@ -756,7 +748,7 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const std::string& payment_id)
+  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const payment_id_t& payment_id)
   {
     if(!payment_id.size() || payment_id.size() >= TX_MAX_PAYMENT_ID_SIZE)
       return false;
@@ -774,7 +766,7 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool get_payment_id_from_user_data(const std::string& user_data, std::string& payment_id)
+  bool get_payment_id_from_user_data(const std::string& user_data, payment_id_t& payment_id)
   {
     if(!user_data.size())
       return false;
@@ -843,47 +835,6 @@ namespace currency
     return get_object_hash(t, res, blob_size);
   }*/
   //------------------------------------------------------------------
-  template<typename pod_operand_a, typename pod_operand_b>
-  crypto::hash hash_together(const pod_operand_a& a, const pod_operand_b& b)
-  {
-    std::string blob;
-    string_tools::apped_pod_to_strbuff(blob, a);
-    string_tools::apped_pod_to_strbuff(blob, b);  
-    return crypto::cn_fast_hash(blob.data(), blob.size());
-  }
-  //------------------------------------------------------------------
-  bool get_scratchpad_patch(size_t global_start_entry, size_t local_start_entry, size_t local_end_entry, const std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch)
-  {
-    if(!global_start_entry)
-      return true;
-    for(size_t i = local_start_entry; i != local_end_entry; i++)
-    {
-      size_t rnd_upd_ind = reinterpret_cast<const uint64_t*>(&scratchpd[i])[0] % global_start_entry;
-      patch[rnd_upd_ind] = crypto::xor_pod(patch[rnd_upd_ind], scratchpd[i]);
-    }
-    return true;
-  }
-  //------------------------------------------------------------------
-  bool get_block_scratchpad_addendum(const block& b, std::vector<crypto::hash>& res)
-  {
-    if(get_block_height(b))
-      res.push_back(b.prev_id);
-    crypto::public_key tx_pub;
-    bool r = parse_and_validate_tx_extra(b.miner_tx, tx_pub);
-    CHECK_AND_ASSERT_MES(r, false, "wrong miner tx in put_block_scratchpad_data: no one-time tx pubkey");
-    res.push_back(*reinterpret_cast<crypto::hash*>(&tx_pub));
-    res.push_back(get_tx_tree_hash(b));
-    for(const auto& out: b.miner_tx.vout)
-    {
-      CHECK_AND_ASSERT_MES(out.target.type() == typeid(txout_to_key), false, "wrong tx out type in coinbase!!!");
-      /*
-      tx outs possible to fill with nonrandom data, let's hash it with prev_tx to avoid nonrandom data in scratchpad
-      */
-      res.push_back(hash_together(b.prev_id, boost::get<txout_to_key>(out.target).key));
-    }
-    return true;
-  }
-  //------------------------------------------------------------------
   crypto::hash get_blob_longhash(const blobdata& bd, uint64_t height, const std::vector<crypto::hash>& scratchpad)
   {
     crypto::hash h = null_hash;
@@ -902,29 +853,8 @@ namespace currency
     crypto::wild_keccak_dbl_opt(reinterpret_cast<const uint8_t*>(&blob[0]), blob.size(), reinterpret_cast<uint8_t*>(&h2), sizeof(h2), (const UINT64*)&scratchpad[0], scratchpad.size()*4);
     return h2;
   }
-  //---------------------------------------------------------------
-  bool push_block_scratchpad_data(size_t global_start_entry, const block& b, std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch)
-  {
-    size_t start_offset = scratchpd.size();
-    get_block_scratchpad_addendum(b, scratchpd);
-    get_scratchpad_patch(global_start_entry, start_offset, scratchpd.size(), scratchpd, patch);
-#ifdef ENABLE_HASHING_DEBUG
-    LOG_PRINT2("patches.log", "PATCH FOR BID: " << get_block_hash(b) 
-                         << ", scr_offset " << global_start_entry << ENDL 
-                         << dump_patch(patch) , LOG_LEVEL_3);
-#endif
 
-    return true;
-  }
-  //------------------------------------------------------------------
-  bool apply_scratchpad_patch(std::vector<crypto::hash>& scratchpd, std::map<uint64_t, crypto::hash>& patch)
-  {
-    for(auto& p: patch)
-    {
-      scratchpd[p.first] = crypto::xor_pod(scratchpd[p.first], p.second);
-    }
-    return true;
-  }
+
   //------------------------------------------------------------------
   bool validate_alias_name(const std::string& al)
   {
@@ -945,20 +875,7 @@ namespace currency
     }
     return true;
   }
-  //------------------------------------------------------------------
-  bool push_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd)
-  {
-    std::map<uint64_t, crypto::hash> patch;
-    size_t inital_sz = scratchpd.size();
-    if(!push_block_scratchpad_data(scratchpd.size(), b, scratchpd, patch))
-    {
-      scratchpd.resize(inital_sz);
-      return false;
-    }
-    //apply patch
-    apply_scratchpad_patch(scratchpd, patch);
-    return true;
-  }
+
   //------------------------------------------------------------------
   std::string dump_scratchpad(const std::vector<crypto::hash>& scr)
   {
@@ -1052,25 +969,7 @@ namespace currency
     }
     return ss.str();
   }
-  //------------------------------------------------------------------
-  bool pop_block_scratchpad_data(const block& b, std::vector<crypto::hash>& scratchpd)
-  {
-    std::map<uint64_t, crypto::hash> patch;
-    std::vector<crypto::hash> block_scratch_addendum;
-    if(!get_block_scratchpad_addendum(b, block_scratch_addendum))
-      return false;
 
-    get_scratchpad_patch(scratchpd.size() - block_scratch_addendum.size(), 0, block_scratch_addendum.size(), block_scratch_addendum, patch);
-#ifdef ENABLE_HASHING_DEBUG
-    LOG_PRINT2("patches.log", "PATCH FOR BID: " << get_block_hash(b) 
-                         << ", scr_offset " << scratchpd.size() - block_scratch_addendum.size() << ENDL 
-                         << dump_patch(patch) , LOG_LEVEL_3);
-#endif
-    //apply patch
-    apply_scratchpad_patch(scratchpd, patch);
-    scratchpd.resize(scratchpd.size() - block_scratch_addendum.size());
-    return true;
-  }
   //---------------------------------------------------------------
   blobdata get_block_hashing_blob(const block& b)
   {
@@ -1129,7 +1028,11 @@ namespace currency
     bl.major_version = CURRENT_BLOCK_MAJOR_VERSION;
     bl.minor_version = CURRENT_BLOCK_MINOR_VERSION;
     bl.timestamp = 0;
+#ifndef TESTNET
     bl.nonce = 1010101020; //bender's nightmare
+#else
+    bl.nonce = 1010101012; //another bender's nightmare
+#endif
     //miner::find_nonce_for_given_block(bl, 1, 0,);
     return true;
   }

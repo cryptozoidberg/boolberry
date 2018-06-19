@@ -149,6 +149,7 @@ namespace nodetool
     virtual void for_each_connection(std::function<bool(typename t_payload_net_handler::connection_context&, peerid_type)> f);
     virtual bool block_ip(uint32_t adress);
     virtual bool add_ip_fail(uint32_t address);
+    virtual bool is_stop_signal_sent();
     //----------------- i_connection_filter  --------------------------------------------------------
     virtual bool is_remote_ip_allowed(uint32_t adress);
     //-----------------------------------------------------------------------------------------------

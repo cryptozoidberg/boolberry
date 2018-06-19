@@ -7,6 +7,9 @@
 #include "common/command_line.h"
 #include "transaction_tests.h"
 
+#include "crypto/random.h"
+
+
 
 namespace po = boost::program_options;
 
@@ -73,7 +76,9 @@ int main(int argc, char* argv[])
   }
   else //if (command_line::get_arg(vm, arg_generate_and_play_test_data))
   {    
-    
+     // crypto::random_prng_initialize_with_seed(0);
+//     GENERATE_AND_PLAY(mix_attr_tests);
+
     GENERATE_AND_PLAY(prun_ring_signatures);
     GENERATE_AND_PLAY(get_random_outs_test);
     GENERATE_AND_PLAY(mix_attr_tests);
@@ -150,11 +155,11 @@ int main(int argc, char* argv[])
     GENERATE_AND_PLAY(gen_uint_overflow_2);
 
     //GENERATE_AND_PLAY(gen_block_reward);
-
-    std::cout << (failed_tests.empty() ? concolor::green : concolor::magenta);
-    std::cout << "\nREPORT:\n";
-    std::cout << "  Test run: " << tests_count << '\n';
-    std::cout << "  Failures: " << failed_tests.size() << '\n';
+    std::stringstream ss;
+    ss << (failed_tests.empty() ? concolor::green : concolor::magenta);
+    ss << "\nREPORT:\n";
+    ss << "  Test run: " << tests_count << '\n';
+    ss << "  Failures: " << failed_tests.size() << '\n';
     if (!failed_tests.empty())
     {
       std::cout << "FAILED TESTS:\n";
@@ -163,7 +168,8 @@ int main(int argc, char* argv[])
         std::cout << "  " << test_name << '\n';
       }
     }
-    std::cout << concolor::normal << std::endl;
+    ss << concolor::normal << std::endl;
+    LOG_PRINT_MAGENTA(ss.str(), LOG_LEVEL_0);
   }
 
   /*{

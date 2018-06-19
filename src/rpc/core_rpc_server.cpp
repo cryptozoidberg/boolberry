@@ -299,13 +299,6 @@ namespace currency
       return true;
     }
 
-    if(!tvc.m_should_be_relayed)
-    {
-      LOG_PRINT_L0("[on_send_raw_tx]: tx accepted, but not relayed");
-      res.status = "Not relayed";
-      return true;
-    }
-
 
     NOTIFY_NEW_TRANSACTIONS::request r;
     r.txs.push_back(tx_blob);
@@ -1095,14 +1088,14 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
       }
 
       for(const auto& tx: txs) {
-          std::string payment_id;
+          payment_id_t payment_id;
           get_payment_id_from_tx_extra(tx, payment_id);
           crypto::hash hash;
           get_transaction_hash(tx, hash);
 
           transfer_rpc_details transfer;
           transfer.tx_hash = string_tools::pod_to_hex(hash);
-          transfer.payment_id = string_tools::pod_to_hex(payment_id);
+          transfer.payment_id = string_tools::buff_to_hex_nodelimer(payment_id);
           
           for (const auto& vout: tx.vout) {
               const txout_to_key* key_out = boost::get<txout_to_key>(&vout.target);
@@ -1357,7 +1350,7 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
     uint32_t str_len = static_cast<uint32_t>(json_hi.size());
     response_info.m_body.append(reinterpret_cast<const char*>(&str_len), sizeof(str_len));
     response_info.m_body.append(json_hi.data(), json_hi.size());
-    m_core.get_blockchain_storage().copy_scratchpad(response_info.m_body);    
+    m_core.get_blockchain_storage().copy_scratchpad_as_blob(response_info.m_body);    
 
     //TODO: remove this code
     LOG_PRINT_L0("[getfullscratchpad2]: json prefix len: " << str_len << ", JSON: " << json_hi);
@@ -1400,7 +1393,8 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
     }
      
     currency::account_public_address ac_adr = AUTO_VAL_INIT(ac_adr);
-    if (!tools::get_transfer_address_t(req.address, ac_adr, *this))
+    currency::payment_id_t payment_id_stub;
+    if (!tools::get_transfer_address_t(req.address, ac_adr, payment_id_stub, *this))
     {
       LOG_PRINT_RED_L0("Failed to parse address: " << req.address);
       res.status = CORE_RPC_STATUS_INVALID_ARGUMENT;

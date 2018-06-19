@@ -84,10 +84,9 @@ namespace tools
       return m_rpc.on_check_keyimages(req, rsp, m_cntxt_stub);
     }
     //------------------------------------------------------------------------------------------------------------------------------
-
-    bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr)
+    bool get_transfer_address(const std::string& addr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id) override
     {
-      return tools::get_transfer_address(adr_str, addr, this);
+      return tools::get_transfer_address(addr_str, addr, payment_id, this);
     }
 
   private:

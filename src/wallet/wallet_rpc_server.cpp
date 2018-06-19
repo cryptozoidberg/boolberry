@@ -90,32 +90,53 @@ namespace tools
   //------------------------------------------------------------------------------------------------------------------------------
   bool wallet_rpc_server::on_transfer(const wallet_rpc::COMMAND_RPC_TRANSFER::request& req, wallet_rpc::COMMAND_RPC_TRANSFER::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
+    currency::payment_id_t payment_id;
+    if (!req.payment_id_hex.empty() && !currency::parse_payment_id_from_hex_str(req.payment_id_hex, payment_id))
+    {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_PAYMENT_ID;
+      er.message = std::string("Invalid payment id: ") + req.payment_id_hex;
+      return false;
+    }
 
     std::vector<currency::tx_destination_entry> dsts;
     for (auto it = req.destinations.begin(); it != req.destinations.end(); it++) 
     {
       currency::tx_destination_entry de;
-      if(!m_wallet.get_transfer_address(it->address, de.addr))
+      currency::payment_id_t integrated_payment_id;
+      if (!m_wallet.get_transfer_address(it->address, de.addr, integrated_payment_id))
       {
         er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
         er.message = std::string("WALLET_RPC_ERROR_CODE_WRONG_ADDRESS: ") + it->address;
         return false;
       }
+      
+      if (!integrated_payment_id.empty())
+      {
+        if (!payment_id.empty())
+        {
+          er.code = WALLET_RPC_ERROR_CODE_WRONG_PAYMENT_ID;
+          er.message = std::string("address ") + it->address + " has integrated payment id " + epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) +
+            " which is incompatible with payment id " + epee::string_tools::buff_to_hex_nodelimer(payment_id) + " that was already assigned to this transfer";
+          return false;
+        }
+        payment_id = integrated_payment_id;
+      }
+      
       de.amount = it->amount;
       dsts.push_back(de);
     }
+
     try
     {
       std::vector<uint8_t> extra;
-      crypto::hash payment_id = AUTO_VAL_INIT(payment_id);
-      if(currency::parse_payment_id_from_hex_str(req.payment_id_hex, payment_id))
-      {
+      if (!payment_id.empty())
         currency::set_payment_id_to_tx_extra(extra, payment_id);
-      }
 
       currency::transaction tx;
-      m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, extra, tx);
+      currency::blobdata relay_blob;
+      m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, extra, tx, relay_blob, req.do_not_relay);
       res.tx_hash = boost::lexical_cast<std::string>(currency::get_transaction_hash(tx));
+      res.tx_blob = epee::string_tools::buff_to_hex_nodelimer(relay_blob);
       return true;
     }
     catch (const tools::error::daemon_busy& e)
@@ -156,23 +177,13 @@ namespace tools
   //------------------------------------------------------------------------------------------------------------------------------
   bool wallet_rpc_server::on_get_payments(const wallet_rpc::COMMAND_RPC_GET_PAYMENTS::request& req, wallet_rpc::COMMAND_RPC_GET_PAYMENTS::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
-    crypto::hash payment_id;
-    currency::blobdata payment_id_blob;
-    if(!epee::string_tools::parse_hexstr_to_binbuff(req.payment_id, payment_id_blob))
+    currency::payment_id_t payment_id;
+    if (!currency::parse_payment_id_from_hex_str(req.payment_id, payment_id))
     {
       er.code = WALLET_RPC_ERROR_CODE_WRONG_PAYMENT_ID;
       er.message = "Payment ID has invald format";
       return false;
     }
-
-    if(sizeof(payment_id) != payment_id_blob.size())
-    {
-      er.code = WALLET_RPC_ERROR_CODE_WRONG_PAYMENT_ID;
-      er.message = "Payment ID has invalid size";
-      return false;
-    }
-
-    payment_id = *reinterpret_cast<const crypto::hash*>(payment_id_blob.data());
 
     res.payments.clear();
     std::list<wallet2::payment_details> payment_list;
@@ -196,26 +207,16 @@ namespace tools
 
     for (auto & payment_id_str : req.payment_ids)
     {
-      crypto::hash payment_id;
-      currency::blobdata payment_id_blob;
+      currency::payment_id_t payment_id;
 
       // TODO - should the whole thing fail because of one bad id?
 
-      if(!epee::string_tools::parse_hexstr_to_binbuff(payment_id_str, payment_id_blob))
+      if(!currency::parse_payment_id_from_hex_str(payment_id_str, payment_id))
       {
         er.code = WALLET_RPC_ERROR_CODE_WRONG_PAYMENT_ID;
         er.message = "Payment ID has invalid format: " + payment_id_str;
         return false;
       }
-
-      if(sizeof(payment_id) != payment_id_blob.size())
-      {
-        er.code = WALLET_RPC_ERROR_CODE_WRONG_PAYMENT_ID;
-        er.message = "Payment ID has invalid size: " + payment_id_str;
-        return false;
-      }
-
-      payment_id = *reinterpret_cast<const crypto::hash*>(payment_id_blob.data());
 
       std::list<wallet2::payment_details> payment_list;
       m_wallet.get_payments(payment_id, payment_list, req.min_block_height);
@@ -233,6 +234,60 @@ namespace tools
     }
 
     return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANSFERS::request& req, wallet_rpc::COMMAND_RPC_GET_TRANSFERS::response& res, epee::json_rpc::error& er, connection_context& cntx)
+  {
+    return m_wallet.get_transfers(req, res);
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_convert_address(const wallet_rpc::COMMAND_RPC_CONVERT_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_CONVERT_ADDRESS::response& res, epee::json_rpc::error& er, connection_context& cntx)
+  {
+    //
+    // 1/2 standard address + payment id => integrated address
+    if (!req.address_str.empty() && req.integrated_address_str.empty())
+    {
+      currency::account_public_address addr;
+      if (!currency::get_account_address_from_str(addr, req.address_str))
+      {
+        er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
+        er.message = "invalid address: " + req.address_str;
+        return false;
+      }
+
+      currency::payment_id_t payment_id;
+      if (!req.payment_id_hex.empty() && !currency::parse_payment_id_from_hex_str(req.payment_id_hex, payment_id))
+      {
+        er.code = WALLET_RPC_ERROR_CODE_WRONG_PAYMENT_ID;
+        er.message = "invalid payment id: " + req.payment_id_hex;
+        return false;
+      }
+
+      res.integrated_address_str = currency::get_account_address_as_str(addr, payment_id);
+      return true;
+    }
+
+    //
+    // 2/2 integrated address => payment id + standard address
+    if (req.address_str.empty() && !req.integrated_address_str.empty())
+    {
+      currency::account_public_address addr;
+      currency::payment_id_t payment_id;
+      if (!currency::get_account_address_and_payment_id_from_str(addr, payment_id, req.integrated_address_str))
+      {
+        er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
+        er.message = "invalid address: " + req.integrated_address_str;
+        return false;
+      }
+
+      res.address_str = currency::get_account_address_as_str(addr);
+      res.payment_id_hex = epee::string_tools::buff_to_hex_nodelimer(payment_id);
+      return true;
+    }
+
+    er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
+    er.message = "wrong arguments, request was not understood";
+    return false;
   }
   //------------------------------------------------------------------------------------------------------------------------------
   bool wallet_rpc_server::on_maketelepod(const wallet_rpc::COMMAND_RPC_MAKETELEPOD::request& req, wallet_rpc::COMMAND_RPC_MAKETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx)

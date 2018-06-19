@@ -9,7 +9,6 @@ using namespace epee;
 #include "currency_basic_impl.h"
 #include "string_tools.h"
 #include "serialization/binary_utils.h"
-#include "serialization/vector.h"
 #include "currency_format_utils.h"
 #include "currency_config.h"
 #include "misc_language.h"
@@ -103,21 +102,6 @@ namespace currency {
     reward = reward_lo;
     return true;
   }
-  //------------------------------------------------------------------------------------
-  uint8_t get_account_address_checksum(const public_address_outer_blob& bl)
-  {
-    const unsigned char* pbuf = reinterpret_cast<const unsigned char*>(&bl);
-    uint8_t summ = 0;
-    for(size_t i = 0; i!= sizeof(public_address_outer_blob)-1; i++)
-      summ += pbuf[i];
-
-    return summ;
-  }
-  //-----------------------------------------------------------------------
-  std::string get_account_address_as_str(const account_public_address& adr)
-  {
-    return tools::base58::encode_addr(CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX, t_serializable_object_to_blob(adr));
-  }
   //-----------------------------------------------------------------------
   bool is_coinbase(const transaction& tx)
   {
@@ -130,69 +114,63 @@ namespace currency {
     return true;
   }
   //-----------------------------------------------------------------------
-  bool get_account_address_from_str(account_public_address& adr, const std::string& str)
+  std::string get_account_address_as_str(const account_public_address& addr, const payment_id_t& payment_id)
   {
-    if (2 * sizeof(public_address_outer_blob) != str.size())
+    return tools::base58::encode_addr(CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX, t_serializable_object_to_blob(addr) + payment_id);
+  }
+  //-----------------------------------------------------------------------
+  std::string get_account_address_as_str(const account_public_address& addr)
+  {
+    return tools::base58::encode_addr(CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX, t_serializable_object_to_blob(addr));
+  }
+  //-----------------------------------------------------------------------
+#define ADDRESS_KEYS_DATA_SIZE (sizeof(crypto::public_key) * 2)
+  
+  bool get_account_address_and_payment_id_from_str(account_public_address& addr, payment_id_t& payment_id, const std::string& str)
+  {
+    blobdata data;
+    uint64_t prefix;
+    if (!tools::base58::decode_addr(str, prefix, data))
     {
-      blobdata data;
-      uint64_t prefix;
-      if (!tools::base58::decode_addr(str, prefix, data))
-      {
-        LOG_PRINT_L1("Invalid address format");
-        return false;
-      }
-
-      if (CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX != prefix)
-      {
-        LOG_PRINT_L1("Wrong address prefix: " << prefix << ", expected " << CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX);
-        return false;
-      }
-
-      if (!::serialization::parse_binary(data, adr))
-      {
-        LOG_PRINT_L1("Account public address keys can't be parsed");
-        return false;
-      }
-
-      if (!crypto::check_key(adr.m_spend_public_key) || !crypto::check_key(adr.m_view_public_key))
-      {
-        LOG_PRINT_L1("Failed to validate address keys");
-        return false;
-      }
+      LOG_PRINT_L1("Invalid address format: " << str);
+      return false;
     }
-    else
+
+    if (CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX != prefix && CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX != prefix)
     {
-      // Old address format
-      std::string buff;
-      if(!string_tools::parse_hexstr_to_binbuff(str, buff))
-        return false;
-
-      if(buff.size()!=sizeof(public_address_outer_blob))
-      {
-        LOG_PRINT_L1("Wrong public address size: " << buff.size() << ", expected size: " << sizeof(public_address_outer_blob));
-        return false;
-      }
-
-      public_address_outer_blob blob = *reinterpret_cast<const public_address_outer_blob*>(buff.data());
-
-
-      if(blob.m_ver > CURRENCY_PUBLIC_ADDRESS_TEXTBLOB_VER)
-      {
-        LOG_PRINT_L1("Unknown version of public address: " << blob.m_ver << ", expected " << CURRENCY_PUBLIC_ADDRESS_TEXTBLOB_VER);
-        return false;
-      }
-
-      if(blob.check_sum != get_account_address_checksum(blob))
-      {
-        LOG_PRINT_L1("Wrong public address checksum");
-        return false;
-      }
-
-      //we success
-      adr = blob.m_address;
+      LOG_PRINT_L1("Wrong address prefix: " << prefix << ", expected " << CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX << " or " << CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX);
+      return false;
     }
+
+    if (data.size() < ADDRESS_KEYS_DATA_SIZE)
+    {
+      LOG_PRINT_L1("Address data is not enough: " << str << ", has only " << data.size() << " bytes");
+      return false;
+    }
+
+    std::string keys_data = data.substr(0, ADDRESS_KEYS_DATA_SIZE);
+    if (!::serialization::parse_binary(keys_data, addr))
+    {
+      LOG_PRINT_L1("Account public address keys can't be parsed");
+      return false;
+    }
+
+    if (!crypto::check_key(addr.m_spend_public_key) || !crypto::check_key(addr.m_view_public_key))
+    {
+      LOG_PRINT_L1("Failed to validate address keys");
+      return false;
+    }
+
+    // payment id is everything else (if present)
+    payment_id = data.substr(ADDRESS_KEYS_DATA_SIZE);
 
     return true;
+  }
+  //-----------------------------------------------------------------------
+  bool get_account_address_from_str(account_public_address& addr, const std::string& str)
+  {
+    payment_id_t stub;
+    return get_account_address_and_payment_id_from_str(addr, stub, str);
   }
 
   bool operator ==(const currency::transaction& a, const currency::transaction& b) {

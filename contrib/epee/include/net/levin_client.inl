@@ -138,7 +138,7 @@ inline
   head.m_signature = LEVIN_SIGNATURE;
   head.m_cb = in_buff.size();
   head.m_have_to_return_data = true;
-  head.m_command = command;
+  head.m_command = static_cast<uint32_t>(command);
   head.m_protocol_version = LEVIN_PROTOCOL_VER_1;
   head.m_flags = LEVIN_PACKET_REQUEST;
   if(!m_transport.send(&head, sizeof(head)))
@@ -147,23 +147,35 @@ inline
   if(!m_transport.send(in_buff))
     return -1;
 
+  //Since other side of connection could be running by async server, 
+  //we can receive some unexpected notify(forwarded broadcast notifications for example).
+  //let's ignore every notify in the channel until we get invoke response
   std::string local_buff;
-  if(!m_transport.recv_n(local_buff, sizeof(bucket_head2)))
-    return -1;
-
-  head = *(bucket_head2*)local_buff.data();
-
-
-  if(head.m_signature!=LEVIN_SIGNATURE) 
+  
+  while (true)
   {
-    LOG_PRINT_L0("Signature missmatch in response");
-    return -1;
+    if (!m_transport.recv_n(local_buff, sizeof(bucket_head2)))
+      return LEVIN_ERROR_NET_ERROR;
+
+    head = *(bucket_head2*)local_buff.data();
+    if (head.m_signature != LEVIN_SIGNATURE)
+    {
+      LOG_PRINT_L0("Signature missmatch in response");
+      return LEVIN_ERROR_SIGNATURE_MISMATCH;
+    }
+    if (!m_transport.recv_n(buff_out, head.m_cb))
+      return LEVIN_ERROR_NET_ERROR;
+
+    //now check if this is response to invoke  (and extra validate if it's response to this(!) invoke)
+    if (head.m_flags&LEVIN_PACKET_RESPONSE)
+    {
+      //we got response, extra validate if its response to our request
+      CHECK_AND_ASSERT_MES(head.m_command == static_cast<uint32_t>(command), LEVIN_ERROR_PROTOCOL_INCONSISTENT, "command id missmatch in response: " << head.m_command << ", expected: " << command);
+      return head.m_return_code;
+    }
   }
-
-  if(!m_transport.recv_n(buff_out, head.m_cb))
-    return -1;
-
-  return head.m_return_code;
+  //never comes here
+  return LEVIN_ERROR_INTERNAL;
 }
 //------------------------------------------------------------------------------
 inline
