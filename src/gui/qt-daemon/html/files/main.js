@@ -475,6 +475,10 @@ function on_sign() {
   last_timerId = setTimeout(function(){$("#signature_id").hide("fast");}, 15000);
 }
 
+function isBlank(str)
+ {
+    return (!str || /^\s*$/.test(str));
+}
 function on_transfer()
 {
     var addressInputVal = $('#transfer_address_id').val();
@@ -490,9 +494,18 @@ function on_transfer()
         lock_time: 0
     };
 
-    if (!addressValidation.valid) {
+    if (!addressValidation.valid)
+	{
+		return;
+	}
+
+	if(isBlank(addressValidation.payment_id_hex))
+	{
       transfer_obj.payment_id = $('#payment_id').val();
-    }
+    }else
+	{
+	  //do not set, wallet code set all the necessary things 
+	}
 
     var lock_time = 0; //parse_and_get_locktime();
     if(lock_time === undefined)
