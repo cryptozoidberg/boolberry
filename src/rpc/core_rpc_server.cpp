@@ -969,9 +969,9 @@ bool core_rpc_server::f_on_transaction_json(const F_COMMAND_RPC_GET_TRANSACTION_
   }
   res.txDetails.mixin = mixin;
 
-  crypto::hash paymentId;
+  payment_id_t paymentId;
   if (currency::get_payment_id_from_tx_extra(restx, paymentId)) {
-    res.txDetails.paymentId = string_tools::pod_to_hex(paymentId);
+    res.txDetails.paymentId = string_tools::buff_to_hex_nodelimer(paymentId);
   } else {
     res.txDetails.paymentId = "";
   }

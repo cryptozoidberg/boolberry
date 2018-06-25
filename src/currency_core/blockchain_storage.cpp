@@ -958,9 +958,9 @@ uint64_t blockchain_storage::get_current_comulative_blocksize_limit()
 uint64_t blockchain_storage::get_already_generated_coins(crypto::hash &hash, uint64_t &count)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  blocks_by_id_index::const_iterator it = m_blocks_index.find(hash);
-  if (m_blocks_index.end() != it) {
-    count = m_blocks[it->second].already_generated_coins;
+  auto it = m_db_blocks_index.find(hash);
+  if (m_db_blocks_index.end() != it) {
+    count = m_db_blocks[*it]->already_generated_coins;
     return true;
   }
   return false;
@@ -969,9 +969,9 @@ uint64_t blockchain_storage::get_already_generated_coins(crypto::hash &hash, uin
 uint64_t blockchain_storage::get_already_donated_coins(crypto::hash &hash, uint64_t &count)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  blocks_by_id_index::const_iterator it = m_blocks_index.find(hash);
-  if (m_blocks_index.end() != it) {
-    count = m_blocks[it->second].already_donated_coins;
+  auto it = m_db_blocks_index.find(hash);
+  if (m_db_blocks_index.end() != it) {
+    count = m_db_blocks[*it]->already_donated_coins;
     return true;
   }
   return false;
@@ -980,11 +980,11 @@ uint64_t blockchain_storage::get_already_donated_coins(crypto::hash &hash, uint6
 bool blockchain_storage::get_block_containing_tx(const crypto::hash &txId, crypto::hash &blockId, uint64_t &blockHeight)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  auto it = m_transactions.find(txId);
-  if (it == m_transactions.end()) {
+  auto it = m_db_transactions.find(txId);
+  if (!it) {
     return false;
   } else {
-    blockHeight = m_blocks[it->second.m_keeper_block_height].height;
+    blockHeight = m_db_blocks[it->m_keeper_block_height]->height;
     blockId = get_block_id_by_height(blockHeight);
     return true;
   }
