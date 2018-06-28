@@ -640,7 +640,7 @@ void Html5ApplicationViewer::open_wallet()
 {                        
   QString path = QFileDialog::getOpenFileName(this, tr("Open wallet File"),
     m_config.wallets_last_used_dir.c_str(),
-    tr("Boolberry wallet (*.bbr *.bbr.keys);; All files (*.*)"));
+    tr("All files (*.*)"));
   if (!path.length())
     return;
 
