@@ -69,6 +69,7 @@ set version=%version:~0,-2%
 echo '%version%'
 
 @echo "Signing...."
+@echo on
 signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% Boolberry.exe
 signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% boolbd.exe
 signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% simplewallet.exe
