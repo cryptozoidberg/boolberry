@@ -135,7 +135,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 @echo on
 @echo "Signing installer..."
-signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% o%BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%-installer.exe
+signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%-installer.exe
 
 
 
