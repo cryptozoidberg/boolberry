@@ -7,6 +7,7 @@ SET SOURCES_PATH=C:\home\deploy\boolberry\sources\boolberry
 set BOOST_ROOT=C:\local\boost_1_56_0
 set BOOST_LIBRARYDIR=C:\local\boost_1_56_0\lib64-msvc-12.0
 set EXTRA_FILES_PATH=C:\home\deploy\boolberry\extra_files
+set CERT_FILEPATH=C:\home\cert\bbr\boolberry.pfx
 
 cd %SOURCES_PATH%
 
@@ -67,9 +68,12 @@ FOR /F "tokens=3" %%a IN ('%cmd%') DO set version=%%a
 set version=%version:~0,-2%
 echo '%version%'
 
+@echo "Signing...."
+signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% Boolberry.exe
+signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% boolbd.exe
+signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% simplewallet.exe
 
-
-
+@echo "Copying...."
 mkdir bunch
 copy /Y Boolberry.exe bunch
 copy /Y boolbd.exe bunch
