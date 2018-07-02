@@ -74,6 +74,7 @@ function on_update_daemon_state(info_obj)
             $("#daemon_synchronization_text").text((info_obj.max_net_seen_height - info_obj.height).toString() + " blocks behind");
         $("#open_wallet_button").button("disable");
         $("#generate_wallet_button").button("disable");
+        $("#restore_wallet_button").button("disable");
         $("#domining_button").button("disable");
         //show progress
     }else if(info_obj.daemon_network_state == 2)//daemon_network_state_online
@@ -82,6 +83,7 @@ function on_update_daemon_state(info_obj)
         $("#daemon_status_text").addClass("daemon_view_general_status_value_success_text");
         $("#open_wallet_button").button("enable");
         $("#generate_wallet_button").button("enable");
+        $("#restore_wallet_button").button("enable");        
         disable_tab(document.getElementById('wallet_view_menu'), false);
         //load aliases
         update_aliases_autocompletion();
@@ -96,6 +98,7 @@ function on_update_daemon_state(info_obj)
         $("#daemon_status_text").removeClass("daemon_view_general_status_value_success_text");
         $("#open_wallet_button").button("disable");
         $("#generate_wallet_button").button("disable");
+        $("#restore_wallet_button").button("disable");        
         //$("#domining_button").button("disable");
 
         hide_wallet();
@@ -113,6 +116,7 @@ function on_update_daemon_state(info_obj)
 
         $("#open_wallet_button").button("disable");
         $("#generate_wallet_button").button("disable");
+        $("#restore_wallet_button").button("disable");        
         //$("#domining_button").button("disable");
 
         hide_wallet();
@@ -338,6 +342,27 @@ function on_open_wallet()
 function on_generate_new_wallet()
 {
     Qt_parent.generate_wallet();
+}
+
+function on_restore_wallet()
+{
+    var seed_phrase = Qt_parent.get_seed_text();
+    if (seed_phrase.length === 0)
+        return;
+
+    var wallet_path = Qt_parent.browse_wallet(false);
+    if (wallet_path.length === 0)
+        return;
+
+    var pass = Qt_parent.get_password();
+    if (pass.length === 0)
+        return;
+
+    var r = Qt_parent.restore_wallet(seed_phrase, pass, wallet_path);
+    if(!r) 
+    {
+        Qt_parent.message_box("Unable to restore wallet");
+    }
 }
 
 function show_wallet()
@@ -689,6 +714,7 @@ $(function()
 
     $("#open_wallet_button").button("disable");
     $("#generate_wallet_button").button("disable");
+    $("#restore_wallet_button").button("disable");
     $("#domining_button").button("disable");
 
 
@@ -696,7 +722,9 @@ $(function()
     $('#open_wallet_button').on('click',  on_open_wallet);
     $('#transfer_button_id').on('click',  on_transfer);
     $('#generate_wallet_button').on('click',  on_generate_new_wallet);
-    $('#close_wallet_button_id').on('click',  on_close_wallet);
+    $('#close_wallet_button_id').on('click', on_close_wallet);
+    $('#restore_wallet_button').on('click', on_restore_wallet);
+    
 
     $('#sign_button_id').on('click', on_sign);
 

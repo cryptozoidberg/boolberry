@@ -47,8 +47,11 @@ protected:
   public slots:
   QString browse_wallet(bool existing);
   void open_wallet();
-  void generate_wallet();
-  void restore_wallet(const QString& restore_text, const QString& password,
+  QString generate_wallet();
+  QString get_password();
+  QString get_seed_text();
+  //void restore_wallet(const QString& restore_text);
+  bool restore_wallet(const QString& restore_text, const QString& password,
     const QString& path);
   void close_wallet();
   void add_address(const QString& name, const QString& address,
