@@ -735,7 +735,7 @@ struct f_transaction_short_response {
 struct f_transaction_details_response {
   std::string hash;
   uint64_t receiveTime;
-  size_t size;
+  uint64_t size;
   std::string paymentId;
   uint64_t mixin;
   uint64_t fee;
@@ -935,8 +935,10 @@ struct F_COMMAND_RPC_GET_BLOCK_DETAILS {
   };
 };
 
-struct F_COMMAND_RPC_GET_TRANSACTION_DETAILS {
-  struct request {
+struct F_COMMAND_RPC_GET_TRANSACTION_DETAILS
+{
+  struct request 
+  {
     std::string hash;
 
     BEGIN_KV_SERIALIZE_MAP()
