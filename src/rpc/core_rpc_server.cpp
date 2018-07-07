@@ -697,13 +697,14 @@ bool core_rpc_server::f_on_blocks_list_json(const F_COMMAND_RPC_GET_BLOCKS_LIST:
       return false;
   }
 
-  uint32_t print_blocks_count = 30;
-  uint32_t last_height = req.height - print_blocks_count;
+  uint64_t print_blocks_count = 30;
+  uint64_t last_height = req.height - print_blocks_count;
   if (req.height <= print_blocks_count)  {
     last_height = 0;
   } 
 
-  for (uint32_t i = req.height; i >= last_height; i--) {
+  for (uint64_t i = req.height; i >= last_height; i--) 
+  {
     crypto::hash block_hash = m_core.get_block_id_by_height(static_cast<uint32_t>(i));
     block blk;
     if (!m_core.get_block_by_hash(block_hash, blk)) {

@@ -341,7 +341,8 @@ function on_open_wallet()
 
 function on_generate_new_wallet()
 {
-    Qt_parent.generate_wallet();
+    var seed_ = Qt_parent.generate_wallet();
+    var seed2 = seed_;
 }
 
 function on_restore_wallet()
