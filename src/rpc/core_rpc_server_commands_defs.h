@@ -704,10 +704,12 @@ struct EMPTY_STRUCT {
       END_KV_SERIALIZE_MAP()
     };
   };
-struct F_COMMAND_RPC_GET_POOL {
+struct F_COMMAND_RPC_GET_POOL
+{
   typedef std::vector<std::string> request;
 
-  struct response {
+  struct response 
+  {
     std::string transactions;
     std::string status;
 
@@ -718,7 +720,8 @@ struct F_COMMAND_RPC_GET_POOL {
     
   };
 };
-struct f_transaction_short_response {
+struct f_transaction_short_response
+{
   std::string hash;
   uint64_t fee;
   uint64_t amount_out;
@@ -732,7 +735,8 @@ struct f_transaction_short_response {
   END_KV_SERIALIZE_MAP()
 };
 
-struct f_transaction_details_response {
+struct f_transaction_details_response 
+{
   std::string hash;
   uint64_t receiveTime;
   uint64_t size;
@@ -752,7 +756,8 @@ struct f_transaction_details_response {
   END_KV_SERIALIZE_MAP()
 };
 
-struct f_txin_short {
+struct f_txin_short 
+{
   std::string k_image;
   uint64_t amount;
   BEGIN_KV_SERIALIZE_MAP()
@@ -761,7 +766,8 @@ struct f_txin_short {
   END_KV_SERIALIZE_MAP()
 };
 
-struct f_txout_short {
+struct f_txout_short 
+{
   std::string key;
   uint64_t amount;
   BEGIN_KV_SERIALIZE_MAP()
@@ -770,9 +776,10 @@ struct f_txout_short {
   END_KV_SERIALIZE_MAP()
 };
 
-struct f_block_short_response {
+struct f_block_short_response 
+{
   uint64_t timestamp;
-  uint32_t height;
+  uint64_t height;
   std::string hash;
   uint64_t tx_count;
   uint64_t cumul_size;
@@ -788,12 +795,13 @@ struct f_block_short_response {
   END_KV_SERIALIZE_MAP()
 };
 
-struct f_block_details_response {
+struct f_block_details_response 
+{
   uint8_t major_version;
   uint8_t minor_version;  
   uint64_t timestamp;
   std::string prev_hash;
-  uint32_t nonce;
+  uint64_t nonce;
   bool orphan_status;
   uint64_t height;
   uint64_t depth;
@@ -833,7 +841,9 @@ struct f_block_details_response {
     KV_SERIALIZE(totalFeeAmount)
   END_KV_SERIALIZE_MAP()
 };
-struct currency_base_coin {
+
+struct currency_base_coin
+{
   std::string name;
   std::string git;
 
@@ -843,7 +853,8 @@ struct currency_base_coin {
   END_KV_SERIALIZE_MAP()
 };
 
-struct currency_core {
+struct currency_core 
+{
   std::vector<std::string> SEED_NODES;
   uint64_t EMISSION_SPEED_FACTOR;
   uint64_t DIFFICULTY_TARGET_LOCAL;
@@ -895,8 +906,10 @@ struct currency_core {
   END_KV_SERIALIZE_MAP()
 };
 
-struct F_COMMAND_RPC_GET_BLOCKS_LIST {
-  struct request {
+struct F_COMMAND_RPC_GET_BLOCKS_LIST 
+{
+  struct request
+  {
     uint64_t height;
 
     BEGIN_KV_SERIALIZE_MAP()
@@ -904,7 +917,8 @@ struct F_COMMAND_RPC_GET_BLOCKS_LIST {
     END_KV_SERIALIZE_MAP()
   };
 
-  struct response {
+  struct response 
+  {
     std::vector<f_block_short_response> blocks; //transactions blobs as hex
     std::string status;
 
@@ -915,8 +929,10 @@ struct F_COMMAND_RPC_GET_BLOCKS_LIST {
   };
 };
 
-struct F_COMMAND_RPC_GET_BLOCK_DETAILS {
-  struct request {
+struct F_COMMAND_RPC_GET_BLOCK_DETAILS
+{
+  struct request 
+  {
     std::string hash;
 
     BEGIN_KV_SERIALIZE_MAP()
@@ -924,7 +940,8 @@ struct F_COMMAND_RPC_GET_BLOCK_DETAILS {
     END_KV_SERIALIZE_MAP()
   };
 
-  struct response {
+  struct response 
+  {
     f_block_details_response block;
     std::string status;
 
