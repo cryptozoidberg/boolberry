@@ -20,7 +20,10 @@ namespace currency
 #define CORE_RPC_STATUS_FAILED              "FAILED"
 #define CORE_RPC_STATUS_INVALID_ARGUMENT    "INVALID_ARGUMENT"
 
-
+struct EMPTY_STRUCT {
+  BEGIN_KV_SERIALIZE_MAP()
+  END_KV_SERIALIZE_MAP()
+};
   struct alias_rpc_details_base
   {
     std::string address;
@@ -356,6 +359,24 @@ namespace currency
     };
   };    
   //-----------------------------------------------
+  struct COMMAND_RPC_STOP_DAEMON
+  {
+	  struct request
+	  {
+		  BEGIN_KV_SERIALIZE_MAP()
+		  END_KV_SERIALIZE_MAP()
+	  };
+
+	  struct response
+	  {
+		  std::string status;
+
+		  BEGIN_KV_SERIALIZE_MAP()
+			  KV_SERIALIZE(status)
+		  END_KV_SERIALIZE_MAP()
+	  };
+  };
+  //-----------------------------------------------
   struct COMMAND_RPC_STOP_MINING
   {
     struct request
@@ -683,8 +704,299 @@ namespace currency
       END_KV_SERIALIZE_MAP()
     };
   };
+struct F_COMMAND_RPC_GET_POOL
+{
+  typedef std::vector<std::string> request;
 
+  struct response 
+  {
+    std::string transactions;
+    std::string status;
 
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(transactions)
+      KV_SERIALIZE(status)
+    END_KV_SERIALIZE_MAP()
+    
+  };
+};
+struct f_transaction_short_response
+{
+  std::string hash;
+  uint64_t fee;
+  uint64_t amount_out;
+  uint64_t size;
+
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(hash)
+    KV_SERIALIZE(fee)
+    KV_SERIALIZE(amount_out)
+    KV_SERIALIZE(size)
+  END_KV_SERIALIZE_MAP()
+};
+
+struct f_transaction_details_response 
+{
+  std::string hash;
+  uint64_t receiveTime;
+  uint64_t size;
+  std::string paymentId;
+  uint64_t mixin;
+  uint64_t fee;
+  uint64_t amount_out;
+
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(hash)
+    KV_SERIALIZE(receiveTime)
+    KV_SERIALIZE(size)
+    KV_SERIALIZE(paymentId)
+    KV_SERIALIZE(mixin)
+    KV_SERIALIZE(fee)
+    KV_SERIALIZE(amount_out)
+  END_KV_SERIALIZE_MAP()
+};
+
+struct f_txin_short 
+{
+  std::string k_image;
+  uint64_t amount;
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(k_image)
+    KV_SERIALIZE(amount)
+  END_KV_SERIALIZE_MAP()
+};
+
+struct f_txout_short 
+{
+  std::string key;
+  uint64_t amount;
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(key)
+    KV_SERIALIZE(amount)
+  END_KV_SERIALIZE_MAP()
+};
+
+struct f_block_short_response 
+{
+  uint64_t timestamp;
+  uint64_t height;
+  std::string hash;
+  uint64_t tx_count;
+  uint64_t cumul_size;
+  difficulty_type difficulty;
+
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(timestamp)
+    KV_SERIALIZE(height)
+    KV_SERIALIZE(hash)
+    KV_SERIALIZE(cumul_size)
+    KV_SERIALIZE(tx_count)
+    KV_SERIALIZE(difficulty)
+  END_KV_SERIALIZE_MAP()
+};
+
+struct f_block_details_response 
+{
+  uint8_t major_version;
+  uint8_t minor_version;  
+  uint64_t timestamp;
+  std::string prev_hash;
+  uint64_t nonce;
+  bool orphan_status;
+  uint64_t height;
+  uint64_t depth;
+  std::string hash;
+  difficulty_type difficulty;
+  uint64_t reward;
+  uint64_t blockSize;
+  uint64_t sizeMedian;
+  uint64_t transactionsCumulativeSize;
+  uint64_t alreadyGeneratedCoins;
+  uint64_t alreadyGeneratedTransactions;
+  uint64_t baseReward;
+  double penalty;
+  uint64_t totalFeeAmount;
+  std::vector<f_transaction_short_response> transactions;
+
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(major_version)
+    KV_SERIALIZE(minor_version)
+    KV_SERIALIZE(timestamp)
+    KV_SERIALIZE(prev_hash)
+    KV_SERIALIZE(nonce)
+    KV_SERIALIZE(orphan_status)
+    KV_SERIALIZE(height)
+    KV_SERIALIZE(depth)
+    KV_SERIALIZE(hash)
+    KV_SERIALIZE(difficulty)
+    KV_SERIALIZE(reward)
+    KV_SERIALIZE(blockSize)
+    KV_SERIALIZE(sizeMedian)
+    KV_SERIALIZE(transactionsCumulativeSize)
+    KV_SERIALIZE(alreadyGeneratedCoins)
+    KV_SERIALIZE(alreadyGeneratedTransactions)
+    KV_SERIALIZE(baseReward)
+    KV_SERIALIZE(penalty)
+    KV_SERIALIZE(transactions)
+    KV_SERIALIZE(totalFeeAmount)
+  END_KV_SERIALIZE_MAP()
+};
+
+struct currency_base_coin
+{
+  std::string name;
+  std::string git;
+
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(name)
+    KV_SERIALIZE(git)
+  END_KV_SERIALIZE_MAP()
+};
+
+struct currency_core 
+{
+  std::vector<std::string> SEED_NODES;
+  uint64_t EMISSION_SPEED_FACTOR;
+  uint64_t DIFFICULTY_TARGET_LOCAL;
+  uint64_t CRYPTONOTE_DISPLAY_DECIMAL_POINT;
+  std::string MONEY_SUPPLY;
+  uint64_t GENESIS_BLOCK_REWARD;
+  uint64_t DEFAULT_DUST_THRESHOLD_LOCAL;
+  uint64_t MINIMUM_FEE;
+  uint64_t CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW;
+  uint64_t CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE;
+  uint64_t CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V1;
+  uint64_t CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
+  uint64_t P2P_DEFAULT_PORT_LOCAL;
+  uint64_t RPC_DEFAULT_PORT_LOCAL;
+  uint64_t MAX_BLOCK_SIZE_INITIAL;
+  uint64_t EXPECTED_NUMBER_OF_BLOCKS_PER_DAY;
+  uint64_t UPGRADE_HEIGHT;
+  uint64_t DIFFICULTY_CUT_LOCAL;
+  uint64_t DIFFICULTY_LAG_LOCAL;
+  std::string BYTECOIN_NETWORK;
+  std::string CRYPTONOTE_NAME;
+  std::string GENESIS_COINBASE_TX_HEX;
+  std::vector<std::string> CHECKPOINTS;
+
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(SEED_NODES)
+    KV_SERIALIZE(EMISSION_SPEED_FACTOR)
+    KV_SERIALIZE_N(DIFFICULTY_TARGET_LOCAL, "difficulty_target")
+    KV_SERIALIZE(CRYPTONOTE_DISPLAY_DECIMAL_POINT)
+    KV_SERIALIZE(MONEY_SUPPLY)
+    KV_SERIALIZE(GENESIS_BLOCK_REWARD)
+    KV_SERIALIZE_N(DEFAULT_DUST_THRESHOLD_LOCAL, "default_dust_threshold")
+    KV_SERIALIZE(MINIMUM_FEE)
+    KV_SERIALIZE(CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW)
+    KV_SERIALIZE(CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE)
+    KV_SERIALIZE(CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V1)
+    KV_SERIALIZE(CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX)
+    KV_SERIALIZE_N(P2P_DEFAULT_PORT_LOCAL, "p2p_default_port")
+    KV_SERIALIZE_N(RPC_DEFAULT_PORT_LOCAL, "rpc_default_port")
+    KV_SERIALIZE(MAX_BLOCK_SIZE_INITIAL)
+    KV_SERIALIZE(EXPECTED_NUMBER_OF_BLOCKS_PER_DAY)
+    KV_SERIALIZE(UPGRADE_HEIGHT)
+    KV_SERIALIZE_N(DIFFICULTY_CUT_LOCAL, "difficulty_cut")
+    KV_SERIALIZE_N(DIFFICULTY_LAG_LOCAL, "difficulty_lag")
+    KV_SERIALIZE(BYTECOIN_NETWORK)
+    KV_SERIALIZE(CRYPTONOTE_NAME)
+    KV_SERIALIZE(GENESIS_COINBASE_TX_HEX)
+    KV_SERIALIZE(CHECKPOINTS)
+  END_KV_SERIALIZE_MAP()
+};
+
+struct F_COMMAND_RPC_GET_BLOCKS_LIST 
+{
+  struct request
+  {
+    uint64_t height;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(height)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct response 
+  {
+    std::vector<f_block_short_response> blocks; //transactions blobs as hex
+    std::string status;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(blocks)
+      KV_SERIALIZE(status)
+    END_KV_SERIALIZE_MAP()
+  };
+};
+
+struct F_COMMAND_RPC_GET_BLOCK_DETAILS
+{
+  struct request 
+  {
+    std::string hash;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(hash)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct response 
+  {
+    f_block_details_response block;
+    std::string status;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(block)
+      KV_SERIALIZE(status)
+    END_KV_SERIALIZE_MAP()
+  };
+};
+
+struct F_COMMAND_RPC_GET_TRANSACTION_DETAILS
+{
+  struct request 
+  {
+    std::string hash;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(hash)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct response {
+//    currency::transaction tx;
+    std::vector<f_txin_short> txin;
+    std::vector<f_txout_short> txout;
+    //std::vector<std::vector<crypto::signature> > signatures;
+    f_transaction_details_response txDetails;
+    f_block_short_response ablock;
+    std::string status;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(txin)
+      KV_SERIALIZE(txout)
+      KV_SERIALIZE(txDetails)
+      KV_SERIALIZE_N(ablock, "block")
+      KV_SERIALIZE(status)
+    END_KV_SERIALIZE_MAP()
+  };
+};
+struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
+  typedef EMPTY_STRUCT request;
+  struct response {
+    currency_base_coin base_coin;
+    currency_core core;
+    std::vector<std::string> extensions;
+    std::string status;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(base_coin)
+      KV_SERIALIZE(core)
+      KV_SERIALIZE(extensions)
+      KV_SERIALIZE(status)
+    END_KV_SERIALIZE_MAP()
+  };
+};
   struct COMMAND_RPC_VALIDATE_SIGNED_TEXT
   {
     struct request

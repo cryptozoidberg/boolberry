@@ -107,8 +107,6 @@ namespace currency
     {
 
       context.m_state = currency_connection_context::state_normal;
-      if(is_inital)
-        on_connection_synchronized();
       return true;
     }
 
@@ -418,6 +416,30 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::on_idle()
   {
+
+    size_t count_synced = 0;
+    size_t count_total = 0;
+    m_p2p->for_each_connection([&](currency_connection_context& context, nodetool::peerid_type peer_id)->bool{
+      if (context.m_state == currency_connection_context::state_normal)
+      {
+        ++count_synced;
+      }
+      ++count_total;
+      return true;
+    });
+
+    if (count_total && count_synced && count_synced >= count_total / 2 && !m_synchronized)
+    {
+      on_connection_synchronized();
+      m_synchronized = true;
+      LOG_PRINT_MAGENTA("Synchronized set to TRUE (idle)", LOG_LEVEL_0);
+    }
+    else if ((!count_total || count_synced < count_total / 3) && m_synchronized)
+    {
+      LOG_PRINT_MAGENTA("Synchronized set to FALSE (idle)", LOG_LEVEL_0);
+      m_synchronized = false;
+    }
+
     return m_core.on_idle();
   }
   //------------------------------------------------------------------------------------------------------------------------
@@ -478,7 +500,7 @@ namespace currency
       
       context.m_state = currency_connection_context::state_normal;
       LOG_PRINT_CCONTEXT_GREEN(" SYNCHRONIZED OK", LOG_LEVEL_0);
-      on_connection_synchronized();
+
     }
     return true;
   }

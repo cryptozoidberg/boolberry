@@ -341,7 +341,29 @@ function on_open_wallet()
 
 function on_generate_new_wallet()
 {
-    Qt_parent.generate_wallet();
+    var seed_ = Qt_parent.generate_wallet();
+    var seed2 = seed_;
+}
+
+function on_restore_wallet()
+{
+    var seed_phrase = Qt_parent.get_seed_text();
+    if (seed_phrase.length === 0)
+        return;
+
+    var wallet_path = Qt_parent.browse_wallet(false);
+    if (wallet_path.length === 0)
+        return;
+
+    var pass = Qt_parent.get_password();
+    if (pass.length === 0)
+        return;
+
+    var r = Qt_parent.restore_wallet(seed_phrase, pass, wallet_path);
+    if(!r) 
+    {
+        Qt_parent.message_box("Unable to restore wallet");
+    }
 }
 
 function on_restore_wallet()
