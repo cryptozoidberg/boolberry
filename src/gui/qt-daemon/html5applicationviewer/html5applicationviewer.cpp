@@ -599,6 +599,14 @@ QString Html5ApplicationViewer::generate_wallet()
   std::string seed; //not used yet
   m_backend.generate_wallet(path.toStdString(), pass.toStdString(), seed);
   QString res = seed.c_str();
+
+  QString message = "This is your wallet seed phrase:\n\n";
+  message += res + "\n\n";
+  message += "Please write it on the paper and put it in some safe place";
+
+
+  QMessageBox::information(m_d, "Important", message, QMessageBox::Ok);
+
   return res;
 }
 
