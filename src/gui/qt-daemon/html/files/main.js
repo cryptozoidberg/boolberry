@@ -341,8 +341,22 @@ function on_open_wallet()
 
 function on_generate_new_wallet()
 {
-    var seed_ = Qt_parent.generate_wallet();
-    var seed2 = seed_;
+  var seed_phrase = Qt_parent.generate_wallet();
+  showModal(seed_phrase);
+}
+
+function showModal(text) {
+  var $modal = $('#modal');
+  var $modalText = $('#modal-text');
+  var $modalButton = $('#modal-button');
+
+  $($modal).toggle();
+  $($modalText).text(text);
+
+  $($modalButton).click(function() {
+    $($modalText).text('');
+    $($modal).toggle();
+  });
 }
 
 function on_restore_wallet()
