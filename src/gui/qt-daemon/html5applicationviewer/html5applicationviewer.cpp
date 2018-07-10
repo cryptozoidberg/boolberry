@@ -580,7 +580,7 @@ QString Html5ApplicationViewer::generate_wallet()
   std::string default_file = (tools::get_current_username() + "_wallet.bbr").c_str();
   QString path = dialogFile.getSaveFileName(this, tr("Wallet file to store"),
     (m_config.wallets_last_used_dir + "/" + default_file).c_str(),
-    tr("All files (*.*)"));
+    tr("All files (*)"));
 
   if (!path.length())
     return QString();
@@ -599,6 +599,14 @@ QString Html5ApplicationViewer::generate_wallet()
   std::string seed; //not used yet
   m_backend.generate_wallet(path.toStdString(), pass.toStdString(), seed);
   QString res = seed.c_str();
+// 
+//   QString message = "This is your wallet seed phrase:\n\n";
+//   message += res + "\n\n";
+//   message += "Please write it on the paper and put it in some safe place";
+// 
+// 
+//   QMessageBox::information(m_d, "Important", message, QMessageBox::Ok);
+
   return res;
 }
 
@@ -652,13 +660,13 @@ QString Html5ApplicationViewer::browse_wallet(bool existing)
   {
     return QFileDialog::getOpenFileName(this, tr("Open wallet File"),
       m_config.wallets_last_used_dir.c_str(),
-      tr("All files (*.*)"));
+      tr("All files (*)"));
   }
   QFileDialog dialogFile(this);
   std::string default_file = (tools::get_current_username() + "_wallet.bbr").c_str();
   return dialogFile.getSaveFileName(this, tr("Wallet file to store"),
     (m_config.wallets_last_used_dir + "/" + default_file).c_str(),
-    tr("All files (*.*)"));
+    tr("All files (*)"));
 }
 
 QString Html5ApplicationViewer::get_password()
@@ -689,7 +697,7 @@ void Html5ApplicationViewer::open_wallet()
 {                        
   QString path = QFileDialog::getOpenFileName(this, tr("Open wallet File"),
     m_config.wallets_last_used_dir.c_str(),
-    tr("All files (*.*)"));
+    tr("All files (*)"));
   if (!path.length())
     return;
 

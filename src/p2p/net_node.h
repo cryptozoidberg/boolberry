@@ -247,6 +247,7 @@ namespace nodetool
     std::map<net_address, time_t> m_conn_fails_cache;
     critical_section m_conn_fails_cache_lock;
     crypto::public_key m_maintainers_pub_key;
+    crypto::public_key m_maintainers_pub_key2;
 
     maintainers_info m_maintainers_info_local;
     maintainers_entry m_maintainers_entry_local;

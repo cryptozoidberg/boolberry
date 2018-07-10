@@ -54,6 +54,9 @@ namespace nodetool
     bool r = string_tools::hex_to_pod(P2P_MAINTAINERS_PUB_KEY, m_maintainers_pub_key);
     CHECK_AND_ASSERT_MES(r, false, "Failed to parse P2P_MAINTAINERS_PUB_KEY = " << P2P_MAINTAINERS_PUB_KEY);
 
+    r = string_tools::hex_to_pod(P2P_MAINTAINERS_PUB_KEY2, m_maintainers_pub_key2);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to parse P2P_MAINTAINERS_PUB_KEY2 = " << P2P_MAINTAINERS_PUB_KEY2);
+
     std::string state_file_path = m_config_folder + "/" + P2P_NET_DATA_FILENAME;
     tools::unserialize_obj_from_file(*this, state_file_path);
 
@@ -385,6 +388,10 @@ namespace nodetool
        return true;
 
      bool r = crypto::check_signature(crypto::cn_fast_hash(me.maintainers_info_buff.data(), me.maintainers_info_buff.size()), m_maintainers_pub_key, me.sign);
+     if (!r)
+     {
+       r = crypto::check_signature(crypto::cn_fast_hash(me.maintainers_info_buff.data(), me.maintainers_info_buff.size()), m_maintainers_pub_key2, me.sign);
+     }
      CHECK_AND_ASSERT_MES(r, false, "Failed to check signature in maintainers_entry");
      //signature ok, load from blob
      maintainers_info mi = AUTO_VAL_INIT(mi);
@@ -954,10 +961,15 @@ namespace nodetool
       LOG_ERROR("check_trust failed: peer_id mismatch (passed " << tr.peer_id << ", expected " << m_config.m_peer_id<< ")");
       return false;
     }
-    crypto::public_key pk = AUTO_VAL_INIT(pk);
-    string_tools::hex_to_pod(P2P_MAINTAINERS_PUB_KEY, pk);
+    //crypto::public_key pk = AUTO_VAL_INIT(pk);
+    //string_tools::hex_to_pod(P2P_MAINTAINERS_PUB_KEY, pk);
     crypto::hash h = tools::get_proof_of_trust_hash(tr);
-    if(!crypto::check_signature(h, pk, tr.sign))
+    bool r = crypto::check_signature(h, m_maintainers_pub_key, tr.sign);
+    if(!r)
+    {
+      r = crypto::check_signature(h, m_maintainers_pub_key2, tr.sign);
+    }
+    if (!r)
     {
       LOG_ERROR("check_trust failed: sign check failed");
       return false;

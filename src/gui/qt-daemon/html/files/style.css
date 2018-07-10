@@ -752,6 +752,36 @@ input:focus {
     margin-right: 12px;
 }
 
+.modal {
+    display: none;
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    width: 500px;
+    padding: 20px 20px 10px 20px;
+    -webkit-transform: translate(-50%, -30%);
+    text-align: center;
+    background-color: #fff;
+    border: 1px solid #bdbdbd;
+    z-index: 100;
+}
+
+.modal_title {
+    color: #3a3a3a;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.modal_content {
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #bdbdbd;
+    min-height: 100px;
+    text-align: left;
+}
+
 /*.active_panel_button {*/
     /*display: flex;*/
     /*justify-content: flex-end;*/
