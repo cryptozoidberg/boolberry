@@ -342,7 +342,10 @@ function on_open_wallet()
 function on_generate_new_wallet()
 {
   var seed_phrase = Qt_parent.generate_wallet();
-  showModal(seed_phrase);
+
+  if (seed_phrase) {
+    showModal(seed_phrase);
+  }
 }
 
 function showModal(text) {
@@ -350,12 +353,12 @@ function showModal(text) {
   var $modalText = $('#modal-text');
   var $modalButton = $('#modal-button');
 
-  $($modal).toggle();
+  $($modal).show();
   $($modalText).text(text);
 
   $($modalButton).click(function() {
     $($modalText).text('');
-    $($modal).toggle();
+    $($modal).hide();
   });
 }
 
