@@ -754,6 +754,16 @@ input:focus {
 
 .modal {
     display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 100;
+}
+
+.modal_content {
     position: absolute;
     top: 30%;
     left: 50%;
@@ -774,7 +784,7 @@ input:focus {
     margin-bottom: 20px;
 }
 
-.modal_content {
+.modal_text {
     margin-bottom: 10px;
     padding: 5px;
     border: 1px solid #bdbdbd;
