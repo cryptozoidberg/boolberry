@@ -229,6 +229,30 @@ namespace currency
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_relay_txs_to_net(const currency::COMMAND_RPC_RELAY_TXS::request& req, currency::COMMAND_RPC_RELAY_TXS::response& res, connection_context& cntx)
+  {
+    CHECK_CORE_READY();
+    NOTIFY_NEW_TRANSACTIONS::request r = AUTO_VAL_INIT(r);
+
+    for (const auto& t : req.raw_txs)
+    {
+      std::string tx_blob;
+      if (!string_tools::parse_hexstr_to_binbuff(t, tx_blob))
+      {
+        LOG_PRINT_L0("[on_relay_txs_to_net]: Failed to parse tx from hexbuff: " << t);
+        res.status = "Failed";
+        return true;
+      }
+      r.txs.push_back(tx_blob);
+    }
+
+    currency_connection_context fake_context = AUTO_VAL_INIT(fake_context);
+    bool call_res = m_core.get_protocol()->relay_transactions(r, fake_context);
+    if (call_res)
+      res.status = CORE_RPC_STATUS_OK;
+    return call_res;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_transactions(const COMMAND_RPC_GET_TRANSACTIONS::request& req, COMMAND_RPC_GET_TRANSACTIONS::response& res, connection_context& cntx)
   {
     CHECK_CORE_READY();

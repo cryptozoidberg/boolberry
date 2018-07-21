@@ -1022,5 +1022,26 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
     };
   };
 
+  struct COMMAND_RPC_RELAY_TXS
+  {
+    struct request
+    {
+      std::vector<std::string> raw_txs;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(raw_txs)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
 }
 

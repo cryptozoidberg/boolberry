@@ -42,6 +42,7 @@ namespace currency
     bool on_set_maintainers_info(const COMMAND_RPC_SET_MAINTAINERS_INFO::request& req, COMMAND_RPC_SET_MAINTAINERS_INFO::response& res, connection_context& cntx);
     bool on_get_tx_pool(const COMMAND_RPC_GET_TX_POOL::request& req, COMMAND_RPC_GET_TX_POOL::response& res, connection_context& cntx);
     bool on_check_keyimages(const COMMAND_RPC_CHECK_KEYIMAGES::request& req, COMMAND_RPC_CHECK_KEYIMAGES::response& res, connection_context& cntx);
+    bool on_relay_txs_to_net(const currency::COMMAND_RPC_RELAY_TXS::request& rqt, currency::COMMAND_RPC_RELAY_TXS::response& rsp, connection_context& cntx);
     
 
     //json_rpc
@@ -113,6 +114,7 @@ namespace currency
         MAP_JON_RPC_WE("f_pool_json",            f_on_pool_json,                F_COMMAND_RPC_GET_POOL)
         MAP_JON_RPC_IF("reset_transaction_pool", on_reset_transaction_pool,     COMMAND_RPC_RESET_TX_POOL, !m_restricted)
         MAP_JON_RPC_WE("getblock",               on_getblock,                   COMMAND_RPC_GETBLOCK)
+        MAP_JON_RPC("relay_txs",              on_relay_txs_to_net,           COMMAND_RPC_RELAY_TXS)
         MAP_JON_RPC("validate_signed_text",      on_validate_signed_text,       COMMAND_RPC_VALIDATE_SIGNED_TEXT)
         //remote miner rpc
         MAP_JON_RPC_N(on_login,            mining::COMMAND_RPC_LOGIN)

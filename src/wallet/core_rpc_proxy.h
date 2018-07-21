@@ -27,6 +27,7 @@ namespace tools
     virtual bool call_COMMAND_RPC_GET_TRANSACTIONS(const currency::COMMAND_RPC_GET_TRANSACTIONS::request& req, currency::COMMAND_RPC_GET_TRANSACTIONS::response& rsp) = 0;
     virtual bool call_COMMAND_RPC_COMMAND_RPC_CHECK_KEYIMAGES(const currency::COMMAND_RPC_CHECK_KEYIMAGES::request& req, currency::COMMAND_RPC_CHECK_KEYIMAGES::response& rsp) = 0;
     virtual bool call_COMMAND_RPC_VALIDATE_SIGNED_TEXT(const currency::COMMAND_RPC_VALIDATE_SIGNED_TEXT::request& req, currency::COMMAND_RPC_VALIDATE_SIGNED_TEXT::response& rsp) = 0;
+    virtual bool call_COMMAND_RPC_RELAY_TXS(const currency::COMMAND_RPC_RELAY_TXS::request& req, currency::COMMAND_RPC_RELAY_TXS::response& rsp) = 0;
     
     
 

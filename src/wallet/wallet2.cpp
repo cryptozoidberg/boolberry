@@ -476,6 +476,9 @@ void wallet2::refresh(size_t & blocks_fetched, bool& received_money)
     received_money = true;
 
   LOG_PRINT_L1("Refresh done, blocks received: " << blocks_fetched << ", balance: " << print_money(balance()) << ", unlocked: " << print_money(unlocked_balance()));
+  if (blocks_fetched)
+    resend_unconfirmed();
+
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::refresh(size_t & blocks_fetched, bool& received_money, bool& ok)
@@ -699,16 +702,22 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
     return;
   }
   bool r = tools::unserialize_obj_from_file(*this, m_wallet_file);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_read_error, m_wallet_file);
-  CHECK_AND_THROW_WALLET_EX(
-    m_account_public_address.m_spend_public_key != m_account.get_keys().m_account_address.m_spend_public_key ||
-    m_account_public_address.m_view_public_key  != m_account.get_keys().m_account_address.m_view_public_key,
-    error::wallet_files_doesnt_correspond, m_keys_file, m_wallet_file);
 
-  if(m_blockchain.empty())
+  bool need_to_resync = false;
+  if (!r || m_blockchain.empty() ||
+    (m_account_public_address.m_spend_public_key != m_account.get_keys().m_account_address.m_spend_public_key ||
+     m_account_public_address.m_view_public_key != m_account.get_keys().m_account_address.m_view_public_key)
+    )
   {
+    need_to_resync = true;
+  }
+
+  if (need_to_resync)
+  {
+    LOG_PRINT_L0("Wallet resyncing from genesis...");
     currency::block b;
     currency::generate_genesis_block(b);
+    m_blockchain.clear();
     m_blockchain.push_back(get_block_hash(b));
   }
   m_local_bc_height = m_blockchain.size();
@@ -1026,6 +1035,27 @@ namespace
 
     return res;
   }
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::resend_unconfirmed()
+{
+  COMMAND_RPC_RELAY_TXS::request req = AUTO_VAL_INIT(req);
+  COMMAND_RPC_RELAY_TXS::response res = AUTO_VAL_INIT(res);
+
+  for (auto& ut : m_unconfirmed_txs)
+  {
+    req.raw_txs.push_back(epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(ut.second.m_tx)));
+    LOG_PRINT_GREEN("Relaying tx: " << get_transaction_hash(ut.second.m_tx), LOG_LEVEL_0);
+  }
+
+  if (!req.raw_txs.size())
+    return;
+
+  bool r = m_core_proxy->call_COMMAND_RPC_RELAY_TXS(req, res);
+  CHECK_AND_ASSERT_MES(r, void(), "wrong result at call_COMMAND_RPC_FORCE_RELAY_RAW_TXS");
+  CHECK_AND_ASSERT_MES(res.status == CORE_RPC_STATUS_OK, void(), "wrong result at call_COMMAND_RPC_FORCE_RELAY_RAW_TXS: status != OK, status=" << res.status);
+
+  LOG_PRINT_GREEN("Relayed " << req.raw_txs.size() << " txs", LOG_LEVEL_0);
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::select_indices_for_transfer(std::list<size_t>& selected_indexes, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money)
