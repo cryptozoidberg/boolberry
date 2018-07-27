@@ -28,6 +28,53 @@
 #ifndef _PROFILE_TOOLS_H_
 #define _PROFILE_TOOLS_H_
 
+#include <chrono>
+
+// 0 - no profiling, 1 - basic, 2 - full, 3 - ultimate
+#define PROFILING_LEVEL 1
+
+#if PROFILING_LEVEL >= 1
+#  define PROF_L1_START(var) TIME_MEASURE_START(var)
+#  define PROF_L1_FINISH(var) TIME_MEASURE_FINISH(var)
+#  define PROF_L1_STR_MS(text, var) text << print_mcsec_as_ms(var, 8)
+#  define PROF_L1_STR(text) text
+#  define PROF_L1_DO(statement) statement
+#else
+#  define PROF_L1_START(var) 
+#  define PROF_L1_FINISH(var) 
+#  define PROF_L1_STR_MS(text, var) ""
+#  define PROF_L1_STR(text) ""
+#  define PROF_L1_DO(statement)
+#endif
+
+#if PROFILING_LEVEL >= 2
+#  define PROF_L2_START(var) TIME_MEASURE_START(var)
+#  define PROF_L2_FINISH(var) TIME_MEASURE_FINISH(var)
+#  define PROF_L2_STR_MS(text, var) text << print_mcsec_as_ms(var, 8)
+#  define PROF_L2_STR(text) text
+#  define PROF_L3_DO(statement) statement
+#else
+#  define PROF_L2_START(var) 
+#  define PROF_L2_FINISH(var) 
+#  define PROF_L2_STR_MS(text, var) ""
+#  define PROF_L2_STR(text) ""
+#  define PROF_L2_DO(statement)
+#endif
+
+#if PROFILING_LEVEL >= 3
+#  define PROF_L3_START(var) TIME_MEASURE_START(var)
+#  define PROF_L3_FINISH(var) TIME_MEASURE_FINISH(var)
+#  define PROF_L3_STR_MS(text, var) text << print_mcsec_as_ms(var, 8)
+#  define PROF_L3_STR(text) text
+#  define PROF_L3_DO(statement) statement
+#else
+#  define PROF_L3_START(var) 
+#  define PROF_L3_FINISH(var) 
+#  define PROF_L3_STR_MS(text, var) ""
+#  define PROF_L3_STR(text) ""
+#  define PROF_L3_DO(statement)
+#endif
+
 namespace epee
 {
 
@@ -64,15 +111,17 @@ namespace epee
 #define TIME_MEASURE_FINISH(var_name)   var_name = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - var_name##_chrono).count();
 
 
-  inline std::string print_mcsec(uint64_t am)
+  inline std::string print_mcsec_as_ms(uint64_t microseconds, size_t target_width = 0, char padding_char = ' ')
   {
     const uint64_t MCSEC_TO_MS_POINT = 3;
-    std::string s = std::to_string(am);
+    std::string s = std::to_string(microseconds);
     if (s.size() < MCSEC_TO_MS_POINT + 1)
     {
       s.insert(0, MCSEC_TO_MS_POINT + 1 - s.size(), '0');
     }
     s.insert(s.size() - MCSEC_TO_MS_POINT, ".");
+    if (s.size() < target_width)
+      s.insert(0, target_width - s.size(), padding_char);
     return s;
   }
 

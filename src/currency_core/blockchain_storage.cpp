@@ -2134,10 +2134,10 @@ bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
 bool blockchain_storage::add_transaction_from_block(const transaction& tx, const crypto::hash& tx_id, const crypto::hash& bl_id, uint64_t bl_height)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  TIME_MEASURE_START(process_tx_extra_time);
+  PROF_L2_START(process_tx_extra_time);
   bool r = process_blockchain_tx_extra(tx);
   CHECK_AND_ASSERT_MES(r, false, "failed to process_blockchain_tx_extra");
-  TIME_MEASURE_FINISH(process_tx_extra_time);
+  PROF_L2_FINISH(process_tx_extra_time);
   struct add_transaction_input_visitor : public boost::static_visitor<bool>
   {
     blockchain_storage& m_bcs;
@@ -2182,7 +2182,7 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
     bool operator()(const txin_to_scripthash& tx) const{ return false; }
   };
 
-  TIME_MEASURE_START(process_tx_inputs_time);
+  PROF_L2_START(process_tx_inputs_time);
   BOOST_FOREACH(const txin_v& in, tx.vin)
   {
     if (!boost::apply_visitor(add_transaction_input_visitor(*this, m_db_spent_keys, tx_id, bl_id), in))
@@ -2194,8 +2194,8 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
       return false;
     }
   }
-  TIME_MEASURE_FINISH(process_tx_inputs_time);
-  TIME_MEASURE_START(push_tx_to_global_index_time);
+  PROF_L2_FINISH(process_tx_inputs_time);
+  PROF_L2_START(push_tx_to_global_index_time_1);
   transaction_chain_entry ch_e;
   ch_e.m_keeper_block_height = bl_height;
   ch_e.m_spent_flags.resize(tx.vout.size(), false);
@@ -2203,6 +2203,8 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
 
   //check if there is already transaction with this hash
   auto tx_entry_ptr = m_db_transactions.get(tx_id);
+  PROF_L2_FINISH(push_tx_to_global_index_time_1);
+  PROF_L2_START(push_tx_to_global_index_time_2);
   if (tx_entry_ptr)
   {
     LOG_ERROR("critical internal error: tx with id: " << tx_id << " in block id: " << bl_id << " already in blockchain");
@@ -2214,21 +2216,23 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
 
   r = push_transaction_to_global_outs_index(tx, tx_id, ch_e.m_global_output_indexes);
   CHECK_AND_ASSERT_MES(r, false, "failed to return push_transaction_to_global_outs_index tx id " << tx_id);
-  TIME_MEASURE_FINISH(push_tx_to_global_index_time);
+  PROF_L2_FINISH(push_tx_to_global_index_time_2);
 
   //store everything to db
-  TIME_MEASURE_START(store_to_db_time);
+  PROF_L2_START(store_to_db_time);
   m_db_transactions.set(tx_id, ch_e);
-  TIME_MEASURE_FINISH(store_to_db_time);
+  PROF_L2_FINISH(store_to_db_time);
   LOG_PRINT_L2("Added transaction to blockchain history:" << ENDL
     << "tx_id: " << tx_id << ENDL
-    << "inputs: " << tx.vin.size() << ", outs: " << tx.vout.size() << ", spend money: " << print_money(get_outs_money_amount(tx)) << "(fee: " << (is_coinbase(tx) ? "0[coinbase]" : print_money(get_tx_fee(tx))) << ")" //<< ENDL
-//     << "Profile details: " << ENDL
-//     << "process_tx_extra_time: " << print_mcsec(process_tx_extra_time) << ENDL
-//     << "process_tx_inputs_time: " << print_mcsec(process_tx_inputs_time) << ENDL
-//     << "push_tx_to_global_index_time: " << print_mcsec(push_tx_to_global_index_time) << ENDL
-//     << "store_to_db_time: " << print_mcsec(store_to_db_time) << ENDL
-    );
+    << "inputs: " << tx.vin.size() << ", outs: " << tx.vout.size() << ", spend money: " << print_money(get_outs_money_amount(tx)) << "(fee: " << (is_coinbase(tx) ? "0[coinbase]" : print_money(get_tx_fee(tx))) << ")"
+    << PROF_L2_STR("  Profiling results (ms):")
+    << PROF_L2_STR_MS(ENDL << "  process_tx_extra_time:          ", process_tx_extra_time)
+    << PROF_L2_STR_MS(ENDL << "  process_tx_inputs_time:         ", process_tx_inputs_time)
+    << PROF_L2_STR_MS(ENDL << "  push_tx_to_global_index_time_1: ", push_tx_to_global_index_time_1)
+    << PROF_L2_STR_MS(ENDL << "  push_tx_to_global_index_time_2: ", push_tx_to_global_index_time_2)
+    << PROF_L2_STR_MS(ENDL << "  store_to_db_time:               ", store_to_db_time)
+    << PROF_L2_STR(ENDL)
+  );
 
   return true;
 }
@@ -2472,7 +2476,7 @@ bool blockchain_storage::prune_aged_alt_blocks()
 //------------------------------------------------------------------
 bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypto::hash& id, block_verification_context& bvc)
 {
-  TIME_MEASURE_START(block_processing_time);
+  PROF_L1_START(block_processing_time);
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
 
   if (bl.prev_id != get_top_block_id())
@@ -2483,7 +2487,7 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     return false;
   }
 
-  TIME_MEASURE_START(timestamp_check_time);
+  PROF_L2_START(timestamp_check_time);
   if (!check_block_timestamp_main(bl))
   {
     LOG_PRINT_L0("Block with id: " << id << ENDL
@@ -2492,14 +2496,14 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     bvc.m_verifivation_failed = true;
     return false;
   }
-  TIME_MEASURE_FINISH(timestamp_check_time);
+  PROF_L2_FINISH(timestamp_check_time);
 
   //check proof of work
-  TIME_MEASURE_START(target_calculating_time);
+  PROF_L1_START(target_calculating_time);
   wide_difficulty_type current_diffic = get_difficulty_for_next_block();
   CHECK_AND_ASSERT_MES(current_diffic, false, "!!!!!!!!! difficulty overhead !!!!!!!!!");
-  TIME_MEASURE_FINISH(target_calculating_time);
-  TIME_MEASURE_START(longhash_calculating_time);
+  PROF_L1_FINISH(target_calculating_time);
+  PROF_L1_START(longhash_calculating_time);
   crypto::hash proof_of_work = null_hash;
 
   proof_of_work = get_block_longhash(bl, m_db_blocks.size(), [&](uint64_t index) -> crypto::hash
@@ -2528,9 +2532,9 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   else
     m_is_in_checkpoint_zone = false;
 
-  TIME_MEASURE_FINISH(longhash_calculating_time);
+  PROF_L1_FINISH(longhash_calculating_time);
 
-  TIME_MEASURE_START(prevalidate_miner_tx_time);
+  PROF_L2_START(prevalidate_miner_tx_time);
   if (!prevalidate_miner_transaction(bl, m_db_blocks.size()))
   {
     LOG_PRINT_L0("Block with id: " << id
@@ -2538,9 +2542,9 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     bvc.m_verifivation_failed = true;
     return false;
   }
-  TIME_MEASURE_FINISH(prevalidate_miner_tx_time);
+  PROF_L2_FINISH(prevalidate_miner_tx_time);
 
-  TIME_MEASURE_START(add_miner_tx_time);
+  PROF_L2_START(add_miner_tx_time);
   size_t coinbase_blob_size = get_object_blobsize(bl.miner_tx);
   size_t cumulative_block_size = coinbase_blob_size;
   //process transactions
@@ -2550,10 +2554,10 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     bvc.m_verifivation_failed = true;
     return false;
   }
-  TIME_MEASURE_FINISH(add_miner_tx_time);
+  PROF_L2_FINISH(add_miner_tx_time);
 
 
-  TIME_MEASURE_START(process_transactions_time);
+  PROF_L2_START(process_transactions_time);
   size_t tx_processed_count = 0;
   uint64_t fee_summary = 0;
   BOOST_FOREACH(const crypto::hash& tx_id, bl.tx_hashes)
@@ -2603,10 +2607,10 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     cumulative_block_size += blob_size;
     ++tx_processed_count;
   }
-  TIME_MEASURE_FINISH(process_transactions_time);
+  PROF_L2_FINISH(process_transactions_time);
 
 
-  TIME_MEASURE_START(validate_miner_tx_time);
+  PROF_L2_START(validate_miner_tx_time);
   uint64_t base_reward = 0;
   uint64_t already_generated_coins = m_db_blocks.size() ? m_db_blocks.back()->already_generated_coins : 0;
   uint64_t already_donated_coins = m_db_blocks.size() ? m_db_blocks.back()->already_donated_coins : 0;
@@ -2619,10 +2623,10 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     bvc.m_verifivation_failed = true;
     return false;
   }
-  TIME_MEASURE_FINISH(validate_miner_tx_time);
+  PROF_L2_FINISH(validate_miner_tx_time);
 
 
-  TIME_MEASURE_START(update_blocks_table_time1);
+  PROF_L2_START(update_blocks_table_time1);
   block_extended_info bei = boost::value_initialized<block_extended_info>();
   bei.bl = bl;
   bei.scratch_offset = m_scratchpad_wr.get_scratchpad().size();
@@ -2644,9 +2648,9 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     return false;
   }
   m_db_blocks_index.set(id, bei.height);
-  TIME_MEASURE_FINISH(update_blocks_table_time1);
+  PROF_L2_FINISH(update_blocks_table_time1);
 
-  TIME_MEASURE_START(update_scratchpad_time);
+  PROF_L2_START(update_scratchpad_time);
   if (!m_scratchpad_wr.push_block_scratchpad_data(bl))
   {
     LOG_ERROR("Internal error for block id: " << id << ": failed to put_block_scratchpad_data");
@@ -2658,34 +2662,35 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
 #ifdef ENABLE_HASHING_DEBUG  
   LOG_PRINT_L3("SCRATCHPAD_SHOT FOR H=" << bei.height + 1 << ENDL << dump_scratchpad(m_scratchpad_wr.get_scratchpad()));
 #endif
-  TIME_MEASURE_FINISH(update_scratchpad_time);
+  PROF_L2_FINISH(update_scratchpad_time);
 
-  TIME_MEASURE_START(update_blocks_table_time2);
+  PROF_L2_START(update_blocks_table_time2);
   m_db_blocks.push_back(bei);
   update_next_comulative_size_limit();
-  TIME_MEASURE_FINISH(update_blocks_table_time2);
+  PROF_L2_FINISH(update_blocks_table_time2);
 
-  TIME_MEASURE_FINISH(block_processing_time);
+  PROF_L1_FINISH(block_processing_time);
   LOG_PRINT_L1("+++++ BLOCK SUCCESSFULLY ADDED" << ENDL << "id:\t" << id
     << ENDL << "PoW:\t" << proof_of_work
     << ENDL << "HEIGHT " << bei.height << ", difficulty:\t" << current_diffic
     << ENDL << "block reward: " << print_money(fee_summary + base_reward) << "(" << print_money(base_reward) << " + " << print_money(fee_summary)
     << ")" << ((bei.height%CURRENCY_DONATIONS_INTERVAL) ? std::string("") : std::string("donation: ") + print_money(donation_total)) << ", coinbase_blob_size: " << coinbase_blob_size << ", cumulative size: " << cumulative_block_size
-    << ", " << print_mcsec(block_processing_time)
-    << "(" << print_mcsec(target_calculating_time)
-    << "/" << print_mcsec(longhash_calculating_time) << ")ms" //<< ENDL
-//    << "Full profiling: " << ENDL
-//     << "timestamp_check_time: " << print_mcsec(timestamp_check_time) << ENDL
-//     << "target_calculating_time: " << print_mcsec(target_calculating_time) << ENDL
-//     << "longhash_calculating_time: " << print_mcsec(longhash_calculating_time) << ENDL
-//     << "prevalidate_miner_tx_time: " << print_mcsec(prevalidate_miner_tx_time) << ENDL
-//     << "add_miner_tx_time: " << print_mcsec(add_miner_tx_time) << ENDL
-//     << "process_transactions_time: " << print_mcsec(process_transactions_time) << ENDL
-//     << "validate_miner_tx_time: " << print_mcsec(validate_miner_tx_time) << ENDL
-//     << "update_blocks_table_time1: " << print_mcsec(update_blocks_table_time1) << ENDL
-//     << "update_scratchpad_time: " << print_mcsec(update_scratchpad_time) << ENDL
-//     << "update_blocks_table_time2: " << print_mcsec(update_blocks_table_time2)
-    );
+    << PROF_L1_STR(", " << print_mcsec_as_ms(block_processing_time))
+    << PROF_L1_STR("(" << print_mcsec_as_ms(target_calculating_time))
+    << PROF_L1_STR("/" << print_mcsec_as_ms(longhash_calculating_time))
+    << PROF_L1_STR(")ms")
+    << PROF_L2_STR("  Profiling results (ms): ")
+    << PROF_L2_STR_MS(ENDL << "  timestamp_check_time:       ", timestamp_check_time)
+    << PROF_L2_STR_MS(ENDL << "  target_calculating_time:    ", target_calculating_time)
+    << PROF_L2_STR_MS(ENDL << "  longhash_calculating_time:  ", longhash_calculating_time)
+    << PROF_L2_STR_MS(ENDL << "  prevalidate_miner_tx_time:  ", prevalidate_miner_tx_time)
+    << PROF_L2_STR_MS(ENDL << "  add_miner_tx_time:          ", add_miner_tx_time)
+    << PROF_L2_STR_MS(ENDL << "  process_transactions_time:  ", process_transactions_time)
+    << PROF_L2_STR_MS(ENDL << "  validate_miner_tx_time:     ", validate_miner_tx_time)
+    << PROF_L2_STR_MS(ENDL << "  update_blocks_table_time1:  ", update_blocks_table_time1)
+    << PROF_L2_STR_MS(ENDL << "  update_scratchpad_time:     ", update_scratchpad_time)
+    << PROF_L2_STR_MS(ENDL << "  update_blocks_table_time2:  ", update_blocks_table_time2)
+  );
 
   bvc.m_added_to_main_chain = true;
 
@@ -2716,15 +2721,18 @@ bool blockchain_storage::add_new_block(const block& bl_, block_verification_cont
     crypto::hash id = get_block_hash(bl);
     CRITICAL_REGION_LOCAL(m_tx_pool);//to avoid deadlock lets lock tx_pool for whole add/reorganize process
     CRITICAL_REGION_LOCAL1(m_blockchain_lock);
+    PROF_L2_START(time_have_block_check);
     if (have_block(id))
     {
       LOG_PRINT_L3("block with id = " << id << " already exists");
       bvc.m_already_exists = true;
       return false;
     }
+    PROF_L2_FINISH(time_have_block_check);
 
     //check that block refers to chain tail
 
+    PROF_L2_START(time_handle_alt);
     if (!(bl.prev_id == get_top_block_id()))
     {
       //chain switching or wrong block
@@ -2735,10 +2743,25 @@ bool blockchain_storage::add_new_block(const block& bl_, block_verification_cont
       return r;
       //never relay alternative blocks
     }
+    PROF_L2_FINISH(time_handle_alt);
 
+    PROF_L2_START(time_handle_main);
+    PROF_L2_START(time_handle_main_1);
     m_db.begin_transaction();
+    PROF_L2_FINISH(time_handle_main_1);
+    PROF_L2_START(time_handle_main_2);
     bool res = handle_block_to_main_chain(bl, id, bvc);
+    PROF_L2_FINISH(time_handle_main_2);
+    PROF_L2_START(time_handle_main_3);
     m_db.commit_transaction();
+    PROF_L2_FINISH(time_handle_main_3);
+    PROF_L2_FINISH(time_handle_main);
+
+#if PROFILING_LEVEL >= 2
+    LOG_PRINT_L2("bcs::add_new_block timings (ms) have block: " << print_mcsec_as_ms(time_have_block_check) << ", handle alt: " << print_mcsec_as_ms(time_handle_alt) <<
+      ", handle main: " << print_mcsec_as_ms(time_handle_main) << "(" << print_mcsec_as_ms(time_handle_main_1) << "+" << print_mcsec_as_ms(time_handle_main_2) << "+" << print_mcsec_as_ms(time_handle_main_3) << ")");
+#endif
+
     return res;
   }
   catch (const std::exception& ex)
