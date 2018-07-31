@@ -772,7 +772,7 @@ namespace db
     template<typename container_t>
     bool load_all_itmes_to_container(container_t& container) const
     {
-      m_dbb.begin_transaction(true);
+      super::m_dbb.begin_transaction(true);
 
       size_t items_count = super::size();
       container.clear();
@@ -794,7 +794,7 @@ namespace db
         };
       super::enumerate_items(lambda);
 
-      m_dbb.commit_transaction();
+      super::m_dbb.commit_transaction();
 
       CHECK_AND_ASSERT_MES(items_added == items_count, false, "internal DB error: items_added == " << items_added << ", items_count == " << items_count);
       return result;
