@@ -769,6 +769,37 @@ namespace db
       return ptr;
     }
 
+    template<typename container_t>
+    bool load_all_itmes_to_container(container_t& container) const
+    {
+      m_dbb.begin_transaction(true);
+
+      size_t items_count = super::size();
+      container.clear();
+      container.resize(items_count);
+
+      size_t items_added = 0;;
+      bool result = true;
+      auto lambda = [&](size_t item_idx, size_t key, const value_t& value) -> bool
+        {
+          if (key >= items_count)
+          {
+            LOG_ERROR("internal DB error during enumeration: items_count == " << items_count << ", item_idx == " << item_idx << ", key == " << key);
+            result = false;
+            return false;
+          }
+          container[key] = value;
+          ++items_added;
+          return true;
+        };
+      super::enumerate_items(lambda);
+
+      m_dbb.commit_transaction();
+
+      CHECK_AND_ASSERT_MES(items_added == items_count, false, "internal DB error: items_added == " << items_added << ", items_count == " << items_count);
+      return result;
+    }
+
   }; // class array_accessor
 
   template<class value_t, bool value_type_is_serializable>
