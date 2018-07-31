@@ -34,45 +34,57 @@
 #define PROFILING_LEVEL 1
 
 #if PROFILING_LEVEL >= 1
-#  define PROF_L1_START(var) TIME_MEASURE_START(var)
-#  define PROF_L1_FINISH(var) TIME_MEASURE_FINISH(var)
-#  define PROF_L1_STR_MS(text, var) text << print_mcsec_as_ms(var, 8)
-#  define PROF_L1_STR(text) text
+#  define PROF_L1_START(timer_var) TIME_MEASURE_START(timer_var)
+#  define PROF_L1_FINISH(timer_var) TIME_MEASURE_FINISH(timer_var)
+#  define PROF_L1_STR_MS(str, timer_var) str << epee::print_mcsec_as_ms(timer_var, 8)
+#  define PROF_L1_STR_MS_STR(str, timer_var, text2) str << epee::print_mcsec_as_ms(timer_var, 8) << text2
+#  define PROF_L1_STR(str) str
 #  define PROF_L1_DO(statement) statement
+#  define PROF_L1_LOG_PRINT(str, log_level) LOG_PRINT(str, log_level)
 #else
-#  define PROF_L1_START(var) 
-#  define PROF_L1_FINISH(var) 
-#  define PROF_L1_STR_MS(text, var) ""
-#  define PROF_L1_STR(text) ""
+#  define PROF_L1_START(timer_var) 
+#  define PROF_L1_FINISH(timer_var) 
+#  define PROF_L1_STR_MS(str, timer_var) ""
+#  define PROF_L1_STR_MS_STR(str, timer_var, text2) ""
+#  define PROF_L1_STR(str) ""
 #  define PROF_L1_DO(statement)
+#  define PROF_L1_LOG_PRINT(str, log_level)
 #endif
 
 #if PROFILING_LEVEL >= 2
-#  define PROF_L2_START(var) TIME_MEASURE_START(var)
-#  define PROF_L2_FINISH(var) TIME_MEASURE_FINISH(var)
-#  define PROF_L2_STR_MS(text, var) text << print_mcsec_as_ms(var, 8)
-#  define PROF_L2_STR(text) text
-#  define PROF_L3_DO(statement) statement
+#  define PROF_L2_START(timer_var) TIME_MEASURE_START(timer_var)
+#  define PROF_L2_FINISH(timer_var) TIME_MEASURE_FINISH(timer_var)
+#  define PROF_L2_STR_MS(str, timer_var) str << epee::print_mcsec_as_ms(timer_var, 8)
+#  define PROF_L2_STR_MS_STR(str, timer_var, text2) str << epee::print_mcsec_as_ms(timer_var, 8) << text2
+#  define PROF_L2_STR(str) str
+#  define PROF_L2_DO(statement) statement
+#  define PROF_L2_LOG_PRINT(str, log_level) LOG_PRINT(str, log_level)
 #else
-#  define PROF_L2_START(var) 
-#  define PROF_L2_FINISH(var) 
-#  define PROF_L2_STR_MS(text, var) ""
-#  define PROF_L2_STR(text) ""
+#  define PROF_L2_START(timer_var) 
+#  define PROF_L2_FINISH(timer_var) 
+#  define PROF_L2_STR_MS(str, timer_var) ""
+#  define PROF_L2_STR_MS_STR(str, timer_var, text2) ""
+#  define PROF_L2_STR(str) ""
 #  define PROF_L2_DO(statement)
+#  define PROF_L2_LOG_PRINT(str, log_level)
 #endif
 
 #if PROFILING_LEVEL >= 3
-#  define PROF_L3_START(var) TIME_MEASURE_START(var)
-#  define PROF_L3_FINISH(var) TIME_MEASURE_FINISH(var)
-#  define PROF_L3_STR_MS(text, var) text << print_mcsec_as_ms(var, 8)
-#  define PROF_L3_STR(text) text
+#  define PROF_L3_START(timer_var) TIME_MEASURE_START(timer_var)
+#  define PROF_L3_FINISH(timer_var) TIME_MEASURE_FINISH(timer_var)
+#  define PROF_L3_STR_MS(str, timer_var) str << epee::print_mcsec_as_ms(timer_var, 8)
+#  define PROF_L3_STR_MS_STR(str, timer_var, text2) str << epee::print_mcsec_as_ms(timer_var, 8) << text2
+#  define PROF_L3_STR(str) str
 #  define PROF_L3_DO(statement) statement
+#  define PROF_L3_LOG_PRINT(str, log_level) LOG_PRINT(str, log_level)
 #else
-#  define PROF_L3_START(var) 
-#  define PROF_L3_FINISH(var) 
-#  define PROF_L3_STR_MS(text, var) ""
-#  define PROF_L3_STR(text) ""
+#  define PROF_L3_START(timer_var) 
+#  define PROF_L3_FINISH(timer_var) 
+#  define PROF_L3_STR_MS(str, timer_var) ""
+#  define PROF_L3_STR_MS_STR(str, timer_var, text2) ""
+#  define PROF_L3_STR(str) ""
 #  define PROF_L3_DO(statement)
+#  define PROF_L3_LOG_PRINT(str, log_level)
 #endif
 
 namespace epee
