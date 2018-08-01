@@ -71,7 +71,7 @@ namespace db
     static_assert(std::is_pod<tkey_pod_t>::value, "pod type expected");
     CHECK_AND_ASSERT_THROW_MES(sizeof(tkey_pod_t) == len, "wrong size");
     CHECK_AND_ASSERT_THROW_MES(pointer != nullptr, "pointer is null");
-    tkey_out = *static_cast<tkey_pod_t*>(pointer);
+    tkey_out = *static_cast<const tkey_pod_t*>(pointer);
   }
 
   // std::string table keys accessors
@@ -252,7 +252,7 @@ namespace db
     static bool tvalue_from_pointer(const void* p, size_t s, value_t& v)
     {
       CHECK_AND_ASSERT_THROW_MES(s == sizeof(value_t), "wrong argument s = " << s << "expected: " << sizeof(value_t));
-      v = *reinterpret_cast<value_t*>(v);
+      v = *reinterpret_cast<const value_t*>(p);
       return true;
     }
 
@@ -767,6 +767,37 @@ namespace db
       std::shared_ptr<const value_t> ptr = super::get(k);
       CHECK_AND_ASSERT_THROW_MES(static_cast<bool>(ptr), "operator[] exceeding the limits with key " << k << ": size() = " << super::size() << ", size_no_cache() = " << super::size_no_cache());
       return ptr;
+    }
+
+    template<typename container_t>
+    bool load_all_itmes_to_container(container_t& container) const
+    {
+      super::m_dbb.begin_transaction(true);
+
+      size_t items_count = super::size();
+      container.clear();
+      container.resize(items_count);
+
+      size_t items_added = 0;;
+      bool result = true;
+      auto lambda = [&](size_t item_idx, size_t key, const value_t& value) -> bool
+        {
+          if (key >= items_count)
+          {
+            LOG_ERROR("internal DB error during enumeration: items_count == " << items_count << ", item_idx == " << item_idx << ", key == " << key);
+            result = false;
+            return false;
+          }
+          container[key] = value;
+          ++items_added;
+          return true;
+        };
+      super::enumerate_items(lambda);
+
+      super::m_dbb.commit_transaction();
+
+      CHECK_AND_ASSERT_MES(items_added == items_count, false, "internal DB error: items_added == " << items_added << ", items_count == " << items_count);
+      return result;
     }
 
   }; // class array_accessor

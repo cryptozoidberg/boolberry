@@ -291,7 +291,8 @@ namespace currency
   template<class t_core>
   int t_currency_protocol_handler<t_core>::handle_response_get_objects(int command, NOTIFY_RESPONSE_GET_OBJECTS::request& arg, currency_connection_context& context)
   {
-    LOG_PRINT_CCONTEXT_L2("NOTIFY_RESPONSE_GET_OBJECTS");
+    LOG_PRINT_CCONTEXT_YELLOW("NOTIFY_RESPONSE_GET_OBJECTS: " << arg.blocks.size() << " blocks, " << arg.txs.size() << " txs, remote height: " << arg.current_blockchain_height, LOG_LEVEL_2);
+
     if(context.m_last_response_height > arg.current_blockchain_height)
     {
       LOG_ERROR_CCONTEXT("sent wrong NOTIFY_HAVE_OBJECTS: arg.m_current_blockchain_height=" << arg.current_blockchain_height 
@@ -302,6 +303,9 @@ namespace currency
 
     context.m_remote_blockchain_height = arg.current_blockchain_height;
 
+    PROF_L2_DO(uint64_t syncing_conn_count_sum = get_synchronizing_connections_count(); uint64_t syncing_conn_count_count = 1);
+
+    PROF_L2_START(block_complete_entries_prevalidation_time);
     size_t count = 0;
     BOOST_FOREACH(const block_complete_entry& block_entry, arg.blocks)
     {
@@ -348,6 +352,9 @@ namespace currency
 
       context.m_requested_objects.erase(req_it);
     }
+    PROF_L2_FINISH(block_complete_entries_prevalidation_time);
+
+    PROF_L2_DO(syncing_conn_count_sum += get_synchronizing_connections_count(); ++syncing_conn_count_count);
 
     if(context.m_requested_objects.size())
     {
@@ -357,6 +364,7 @@ namespace currency
       return 1;
     }
 
+    PROF_L2_START(blocks_handle_time);
     {
       m_core.pause_mine();
       misc_utils::auto_scope_leave_caller scope_exit_handler = misc_utils::create_scope_leave_handler(
@@ -366,7 +374,7 @@ namespace currency
       {
         CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
         //process transactions
-        TIME_MEASURE_START(transactions_process_time);
+        PROF_L1_START(transactions_process_time);
         BOOST_FOREACH(auto& tx_blob, block_entry.txs)
         {
           CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
@@ -380,10 +388,10 @@ namespace currency
             return 1;
           }
         }
-        TIME_MEASURE_FINISH(transactions_process_time);
+        PROF_L1_FINISH(transactions_process_time);
 
         //process block
-        TIME_MEASURE_START(block_process_time);
+        PROF_L1_START(block_process_time);
         block_verification_context bvc = boost::value_initialized<block_verification_context>();
 
         m_core.handle_incoming_block(block_entry.block, bvc, false);
@@ -403,10 +411,23 @@ namespace currency
           return 1;
         }
 
-        TIME_MEASURE_FINISH(block_process_time);
-        LOG_PRINT_CCONTEXT_L2("Block process time: " << block_process_time + transactions_process_time << "(" << transactions_process_time << "/" << block_process_time << ")ms");
+        PROF_L1_FINISH(block_process_time);
+        PROF_L1_DO(LOG_PRINT_CCONTEXT_L2("Block process time: " << print_mcsec_as_ms(block_process_time + transactions_process_time) << "(" << print_mcsec_as_ms(transactions_process_time) << "/" << print_mcsec_as_ms(block_process_time) << ") ms"));
+
+        PROF_L2_DO(syncing_conn_count_sum += get_synchronizing_connections_count(); ++syncing_conn_count_count);
       }
     }
+    PROF_L2_FINISH(blocks_handle_time);
+
+#if PROFILING_LEVEL >= 2
+    double syncing_conn_count_av = syncing_conn_count_sum / static_cast<double>(syncing_conn_count_count);
+    size_t blocks_count = arg.blocks.size();
+    LOG_PRINT_CCONTEXT_YELLOW("NOTIFY_RESPONSE_GET_OBJECTS: " << blocks_count << " blocks were prevalidated in " << block_complete_entries_prevalidation_time / 1000
+      << " ms (" << std::fixed << std::setprecision(2) << block_complete_entries_prevalidation_time / 1000.0f / blocks_count << " ms per block av) and handled in " << blocks_handle_time / 1000
+      << " ms (" << std::fixed << std::setprecision(2) << blocks_handle_time / 1000.0f / blocks_count << " ms per block av)"
+      << " syncing conns av: " << std::fixed << std::setprecision(2) << syncing_conn_count_av, LOG_LEVEL_1);
+#endif
+
 
     request_missing_objects(context, true);
     return 1;

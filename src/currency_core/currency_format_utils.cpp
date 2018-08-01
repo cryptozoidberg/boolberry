@@ -254,17 +254,21 @@ namespace currency
   //---------------------------------------------------------------
   bool get_tx_fee(const transaction& tx, uint64_t & fee)
   {
+    fee = 0;
+    if (is_coinbase(tx))
+      return true;
+
     uint64_t amount_in = 0;
     uint64_t amount_out = 0;
-    BOOST_FOREACH(auto& in, tx.vin)
+    for(auto& in : tx.vin)
     {
-      CHECK_AND_ASSERT_MES(in.type() == typeid(txin_to_key), 0, "unexpected type id in transaction");
+      CHECK_AND_ASSERT_MES(in.type() == typeid(txin_to_key), 0, "tx " << get_transaction_hash(tx) << ": unexpected input type: " << in.type().name() << ", expected: txin_to_key");
       amount_in += boost::get<txin_to_key>(in).amount;
     }
-    BOOST_FOREACH(auto& o, tx.vout)
+    for(auto& o : tx.vout)
       amount_out += o.amount;
 
-    CHECK_AND_ASSERT_MES(amount_in >= amount_out, false, "transaction spend (" <<amount_in << ") more than it has (" << amount_out << ")");
+    CHECK_AND_ASSERT_MES(amount_in >= amount_out, false, "tx " << get_transaction_hash(tx) << ": outputs sum is " << print_money(amount_out) << ", which is more than it has in inputs: " << print_money(amount_in));
     fee = amount_in - amount_out;
     return true;
   }

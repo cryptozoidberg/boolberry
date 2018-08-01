@@ -5,30 +5,12 @@
 #include "boost/filesystem.hpp"
 #include "scratchpad_helpers.h"
 #include "file_io_utils.h"
+#include "profile_tools.h"
+
 //#define SELF_VALIDATE_SCRATCHPAD
+
 namespace currency
 {
-  bool load_scratchpad_from_db(const scratchpad_wrapper::scratchpad_container& m_db_scratchpad, std::vector<crypto::hash>& scratchpad_cache)
-  {
-    size_t count = m_db_scratchpad.size();
-    size_t sz_no_cache = m_db_scratchpad.size_no_cache();
-
-    scratchpad_cache.resize(count);
-    size_t i = 0;
-    for (; i != count; i++)
-    {
-      scratchpad_cache[i] = m_db_scratchpad[i];
-
-      size_t new_count = m_db_scratchpad.size();
-      //CHECK_AND_ASSERT_MES(count == new_count, false, "!!! achtung  #1, i = " << i << " : " << count << " != " << new_count);
-      size_t new_sz_no_cache = m_db_scratchpad.size_no_cache();
-      //CHECK_AND_ASSERT_MES(sz_no_cache == new_sz_no_cache, false, "!!! achtung #2, i = " << i << " : " << sz_no_cache << " != " << new_sz_no_cache);
-
-    }
-    return true;
-  }
-
-
   scratchpad_wrapper::scratchpad_wrapper(scratchpad_container& m_db_scratchpad) :m_rdb_scratchpad(m_db_scratchpad)
   {}
 
@@ -54,10 +36,13 @@ namespace currency
 
     if (!success_from_cache)
     {
-      LOG_PRINT_MAGENTA("Loading scratchpad db...", LOG_LEVEL_0);
+      LOG_PRINT_MAGENTA("Loading scratchpad from db...", LOG_LEVEL_0);
       //load scratchpad from db to cache
-      load_scratchpad_from_db(m_rdb_scratchpad, m_scratchpad_cache);
-      LOG_PRINT_MAGENTA("Scratchpad loaded from db OK (" << m_scratchpad_cache.size() << "elements, " << (m_scratchpad_cache.size() * 32) / 1024 << "KB)", LOG_LEVEL_0);
+      PROF_L1_START(cache_load_timer);
+      bool res = m_rdb_scratchpad.load_all_itmes_to_container(m_scratchpad_cache);
+      CHECK_AND_ASSERT_MES(res, false, "scratchpad loading failed");
+      PROF_L1_FINISH(cache_load_timer);
+      LOG_PRINT_MAGENTA("Scratchpad loaded from db OK (" << m_scratchpad_cache.size() << "elements, " << (m_scratchpad_cache.size() * 32) / 1024 << " KB)" << PROF_L1_STR_MS_STR(" in ", cache_load_timer, " ms"), LOG_LEVEL_0);
     }
 
     return true;
