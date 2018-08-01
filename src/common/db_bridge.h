@@ -71,7 +71,7 @@ namespace db
     static_assert(std::is_pod<tkey_pod_t>::value, "pod type expected");
     CHECK_AND_ASSERT_THROW_MES(sizeof(tkey_pod_t) == len, "wrong size");
     CHECK_AND_ASSERT_THROW_MES(pointer != nullptr, "pointer is null");
-    tkey_out = *static_cast<tkey_pod_t*>(pointer);
+    tkey_out = *static_cast<const tkey_pod_t*>(pointer);
   }
 
   // std::string table keys accessors
@@ -252,7 +252,7 @@ namespace db
     static bool tvalue_from_pointer(const void* p, size_t s, value_t& v)
     {
       CHECK_AND_ASSERT_THROW_MES(s == sizeof(value_t), "wrong argument s = " << s << "expected: " << sizeof(value_t));
-      v = *reinterpret_cast<value_t*>(v);
+      v = *reinterpret_cast<const value_t*>(p);
       return true;
     }
 
