@@ -14,9 +14,9 @@ IF (MSVC)
 	include_directories(SYSTEM platform/msvc)
 ELSE()
 	# set stuff for other systems
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -Wall -Werror")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -Wall")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -maes") # needed for AES
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Werror -Wno-reorder")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wno-reorder")
 ENDIF()
 
 
