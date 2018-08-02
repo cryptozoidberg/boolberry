@@ -482,8 +482,6 @@ namespace lmdb_test
   
   TEST(lmdb, single_value_test)
   {
-    bool r = false;
-
     const std::string options_table_name("options");
     
     std::shared_ptr<db::lmdb_adapter> lmdb_ptr = std::make_shared<db::lmdb_adapter>();

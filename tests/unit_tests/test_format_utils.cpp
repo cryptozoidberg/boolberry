@@ -109,9 +109,10 @@ TEST(parse_and_validate_tx_extra, put_and_load_alias)
   alias.m_text_comment = "werwrwerw";
 
   bool res = currency::construct_miner_tx(0, 0, 0, 0, 0, 1000, acc, acc, acc, miner_tx, currency::blobdata(), 10, 50, alias);
+  ASSERT_TRUE(res);
   currency::tx_extra_info ei = AUTO_VAL_INIT(ei);
-  bool r = parse_and_validate_tx_extra(miner_tx, ei);
-  ASSERT_TRUE(r);
+  res = parse_and_validate_tx_extra(miner_tx, ei);
+  ASSERT_TRUE(res);
   if(ei.m_alias.m_address.m_spend_public_key == alias.m_address.m_spend_public_key &&
     ei.m_alias.m_address.m_view_public_key == alias.m_address.m_view_public_key &&
     ei.m_alias.m_alias == alias.m_alias &&
