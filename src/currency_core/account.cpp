@@ -56,7 +56,7 @@ DISABLE_VS_WARNINGS(4244 4345)
     dependent_key(m_keys.m_spend_secret_key, m_keys.m_view_secret_key);
     if (!crypto::secret_key_to_public_key(m_keys.m_view_secret_key, m_keys.m_account_address.m_view_public_key))
       throw std::runtime_error("Failed to create public view key");
-    m_creation_timestamp = time(NULL);
+    m_creation_timestamp = 0; // if an account has been just restored we can't certainly say when it was created
   }
    //-----------------------------------------------------------------
   const account_keys& account_base::get_keys() const
