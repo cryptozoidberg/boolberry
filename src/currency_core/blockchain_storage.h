@@ -31,6 +31,7 @@
 #include "checkpoints.h"
 #include "scratchpad_helpers.h"
 #include "file_io_utils.h"
+#include "common/db_lmdb_adapter.h"
 
 MAKE_POD_C11(crypto::key_image);
 typedef std::pair<crypto::hash, uint64_t> macro_alias_1;
@@ -96,8 +97,9 @@ namespace currency
 
     blockchain_storage(tx_memory_pool& tx_pool);
 
-    bool init() { return init(tools::get_default_data_dir()); }
-    bool init(const std::string& config_folder);
+    static void init_options(boost::program_options::options_description& desc);
+
+    bool init(const boost::program_options::variables_map& vm, const std::string& config_folder);
     bool deinit();
 
     bool set_checkpoints(checkpoints&& chk_pts);
@@ -243,6 +245,7 @@ namespace currency
     tx_memory_pool& m_tx_pool;
 
     //main accessor
+    std::shared_ptr<db::lmdb_adapter> m_lmdb_adapter;
     db::db_bridge_base m_db;
     //containers
     blocks_container m_db_blocks;

@@ -55,7 +55,8 @@ DISABLE_VS_WARNINGS(4267)
 
 
 //------------------------------------------------------------------
-blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) :m_db(std::shared_ptr<db::i_db_adapter>(new db::lmdb_adapter())),
+blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) : m_lmdb_adapter(new db::lmdb_adapter()),
+                                                                 m_db(m_lmdb_adapter),
                                                                  m_db_blocks(m_db),
                                                                  m_db_blocks_index(m_db),
                                                                  m_db_transactions(m_db),
@@ -122,16 +123,23 @@ uint64_t blockchain_storage::get_current_blockchain_height()
 //   }
 // }
 //------------------------------------------------------------------
-bool blockchain_storage::init(const std::string& config_folder)
+void blockchain_storage::init_options(boost::program_options::options_description& desc)
+{
+  db::lmdb_adapter::init_options(desc);
+}
+//------------------------------------------------------------------
+bool blockchain_storage::init(const boost::program_options::variables_map& vm, const std::string& config_folder)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
 
+  bool res = m_lmdb_adapter->init(vm);
+  CHECK_AND_ASSERT_MES(res, false, "Unable to init lmdb adapter");
 
   m_config_folder = config_folder;
   LOG_PRINT_L0("Loading blockchain...");
   const std::string folder_name = m_config_folder + "/" CURRENCY_BLOCKCHAINDATA_FOLDERNAME;
   tools::create_directories_if_necessary(folder_name);
-  bool res = m_db.open(folder_name);
+  res = m_db.open(folder_name);
   CHECK_AND_ASSERT_MES(res, false, "Failed to initialize database in folder: " << folder_name);
 
   res = m_db_blocks.init(BLOCKCHAIN_CONTAINER_BLOCKS);
