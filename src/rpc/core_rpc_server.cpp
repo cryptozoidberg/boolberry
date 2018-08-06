@@ -806,7 +806,6 @@ bool core_rpc_server::f_on_block_json(const F_COMMAND_RPC_GET_BLOCK_DETAILS::req
   }
   res.block.sizeMedian = misc_utils::median(blocksSizes);
 
-  size_t blockSize = 0;
   std::vector<size_t> blocks_sizes;
     m_core.get_backward_blocks_sizes(res.block.height, blocks_sizes, 1);
   if (!misc_utils::median(blocks_sizes)) {

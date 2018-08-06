@@ -46,8 +46,9 @@ namespace currency
     m_blockchain_storage.set_checkpoints(std::move(chk_pts));
   }
   //-----------------------------------------------------------------------------------
-  void core::init_options(boost::program_options::options_description& /*desc*/)
+  void core::init_options(boost::program_options::options_description& desc)
   {
+    blockchain_storage::init_options(desc);
   }
   //-----------------------------------------------------------------------------------------------
   std::string core::get_config_folder()
@@ -128,7 +129,7 @@ namespace currency
     r = m_mempool.init(m_config_folder);
     CHECK_AND_ASSERT_MES(r, false, "Failed to initialize memory pool");
 
-    r = m_blockchain_storage.init(m_config_folder);
+    r = m_blockchain_storage.init(vm, m_config_folder);
     CHECK_AND_ASSERT_MES(r, false, "Failed to initialize blockchain storage");
 
     r = m_miner.init(vm);

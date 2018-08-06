@@ -9,6 +9,7 @@
 #include "common/util.h"
 #include "boost/thread/recursive_mutex.hpp"
 #include "epee/include/misc_language.h"
+#include "command_line.h"
 
 // TODO: estimate correct size
 #define LMDB_MEMORY_MAP_SIZE (128ull * 1024 * 1024 * 1024)
@@ -19,6 +20,8 @@
 
 namespace db
 {
+  const command_line::arg_descriptor<std::string> arg_db_sync_mode = { "db-sync-mode", "Specify DB sync mode: safe - do filesystem sync on each DB commit, fast - don't enforce FS syncs at all", "safe" };
+
   struct stack_entry_t
   {
     explicit stack_entry_t(MDB_txn* txn, bool ro_access) : txn(txn), ro_access(ro_access) {}
@@ -30,6 +33,8 @@ namespace db
   {
     lmdb_adapter_impl()
       : p_mdb_env(nullptr)
+      , m_db_flags_default(MDB_NORDAHEAD)
+      , m_db_flags(m_db_flags_default)
     {}
 
     MDB_txn* get_current_transaction() const
@@ -52,6 +57,8 @@ namespace db
     std::map<std::thread::id, std::list<stack_entry_t>> m_transaction_stack; // thread_id -> (tx_entry, tx_entry, ...)
     mutable boost::recursive_mutex m_transaction_stack_mutex; // protects m_transaction_stack
     mutable boost::recursive_mutex m_begin_commit_abort_mutex; // protects db transaction sequence
+    const unsigned int m_db_flags_default;
+    unsigned int m_db_flags;
   };
 
 
@@ -67,6 +74,33 @@ namespace db
     lmdb_adapter_impl* p = m_p_impl;
     m_p_impl = nullptr;
     delete p;
+  }
+
+  void lmdb_adapter::init_options(boost::program_options::options_description& desc)
+  {
+    command_line::add_arg(desc, arg_db_sync_mode);
+  }
+  
+  bool lmdb_adapter::init(const boost::program_options::variables_map& vm)
+  {
+    std::string sync_mode = command_line::get_arg(vm, arg_db_sync_mode);
+
+    m_p_impl->m_db_flags = m_p_impl->m_db_flags_default;
+    if (sync_mode == "fast")
+    {
+      m_p_impl->m_db_flags = m_p_impl->m_db_flags | MDB_NOSYNC;
+    }
+    else if (sync_mode == "safe")
+    {
+      // use default
+    }
+    else
+    {
+      LOG_ERROR("Invalid db-sync-mode option value: \"" << sync_mode << "\"");
+      return false;
+    }
+
+    return true;
   }
 
   bool lmdb_adapter::open(const std::string& db_name)
@@ -85,7 +119,8 @@ namespace db
     bool br = tools::create_directories_if_necessary(m_db_folder);
     CHECK_AND_ASSERT_MES(br, false, "create_directories_if_necessary failed");
 
-    r = mdb_env_open(m_p_impl->p_mdb_env, m_db_folder.c_str(), MDB_NORDAHEAD, 0644);
+    LOG_PRINT_L2("Opening lmdb database at " << m_db_folder << ", flags: 0x" << std::hex << m_p_impl->m_db_flags << " ...");
+    r = mdb_env_open(m_p_impl->p_mdb_env, m_db_folder.c_str(), m_p_impl->m_db_flags, 0644);
     CHECK_DB_CALL_RESULT(r, false, "mdb_env_open failed, m_db_folder = " << m_db_folder);
 
     return true;

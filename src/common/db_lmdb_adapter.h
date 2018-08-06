@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #pragma once
 #include "db_bridge.h"
+#include "boost/program_options.hpp"
 
 namespace db
 {
@@ -13,6 +14,9 @@ namespace db
   public:
     explicit lmdb_adapter();
     virtual ~lmdb_adapter();
+
+    static void init_options(boost::program_options::options_description& desc);
+    bool init(const boost::program_options::variables_map& vm);
 
     // interface i_db_adapter
     virtual bool open(const std::string& db_name) override;

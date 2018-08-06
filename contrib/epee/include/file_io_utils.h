@@ -440,8 +440,6 @@ namespace file_io_utils
         
         res.resize(file_size / sizeof(t_value));
 
-        size_t file_size_t = static_cast<size_t>(file_size);
-
         fstream.seekg(0, std::ios::beg);
         fstream.read((char*)&res[0], res.size()*sizeof(t_value));
         fstream.close();
