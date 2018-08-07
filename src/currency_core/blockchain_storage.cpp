@@ -1795,11 +1795,15 @@ bool blockchain_storage::find_blockchain_supplement(const std::list<crypto::hash
 bool blockchain_storage::find_blockchain_supplement(const std::list<crypto::hash>& qblock_ids, std::list<std::pair<block, std::list<transaction> > >& blocks, uint64_t& total_height, uint64_t& start_height, size_t max_count)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  PROF_L2_START(find_blockchain_supplement_time);
   if (!find_blockchain_supplement(qblock_ids, start_height))
     return false;
+  PROF_L2_FINISH(find_blockchain_supplement_time);
 
+  PROF_L2_START(get_transactions_time);
   total_height = get_current_blockchain_height();
   size_t count = 0;
+  size_t txs_count = 0;
   for (size_t i = start_height; i != m_db_blocks.size() && count < max_count; i++, count++)
   {
     blocks.resize(blocks.size() + 1);
@@ -1807,7 +1811,10 @@ bool blockchain_storage::find_blockchain_supplement(const std::list<crypto::hash
     std::list<crypto::hash> mis;
     get_transactions(m_db_blocks[i]->bl.tx_hashes, blocks.back().second, mis);
     CHECK_AND_ASSERT_MES(!mis.size(), false, "internal error, transaction from block not found");
+    txs_count += blocks.back().second.size();
   }
+  PROF_L2_FINISH(get_transactions_time);
+  PROF_L2_LOG_PRINT("find_blockchain_supplement(5): " << blocks.size() << " blocks, " << txs_count << " txs, timings: " << print_mcsec_as_ms(find_blockchain_supplement_time) << " / " << print_mcsec_as_ms(get_transactions_time), LOG_LEVEL_1);
   return true;
 }
 //------------------------------------------------------------------
@@ -2316,7 +2323,7 @@ bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::ha
     }
     if (!check_tx_input(in_to_key, tx_prefix_hash, *psig, pmax_used_block_height))
     {
-      LOG_PRINT_L0("Failed to check ring signature for tx " << get_transaction_hash(tx));
+      LOG_PRINT_L0("Failed to check input #" << sig_index << " for tx " << get_transaction_hash(tx));
       return false;
     }
 

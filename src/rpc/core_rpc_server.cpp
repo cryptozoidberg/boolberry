@@ -128,22 +128,30 @@ namespace currency
   bool core_rpc_server::on_get_blocks(const COMMAND_RPC_GET_BLOCKS_FAST::request& req, COMMAND_RPC_GET_BLOCKS_FAST::response& res, connection_context& cntx)
   {
     CHECK_CORE_READY();
+
+    PROF_L2_START(find_blockchain_supplement_time);
     std::list<std::pair<block, std::list<transaction> > > bs;
     if(!m_core.find_blockchain_supplement(req.block_ids, bs, res.current_height, res.start_height, COMMAND_RPC_GET_BLOCKS_FAST_MAX_COUNT))
     {
       res.status = "Failed";
       return false;
     }
+    PROF_L2_FINISH(find_blockchain_supplement_time);
 
-    BOOST_FOREACH(auto& b, bs)
+    PROF_L2_START(bs_to_res_time);
+    size_t txs_count = 0;
+    for (auto& b : bs)
     {
       res.blocks.resize(res.blocks.size()+1);
       res.blocks.back().block = block_to_blob(b.first);
-      BOOST_FOREACH(auto& t, b.second)
+      for(auto& t : b.second)
       {
         res.blocks.back().txs.push_back(tx_to_blob(t));
+        ++txs_count;
       }
     }
+    PROF_L2_FINISH(bs_to_res_time);
+    PROF_L2_LOG_PRINT("RPC: on_get_blocks: " << res.blocks.size() << " blocks, " << txs_count << " txs, timings: " << print_mcsec_as_ms(find_blockchain_supplement_time) << "/" << print_mcsec_as_ms(bs_to_res_time), LOG_LEVEL_1);
 
     res.status = CORE_RPC_STATUS_OK;
     return true;
