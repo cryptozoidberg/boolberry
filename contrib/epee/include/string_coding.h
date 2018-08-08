@@ -29,11 +29,17 @@
 #define _STRING_CODING_H_
 
 #include <string>
-//#include "md5_l.h"
+#include <boost/locale/encoding_utf.hpp>
+
 namespace epee
 {
 namespace string_encoding
 {
+  inline std::string wstring_to_utf8(const std::wstring& str)
+  {
+    return boost::locale::conv::utf_to_utf<char>(str.c_str(), str.c_str() + str.size());
+  }
+
 	inline std::string convert_to_ansii(const std::wstring& str_from)
 	{
 		
@@ -88,11 +94,12 @@ namespace string_encoding
 	inline std::wstring convert_to_unicode(const std::string& str_from)
 	{
 		std::wstring result;
-		std::locale loc;
+    std::locale loc = std::locale("");
 		for(unsigned int i= 0; i < str_from.size(); ++i)
 		{
 			result += std::use_facet<std::ctype<wchar_t> >(loc).widen(str_from[i]);
 		}
+
 		return result;
 		
 		//return boost::lexical_cast<std::wstring>(str_from);
@@ -114,6 +121,27 @@ namespace string_encoding
 	{
 		return str_from;
 	}
+
+  inline bool convert_to_utf8(const std::string& str_from, std::string& str_to)
+  {
+    try
+    {
+      std::wstring w = convert_to_unicode(str_from);
+      str_to = wstring_to_utf8(w);
+      return true;
+    }
+    catch(...)
+    {
+      return false;
+    }
+  }
+
+  inline std::string convert_to_utf8(const std::string& str_from)
+  {
+    std::string result("!?convert_to_utf8_FAILED!?");
+    convert_to_utf8(str_from, result);
+    return result;
+  }
 
 	template<class target_string>
 	inline target_string convert_to_t(const std::wstring& str_from);
@@ -289,7 +317,7 @@ namespace string_encoding
 #endif
 
 
-}
-}
+} // string_encoding
+} // epee
 
 #endif //_STRING_CODING_H_

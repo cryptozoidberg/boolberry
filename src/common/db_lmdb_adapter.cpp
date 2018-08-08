@@ -9,6 +9,7 @@
 #include "common/util.h"
 #include "boost/thread/recursive_mutex.hpp"
 #include "epee/include/misc_language.h"
+#include "epee/include/string_coding.h"
 #include "command_line.h"
 
 // TODO: estimate correct size
@@ -114,14 +115,15 @@ namespace db
     r = mdb_env_set_mapsize(m_p_impl->p_mdb_env, LMDB_MEMORY_MAP_SIZE);
     CHECK_DB_CALL_RESULT(r, false, "mdb_env_set_mapsize failed");
       
-    m_db_folder = db_name;
-    // TODO: any UTF-8 checks?
-    bool br = tools::create_directories_if_necessary(m_db_folder);
+    bool br = epee::string_encoding::convert_to_utf8(db_name, m_db_folder);
+    CHECK_AND_ASSERT_MES(br, false, "convert_to_utf8 failed");
+
+    br = tools::create_directories_if_necessary(m_db_folder);
     CHECK_AND_ASSERT_MES(br, false, "create_directories_if_necessary failed");
 
-    LOG_PRINT_L2("Opening lmdb database at " << m_db_folder << ", flags: 0x" << std::hex << m_p_impl->m_db_flags << " ...");
+    LOG_PRINT_L2("Opening lmdb database at " << db_name << ", flags: 0x" << std::hex << m_p_impl->m_db_flags << " ...");
     r = mdb_env_open(m_p_impl->p_mdb_env, m_db_folder.c_str(), m_p_impl->m_db_flags, 0644);
-    CHECK_DB_CALL_RESULT(r, false, "mdb_env_open failed, m_db_folder = " << m_db_folder);
+    CHECK_DB_CALL_RESULT(r, false, "mdb_env_open failed, m_db_folder = " << db_name);
 
     return true;
   }
