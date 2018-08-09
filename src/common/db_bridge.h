@@ -577,7 +577,7 @@ namespace db
     single_value& operator=(const single_value&) = delete;
 
     value_t operator=(value_t v) 
-    {	
+    {
       m_accessor.template explicit_set<key_t, value_t, value_type_helper_selector<value_type_is_serializable> >(m_key, v);
       return v;
     }

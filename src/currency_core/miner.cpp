@@ -51,7 +51,7 @@ namespace currency
     m_starter_nonce(0), 
     m_do_print_hashrate(false),
     m_do_mining(false),
-	  m_current_hash_rate(0),
+    m_current_hash_rate(0),
     m_last_hr_merge_time(0),
     m_hashes(0),
     m_alias_to_apply_in_block(boost::value_initialized<alias_info>()),
@@ -317,8 +317,8 @@ namespace currency
   //-----------------------------------------------------------------------------------------------------
   uint64_t miner::get_speed()
   {
-	  if(is_mining())
-		  return m_current_hash_rate;
+    if(is_mining())
+      return m_current_hash_rate;
     else 
       return 0;
   }

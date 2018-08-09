@@ -72,8 +72,8 @@ namespace wallet_rpc
 
     struct response
     {
-      uint64_t 	 balance;
-      uint64_t 	 unlocked_balance;
+      uint64_t    balance;
+      uint64_t    unlocked_balance;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(balance)

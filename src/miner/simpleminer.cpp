@@ -323,7 +323,7 @@ namespace mining
   }
   //--------------------------------------------------------------------------------------------------------------------------------
   void simpleminer::worker_thread(uint64_t start_nonce, uint32_t nonce_offset, std::atomic<uint32_t> *result, std::atomic<bool> *do_reset, std::atomic<bool> *done) {
-    //	  printf("Worker thread starting at %lu + %u\n", start_nonce, nonce_offset);
+    // printf("Worker thread starting at %lu + %u\n", start_nonce, nonce_offset);
     currency::blobdata blob = m_job.blob;
     while (!*do_reset) {
       m_hashes_done += attempts_per_loop;

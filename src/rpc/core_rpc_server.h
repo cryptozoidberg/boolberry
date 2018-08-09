@@ -144,7 +144,7 @@ namespace currency
     nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& m_p2p;
     std::string m_port;
     std::string m_bind_ip;
-	bool m_restricted;
+    bool m_restricted;
     //mining stuff
     epee::critical_section m_session_jobs_lock;
     std::map<std::string, currency::block> m_session_jobs; //session id -> blob

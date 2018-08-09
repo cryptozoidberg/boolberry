@@ -178,7 +178,7 @@ namespace currency {
     assert(total_work > 0);
     boost::multiprecision::uint256_t res =  (boost::multiprecision::uint256_t(total_work) * target_seconds + time_span - 1) / time_span;
     if(res > max128bit)
-	return 0; // to behave like previuos implementation, may be better return max128bit?
+      return 0; // to behave like previuos implementation, may be better return max128bit?
     return res.convert_to<wide_difficulty_type>();
   }
 

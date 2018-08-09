@@ -109,13 +109,13 @@ private:
   //--------------------------------------------------------------------------------
   bool show_hr(const std::vector<std::string>& args)
   {
-	if(!m_srv.get_payload_object().get_core().get_miner().is_mining()) 
-	{
-	  std::cout << "Mining is not started. You need start mining before you can see hash rate." << ENDL;
-	} else 
-	{
-	  m_srv.get_payload_object().get_core().get_miner().do_print_hashrate(true);
-	}
+  if(!m_srv.get_payload_object().get_core().get_miner().is_mining()) 
+  {
+    std::cout << "Mining is not started. You need start mining before you can see hash rate." << ENDL;
+  } else 
+  {
+    m_srv.get_payload_object().get_core().get_miner().do_print_hashrate(true);
+  }
     return true;
   }
   //--------------------------------------------------------------------------------

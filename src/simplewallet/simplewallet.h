@@ -138,8 +138,8 @@ namespace currency
     std::string m_generate_new;
     std::string m_import_path;
 
-	std::string m_restore_wallet;
-	std::string m_restore_seed;
+    std::string m_restore_wallet;
+    std::string m_restore_seed;
 
     std::string m_daemon_address;
     std::string m_daemon_host;

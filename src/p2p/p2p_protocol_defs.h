@@ -177,9 +177,9 @@ namespace nodetool
   /*                                                                      */
   /************************************************************************/
   template<class t_playload_type>
-	struct COMMAND_HANDSHAKE_T
-	{
-		const static int ID = P2P_COMMANDS_POOL_BASE + 1;
+  struct COMMAND_HANDSHAKE_T
+  {
+    const static int ID = P2P_COMMANDS_POOL_BASE + 1;
 
     struct request
     {
@@ -208,7 +208,7 @@ namespace nodetool
         KV_SERIALIZE(maintrs_entry)
       END_KV_SERIALIZE_MAP()
     };
-	};
+  };
 
 
   /************************************************************************/

@@ -641,23 +641,23 @@ std::vector<unsigned char> wallet2::generate(const std::string& wallet_, const s
 //----------------------------------------------------------------------------------------------------
 void wallet2::restore(const std::string& wallet_, const std::vector<unsigned char>& restore_seed, const std::string& password)
 {
-	clear();
-	prepare_file_names(wallet_);
+  clear();
+  prepare_file_names(wallet_);
 
-	boost::system::error_code ignored_ec;
-	CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
-	CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_keys_file, ignored_ec), error::file_exists, m_keys_file);
+  boost::system::error_code ignored_ec;
+  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_keys_file, ignored_ec), error::file_exists, m_keys_file);
 
-	m_account.restore(restore_seed);
-	m_account_public_address = m_account.get_keys().m_account_address;
+  m_account.restore(restore_seed);
+  m_account_public_address = m_account.get_keys().m_account_address;
 
-	bool r = store_keys(m_keys_file, password);
-	CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_keys_file);
+  bool r = store_keys(m_keys_file, password);
+  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_keys_file);
 
-	r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str());
-	if (!r) LOG_PRINT_RED_L0("String with address text not saved");
+  r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str());
+  if (!r) LOG_PRINT_RED_L0("String with address text not saved");
 
-	store();
+  store();
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -741,9 +741,9 @@ uint64_t wallet2::unlocked_balance()
 //----------------------------------------------------------------------------------------------------
 int64_t wallet2::unconfirmed_balance()
 {
-	if (m_unconfirmed_in_transfers.size() > 0)
-		return m_unconfirmed_balance;
-	return 0;
+  if (m_unconfirmed_in_transfers.size() > 0)
+    return m_unconfirmed_balance;
+  return 0;
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::balance()

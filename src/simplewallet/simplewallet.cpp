@@ -267,13 +267,13 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
   }
   else if (!m_restore_wallet.empty())
   {
-	  if (m_restore_seed.empty())
-	  {
-		  fail_msg_writer() << "you must specify 24-word restore seed to restore wallet";
-		  return false;
-	  }
-	  bool r = restore_wallet(m_restore_wallet, m_restore_seed, pwd_container.password());
-	  CHECK_AND_ASSERT_MES(r, false, "account restore failed");
+    if (m_restore_seed.empty())
+    {
+      fail_msg_writer() << "you must specify 24-word restore seed to restore wallet";
+      return false;
+    }
+    bool r = restore_wallet(m_restore_wallet, m_restore_seed, pwd_container.password());
+    CHECK_AND_ASSERT_MES(r, false, "account restore failed");
   }
   else
   {
@@ -336,52 +336,52 @@ bool simple_wallet::new_wallet(const string &wallet_file, const std::string& pas
   m_wallet->init(m_daemon_address);
 
   success_msg_writer() <<
-	  "**********************************************************************\n" <<
-	  "Your wallet has been generated.\n" <<
-	  "To start synchronizing with the daemon use \"refresh\" command.\n" <<
-	  "Use \"help\" command to see the list of available commands.\n" <<
-	  "Always use \"exit\" command when closing simplewallet to save\n" <<
-	  "current session's state. Otherwise, you will possibly need to synchronize \n" <<
-	  "your wallet again. Your wallet key is NOT under risk anyway.\n"; 
+    "**********************************************************************\n" <<
+    "Your wallet has been generated.\n" <<
+    "To start synchronizing with the daemon use \"refresh\" command.\n" <<
+    "Use \"help\" command to see the list of available commands.\n" <<
+    "Always use \"exit\" command when closing simplewallet to save\n" <<
+    "current session's state. Otherwise, you will possibly need to synchronize \n" <<
+    "your wallet again. Your wallet key is NOT under risk anyway.\n"; 
   success_msg_writer(true) << 
-	  "\nPLEASE NOTE: the following 24 words can be used to recover access to your wallet. Please write them down and store them somewhere safe and secure. Please do not store them in your email or on file storage services outside of your immediate control.\n";
+    "\nPLEASE NOTE: the following 24 words can be used to recover access to your wallet. Please write them down and store them somewhere safe and secure. Please do not store them in your email or on file storage services outside of your immediate control.\n";
   success_msg_writer() << crypto::mnemonic_encoding::binary2text(restore_seed) << "\n";
   success_msg_writer() << 
-	  "**********************************************************************";
+    "**********************************************************************";
   return true;
 }
 
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::restore_wallet(const std::string &wallet_file, const std::string &restore_seed, const std::string& password)
 {
-	m_wallet_file = wallet_file;
+  m_wallet_file = wallet_file;
 
-	m_wallet.reset(new tools::wallet2());
-	m_wallet->callback(this);
-	try
-	{
-		std::vector<unsigned char> seed = crypto::mnemonic_encoding::text2binary(restore_seed);
-		m_wallet->restore(wallet_file, seed, password);
-		message_writer(epee::log_space::console_color_white, true) << "Wallet restored: " << m_wallet->get_account().get_public_address_str() << std::endl << "view key: " << string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
-	}
-	catch (const std::exception& e)
-	{
-		fail_msg_writer() << "failed to restore wallet: " << e.what();
-		return false;
-	}
+  m_wallet.reset(new tools::wallet2());
+  m_wallet->callback(this);
+  try
+  {
+    std::vector<unsigned char> seed = crypto::mnemonic_encoding::text2binary(restore_seed);
+    m_wallet->restore(wallet_file, seed, password);
+    message_writer(epee::log_space::console_color_white, true) << "Wallet restored: " << m_wallet->get_account().get_public_address_str() << std::endl << "view key: " << string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
+  }
+  catch (const std::exception& e)
+  {
+    fail_msg_writer() << "failed to restore wallet: " << e.what();
+    return false;
+  }
 
-	m_wallet->init(m_daemon_address);
+  m_wallet->init(m_daemon_address);
 
-	success_msg_writer() <<
-		"**********************************************************************\n" <<
-		"Your wallet has been restored.\n" <<
-		"To start synchronizing with the daemon use \"refresh\" command.\n" <<
-		"Use \"help\" command to see the list of available commands.\n" <<
-		"Always use \"exit\" command when closing simplewallet to save\n" <<
-		"current session's state. Otherwise, you will possibly need to synchronize \n" <<
-		"your wallet again. Your wallet key is NOT under risk anyway.\n" <<
-		"**********************************************************************";
-	return true;
+  success_msg_writer() <<
+    "**********************************************************************\n" <<
+    "Your wallet has been restored.\n" <<
+    "To start synchronizing with the daemon use \"refresh\" command.\n" <<
+    "Use \"help\" command to see the list of available commands.\n" <<
+    "Always use \"exit\" command when closing simplewallet to save\n" <<
+    "current session's state. Otherwise, you will possibly need to synchronize \n" <<
+    "your wallet again. Your wallet key is NOT under risk anyway.\n" <<
+    "**********************************************************************";
+  return true;
 }
 
 //----------------------------------------------------------------------------------------------------

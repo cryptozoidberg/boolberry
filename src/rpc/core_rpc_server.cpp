@@ -24,14 +24,14 @@ namespace currency
   {
     const command_line::arg_descriptor<std::string> arg_rpc_bind_ip   = {"rpc-bind-ip", "IP for RPC Server", "127.0.0.1"};
     const command_line::arg_descriptor<std::string> arg_rpc_bind_port = {"rpc-bind-port", "Port for RPC Server", std::to_string(RPC_DEFAULT_PORT)};
-	const command_line::arg_descriptor<bool> arg_rpc_restricted_rpc = { "restricted-rpc", "Restrict RPC to view only commands", false};
+    const command_line::arg_descriptor<bool> arg_rpc_restricted_rpc = { "restricted-rpc", "Restrict RPC to view only commands", false};
   }
   //-----------------------------------------------------------------------------------
   void core_rpc_server::init_options(boost::program_options::options_description& desc)
   {
     command_line::add_arg(desc, arg_rpc_bind_ip);
     command_line::add_arg(desc, arg_rpc_bind_port);
-	command_line::add_arg(desc, arg_rpc_restricted_rpc);
+    command_line::add_arg(desc, arg_rpc_restricted_rpc);
   }
   //------------------------------------------------------------------------------------------------------------------------------
   core_rpc_server::core_rpc_server(core& cr, nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& p2p):m_core(cr), m_p2p(p2p), m_session_counter(0)
@@ -41,7 +41,7 @@ namespace currency
   {
     m_bind_ip = command_line::get_arg(vm, arg_rpc_bind_ip);
     m_port = command_line::get_arg(vm, arg_rpc_bind_port);
-	m_restricted = command_line::get_arg(vm, arg_rpc_restricted_rpc);
+    m_restricted = command_line::get_arg(vm, arg_rpc_restricted_rpc);
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
@@ -120,9 +120,9 @@ namespace currency
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_stop_daemon(const COMMAND_RPC_STOP_DAEMON::request& req, COMMAND_RPC_STOP_DAEMON::response& res, connection_context& cntx)
   {
-	  m_p2p.send_stop_signal();
-	  res.status = CORE_RPC_STATUS_OK;
-	  return true;
+    m_p2p.send_stop_signal();
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_blocks(const COMMAND_RPC_GET_BLOCKS_FAST::request& req, COMMAND_RPC_GET_BLOCKS_FAST::response& res, connection_context& cntx)
