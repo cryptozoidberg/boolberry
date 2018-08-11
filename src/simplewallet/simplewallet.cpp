@@ -1331,7 +1331,7 @@ bool simple_wallet::print_address(const std::vector<std::string> &args/* = std::
 bool simple_wallet::show_seed(const std::vector<std::string> &args)
 {
   const crypto::secret_key& ss = m_wallet->get_account().get_keys().m_spend_secret_key;
-  vector<unsigned char> seed(&ss.data[0], &ss.data[32]);
+  vector<unsigned char> seed(reinterpret_cast<const char*>(&ss), reinterpret_cast<const char*>(&ss) + sizeof ss);
   std::string text_seed = crypto::mnemonic_encoding::binary2text(seed);
 
   // make sure the entire restore process will end up with the same keys
