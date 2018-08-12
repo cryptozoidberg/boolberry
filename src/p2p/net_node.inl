@@ -30,7 +30,10 @@ namespace nodetool
     const command_line::arg_descriptor<std::vector<std::string> > arg_p2p_add_priority_node   = {"add-priority-node", "Specify list of peers to connect to and attempt to keep the connection open"};
     const command_line::arg_descriptor<bool>                      arg_p2p_use_only_priority_nodes   = {"use-only-priority-nodes", "Try to connect only to priority nodes"};
     const command_line::arg_descriptor<std::vector<std::string> > arg_p2p_seed_node           = {"seed-node", "Connect to a node to retrieve peer addresses, and disconnect"};
-    const command_line::arg_descriptor<bool>                      arg_p2p_hide_my_port        = {"hide-my-port", "Do not announce yourself as peerlist candidate", false, true};  }
+    const command_line::arg_descriptor<bool>                      arg_p2p_hide_my_port        = { "hide-my-port", "Do not announce yourself as peerlist candidate", false, true };
+    const command_line::arg_descriptor<bool>                      arg_p2p_offline_mode        = { "p2p-offline-mode", "Neither connect to the network, nor accept incoming connections", false, true };
+}
+
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
   void node_server<t_payload_net_handler>::init_options(boost::program_options::options_description& desc)
@@ -44,6 +47,7 @@ namespace nodetool
     command_line::add_arg(desc, arg_p2p_seed_node);    
     command_line::add_arg(desc, arg_p2p_hide_my_port);   
     command_line::add_arg(desc, arg_p2p_use_only_priority_nodes);       
+    command_line::add_arg(desc, arg_p2p_offline_mode);
   }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
@@ -90,6 +94,9 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::is_remote_ip_allowed(uint32_t addr)
   {
+    if (m_offline_mode)
+      return false;
+
     CRITICAL_REGION_LOCAL(m_blocked_ips_lock);
     auto it = m_blocked_ips.find(addr);
     if(it == m_blocked_ips.end())
@@ -146,6 +153,12 @@ namespace nodetool
     m_port = command_line::get_arg(vm, arg_p2p_bind_port);
     m_external_port = command_line::get_arg(vm, arg_p2p_external_port);
     m_allow_local_ip = command_line::get_arg(vm, arg_p2p_allow_local_ip);
+    m_offline_mode = command_line::get_arg(vm, arg_p2p_offline_mode);
+
+    if (m_offline_mode)
+    {
+      LOG_PRINT_CYAN("Offline mode is ON", LOG_LEVEL_0);
+    }
 
     if (command_line::has_arg(vm, arg_p2p_add_peer))
     {       
@@ -711,7 +724,10 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::connections_maker()
   {
-    if(!m_peerlist.get_white_peers_count() && m_seed_nodes.size() && !m_priority_peers.size())
+    if (m_offline_mode)
+      return true;
+
+    if (!m_peerlist.get_white_peers_count() && m_seed_nodes.size() && !m_priority_peers.size())
     {
       size_t try_count = 0;
       size_t current_index = crypto::rand<size_t>()%m_seed_nodes.size();

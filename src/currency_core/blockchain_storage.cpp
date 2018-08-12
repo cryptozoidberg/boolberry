@@ -132,10 +132,14 @@ bool blockchain_storage::init(const boost::program_options::variables_map& vm, c
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
 
+
   bool res = m_lmdb_adapter->init(vm);
   CHECK_AND_ASSERT_MES(res, false, "Unable to init lmdb adapter");
 
   m_config_folder = config_folder;
+  if (!check_instance(m_config_folder))
+    return false;
+
   LOG_PRINT_L0("Loading blockchain...");
   const std::string folder_name = m_config_folder + "/" CURRENCY_BLOCKCHAINDATA_FOLDERNAME;
   tools::create_directories_if_necessary(folder_name);

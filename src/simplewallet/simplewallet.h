@@ -68,7 +68,8 @@ namespace currency
     bool print_address(const std::vector<std::string> &args = std::vector<std::string>());
     bool save(const std::vector<std::string> &args);
     bool set_log(const std::vector<std::string> &args);
-    
+    bool show_seed(const std::vector<std::string> &args);
+
     bool get_alias_from_daemon(const std::string& alias_name, currency::alias_info_base& ai);
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
 

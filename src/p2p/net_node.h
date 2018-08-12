@@ -214,6 +214,7 @@ namespace nodetool
     uint32_t m_ip_address;
     bool m_allow_local_ip;
     bool m_hide_my_port;
+    bool m_offline_mode;
 
     //critical_section m_connections_lock;
     //connections_indexed_container m_connections;

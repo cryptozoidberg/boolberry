@@ -185,6 +185,8 @@ simple_wallet::simple_wallet()
 
   m_cmd_binder.set_handler("integrated_address", boost::bind(&simple_wallet::integrated_address, this, _1), "integrated_address [payment_id|integrated_address] Encode given payment_id into an integrated address (for this waller public address). Uses random id if not provided. Decode given integrated address into payment id and standard address.");
 
+  m_cmd_binder.set_handler("show_seed", boost::bind(&simple_wallet::show_seed, this, _1), "show_seed");
+
   m_cmd_binder.set_handler("get_tx_key", boost::bind(&simple_wallet::get_tx_key, this, _1), "Get transaction key (r) for a given <txid>");
   m_cmd_binder.set_handler("check_tx_key", boost::bind(&simple_wallet::check_tx_key, this, _1), "Check amount going to <address> in <txid>");
   m_cmd_binder.set_handler("set_log", boost::bind(&simple_wallet::set_log, this, _1), "set_log <level> - Change current log detalization level, <level> is a number 0-4");
@@ -325,7 +327,8 @@ bool simple_wallet::new_wallet(const string &wallet_file, const std::string& pas
   try
   {
     restore_seed = m_wallet->generate(wallet_file, password);
-    message_writer(epee::log_space::console_color_white, true) << "Generated new wallet: " << m_wallet->get_account().get_public_address_str() << std::endl << "view key: " << string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
+    message_writer(epee::log_space::console_color_white, true) << "Generated new wallet: " << m_wallet->get_account().get_public_address_str();
+    std::cout << "view key: " << string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key) << std::endl << std::flush;
   }
   catch (const std::exception& e)
   {
@@ -344,8 +347,8 @@ bool simple_wallet::new_wallet(const string &wallet_file, const std::string& pas
     "current session's state. Otherwise, you will possibly need to synchronize \n" <<
     "your wallet again. Your wallet key is NOT under risk anyway.\n"; 
   success_msg_writer(true) << 
-    "\nPLEASE NOTE: the following 24 words can be used to recover access to your wallet. Please write them down and store them somewhere safe and secure. Please do not store them in your email or on file storage services outside of your immediate control.\n";
-  success_msg_writer() << crypto::mnemonic_encoding::binary2text(restore_seed) << "\n";
+    "\nPLEASE NOTE: the following 24 words can be used to recover access to your wallet. Please write them down and store them somewhere safe and secure. Please do not store them in your email or on file storage services outside of your immediate control.";
+  std::cout << crypto::mnemonic_encoding::binary2text(restore_seed) << std::endl << std::flush;
   success_msg_writer() << 
     "**********************************************************************";
   return true;
@@ -362,7 +365,8 @@ bool simple_wallet::restore_wallet(const std::string &wallet_file, const std::st
   {
     std::vector<unsigned char> seed = crypto::mnemonic_encoding::text2binary(restore_seed);
     m_wallet->restore(wallet_file, seed, password);
-    message_writer(epee::log_space::console_color_white, true) << "Wallet restored: " << m_wallet->get_account().get_public_address_str() << std::endl << "view key: " << string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key);
+    message_writer(epee::log_space::console_color_white, true) << "Wallet restored: " << m_wallet->get_account().get_public_address_str();
+    std::cout << "view key: " << string_tools::pod_to_hex(m_wallet->get_account().get_keys().m_view_secret_key) << std::endl << std::flush;
   }
   catch (const std::exception& e)
   {
@@ -1321,6 +1325,32 @@ void simple_wallet::stop()
 bool simple_wallet::print_address(const std::vector<std::string> &args/* = std::vector<std::string>()*/)
 {
   success_msg_writer() << m_wallet->get_account().get_public_address_str();
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::show_seed(const std::vector<std::string> &args)
+{
+  const crypto::secret_key& ss = m_wallet->get_account().get_keys().m_spend_secret_key;
+  vector<unsigned char> seed(reinterpret_cast<const char*>(&ss), reinterpret_cast<const char*>(&ss) + sizeof ss);
+  std::string text_seed = crypto::mnemonic_encoding::binary2text(seed);
+
+  // make sure the entire restore process will end up with the same keys
+  std::vector<unsigned char> restored_seed = crypto::mnemonic_encoding::text2binary(text_seed);
+  currency::account_base restored_acc = AUTO_VAL_INIT(restored_acc);
+  restored_acc.restore(restored_seed);
+  if (restored_acc.get_public_address_str() == m_wallet->get_account().get_public_address_str())
+  {
+    success_msg_writer() << "Here's your wallet's seed phrase. Write it down and keep in a safe place.";
+    success_msg_writer(true) << "Anyone who knows the following 24 words can access you wallet:";
+    std::cout << text_seed << std::endl << std::flush;
+  }
+  else
+  {
+    fail_msg_writer() <<
+      "It looks like this wallet was created quite a while ago. It can't be restored using a seed phrase.\n" <<
+      "If you would like to use a wallet that can be restored with a key phrase you will need to transfer all your funds to another, newly generated wallet.\n";
+  }
+
   return true;
 }
 //----------------------------------------------------------------------------------------------------
