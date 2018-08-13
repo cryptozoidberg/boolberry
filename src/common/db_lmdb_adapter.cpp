@@ -91,6 +91,10 @@ namespace db
     {
       m_p_impl->m_db_flags = m_p_impl->m_db_flags | MDB_NOSYNC;
     }
+    else if (sync_mode == "ultra")
+    {
+      m_p_impl->m_db_flags = m_p_impl->m_db_flags | MDB_NOSYNC | MDB_WRITEMAP | MDB_MAPASYNC;
+    }
     else if (sync_mode == "safe")
     {
       // use default
