@@ -1199,6 +1199,35 @@ bool wallet2::get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) c
   tx_key = i->second;
   return true;
 }
+//----------------------------------------------------------------------------------------------------
+std::string wallet2::get_transfers_str() const
+{
+  static const char* header = "index                 amount   spent?  g_index    block  tx                                                                   out#  key image";
+  std::stringstream ss;
+  ss << header << ENDL;
+  if (!m_transfers.empty())
+  {
+    for (size_t i = 0; i != m_transfers.size(); ++i)
+    {
+      const transfer_details& td = m_transfers[i];
+      ss << std::right <<
+        std::setw(5) << i << "  " <<
+        std::setw(21) << print_money(td.amount()) << "  " <<
+        std::setw(7) << (td.m_spent ? "spent" : "") << "  " <<
+        std::setw(7) << td.m_global_output_index << "  " <<
+        std::setw(7) << td.m_block_height << "  " <<
+        get_transaction_hash(td.m_tx) << "  " <<
+        std::setw(4) << td.m_internal_output_index << "  " <<
+        td.m_key_image << ENDL;
+    }
+  }
+  else
+  {
+    ss << "(no transfers)" << ENDL;
+  }
+  return ss.str();
+}
+//----------------------------------------------------------------------------------------------------
 
 }
 

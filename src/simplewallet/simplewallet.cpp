@@ -184,8 +184,8 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("submit_transfer", boost::bind(&simple_wallet::submit_transfer, this, _1), "Submit a signed transaction from a file <tx_sources_file> <result_file>");
 
   m_cmd_binder.set_handler("integrated_address", boost::bind(&simple_wallet::integrated_address, this, _1), "integrated_address [payment_id|integrated_address] Encode given payment_id into an integrated address (for this waller public address). Uses random id if not provided. Decode given integrated address into payment id and standard address.");
-
-  m_cmd_binder.set_handler("show_seed", boost::bind(&simple_wallet::show_seed, this, _1), "show_seed");
+  m_cmd_binder.set_handler("show_seed", boost::bind(&simple_wallet::show_seed, this, _1), "displays secret 24 word phrase that could be used to recover this wallet");
+  m_cmd_binder.set_handler("list_outputs", boost::bind(&simple_wallet::list_outputs, this, _1), "lists all the outputs that have ever been sent to this wallet");
 
   m_cmd_binder.set_handler("get_tx_key", boost::bind(&simple_wallet::get_tx_key, this, _1), "Get transaction key (r) for a given <txid>");
   m_cmd_binder.set_handler("check_tx_key", boost::bind(&simple_wallet::check_tx_key, this, _1), "Check amount going to <address> in <txid>");
@@ -1351,6 +1351,13 @@ bool simple_wallet::show_seed(const std::vector<std::string> &args)
       "If you would like to use a wallet that can be restored with a key phrase you will need to transfer all your funds to another, newly generated wallet.\n";
   }
 
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::list_outputs(const std::vector<std::string> &args)
+{
+  success_msg_writer() << "list of all the outputs that have ever been sent to this wallet:" << ENDL <<
+    m_wallet->get_transfers_str();
   return true;
 }
 //----------------------------------------------------------------------------------------------------

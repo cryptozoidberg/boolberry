@@ -161,6 +161,7 @@ namespace tools
     bool check_connection();
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
     bool get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANSFERS::request& req, wallet_rpc::COMMAND_RPC_GET_TRANSFERS::response& res) const;
+    std::string get_transfers_str() const;
     void get_payments(const currency::payment_id_t& payment_id, std::list<payment_details>& payments, uint64_t min_height = 0) const;
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id);
     bool store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet = false);
