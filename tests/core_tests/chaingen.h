@@ -488,7 +488,9 @@ inline bool do_replay_events(std::vector<test_event_entry>& events)
     return false;
   }
   t_test_class validator;
-  return replay_events_through_core<t_test_class>(c, events, validator);
+  bool result = replay_events_through_core<t_test_class>(c, events, validator);
+  c.deinit();
+  return result;
 }
 //--------------------------------------------------------------------------
 template<class t_test_class>
