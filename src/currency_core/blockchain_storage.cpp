@@ -21,6 +21,7 @@
 #include "profile_tools.h"
 #include "file_io_utils.h"
 #include "common/boost_serialization_helper.h"
+#include "common/command_line.h"
 #include "warnings.h"
 #include "crypto/hash.h"
 #include "miner_common.h"
@@ -52,6 +53,11 @@ using namespace currency;
 
 DISABLE_VS_WARNINGS(4267)
 
+  namespace
+  {
+    const command_line::arg_descriptor<std::string>   arg_macos_debuger_dummy_option =     {"-NSDocumentRevisionsDebugMode", "XCode weird paramter", "", true};
+  }
+  
 
 
 //------------------------------------------------------------------
@@ -125,7 +131,9 @@ uint64_t blockchain_storage::get_current_blockchain_height()
 //------------------------------------------------------------------
 void blockchain_storage::init_options(boost::program_options::options_description& desc)
 {
+  command_line::add_arg(desc, arg_macos_debuger_dummy_option); 
   db::lmdb_adapter::init_options(desc);
+
 }
 //------------------------------------------------------------------
 bool blockchain_storage::init(const boost::program_options::variables_map& vm, const std::string& config_folder)
