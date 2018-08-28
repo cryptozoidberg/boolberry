@@ -195,6 +195,8 @@ namespace currency
   bool get_block_hash(const block& b, crypto::hash& res);
   crypto::hash get_block_hash(const block& b);
   bool generate_genesis_block(block& bl);
+  block generate_genesis_block();
+  const crypto::hash& get_genesis_id();
   bool parse_and_validate_block_from_blob(const blobdata& b_blob, block& b);
   bool get_inputs_money_amount(const transaction& tx, uint64_t& money);
   uint64_t get_outs_money_amount(const transaction& tx);

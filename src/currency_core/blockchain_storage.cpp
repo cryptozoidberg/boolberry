@@ -1366,6 +1366,35 @@ bool blockchain_storage::get_blocks(uint64_t start_offset, size_t count, std::li
   return true;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::start_batch_exclusive_operation()
+{
+  m_exclusive_batch_lock.lock();
+  m_exclusive_batch_active = true;
+  m_exclusive_batch_lock.unlock();
+  
+  m_blockchain_lock.lock();
+  m_db.begin_batch_exclusive_operation();
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::finish_batch_exclusive_operation(bool success)
+{
+
+  m_db.finish_batch_exclusive_operation(success);
+  m_blockchain_lock.unlock();
+  
+  m_exclusive_batch_lock.lock();
+  m_exclusive_batch_active = false;
+  m_exclusive_batch_lock.unlock();
+
+  return true;
+}
+//------------------------------------------------------------------
+// bool blockchain_storage::is_batch_exclusive_operation()
+// {
+//   return  m_exclusive_batch_active;
+// }
+//------------------------------------------------------------------
 bool blockchain_storage::get_blocks(uint64_t start_offset, size_t count, std::list<block>& blocks)
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);

@@ -14,6 +14,7 @@ namespace currency
                                                                                                               m_p2p(p_net_layout),
                                                                                                               m_syncronized_connections_count(0),
                                                                                                               m_synchronized(false),
+                                                                                                              m_been_synchronized(false),
                                                                                                               m_max_height_seen(0),
                                                                                                               m_core_inital_height(0),
                                                                                                               m_want_stop(false)
@@ -56,9 +57,23 @@ namespace currency
     if(context.m_state == currency_connection_context::state_synchronizing)
     {
       NOTIFY_REQUEST_CHAIN::request r = boost::value_initialized<NOTIFY_REQUEST_CHAIN::request>();
-      m_core.get_short_chain_history(r.block_ids);
-      LOG_PRINT_CCONTEXT_L2("-->>NOTIFY_REQUEST_CHAIN: m_block_ids.size()=" << r.block_ids.size() );
-      post_notify<NOTIFY_REQUEST_CHAIN>(r, context);
+
+      bool have_called = false;
+      bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+      {
+        m_core.get_short_chain_history(r.block_ids);
+        return true;
+      });
+      if (have_called)
+      {
+        LOG_PRINT_CCONTEXT_L2("-->>NOTIFY_REQUEST_CHAIN: m_block_ids.size()=" << r.block_ids.size());
+        post_notify<NOTIFY_REQUEST_CHAIN>(r, context);
+      }
+      else
+      {
+        LOG_PRINT_CCONTEXT_MAGENTA("[On_callback] Changed connection state to state_idle while core is in batch update", LOG_LEVEL_0);
+        context.m_state = currency_connection_context::state_idle;
+      }
     }
 
     return true;
@@ -67,7 +82,12 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::get_stat_info(core_stat_info& stat_inf)
   {
-    return m_core.get_stat_info(stat_inf);
+    bool have_called = false;
+    bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+    {
+      return m_core.get_stat_info(stat_inf);
+    });
+    return have_called && res;
   }
   //------------------------------------------------------------------------------------------------------------------------   
   template<class t_core> 
@@ -103,50 +123,71 @@ namespace currency
     if(context.m_state == currency_connection_context::state_synchronizing)
       return true;
 
-    if(m_core.have_block(hshd.top_id))  
+    //while we not synchronized, we have to keep major amount of connections with nodes servicing our blockchain download
+    if (!m_synchronized && !context.m_is_income && hshd.current_height == 1 && is_inital)
     {
+      LOG_PRINT_CCONTEXT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA()]: rejected busy node.", LOG_LEVEL_0);
+      return false;
+    }
 
-      context.m_state = currency_connection_context::state_normal;
+    bool have_called = false;
+    bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+    {
+      if (m_core.have_block(hshd.top_id))
+      {
+
+        context.m_state = currency_connection_context::state_normal;
+        return true;
+      }
+      int64_t diff = static_cast<int64_t>(hshd.current_height) - static_cast<int64_t>(m_core.get_current_blockchain_height());
+      LOG_PRINT_CCONTEXT_YELLOW("Sync data returned unknown top block: " << m_core.get_current_blockchain_height() << " -> " << hshd.current_height
+        << " [" << std::abs(diff) << " blocks (" << diff / (24 * 60 * 60 / DIFFICULTY_TARGET) << " days) "
+        << (0 <= diff ? std::string("behind") : std::string("ahead"))
+        << "] " << ENDL << "SYNCHRONIZATION started", (is_inital ? LOG_LEVEL_0 : LOG_LEVEL_1));
+      LOG_PRINT_L1("Remote top block height: " << hshd.current_height << ", id: " << hshd.top_id);
+
+      /*check if current height is in remote checkpoints zone*/
+      if (hshd.last_checkpoint_height
+        && m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() < hshd.last_checkpoint_height
+        && m_core.get_current_blockchain_height() < hshd.last_checkpoint_height)
+      {
+        LOG_PRINT_CCONTEXT_RED("Remote node have longer checkpoints zone( " << hshd.last_checkpoint_height << ") " <<
+          "that local (" << m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() << ")" <<
+          "That means that current software is outdated, please updated it." <<
+          "Current heigh lay under checkpoints on remote host, so it is not possible validate this transactions on local host, disconnecting.", LOG_LEVEL_0);
+        return false;
+      }
+      else if (m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() < hshd.last_checkpoint_height)
+      {
+        LOG_PRINT_CCONTEXT_MAGENTA("Remote node have longer checkpoints zone( " << hshd.last_checkpoint_height << ") " <<
+          "that local (" << m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() << ")" <<
+          "That means that current software is outdated, please updated it.", LOG_LEVEL_0);
+      }
+
+      context.m_state = currency_connection_context::state_synchronizing;
+      context.m_remote_blockchain_height = hshd.current_height;
+      //let the socket to send response to handshake, but request callback, to let send request data after response
+      LOG_PRINT_CCONTEXT_L2("requesting callback");
+      ++context.m_callback_request_count;
+      m_p2p->request_callback(context);
+      //update progress vars 
+      if (m_max_height_seen < hshd.current_height)
+        m_max_height_seen = hshd.current_height;
+      if (!m_core_inital_height)
+        m_core_inital_height = m_core.get_current_blockchain_height();
+      return true;
+    });
+
+    if (!have_called)
+    {
+      LOG_PRINT_CCONTEXT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA(is_inital=" << is_inital<<")]: call blocked.", LOG_LEVEL_0);
+      context.m_state = currency_connection_context::state_idle;
       return true;
     }
 
-    int64_t diff = static_cast<int64_t>(hshd.current_height) - static_cast<int64_t>(m_core.get_current_blockchain_height());
-    LOG_PRINT_CCONTEXT_YELLOW("Sync data returned unknown top block: " << m_core.get_current_blockchain_height() << " -> " << hshd.current_height
-      << " [" << std::abs(diff) << " blocks (" << diff / (24 * 60 * 60 / DIFFICULTY_TARGET) << " days) "
-      << (0 <= diff ? std::string("behind") : std::string("ahead"))
-      << "] " << ENDL << "SYNCHRONIZATION started", (is_inital ? LOG_LEVEL_0:LOG_LEVEL_1));
-    LOG_PRINT_L1("Remote top block height: " << hshd.current_height << ", id: " << hshd.top_id);
 
-    /*check if current height is in remote's checkpoints zone*/
-    if(hshd.last_checkpoint_height 
-      && m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() < hshd.last_checkpoint_height 
-      && m_core.get_current_blockchain_height() < hshd.last_checkpoint_height )
-    {
-      LOG_PRINT_CCONTEXT_RED("Remote node have longer checkpoints zone( " << hshd.last_checkpoint_height <<  ") " << 
-        "that local (" << m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() << ")" <<
-        "That means that current software is outdated, please updated it." << 
-        "Current heigh lay under checkpoints on remote host, so it is not possible validate this transactions on local host, disconnecting.", LOG_LEVEL_0);
-      return false;
-    }else if (m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() < hshd.last_checkpoint_height)
-    {
-      LOG_PRINT_CCONTEXT_MAGENTA("Remote node have longer checkpoints zone( " << hshd.last_checkpoint_height <<  ") " <<
-        "that local (" << m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height() << ")" << 
-        "That means that current software is outdated, please updated it.", LOG_LEVEL_0);
-    }
 
-    context.m_state = currency_connection_context::state_synchronizing;
-    context.m_remote_blockchain_height = hshd.current_height;
-    //let the socket to send response to handshake, but request callback, to let send request data after response
-    LOG_PRINT_CCONTEXT_L2("requesting callback");
-    ++context.m_callback_request_count;
-    m_p2p->request_callback(context);
-    //update progress vars 
-    if (m_max_height_seen < hshd.current_height)
-      m_max_height_seen = hshd.current_height;
-    if (!m_core_inital_height)
-      m_core_inital_height = m_core.get_current_blockchain_height();
-
-    return true;
+    return res;
   }
   //------------------------------------------------------------------------------------------------------------------------  
   template<class t_core>
@@ -164,9 +205,23 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::get_payload_sync_data(CORE_SYNC_DATA& hshd)
   {
-    m_core.get_blockchain_top(hshd.current_height, hshd.top_id);
-    hshd.current_height +=1;
-    hshd.last_checkpoint_height = m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height();
+    bool have_called = false;
+    bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+    {
+      m_core.get_blockchain_top(hshd.current_height, hshd.top_id);
+      hshd.current_height += 1;
+      hshd.last_checkpoint_height = m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height();
+      return true;
+    });
+    if (!have_called)
+    {
+      //wile we sync say to others thart we have only genesis to avoid sync requests
+      hshd.current_height = 1;
+      hshd.top_id = get_genesis_id();
+      hshd.last_checkpoint_height = m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height();
+      LOG_PRINT_MAGENTA("[GET_PAYLOAD_SYNC_DATA]: call blocked.", LOG_LEVEL_0);
+    }
+
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------  
@@ -183,7 +238,7 @@ namespace currency
     int t_currency_protocol_handler<t_core>::handle_notify_new_block(int command, NOTIFY_NEW_BLOCK::request& arg, currency_connection_context& context)
   {
     LOG_PRINT_CCONTEXT_L2("NOTIFY_NEW_BLOCK (hop " << arg.hop << ")");
-    if(context.m_state != currency_connection_context::state_normal)
+    if (!m_synchronized || context.m_state != currency_connection_context::state_normal || context.m_remote_blockchain_height <=1)
       return 1;
 
     for(auto tx_blob_it = arg.b.txs.begin(); tx_blob_it!=arg.b.txs.end();tx_blob_it++)
@@ -230,8 +285,10 @@ namespace currency
   int t_currency_protocol_handler<t_core>::handle_notify_new_transactions(int command, NOTIFY_NEW_TRANSACTIONS::request& arg, currency_connection_context& context)
   {
     LOG_PRINT_CCONTEXT_L2("NOTIFY_NEW_TRANSACTIONS");
-    if(context.m_state != currency_connection_context::state_normal)
+
+    if (!m_synchronized || context.m_state != currency_connection_context::state_normal || context.m_remote_blockchain_height <= 1)
       return 1;
+
 
     for(auto tx_blob_it = arg.txs.begin(); tx_blob_it!=arg.txs.end();)
     {
@@ -262,6 +319,13 @@ namespace currency
   template<class t_core> 
   int t_currency_protocol_handler<t_core>::handle_request_get_objects(int command, NOTIFY_REQUEST_GET_OBJECTS::request& arg, currency_connection_context& context)
   {
+    if (!m_been_synchronized)
+    {
+      LOG_ERROR_CCONTEXT("Internal error: got NOTIFY_REQUEST_GET_OBJECTS while m_been_synchronized = false, dropping connection");
+      return LEVIN_ERROR_INTERNAL;
+    }
+
+
     LOG_PRINT_CCONTEXT_L2("NOTIFY_REQUEST_GET_OBJECTS");
     NOTIFY_RESPONSE_GET_OBJECTS::request rsp;
     if(!m_core.handle_get_objects(arg, rsp, context))
@@ -293,9 +357,9 @@ namespace currency
   {
     LOG_PRINT_CCONTEXT_YELLOW("NOTIFY_RESPONSE_GET_OBJECTS: " << arg.blocks.size() << " blocks, " << arg.txs.size() << " txs, remote height: " << arg.current_blockchain_height, LOG_LEVEL_2);
 
-    if(context.m_last_response_height > arg.current_blockchain_height)
+    if (context.m_last_response_height > arg.current_blockchain_height)
     {
-      LOG_ERROR_CCONTEXT("sent wrong NOTIFY_HAVE_OBJECTS: arg.m_current_blockchain_height=" << arg.current_blockchain_height 
+      LOG_ERROR_CCONTEXT("sent wrong NOTIFY_HAVE_OBJECTS: arg.m_current_blockchain_height=" << arg.current_blockchain_height
         << " < m_last_response_height=" << context.m_last_response_height << ", dropping connection");
       m_p2p->drop_connection(context);
       return 1;
@@ -305,141 +369,158 @@ namespace currency
 
     PROF_L2_DO(uint64_t syncing_conn_count_sum = get_synchronizing_connections_count(); uint64_t syncing_conn_count_count = 1);
 
-    PROF_L2_START(block_complete_entries_prevalidation_time);
-    size_t count = 0;
-    BOOST_FOREACH(const block_complete_entry& block_entry, arg.blocks)
+    bool have_called = false;
+    int res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<int>(have_called, [&]()
     {
-      CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
 
-      ++count;
-      block b;
-      if(!parse_and_validate_block_from_blob(block_entry.block, b))
-      {
-        LOG_ERROR_CCONTEXT("sent wrong block: failed to parse and validate block: \r\n" 
-          << string_tools::buff_to_hex_nodelimer(block_entry.block) << "\r\n dropping connection");
-        m_p2p->drop_connection(context);
-        m_p2p->add_ip_fail(context.m_remote_ip);
-        return 1;
-      }      
-      //to avoid concurrency in core between connections, suspend connections which delivered block later then first one
-      if(count == 2)
-      { 
-        if(m_core.have_block(get_block_hash(b)))
-        {
-          context.m_state = currency_connection_context::state_idle;
-          context.m_needed_objects.clear();
-          context.m_requested_objects.clear();
-          LOG_PRINT_CCONTEXT_L1("Connection set to idle state.");
-          return 1;
-        }
-      }
-      
-      auto req_it = context.m_requested_objects.find(get_block_hash(b));
-      if(req_it == context.m_requested_objects.end())
-      {
-        LOG_ERROR_CCONTEXT("sent wrong NOTIFY_RESPONSE_GET_OBJECTS: block with id=" << string_tools::pod_to_hex(get_blob_hash(block_entry.block)) 
-          << " wasn't requested, dropping connection");
-        m_p2p->drop_connection(context);
-        return 1;
-      }
-      if(b.tx_hashes.size() != block_entry.txs.size()) 
-      {
-        LOG_ERROR_CCONTEXT("sent wrong NOTIFY_RESPONSE_GET_OBJECTS: block with id=" << string_tools::pod_to_hex(get_blob_hash(block_entry.block)) 
-          << ", tx_hashes.size()=" << b.tx_hashes.size() << " mismatch with block_complete_entry.m_txs.size()=" << block_entry.txs.size() << ", dropping connection");
-        m_p2p->drop_connection(context);
-        return 1;
-      }
-
-      context.m_requested_objects.erase(req_it);
-    }
-    PROF_L2_FINISH(block_complete_entries_prevalidation_time);
-
-    PROF_L2_DO(syncing_conn_count_sum += get_synchronizing_connections_count(); ++syncing_conn_count_count);
-
-    if(context.m_requested_objects.size())
-    {
-      LOG_PRINT_CCONTEXT_RED("returned not all requested objects (context.m_requested_objects.size()=" 
-        << context.m_requested_objects.size() << "), dropping connection", LOG_LEVEL_0);
-      m_p2p->drop_connection(context);
-      return 1;
-    }
-
-    PROF_L2_START(blocks_handle_time);
-    {
-      m_core.pause_mine();
-      misc_utils::auto_scope_leave_caller scope_exit_handler = misc_utils::create_scope_leave_handler(
-        boost::bind(&t_core::resume_mine, &m_core));
-
-      BOOST_FOREACH(const block_complete_entry& block_entry, arg.blocks)
+      PROF_L2_START(block_complete_entries_prevalidation_time);
+      size_t count = 0;
+      for (const block_complete_entry& block_entry : arg.blocks)
       {
         CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
-        //process transactions
-        PROF_L1_START(transactions_process_time);
-        BOOST_FOREACH(auto& tx_blob, block_entry.txs)
+
+        ++count;
+        block b;
+        if (!parse_and_validate_block_from_blob(block_entry.block, b))
         {
-          CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
-          tx_verification_context tvc = AUTO_VAL_INIT(tvc);
-          m_core.handle_incoming_tx(tx_blob, tvc, true);
-          if(tvc.m_verifivation_failed)
+          LOG_ERROR_CCONTEXT("sent wrong block: failed to parse and validate block: \r\n"
+            << string_tools::buff_to_hex_nodelimer(block_entry.block) << "\r\n dropping connection");
+          m_p2p->drop_connection(context);
+          m_p2p->add_ip_fail(context.m_remote_ip);
+          return 1;
+        }
+        //to avoid concurrency in core between connections, suspend connections which delivered block later then first one
+        if (count == 2)
+        {
+          if (m_core.have_block(get_block_hash(b)))
           {
-            LOG_ERROR_CCONTEXT("transaction verification failed on NOTIFY_RESPONSE_GET_OBJECTS, \r\ntx_id = " 
-              << string_tools::pod_to_hex(get_blob_hash(tx_blob)) << ", dropping connection");
-            m_p2p->drop_connection(context);
+            context.m_state = currency_connection_context::state_idle;
+            context.m_needed_objects.clear();
+            context.m_requested_objects.clear();
+            LOG_PRINT_CCONTEXT_L1("Connection set to idle state.");
             return 1;
           }
         }
-        PROF_L1_FINISH(transactions_process_time);
 
-        //process block
-        PROF_L1_START(block_process_time);
-        block_verification_context bvc = boost::value_initialized<block_verification_context>();
-
-        m_core.handle_incoming_block(block_entry.block, bvc, false);
-
-        if(bvc.m_verifivation_failed)
+        auto req_it = context.m_requested_objects.find(get_block_hash(b));
+        if (req_it == context.m_requested_objects.end())
         {
-          LOG_PRINT_CCONTEXT_L0("Block verification failed, dropping connection");
+          LOG_ERROR_CCONTEXT("sent wrong NOTIFY_RESPONSE_GET_OBJECTS: block with id=" << string_tools::pod_to_hex(get_blob_hash(block_entry.block))
+            << " wasn't requested, dropping connection");
           m_p2p->drop_connection(context);
-          m_p2p->add_ip_fail(context.m_remote_ip);
           return 1;
         }
-        if(bvc.m_marked_as_orphaned)
+        if (b.tx_hashes.size() != block_entry.txs.size())
         {
-          LOG_PRINT_CCONTEXT_L0("Block received at sync phase was marked as orphaned, dropping connection");
+          LOG_ERROR_CCONTEXT("sent wrong NOTIFY_RESPONSE_GET_OBJECTS: block with id=" << string_tools::pod_to_hex(get_blob_hash(block_entry.block))
+            << ", tx_hashes.size()=" << b.tx_hashes.size() << " mismatch with block_complete_entry.m_txs.size()=" << block_entry.txs.size() << ", dropping connection");
           m_p2p->drop_connection(context);
-          m_p2p->add_ip_fail(context.m_remote_ip);
           return 1;
         }
 
-        PROF_L1_FINISH(block_process_time);
-        PROF_L1_DO(LOG_PRINT_CCONTEXT_L2("Block process time: " << print_mcsec_as_ms(block_process_time + transactions_process_time) << "(" << print_mcsec_as_ms(transactions_process_time) << "/" << print_mcsec_as_ms(block_process_time) << ") ms"));
-
-        PROF_L2_DO(syncing_conn_count_sum += get_synchronizing_connections_count(); ++syncing_conn_count_count);
+        context.m_requested_objects.erase(req_it);
       }
-    }
-    PROF_L2_FINISH(blocks_handle_time);
-    
-    uint64_t current_height = m_core.get_current_blockchain_height();
-    LOG_PRINT_CCONTEXT_YELLOW(">>>>>>>>> sync progress: " << arg.blocks.size() << " blocks added, now have "
-      << current_height << " of " << context.m_remote_blockchain_height
-      << " ( " << std::fixed << std::setprecision(2) << current_height * 100.0 / context.m_remote_blockchain_height << "% ) and "
-      << context.m_remote_blockchain_height - current_height << " blocks left"
-      , LOG_LEVEL_0);
-    
-    
+      PROF_L2_FINISH(block_complete_entries_prevalidation_time);
+
+      PROF_L2_DO(syncing_conn_count_sum += get_synchronizing_connections_count(); ++syncing_conn_count_count);
+
+      if (context.m_requested_objects.size())
+      {
+        LOG_PRINT_CCONTEXT_RED("returned not all requested objects (context.m_requested_objects.size()="
+          << context.m_requested_objects.size() << "), dropping connection", LOG_LEVEL_0);
+        m_p2p->drop_connection(context);
+        return 1;
+      }
+
+      PROF_L2_START(blocks_handle_time);
+      {
+        m_core.pause_mine();
+        m_core.get_blockchain_storage().start_batch_exclusive_operation();
+        bool success = false;
+        misc_utils::auto_scope_leave_caller scope_exit_handler = misc_utils::create_scope_leave_handler([&, this](){
+          boost::bind(&t_core::resume_mine, &m_core);
+          m_core.get_blockchain_storage().finish_batch_exclusive_operation(success);
+        });
+
+        BOOST_FOREACH(const block_complete_entry& block_entry, arg.blocks)
+        {
+          CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
+          //process transactions
+          PROF_L1_START(transactions_process_time);
+          BOOST_FOREACH(auto& tx_blob, block_entry.txs)
+          {
+            CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
+            tx_verification_context tvc = AUTO_VAL_INIT(tvc);
+            m_core.handle_incoming_tx(tx_blob, tvc, true);
+            if (tvc.m_verifivation_failed)
+            {
+              LOG_ERROR_CCONTEXT("transaction verification failed on NOTIFY_RESPONSE_GET_OBJECTS, \r\ntx_id = "
+                << string_tools::pod_to_hex(get_blob_hash(tx_blob)) << ", dropping connection");
+              m_p2p->drop_connection(context);
+              return 1;
+            }
+          }
+          PROF_L1_FINISH(transactions_process_time);
+
+          //process block
+          PROF_L1_START(block_process_time);
+          block_verification_context bvc = boost::value_initialized<block_verification_context>();
+
+          m_core.handle_incoming_block(block_entry.block, bvc, false);
+
+          if (bvc.m_verifivation_failed)
+          {
+            LOG_PRINT_CCONTEXT_L0("Block verification failed, dropping connection");
+            m_p2p->drop_connection(context);
+            m_p2p->add_ip_fail(context.m_remote_ip);
+            return 1;
+          }
+          if (bvc.m_marked_as_orphaned)
+          {
+            LOG_PRINT_CCONTEXT_L0("Block received at sync phase was marked as orphaned, dropping connection");
+            m_p2p->drop_connection(context);
+            m_p2p->add_ip_fail(context.m_remote_ip);
+            return 1;
+          }
+
+          PROF_L1_FINISH(block_process_time);
+          PROF_L1_DO(LOG_PRINT_CCONTEXT_L2("Block process time: " << print_mcsec_as_ms(block_process_time + transactions_process_time) << "(" << print_mcsec_as_ms(transactions_process_time) << "/" << print_mcsec_as_ms(block_process_time) << ") ms"));
+
+          PROF_L2_DO(syncing_conn_count_sum += get_synchronizing_connections_count(); ++syncing_conn_count_count);
+        }
+        success = true;
+      }
+      PROF_L2_FINISH(blocks_handle_time);
+
+      uint64_t current_height = m_core.get_current_blockchain_height();
+      LOG_PRINT_CCONTEXT_YELLOW(">>>>>>>>> sync progress: " << arg.blocks.size() << " blocks added, now have "
+        << current_height << " of " << context.m_remote_blockchain_height
+        << " ( " << std::fixed << std::setprecision(2) << current_height * 100.0 / context.m_remote_blockchain_height << "% ) and "
+        << context.m_remote_blockchain_height - current_height << " blocks left"
+        , LOG_LEVEL_0);
+
+
 
 #if PROFILING_LEVEL >= 2
-    double syncing_conn_count_av = syncing_conn_count_sum / static_cast<double>(syncing_conn_count_count);
-    size_t blocks_count = arg.blocks.size();
-    LOG_PRINT_CCONTEXT_YELLOW("NOTIFY_RESPONSE_GET_OBJECTS: " << blocks_count << " blocks were prevalidated in " << block_complete_entries_prevalidation_time / 1000
-      << " ms (" << std::fixed << std::setprecision(2) << block_complete_entries_prevalidation_time / 1000.0f / blocks_count << " ms per block av) and handled in " << blocks_handle_time / 1000
-      << " ms (" << std::fixed << std::setprecision(2) << blocks_handle_time / 1000.0f / blocks_count << " ms per block av)"
-      << " syncing conns av: " << std::fixed << std::setprecision(2) << syncing_conn_count_av, LOG_LEVEL_1);
+      double syncing_conn_count_av = syncing_conn_count_sum / static_cast<double>(syncing_conn_count_count);
+      size_t blocks_count = arg.blocks.size();
+      LOG_PRINT_CCONTEXT_YELLOW("NOTIFY_RESPONSE_GET_OBJECTS: " << blocks_count << " blocks were prevalidated in " << block_complete_entries_prevalidation_time / 1000
+        << " ms (" << std::fixed << std::setprecision(2) << block_complete_entries_prevalidation_time / 1000.0f / blocks_count << " ms per block av) and handled in " << blocks_handle_time / 1000
+        << " ms (" << std::fixed << std::setprecision(2) << blocks_handle_time / 1000.0f / blocks_count << " ms per block av)"
+        << " syncing conns av: " << std::fixed << std::setprecision(2) << syncing_conn_count_av, LOG_LEVEL_1);
 #endif
 
+      request_missing_objects(context, true);
+      return 1;
+    });
 
-    request_missing_objects(context, true);
-    return 1;
+    if (!have_called)
+    {
+      context.m_state = currency_connection_context::state_idle;
+      LOG_PRINT_CCONTEXT_MAGENTA("[HANDLE_RESPONSE_GET_OBJECTS]: Core blocked response, connection state changed to idle", LOG_LEVEL_0);
+    }
+      
+    return res;
   }
 #undef CHECK_STOP_FLAG__DROP_AND_RETURN_IF_SET
   //------------------------------------------------------------------------------------------------------------------------
@@ -450,7 +531,7 @@ namespace currency
     size_t count_synced = 0;
     size_t count_total = 0;
     m_p2p->for_each_connection([&](currency_connection_context& context, nodetool::peerid_type peer_id)->bool{
-      if (context.m_state == currency_connection_context::state_normal)
+      if (context.m_state == currency_connection_context::state_normal && context.m_remote_blockchain_height > 1)
       {
         ++count_synced;
       }
@@ -462,6 +543,7 @@ namespace currency
     {
       on_connection_synchronized();
       m_synchronized = true;
+      m_been_synchronized = true;
       LOG_PRINT_MAGENTA("Synchronized set to TRUE (idle)", LOG_LEVEL_0);
     }
     else if ((!count_total || count_synced < count_total / 3) && m_synchronized)
@@ -478,14 +560,40 @@ namespace currency
   {
     LOG_PRINT_CCONTEXT_L2("NOTIFY_REQUEST_CHAIN: m_block_ids.size()=" << arg.block_ids.size());
     NOTIFY_RESPONSE_CHAIN_ENTRY::request r;
-    if(!m_core.find_blockchain_supplement(arg.block_ids, r))
+    //workaround to less load of the core storage of requests from other seeds while it being synchronized
+    if (!m_been_synchronized)
     {
-      LOG_ERROR_CCONTEXT("Failed to handle NOTIFY_REQUEST_CHAIN.");
-      return 1;
+      r.m_block_ids.push_back(get_genesis_id());
+      r.start_height = 0;
+      r.total_height = 1;
+      LOG_PRINT_CCONTEXT_MAGENTA("[HANDLE_REQUEST_CHAIN][Unsyncronized]Income chain request responded with empty chain.", LOG_LEVEL_0);
+      LOG_PRINT_CCONTEXT_L2("-->>NOTIFY_RESPONSE_CHAIN_ENTRY: m_start_height=" << r.start_height << ", m_total_height=" << r.total_height << ", m_block_ids.size()=" << r.m_block_ids.size());
+      post_notify<NOTIFY_RESPONSE_CHAIN_ENTRY>(r, context);
     }
-    LOG_PRINT_CCONTEXT_L2("-->>NOTIFY_RESPONSE_CHAIN_ENTRY: m_start_height=" << r.start_height << ", m_total_height=" << r.total_height << ", m_block_ids.size()=" << r.m_block_ids.size());
-    post_notify<NOTIFY_RESPONSE_CHAIN_ENTRY>(r, context);
-    return 1;
+
+    bool have_called = false;
+    int res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+    {
+      if (!m_core.find_blockchain_supplement(arg.block_ids, r))
+      {
+        LOG_ERROR_CCONTEXT("Internal error: failed to handle NOTIFY_REQUEST_CHAIN.");
+        return 1;
+      }
+      LOG_PRINT_CCONTEXT_L2("-->>NOTIFY_RESPONSE_CHAIN_ENTRY: m_start_height=" << r.start_height << ", m_total_height=" << r.total_height << ", m_block_ids.size()=" << r.m_block_ids.size());
+      post_notify<NOTIFY_RESPONSE_CHAIN_ENTRY>(r, context);
+      return 1;
+    });
+
+    if (!have_called)
+    {
+      r.m_block_ids.push_back(get_genesis_id());
+      r.start_height = 0;
+      r.total_height = 1;
+      LOG_PRINT_CCONTEXT_MAGENTA("[HANDLE_REQUEST_CHAIN]Core blocked, respond empty chain.", LOG_LEVEL_0);
+      LOG_PRINT_CCONTEXT_L2("-->>NOTIFY_RESPONSE_CHAIN_ENTRY: m_start_height=" << r.start_height << ", m_total_height=" << r.total_height << ", m_block_ids.size()=" << r.m_block_ids.size());
+      post_notify<NOTIFY_RESPONSE_CHAIN_ENTRY>(r, context);
+    }
+    return res;
   }
   //------------------------------------------------------------------------------------------------------------------------
   template<class t_core> 
@@ -514,9 +622,21 @@ namespace currency
     {//we have to fetch more objects ids, request blockchain entry
      
       NOTIFY_REQUEST_CHAIN::request r = boost::value_initialized<NOTIFY_REQUEST_CHAIN::request>();
-      m_core.get_short_chain_history(r.block_ids);
-      LOG_PRINT_CCONTEXT_L2("-->>NOTIFY_REQUEST_CHAIN: m_block_ids.size()=" << r.block_ids.size() );
-      post_notify<NOTIFY_REQUEST_CHAIN>(r, context);
+      bool have_called = false;
+      bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+      {
+        return m_core.get_short_chain_history(r.block_ids);
+      });
+      if (!have_called)
+      {
+        LOG_PRINT_CCONTEXT_MAGENTA("[REQUEST_MISSING_OBJECTS] core request blocked, connection changed to state idle", LOG_LEVEL_0);
+        context.m_state = currency_connection_context::state_idle;
+      }
+      else
+      {
+        LOG_PRINT_CCONTEXT_L2("-->>NOTIFY_REQUEST_CHAIN: m_block_ids.size()=" << r.block_ids.size());
+        post_notify<NOTIFY_REQUEST_CHAIN>(r, context);
+      }
     }else
     { 
       CHECK_AND_ASSERT_MES(context.m_last_response_height == context.m_remote_blockchain_height-1 
@@ -530,7 +650,6 @@ namespace currency
       
       context.m_state = currency_connection_context::state_normal;
       LOG_PRINT_CCONTEXT_GREEN(" SYNCHRONIZED OK", LOG_LEVEL_0);
-
     }
     return true;
   }
@@ -580,34 +699,42 @@ namespace currency
       return 1;
     }
 
-    if(!m_core.have_block(arg.m_block_ids.front()))
+    bool have_called = false;
+    bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
     {
-      LOG_ERROR_CCONTEXT("sent m_block_ids starting from unknown id: "
-                                              << string_tools::pod_to_hex(arg.m_block_ids.front()) << " , dropping connection");
-      m_p2p->drop_connection(context);
-      m_p2p->add_ip_fail(context.m_remote_ip);
+      if (!m_core.have_block(arg.m_block_ids.front()))
+      {
+        LOG_ERROR_CCONTEXT("sent m_block_ids starting from unknown id: "
+          << string_tools::pod_to_hex(arg.m_block_ids.front()) << " , dropping connection");
+        m_p2p->drop_connection(context);
+        m_p2p->add_ip_fail(context.m_remote_ip);
+        return 1;
+      }
+
+      context.m_remote_blockchain_height = arg.total_height;
+      context.m_last_response_height = arg.start_height + arg.m_block_ids.size() - 1;
+      if (context.m_last_response_height > context.m_remote_blockchain_height)
+      {
+        LOG_ERROR_CCONTEXT("sent wrong NOTIFY_RESPONSE_CHAIN_ENTRY, with \r\nm_total_height=" << arg.total_height
+          << "\r\nm_start_height=" << arg.start_height
+          << "\r\nm_block_ids.size()=" << arg.m_block_ids.size());
+        m_p2p->drop_connection(context);
+      }
+
+      for(auto& bl_id: arg.m_block_ids)
+      {
+        if (check_stop_flag_and_exit(context))
+          return 1;
+        if (!m_core.have_block(bl_id))
+          context.m_needed_objects.push_back(bl_id);
+      }
+
+      request_missing_objects(context, false);
       return 1;
-    }
-    
-    context.m_remote_blockchain_height = arg.total_height;
-    context.m_last_response_height = arg.start_height + arg.m_block_ids.size()-1;
-    if(context.m_last_response_height > context.m_remote_blockchain_height)
-    {
-      LOG_ERROR_CCONTEXT("sent wrong NOTIFY_RESPONSE_CHAIN_ENTRY, with \r\nm_total_height=" << arg.total_height
-                                                                         << "\r\nm_start_height=" << arg.start_height
-                                                                         << "\r\nm_block_ids.size()=" << arg.m_block_ids.size());
-      m_p2p->drop_connection(context);
-    }
+    });
 
-    BOOST_FOREACH(auto& bl_id, arg.m_block_ids)
-    {
-      if (check_stop_flag_and_exit(context))
-        return true;
-      if(!m_core.have_block(bl_id))
-        context.m_needed_objects.push_back(bl_id);
-    }
 
-    request_missing_objects(context, false);
+
     return 1;
   }
   //------------------------------------------------------------------------------------------------------------------------

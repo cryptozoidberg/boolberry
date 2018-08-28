@@ -97,6 +97,8 @@ namespace db
     explicit db_bridge_base(std::shared_ptr<i_db_adapter> adapter_ptr)
       : m_db_adapter_ptr(adapter_ptr)
       , m_db_opened(false)
+      , m_is_batch_exclusive(false)
+      , m_was_aborts(false)
     {}
 
     ~db_bridge_base()
@@ -106,6 +108,8 @@ namespace db
 
     bool begin_transaction(bool read_only_access = false)
     {
+      if (m_is_batch_exclusive)
+        return true;
       // TODO     !!!
       bool r = m_db_adapter_ptr->begin_transaction(read_only_access);
       return r;
@@ -113,6 +117,8 @@ namespace db
 
     void commit_transaction()
     {
+      if (m_is_batch_exclusive)
+        return;
       // TODO    !!!
       bool r = m_db_adapter_ptr->commit_transaction();
       CHECK_AND_ASSERT_THROW_MES(r, "commit_transaction failed");
@@ -120,19 +126,47 @@ namespace db
 
     void abort_transaction()
     {
+      m_was_aborts = true;
+      if (m_is_batch_exclusive)
+        return;
       // TODO     !!!
       m_db_adapter_ptr->abort_transaction();
+      
     }
+
+    bool begin_batch_exclusive_operation()
+    {
+      bool r = m_db_adapter_ptr->begin_transaction(false);
+      if (!r) return false;
+      m_is_batch_exclusive = true;
+      m_was_aborts = false; 
+      return true;
+    }
+
+    bool finish_batch_exclusive_operation(bool success)
+    {
+      m_is_batch_exclusive = false;
+      if (success)
+        m_db_adapter_ptr->commit_transaction();
+      else
+        m_db_adapter_ptr->abort_transaction();
+      
+      CHECK_AND_ASSERT_MES2(!success || (success && !m_was_aborts), "internal error: success = " << success << ", m_was_aborts = " << m_was_aborts);
+      return true;
+    }
+    
 
     bool is_open() const
     {
       return m_db_opened;
     }
 
+    
     std::shared_ptr<i_db_adapter> get_adapter() const
     {
       return m_db_adapter_ptr;
     }
+    
 
     bool open(const std::string& db_name)
     {
@@ -237,6 +271,8 @@ namespace db
     protected:
       std::shared_ptr<i_db_adapter> m_db_adapter_ptr;
       bool m_db_opened;
+      bool m_is_batch_exclusive;
+      bool m_was_aborts;
 
     private:
       epee::critical_section m_attached_container_receivers_lock;

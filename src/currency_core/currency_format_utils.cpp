@@ -1041,6 +1041,18 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
+  block  generate_genesis_block()
+  {
+    block bl = AUTO_VAL_INIT(bl);
+    generate_genesis_block(bl);
+    return bl;
+  }
+  //---------------------------------------------------------------
+  const crypto::hash& get_genesis_id()
+  {
+    static crypto::hash h = get_block_hash(generate_genesis_block());
+    return h;
+  }
   //---------------------------------------------------------------
   std::vector<uint64_t> relative_output_offsets_to_absolute(const std::vector<uint64_t>& off)
   {

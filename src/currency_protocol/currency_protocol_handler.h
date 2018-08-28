@@ -80,9 +80,12 @@ namespace currency
     nodetool::i_p2p_endpoint<connection_context>* m_p2p;
     std::atomic<uint32_t> m_syncronized_connections_count;
     std::atomic<bool> m_synchronized;
+    std::atomic<bool> m_been_synchronized;
     std::atomic<uint64_t> m_max_height_seen;
     std::atomic<uint64_t> m_core_inital_height;
     std::atomic<bool> m_want_stop;
+
+
 
     template<class t_parametr>
       bool post_notify(typename t_parametr::request& arg, currency_connection_context& context)

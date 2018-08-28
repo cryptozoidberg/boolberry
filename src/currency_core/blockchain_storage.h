@@ -102,6 +102,28 @@ namespace currency
     bool init(const boost::program_options::variables_map& vm, const std::string& config_folder);
     bool deinit();
 
+    bool start_batch_exclusive_operation();
+    bool finish_batch_exclusive_operation(bool success);
+    //bool is_batch_exclusive_operation();
+    struct exclusive_call_result
+    {};
+    template<typename retun_value_t, typename t_callback>
+    retun_value_t call_if_no_batch_exclusive_operation(bool& called, t_callback c)
+    {
+      CRITICAL_REGION_LOCAL(m_exclusive_batch_lock);
+      if (m_exclusive_batch_active)
+      {
+        called = false;
+        return AUTO_VAL_INIT(retun_value_t());
+      }
+      m_blockchain_lock.lock();
+      retun_value_t r = c();
+      m_blockchain_lock.unlock();
+      m_exclusive_batch_lock.unlock();
+      called = true;
+      return r;
+    }
+
     bool set_checkpoints(checkpoints&& chk_pts);
     checkpoints& get_checkpoints() { return m_checkpoints; }
 
@@ -284,6 +306,8 @@ namespace currency
 
     // mutable members
     mutable critical_section m_blockchain_lock; // TODO: add here reader/writer lock
+    mutable critical_section m_exclusive_batch_lock; // TODO: add here reader/writer lock
+    std::atomic<bool> m_exclusive_batch_active;
 
     bool switch_to_alternative_blockchain(std::list<blocks_ext_by_hash::iterator>& alt_chain);
     bool pop_block_from_blockchain();
