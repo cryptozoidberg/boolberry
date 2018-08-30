@@ -127,7 +127,8 @@ namespace currency
     if (!m_synchronized && !context.m_is_income && hshd.current_height == 1 && is_inital)
     {
       LOG_PRINT_CCONTEXT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA()]: rejected busy node.", LOG_LEVEL_0);
-      return false;
+      m_p2p->drop_connection(context);
+      return true;
     }
 
     bool have_called = false;
