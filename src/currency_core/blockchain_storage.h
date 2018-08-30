@@ -104,9 +104,7 @@ namespace currency
 
     bool start_batch_exclusive_operation();
     bool finish_batch_exclusive_operation(bool success);
-    //bool is_batch_exclusive_operation();
-    struct exclusive_call_result
-    {};
+
     template<typename retun_value_t, typename t_callback>
     retun_value_t call_if_no_batch_exclusive_operation(bool& called, t_callback c)
     {
@@ -116,10 +114,12 @@ namespace currency
         called = false;
         return AUTO_VAL_INIT(retun_value_t());
       }
-      m_blockchain_lock.lock();
-      retun_value_t r = c();
-      m_blockchain_lock.unlock();
-      called = true;
+      {
+        CRITICAL_REGION_LOCAL1(m_blockchain_lock);
+        retun_value_t r = c();
+        called = true;
+      }
+      
       return r;
     }
 
