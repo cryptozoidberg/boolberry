@@ -59,7 +59,7 @@ namespace currency
       NOTIFY_REQUEST_CHAIN::request r = boost::value_initialized<NOTIFY_REQUEST_CHAIN::request>();
 
       bool have_called = false;
-      bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+      bool res = m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
       {
         m_core.get_short_chain_history(r.block_ids);
         return true;
@@ -83,7 +83,7 @@ namespace currency
   bool t_currency_protocol_handler<t_core>::get_stat_info(core_stat_info& stat_inf)
   {
     bool have_called = false;
-    bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+    bool res = m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
     {
       return m_core.get_stat_info(stat_inf);
     });
@@ -131,7 +131,7 @@ namespace currency
     }
 
     bool have_called = false;
-    bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+    bool res = m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
     {
       if (m_core.have_block(hshd.top_id))
       {
@@ -206,7 +206,7 @@ namespace currency
   bool t_currency_protocol_handler<t_core>::get_payload_sync_data(CORE_SYNC_DATA& hshd)
   {
     bool have_called = false;
-    bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+    bool res = m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
     {
       m_core.get_blockchain_top(hshd.current_height, hshd.top_id);
       hshd.current_height += 1;
@@ -370,7 +370,7 @@ namespace currency
     PROF_L2_DO(uint64_t syncing_conn_count_sum = get_synchronizing_connections_count(); uint64_t syncing_conn_count_count = 1);
 
     bool have_called = false;
-    int res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<int>(have_called, [&]()
+    int res = m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<int>(have_called, [&]()
     {
 
       PROF_L2_START(block_complete_entries_prevalidation_time);
@@ -572,7 +572,7 @@ namespace currency
     }
 
     bool have_called = false;
-    int res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+    int res = m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
     {
       if (!m_core.find_blockchain_supplement(arg.block_ids, r))
       {
@@ -623,7 +623,7 @@ namespace currency
      
       NOTIFY_REQUEST_CHAIN::request r = boost::value_initialized<NOTIFY_REQUEST_CHAIN::request>();
       bool have_called = false;
-      bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+      bool res = m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
       {
         return m_core.get_short_chain_history(r.block_ids);
       });
@@ -700,7 +700,7 @@ namespace currency
     }
 
     bool have_called = false;
-    bool res = m_core.get_blockchain_storage().call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
+    bool res = m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
     {
       if (!m_core.have_block(arg.m_block_ids.front()))
       {
