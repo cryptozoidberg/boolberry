@@ -1374,6 +1374,7 @@ bool blockchain_storage::start_batch_exclusive_operation()
   
   m_blockchain_lock.lock();
   m_db.begin_batch_exclusive_operation();
+  LOG_PRINT_MAGENTA("[START_BATCH_EXCLUSIVE_OPERATION]", LOG_LEVEL_0);
   return true;
 }
 //------------------------------------------------------------------
@@ -1386,7 +1387,7 @@ bool blockchain_storage::finish_batch_exclusive_operation(bool success)
   m_exclusive_batch_lock.lock();
   m_exclusive_batch_active = false;
   m_exclusive_batch_lock.unlock();
-
+  LOG_PRINT_MAGENTA("[FINISH_BATCH_EXCLUSIVE_OPERATION]", LOG_LEVEL_0);
   return true;
 }
 //------------------------------------------------------------------

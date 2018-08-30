@@ -217,7 +217,7 @@ namespace currency
     });
     if (!have_called)
     {
-      //wile we sync say to others thart we have only genesis to avoid sync requests
+      //wile we sync say to others that we have only genesis to avoid sync requests
       hshd.current_height = 1;
       hshd.top_id = get_genesis_id();
       hshd.last_checkpoint_height = m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height();
