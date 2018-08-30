@@ -76,7 +76,8 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) : m_lmdb_adapter
                                                                  m_donations_account(AUTO_VAL_INIT(m_donations_account)), 
                                                                  m_royalty_account(AUTO_VAL_INIT(m_royalty_account)),
                                                                  m_is_blockchain_storing(false), 
-                                                                 m_locker_file(0)
+                                                                 m_locker_file(0), 
+                                                                 m_exclusive_batch_active(false)
 {
   bool r = get_donation_accounts(m_donations_account, m_royalty_account);
   CHECK_AND_ASSERT_THROW_MES(r, "failed to load donation accounts");
