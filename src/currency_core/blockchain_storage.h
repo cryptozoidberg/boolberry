@@ -119,7 +119,6 @@ namespace currency
       m_blockchain_lock.lock();
       retun_value_t r = c();
       m_blockchain_lock.unlock();
-      m_exclusive_batch_lock.unlock();
       called = true;
       return r;
     }
