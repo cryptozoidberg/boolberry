@@ -118,9 +118,8 @@ namespace currency
         CRITICAL_REGION_LOCAL1(m_blockchain_lock);
         retun_value_t r = c();
         called = true;
+        return r;
       }
-      
-      return r;
     }
 
     bool set_checkpoints(checkpoints&& chk_pts);
