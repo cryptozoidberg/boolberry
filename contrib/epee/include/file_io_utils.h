@@ -261,45 +261,6 @@ namespace file_io_utils
   typedef int native_filesystem_handle;
 #endif
 
-  inline bool open_and_lock_file(const std::string file_path, native_filesystem_handle& h_file)
-  {
-#ifdef WIN32
-    h_file = ::CreateFileA(file_path.c_str(),                // name of the write
-      GENERIC_WRITE,          // open for writing
-      0,                      // do not share
-      NULL,                   // default security
-      OPEN_ALWAYS,             // create new file only
-      FILE_ATTRIBUTE_NORMAL,  // normal file
-      NULL);                  // no attr. template
-    if (h_file == INVALID_HANDLE_VALUE)
-      return false;
-    else
-      return true;
-#else
-    h_file = open(file_path.c_str(), O_RDWR | O_CREAT, 0666); // open or create lockfile
-    if (h_file < 0)
-      return false;
-    //check open success...
-    int rc = flock(h_file, LOCK_EX | LOCK_NB); // grab exclusive lock, fail if can't obtain.
-    if (rc < 0)
-    {
-      return false;
-    }
-    return true;
-#endif
-  }
-
-  inline bool unlock_and_close_file(native_filesystem_handle& h_file)
-  {
-#ifdef WIN32
-    ::CloseHandle(h_file);                  // no attr. template
-#else
-    flock(h_file, LOCK_UN); // grab exclusive lock, fail if can't obtain.
-    close(h_file);
-#endif
-    return true;
-  }
-
 
 	inline
 		bool save_string_to_file(const std::string& path_to_file, const std::string& str)

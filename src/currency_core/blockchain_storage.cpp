@@ -218,7 +218,7 @@ bool blockchain_storage::deinit()
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   m_scratchpad_wr.deinit();
   m_db.close();
-  epee::file_io_utils::unlock_and_close_file(m_locker_file);
+  tools::unlock_and_close_file(m_locker_file);
   return true;
 }
 //------------------------------------------------------------------
@@ -311,7 +311,7 @@ bool blockchain_storage::prune_ring_signatures(uint64_t height, uint64_t& transa
 bool blockchain_storage::check_instance(const std::string& path)
 {
   std::string locker_name = path + "/" + std::string(CURRENCY_CORE_INSTANCE_LOCK_FILE);
-  bool r = epee::file_io_utils::open_and_lock_file(locker_name, m_locker_file);
+  bool r = tools::open_and_lock_file(locker_name, m_locker_file);
 
   if (r)
     return true;
