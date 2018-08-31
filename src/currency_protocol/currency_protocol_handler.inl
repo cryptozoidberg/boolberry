@@ -541,7 +541,7 @@ namespace currency
       return true;
     });
 
-    if (count_total && count_synced && count_synced >= count_total / 2 && !m_synchronized)
+    if (count_total && count_synced  && count_synced > count_total / 2 && !m_synchronized)
     {
       on_connection_synchronized();
       m_synchronized = true;
@@ -560,7 +560,7 @@ namespace currency
   template<class t_core>
   int t_currency_protocol_handler<t_core>::handle_request_chain(int command, NOTIFY_REQUEST_CHAIN::request& arg, currency_connection_context& context)
   {
-    LOG_PRINT_CCONTEXT_L2("NOTIFY_REQUEST_CHAIN: m_block_ids.size()=" << arg.block_ids.size());
+    LOG_PRINT_CCONTEXT_L2("NOTIFY_REQUEST_CHAIN: m_been_synchronized = " << m_been_synchronized  << "m_block_ids.size()=" << arg.block_ids.size());
     NOTIFY_RESPONSE_CHAIN_ENTRY::request r;
     //workaround to less load of the core storage of requests from other seeds while it being synchronized
     if (!m_been_synchronized)
