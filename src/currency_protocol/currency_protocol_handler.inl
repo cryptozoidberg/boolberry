@@ -36,6 +36,9 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::init(const boost::program_options::variables_map& vm)
   {
+    if (command_line::has_arg(vm, arg_currency_protocol_explicit_set_online))
+      m_been_synchronized = true;
+
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------  
