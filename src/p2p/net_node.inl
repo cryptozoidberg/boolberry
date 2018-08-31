@@ -48,6 +48,8 @@ namespace nodetool
     command_line::add_arg(desc, arg_p2p_hide_my_port);   
     command_line::add_arg(desc, arg_p2p_use_only_priority_nodes);       
     command_line::add_arg(desc, arg_p2p_offline_mode);
+
+    t_payload_net_handler::init_options(desc);
   }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
