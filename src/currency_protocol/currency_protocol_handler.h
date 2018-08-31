@@ -41,6 +41,9 @@ namespace currency
     END_INVOKE_MAP2()
 
     bool on_idle();
+    
+    static void init_options(boost::program_options::options_description& desc);
+
     bool init(const boost::program_options::variables_map& vm);
     bool deinit();
     void set_p2p_endpoint(nodetool::i_p2p_endpoint<connection_context>* p2p);

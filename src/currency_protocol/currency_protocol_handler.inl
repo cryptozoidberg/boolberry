@@ -7,7 +7,10 @@
 #include "profile_tools.h"
 namespace currency
 {
-
+  namespace
+  {
+    const command_line::arg_descriptor<bool>               arg_currency_protocol_explicit_set_online = { "explicit_set_online", "Explicitly set node to online mode(needed for launch first node in network)", false, true};
+  }
   //-----------------------------------------------------------------------------------------------------------------------  
   template<class t_core>
     t_currency_protocol_handler<t_core>::t_currency_protocol_handler(t_core& rcore, nodetool::i_p2p_endpoint<connection_context>* p_net_layout):m_core(rcore), 
@@ -23,7 +26,13 @@ namespace currency
     if(!m_p2p)
       m_p2p = &m_p2p_stub;
   }
-  //-----------------------------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
+    template<class t_core>
+    void t_currency_protocol_handler<t_core>::init_options(boost::program_options::options_description& desc)
+    {
+      command_line::add_arg(desc, arg_currency_protocol_explicit_set_online);
+    }
+    //-----------------------------------------------------------------------------------------------------------------------
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::init(const boost::program_options::variables_map& vm)
   {
@@ -124,7 +133,7 @@ namespace currency
       return true;
 
     //while we not synchronized, we have to keep major amount of connections with nodes servicing our blockchain download
-    if (!m_synchronized && !context.m_is_income && hshd.current_height == 1 && is_inital)
+    if (!m_been_synchronized && !context.m_is_income && hshd.current_height == 1 && is_inital)
     {
       LOG_PRINT_CCONTEXT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA()]: rejected busy node.", LOG_LEVEL_0);
       m_p2p->drop_connection(context);
