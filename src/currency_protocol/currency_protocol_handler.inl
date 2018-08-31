@@ -571,6 +571,7 @@ namespace currency
       LOG_PRINT_CCONTEXT_MAGENTA("[HANDLE_REQUEST_CHAIN][Unsyncronized]Income chain request responded with empty chain.", LOG_LEVEL_0);
       LOG_PRINT_CCONTEXT_L2("-->>NOTIFY_RESPONSE_CHAIN_ENTRY: m_start_height=" << r.start_height << ", m_total_height=" << r.total_height << ", m_block_ids.size()=" << r.m_block_ids.size());
       post_notify<NOTIFY_RESPONSE_CHAIN_ENTRY>(r, context);
+      return 1;
     }
 
     bool have_called = false;
