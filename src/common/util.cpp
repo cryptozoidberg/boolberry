@@ -406,7 +406,7 @@ std::string get_nix_version_display_string()
   }
 
 
-  inline bool open_and_lock_file(const std::string file_path, epee::file_io_utils::native_filesystem_handle& h_file)
+  bool open_and_lock_file(const std::string file_path, epee::file_io_utils::native_filesystem_handle& h_file)
   {
 #ifdef WIN32
     h_file = ::CreateFileA(file_path.c_str(),                // name of the write
@@ -438,7 +438,7 @@ std::string get_nix_version_display_string()
 #endif
   }
 
-  inline bool unlock_and_close_file(epee::file_io_utils::native_filesystem_handle& h_file)
+  bool unlock_and_close_file(epee::file_io_utils::native_filesystem_handle& h_file)
   {
 #ifdef WIN32
     ::CloseHandle(h_file);                  // no attr. template

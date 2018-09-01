@@ -310,6 +310,7 @@ bool blockchain_storage::prune_ring_signatures(uint64_t height, uint64_t& transa
 //------------------------------------------------------------------
 bool blockchain_storage::check_instance(const std::string& path)
 {
+  tools::create_directories_if_necessary(path);
   std::string locker_name = path + "/" + std::string(CURRENCY_CORE_INSTANCE_LOCK_FILE);
   bool r = tools::open_and_lock_file(locker_name, m_locker_file);
 
