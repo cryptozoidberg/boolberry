@@ -120,6 +120,7 @@ namespace tools
     void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
     void get_unconfirmed_transfers(std::vector<wallet_rpc::wallet_transfer_info>& trs);
     void init(const std::string& daemon_address = "http://localhost:8080");
+    void reset_and_sync_wallet();
     bool deinit();
 
     void stop() { m_run.store(false, std::memory_order_relaxed); }

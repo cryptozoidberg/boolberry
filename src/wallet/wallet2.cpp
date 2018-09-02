@@ -543,6 +543,12 @@ bool wallet2::clear()
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::reset_and_sync_wallet()
+{
+  clear();
+  refresh();
+}
+//----------------------------------------------------------------------------------------------------
 bool wallet2::store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet)
 {
   std::string account_data;
@@ -717,8 +723,7 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
     LOG_PRINT_L0("Wallet resyncing from genesis...");
     currency::block b;
     currency::generate_genesis_block(b);
-    m_blockchain.clear();
-    m_blockchain.push_back(get_block_hash(b));
+    clear();
   }
   m_local_bc_height = m_blockchain.size();
 }
