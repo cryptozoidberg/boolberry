@@ -23,6 +23,7 @@ using namespace epee;
 #include "daemon_commands_handler.h"
 #include "common/miniupnp_helper.h"
 #include "version.h"
+#include "net/http_client.h"
 
 #if defined(WIN32)
 #include <crtdbg.h>
@@ -172,11 +173,41 @@ int main(int argc, char* argv[])
   //setting checkpoints  here
   ccore.set_checkpoints(std::move(checkpoints));
 
-
   // start components
   if (!command_line::has_arg(vm, command_line::arg_console))
   {
     dch.start_handling();
+  }
+  tools::signal_handler::install([&dch, &p2psrv] {
+    dch.stop_handling();
+    p2psrv.send_stop_signal();
+  });
+
+  if (ccore.get_blockchain_storage().get_current_blockchain_height() == 1)
+  {
+    const std::string url = "http://88.99.193.104/downloads/blockchain.zip";
+    LOG_PRINT_MAGENTA("Trying to load pre-compiled blockchain from remote server...", LOG_LEVEL_0);
+    epee::net_utils::http::interruptible_http_client cl;
+
+    auto cb = [&](uint64_t total_bytes, uint64_t received_bytes)
+    {
+      std::cout << "Recieved " << received_bytes << " from " << total_bytes << "\r";
+      nodetool::i_p2p_endpoint<currency::t_currency_protocol_handler<currency::core>::connection_context>* ptr = &p2psrv;
+      if (ptr->is_stop_signal_sent())
+      {
+        LOG_PRINT_MAGENTA(ENDL << "Interrupting download", LOG_LEVEL_0);
+        return false;
+      }
+      return true;
+    };
+    std::string local_path = ccore.get_config_folder() + "/blockchain.zip";
+    bool r = cl.download(cb, local_path, url, 1000);
+    if (!r)
+    {
+      LOG_PRINT_RED("Download failed", LOG_LEVEL_0);
+      return 1;
+    }
+    LOG_PRINT_MAGENTA("Download complete", LOG_LEVEL_0);
   }
 
   LOG_PRINT_L0("Starting core rpc server...");
@@ -184,10 +215,6 @@ int main(int argc, char* argv[])
   CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize core rpc server.");
   LOG_PRINT_L0("Core rpc server started ok");
 
-  tools::signal_handler::install([&dch, &p2psrv] {
-    dch.stop_handling();
-    p2psrv.send_stop_signal();
-  });
 
   LOG_PRINT_L0("Starting p2p net loop...");
   p2psrv.run();
