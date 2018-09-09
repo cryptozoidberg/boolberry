@@ -153,7 +153,7 @@ namespace tools
     template<typename T>
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED);
     template<typename T>
-    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr, currency::blobdata& relay_blob, bool do_not_relay = false);
+    void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr, currency::blobdata& relay_blob, bool do_not_relay = false, const std::vector<size_t>& outs_to_spend = std::vector<size_t>());
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx, currency::blobdata& relay_blob, bool do_not_relay = false);
@@ -162,7 +162,7 @@ namespace tools
     bool check_connection();
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
     bool get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANSFERS::request& req, wallet_rpc::COMMAND_RPC_GET_TRANSFERS::response& res) const;
-    std::string get_transfers_str() const;
+    std::string get_transfers_str(bool include_spent = true, bool include_unspent = true) const;
     void get_payments(const currency::payment_id_t& payment_id, std::list<payment_details>& payments, uint64_t min_height = 0) const;
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id);
     bool store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet = false);
@@ -202,7 +202,7 @@ namespace tools
     bool is_transfer_unlocked(const transfer_details& td) const;
     bool clear();
     void pull_blocks(size_t& blocks_added);
-    uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers);
+    uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, const std::vector<size_t>& outs_to_spend, std::list<transfer_container::iterator>& selected_transfers);
     bool prepare_file_names(const std::string& file_path);
     void process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias);
     void add_sent_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient);
@@ -403,7 +403,9 @@ namespace tools
   //----------------------------------------------------------------------------------------------------
   template<typename T>
   void wallet2::transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count,
-    uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy, currency::transaction &tx, uint8_t tx_outs_attr, currency::blobdata& relay_blob, bool do_not_relay)
+    uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, T destination_split_strategy, const tx_dust_policy& dust_policy,
+    currency::transaction &tx, uint8_t tx_outs_attr, currency::blobdata& relay_blob, bool do_not_relay,
+    const std::vector<size_t>& outs_to_spend)
   {
     using namespace currency;
     CHECK_AND_THROW_WALLET_EX(dsts.empty(), error::zero_destination);
@@ -427,7 +429,7 @@ namespace tools
     }
 
     std::list<transfer_container::iterator> selected_transfers;
-    uint64_t found_money = select_transfers(needed_money, fake_outputs_count, dust_policy.dust_threshold, selected_transfers);
+    uint64_t found_money = select_transfers(needed_money, fake_outputs_count, dust_policy.dust_threshold, outs_to_spend, selected_transfers);
     CHECK_AND_THROW_WALLET_EX(found_money < needed_money, error::not_enough_money, found_money, needed_money - fee, fee);
 
     typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry out_entry;
