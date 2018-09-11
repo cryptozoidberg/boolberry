@@ -24,6 +24,7 @@ using namespace epee;
 #include "common/miniupnp_helper.h"
 #include "version.h"
 #include "net/http_client.h"
+#include "md5_l.h"
 
 #if defined(WIN32)
 #include <crtdbg.h>
@@ -189,6 +190,16 @@ int main(int argc, char* argv[])
     LOG_PRINT_MAGENTA("Trying to load pre-compiled blockchain from remote server...", LOG_LEVEL_0);
     epee::net_utils::http::interruptible_http_client cl;
 
+    //@#@
+    const std::string pa = "C:/Users/rocky/AppData/Roaming/boolb/blockchain/theory.html";
+    std::string buff;
+    bool rr = file_io_utils::load_file_to_string(pa, buff);
+    unsigned char output[16] = {0};
+    md5::md5(reinterpret_cast<const unsigned char*>(buff.data()), buff.length(), output);
+    std::string res = epee::string_tools::pod_to_hex(output);
+    //@@@
+
+
     auto cb = [&](uint64_t total_bytes, uint64_t received_bytes)
     {
       std::cout << "Recieved " << received_bytes << " from " << total_bytes << "\r";
@@ -201,7 +212,7 @@ int main(int argc, char* argv[])
       return true;
     };
     std::string local_path = ccore.get_config_folder() + "/blockchain.zip";
-    bool r = cl.download(cb, local_path, url, 1000);
+    bool r = cl.download_and_unzip(cb, local_path, url, 1000);
     if (!r)
     {
       LOG_PRINT_RED("Download failed", LOG_LEVEL_0);

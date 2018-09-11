@@ -49,7 +49,7 @@ namespace net_utils
 		*
 		*/
 		inline 
-		content_encoding_gzip(i_target_handler* powner_filter, bool is_deflate_mode = false):m_powner_filter(powner_filter), 
+      content_encoding_gzip(i_target_handler* powner_filter, bool is_deflate_mode = false, int compression_level = Z_DEFAULT_COMPRESSION) :m_powner_filter(powner_filter),
 			m_is_stream_ended(false), 
 			m_is_deflate_mode(is_deflate_mode),
 			m_is_first_update_in(true)
@@ -60,11 +60,11 @@ namespace net_utils
 			if(is_deflate_mode)
 			{
 				ret = inflateInit(&m_zstream_in);	
-				ret = deflateInit(&m_zstream_out, Z_DEFAULT_COMPRESSION);
+        ret = deflateInit(&m_zstream_out, compression_level);
 			}else
 			{
 				ret = inflateInit2(&m_zstream_in, 0x1F);
-				ret = deflateInit2(&m_zstream_out, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 0x1F, 8, Z_DEFAULT_STRATEGY);
+        ret = deflateInit2(&m_zstream_out, compression_level, Z_DEFLATED, 0x1F, 8, Z_DEFAULT_STRATEGY);
 			}	
 		}
 		/*! \brief
@@ -219,6 +219,144 @@ namespace net_utils
 		*/
 		bool		m_is_first_update_in;
 	};
+
+
+  struct abstract_callback_base
+  {
+    virtual bool do_call(const std::string& piece_of_transfer) = 0;
+  };
+
+  template <typename callback_t>
+  struct abstract_callback : public abstract_callback_base
+  {
+    callback_t m_cb;
+
+    abstract_callback(callback_t cb) : m_cb(cb){}
+    virtual bool do_call(const std::string& piece_of_transfer)
+    {
+      return m_cb(piece_of_transfer);
+    }
+  };
+
+  class gzip_lambda_handler : public content_encoding_gzip,
+                              public i_target_handler
+  {
+    std::shared_ptr<abstract_callback_base> m_pcb;
+
+    virtual bool handle_target_data(std::string& piece_of_transfer)
+    {
+      bool r = m_pcb->do_call(piece_of_transfer);
+      piece_of_transfer.clear();
+      return r;
+    }
+  public: 
+    gzip_lambda_handler() : content_encoding_gzip(this, true, Z_BEST_COMPRESSION)
+    {}
+    
+    template<class callback_t>
+    bool update_in(std::string& piece_of_transfer, callback_t cb)
+    {
+      m_pcb.reset(new abstract_callback<callback_t>(cb));
+      return content_encoding_gzip::update_in(piece_of_transfer);
+    }
+    template<class callback_t>
+    bool stop(callback_t cb)
+    {return true;}
+  };
+
+
+
+  class gzip_encoder_lyambda
+  {
+    bool m_initialized;
+    z_stream  m_zstream;
+  public: 
+
+
+    gzip_encoder_lyambda(int compression_level = Z_DEFAULT_COMPRESSION) :m_initialized(false), m_zstream(AUTO_VAL_INIT(m_zstream))
+    {
+      int ret = deflateInit(&m_zstream, compression_level);
+      if (ret == Z_OK)
+        m_initialized = true;
+    }
+    ~gzip_encoder_lyambda()
+    {
+      deflateEnd(&m_zstream);
+    }
+    template<typename callback_t>
+    bool update_in(const std::string& target, callback_t cb)
+    {
+      if (!m_initialized)
+      {        
+        return false;
+      }
+      
+      if (!target.size())
+      {
+        return true;
+      }
+
+      std::string result_packed_buff;
+      //theoretically it supposed to be smaller
+      result_packed_buff.resize(target.size(), 'X');
+      while (true)
+      {
+        m_zstream.next_in = (Bytef*)target.data();
+        m_zstream.avail_in = (uInt)target.size();
+        m_zstream.next_out = (Bytef*)result_packed_buff.data();
+        m_zstream.avail_out = (uInt)result_packed_buff.size();
+
+        int ret = deflate(&m_zstream, Z_NO_FLUSH);
+        CHECK_AND_ASSERT_MES(ret >= 0, false, "Failed to deflate. err = " << ret);
+        if (m_zstream.avail_out == 0)
+        {
+          //twice bigger buffer
+          result_packed_buff.resize(result_packed_buff.size()*2);
+          continue;
+        }        
+        if (result_packed_buff.size() != m_zstream.avail_out)
+          result_packed_buff.resize(result_packed_buff.size() - m_zstream.avail_out);
+        break;
+      }
+      
+      return cb(result_packed_buff);
+    }
+    template<typename callback_t>
+    bool stop(callback_t cb)
+    {
+      if (!m_initialized)
+      {
+        return false;
+      }
+
+      std::string result_packed_buff;
+      //theoretically it supposed to be smaller
+      result_packed_buff.resize(1000000, 'X');
+      while (true)
+      {
+        m_zstream.next_in =  nullptr;
+        m_zstream.avail_in = 0;
+        m_zstream.next_out = (Bytef*)result_packed_buff.data();
+        m_zstream.avail_out = (uInt)result_packed_buff.size();
+
+        int ret = deflate(&m_zstream, Z_FINISH);
+        CHECK_AND_ASSERT_MES(ret >= 0, false, "Failed to deflate at finish. err = " << ret);
+        if (ret != Z_STREAM_END)
+        {
+          //twice bigger buffer
+          result_packed_buff.resize(result_packed_buff.size() * 2);
+          continue;
+        }
+        if (result_packed_buff.size() != m_zstream.avail_out)
+          result_packed_buff.resize(result_packed_buff.size() - m_zstream.avail_out);
+        m_initialized = false;
+        break;
+      }
+
+      return cb(result_packed_buff);      
+    }
+
+  };
 }
 }
 

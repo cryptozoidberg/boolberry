@@ -43,7 +43,6 @@ namespace zlib_helper
 		int ret = deflateInit(&zstream, Z_DEFAULT_COMPRESSION);
 		if(target.size())
 		{
-
 			
 			result_packed_buff.resize(target.size()*2, 'X');
 

@@ -54,11 +54,11 @@ add_dependencies(wallet version)
 
 add_executable(daemon ${DAEMON} ${P2P} ${CURRENCY_PROTOCOL})
 add_dependencies(daemon version)
-target_link_libraries(daemon rpc currency_core crypto common upnpc-static ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_link_libraries(daemon rpc currency_core crypto common zlibstatic upnpc-static ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
                      
 add_executable(connectivity_tool ${CONN_TOOL})
 add_dependencies(connectivity_tool version)
-target_link_libraries(connectivity_tool currency_core crypto common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_link_libraries(connectivity_tool currency_core crypto zlibstatic common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
 
 add_executable(simplewallet ${SIMPLEWALLET})
@@ -79,7 +79,7 @@ if(BUILD_GUI)
   SET(MACOSX_BUNDLE_ICON_FILE app.icns)
   add_executable(Boolberry WIN32 MACOSX_BUNDLE ${QTDAEMON} )	  
   QT5_USE_MODULES(Boolberry WebKit WebKitWidgets)
-  target_link_libraries(Boolberry wallet rpc currency_core crypto common Qt5::Widgets ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} )
+  target_link_libraries(Boolberry wallet rpc currency_core crypto common zlibstatic Qt5::Widgets ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} )
   set_property(TARGET Boolberry PROPERTY FOLDER "prog")
   set(CMAKE_AUTOMOC OFF)
 endif()

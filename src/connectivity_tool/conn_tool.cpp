@@ -20,6 +20,7 @@ using namespace epee;
 #include "crypto/crypto.h"
 #include "storages/http_abstract_invoke.h"
 #include "net/http_client.h"
+#include "md5_l.h"
 
 namespace po = boost::program_options;
 using namespace currency;
@@ -40,6 +41,9 @@ namespace
   const command_line::arg_descriptor<bool>        arg_get_aliases        = {"rpc_get_aliases", "request daemon aliases all list", "", true};
   const command_line::arg_descriptor<std::string> arg_upate_maintainers_info = {"upate_maintainers_info", "Push maintainers info into the network, upate_maintainers_info=file_with_info.json", "", true};
   const command_line::arg_descriptor<std::string> arg_update_build_no    = {"update_build_no", "Updated version number in version template file", "", true};
+  const command_line::arg_descriptor<std::string> arg_pack_file          = {"pack_file", "Pack(using gzip) and calculate md5 hash for file", "", true };
+  const command_line::arg_descriptor<std::string> arg_unpack_file        = { "unpack_file", "UnPack(using gzip) and calculate md5 hash", "", true };
+  const command_line::arg_descriptor<std::string> arg_target_file        = { "target_file", "Specify target file for pack and upack commands", "", true };
 }
 
 typedef COMMAND_REQUEST_STAT_INFO_T<t_currency_protocol_handler<core>::stat_info> COMMAND_REQUEST_STAT_INFO;
@@ -336,6 +340,116 @@ bool get_private_key(crypto::secret_key& pk, po::variables_map& vm)
   return true;
 }
 //---------------------------------------------------------------------------------------------------------------
+template<class archive_processor_t>
+bool process_archive(archive_processor_t& arch_processor, bool is_md5_from_source, std::ifstream& source, std::ofstream& target)
+{
+  uint64_t sz = source.tellg();
+  uint64_t remainin = sz;
+  uint64_t packed_size = 0;
+
+  //MD5 stream calculator
+  md5::MD5_CTX md5_state = AUTO_VAL_INIT(md5_state);
+  md5::MD5Init(&md5_state);
+
+
+  source.seekg(0, std::ios::beg);
+#define PACK_READ_BLOCKS_SIZE  1048576 // 1MB blocks
+  std::string buff;
+
+  auto writer_cb = [&](const std::string& piece_of_transfe)
+  {
+    target.write(piece_of_transfe.data(), piece_of_transfe.size());
+    packed_size += piece_of_transfe.size();
+    if (!is_md5_from_source)
+    {
+      //update MD5 state
+      md5::MD5Update(&md5_state, reinterpret_cast<const unsigned char *>(piece_of_transfe.data()), piece_of_transfe.size());
+    }
+    return true;
+  };
+
+  while (remainin)
+  {
+    uint64_t read_sz = remainin >= PACK_READ_BLOCKS_SIZE ? PACK_READ_BLOCKS_SIZE : remainin;
+    buff.resize(read_sz);
+    source.read(const_cast<char*>(buff.data()), buff.size());
+    if (!source)
+    {
+      std::cout << "Error on read from source" << ENDL;
+      return true;
+    }
+    if (is_md5_from_source)
+    {
+      //update MD5 state
+      md5::MD5Update(&md5_state, reinterpret_cast<const unsigned char *>(buff.data()), buff.size());
+    }
+
+    arch_processor.update_in(buff, writer_cb);
+
+    remainin -= read_sz;
+    std::cout << "Progress " << ((sz - remainin) * 100) / sz << "%\r";
+  }
+
+  //flush gzip decoder
+  arch_processor.stop(writer_cb);
+
+  source.close();
+  target.close();
+
+  unsigned char md5_signature[16] = { 0 };
+  md5::MD5Final(md5_signature, &md5_state);
+
+  std::cout << "\r\nFile packed from size " << sz << " to " << packed_size <<
+    "\r\nMD5 of source file is " << epee::string_tools::pod_to_hex(md5_signature) << "\r\n";
+  return true;
+
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+bool handle_pack_file(po::variables_map& vm)
+{
+  bool do_pack = false;
+  std::string path_source;
+  std::string path_target;
+  if (command_line::has_arg(vm, arg_pack_file))
+  {
+    path_source = command_line::get_arg(vm, arg_pack_file);
+    do_pack = true;
+  }
+  else if (command_line::has_arg(vm, arg_unpack_file))
+  {
+    path_source = command_line::get_arg(vm, arg_unpack_file);
+    do_pack = false;
+  }
+
+  if (!command_line::has_arg(vm, arg_target_file))
+    std::cout << "Error: Parameter target_file not set." << ENDL;
+  path_target = command_line::get_arg(vm, arg_target_file);
+
+  std::ifstream source;
+  std::ofstream target;
+  source.open(path_source, std::ios::binary | std::ios::in | std::ios::ate);
+  target.open(path_target, std::ios::binary | std::ios::out | std::ios::trunc);
+
+  if (!source.is_open() || !target.is_open())
+  {
+    std::cout << "Error: Unable to open " << path_source << " or " << path_source << ENDL;
+    return true;
+  }
+  if (do_pack)
+  {
+    //gzip packer
+    epee::net_utils::gzip_encoder_lyambda gzip_encoder(Z_BEST_COMPRESSION);
+    return process_archive(gzip_encoder, true, source, target);
+  }else
+  {
+    //gzip unpacker
+    epee::net_utils::gzip_lambda_handler gzip_decoder;
+    return process_archive(gzip_decoder, false, source, target);
+  }
+}
+//---------------------------------------------------------------------------------------------------------------
 bool handle_update_maintainers_info(po::variables_map& vm)
 {
   if(!command_line::has_arg(vm, arg_rpc_port))
@@ -412,7 +526,12 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_params, arg_get_daemon_info);
   command_line::add_arg(desc_params, arg_get_aliases);
   command_line::add_arg(desc_params, arg_upate_maintainers_info);
+  command_line::add_arg(desc_params, arg_pack_file);
+  command_line::add_arg(desc_params, arg_unpack_file);
+  command_line::add_arg(desc_params, arg_target_file);
+  
   command_line::add_arg(desc_params, command_line::arg_version);
+  
 
   po::options_description desc_all;
   desc_all.add(desc_general).add(desc_params);
@@ -456,6 +575,10 @@ int main(int argc, char* argv[])
   else if(command_line::has_arg(vm, arg_get_aliases))
   {
     return handle_get_aliases(vm) ? 0:1;
+  }
+  else if (command_line::has_arg(vm, arg_pack_file) || command_line::has_arg(vm, arg_unpack_file))
+  {
+    return handle_pack_file(vm) ? 0 : 1;
   }
   else if(command_line::has_arg(vm, arg_upate_maintainers_info))
   {

@@ -62,42 +62,6 @@ namespace epee
 
     using namespace std;
 
-    /*struct url
-    {
-    public:
-    void parse(const std::string& url_s)
-    {
-    const string prot_end("://");
-    string::const_iterator prot_i = search(url_s.begin(), url_s.end(),
-    prot_end.begin(), prot_end.end());
-    protocol_.reserve(distance(url_s.begin(), prot_i));
-    transform(url_s.begin(), prot_i,
-    back_inserter(protocol_),
-    ptr_fun<int,int>(tolower)); // protocol is icase
-    if( prot_i == url_s.end() )
-    return;
-    advance(prot_i, prot_end.length());
-    string::const_iterator path_i = find(prot_i, url_s.end(), '/');
-    host_.reserve(distance(prot_i, path_i));
-    transform(prot_i, path_i,
-    back_inserter(host_),
-    ptr_fun<int,int>(tolower)); // host is icase
-    string::const_iterator query_i = find(path_i, url_s.end(), '?');
-    path_.assign(path_i, query_i);
-    if( query_i != url_s.end() )
-    ++query_i;
-    query_.assign(query_i, url_s.end());
-    }
-
-    std::string protocol_;
-    std::string host_;
-    std::string path_;
-    std::string query_;
-    };*/
-
-
-
-
     //---------------------------------------------------------------------------
     static inline const char* get_hex_vals()
     {
@@ -314,6 +278,10 @@ namespace epee
           std::string req_buff = method + " ";
           req_buff += uri + " HTTP/1.1\r\n" +
             "Host: " + m_host_buff + "\r\n" + "Content-Length: " + boost::lexical_cast<std::string>(body.size()) + "\r\n";
+
+#ifdef HTTP_ENABLE_GZIP
+          req_buff += "Accept-Encoding: gzip, deflate\r\n";
+#endif
 
 
           //handle "additional_params"
@@ -957,6 +925,33 @@ namespace epee
           }
           auto local_cb = [&](const std::string& piece_of_data, uint64_t total_bytes, uint64_t received_bytes)
           {
+            fs.write(piece_of_data.data(), piece_of_data.size());
+            return cb(total_bytes, received_bytes);
+          };
+          bool r = this->invoke_cb(local_cb, url, timeout, method, body, additional_params);
+          fs.close();
+          return r;
+        }
+
+        //
+        template<typename callback_t>
+        bool download_and_unzip(callback_t cb, const std::string& path_for_file, const std::string& url, uint64_t timeout, const std::string& method = "GET", const std::string& body = std::string(), const fields_list& additional_params = fields_list())
+        {
+          std::ofstream fs;
+          fs.open(path_for_file, std::ios::binary | std::ios::out | std::ios::trunc);
+          if (!fs.is_open())
+          {
+            LOG_ERROR("Fsiled to open " << path_for_file);
+            return false;
+          }
+          std::string buff;
+          content_encoding_gzip zip_decoder(nullptr, true);
+          auto local_cb = [&](const std::string& piece_of_data, uint64_t total_bytes, uint64_t received_bytes)
+          {
+            buff += piece_of_data;
+            zip_decoder.update_in(buff);
+
+            
             fs.write(piece_of_data.data(), piece_of_data.size());
             return cb(total_bytes, received_bytes);
           };
