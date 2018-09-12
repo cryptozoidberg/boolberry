@@ -183,4 +183,7 @@ namespace command_line
   extern const arg_descriptor<int>         arg_log_level;
   extern const arg_descriptor<bool>        arg_console;
   extern const arg_descriptor<bool>        arg_show_details;
+  extern const arg_descriptor<bool>        arg_no_predownload;
+  extern const arg_descriptor<bool>        arg_explicit_predownload;
+  extern const arg_descriptor<bool>        arg_validate_predownload;
 }

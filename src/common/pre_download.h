@@ -21,11 +21,14 @@ namespace tools
     uint64_t packed_size;
     uint64_t unpacked_size;
   };
-
+#ifndef TESTNET
   const static pre_download_entrie pre_download = { "http://88.99.193.104/downloads/data.mdb.pak", "8145a1817b5bfe60f68165681681e611", 4874525210, 6718447616 };
+#else
+  const static pre_download_entrie pre_download = { "http://88.99.193.104/downloads/data_testnet.mdb.pak", "", 0, 0 };
+#endif
 
   template<class callback_t>
-  bool process_predownload(const po::variables_map& vm, callback_t is_stop)
+  bool process_predownload(const boost::program_options::variables_map& vm, callback_t is_stop)
   {
 
     std::string config_folder = command_line::get_arg(vm, command_line::arg_data_dir);
@@ -50,8 +53,7 @@ namespace tools
 
     auto cb = [&](const std::string& buff, uint64_t total_bytes, uint64_t received_bytes)
     {
-      std::cout << "Recieved " << received_bytes << " from " << total_bytes << "\r";
-      nodetool::i_p2p_endpoint<currency::t_currency_protocol_handler<currency::core>::connection_context>* ptr = &p2psrv;
+      std::cout << "Received " << received_bytes << " from " << total_bytes << "\r";
       if (is_stop())
       {
         LOG_PRINT_MAGENTA(ENDL << "Interrupting download", LOG_LEVEL_0);
@@ -124,28 +126,28 @@ namespace tools
     CHECK_AND_ASSERT_MES(target_core.get_current_blockchain_height() == 1, false, "Target blockchain initialized not empty");
     uint64_t total_blocks = source_core.get_current_blockchain_height();
 
-    LOG_PRINT_GREEN("Manually processing blocks from 1 to " << total_blocks << "...");
+    LOG_PRINT_GREEN("Manually processing blocks from 1 to " << total_blocks << "...", LOG_LEVEL_0);
 
     for (uint64_t i = 1; i != total_blocks; i++)
     { 
-      std::list<block> blocks;
-      std::list<transaction> txs;
+      std::list<currency::block> blocks;
+      std::list<currency::transaction> txs;
       bool r = source_core.get_blocks(i, 1, blocks, txs);
       CHECK_AND_ASSERT_MES(r && blocks.size()==1, false, "Filed to get block " << i << " from core");
       currency::tx_verification_context tvc = AUTO_VAL_INIT(tvc);
       for (auto& tx : txs)
       {
-        r = target_core.add_new_tx(tx, tvc, true);
+        r = target_core.handle_incoming_tx(tx, tvc, true);
         CHECK_AND_ASSERT_MES(r && tvc.m_added_to_pool == true, false, "Filed to get block " << i << " from core");
       }
       currency::block_verification_context bvc = AUTO_VAL_INIT(bvc);
-      r = target_core.add_new_block(*blocks.begin(), bvc);
+      r = target_core.handle_incoming_block(*blocks.begin(), bvc);
       CHECK_AND_ASSERT_MES(r && bvc.m_added_to_main_chain == true, false, "Filed to add block " << i << " to core");
       if (i % 100)
         std::cout << "Block " << i << "(" << (i * 100) / total_blocks << "%) \r";
     }
     
-    LOG_PRINT_GREEN("Processing finished, " << total_blocks << " successfully added.");
+    LOG_PRINT_GREEN("Processing finished, " << total_blocks << " successfully added.", LOG_LEVEL_0);
     target_core.deinit();
     source_core.deinit();
     return true;
