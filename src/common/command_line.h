@@ -12,6 +12,8 @@
 #include <boost/program_options/variables_map.hpp>
 #include "include_base_utils.h"
 
+
+
 namespace command_line
 {
   template<typename T, bool required = false>
@@ -170,6 +172,7 @@ namespace command_line
     return get_arg<bool, false>(vm, arg);
   }
 
+#define DATA_DIR_PARAM_NAME "data-dir"
 
   extern const arg_descriptor<bool>        arg_help;
   extern const arg_descriptor<bool>        arg_version;

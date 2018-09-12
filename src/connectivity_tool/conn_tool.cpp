@@ -343,6 +343,7 @@ bool get_private_key(crypto::secret_key& pk, po::variables_map& vm)
 template<class archive_processor_t>
 bool process_archive(archive_processor_t& arch_processor, bool is_md5_from_source, std::ifstream& source, std::ofstream& target)
 {
+  source.seekg(0, std::ios::end);
   uint64_t sz = source.tellg();
   uint64_t remainin = sz;
   uint64_t packed_size = 0;
@@ -429,7 +430,7 @@ bool handle_pack_file(po::variables_map& vm)
 
   std::ifstream source;
   std::ofstream target;
-  source.open(path_source, std::ios::binary | std::ios::in | std::ios::ate);
+  source.open(path_source, std::ios::binary | std::ios::in );
   target.open(path_target, std::ios::binary | std::ios::out | std::ios::trunc);
 
   if (!source.is_open() || !target.is_open())

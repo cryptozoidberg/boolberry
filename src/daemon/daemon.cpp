@@ -23,8 +23,7 @@ using namespace epee;
 #include "daemon_commands_handler.h"
 #include "common/miniupnp_helper.h"
 #include "version.h"
-#include "net/http_client.h"
-#include "md5_l.h"
+#include "common/pre_download.h"
 
 #if defined(WIN32)
 #include <crtdbg.h>
@@ -36,10 +35,9 @@ BOOST_CLASS_VERSION(nodetool::node_server<currency::t_currency_protocol_handler<
 
 namespace po = boost::program_options;
 
-namespace
-{
-}
 
+
+bool process_predownload(nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& p2psrv);
 bool command_line_preprocessor(const boost::program_options::variables_map& vm);
 
 int main(int argc, char* argv[])
@@ -69,6 +67,10 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_cmd_sett, command_line::arg_log_level);
   command_line::add_arg(desc_cmd_sett, command_line::arg_console);
   command_line::add_arg(desc_cmd_sett, command_line::arg_show_details);
+
+  command_line::add_arg(desc_cmd_sett, command_line::arg_no_predownload);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_explicit_predownload);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_validate_predownload);
   
 
   currency::core::init_options(desc_cmd_sett);
@@ -146,6 +148,27 @@ int main(int argc, char* argv[])
   daemon_cmmands_handler dch(p2psrv);
   tools::miniupnp_helper upnp_helper;
 
+  // start components
+  if (!command_line::has_arg(vm, command_line::arg_console))
+  {
+    dch.start_handling();
+  }
+  tools::signal_handler::install([&dch, &p2psrv] {
+    dch.stop_handling();
+    p2psrv.send_stop_signal();
+  });
+
+  //do pre_download if needed
+  if (!command_line::has_arg(vm, command_line::arg_no_predownload) || command_line::has_arg(vm, command_line::arg_explicit_predownload))
+  {
+    bool r = tools::process_predownload(vm, [&](){
+      return p2psrv->is_stop_signal_sent();
+    });
+    if (p2psrv->is_stop_signal_sent())
+      return 1;
+  }
+
+
   //initialize objects
   LOG_PRINT_L0("Initializing p2p server...");
   res = p2psrv.init(vm);
@@ -173,53 +196,6 @@ int main(int argc, char* argv[])
   
   //setting checkpoints  here
   ccore.set_checkpoints(std::move(checkpoints));
-
-  // start components
-  if (!command_line::has_arg(vm, command_line::arg_console))
-  {
-    dch.start_handling();
-  }
-  tools::signal_handler::install([&dch, &p2psrv] {
-    dch.stop_handling();
-    p2psrv.send_stop_signal();
-  });
-
-  if (ccore.get_blockchain_storage().get_current_blockchain_height() == 1)
-  {
-    const std::string url = "http://88.99.193.104/downloads/blockchain.zip";
-    LOG_PRINT_MAGENTA("Trying to load pre-compiled blockchain from remote server...", LOG_LEVEL_0);
-    epee::net_utils::http::interruptible_http_client cl;
-
-    //@#@
-    const std::string pa = "C:/Users/rocky/AppData/Roaming/boolb/blockchain/theory.html";
-    std::string buff;
-    bool rr = file_io_utils::load_file_to_string(pa, buff);
-    unsigned char output[16] = {0};
-    md5::md5(reinterpret_cast<const unsigned char*>(buff.data()), buff.length(), output);
-    std::string res = epee::string_tools::pod_to_hex(output);
-    //@@@
-
-
-    auto cb = [&](uint64_t total_bytes, uint64_t received_bytes)
-    {
-      std::cout << "Recieved " << received_bytes << " from " << total_bytes << "\r";
-      nodetool::i_p2p_endpoint<currency::t_currency_protocol_handler<currency::core>::connection_context>* ptr = &p2psrv;
-      if (ptr->is_stop_signal_sent())
-      {
-        LOG_PRINT_MAGENTA(ENDL << "Interrupting download", LOG_LEVEL_0);
-        return false;
-      }
-      return true;
-    };
-    std::string local_path = ccore.get_config_folder() + "/blockchain.zip";
-    bool r = cl.download_and_unzip(cb, local_path, url, 1000);
-    if (!r)
-    {
-      LOG_PRINT_RED("Download failed", LOG_LEVEL_0);
-      return 1;
-    }
-    LOG_PRINT_MAGENTA("Download complete", LOG_LEVEL_0);
-  }
 
   LOG_PRINT_L0("Starting core rpc server...");
   res = rpc_server.run(2, false);
@@ -294,3 +270,4 @@ bool command_line_preprocessor(const boost::program_options::variables_map& vm)
 
   return false;
 }
+

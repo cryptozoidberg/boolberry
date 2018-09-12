@@ -945,15 +945,14 @@ namespace epee
             return false;
           }
           std::string buff;
-          content_encoding_gzip zip_decoder(nullptr, true);
+          content_encoding_gzip zip_decoder(nullptr);
           auto local_cb = [&](const std::string& piece_of_data, uint64_t total_bytes, uint64_t received_bytes)
           {
             buff += piece_of_data;
             zip_decoder.update_in(buff);
-
             
-            fs.write(piece_of_data.data(), piece_of_data.size());
-            return cb(total_bytes, received_bytes);
+            fs.write(buff.data(), buff.size());
+            return cb(buff, total_bytes, received_bytes);
           };
           bool r = this->invoke_cb(local_cb, url, timeout, method, body, additional_params);
           fs.close();
