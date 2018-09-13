@@ -446,7 +446,7 @@ bool handle_pack_file(po::variables_map& vm)
   }else
   {
     //gzip unpacker
-    epee::net_utils::gzip_lambda_handler gzip_decoder;
+    epee::net_utils::gzip_decoder_lambda gzip_decoder;
     return process_archive(gzip_decoder, false, source, target);
   }
 }

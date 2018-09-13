@@ -24,7 +24,7 @@ namespace tools
 #ifndef TESTNET
   const static pre_download_entrie pre_download = { "http://88.99.193.104/downloads/data.mdb.pak", "8145a1817b5bfe60f68165681681e611", 4874525210, 6718447616 };
 #else
-  const static pre_download_entrie pre_download = { "http://88.99.193.104/downloads/data_testnet.mdb.pak", "", 0, 0 };
+  const static pre_download_entrie pre_download = { "http://88.99.193.104/downloads/data_testnet.mdb.pak", "57feaa97401048386f335355d23fdf18", 164782602, 238563328 };
 #endif
 
   template<class callback_t>
@@ -53,7 +53,7 @@ namespace tools
 
     auto cb = [&](const std::string& buff, uint64_t total_bytes, uint64_t received_bytes)
     {
-      std::cout << "Received " << received_bytes << " from " << total_bytes << "\r";
+      std::cout << "Received " << received_bytes << " from " << total_bytes << " (" << (received_bytes * 100) / total_bytes << "%)\r";
       if (is_stop())
       {
         LOG_PRINT_MAGENTA(ENDL << "Interrupting download", LOG_LEVEL_0);
@@ -63,6 +63,7 @@ namespace tools
       md5::MD5Update(&md5_state, reinterpret_cast<const unsigned char *>(buff.data()), buff.size());
       return true;
     };
+    tools::create_directories_if_necessary(working_folder);
     bool r = cl.download_and_unzip(cb, local_path, pre_download.url, 1000);
     if (!r)
     {
@@ -94,11 +95,12 @@ namespace tools
 
     //paranoid mode
     //move downloaded blockchain into temporary folder
-    std::string path_to_temp_blockchain = config_folder + "/TEMP/" CURRENCY_BLOCKCHAINDATA_FOLDERNAME;
-    std::string path_to_temp_blockchain_file = "/" LMDB_DATA_FILE_NAME;
+    std::string path_to_temp_datafolder = config_folder + "/TEMP";
+    std::string path_to_temp_blockchain = path_to_temp_datafolder + "/" CURRENCY_BLOCKCHAINDATA_FOLDERNAME;
+    std::string path_to_temp_blockchain_file = path_to_temp_blockchain + "/" LMDB_DATA_FILE_NAME;
     tools::create_directories_if_necessary(path_to_temp_blockchain);
     boost::filesystem::rename(local_path, path_to_temp_blockchain_file, ec);
-    if (!ec)
+    if (ec)
     {
       LOG_ERROR("Failed to rename pre-downloaded blockchain database file from " << local_path << " to " << path_to_temp_blockchain_file);
       return false;
@@ -111,7 +113,10 @@ namespace tools
 
     currency::core source_core(nullptr);
     po::variables_map source_core_vm;
-    source_core_vm.insert(std::make_pair(DATA_DIR_PARAM_NAME, boost::program_options::variable_value(path_to_temp_blockchain, false)));
+    source_core_vm.insert(std::make_pair(DATA_DIR_PARAM_NAME, boost::program_options::variable_value(path_to_temp_datafolder, false)));
+    //TODO: change "db-sync-mode" to macro/constant
+    source_core_vm.insert(std::make_pair("db-sync-mode", boost::program_options::variable_value(std::string("fast"), false)));
+    
     r = source_core.init(source_core_vm);
     CHECK_AND_ASSERT_MES(r, false, "Failed to init source core");
 
@@ -143,8 +148,14 @@ namespace tools
       currency::block_verification_context bvc = AUTO_VAL_INIT(bvc);
       r = target_core.handle_incoming_block(*blocks.begin(), bvc);
       CHECK_AND_ASSERT_MES(r && bvc.m_added_to_main_chain == true, false, "Filed to add block " << i << " to core");
-      if (i % 100)
+      if (!(i % 100))
         std::cout << "Block " << i << "(" << (i * 100) / total_blocks << "%) \r";
+
+      if (is_stop())
+      {
+        LOG_PRINT_MAGENTA(ENDL << "Interrupting updating db...", LOG_LEVEL_0);
+        return false;
+      }
     }
     
     LOG_PRINT_GREEN("Processing finished, " << total_blocks << " successfully added.", LOG_LEVEL_0);

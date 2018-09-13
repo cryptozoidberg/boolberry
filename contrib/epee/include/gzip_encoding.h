@@ -238,7 +238,7 @@ namespace net_utils
     }
   };
 
-  class gzip_lambda_handler : public content_encoding_gzip,
+  class gzip_decoder_lambda : public content_encoding_gzip,
                               public i_target_handler
   {
     std::shared_ptr<abstract_callback_base> m_pcb;
@@ -250,7 +250,7 @@ namespace net_utils
       return r;
     }
   public: 
-    gzip_lambda_handler() : content_encoding_gzip(this, true, Z_BEST_COMPRESSION)
+    gzip_decoder_lambda() : content_encoding_gzip(this, true, Z_BEST_COMPRESSION)
     {}
     
     template<class callback_t>

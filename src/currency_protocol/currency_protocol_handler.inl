@@ -420,7 +420,7 @@ namespace currency
     PROF_L2_FINISH(blocks_handle_time);
     
     uint64_t current_height = m_core.get_current_blockchain_height();
-    LOG_PRINT_CCONTEXT_YELLOW(">>>>>>>>> sync progress: " << arg.blocks.size() << " blocks added, now have "
+    LOG_PRINT_YELLOW(">>>>>>>>> sync progress: " << arg.blocks.size() << " blocks added, now have "
       << current_height << " of " << context.m_remote_blockchain_height
       << " ( " << std::fixed << std::setprecision(2) << current_height * 100.0 / context.m_remote_blockchain_height << "% ) and "
       << context.m_remote_blockchain_height - current_height << " blocks left"
