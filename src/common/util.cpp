@@ -5,6 +5,7 @@
 #include <cstdio>
 
 #include "include_base_utils.h"
+#include "file_io_utils.h"
 using namespace epee;
 
 #include "util.h"
@@ -16,6 +17,7 @@ using namespace epee;
 #include <strsafe.h>
 #else 
 #include <sys/utsname.h>
+#include <errno.h>
 #endif
 
 
@@ -402,4 +404,51 @@ std::string get_nix_version_display_string()
 #endif
     return std::error_code(code, std::system_category());
   }
+
+
+  bool open_and_lock_file(const std::string file_path, epee::file_io_utils::native_filesystem_handle& h_file)
+  {
+#ifdef WIN32
+    h_file = ::CreateFileA(file_path.c_str(),                // name of the write
+      GENERIC_WRITE,          // open for writing
+      0,                      // do not share
+      NULL,                   // default security
+      OPEN_ALWAYS,            // create new file only
+      FILE_ATTRIBUTE_NORMAL,  // normal file
+      NULL);                  // no attr. template
+    if (h_file == INVALID_HANDLE_VALUE)
+      return false;
+    else
+      return true;
+#else
+    h_file = open(file_path.c_str(), O_RDWR | O_CREAT, 0666); // open or create lockfile
+    if (h_file < 0)
+    {
+      LOG_ERROR("open_and_lock_file : open() failed with errno: " << errno);
+      return false;
+    }
+    //check open success...
+    int rc = flock(h_file, LOCK_EX | LOCK_NB); // grab exclusive lock, fail if can't obtain.
+    if (rc < 0)
+    {
+      LOG_ERROR("open_and_lock_file : flock() failed with result: " << rc << ", errno: " << errno);
+      return false;
+    }
+    return true;
+#endif
+  }
+
+  bool unlock_and_close_file(epee::file_io_utils::native_filesystem_handle& h_file)
+  {
+#ifdef WIN32
+    ::CloseHandle(h_file);                  // no attr. template
+#else
+    flock(h_file, LOCK_UN); // grab exclusive lock, fail if can't obtain.
+    close(h_file);
+#endif
+    return true;
+  }
+
+
+
 }

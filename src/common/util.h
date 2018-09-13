@@ -8,9 +8,12 @@
 #include <system_error>
 #include <boost/filesystem.hpp>
 
+#include "misc_language.h"
+#include "include_base_utils.h"
+#include "file_io_utils.h"
+
 #include "crypto/crypto.h"
 #include "crypto/hash.h"
-#include "misc_language.h"
 #include "p2p/p2p_protocol_defs.h"
 
 namespace tools
@@ -93,4 +96,8 @@ namespace tools
   private:
     static std::function<void(void)> m_handler;
   };
-}
+
+  bool open_and_lock_file(const std::string file_path, epee::file_io_utils::native_filesystem_handle& h_file);
+  bool unlock_and_close_file(epee::file_io_utils::native_filesystem_handle& h_file);
+
+} // namespace tools

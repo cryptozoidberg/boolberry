@@ -543,6 +543,12 @@ bool wallet2::clear()
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::reset_and_sync_wallet()
+{
+  clear();
+  refresh();
+}
+//----------------------------------------------------------------------------------------------------
 bool wallet2::store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet)
 {
   std::string account_data;
@@ -717,8 +723,7 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
     LOG_PRINT_L0("Wallet resyncing from genesis...");
     currency::block b;
     currency::generate_genesis_block(b);
-    m_blockchain.clear();
-    m_blockchain.push_back(get_block_hash(b));
+    clear();
   }
   m_local_bc_height = m_blockchain.size();
 }
@@ -1084,11 +1089,28 @@ uint64_t wallet2::select_indices_for_transfer(std::list<size_t>& selected_indexe
   return found_money;
 }
 //----------------------------------------------------------------------------------------------------
-uint64_t wallet2::select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers)
+uint64_t wallet2::select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, const std::vector<size_t>& outs_to_spend, std::list<transfer_container::iterator>& selected_transfers)
 {
   std::map<uint64_t, std::list<size_t> > found_free_amounts;
 
-  for (size_t i = 0; i < m_transfers.size(); ++i)
+  std::vector<size_t> outs_indices_allowed_to_be_spent;
+  outs_indices_allowed_to_be_spent.reserve(m_transfers.size());
+  if (outs_to_spend.empty())
+  {
+    // if outs_to_spend is empty -- it means all outs are allowed to be spent
+    for (size_t i = 0; i < m_transfers.size(); ++i)
+      outs_indices_allowed_to_be_spent.push_back(i);
+  }
+  else
+  {
+    for (size_t idx : outs_to_spend)
+    {
+      CHECK_AND_THROW_WALLET_EX(!(idx < m_transfers.size()), error::wallet_common_error, std::string("invalid output index given: ") + std::to_string(idx));
+      outs_indices_allowed_to_be_spent.push_back(idx);
+    }
+  }
+
+  for (size_t i : outs_indices_allowed_to_be_spent)
   {
     const transfer_details& td = m_transfers[i];
     if (!td.m_spent && is_transfer_unlocked(td) && 
@@ -1200,7 +1222,7 @@ bool wallet2::get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) c
   return true;
 }
 //----------------------------------------------------------------------------------------------------
-std::string wallet2::get_transfers_str() const
+std::string wallet2::get_transfers_str(bool include_spent /*= true*/, bool include_unspent /*= true*/) const
 {
   static const char* header = "index                 amount   spent?  g_index    block  tx                                                                   out#  key image";
   std::stringstream ss;
@@ -1210,6 +1232,10 @@ std::string wallet2::get_transfers_str() const
     for (size_t i = 0; i != m_transfers.size(); ++i)
     {
       const transfer_details& td = m_transfers[i];
+
+      if ((td.m_spent && !include_spent) || (!td.m_spent && !include_unspent))
+        continue;
+
       ss << std::right <<
         std::setw(5) << i << "  " <<
         std::setw(21) << print_money(td.amount()) << "  " <<

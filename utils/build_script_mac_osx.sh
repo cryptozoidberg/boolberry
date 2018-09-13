@@ -56,11 +56,24 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+cp simplewallet Boolberry.app/Contents/MacOS
+if [ $? -ne 0 ]; then
+    echo "Failed to cp simplewallet to MacOS"
+    exit $?
+fi
+
+cp boolbd Boolberry.app/Contents/MacOS
+if [ $? -ne 0 ]; then
+    echo "Failed to cp boolbd to MacOS"
+    exit $?
+fi
 
 # fix boost links
 echo "Fixing boost library links...."
 source ../../../utils/fix_boost_libs.sh
 update_links_in_boost_binary @executable_path/../Frameworks/boost_libs Boolberry.app/Contents/MacOS/Boolberry
+update_links_in_boost_binary @executable_path/../Frameworks/boost_libs Boolberry.app/Contents/MacOS/boolbd
+update_links_in_boost_binary @executable_path/../Frameworks/boost_libs Boolberry.app/Contents/MacOS/simplewallet
 update_links_in_boost_libs @executable_path/../Frameworks/boost_libs Boolberry.app/Contents/Frameworks/boost_libs
 
 
@@ -83,17 +96,7 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 
-cp simplewallet Boolberry.app/Contents/MacOS
-if [ $? -ne 0 ]; then
-    echo "Failed to cp simplewallet to MacOS"
-    exit $?
-fi
 
-cp boolbd Boolberry.app/Contents/MacOS
-if [ $? -ne 0 ]; then
-    echo "Failed to cp boolbd to MacOS"
-    exit $?
-fi
 
 
 read version_str <<< $(DYLD_LIBRARY_PATH=$LOCAL_BOOST_LIBS_PATH ./connectivity_tool --version | awk '/^Boolberry / { print $2 }')

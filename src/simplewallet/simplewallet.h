@@ -53,7 +53,9 @@ namespace currency
     bool show_incoming_transfers(const std::vector<std::string> &args);
     bool show_payments(const std::vector<std::string> &args);
     bool show_blockchain_height(const std::vector<std::string> &args);
+    bool transfer_impl(const std::vector<std::string> &args, uint64_t fee, const std::vector<size_t>& outs_to_spend);
     bool transfer(const std::vector<std::string> &args);
+    bool transfer_so(const std::vector<std::string> &args);
     bool save_watch_only(const std::vector<std::string> &args);
     bool sign_transfer(const std::vector<std::string> &args);
     bool submit_transfer(const std::vector<std::string> &args);
@@ -63,6 +65,7 @@ namespace currency
     bool get_tx_key(const std::vector<std::string> &args_);
     bool check_tx_key(const std::vector<std::string> &args);
     bool sign_text(const std::vector<std::string> &args);
+    bool resync_wallet(const std::vector<std::string> &args);    
     bool validate_text_signature(const std::vector<std::string> &args);
     bool check_tx_key_helper(const crypto::hash &txid, const currency::account_public_address &address, const crypto::key_derivation &derivation);
     bool print_address(const std::vector<std::string> &args = std::vector<std::string>());

@@ -77,6 +77,9 @@ namespace currency
   //-----------------------------------------------------------------------------------------------------
   bool miner::validate_alias_info()
   {
+    if (m_alias_to_apply_in_block.m_alias.empty())
+      return true;
+
     alias_info dummy;
     CRITICAL_REGION_LOCAL(m_aliace_to_apply_in_block_lock);
     if(m_bc.get_alias_info(m_alias_to_apply_in_block.m_alias, dummy))

@@ -35,7 +35,7 @@
 #define CURRENCY_DISPLAY_DECIMAL_POINT                12
 
 // COIN - number of smallest units in one coin
-#define COIN                                            ((uint64_t)100000000) // pow(10, 8)
+#define COIN                                            ((uint64_t)1000000000000) // pow(10, CURRENCY_DISPLAY_DECIMAL_POINT)
 #define DEFAULT_DUST_THRESHOLD                          ((uint64_t)1000000) // pow(10, 6)
 
 #define DEFAULT_FEE                                     ((uint64_t)1000000000) // pow(10, 9)
