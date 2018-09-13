@@ -99,6 +99,35 @@ namespace misc_utils
 #endif
   }
 
+#ifdef __GNUC__
+#include <execinfo.h>
+  inline std::string get_callstack_str()
+  {
+    std::string result("callstack:\n");
+    void *array[128];
+    size_t size;
+    char **strings;
+    size_t i;
+
+    size = backtrace(array, sizeof array / sizeof array[0]);
+    strings = backtrace_symbols(array, size);
+
+    for (i = 0; i < size; i++)
+      result += strings[i] + std::string("\n");
+
+    free(strings);
+    return result;
+  }
+#else
+  inline std::string get_callstack_str()
+  {
+    // not yet supported for Windows and macOS
+    return std::string();
+  }
+#endif
+
+
+
 
 } // namespace misc_utils
 } // namespace epee
