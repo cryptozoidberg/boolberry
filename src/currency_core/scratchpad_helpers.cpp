@@ -42,7 +42,7 @@ namespace currency
       bool res = m_rdb_scratchpad.load_all_itmes_to_container(m_scratchpad_cache);
       CHECK_AND_ASSERT_MES(res, false, "scratchpad loading failed");
       PROF_L1_FINISH(cache_load_timer);
-      LOG_PRINT_MAGENTA("Scratchpad loaded from db OK (" << m_scratchpad_cache.size() << "elements, " << (m_scratchpad_cache.size() * 32) / 1024 << " KB)" << PROF_L1_STR_MS_STR(" in ", cache_load_timer, " ms"), LOG_LEVEL_0);
+      LOG_PRINT_MAGENTA("Scratchpad loaded from db OK (" << m_scratchpad_cache.size() << " elements, " << (m_scratchpad_cache.size() * 32) / 1024 << " KB)" << PROF_L1_STR_MS_STR(" in ", cache_load_timer, " ms"), LOG_LEVEL_0);
     }
 
     return true;
