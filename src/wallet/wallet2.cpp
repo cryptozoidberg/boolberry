@@ -91,6 +91,22 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       CHECK_AND_THROW_WALLET_EX(tx.vout.size() <= o, error::wallet_internal_error, "wrong out in transaction: internal index=" +
         std::to_string(o) + ", total_outs=" + std::to_string(tx.vout.size()));
 
+      currency::keypair in_ephemeral;
+      crypto::key_image ki;
+      currency::generate_key_image_helper(m_account.get_keys(), tx_pub_key, o, in_ephemeral, ki);
+      CHECK_AND_THROW_WALLET_EX(in_ephemeral.pub != boost::get<currency::txout_to_key>(tx.vout[o].target).key,
+        error::wallet_internal_error, "key_image generated ephemeral public key not matched with output_key");
+
+      auto it = m_key_images.find(ki);
+      if (it != m_key_images.end())
+      {
+        CHECK_AND_THROW_WALLET_EX(it->second >= m_transfers.size(), error::wallet_internal_error, "m_key_images entry has wrong m_transfers index");
+        const transfer_details& td = m_transfers[it->second];
+        LOG_PRINT_YELLOW("tx " << get_transaction_hash(tx) << " output's key image has already been seen in tx " << get_transaction_hash(td.m_tx) << ". The entire transaction will be skipped.", LOG_LEVEL_0);
+        return; // skip entire transaction
+      }
+
+
       mtd.receive_indices.push_back(o);
 
       m_transfers.push_back(boost::value_initialized<transfer_details>());
@@ -100,10 +116,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       td.m_global_output_index = res.o_indexes[o];
       td.m_tx = tx;
       td.m_spent = false;
-      currency::keypair in_ephemeral;
-      currency::generate_key_image_helper(m_account.get_keys(), tx_pub_key, o, in_ephemeral, td.m_key_image);
-      CHECK_AND_THROW_WALLET_EX(in_ephemeral.pub != boost::get<currency::txout_to_key>(tx.vout[o].target).key,
-        error::wallet_internal_error, "key_image generated ephemeral public key not matched with output_key");
+      td.m_key_image = ki;
 
       m_key_images[td.m_key_image] = m_transfers.size()-1;
       LOG_PRINT_L0("Received money: " << print_money(td.amount()) << ", with tx: " << get_transaction_hash(tx));
