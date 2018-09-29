@@ -474,7 +474,7 @@ namespace epee
           }
         //---------------------------------------------------------------------------
         inline
-          bool get_chunk_head(std::string& buff, size_t& chunk_size, bool& is_matched)
+          bool get_chunk_head(std::string& buff, uint64_t& chunk_size, bool& is_matched)
         {
             is_matched = false;
             size_t offset = 0;
