@@ -112,7 +112,7 @@ namespace tools
     boost::filesystem::remove(config_folder + "/" CURRENCY_POOLDATA_FILENAME, ec);
 
     currency::core source_core(nullptr);
-    po::variables_map source_core_vm;
+    boost::program_options::variables_map source_core_vm;
     source_core_vm.insert(std::make_pair(DATA_DIR_PARAM_NAME, boost::program_options::variable_value(path_to_temp_datafolder, false)));
     //TODO: change "db-sync-mode" to macro/constant
     source_core_vm.insert(std::make_pair("db-sync-mode", boost::program_options::variable_value(std::string("fast"), false)));
@@ -120,7 +120,7 @@ namespace tools
     r = source_core.init(source_core_vm);
     CHECK_AND_ASSERT_MES(r, false, "Failed to init source core");
 
-    po::variables_map vm_with_fast_sync(vm);
+    boost::program_options::variables_map vm_with_fast_sync(vm);
     vm_with_fast_sync.insert(std::make_pair("db-sync-mode", boost::program_options::variable_value(std::string("fast"), false)));
 
     currency::core target_core(nullptr);
