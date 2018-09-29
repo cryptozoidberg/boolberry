@@ -463,7 +463,7 @@ namespace epee
         }
         //---------------------------------------------------------------------------
         inline
-          bool get_len_from_chunk_head(const std::string &chunk_head, size_t& result_size)
+          bool get_len_from_chunk_head(const std::string &chunk_head, uint64_t& result_size)
         {
             std::stringstream str_stream;
             str_stream << std::hex;
