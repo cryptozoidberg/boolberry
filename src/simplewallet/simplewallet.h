@@ -53,7 +53,9 @@ namespace currency
     bool show_incoming_transfers(const std::vector<std::string> &args);
     bool show_payments(const std::vector<std::string> &args);
     bool show_blockchain_height(const std::vector<std::string> &args);
+    bool transfer_impl(const std::vector<std::string> &args, uint64_t fee, const std::vector<size_t>& outs_to_spend);
     bool transfer(const std::vector<std::string> &args);
+    bool transfer_so(const std::vector<std::string> &args);
     bool save_watch_only(const std::vector<std::string> &args);
     bool sign_transfer(const std::vector<std::string> &args);
     bool submit_transfer(const std::vector<std::string> &args);

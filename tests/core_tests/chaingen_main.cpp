@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
     GENERATE_AND_PLAY(gen_uint_overflow_1);
     GENERATE_AND_PLAY(gen_uint_overflow_2);
 
-    //GENERATE_AND_PLAY(gen_block_reward);
+    //GENERATE_AND_PLAY(gen_block_reward);*/
     std::stringstream ss;
     ss << (failed_tests.empty() ? concolor::green : concolor::magenta);
     ss << "\nREPORT:\n";

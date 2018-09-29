@@ -31,7 +31,7 @@
 #include <chrono>
 
 // 0 - no profiling, 1 - basic, 2 - full, 3 - ultimate
-#define PROFILING_LEVEL 2
+#define PROFILING_LEVEL 1
 
 #if PROFILING_LEVEL >= 1
 #  define PROF_L1_START(timer_var) TIME_MEASURE_START(timer_var)

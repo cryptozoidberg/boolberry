@@ -91,6 +91,22 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       CHECK_AND_THROW_WALLET_EX(tx.vout.size() <= o, error::wallet_internal_error, "wrong out in transaction: internal index=" +
         std::to_string(o) + ", total_outs=" + std::to_string(tx.vout.size()));
 
+      currency::keypair in_ephemeral;
+      crypto::key_image ki;
+      currency::generate_key_image_helper(m_account.get_keys(), tx_pub_key, o, in_ephemeral, ki);
+      CHECK_AND_THROW_WALLET_EX(in_ephemeral.pub != boost::get<currency::txout_to_key>(tx.vout[o].target).key,
+        error::wallet_internal_error, "key_image generated ephemeral public key not matched with output_key");
+
+      auto it = m_key_images.find(ki);
+      if (it != m_key_images.end())
+      {
+        CHECK_AND_THROW_WALLET_EX(it->second >= m_transfers.size(), error::wallet_internal_error, "m_key_images entry has wrong m_transfers index");
+        const transfer_details& td = m_transfers[it->second];
+        LOG_PRINT_YELLOW("tx " << get_transaction_hash(tx) << " output's key image has already been seen in tx " << get_transaction_hash(td.m_tx) << ". The entire transaction will be skipped.", LOG_LEVEL_0);
+        return; // skip entire transaction
+      }
+
+
       mtd.receive_indices.push_back(o);
 
       m_transfers.push_back(boost::value_initialized<transfer_details>());
@@ -100,10 +116,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       td.m_global_output_index = res.o_indexes[o];
       td.m_tx = tx;
       td.m_spent = false;
-      currency::keypair in_ephemeral;
-      currency::generate_key_image_helper(m_account.get_keys(), tx_pub_key, o, in_ephemeral, td.m_key_image);
-      CHECK_AND_THROW_WALLET_EX(in_ephemeral.pub != boost::get<currency::txout_to_key>(tx.vout[o].target).key,
-        error::wallet_internal_error, "key_image generated ephemeral public key not matched with output_key");
+      td.m_key_image = ki;
 
       m_key_images[td.m_key_image] = m_transfers.size()-1;
       LOG_PRINT_L0("Received money: " << print_money(td.amount()) << ", with tx: " << get_transaction_hash(tx));
@@ -1089,11 +1102,28 @@ uint64_t wallet2::select_indices_for_transfer(std::list<size_t>& selected_indexe
   return found_money;
 }
 //----------------------------------------------------------------------------------------------------
-uint64_t wallet2::select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, std::list<transfer_container::iterator>& selected_transfers)
+uint64_t wallet2::select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, const std::vector<size_t>& outs_to_spend, std::list<transfer_container::iterator>& selected_transfers)
 {
   std::map<uint64_t, std::list<size_t> > found_free_amounts;
 
-  for (size_t i = 0; i < m_transfers.size(); ++i)
+  std::vector<size_t> outs_indices_allowed_to_be_spent;
+  outs_indices_allowed_to_be_spent.reserve(m_transfers.size());
+  if (outs_to_spend.empty())
+  {
+    // if outs_to_spend is empty -- it means all outs are allowed to be spent
+    for (size_t i = 0; i < m_transfers.size(); ++i)
+      outs_indices_allowed_to_be_spent.push_back(i);
+  }
+  else
+  {
+    for (size_t idx : outs_to_spend)
+    {
+      CHECK_AND_THROW_WALLET_EX(!(idx < m_transfers.size()), error::wallet_common_error, std::string("invalid output index given: ") + std::to_string(idx));
+      outs_indices_allowed_to_be_spent.push_back(idx);
+    }
+  }
+
+  for (size_t i : outs_indices_allowed_to_be_spent)
   {
     const transfer_details& td = m_transfers[i];
     if (!td.m_spent && is_transfer_unlocked(td) && 
@@ -1205,7 +1235,7 @@ bool wallet2::get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) c
   return true;
 }
 //----------------------------------------------------------------------------------------------------
-std::string wallet2::get_transfers_str() const
+std::string wallet2::get_transfers_str(bool include_spent /*= true*/, bool include_unspent /*= true*/) const
 {
   static const char* header = "index                 amount   spent?  g_index    block  tx                                                                   out#  key image";
   std::stringstream ss;
@@ -1215,6 +1245,10 @@ std::string wallet2::get_transfers_str() const
     for (size_t i = 0; i != m_transfers.size(); ++i)
     {
       const transfer_details& td = m_transfers[i];
+
+      if ((td.m_spent && !include_spent) || (!td.m_spent && !include_unspent))
+        continue;
+
       ss << std::right <<
         std::setw(5) << i << "  " <<
         std::setw(21) << print_money(td.amount()) << "  " <<

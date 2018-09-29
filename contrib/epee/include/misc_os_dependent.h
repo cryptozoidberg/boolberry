@@ -23,18 +23,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
+#pragma once 
+
 #ifdef WIN32
   #ifndef WIN32_LEAN_AND_MEAN 
   #define WIN32_LEAN_AND_MEAN
   #endif
-
-  //#ifdef _WIN32_WINNT 
-  //  #undef _WIN32_WINNT
-  //  #define _WIN32_WINNT 0x0600
-  //#endif
-
-  
-#include <windows.h>
+  #include <windows.h>
 #endif
 
 #ifdef __MACH__
@@ -42,67 +37,97 @@
 #include <mach/mach.h>
 #endif
 
-#pragma once 
 namespace epee
 {
 namespace misc_utils
 {
 
-        inline uint64_t get_tick_count()
-        {
+  inline uint64_t get_tick_count()
+  {
 #if defined(_MSC_VER)
-                return ::GetTickCount64();
+    return ::GetTickCount64();
 #elif defined(__MACH__)
-                clock_serv_t cclock;
-                mach_timespec_t mts;
+    clock_serv_t cclock;
+    mach_timespec_t mts;
 
-                host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
-                clock_get_time(cclock, &mts);
-                mach_port_deallocate(mach_task_self(), cclock);
+    host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
 
-                return (mts.tv_sec * 1000) + (mts.tv_nsec/1000000);
+    return (mts.tv_sec * 1000) + (mts.tv_nsec/1000000);
 #else
-                struct timespec ts;
-                if(clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-                        return 0;
-                }
-                return (ts.tv_sec * 1000) + (ts.tv_nsec/1000000);
+    struct timespec ts;
+    if(clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
+      return 0;
+    }
+    return (ts.tv_sec * 1000) + (ts.tv_nsec/1000000);
 #endif
-        }
+  }
 
 
-        inline int call_sys_cmd(const std::string& cmd)
-	{      
-                std::cout << "# " << cmd << std::endl;
+  inline int call_sys_cmd(const std::string& cmd)
+  {
+    std::cout << "# " << cmd << std::endl;
 
-		FILE * fp ;
-		//char tstCommand[] ="ls *";
-		char path[1000] = {0};
+    FILE * fp;
+    //char tstCommand[] ="ls *";
+    char path[1000] = { 0 };
 #if !defined(__GNUC__) 
-		fp = _popen(cmd.c_str(), "r");
+    fp = _popen(cmd.c_str(), "r");
 #else
-		fp = popen(cmd.c_str(), "r");
+    fp = popen(cmd.c_str(), "r");
 #endif
-		while ( fgets( path, 1000, fp ) != NULL )
-			std::cout << path;
+    while (fgets(path, 1000, fp) != NULL)
+      std::cout << path;
 
 #if !defined(__GNUC__) 
-		_pclose(fp);
+    _pclose(fp);
 #else
-		pclose(fp);
+    pclose(fp);
 #endif
-		return 0;
+    return 0;
 
-	}
+  }
 
 
-	inline std::string get_thread_string_id()
-	{
+  inline std::string get_thread_string_id()
+  {
 #if defined(_MSC_VER)
-		return boost::lexical_cast<std::string>(GetCurrentThreadId());
+    return boost::lexical_cast<std::string>(GetCurrentThreadId());
 #elif defined(__GNUC__)  
-		return boost::lexical_cast<std::string>(pthread_self());
+    return boost::lexical_cast<std::string>(pthread_self());
 #endif
-	}
-}
-}
+  }
+
+#ifdef __GNUC__
+#include <execinfo.h>
+  inline std::string get_callstack_str()
+  {
+    std::string result("callstack:\n");
+    void *array[128];
+    size_t size;
+    char **strings;
+    size_t i;
+
+    size = backtrace(array, sizeof array / sizeof array[0]);
+    strings = backtrace_symbols(array, size);
+
+    for (i = 0; i < size; i++)
+      result += strings[i] + std::string("\n");
+
+    free(strings);
+    return result;
+  }
+#else
+  inline std::string get_callstack_str()
+  {
+    // not yet supported for Windows and macOS
+    return std::string();
+  }
+#endif
+
+
+
+
+} // namespace misc_utils
+} // namespace epee
