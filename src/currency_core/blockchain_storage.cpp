@@ -91,6 +91,7 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) : m_lmdb_adapter
 //------------------------------------------------------------------
 bool blockchain_storage::have_tx(const crypto::hash &id)
 {
+  PROFILE_FUNC("blockchain_storage::have_tx");
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   return m_db_transactions.find(id) != m_db_transactions.end();
 }
@@ -2315,6 +2316,7 @@ bool blockchain_storage::get_tx_outputs_gindexs(const crypto::hash& tx_id, std::
 //------------------------------------------------------------------
 bool blockchain_storage::check_tx_inputs(const transaction& tx, uint64_t& max_used_block_height, crypto::hash& max_used_block_id)
 {
+  PROFILE_FUNC("blockchain_storage::check_tx_inputs(tx, max_h, max_id)");
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   bool res = check_tx_inputs(tx, &max_used_block_height);
   if (!res) return false;
@@ -2336,12 +2338,14 @@ bool blockchain_storage::have_tx_keyimges_as_spent(const transaction &tx)
 //------------------------------------------------------------------
 bool blockchain_storage::check_tx_inputs(const transaction& tx, uint64_t* pmax_used_block_height)
 {
+  PROFILE_FUNC("blockchain_storage::check_tx_inputs(tx, max_h)");
   crypto::hash tx_prefix_hash = get_transaction_prefix_hash(tx);
   return check_tx_inputs(tx, tx_prefix_hash, pmax_used_block_height);
 }
 //------------------------------------------------------------------
 bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::hash& tx_prefix_hash, uint64_t* pmax_used_block_height)
 {
+  PROFILE_FUNC("blockchain_storage::check_tx_inputs(tx, prefix_id, max_h)");
   size_t sig_index = 0;
   if (pmax_used_block_height)
     *pmax_used_block_height = 0;

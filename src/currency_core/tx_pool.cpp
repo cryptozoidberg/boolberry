@@ -17,6 +17,7 @@
 #include "misc_language.h"
 #include "warnings.h"
 #include "crypto/hash.h"
+#include "profile_tools.h"
 
 DISABLE_VS_WARNINGS(4244 4345 4503) //'boost::foreach_detail_::or_' : decorated name length exceeded, name was truncated
 
@@ -30,6 +31,7 @@ namespace currency
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::add_tx(const transaction &tx, const crypto::hash &id, tx_verification_context& tvc, bool kept_by_block)
   {    
+    PROFILE_FUNC("tx_memory_pool::add_tx(tx, id, tvc, keept)");
     size_t blob_size = get_object_blobsize(tx);
     //#9Protection from big transaction flood
     if(!kept_by_block && blob_size > CURRENCY_MAX_TRANSACTION_BLOB_SIZE)
@@ -146,6 +148,7 @@ namespace currency
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::add_tx(const transaction &tx, tx_verification_context& tvc, bool keeped_by_block)
   {
+    PROFILE_FUNC("tx_memory_pool::add_tx(tx, tvc, keept)");
     crypto::hash h = null_hash;
     get_transaction_hash(tx, h);
     return add_tx(tx, h, tvc, keeped_by_block);
@@ -254,6 +257,7 @@ namespace currency
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::have_tx(const crypto::hash &id)
   {
+    PROFILE_FUNC("tx_memory_pool::have_tx");
     CRITICAL_REGION_LOCAL(m_transactions_lock);
     if(m_transactions.count(id))
       return true;
@@ -262,6 +266,7 @@ namespace currency
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::have_tx_keyimges_as_spent(const transaction& tx)
   {
+    PROFILE_FUNC("tx_memory_pool::have_tx_keyimges_as_spent");
     CRITICAL_REGION_LOCAL(m_transactions_lock);
     BOOST_FOREACH(const auto& in, tx.vin)
     {
