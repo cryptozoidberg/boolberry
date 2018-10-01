@@ -23,6 +23,7 @@ using namespace epee;
 #include "daemon_commands_handler.h"
 #include "common/miniupnp_helper.h"
 #include "version.h"
+#include "common/pre_download.h"
 
 #if defined(WIN32)
 #include <crtdbg.h>
@@ -34,10 +35,9 @@ BOOST_CLASS_VERSION(nodetool::node_server<currency::t_currency_protocol_handler<
 
 namespace po = boost::program_options;
 
-namespace
-{
-}
 
+
+bool process_predownload(nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& p2psrv);
 bool command_line_preprocessor(const boost::program_options::variables_map& vm);
 
 int main(int argc, char* argv[])
@@ -67,6 +67,10 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_cmd_sett, command_line::arg_log_level);
   command_line::add_arg(desc_cmd_sett, command_line::arg_console);
   command_line::add_arg(desc_cmd_sett, command_line::arg_show_details);
+
+  command_line::add_arg(desc_cmd_sett, command_line::arg_no_predownload);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_explicit_predownload);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_validate_predownload);
   
 
   currency::core::init_options(desc_cmd_sett);
@@ -144,8 +148,29 @@ int main(int argc, char* argv[])
   daemon_cmmands_handler dch(p2psrv);
   tools::miniupnp_helper upnp_helper;
 
+  // start components
+  if (!command_line::has_arg(vm, command_line::arg_console))
+  {
+    dch.start_handling();
+  }
+  tools::signal_handler::install([&dch, &p2psrv] {
+    dch.stop_handling();
+    p2psrv.send_stop_signal();
+  });
+
+  //do pre_download if needed
+  if (!command_line::has_arg(vm, command_line::arg_no_predownload) || command_line::has_arg(vm, command_line::arg_explicit_predownload))
+  {
+    bool r = tools::process_predownload(vm, [&](){
+      return static_cast<nodetool::i_p2p_endpoint<currency::t_currency_protocol_handler<currency::core>::connection_context> *>(&p2psrv)->is_stop_signal_sent();
+    });
+    if (static_cast<nodetool::i_p2p_endpoint<currency::t_currency_protocol_handler<currency::core>::connection_context>*>(&p2psrv)->is_stop_signal_sent())
+      return 1;
+  }
+
+
   //initialize objects
-  LOG_PRINT_L0("Initializing p2p server...");
+   LOG_PRINT_L0("Initializing p2p server...");
   res = p2psrv.init(vm);
   CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize p2p server.");
   LOG_PRINT_L0("P2p server initialized OK on port: " << p2psrv.get_this_peer_port());
@@ -172,22 +197,11 @@ int main(int argc, char* argv[])
   //setting checkpoints  here
   ccore.set_checkpoints(std::move(checkpoints));
 
-
-  // start components
-  if (!command_line::has_arg(vm, command_line::arg_console))
-  {
-    dch.start_handling();
-  }
-
   LOG_PRINT_L0("Starting core rpc server...");
   res = rpc_server.run(2, false);
   CHECK_AND_ASSERT_MES(res, 1, "Failed to initialize core rpc server.");
   LOG_PRINT_L0("Core rpc server started ok");
 
-  tools::signal_handler::install([&dch, &p2psrv] {
-    dch.stop_handling();
-    p2psrv.send_stop_signal();
-  });
 
   LOG_PRINT_L0("Starting p2p net loop...");
   p2psrv.run();
@@ -256,3 +270,4 @@ bool command_line_preprocessor(const boost::program_options::variables_map& vm)
 
   return false;
 }
+

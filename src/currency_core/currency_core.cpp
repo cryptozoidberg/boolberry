@@ -157,8 +157,46 @@ namespace currency
     m_blockchain_storage.deinit();
     return true;
   }
+
+ bool core::handle_incoming_tx(const transaction & tx, tx_verification_context& tvc, bool keeped_by_block, const crypto::hash& tx_hash_)
+{
+   crypto::hash tx_hash = tx_hash_;
+   if (tx_hash == null_hash)
+     tx_hash = get_transaction_hash(tx);
+   CRITICAL_REGION_LOCAL(m_incoming_tx_lock);
+  tvc = boost::value_initialized<tx_verification_context>();
+  //want to process all transactions sequentially
+  if (!check_tx_syntax(tx))
+  {
+    LOG_PRINT_L0("WRONG TRANSACTION BLOB, Failed to check tx " << tx_hash << " syntax, rejected");
+    tvc.m_verifivation_failed = true;
+    return false;
+  }
+
+  if (!check_tx_semantic(tx, keeped_by_block))
+  {
+    LOG_PRINT_L0("WRONG TRANSACTION BLOB, Failed to check tx " << tx_hash << " semantic, rejected");
+    tvc.m_verifivation_failed = true;
+    return false;
+  }
+
+  bool r = add_new_tx(tx, tx_hash, tx_hash, tvc, keeped_by_block);
+  if (tvc.m_verifivation_failed)
+  {
+    LOG_PRINT_RED_L0("Transaction verification failed: " << tx_hash);
+  }
+  else if (tvc.m_verifivation_impossible)
+  {
+    LOG_PRINT_RED_L0("Transaction verification impossible: " << tx_hash);
+  }
+
+  if (tvc.m_added_to_pool)
+    LOG_PRINT_L1("tx added: " << tx_hash);
+  return r;
+
+}
   //-----------------------------------------------------------------------------------------------
-  bool core::handle_incoming_tx(const blobdata& tx_blob, tx_verification_context& tvc, bool keeped_by_block)
+bool core::handle_incoming_tx(const blobdata& tx_blob, tx_verification_context& tvc, bool keeped_by_block)
   {
     tvc = boost::value_initialized<tx_verification_context>();
     //want to process all transactions sequentially
@@ -183,29 +221,7 @@ namespace currency
     }
     //std::cout << "!"<< tx.vin.size() << std::endl;
 
-    if(!check_tx_syntax(tx))
-    {
-      LOG_PRINT_L0("WRONG TRANSACTION BLOB, Failed to check tx " << tx_hash << " syntax, rejected");
-      tvc.m_verifivation_failed = true;
-      return false;
-    }
-
-    if(!check_tx_semantic(tx, keeped_by_block))
-    {
-      LOG_PRINT_L0("WRONG TRANSACTION BLOB, Failed to check tx " << tx_hash << " semantic, rejected");
-      tvc.m_verifivation_failed = true;
-      return false;
-    }
-
-    bool r = add_new_tx(tx, tx_hash, tx_prefixt_hash, tvc, keeped_by_block);
-    if(tvc.m_verifivation_failed)
-    {LOG_PRINT_RED_L0("Transaction verification failed: " << tx_hash);}
-    else if(tvc.m_verifivation_impossible)
-    {LOG_PRINT_RED_L0("Transaction verification impossible: " << tx_hash);}
-
-    if(tvc.m_added_to_pool)
-      LOG_PRINT_L1("tx added: " << tx_hash);
-    return r;
+    return handle_incoming_tx(tx, tvc, keeped_by_block, tx_hash);
   }
   //-----------------------------------------------------------------------------------------------
   bool core::get_stat_info(core_stat_info& st_inf)
@@ -454,10 +470,15 @@ namespace currency
       bvc.m_verifivation_failed = true;
       return false;
     }
-    add_new_block(b, bvc);
-    if(update_miner_blocktemplate && bvc.m_added_to_main_chain)
-       update_miner_block_template();
-    return true;
+    return handle_incoming_block(b, bvc, update_miner_blocktemplate);
+  }
+  //-----------------------------------------------------------------------------------------------
+  bool core::handle_incoming_block(const block& b, block_verification_context& bvc, bool update_miner_blocktemplate)
+  {
+    bool r = add_new_block(b, bvc);
+    if (update_miner_blocktemplate && bvc.m_added_to_main_chain)
+      update_miner_block_template();
+    return r;
   }
   //-----------------------------------------------------------------------------------------------
   crypto::hash core::get_tail_id()

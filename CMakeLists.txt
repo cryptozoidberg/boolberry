@@ -14,7 +14,7 @@ if(APPLE)
 endif()
 
 
-include_directories(src contrib contrib/epee/include "${CMAKE_BINARY_DIR}/version")
+include_directories(src contrib contrib/epee/include "${CMAKE_BINARY_DIR}/version" "${CMAKE_BINARY_DIR}/contrib/zlib")
 add_definitions(-DSTATICLIB)
 
 set(TESTNET FALSE CACHE BOOL "Compile for testnet")
@@ -30,6 +30,7 @@ if (UNIX AND NOT APPLE)
   find_package(Threads REQUIRED)
 endif()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHTTP_ENABLE_GZIP")
 
 if(MSVC)
   add_definitions("/bigobj /MP /W3 /GS- /D_CRT_SECURE_NO_WARNINGS /wd4996 /wd4267 /wd4345 /D_WIN32_WINNT=0x0600 /DWIN32_LEAN_AND_MEAN /DGTEST_HAS_TR1_TUPLE=0 /FIinline_c.h /D__SSE4_1__")

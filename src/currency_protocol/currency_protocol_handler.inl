@@ -513,6 +513,19 @@ namespace currency
         << context.m_remote_blockchain_height - current_height << " blocks left"
         , LOG_LEVEL_0);
 
+        PROF_L2_DO(syncing_conn_count_sum += get_synchronizing_connections_count(); ++syncing_conn_count_count);
+      }
+    }
+    PROF_L2_FINISH(blocks_handle_time);
+    
+    uint64_t current_height = m_core.get_current_blockchain_height();
+    LOG_PRINT_YELLOW(">>>>>>>>> sync progress: " << arg.blocks.size() << " blocks added, now have "
+      << current_height << " of " << context.m_remote_blockchain_height
+      << " ( " << std::fixed << std::setprecision(2) << current_height * 100.0 / context.m_remote_blockchain_height << "% ) and "
+      << context.m_remote_blockchain_height - current_height << " blocks left"
+      , LOG_LEVEL_0);
+    
+    
 
 
 #if PROFILING_LEVEL >= 2

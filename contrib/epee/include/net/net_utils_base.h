@@ -134,7 +134,7 @@ namespace net_utils
   }
 
 #define LOG_PRINT_CC(ct, message, log_level) LOG_PRINT( message, log_level)
-#define LOG_PRINT_CC_GREEN(ct, message, log_level) LOG_PRINT_GREEN(message, log_level)
+#define LOG_PRINT_CC_GREEN(ct, message, log_level) LOG_PRINT_GREEN( message, log_level)
 #define LOG_PRINT_CC_RED(ct, message, log_level) LOG_PRINT_RED( message, log_level)
 #define LOG_PRINT_CC_BLUE(ct, message, log_level) LOG_PRINT_BLUE( message, log_level)
 #define LOG_PRINT_CC_YELLOW(ct, message, log_level) LOG_PRINT_YELLOW( message, log_level)
@@ -142,11 +142,11 @@ namespace net_utils
 #define LOG_PRINT_CC_MAGENTA(ct, message, log_level) LOG_PRINT_MAGENTA( message, log_level)
 #define LOG_ERROR_CC(ct, message) LOG_ERROR( message)
 
-#define LOG_PRINT_CC_L0(ct, message) LOG_PRINT_L0(message)
-#define LOG_PRINT_CC_L1(ct, message) LOG_PRINT_L1(message)
-#define LOG_PRINT_CC_L2(ct, message) LOG_PRINT_L2(message)
-#define LOG_PRINT_CC_L3(ct, message) LOG_PRINT_L3(message)
-#define LOG_PRINT_CC_L4(ct, message) LOG_PRINT_L4(message)
+#define LOG_PRINT_CC_L0(ct, message) LOG_PRINT_L0( message)
+#define LOG_PRINT_CC_L1(ct, message) LOG_PRINT_L1( message)
+#define LOG_PRINT_CC_L2(ct, message) LOG_PRINT_L2( message)
+#define LOG_PRINT_CC_L3(ct, message) LOG_PRINT_L3( message)
+#define LOG_PRINT_CC_L4(ct, message) LOG_PRINT_L4( message)
 
 #define LOG_PRINT_CCONTEXT_L0(message) LOG_PRINT_CC_L0(context, message)
 #define LOG_PRINT_CCONTEXT_L1(message) LOG_PRINT_CC_L1(context, message)
@@ -161,7 +161,7 @@ namespace net_utils
 #define LOG_PRINT_CCONTEXT_CYAN(message, log_level) LOG_PRINT_CC_CYAN(context, message, log_level) 
 #define LOG_PRINT_CCONTEXT_MAGENTA(message, log_level) LOG_PRINT_CC_MAGENTA(context, message, log_level) 
 
-#define CHECK_AND_ASSERT_MES_CC(condition, return_val, err_message) CHECK_AND_ASSERT_MES(condition, return_val, "[" << epee::net_utils::print_connection_context_short(context) << "]" << err_message)
+#define CHECK_AND_ASSERT_MES_CC(condition, return_val, err_message) CHECK_AND_ASSERT_MES(condition, return_val, err_message)
 
 }
 }

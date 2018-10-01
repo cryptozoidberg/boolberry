@@ -41,6 +41,16 @@ namespace crypto {
     tree_hash(reinterpret_cast<const char (*)[HASH_SIZE]>(hashes), count, reinterpret_cast<char *>(&root_hash));
   }
 
+  inline uint64_t cn_fast_hash_64(const void *data, std::size_t length)
+  {
+    static_assert(sizeof(hash) == 4 * sizeof(uint64_t), "types sanity check failed");
+    if (length == 0)
+      return 0;
+    hash h = cn_fast_hash(data, length);
+    uint8_t idx = reinterpret_cast<uint8_t*>(&h)[5] % 4;
+    return reinterpret_cast<uint64_t*>(&h)[idx];
+  }
+
 }
 
 POD_MAKE_HASHABLE(crypto, hash)
