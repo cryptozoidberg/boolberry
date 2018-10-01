@@ -29,6 +29,7 @@
 #define _PROFILE_TOOLS_H_
 
 #include <chrono>
+#include "print_fixed_dec_point_helper.h"
 
 // 0 - no profiling, 1 - basic, 2 - full, 3 - ultimate
 #define PROFILING_LEVEL 1
@@ -41,6 +42,7 @@
 #  define PROF_L1_STR(str) str
 #  define PROF_L1_DO(statement) statement
 #  define PROF_L1_LOG_PRINT(str, log_level) LOG_PRINT(str, log_level)
+#define ENABLE_PROFILING
 #else
 #  define PROF_L1_START(timer_var) 
 #  define PROF_L1_FINISH(timer_var) 
@@ -139,18 +141,34 @@ namespace epee
 
 namespace profile_tools
 {
+  static inline void init_profile_session()
+  {
+    static std::atomic<bool> is_called(false);
+    if (!is_called)
+    {
+      is_called = true;
+      LOG_PRINT2("profile_details.log", "*********************************************************************************************************", LOG_LEVEL_0);
+    }
+  }
+
 	struct local_call_account
 	{
-		local_call_account(const char* pstr):m_count_of_call(0), m_summary_time_used(0),m_pname(pstr)
-		{}
+		local_call_account(const char* pstr):m_count_of_call(0), m_summary_time_used(0),m_name(pstr)
+		{
+      init_profile_session();
+    }
 		~local_call_account()
 		{
-			LOG_PRINT2("profile_details.log", "PROFILE "<<m_pname<<":av_time:\t" << (m_count_of_call ? (m_summary_time_used/m_count_of_call):0) <<" sum_time:\t"<<m_summary_time_used<<" call_count:\t" << m_count_of_call, LOG_LEVEL_0);
+      LOG_PRINT2("profile_details.log", "PROFILE " << std::left << std::setw(80) << (m_name + ":")
+        << "av_time:" << std::setw(15) << epee::string_tools::print_fixed_dec_point(m_count_of_call ? (m_summary_time_used / m_count_of_call) : 0, 3)
+        << "sum_time: " << std::setw(15) << epee::string_tools::print_fixed_dec_point(m_summary_time_used, 3)
+        << "call_count: " << std::setw(15) << m_count_of_call, LOG_LEVEL_0);
+
 		}
 
 		size_t m_count_of_call;
 		uint64_t m_summary_time_used;
-		const char* m_pname;
+		const std::string m_name;
 	};
 	
 	struct call_frame
@@ -160,20 +178,15 @@ namespace profile_tools
 		{
 			cc.m_count_of_call++;
 			m_call_time = boost::posix_time::microsec_clock::local_time();
-			//::QueryPerformanceCounter((LARGE_INTEGER *)&m_call_time);
 		}
 		
 		~call_frame()
 		{
-			//__int64 ret_time = 0;
-			
-			boost::posix_time::ptime now_t(boost::posix_time::microsec_clock::local_time());
-			boost::posix_time::time_duration delta_microsec = now_t - m_call_time;
-			uint64_t miliseconds_used = delta_microsec.total_microseconds();
-
-			//::QueryPerformanceCounter((LARGE_INTEGER *)&ret_time);
-			//m_call_time = (ret_time-m_call_time)/1000;
-			m_cc.m_summary_time_used += miliseconds_used;
+      boost::posix_time::ptime now_t(boost::posix_time::microsec_clock::local_time());
+      boost::posix_time::time_duration delta_microseconds = now_t - m_call_time;
+      uint64_t microsec_used = delta_microseconds.total_microseconds();
+      m_cc.m_count_of_call++;
+      m_cc.m_summary_time_used += microsec_used;
 		}
 		
 	private:

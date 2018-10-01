@@ -17,6 +17,7 @@ using namespace epee;
 #include "currency_config.h"
 #include "currency_format_utils.h"
 #include "misc_language.h"
+#include "profile_tools.h"
 
 DISABLE_VS_WARNINGS(4355)
 
@@ -160,6 +161,7 @@ namespace currency
 
  bool core::handle_incoming_tx(const transaction & tx, tx_verification_context& tvc, bool keeped_by_block, const crypto::hash& tx_hash_)
 {
+   PROFILE_FUNC("core::handle_incoming_tx");
    crypto::hash tx_hash = tx_hash_;
    if (tx_hash == null_hash)
      tx_hash = get_transaction_hash(tx);
@@ -237,6 +239,7 @@ bool core::handle_incoming_tx(const blobdata& tx_blob, tx_verification_context& 
   //-----------------------------------------------------------------------------------------------
   bool core::check_tx_semantic(const transaction& tx, bool keeped_by_block)
   {
+    PROFILE_FUNC("core::check_tx_semantic");
     if(!tx.vin.size())
     {
       LOG_PRINT_RED_L0("tx with empty inputs, rejected for tx id= " << get_transaction_hash(tx));
@@ -335,6 +338,7 @@ bool core::handle_incoming_tx(const blobdata& tx_blob, tx_verification_context& 
   //-----------------------------------------------------------------------------------------------
   bool core::add_new_tx(const transaction& tx, const crypto::hash& tx_hash, const crypto::hash& tx_prefix_hash, tx_verification_context& tvc, bool keeped_by_block)
   {
+    PROFILE_FUNC("core::add_new_tx");
     if(m_mempool.have_tx(tx_hash))
     {
       LOG_PRINT_L2("tx " << tx_hash << "already have transaction in tx_pool");
@@ -454,6 +458,7 @@ bool core::handle_incoming_tx(const blobdata& tx_blob, tx_verification_context& 
   //-----------------------------------------------------------------------------------------------
   bool core::handle_incoming_block(const blobdata& block_blob, block_verification_context& bvc, bool update_miner_blocktemplate)
   {
+    PROFILE_FUNC("core::handle_incoming_block(blob, bvc, upd_tmp)");
     bvc = boost::value_initialized<block_verification_context>();
     if(block_blob.size() > get_max_block_size())
     {
@@ -475,6 +480,7 @@ bool core::handle_incoming_tx(const blobdata& tx_blob, tx_verification_context& 
   //-----------------------------------------------------------------------------------------------
   bool core::handle_incoming_block(const block& b, block_verification_context& bvc, bool update_miner_blocktemplate)
   {
+    PROFILE_FUNC("core::handle_incoming_block(b, bvc, upd_tmp)");
     bool r = add_new_block(b, bvc);
     if (update_miner_blocktemplate && bvc.m_added_to_main_chain)
       update_miner_block_template();

@@ -412,7 +412,7 @@ namespace currency
         }
 
         PROF_L1_FINISH(block_process_time);
-        PROF_L1_DO(LOG_PRINT_CCONTEXT_L2("Block process time: " << print_mcsec_as_ms(block_process_time + transactions_process_time) << "(" << print_mcsec_as_ms(transactions_process_time) << "/" << print_mcsec_as_ms(block_process_time) << ") ms"));
+        PROF_L1_DO(LOG_PRINT_CCONTEXT_L1("Block process time: " << print_mcsec_as_ms(block_process_time + transactions_process_time) << "(" << print_mcsec_as_ms(transactions_process_time) << "/" << print_mcsec_as_ms(block_process_time) << ") ms"));
 
         PROF_L2_DO(syncing_conn_count_sum += get_synchronizing_connections_count(); ++syncing_conn_count_count);
       }

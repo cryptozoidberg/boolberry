@@ -12,6 +12,7 @@ using namespace epee;
 #include "miner.h"
 #include "crypto/crypto.h"
 #include "crypto/hash.h"
+#include "profile_tools.h"
 
 namespace currency
 {
@@ -820,6 +821,7 @@ namespace currency
   //---------------------------------------------------------------
   crypto::hash get_transaction_hash(const transaction& t)
   {
+    PROFILE_FUNC("currency::get_transaction_hash");
     crypto::hash h = null_hash;
     size_t blob_size = 0;
     get_object_hash(static_cast<const transaction_prefix&>(t), h, blob_size);
