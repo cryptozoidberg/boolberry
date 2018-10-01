@@ -34,7 +34,7 @@ namespace currency
      bool handle_get_objects(NOTIFY_REQUEST_GET_OBJECTS::request& arg, NOTIFY_RESPONSE_GET_OBJECTS::request& rsp, currency_connection_context& context);
      bool on_idle();
      bool handle_incoming_tx(const blobdata& tx_blob, tx_verification_context& tvc, bool keeped_by_block);
-     bool core::handle_incoming_tx(const transaction & tx, tx_verification_context& tvc, bool keeped_by_block, const crypto::hash& tx_hash = null_hash);
+     bool handle_incoming_tx(const transaction & tx, tx_verification_context& tvc, bool keeped_by_block, const crypto::hash& tx_hash = null_hash);
      bool handle_incoming_block(const blobdata& block_blob, block_verification_context& bvc, bool update_miner_blocktemplate = true);
      bool handle_incoming_block(const block& b, block_verification_context& bvc, bool update_miner_blocktemplate = true);
      i_currency_protocol* get_protocol(){return m_pprotocol;}

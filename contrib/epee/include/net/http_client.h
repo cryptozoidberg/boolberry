@@ -463,7 +463,7 @@ namespace epee
         }
         //---------------------------------------------------------------------------
         inline
-          bool get_len_from_chunk_head(const std::string &chunk_head, size_t& result_size)
+          bool get_len_from_chunk_head(const std::string &chunk_head, uint64_t& result_size)
         {
             std::stringstream str_stream;
             str_stream << std::hex;
@@ -474,7 +474,7 @@ namespace epee
           }
         //---------------------------------------------------------------------------
         inline
-          bool get_chunk_head(std::string& buff, size_t& chunk_size, bool& is_matched)
+          bool get_chunk_head(std::string& buff, uint64_t& chunk_size, bool& is_matched)
         {
             is_matched = false;
             size_t offset = 0;
