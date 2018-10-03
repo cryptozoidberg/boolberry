@@ -387,7 +387,7 @@ namespace currency
     int res = m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<int>(have_called, [&]()
     {
 
-      PROF_L2_START(block_complete_entries_prevalidation_time);
+      PROF_L1_START(block_complete_entries_prevalidation_time);
       size_t count = 0;
       for (const block_complete_entry& block_entry : arg.blocks)
       {
@@ -434,7 +434,7 @@ namespace currency
 
         context.m_requested_objects.erase(req_it);
       }
-      PROF_L2_FINISH(block_complete_entries_prevalidation_time);
+      PROF_L1_FINISH(block_complete_entries_prevalidation_time);
 
       PROF_L2_DO(syncing_conn_count_sum += get_synchronizing_connections_count(); ++syncing_conn_count_count);
 
@@ -446,7 +446,7 @@ namespace currency
         return 1;
       }
 
-      PROF_L2_START(blocks_handle_time);
+      PROF_L1_START(blocks_handle_time);
       {
         m_core.pause_mine();
         m_core.get_blockchain_storage().start_batch_exclusive_operation();
@@ -511,10 +511,11 @@ namespace currency
         }
         success = true;
       }
-      PROF_L2_FINISH(blocks_handle_time);
+      PROF_L1_FINISH(blocks_handle_time);
 
       uint64_t current_height = m_core.get_current_blockchain_height();
-      LOG_PRINT_CCONTEXT_YELLOW(">>>>>>>>> sync progress: " << arg.blocks.size() << " blocks added, now have "
+      LOG_PRINT_CCONTEXT_YELLOW(">>>>>>>>> sync progress: " << arg.blocks.size() << " blocks added"
+        "(" << print_mcsec_as_ms(blocks_handle_time) << "+" << print_mcsec_as_ms(block_complete_entries_prevalidation_time) << "), now have "
         << current_height << " of " << context.m_remote_blockchain_height
         << " ( " << std::fixed << std::setprecision(2) << current_height * 100.0 / context.m_remote_blockchain_height << "% ) and "
         << context.m_remote_blockchain_height - current_height << " blocks left"
