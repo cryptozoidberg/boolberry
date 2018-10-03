@@ -250,7 +250,7 @@ namespace currency
     typedef db::key_value_accessor_base<crypto::hash, transaction_chain_entry, true> transactions_container; //typedef std::unordered_map<crypto::hash, transaction_chain_entry> transactions_container;
 
     typedef db::key_value_accessor_base<crypto::key_image, bool, false> key_images_container; //typedef std::unordered_set<crypto::key_image> key_images_container;
-    typedef db::array_accessor<block_extended_info, true> blocks_container;
+    typedef db::cached_array_accessor<block_extended_info, true, DIFFICULTY_BLOCKS_COUNT+10> blocks_container;
 
 
     typedef db::key_value_accessor_base<std::string, std::list<alias_info_base>, true> aliases_container; //typedef std::map<std::string, std::list<extra_alias_entry_base>> aliases_container; //alias can be address address address + view key

@@ -183,6 +183,7 @@ namespace currency
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::take_tx(const crypto::hash &id, transaction &tx, size_t& blob_size, uint64_t& fee)
   {
+    PROFILE_FUNC("tx_memory_pool::take_tx");
     CRITICAL_REGION_LOCAL(m_transactions_lock);
     auto it = m_transactions.find(id);
     if(it == m_transactions.end())

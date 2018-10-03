@@ -58,6 +58,7 @@ namespace currency
     void log_connections();
     uint64_t get_core_inital_height();
     uint64_t get_max_seen_height();
+    void set_want_stop(){ m_want_stop = true; }
   private:
     //----------------- commands handlers ----------------------------------------------
     int handle_notify_new_block(int command, NOTIFY_NEW_BLOCK::request& arg, currency_connection_context& context);

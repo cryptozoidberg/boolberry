@@ -86,8 +86,17 @@ namespace currency
   }
   bool scratchpad_wrapper::push_block_scratchpad_data(const block& b)
   {
-    bool res = currency::push_block_scratchpad_data(b, m_scratchpad_cache);
-    res &= currency::push_block_scratchpad_data(b, m_rdb_scratchpad);
+    PROFILE_FUNC("scratchpad_wrapper::push_block_scratchpad_data(b)");
+    bool res = false;
+    {
+      PROFILE_FUNC_SECOND("scratchpad_wrapper::push_block_scratchpad_data-cache");
+      res = currency::push_block_scratchpad_data(b, m_scratchpad_cache);
+    }
+    {
+      PROFILE_FUNC_SECOND("scratchpad_wrapper::push_block_scratchpad_data-db");
+      res &= currency::push_block_scratchpad_data(b, m_rdb_scratchpad);
+    }
+    
 #ifdef SELF_VALIDATE_SCRATCHPAD
     std::vector<crypto::hash> scratchpad_cache;
     load_scratchpad_from_db(m_rdb_scratchpad, scratchpad_cache);

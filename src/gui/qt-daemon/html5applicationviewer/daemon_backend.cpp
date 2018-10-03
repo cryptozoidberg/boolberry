@@ -111,6 +111,8 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
     return false;
 
   //set up logging options
+  log_space::log_singletone::get_set_log_detalisation_level(true, command_line::get_arg(vm, command_line::arg_log_level));
+
   if (command_line::has_arg(vm, arg_alloc_win_console))
   {
     log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
@@ -149,7 +151,9 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
 
 bool daemon_backend::send_stop_signal()
 {
+  LOG_PRINT_MAGENTA("GUI stop signal sent", LOG_LEVEL_1);
   m_stop_singal_sent = true;
+  m_cprotocol.set_want_stop();
   return true;
 }
 

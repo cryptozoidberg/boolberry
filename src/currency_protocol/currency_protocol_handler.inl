@@ -463,7 +463,14 @@ namespace currency
           PROF_L1_START(transactions_process_time);
           BOOST_FOREACH(auto& tx_blob, block_entry.txs)
           {
-            CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
+            //CHECK_STOP_FLAG_EXIT_IF_SET(1, "Blocks processing interrupted, connection dropped");
+            if (check_stop_flag_and_exit(context)) 
+            {             
+              LOG_PRINT_YELLOW("Stop flag detected within NOTIFY_RESPONSE_GET_OBJECTS. ", LOG_LEVEL_0);
+              //commit transaction
+              success = true;
+              return 1; 
+            }
             tx_verification_context tvc = AUTO_VAL_INIT(tvc);
             m_core.handle_incoming_tx(tx_blob, tvc, true);
             if (tvc.m_verifivation_failed)
@@ -514,18 +521,7 @@ namespace currency
         , LOG_LEVEL_0);
 
         PROF_L2_DO(syncing_conn_count_sum += get_synchronizing_connections_count(); ++syncing_conn_count_count);
-      }
-    }
-    PROF_L2_FINISH(blocks_handle_time);
-    
-    uint64_t current_height = m_core.get_current_blockchain_height();
-    LOG_PRINT_YELLOW(">>>>>>>>> sync progress: " << arg.blocks.size() << " blocks added, now have "
-      << current_height << " of " << context.m_remote_blockchain_height
-      << " ( " << std::fixed << std::setprecision(2) << current_height * 100.0 / context.m_remote_blockchain_height << "% ) and "
-      << context.m_remote_blockchain_height - current_height << " blocks left"
-      , LOG_LEVEL_0);
-    
-    
+     
 
 
 #if PROFILING_LEVEL >= 2

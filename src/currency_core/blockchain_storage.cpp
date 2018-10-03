@@ -2194,6 +2194,7 @@ bool blockchain_storage::process_blockchain_tx_extra(const transaction& tx)
 //------------------------------------------------------------------
 bool blockchain_storage::add_transaction_from_block(const transaction& tx, const crypto::hash& tx_id, const crypto::hash& bl_id, uint64_t bl_height)
 {
+  PROFILE_FUNC("blockchain_storage::add_transaction_from_block");
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   PROF_L2_START(process_tx_extra_time);
   bool r = process_blockchain_tx_extra(tx);
@@ -2283,6 +2284,7 @@ bool blockchain_storage::add_transaction_from_block(const transaction& tx, const
   PROF_L2_START(store_to_db_time);
   m_db_transactions.set(tx_id, ch_e);
   PROF_L2_FINISH(store_to_db_time);
+  
   LOG_PRINT_L2("Added transaction to blockchain history:" << ENDL
     << "tx_id: " << tx_id << ENDL
     << "inputs: " << tx.vin.size() << ", outs: " << tx.vout.size() << ", spend money: " << print_money(get_outs_money_amount(tx)) << "(fee: " << (is_coinbase(tx) ? "0[coinbase]" : print_money(get_tx_fee(tx))) << ")"
@@ -2779,6 +2781,7 @@ bool blockchain_storage::update_next_comulative_size_limit()
 //------------------------------------------------------------------
 bool blockchain_storage::add_new_block(const block& bl_, block_verification_context& bvc)
 {
+  PROFILE_FUNC("blockchain_storage::add_new_block");
   try
   {
     block bl = bl_;

@@ -93,17 +93,17 @@ namespace epee
 {
 
 #ifdef ENABLE_PROFILING
-#define PROFILE_FUNC(immortal_ptr_str) static profile_tools::local_call_account lcl_acc(immortal_ptr_str); \
-	profile_tools::call_frame cf(lcl_acc);
+#define PROFILE_FUNC(immortal_ptr_str) static epee::profile_tools::local_call_account lcl_acc(immortal_ptr_str); \
+	epee::profile_tools::call_frame cf(lcl_acc);
 
-#define PROFILE_FUNC_SECOND(immortal_ptr_str) static profile_tools::local_call_account lcl_acc2(immortal_ptr_str); \
-	profile_tools::call_frame cf2(lcl_acc2);
+#define PROFILE_FUNC_SECOND(immortal_ptr_str) static epee::profile_tools::local_call_account lcl_acc2(immortal_ptr_str); \
+	epee::profile_tools::call_frame cf2(lcl_acc2);
 
-#define PROFILE_FUNC_THIRD(immortal_ptr_str) static profile_tools::local_call_account lcl_acc3(immortal_ptr_str); \
-	profile_tools::call_frame cf3(lcl_acc3);
+#define PROFILE_FUNC_THIRD(immortal_ptr_str) static epee::profile_tools::local_call_account lcl_acc3(immortal_ptr_str); \
+	epee::profile_tools::call_frame cf3(lcl_acc3);
 
 #define PROFILE_FUNC_ACC(acc) \
-	profile_tools::call_frame cf(acc);
+	epee::profile_tools::call_frame cf(acc);
 
 
 #else

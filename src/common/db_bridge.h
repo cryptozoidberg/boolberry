@@ -852,5 +852,95 @@ namespace db
   };
 
     
+  // naive cache for array 
+  template<class value_t, bool value_type_is_serializable, int cache_default_limit>
+  class cached_array_accessor : protected array_accessor<value_t, value_type_is_serializable>
+  {
+    typedef array_accessor<value_t, value_type_is_serializable> super;
+  public:
+    cached_array_accessor(db_bridge_base& dbb) :array_accessor<value_t, value_type_is_serializable>(dbb), m_cache_size_limit(cache_default_limit)
+    {}
+
+    uint64_t m_cache_size_limit;
+    mutable std::map<size_t, std::shared_ptr<const value_t> > m_cache;
+
+    bool init(const std::string& table_name)
+    {
+      m_cache.clear();
+      return super::init(table_name);
+    }
+
+    bool clear()
+    {
+      return super::clear();
+      m_cache.clear();
+    }
+
+    void push_back(const value_t& v)
+    {
+      super::push_back(v);
+      m_cache[super::size() - 1] = std::make_shared<const value_t>(v);
+      crop_cache();
+    }
+
+    void pop_back()
+    {
+      super::pop_back();
+      auto it = m_cache.find(super::size());
+      if (it != m_cache.end())
+        m_cache.erase(it);
+    }
+
+    size_t size() const
+    {
+      return super::size();
+    }
+
+    std::shared_ptr<const value_t> back() const
+    {
+      return this->operator [](size()-1);
+    }
+
+    std::shared_ptr<const value_t> operator[] (size_t k) const
+    {
+      size_t sz = this->size();
+      bool supposed_to_cache = m_cache_size_limit >= sz ? true : (sz - m_cache_size_limit > k ? false : true);
+
+      if (supposed_to_cache)
+      {
+        auto it = m_cache.find(k);
+        if (it != m_cache.end())
+          return it->second;
+      }
+      auto res = super:: operator [](k);
+      if (supposed_to_cache)
+      {
+        m_cache[k] = res;
+      }
+      return res;
+    }
+  private: 
+    void crop_cache()
+    {
+      size_t sz = super::size();
+      if (sz <= m_cache_size_limit)
+        return;
+
+      size_t stop_index = sz - m_cache_size_limit;
+
+      for (auto it = m_cache.begin(); it != m_cache.end(); )
+      {
+        if (it->first > stop_index)
+          break;
+        m_cache.erase(it++);
+      }
+
+    }
+  };
+
+
+
+
+
 
 } // namespace db

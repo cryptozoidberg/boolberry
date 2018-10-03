@@ -19,6 +19,7 @@
 #include "string_coding.h"
 #include "version.h"
 #include "storages/portable_storage_template_helper.h"
+#include "profile_tools.h"
 
 using namespace epee;
 
@@ -99,6 +100,7 @@ namespace currency
   //-----------------------------------------------------------------------------------------------------
   bool miner::on_block_chain_update()
   {
+    PROFILE_FUNC("miner::on_block_chain_update()");
     if(!is_mining())
       return true;
     
