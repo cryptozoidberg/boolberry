@@ -63,7 +63,7 @@ target_link_libraries(connectivity_tool currency_core crypto zlibstatic common $
 
 add_executable(simplewallet ${SIMPLEWALLET})
 add_dependencies(simplewallet version)
-target_link_libraries(simplewallet wallet rpc currency_core crypto common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_link_libraries(simplewallet wallet rpc currency_core crypto zlibstatic common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
 # add_executable(simpleminer ${SIMPLEMINER})
 # add_dependencies(simpleminer version)
