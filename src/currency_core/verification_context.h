@@ -22,6 +22,6 @@ namespace currency
     bool m_added_to_main_chain;
     bool m_verifivation_failed; //bad block, should drop connection
     bool m_marked_as_orphaned;
-    bool m_already_exists;
+    uint64_t height;
   };
 }

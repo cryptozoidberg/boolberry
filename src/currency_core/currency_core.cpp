@@ -453,6 +453,7 @@ bool core::handle_incoming_tx(const blobdata& tx_blob, tx_verification_context& 
   //-----------------------------------------------------------------------------------------------
   bool core::add_new_block(const block& b, block_verification_context& bvc)
   {
+    bvc.height = get_block_height(b);
     return m_blockchain_storage.add_new_block(b, bvc);
   }
   //-----------------------------------------------------------------------------------------------

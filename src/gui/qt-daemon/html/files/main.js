@@ -142,8 +142,8 @@ function on_update_daemon_state(info_obj)
     //$("#daemon_inc_connections_text").text(info_obj.inc_connections_count.toString());
 
     $("#daemon_height_text").text(info_obj.height.toString());
-    $("#difficulty_text").text(info_obj.difficulty);
-    $("#hashrate_text").text(info_obj.hashrate.toString());
+    //$("#difficulty_text").text(info_obj.difficulty);
+    //$("#hashrate_text").text(info_obj.hashrate.toString());
     if(info_obj.last_build_displaymode < 3)
         $("#last_actual_version_text").text("(available version: " + info_obj.last_build_available + ")");
     else

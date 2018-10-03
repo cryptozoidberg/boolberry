@@ -20,6 +20,7 @@ namespace currency
                                                                                                               m_been_synchronized(false),
                                                                                                               m_max_height_seen(0),
                                                                                                               m_core_inital_height(0),
+                                                                                                              m_core_current_height(0),
                                                                                                               m_want_stop(false)
 
   {
@@ -38,7 +39,6 @@ namespace currency
   {
     if (command_line::has_arg(vm, arg_currency_protocol_explicit_set_online))
       m_been_synchronized = true;
-
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------  
@@ -187,7 +187,9 @@ namespace currency
       if (m_max_height_seen < hshd.current_height)
         m_max_height_seen = hshd.current_height;
       if (!m_core_inital_height)
-        m_core_inital_height = m_core.get_current_blockchain_height();
+      {
+        m_core_current_height = m_core_inital_height = m_core.get_current_blockchain_height();        
+      }
       return true;
     });
 
@@ -207,6 +209,12 @@ namespace currency
   uint64_t t_currency_protocol_handler<t_core>::get_core_inital_height()
   {
     return m_core_inital_height;
+  }
+  //------------------------------------------------------------------------------------------------------------------------
+  template<class t_core>
+  uint64_t t_currency_protocol_handler<t_core>::get_core_current_height()
+  {
+    return m_core_current_height;
   }
   //------------------------------------------------------------------------------------------------------------------------  
   template<class t_core>
@@ -280,6 +288,7 @@ namespace currency
     }
     if(bvc.m_added_to_main_chain)
     {
+      m_core_current_height = bvc.height;
       ++arg.hop;
       //TODO: Add here announce protocol usage
       relay_block(arg, context);
@@ -503,7 +512,7 @@ namespace currency
             m_p2p->add_ip_fail(context.m_remote_ip);
             return 1;
           }
-
+          m_core_current_height = bvc.height;
           PROF_L1_FINISH(block_process_time);
           PROF_L1_DO(LOG_PRINT_CCONTEXT_L2("Block process time: " << print_mcsec_as_ms(block_process_time + transactions_process_time) << "(" << print_mcsec_as_ms(transactions_process_time) << "/" << print_mcsec_as_ms(block_process_time) << ") ms"));
 

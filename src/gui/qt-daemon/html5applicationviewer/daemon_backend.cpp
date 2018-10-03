@@ -326,42 +326,43 @@ bool daemon_backend::update_state_info()
 {
   view::daemon_status_info dsi = AUTO_VAL_INIT(dsi);
   dsi.difficulty = "---";
-  currency::COMMAND_RPC_GET_INFO::request req = AUTO_VAL_INIT(req);
-  currency::COMMAND_RPC_GET_INFO::response inf = AUTO_VAL_INIT(inf);
-  if (!m_rpc_proxy->call_COMMAND_RPC_GET_INFO(req, inf))
-  {
-    dsi.text_state = "get_info failed";
-    m_pview->update_daemon_status(dsi);
-    LOG_ERROR("Failed to call get_info");
-    return false;
-  }
-  dsi.difficulty = std::to_string(inf.difficulty);
-  dsi.hashrate = inf.current_network_hashrate_350;
-  dsi.inc_connections_count = inf.incoming_connections_count;
-  dsi.out_connections_count = inf.outgoing_connections_count;
-  switch (inf.daemon_network_state)
+  uint64_t total_conn = m_p2psrv.get_connections_count();
+  dsi.out_connections_count = m_p2psrv.get_outgoing_connections_count();
+  dsi.inc_connections_count = total_conn - dsi.out_connections_count;
+  int daemon_network_state = 0;
+  if (!dsi.out_connections_count)
+    daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_connecting;
+  else if (m_cprotocol.is_synchronized())
+    daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_online;
+  else
+    daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_synchronizing;
+
+  switch (daemon_network_state)
   {
   case currency::COMMAND_RPC_GET_INFO::daemon_network_state_connecting:     dsi.text_state = "Connecting"; break;
   case currency::COMMAND_RPC_GET_INFO::daemon_network_state_online:         dsi.text_state = "Online"; break;
   case currency::COMMAND_RPC_GET_INFO::daemon_network_state_synchronizing:  dsi.text_state = "Synchronizing"; break;
   default: dsi.text_state = "unknown"; break;
   }
-  dsi.daemon_network_state = inf.daemon_network_state;
-  dsi.synchronization_start_height = inf.synchronization_start_height;
-  dsi.max_net_seen_height = inf.max_net_seen_height;
+//  dsi.daemon_network_state = inf.daemon_network_state;
+  dsi.synchronization_start_height = m_cprotocol.get_core_inital_height();
+  dsi.max_net_seen_height = m_cprotocol.get_max_seen_height();
 
-  dsi.last_build_available = std::to_string(inf.mi.ver_major)
-    + "." + std::to_string(inf.mi.ver_minor)
-    + "." + std::to_string(inf.mi.ver_revision)
-    + "." + std::to_string(inf.mi.build_no);
+  nodetool::maintainers_info_external me = AUTO_VAL_INIT(me);
+  m_p2psrv.get_maintainers_info(me);
 
-  if (inf.mi.mode)
+  dsi.last_build_available = std::to_string(me.ver_major)
+    + "." + std::to_string(me.ver_minor)
+    + "." + std::to_string(me.ver_revision)
+    + "." + std::to_string(me.build_no);
+
+  if (me.mode)
   {
-    dsi.last_build_displaymode = inf.mi.mode + 1;
+    dsi.last_build_displaymode = me.mode + 1;
   }
   else
   {
-    if (inf.mi.build_no > PROJECT_VERSION_BUILD_NO)
+    if (me.build_no > PROJECT_VERSION_BUILD_NO)
       dsi.last_build_displaymode = view::ui_last_build_displaymode::ui_lb_dm_new;
     else
     {
@@ -370,7 +371,7 @@ bool daemon_backend::update_state_info()
   }
 
 
-  m_last_daemon_height = dsi.height = inf.height;
+  m_last_daemon_height = dsi.height = m_cprotocol.get_core_current_height();
 
   m_pview->update_daemon_status(dsi);
   return true;

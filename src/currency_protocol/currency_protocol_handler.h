@@ -57,6 +57,7 @@ namespace currency
     bool is_synchronized(){return m_synchronized;}
     void log_connections();
     uint64_t get_core_inital_height();
+    uint64_t get_core_current_height();    
     uint64_t get_max_seen_height();
     void set_want_stop(){ m_want_stop = true; }
   private:
@@ -87,6 +88,7 @@ namespace currency
     std::atomic<bool> m_been_synchronized;
     std::atomic<uint64_t> m_max_height_seen;
     std::atomic<uint64_t> m_core_inital_height;
+    std::atomic<uint64_t> m_core_current_height;
     std::atomic<bool> m_want_stop;
 
 
