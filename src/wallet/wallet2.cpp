@@ -100,7 +100,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       auto it = m_key_images.find(ki);
       if (it != m_key_images.end())
       {
-        CHECK_AND_THROW_WALLET_EX(it->second >= m_transfers.size(), error::wallet_internal_error, "m_key_images entry has wrong m_transfers index");
+        CHECK_AND_THROW_WALLET_EX(it->second >= m_transfers.size(), error::wallet_internal_error, "m_key_images entry has wrong m_transfers index, it->second: " + epee::string_tools::num_to_string_fast(it->second) + ", m_transfers.size(): " + epee::string_tools::num_to_string_fast(m_transfers.size()));
         const transfer_details& td = m_transfers[it->second];
         LOG_PRINT_YELLOW("tx " << get_transaction_hash(tx) << " output's key image has already been seen in tx " << get_transaction_hash(td.m_tx) << ". The entire transaction will be skipped.", LOG_LEVEL_0);
         return; // skip entire transaction
@@ -518,12 +518,29 @@ void wallet2::detach_blockchain(uint64_t height)
 
   for(size_t i = i_start; i!= m_transfers.size();i++)
   {
-    auto it_ki = m_key_images.find(m_transfers[i].m_key_image);
+    const crypto::key_image &ki = m_transfers[i].m_key_image;
+    auto it_ki = m_key_images.find(ki);
     CHECK_AND_THROW_WALLET_EX(it_ki == m_key_images.end(), error::wallet_internal_error, "key image not found");
+    if (it_ki->second != i)
+    {
+      LOG_ERROR("internal condition failure: ki " << ki << ", i: " << i << ", it_ki->second: " << it_ki->second);
+    }
     m_key_images.erase(it_ki);
+    // paranoid check
+    it_ki = m_key_images.find(ki);
+    if (it_ki != m_key_images.end())
+    {
+      LOG_ERROR("internal condition failure: ki " << ki << " is found in m_key_images upon removing, referencing transfer #" << it_ki->second <<
+        ", m_transfers.size() == " << m_transfers.size() << ", i:" << i);
+    }
     ++transfers_detached;
   }
+  size_t transfers_size_before = m_transfers.size();
   m_transfers.erase(it, m_transfers.end());
+  if (transfers_detached != transfers_size_before - m_transfers.size())
+  {
+    LOG_ERROR("internal condition failure: transfers_detached: " << transfers_detached << ", elements removed:" << transfers_size_before - m_transfers.size());
+  }
 
   size_t blocks_detached = m_blockchain.end() - (m_blockchain.begin()+height);
   m_blockchain.erase(m_blockchain.begin()+height, m_blockchain.end());
