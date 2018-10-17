@@ -43,7 +43,7 @@ namespace
   const command_line::arg_descriptor<std::string> arg_password = {"password", "Wallet password", "", true};
   const command_line::arg_descriptor<std::string> arg_restore_seed = { "restore-seed", "Restore wallet from the 24-word seed", ""};
   const command_line::arg_descriptor<int> arg_daemon_port = { "daemon-port", "Use daemon instance at port <arg> instead of default", 0 };
-  const command_line::arg_descriptor<uint32_t> arg_log_level = {"set_log", "", 0, true};
+  const command_line::arg_descriptor<uint32_t> arg_log_level = {"set-log", "", 0, true};
 
   const command_line::arg_descriptor< std::vector<std::string> > arg_command = {"command", ""};
 

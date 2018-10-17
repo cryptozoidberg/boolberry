@@ -9,7 +9,7 @@ namespace currency
 {
   namespace
   {
-    const command_line::arg_descriptor<bool>               arg_currency_protocol_explicit_set_online = { "explicit_set_online", "Explicitly set node to online mode(needed for launch first node in network)", false, true};
+    const command_line::arg_descriptor<bool>               arg_currency_protocol_explicit_set_online = { "explicit-set-online", "Explicitly set node to online mode (needed for launch first node in network)", false, true};
   }
   //-----------------------------------------------------------------------------------------------------------------------  
   template<class t_core>
