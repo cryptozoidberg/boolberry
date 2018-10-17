@@ -566,6 +566,11 @@ bool wallet2::clear()
 {
   m_blockchain.clear();
   m_transfers.clear();
+  m_payments.clear();
+  m_key_images.clear();
+  m_transfer_history.clear();
+  m_unconfirmed_in_transfers.clear();
+  // m_tx_keys is not cleared intentionally, considered to be safe
   currency::block b;
   currency::generate_genesis_block(b);
   m_blockchain.push_back(get_block_hash(b));
