@@ -129,8 +129,11 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::process_payload_sync_data(const CORE_SYNC_DATA& hshd, currency_connection_context& context, bool is_inital)
   {
-    if(context.m_state == currency_connection_context::state_befor_handshake && !is_inital)
+    if (context.m_state == currency_connection_context::state_befor_handshake && !is_inital)
+    {
+      LOG_PRINT_L3("[PROCESS_PAYLOAD_SYNC_DATA]: state_befor_handshake, ignored");
       return true;
+    }
 
     if(context.m_state == currency_connection_context::state_synchronizing)
       return true;
@@ -148,7 +151,7 @@ namespace currency
     {
       if (m_core.have_block(hshd.top_id))
       {
-
+        LOG_PRINT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA]: remote top " << hshd.top_id << " is already in core, m_state set to state_normal", LOG_LEVEL_3);
         context.m_state = currency_connection_context::state_normal;
         return true;
       }
@@ -177,6 +180,7 @@ namespace currency
           "That means that current software is outdated, please updated it.", LOG_LEVEL_0);
       }
 
+      LOG_PRINT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA]: m_state set to state_synchronizing", LOG_LEVEL_3);
       context.m_state = currency_connection_context::state_synchronizing;
       context.m_remote_blockchain_height = hshd.current_height;
       //let the socket to send response to handshake, but request callback, to let send request data after response
@@ -195,7 +199,7 @@ namespace currency
 
     if (!have_called)
     {
-      LOG_PRINT_CCONTEXT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA(is_inital=" << is_inital<<")]: call blocked.", LOG_LEVEL_0);
+      LOG_PRINT_CCONTEXT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA(is_inital=" << is_inital<<")]: call blocked.set to state_idle", LOG_LEVEL_0);
       context.m_state = currency_connection_context::state_idle;
       return true;
     }
@@ -294,6 +298,7 @@ namespace currency
       relay_block(arg, context);
     }else if(bvc.m_marked_as_orphaned)
     {
+      LOG_PRINT_MAGENTA("[NOTIFY_NEW_BLOCK]: m_state set state_synchronizing", LOG_LEVEL_3);
       context.m_state = currency_connection_context::state_synchronizing;
       NOTIFY_REQUEST_CHAIN::request r = boost::value_initialized<NOTIFY_REQUEST_CHAIN::request>();
       m_core.get_short_chain_history(r.block_ids);
@@ -395,7 +400,6 @@ namespace currency
     bool have_called = false;
     int res = m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<int>(have_called, [&]()
     {
-
       PROF_L1_START(block_complete_entries_prevalidation_time);
       size_t count = 0;
       for (const block_complete_entry& block_entry : arg.blocks)
@@ -417,6 +421,7 @@ namespace currency
         {
           if (m_core.have_block(get_block_hash(b)))
           {
+            LOG_PRINT_MAGENTA("[RESPONSE_GET_OBJECTS]: m_state set state_idle", LOG_LEVEL_3);
             context.m_state = currency_connection_context::state_idle;
             context.m_needed_objects.clear();
             context.m_requested_objects.clear();
@@ -550,7 +555,7 @@ namespace currency
     if (!have_called)
     {
       context.m_state = currency_connection_context::state_idle;
-      LOG_PRINT_CCONTEXT_MAGENTA("[HANDLE_RESPONSE_GET_OBJECTS]: Core blocked response, connection state changed to idle", LOG_LEVEL_0);
+      LOG_PRINT_CCONTEXT_MAGENTA("[HANDLE_RESPONSE_GET_OBJECTS]: Core blocked response, m_state set state_idle", LOG_LEVEL_0);
     }
       
     return res;
@@ -663,7 +668,7 @@ namespace currency
       });
       if (!have_called)
       {
-        LOG_PRINT_CCONTEXT_MAGENTA("[REQUEST_MISSING_OBJECTS] core request blocked, connection changed to state idle", LOG_LEVEL_0);
+        LOG_PRINT_CCONTEXT_MAGENTA("[REQUEST_MISSING_OBJECTS] core request blocked, m_state set state_idle", LOG_LEVEL_0);
         context.m_state = currency_connection_context::state_idle;
       }
       else
@@ -682,6 +687,7 @@ namespace currency
                            << "\r\nm_requested_objects.size()=" << context.m_requested_objects.size()
                            << "\r\non connection [" << net_utils::print_connection_context_short(context)<< "]");
       
+      LOG_PRINT_CCONTEXT_MAGENTA("[REQUEST_MISSING_OBJECTS] m_state set state_normal", LOG_LEVEL_0);
       context.m_state = currency_connection_context::state_normal;
       LOG_PRINT_CCONTEXT_GREEN(" SYNCHRONIZED OK", LOG_LEVEL_0);
     }
