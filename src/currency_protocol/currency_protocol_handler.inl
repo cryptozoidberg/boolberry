@@ -129,6 +129,7 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::process_payload_sync_data(const CORE_SYNC_DATA& hshd, currency_connection_context& context, bool is_inital)
   {
+    context.m_remote_blockchain_height = hshd.current_height;
     LOG_PRINT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA][m_been_synchronized=" << m_been_synchronized << "]: hshd.current_height = " << hshd.current_height << "(" << hshd.top_id << ")", LOG_LEVEL_3);
     if (context.m_state == currency_connection_context::state_befor_handshake && !is_inital)
     {
