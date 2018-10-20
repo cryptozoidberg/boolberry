@@ -119,7 +119,7 @@ namespace currency
         string_tools::get_ip_string_from_int32(cntxt.m_remote_ip) + ":" + std::to_string(cntxt.m_remote_port) 
         << std::setw(20) << std::hex << peer_id
         << std::setw(25) << std::to_string(cntxt.m_recv_cnt)+ "(" + std::to_string(time(NULL) - cntxt.m_last_recv) + ")" + "/" + std::to_string(cntxt.m_send_cnt) + "(" + std::to_string(time(NULL) - cntxt.m_last_send) + ")"
-        << std::setw(25) << get_protocol_state_string(cntxt.m_state)
+        << std::setw(25) << get_protocol_state_string(cntxt.m_state) << "(remote_h: " << cntxt.m_remote_blockchain_height << ")"
         << std::setw(20) << std::to_string(time(NULL) - cntxt.m_started) << ENDL;
       return true;
     });
