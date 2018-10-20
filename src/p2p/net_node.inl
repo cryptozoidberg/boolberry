@@ -561,7 +561,7 @@ namespace nodetool
 
     size_t x = crypto::rand<size_t>()%(max_index+1);
     size_t res = (x*x*x)/(max_index*max_index); //parabola \/
-    LOG_PRINT_L3("Random connection index=" << res << "(x="<< x << ", max_index=" << max_index << ")");
+    LOG_PRINT_L4("Random connection index=" << res << "(x="<< x << ", max_index=" << max_index << ")");
     return res;
   }
   //-----------------------------------------------------------------------------------
