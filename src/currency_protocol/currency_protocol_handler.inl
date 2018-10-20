@@ -129,14 +129,18 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::process_payload_sync_data(const CORE_SYNC_DATA& hshd, currency_connection_context& context, bool is_inital)
   {
+    LOG_PRINT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA][m_been_synchronized=" << m_been_synchronized << "]: hshd.current_height = " << hshd.current_height << "(" << hshd.top_id << ")", LOG_LEVEL_3);
     if (context.m_state == currency_connection_context::state_befor_handshake && !is_inital)
     {
       LOG_PRINT_L3("[PROCESS_PAYLOAD_SYNC_DATA]: state_befor_handshake, ignored");
       return true;
     }
 
-    if(context.m_state == currency_connection_context::state_synchronizing)
+    if (context.m_state == currency_connection_context::state_synchronizing)
+    {
+      LOG_PRINT_L3("[PROCESS_PAYLOAD_SYNC_DATA]:m_state = state_synchronizing, ignored");
       return true;
+    }
 
     //while we not synchronized, we have to keep major amount of connections with nodes servicing our blockchain download
     if (!m_been_synchronized && !context.m_is_income && hshd.current_height == 1 && is_inital)
@@ -237,6 +241,7 @@ namespace currency
       m_core.get_blockchain_top(hshd.current_height, hshd.top_id);
       hshd.current_height += 1;
       hshd.last_checkpoint_height = m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height();
+      LOG_PRINT_MAGENTA("[GET_PAYLOAD_SYNC_DATA][m_been_synchronized=" << m_been_synchronized << "]: hshd.current_height " << hshd.current_height, LOG_LEVEL_0);
       return true;
     });
     if (!have_called)
@@ -245,7 +250,7 @@ namespace currency
       hshd.current_height = 1;
       hshd.top_id = get_genesis_id();
       hshd.last_checkpoint_height = m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height();
-      LOG_PRINT_MAGENTA("[GET_PAYLOAD_SYNC_DATA]: call blocked.", LOG_LEVEL_0);
+      LOG_PRINT_MAGENTA("[GET_PAYLOAD_SYNC_DATA][m_been_synchronized=" << m_been_synchronized << "]: call blocked.", LOG_LEVEL_0);
     }
 
     return true;
