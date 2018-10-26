@@ -2345,6 +2345,48 @@ bool blockchain_storage::check_tx_inputs(const transaction& tx, uint64_t* pmax_u
   return check_tx_inputs(tx, tx_prefix_hash, pmax_used_block_height);
 }
 //------------------------------------------------------------------
+std::string blockchain_storage::print_key_image_details(const crypto::key_image& ki, bool& found)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
+  found = false;
+  std::stringstream ss;
+
+  m_db_transactions.enumerate_items([&](size_t i, const crypto::hash& tx_hash, const transaction_chain_entry& tce) -> bool
+  {
+    size_t input_idx = 0;
+    for (auto& in : tce.tx.vin)
+    {
+      if (in.type() == typeid(txin_to_key))
+      {
+        const txin_to_key& intk = boost::get<txin_to_key>(in);
+        if (intk.k_image == ki)
+        {
+          found = true;
+          ss << "key image " << ki << " was found in the blockchain, details:" << ENDL <<
+            "  tx:          " << tx_hash << ENDL <<
+            "  input #:     " << input_idx << ENDL <<
+            "  amount:      " << print_money(intk.amount) << ENDL <<
+            "  block:       " << tce.m_keeper_block_height << ENDL <<
+            "  key offsets: ";
+          std::vector<uint64_t> absolute_offsets = relative_output_offsets_to_absolute(intk.key_offsets);
+          for (uint64_t gi : absolute_offsets)
+            ss << gi << " ";
+          return false; // stop enumeration
+        }
+      }
+      ++input_idx;
+    }
+
+    return true; // continue enumeration
+  });
+
+  if (!found)
+    ss << "key image " << ki << " has not been seen in the blockchain yet";
+
+  return ss.str();
+}
+//------------------------------------------------------------------
 bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::hash& tx_prefix_hash, uint64_t* pmax_used_block_height)
 {
   PROFILE_FUNC("blockchain_storage::check_tx_inputs(tx, prefix_id, max_h)");

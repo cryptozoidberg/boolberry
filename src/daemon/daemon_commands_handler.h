@@ -38,6 +38,8 @@ public:
     m_cmd_binder.set_handler("hide_hr", boost::bind(&daemon_cmmands_handler::hide_hr, this, _1), "Stop showing hash rate");
     m_cmd_binder.set_handler("make_alias", boost::bind(&daemon_cmmands_handler::make_alias, this, _1), "Puts alias reservation record into block template, if alias is free");
     m_cmd_binder.set_handler("set_donations", boost::bind(&daemon_cmmands_handler::set_donations, this, _1), "Set donations mode: true if you vote for donation, and false - if against");
+    m_cmd_binder.set_handler("print_ki", boost::bind(&daemon_cmmands_handler::print_ki, this, _1), "Print details of the specified key image");
+
     //m_cmd_binder.set_handler("save", boost::bind(&daemon_cmmands_handler::save, this, _1), "Save blockchain");
     //m_cmd_binder.set_handler("get_transactions_statics", boost::bind(&daemon_cmmands_handler::get_transactions_statistics, this, _1), "Calculates transactions statistics");
   }
@@ -357,6 +359,29 @@ private:
   bool stop_mining(const std::vector<std::string>& args)
   {
     m_srv.get_payload_object().get_core().get_miner().stop();
+    return true;
+  }
+  //--------------------------------------------------------------------------------
+  bool print_ki(const std::vector<std::string>& args)
+  {
+    if (args.size() != 1)
+    {
+      std::cout << "Usage: print_ki <key_image>" << std::endl;
+      return true;
+    }
+
+    crypto::key_image ki = AUTO_VAL_INIT(ki);
+    if (!epee::string_tools::hex_to_pod(args[0], ki))
+    {
+      std::cout << "invalid key image given: " << args[0] << std::endl;
+      return true;
+    }
+
+    bool found = false;
+    std::string result = m_srv.get_payload_object().get_core().get_blockchain_storage().print_key_image_details(ki, found);
+
+    LOG_PRINT_L0(result);
+
     return true;
   }
 };
