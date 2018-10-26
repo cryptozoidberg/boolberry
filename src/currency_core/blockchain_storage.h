@@ -198,6 +198,8 @@ namespace currency
     bool get_block_extended_info_by_height(uint64_t h, block_extended_info &blk) const;
     bool lookfor_donation(const transaction& tx, uint64_t& donation, uint64_t& royalty);
 
+    std::string print_key_image_details(const crypto::key_image& ki, bool& found);
+
     template<class t_ids_container, class t_blocks_container, class t_missed_container>
     bool get_blocks(const t_ids_container& block_ids, t_blocks_container& blocks, t_missed_container& missed_bs)
     {
