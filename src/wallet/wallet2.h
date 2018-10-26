@@ -75,7 +75,13 @@ namespace tools
       bool m_spent;
       crypto::key_image m_key_image; //TODO: key_image stored twice :(
 
-      uint64_t amount() const { return m_tx.vout[m_internal_output_index].amount; }
+      uint64_t amount() const
+      {
+        CHECK_AND_THROW_WALLET_EX(m_tx.vout.size() <= m_internal_output_index, error::wallet_internal_error,
+          "m_internal_output_index = " + std::to_string(m_internal_output_index) +
+          " is greater or equal to outputs count = " + std::to_string(m_tx.vout.size()));
+        return m_tx.vout[m_internal_output_index].amount;
+      }
     };
 
     struct unconfirmed_transfer_details
@@ -157,6 +163,9 @@ namespace tools
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx, currency::blobdata& relay_blob, bool do_not_relay = false);
+
+    void sweep_below(size_t fake_outs_count, const currency::account_public_address& addr, uint64_t threshold_amount, const currency::payment_id_t& payment_id,
+      uint64_t fee, size_t& outs_total, uint64_t& amount_total, size_t& outs_swept, currency::transaction* result_tx = nullptr);
     
     bool get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) const;
     bool check_connection();
@@ -441,13 +450,8 @@ namespace tools
       COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::request req = AUTO_VAL_INIT(req);
       req.use_forced_mix_outs = false; //add this feature to UI later
       req.outs_count = fake_outputs_count + 1;// add one to make possible (if need) to skip real output key
-      BOOST_FOREACH(transfer_container::iterator it, selected_transfers)
-      {
-        CHECK_AND_THROW_WALLET_EX(it->m_tx.vout.size() <= it->m_internal_output_index, error::wallet_internal_error,
-          "m_internal_output_index = " + std::to_string(it->m_internal_output_index) +
-          " is greater or equal to outputs count = " + std::to_string(it->m_tx.vout.size()));
+      for(transfer_container::iterator it : selected_transfers)
         req.amounts.push_back(it->amount());
-      }
 
       bool r = m_core_proxy->call_COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS(req, daemon_resp);
       CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "getrandom_outs.bin");

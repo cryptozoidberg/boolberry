@@ -1289,6 +1289,227 @@ std::string wallet2::get_transfers_str(bool include_spent /*= true*/, bool inclu
   return ss.str();
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public_address& addr, uint64_t threshold_amount, const currency::payment_id_t& payment_id,
+  uint64_t fee, size_t& outs_total, uint64_t& amount_total, size_t& outs_swept, currency::transaction* p_result_tx /* = nullptr */)
+{
+  bool r = false;
+  outs_total = 0;
+  amount_total = 0;
+  outs_swept = 0;
+  
+  std::vector<size_t> selected_transfers;
+  selected_transfers.reserve(m_transfers.size());
+  for (size_t i = 0; i < m_transfers.size(); ++i)
+  {
+    const transfer_details& td = m_transfers[i];
+    uint64_t amount = td.amount();
+    if (!td.m_spent && is_transfer_unlocked(td) &&
+      amount < threshold_amount &&
+      currency::is_mixattr_applicable_for_fake_outs_counter(boost::get<currency::txout_to_key>(td.m_tx.vout[td.m_internal_output_index].target).mix_attr, fake_outs_count))
+    {
+      selected_transfers.push_back(i);
+      outs_total += 1;
+      amount_total += amount;
+    }
+  }
+
+  typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry out_entry;
+  typedef currency::tx_source_entry::output_entry tx_output_entry;
+
+  COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::response daemon_resp = AUTO_VAL_INIT(daemon_resp);
+  if (fake_outs_count > 0)
+  {
+    COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::request req = AUTO_VAL_INIT(req);
+    req.use_forced_mix_outs = false;
+    req.outs_count = fake_outs_count + 1;
+    for (size_t i : selected_transfers)
+      req.amounts.push_back(m_transfers[i].amount());
+
+    r = m_core_proxy->call_COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS(req, daemon_resp);
+    CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "getrandom_outs.bin");
+    CHECK_AND_THROW_WALLET_EX(daemon_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "getrandom_outs.bin");
+    CHECK_AND_THROW_WALLET_EX(daemon_resp.status != CORE_RPC_STATUS_OK, error::get_random_outs_error, daemon_resp.status);
+    CHECK_AND_THROW_WALLET_EX(daemon_resp.outs.size() != selected_transfers.size(), error::wallet_internal_error,
+      "daemon returned wrong response for getrandom_outs.bin, wrong amounts count = " +
+      std::to_string(daemon_resp.outs.size()) + ", expected " + std::to_string(selected_transfers.size()));
+
+    std::vector<COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount> scanty_outs;
+    for (COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount& amount_outs : daemon_resp.outs)
+    {
+      if (amount_outs.outs.size() < fake_outs_count)
+        scanty_outs.push_back(amount_outs);
+    }
+    CHECK_AND_THROW_WALLET_EX(!scanty_outs.empty(), error::not_enough_outs_to_mix, scanty_outs, fake_outs_count);
+  }
+
+  create_tx_context ctc = AUTO_VAL_INIT(ctc);
+  create_tx_arg& create_tx_param = ctc.arg;
+  if (!payment_id.empty())
+    set_payment_id_to_tx_extra(create_tx_param.extra, payment_id);
+  create_tx_param.unlock_time = 0;
+  create_tx_param.tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED;
+  create_tx_param.spend_pub_key = m_account.get_keys().m_account_address.m_spend_public_key;
+  create_tx_res& create_tx_result = ctc.res;
+  create_tx_param.recipients.push_back(addr);
+
+  enum try_construct_result_t {rc_ok = 0, rc_too_few_outputs = 1, rc_too_many_outputs = 2, rc_create_tx_failed = 3 };
+  auto try_construct_tx = [&](size_t st_index_upper_boundary, create_tx_arg &create_tx_param) -> try_construct_result_t
+  {
+    //prepare inputs
+    uint64_t amount_swept = 0;
+    create_tx_param.sources.clear();
+    create_tx_param.sources.resize(st_index_upper_boundary);
+    CHECK_AND_THROW_WALLET_EX(st_index_upper_boundary > selected_transfers.size(), error::wallet_internal_error, "index_upper_boundary = "
+      + epee::string_tools::num_to_string_fast(st_index_upper_boundary) + ", selected_transfers.size() = " + epee::string_tools::num_to_string_fast(selected_transfers.size()));
+    for (size_t st_index = 0; st_index < st_index_upper_boundary; ++st_index)
+    {
+      currency::tx_source_entry& src = create_tx_param.sources[st_index];
+      size_t tr_index = selected_transfers[st_index];
+      transfer_details& td = m_transfers[tr_index];
+      src.transfer_index = tr_index;
+      src.amount = td.amount();
+      amount_swept += src.amount;
+      //paste mixin transaction
+      if (daemon_resp.outs.size())
+      {
+        daemon_resp.outs[st_index].outs.sort([](const out_entry& a, const out_entry& b) { return a.global_amount_index < b.global_amount_index; });
+        for (out_entry& daemon_oe : daemon_resp.outs[st_index].outs)
+        {
+          if (td.m_global_output_index == daemon_oe.global_amount_index)
+            continue;
+          tx_output_entry oe;
+          oe.first = daemon_oe.global_amount_index;
+          oe.second = daemon_oe.out_key;
+          src.outputs.push_back(oe);
+          if (src.outputs.size() >= fake_outs_count)
+            break;
+        }
+      }
+
+      //paste real transaction to the random index
+      auto it_to_insert = std::find_if(src.outputs.begin(), src.outputs.end(), [&](const tx_output_entry& a)
+      {
+        return a.first >= td.m_global_output_index;
+      });
+      tx_output_entry real_oe;
+      real_oe.first = td.m_global_output_index;
+      real_oe.second = boost::get<txout_to_key>(td.m_tx.vout[td.m_internal_output_index].target).key;
+      auto inserted_it = src.outputs.insert(it_to_insert, real_oe);
+      src.real_out_tx_key = get_tx_pub_key_from_extra(td.m_tx);
+      src.real_output = inserted_it - src.outputs.begin();
+      src.real_output_in_tx_index = td.m_internal_output_index;
+      //detail::print_source_entry(src);
+    }
+
+    if (amount_swept <= fee)
+      return rc_too_few_outputs;
+
+    // try to construct a transaction
+    std::vector<currency::tx_destination_entry> dsts({ tx_destination_entry(amount_swept - fee, addr) });
+
+    // split output
+    const tx_dust_policy dust_policy = tools::tx_dust_policy(DEFAULT_DUST_THRESHOLD);
+    tx_destination_entry change_dst = AUTO_VAL_INIT(change_dst);
+    detail::digit_split_strategy(dsts, change_dst, dust_policy.dust_threshold, create_tx_param.splitted_dsts, create_tx_param.dust);
+    CHECK_AND_THROW_WALLET_EX(dust_policy.dust_threshold < create_tx_param.dust, error::wallet_internal_error, "invalid dust value: dust = " +
+      std::to_string(create_tx_param.dust) + ", dust_threshold = " + std::to_string(dust_policy.dust_threshold));
+    if (0 != create_tx_param.dust && !dust_policy.add_to_fee)
+      create_tx_param.splitted_dsts.push_back(currency::tx_destination_entry(create_tx_param.dust, dust_policy.addr_for_dust));
+
+    if (!currency::construct_tx(m_account.get_keys(), create_tx_param, create_tx_result))
+    {
+      //CHECK_AND_THROW_WALLET_EX(!tx_created, error::tx_not_constructed, create_tx_param.sources, splitted_dsts, create_tx_param.unlock_time); // the first try should not fail
+      return rc_create_tx_failed;
+    }
+
+    size_t blob_size = get_object_blobsize(create_tx_result.tx);
+    if (blob_size > CURRENCY_MAX_TRANSACTION_BLOB_SIZE)
+      return rc_too_many_outputs;
+
+    return rc_ok;
+  };
+
+  static const size_t estimated_bytes_per_input = 108;
+  const size_t estimated_max_inputs = CURRENCY_MAX_TRANSACTION_BLOB_SIZE / (estimated_bytes_per_input * (fake_outs_count + 1));
+
+  size_t st_index_upper_boundary = std::min(selected_transfers.size(), estimated_max_inputs); // selected_transfers.size();
+  try_construct_result_t res = try_construct_tx(st_index_upper_boundary, create_tx_param);
+  if (res == rc_too_many_outputs)
+  {
+    size_t low_bound = 0;
+    size_t high_bound = st_index_upper_boundary;
+    for (;;)
+    {
+      if (low_bound + 1 >= high_bound)
+      {
+        st_index_upper_boundary = low_bound;
+        res = rc_ok;
+        break;
+      }
+      st_index_upper_boundary = (low_bound + high_bound) / 2;
+      try_construct_result_t res = try_construct_tx(st_index_upper_boundary, create_tx_param);
+      if (res == rc_ok)
+        low_bound = st_index_upper_boundary;
+      else if (res == rc_too_many_outputs)
+        high_bound = st_index_upper_boundary;
+      else
+        break;
+    }
+  }
+
+  if (res != rc_ok)
+  {
+    std::string msg;
+    for (auto& i : selected_transfers)
+      msg += "#" + epee::string_tools::num_to_string_fast(i) + " " + print_money(m_transfers[i].amount()) + "\n";
+    CHECK_AND_THROW_WALLET_EX(true, error::wallet_internal_error, "try_construct_tx failed with result: " + epee::string_tools::num_to_string_fast(res) + ", transfers:\n" + msg);
+  }
+
+
+  if (m_is_view_only)
+  {
+    blobdata bl = t_serializable_object_to_blob(create_tx_param);
+    crypto::do_chacha_crypt(bl, m_account.get_keys().m_view_secret_key);
+    epee::file_io_utils::save_string_to_file("unsigned_boolberry_tx", bl);
+    LOG_PRINT_L0("Transaction stored to unsigned_boolberry_tx. Take this file to offline wallet to sign it and then transfer it usign this wallet");
+    return;
+  }
+
+  r = currency::construct_tx(m_account.get_keys(), create_tx_param, create_tx_result);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, "can't construct tx, create_tx_param: " + obj_to_json_str(create_tx_param));
+
+  outs_swept = create_tx_result.tx.vin.size();
+
+  if (p_result_tx != nullptr)
+    *p_result_tx = create_tx_result.tx;
+
+  std::stringstream ss;
+  for (auto& s : create_tx_param.sources)
+  {
+    keypair eph = AUTO_VAL_INIT(eph);
+    crypto::key_image ki = AUTO_VAL_INIT(ki);
+    if (!generate_key_image_helper(m_account.get_keys(), s.real_out_tx_key, s.real_output_in_tx_index, eph, ki))
+      LOG_ERROR("generate_key_image_helper failed for tr index " << s.transfer_index);
+    ss << std::setw(5) << s.transfer_index << (m_transfers[s.transfer_index].m_spent ? " S " : "   ") << std::setw(10) << print_money(s.amount) << " " << ki << ENDL;
+
+    if (s.transfer_index == 29)
+    {
+      auto& tr = m_transfers[s.transfer_index];
+      ss << "  tx: " << get_transaction_hash(tr.m_tx) << ENDL;
+      ss << "  ki: " << tr.m_key_image << ENDL;
+      ss << "  bh: " << tr.m_block_height << ENDL;
+      ss << "   s: " << tr.m_spent << ENDL;
+      ss << "  gi: " << tr.m_global_output_index << ENDL;
+      ss << "  ii: " << tr.m_internal_output_index<< ENDL;
+    }
+
+  }
+  LOG_PRINT_L0("tx generated: " << get_transaction_hash(create_tx_result.tx) << ENDL << ss.str());
+
+  //relay_blob = t_serializable_object_to_blob(tx);
+  finalize_transaction(create_tx_param, create_tx_result, false);
+}
+//----------------------------------------------------------------------------------------------------
 
 }
 
