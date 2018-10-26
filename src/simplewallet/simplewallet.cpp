@@ -188,6 +188,7 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("integrated_address", boost::bind(&simple_wallet::integrated_address, this, _1),             "integrated_address [payment_id|integrated_address] - Encode given payment_id into an integrated address (for this waller public address). Uses random id if not provided. Decode given integrated address into payment id and standard address.");
   m_cmd_binder.set_handler("show_seed", boost::bind(&simple_wallet::show_seed, this, _1),                               "Displays secret 24 word phrase that could be used to recover this wallet");
   m_cmd_binder.set_handler("list_outputs", boost::bind(&simple_wallet::list_outputs, this, _1),                         "list_outputs [spent|unspent] - Lists all the outputs that have ever been sent to this wallet if called without arguments, otherwise it lists only the spent or unspent outputs");
+  m_cmd_binder.set_handler("sweep_below", boost::bind(&simple_wallet::sweep_below, this, _1),                           "sweep_below <mixin_count> <address> <amount_lower_limit> [payment_id] -  Tries to transfers all coins with amount below the given limit to the given address");
 
   m_cmd_binder.set_handler("get_tx_key", boost::bind(&simple_wallet::get_tx_key, this, _1),                             "Get transaction key (r) for a given <txid>");
   m_cmd_binder.set_handler("check_tx_key", boost::bind(&simple_wallet::check_tx_key, this, _1),                         "Check amount going to <address> in <txid>");
@@ -1471,6 +1472,88 @@ bool simple_wallet::list_outputs(const std::vector<std::string> &args)
 bool simple_wallet::process_command(const std::vector<std::string> &args)
 {
   return m_cmd_binder.process_command_vec(args);
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::sweep_below(const std::vector<std::string> &args)
+{
+  bool r = false;
+  if (args.size() < 3 || args.size() > 4)
+  {
+    fail_msg_writer() << "invalid agruments count: " << args.size() << ", expected 3 or 4";
+    return true;
+  }
+
+  size_t fake_outs_count = 0;
+  if (!string_tools::get_xtype_from_string(fake_outs_count, args[0]))
+  {
+    fail_msg_writer() << "mixin_count should be non-negative integer, got " << args[0];
+    return true;
+  }
+
+  // parse payment_id
+  currency::payment_id_t payment_id;
+  if (args.size() == 4)
+  {
+    const std::string &payment_id_str = args.back();
+    r = parse_payment_id_from_hex_str(payment_id_str, payment_id);
+    if (!r)
+    {
+      fail_msg_writer() << "payment id has invalid format: \"" << payment_id_str << "\", expected hex string";
+      return true;
+    }
+  }
+
+  currency::account_public_address addr;
+  currency::payment_id_t integrated_payment_id;
+  if (!m_wallet->get_transfer_address(args[1], addr, integrated_payment_id))
+  {
+    fail_msg_writer() << "wrong address: " << args[1];
+    return true;
+  }
+
+  // handle integrated payment id
+  if (!integrated_payment_id.empty())
+  {
+    if (!payment_id.empty())
+    {
+      fail_msg_writer() << "address " << args[1] << " has integrated payment id " << epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) <<
+        " which is incompatible with payment id " << epee::string_tools::buff_to_hex_nodelimer(payment_id) << " that was already assigned to this transfer";
+      true;
+    }
+
+    payment_id = integrated_payment_id; // remember integrated payment id as the main payment id
+    success_msg_writer() << "NOTE: using payment id " << epee::string_tools::buff_to_hex_nodelimer(payment_id) << " from integrated address " << args[1];
+  }
+
+  uint64_t amount = 0;
+  r = currency::parse_amount(amount, args[2]);
+  if (!r || amount == 0)
+  {
+    fail_msg_writer() << "incorrect amount: " << args[2];
+    return true;
+  }
+
+  try
+  {
+    uint64_t fee = DEFAULT_FEE;
+    size_t outs_total = 0, outs_swept = 0;
+    uint64_t amount_total = 0, amount_swept = 0;
+    currency::transaction result_tx = AUTO_VAL_INIT(result_tx);
+    m_wallet->sweep_below(fake_outs_count, addr, amount, payment_id, fee, outs_total, amount_total, outs_swept, &result_tx);
+    if (!get_inputs_money_amount(result_tx, amount_swept))
+      LOG_ERROR("get_inputs_money_amount failed, tx: " << obj_to_json_str(result_tx));
+    success_msg_writer(false) << outs_swept << " outputs (" << print_money(amount_swept) << " coins) of " << outs_total << " total (" << print_money(amount_total)
+      << ") below the specified limit of " << print_money(amount) << " were successfully swept";
+    success_msg_writer(true) << "tx: " << get_transaction_hash(result_tx) << " size: " << get_object_blobsize(result_tx) << " bytes";
+  }
+  catch (const std::exception& e)
+  {
+    LOG_ERROR("error: " << e.what());
+    fail_msg_writer() << "error: " << e.what();
+    return true;
+  }
+
+  return true;
 }
 //----------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])

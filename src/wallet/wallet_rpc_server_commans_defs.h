@@ -409,6 +409,44 @@ namespace wallet_rpc
     };
   };
 
+  struct COMMAND_SWEEP_BELOW
+  {
+    struct request
+    {
+      uint64_t    mixin;
+      std::string address;
+      uint64_t    amount;
+      std::string payment_id_hex;
+      uint64_t    fee;
+      uint64_t    unlock_time;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(mixin)
+        KV_SERIALIZE(address)
+        KV_SERIALIZE(amount)
+        KV_SERIALIZE(payment_id_hex)
+        KV_SERIALIZE(fee)
+        KV_SERIALIZE(unlock_time)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string   tx_hash;
+      uint64_t      outs_total;
+      uint64_t      amount_total;
+      uint64_t      outs_swept;
+      uint64_t      amount_swept;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_hash)
+        KV_SERIALIZE(outs_total)
+        KV_SERIALIZE(amount_total)
+        KV_SERIALIZE(outs_swept)
+        KV_SERIALIZE(amount_swept)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
 
 }
 }
