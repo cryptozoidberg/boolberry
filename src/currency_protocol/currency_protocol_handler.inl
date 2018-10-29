@@ -242,7 +242,7 @@ namespace currency
       m_core.get_blockchain_top(hshd.current_height, hshd.top_id);
       hshd.current_height += 1;
       hshd.last_checkpoint_height = m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height();
-      LOG_PRINT_MAGENTA("[GET_PAYLOAD_SYNC_DATA][m_been_synchronized=" << m_been_synchronized << "]: hshd.current_height " << hshd.current_height, LOG_LEVEL_0);
+      LOG_PRINT_MAGENTA("[GET_PAYLOAD_SYNC_DATA][m_been_synchronized=" << m_been_synchronized << "]: hshd.current_height " << hshd.current_height, LOG_LEVEL_2);
       return true;
     });
     if (!have_called)
@@ -251,7 +251,7 @@ namespace currency
       hshd.current_height = 1;
       hshd.top_id = get_genesis_id();
       hshd.last_checkpoint_height = m_core.get_blockchain_storage().get_checkpoints().get_top_checkpoint_height();
-      LOG_PRINT_MAGENTA("[GET_PAYLOAD_SYNC_DATA][m_been_synchronized=" << m_been_synchronized << "]: call blocked.", LOG_LEVEL_0);
+      LOG_PRINT_MAGENTA("[GET_PAYLOAD_SYNC_DATA][m_been_synchronized=" << m_been_synchronized << "]: call blocked.", LOG_LEVEL_2);
     }
 
     return true;
