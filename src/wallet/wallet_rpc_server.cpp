@@ -603,7 +603,7 @@ namespace tools
 
       get_inputs_money_amount(tx, amount_swept);
       res.amount_swept = amount_swept;
-      res.amount_swept = amount_total;
+      res.amount_total = amount_total;
       res.outs_swept = outs_swept;
       res.outs_total = outs_total;
       res.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
