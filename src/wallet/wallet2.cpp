@@ -102,8 +102,12 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       {
         CHECK_AND_THROW_WALLET_EX(it->second >= m_transfers.size(), error::wallet_internal_error, "m_key_images entry has wrong m_transfers index, it->second: " + epee::string_tools::num_to_string_fast(it->second) + ", m_transfers.size(): " + epee::string_tools::num_to_string_fast(m_transfers.size()));
         const transfer_details& td = m_transfers[it->second];
-        LOG_PRINT_YELLOW("tx " << get_transaction_hash(tx) << " output's key image has already been seen in tx " << get_transaction_hash(td.m_tx) << ". The entire transaction will be skipped.", LOG_LEVEL_0);
-        return; // skip entire transaction
+        LOG_PRINT_YELLOW("tx " << get_transaction_hash(tx) << " @ block " << height << " has output #" << o << " with key image " << ki << " that has already been seen in output #" <<
+          td.m_internal_output_index << " in tx " << get_transaction_hash(td.m_tx) << " @ block " << td.m_block_height <<
+          ". This output can't ever be spent and will be skipped.", LOG_LEVEL_0);
+        CHECK_AND_THROW_WALLET_EX(tx_money_got_in_outs < tx.vout[o].amount, error::wallet_internal_error, "tx_money_got_in_outs: " + epee::string_tools::num_to_string_fast(tx_money_got_in_outs) + ", tx.vout[o].amount:" + print_money(tx.vout[o].amount));
+        tx_money_got_in_outs -= tx.vout[o].amount;
+        continue; // skip the output
       }
 
 
@@ -126,7 +130,7 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
   }
   
   uint64_t tx_money_spent_in_ins = 0;
-  // check all outputs for spending (compare key images)
+  // check all inputs for spending (compare against key images we own)
   size_t i = 0;
   for(auto& in : tx.vin)
   {
@@ -336,7 +340,7 @@ void wallet2::pull_blocks(size_t& blocks_added)
     }
     else
     {
-      LOG_PRINT_L2("Block is already in blockchain: " << string_tools::pod_to_hex(bl_id));
+      LOG_PRINT_L2("Block " << bl_id << " @ " << current_index << " is already in wallet's blockchain");
     }
 
     ++current_index;
