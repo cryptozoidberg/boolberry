@@ -711,6 +711,14 @@ namespace db
       return super::get(ck);
     }
 
+    void set_subitem(const array_key_t& array_key, size_t i, const value_t& value)
+    {
+      size_t count = get_item_size(array_key);
+      CHECK_AND_ASSERT_THROW_MES(i < count, "array key " << array_key << ": item index " << i << " exceeds elements count == " << count);
+      complex_key<array_key_t, size_t> ck{ array_key, i };
+      super::set(ck, value);
+    }
+
     void push_back_item(const array_key_t& array_key, const value_t& v)
     {
       auto counter = get_counter_accessor(array_key);
