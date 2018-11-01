@@ -1317,6 +1317,8 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
     }
   }
 
+  CHECK_AND_THROW_WALLET_EX(selected_transfers.empty(), error::wallet_common_error, "No spendable outputs meet the criterion");
+
   typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry out_entry;
   typedef currency::tx_source_entry::output_entry tx_output_entry;
 
@@ -1487,30 +1489,6 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
   if (p_result_tx != nullptr)
     *p_result_tx = create_tx_result.tx;
 
-  std::stringstream ss;
-  for (auto& s : create_tx_param.sources)
-  {
-    keypair eph = AUTO_VAL_INIT(eph);
-    crypto::key_image ki = AUTO_VAL_INIT(ki);
-    if (!generate_key_image_helper(m_account.get_keys(), s.real_out_tx_key, s.real_output_in_tx_index, eph, ki))
-      LOG_ERROR("generate_key_image_helper failed for tr index " << s.transfer_index);
-    ss << std::setw(5) << s.transfer_index << (m_transfers[s.transfer_index].m_spent ? " S " : "   ") << std::setw(10) << print_money(s.amount) << " " << ki << ENDL;
-
-    if (s.transfer_index == 29)
-    {
-      auto& tr = m_transfers[s.transfer_index];
-      ss << "  tx: " << get_transaction_hash(tr.m_tx) << ENDL;
-      ss << "  ki: " << tr.m_key_image << ENDL;
-      ss << "  bh: " << tr.m_block_height << ENDL;
-      ss << "   s: " << tr.m_spent << ENDL;
-      ss << "  gi: " << tr.m_global_output_index << ENDL;
-      ss << "  ii: " << tr.m_internal_output_index<< ENDL;
-    }
-
-  }
-  LOG_PRINT_L0("tx generated: " << get_transaction_hash(create_tx_result.tx) << ENDL << ss.str());
-
-  //relay_blob = t_serializable_object_to_blob(tx);
   finalize_transaction(create_tx_param, create_tx_result, false);
 }
 //----------------------------------------------------------------------------------------------------
