@@ -801,8 +801,20 @@ namespace currency
     cn_fast_hash(blob.data(), blob.size(), res);
   }
   //---------------------------------------------------------------
-  std::string print_money(uint64_t amount)
+  std::string print_money(uint64_t amount, bool trim_zeros /*= false*/)
   {
+    if (trim_zeros)
+    {
+      size_t z = amount != 0 ? 0 : CURRENCY_DISPLAY_DECIMAL_POINT - 1;
+      while (amount != 0 && amount % 10 == 0 && z < CURRENCY_DISPLAY_DECIMAL_POINT-1)
+        amount /= 10, ++z;
+      std::string s = std::to_string(amount);
+      if (s.size() < CURRENCY_DISPLAY_DECIMAL_POINT + 1 - z)
+        s.insert(0, CURRENCY_DISPLAY_DECIMAL_POINT + 1 - z - s.size(), '0');
+      s.insert(s.size() + z - CURRENCY_DISPLAY_DECIMAL_POINT, ".");
+      return s;
+    }
+
     std::string s = std::to_string(amount);
     if(s.size() < CURRENCY_DISPLAY_DECIMAL_POINT+1)
     {

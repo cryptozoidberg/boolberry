@@ -169,3 +169,71 @@ TEST(validate_parse_amount_case, validate_parse_amount)
   r = currency::parse_amount(res, "1 00.00 00");
   ASSERT_FALSE(r);
 }
+
+
+TEST(format_utils, print_money)
+{
+
+  auto naive_uint64_mixer = [](uint64_t v) -> uint64_t
+  {
+    v = v * 3935559000370003845 + 2691343689449507681;
+    v ^= v >> 21;
+    v ^= v << 37;
+    v ^= v >> 4;
+    v *= 4768777513237032717;
+    v ^= v << 20;
+    v ^= v >> 41;
+    v ^= v << 5;
+    v ^= v >> 33;
+    v *= 0xff51afd7ed558ccd;
+    v ^= v >> 33;
+    v *= 0xc4ceb9fe1a85ec53;
+    v ^= v >> 33;
+    return v;
+  };
+
+  auto parse_amount = [](std::string str) -> uint64_t // intentional passing-by-value
+  {
+    // str is assumed to be space-trimmed
+    uint64_t multiplier_pow = CURRENCY_DISPLAY_DECIMAL_POINT;
+    size_t p = str.find('.');
+    if (p != std::string::npos && p != str.size() - 1)
+      multiplier_pow = CURRENCY_DISPLAY_DECIMAL_POINT + 1 + p - str.size();
+
+    if (p != std::string::npos)
+      str.erase(p, 1);
+
+    int64_t value = 0;
+    epee::string_tools::string_to_num_fast(str, value);
+
+    while (multiplier_pow-- != 0)
+      value *= 10;
+
+    return value;
+  };
+
+  auto cycle = [&](const std::vector<uint64_t>& increments) -> void
+  {
+    size_t n = 0;
+    for (uint64_t amount = 0; amount < 10000000000000; ++n)
+    {
+      std::string s = currency::print_money(amount, true);
+      uint64_t parsed_amount = parse_amount(s);
+
+      ASSERT_EQ(amount, parsed_amount);
+
+      amount += increments[naive_uint64_mixer(amount) % increments.size()];
+    }
+    std::cout << "iterations: " << n << ENDL;
+  };
+
+
+  std::vector<uint64_t> increments_dec1{ 100000000 };
+  std::vector<uint64_t> increments_dec2{ 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 };
+  std::vector<uint64_t> increments_fib{ 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765, 10946, 17711, 28657, 46368, 75025, 121393, 196418, 317811, 514229, 832040, 1346269, 2178309, 3524578, 5702887, 9227465, 14930352, 24157817, 39088169, 63245986, 102334155, 165580141, 267914296 };// , 433494437, 701408733, 1134903170, 1836311903, 2971215073, 4807526976, 7778742049, 12586269025
+
+  cycle(increments_dec1);
+  cycle(increments_dec2);
+  cycle(increments_fib);
+
+}
