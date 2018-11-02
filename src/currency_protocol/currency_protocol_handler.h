@@ -78,6 +78,7 @@ namespace currency
     bool request_missing_objects(currency_connection_context& context, bool check_having_blocks);
     size_t get_synchronizing_connections_count();
     bool on_connection_synchronized();  
+    bool do_force_handshake_idle_connections();
     bool check_stop_flag_and_exit(currency_connection_context& context);
     t_core& m_core;
 

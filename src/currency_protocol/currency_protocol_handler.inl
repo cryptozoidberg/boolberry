@@ -696,8 +696,30 @@ namespace currency
       LOG_PRINT_CCONTEXT_MAGENTA("[REQUEST_MISSING_OBJECTS] m_state set state_normal", LOG_LEVEL_0);
       context.m_state = currency_connection_context::state_normal;
       LOG_PRINT_CCONTEXT_GREEN(" SYNCHRONIZED OK", LOG_LEVEL_0);
+      do_force_handshake_idle_connections();
     }
     return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------
+  template<class t_core>
+  bool t_currency_protocol_handler<t_core>::do_force_handshake_idle_connections()
+  {
+    nodetool::connections_list_type peer_list;
+    size_t count = 0;
+    m_p2p->for_each_connection([&](currency_connection_context& context, nodetool::peerid_type peer_id)->bool{
+      if (context.m_state == currency_connection_context::state_idle)
+      {
+        peer_list.push_back(std::make_pair(static_cast<net_utils::connection_context_base>(context), peer_id));
+      }
+      return true;
+    });
+    if (peer_list.size())
+    {
+      LOG_PRINT_CCONTEXT_MAGENTA("[ON_SYNCHRONIZED] Explicit resync idle connections (" << peer_list.size() << ")", LOG_LEVEL_0);
+      return m_p2p->do_idle_sync_with_peers(peer_list);
+    }
+    else 
+      return true;
   }
   //------------------------------------------------------------------------------------------------------------------------
   template<class t_core> 
