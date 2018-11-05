@@ -15,7 +15,7 @@ namespace nodetool
   typedef boost::uuids::uuid net_connection_id;
 
 
-  typedef std::list<std::pair<net_utils::connection_context_base, peerid_type> > connections_list_type;
+  typedef std::list<std::pair<epee::net_utils::connection_context_base, peerid_type> > connections_list_type;
 
   template<class t_connection_context>
   struct i_p2p_endpoint
