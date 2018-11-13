@@ -97,6 +97,28 @@ POP_WARNINGS
 		return tmpbuf;
 	}
 
+  inline
+    std::string get_date_str(const time_t& time_)
+  {
+
+      char tmpbuf[200] = { 0 };
+      tm* pt = NULL;
+      PUSH_WARNINGS
+        DISABLE_VS_WARNINGS(4996)
+        pt = localtime(&time_);
+      POP_WARNINGS
+
+      if (pt)
+        strftime(tmpbuf, 199, "%Y-%m-%d", pt);
+      else
+      {
+        std::stringstream strs;
+        strs << "[wrong_time: " << std::hex << time_ << "]";
+        return strs.str();
+      }
+      return tmpbuf;
+    }
+
   inline 
     std::string get_time_str_v3(const boost::posix_time::ptime& time_)
   {

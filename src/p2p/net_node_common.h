@@ -14,6 +14,9 @@ namespace nodetool
   typedef boost::uuids::uuid uuid;
   typedef boost::uuids::uuid net_connection_id;
 
+
+  typedef std::list<std::pair<epee::net_utils::connection_context_base, peerid_type> > connections_list_type;
+
   template<class t_connection_context>
   struct i_p2p_endpoint
   {
@@ -27,6 +30,7 @@ namespace nodetool
     virtual bool block_ip(uint32_t adress)=0;
     virtual bool add_ip_fail(uint32_t adress)=0;
     virtual bool is_stop_signal_sent()=0;
+    virtual bool do_idle_sync_with_peers(const connections_list_type& concts) = 0;
   };
 
   template<class t_connection_context>
@@ -69,6 +73,10 @@ namespace nodetool
       return true;
     }
     virtual bool add_ip_fail(uint32_t adress)
+    {
+      return true;
+    }
+    virtual bool do_idle_sync_with_peers(const connections_list_type& concts)
     {
       return true;
     }

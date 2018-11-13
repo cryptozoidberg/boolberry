@@ -568,6 +568,7 @@ bool wallet2::deinit()
 //----------------------------------------------------------------------------------------------------
 bool wallet2::clear()
 {
+  LOG_PRINT_L0("clear internal wallet structures...");
   m_blockchain.clear();
   m_transfers.clear();
   m_payments.clear();

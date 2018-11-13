@@ -931,13 +931,13 @@ namespace currency
   void print_reward_halwing()
   {
     std::cout << std::endl << "Reward halving for 10 years:" << std::endl;
-    std::cout << std::setw(10) << std::left << "day" << std::setw(19) << "block reward" << std::setw(19) << "generated coins" << std::endl;
+    std::cout << std::setw(10) << std::left << "day" << std::setw(19) << std::left << "date" << std::setw(19) << "block reward" << std::setw(19) << "generated coins" << std::endl;
 
     uint64_t already_generated_coins = 0;
     uint64_t already_donated_coins = 0;
     
     uint64_t total_money_supply = TOTAL_MONEY_SUPPLY;
-    for(uint64_t day = 0; day != 365*10; ++day)
+    for(uint64_t day = 0; day != 365*30; ++day)
     {
       uint64_t emission_reward = 0;
       uint64_t stub = 0;
@@ -946,6 +946,7 @@ namespace currency
       {
         std::cout << std::left 
           << std::setw(10) << day 
+          << std::setw(19) << epee::misc_utils::get_date_str(1400342511 + (day * 86400))
           << std::setw(19) << print_money(emission_reward) 
           << std::setw(4) << std::string(std::to_string(GET_PERECENTS_BIG_NUMBERS((already_generated_coins + already_donated_coins), total_money_supply)) + "%") 
           << print_money(already_generated_coins + already_donated_coins) 

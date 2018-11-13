@@ -900,19 +900,23 @@ namespace nodetool
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::peer_sync_idle_maker()
-  {
-    LOG_PRINT_L2("STARTED PEERLIST IDLE HANDSHAKE");
-    typedef std::list<std::pair<net_utils::connection_context_base, peerid_type> > local_connects_type;
-    local_connects_type cncts;
+  {    
+    connections_list_type cncts;
     m_net_server.get_config_object().foreach_connection([&](const p2p_connection_context& cntxt)
     {
       if(cntxt.peer_id)
-        cncts.push_back(local_connects_type::value_type(cntxt, cntxt.peer_id));//do idle sync only with handshaked connections
+        cncts.push_back(connections_list_type::value_type(cntxt, cntxt.peer_id));//do idle sync only with handshaked connections
       return true;
     });
 
-    std::for_each(cncts.begin(), cncts.end(), [&](const typename local_connects_type::value_type& vl){do_peer_timed_sync(vl.first, vl.second);});
-
+    return do_idle_sync_with_peers(cncts);
+  }
+  //-----------------------------------------------------------------------------------
+  template<class t_payload_net_handler>
+  bool node_server<t_payload_net_handler>::do_idle_sync_with_peers(const nodetool::connections_list_type& cncts)
+  {
+    LOG_PRINT_L2("STARTED PEERLIST IDLE HANDSHAKE");
+    std::for_each(cncts.begin(), cncts.end(), [&](const typename nodetool::connections_list_type::value_type& vl){do_peer_timed_sync(vl.first, vl.second); });
     LOG_PRINT_L2("FINISHED PEERLIST IDLE HANDSHAKE");
     return true;
   }

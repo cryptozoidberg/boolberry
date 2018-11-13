@@ -57,6 +57,7 @@ namespace nodetool
     typedef COMMAND_TIMED_SYNC_T<typename t_payload_net_handler::payload_type> COMMAND_TIMED_SYNC;
 
   public:
+    
     typedef t_payload_net_handler payload_net_handler;
     // Some code
     node_server(t_payload_net_handler& payload_handler):m_payload_handler(payload_handler), 
@@ -150,6 +151,7 @@ namespace nodetool
     virtual bool block_ip(uint32_t adress);
     virtual bool add_ip_fail(uint32_t address);
     virtual bool is_stop_signal_sent();
+    virtual bool do_idle_sync_with_peers(const nodetool::connections_list_type& concts);
     //----------------- i_connection_filter  --------------------------------------------------------
     virtual bool is_remote_ip_allowed(uint32_t adress);
     //-----------------------------------------------------------------------------------------------
@@ -165,6 +167,7 @@ namespace nodetool
 
     bool connections_maker();
     bool peer_sync_idle_maker();
+
     bool do_handshake_with_peer(peerid_type& pi, p2p_connection_context& context, bool just_take_peerlist = false);
     bool do_peer_timed_sync(const net_utils::connection_context_base& context, peerid_type peer_id);
 
