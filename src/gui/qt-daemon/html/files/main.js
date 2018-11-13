@@ -441,6 +441,11 @@ function on_close_wallet()
     Qt_parent.close_wallet();
 }
 
+function on_copy_wallet () {
+    var $addressValue = $('#wallet_address').text();
+    Qt_parent.place_to_clipboard($addressValue);
+    alert('Wallet address was copy.')
+}
 
 var last_timerId;
 

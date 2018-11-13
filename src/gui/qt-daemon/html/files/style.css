@@ -445,12 +445,6 @@ span.daemon_view_general_status_value_fail_text
     animation-iteration-count: infinite;
 }
 
-#close_wallet_button_id
-{
-    float: right;
-    margin-left: 480px;
-}
-
 .details {
     margin-top: 35px;
     padding-bottom: 12px;
@@ -743,6 +737,25 @@ input:focus {
 .btn:focus {
    outline: none;
 }
+
+.btn-icon {
+    position: relative;
+    top: 8px;
+    margin-right: 10px;
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    background-image: url('../files/copy-content.svg');
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+}
+
+.btn-group {
+    float: right;
+    margin-left: 480px;
+}
+
 .wrap {
     width: 50%;
 }
