@@ -740,15 +740,19 @@ input:focus {
 
 .btn-icon {
     position: relative;
-    top: 8px;
+    top: 2px;
     margin-right: 10px;
     display: inline-block;
-    width: 22px;
-    height: 22px;
+    width: 14px;
+    height: 14px;
     background-image: url('../files/copy-content.svg');
     background-size: cover;
     background-position: center;
     cursor: pointer;
+}
+
+.btn-icon:hover {
+    background-image: url('../files/copy-content-blue.svg');
 }
 
 .btn-group {
