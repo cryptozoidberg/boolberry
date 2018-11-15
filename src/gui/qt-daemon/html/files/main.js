@@ -755,6 +755,7 @@ $(function()
     $( "#synchronization_progressbar" ).progressbar({value: false });
     $( "#wallet_progressbar" ).progressbar({value: false });
     $(".common_button").button();
+    $("#copy-wallet").on('click', on_copy_wallet);
 
     $("#open_wallet_button").button("disable");
     $("#generate_wallet_button").button("disable");
