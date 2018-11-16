@@ -444,8 +444,16 @@ function on_close_wallet()
 function on_copy_wallet () {
     var $addressValue = $('#wallet_address').text();
     Qt_parent.place_to_clipboard($addressValue);
-    alert('Wallet address was copy.')
+    show_hide_tooltip();
 }
+
+function show_hide_tooltip () {
+    var $tooltip = $('#copy_tooltip');
+    $($tooltip).show(100);
+    var timeOut = setTimeout(function() {
+        $($tooltip).hide(100);
+    }, 3000);
+};
 
 var last_timerId;
 

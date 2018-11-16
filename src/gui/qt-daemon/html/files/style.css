@@ -751,6 +751,26 @@ input:focus {
     cursor: pointer;
 }
 
+.copy_tooltip {
+    display: none;
+    padding: 0 4px;
+    position: absolute;
+    top: -26px;
+    left: 0;
+    height: 20px;
+    line-height: 20px;
+    font-size: 12px;
+    -webkit-transform: translateX(-50%);
+    white-space: nowrap;
+    background-color: #209bff;
+    color: #ffffff;
+}
+
+.copy_group {
+    display: inline-block;
+    position: relative;
+}
+
 .btn-icon:hover {
     background-image: url('../files/copy-content-blue.svg');
 }
