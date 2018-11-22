@@ -453,7 +453,7 @@ function show_hide_tooltip () {
     var timeOut = setTimeout(function() {
         $($tooltip).hide(100);
     }, 3000);
-};
+}
 
 var last_timerId;
 
@@ -706,6 +706,18 @@ function on_address_change() {
     if (addressInputVal === '') {
       hide_address_status();
       return;
+    }
+
+    // not show status if user put only '@'
+    if (addressInputVal === '@') {
+        hide_address_status();
+        return;
+    }
+
+    // validate address when user select alias from drop-down list
+    if (addressInputVal.indexOf('@') !== -1) {
+        var $aliasesList = $('#ui-id-1');
+        $($aliasesList).on('click', on_address_change);
     }
 
     var addressValidation = $.parseJSON(Qt_parent.parse_transfer_target(addressInputVal));

@@ -133,20 +133,6 @@
                             <div id="close_wallet_button_id" class="common_button btn btn-grey">Close wallet</div>
                         </div>
                     </div>
-                </div id>
-
-                <div class="wallet_separator" id="toggle-section-sign">Sign message</div>
-                <div class="active_panel" id="section-sign">
-                    <div class="active_form clearfix">
-                        <input id="sign_text_id" type="text" placeholder="Text">
-                        <button id="sign_button_id" class="btn" type="submit">Sign</button>
-                    </div>
-                    <div id='signature_id' style='display: none'>
-
-                        <div>
-                            <a href="javascript:;" onclick="jQuery('#signature_id').hide('fast');" class="options_link_text signature">Hide</a>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="wallet_separator" id="toggle-section-payment">
@@ -206,6 +192,21 @@
                     </div>
 
                 </div>
+
+                <div class="wallet_separator close" id="toggle-section-sign">Sign message</div>
+                <div class="active_panel" id="section-sign" style="display: none;">
+                    <div class="active_form clearfix">
+                        <input id="sign_text_id" type="text" placeholder="Text">
+                        <button id="sign_button_id" class="btn" type="submit">Sign</button>
+                    </div>
+                    <div id='signature_id' style='display: none'>
+
+                        <div>
+                            <a href="javascript:;" onclick="jQuery('#signature_id').hide('fast');" class="options_link_text signature">Hide</a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="wallet_separator" id="toggle-section-history">Recent transfers</div>
                 <div class="wallet_panel_transparent" id="section-history">
                     <div class='transfer_entry_line' style='color: #3a3a3a; height: 36px; background: #f5f5f5; box-sizing: border-box; font-family: "Open Sans"; font-weight: 600'>
