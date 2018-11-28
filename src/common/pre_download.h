@@ -30,7 +30,6 @@ namespace tools
   template<class callback_t>
   bool process_predownload(const boost::program_options::variables_map& vm, callback_t is_stop)
   {
-
     std::string config_folder = command_line::get_arg(vm, command_line::arg_data_dir);
     std::string working_folder = config_folder + "/" CURRENCY_BLOCKCHAINDATA_FOLDERNAME;
     boost::system::error_code ec;
@@ -54,7 +53,7 @@ namespace tools
     auto cb = [&](const std::string& buff, uint64_t total_bytes, uint64_t received_bytes)
     {
       std::cout << "Received " << received_bytes << " from " << total_bytes << " (" << (received_bytes * 100) / total_bytes << "%)\r";
-      if (is_stop())
+      if (is_stop(total_bytes, received_bytes))
       {
         LOG_PRINT_MAGENTA(ENDL << "Interrupting download", LOG_LEVEL_0);
         return false;
@@ -151,7 +150,7 @@ namespace tools
       if (!(i % 100))
         std::cout << "Block " << i << "(" << (i * 100) / total_blocks << "%) \r";
 
-      if (is_stop())
+      if (is_stop(total_blocks, i))
       {
         LOG_PRINT_MAGENTA(ENDL << "Interrupting updating db...", LOG_LEVEL_0);
         return false;
