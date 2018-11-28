@@ -112,6 +112,8 @@ namespace view
     uint64_t synchronization_start_height;
     uint64_t max_net_seen_height;
     uint64_t height;
+    uint64_t current;
+    uint64_t total;
     uint64_t out_connections_count;
     uint64_t inc_connections_count;
     std::string difficulty;
@@ -125,6 +127,8 @@ namespace view
       KV_SERIALIZE(synchronization_start_height)
       KV_SERIALIZE(max_net_seen_height)
       KV_SERIALIZE(height)
+      KV_SERIALIZE(current)
+      KV_SERIALIZE(total)
       KV_SERIALIZE(out_connections_count)
       KV_SERIALIZE(inc_connections_count)
       KV_SERIALIZE(difficulty)

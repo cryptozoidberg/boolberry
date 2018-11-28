@@ -306,7 +306,10 @@ struct EMPTY_STRUCT {
     {
       daemon_network_state_connecting = 0,
       daemon_network_state_synchronizing = 1,
-      daemon_network_state_online = 2
+      daemon_network_state_online = 2, 
+      daemon_network_state_deintializing = 3,
+      daemon_network_state_fail = 4,
+      daemon_network_state_downloading_precompiled = 5
     };
 
     struct response

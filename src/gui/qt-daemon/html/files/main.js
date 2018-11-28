@@ -63,9 +63,11 @@ function on_update_daemon_state(info_obj)
 
     if(info_obj.daemon_network_state == 0)//daemon_network_state_connecting
     {
+        $("#synchronization_progressbar" ).progressbar({value: false });
         //do nothing
     }else if(info_obj.daemon_network_state == 1)//daemon_network_state_synchronizing
     {
+        $("#synchronization_progressbar > div").css({ 'background': '#4286f4'});
         var percents = 0;
         if (info_obj.max_net_seen_height > info_obj.synchronization_start_height)
             percents = ((info_obj.height - info_obj.synchronization_start_height)*100)/(info_obj.max_net_seen_height - info_obj.synchronization_start_height);
@@ -77,7 +79,22 @@ function on_update_daemon_state(info_obj)
         $("#restore_wallet_button").button("disable");
         $("#domining_button").button("disable");
         //show progress
-    }else if(info_obj.daemon_network_state == 2)//daemon_network_state_online
+    } else if (info_obj.daemon_network_state == 5)//daemon_network_state_downloading_precompiled
+    {        
+        $("#synchronization_progressbar > div").css({ 'background': '#82cc83'});
+        var percents = 0;
+        if (info_obj.total > info_obj.current)
+            percents = ((info_obj.current)*100)/(info_obj.total);
+        $("#synchronization_progressbar").progressbar("option", "value", percents);
+
+        $("#daemon_synchronization_text").text((Math.floor(info_obj.current / 1048576)).toString() + " MB of " + Math.floor(info_obj.total / 1048576).toString() + " MB downloaded");
+
+        $("#open_wallet_button").button("disable");
+        $("#generate_wallet_button").button("disable");
+        $("#restore_wallet_button").button("disable");
+        $("#domining_button").button("disable");
+        //show progress
+    } else if (info_obj.daemon_network_state == 2)//daemon_network_state_online
     {
         $("#synchronization_progressbar_block").hide();
         $("#daemon_status_text").addClass("daemon_view_general_status_value_success_text");

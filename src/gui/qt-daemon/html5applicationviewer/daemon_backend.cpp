@@ -6,7 +6,7 @@
 #include "daemon_backend.h"
 #include "currency_core/alias_helper.h"
 #include "crypto/mnemonic-encoding.h"
-
+#include "common/pre_download.h"
 
 daemon_backend::daemon_backend():m_pview(&m_view_stub),
                                  m_stop_singal_sent(false),
@@ -63,6 +63,9 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   command_line::add_arg(desc_cmd_sett, command_line::arg_log_level);
   command_line::add_arg(desc_cmd_sett, command_line::arg_console);
   command_line::add_arg(desc_cmd_sett, command_line::arg_show_details);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_no_predownload);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_explicit_predownload);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_validate_predownload);
   command_line::add_arg(desc_cmd_sett, arg_alloc_win_console);
   command_line::add_arg(desc_cmd_sett, arg_html_folder);
 
@@ -194,7 +197,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   if (!cond) \
   { \
     LOG_ERROR(mess); \
-    dsi.daemon_network_state = 4; \
+    dsi.daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_fail; \
     dsi.text_state = mess; \
     m_pview->update_daemon_status(dsi); \
     m_pview->on_backend_stopped(); \
@@ -205,6 +208,37 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   dsi.difficulty = "---";
   m_pview->update_daemon_status(dsi);
 
+
+  //do pre_download if needed
+  dsi.text_state = "Downloading precompiled database";
+  m_pview->update_daemon_status(dsi);
+
+  if (!command_line::has_arg(vm, command_line::arg_no_predownload) || command_line::has_arg(vm, command_line::arg_explicit_predownload))
+  {
+    auto last_update = std::chrono::system_clock::now();
+    bool r = tools::process_predownload(vm, [&](uint64_t total_bytes, uint64_t received_bytes){
+      auto dif = std::chrono::system_clock::now() - last_update;
+      if (dif >  std::chrono::milliseconds(300))
+      {
+        dsi.current = received_bytes;
+        dsi.total = total_bytes;
+        dsi.daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_downloading_precompiled;
+        m_pview->update_daemon_status(dsi);
+        last_update = std::chrono::system_clock::now();
+      }
+
+      return static_cast<bool>(m_stop_singal_sent);
+    });
+    if (m_stop_singal_sent)
+    {
+      dsi.daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_deintializing;
+      dsi.text_state = "Deinitializing...";
+      m_pview->update_daemon_status(dsi);
+    }
+  }
+
+
+  dsi.daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_connecting;
   //initialize objects
   LOG_PRINT_L0("Initializing p2p server...");
   dsi.text_state = "Initializing p2p server";
@@ -260,7 +294,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
   //go to monitoring view loop
   loop();
 
-  dsi.daemon_network_state = 3;
+  dsi.daemon_network_state = currency::COMMAND_RPC_GET_INFO::daemon_network_state_deintializing;
 
   CRITICAL_REGION_BEGIN(m_wallet_lock);
   if (m_wallet->get_wallet_path().size())

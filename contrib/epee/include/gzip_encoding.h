@@ -169,12 +169,7 @@ namespace net_utils
 			}
 
 			//Process these data if required
-			bool res = true;
-
-			res = m_powner_filter->handle_target_data(decode_summary_buff);
-
-			return true;
-
+      return m_powner_filter->handle_target_data(decode_summary_buff);
 		}
 		/*! \brief
 		*  Function stop : Entry point for stop signal and flushing cached data buffer.
