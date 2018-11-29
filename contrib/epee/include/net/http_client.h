@@ -949,6 +949,7 @@ namespace epee
           uint64_t state_total_bytes = 0;
           uint64_t state_received_bytes_base = 0;
           uint64_t state_received_bytes_current = 0;
+          bool stopped = false;
           auto local_cb = [&](const std::string& piece_of_data, uint64_t total_bytes, uint64_t received_bytes)
           {
             //remember total_bytes only for first attempt, where fetched full lenght of the file
@@ -960,7 +961,8 @@ namespace epee
             {
               state_received_bytes_current = received_bytes;
               fs.write(unpacked_buff.data(), unpacked_buff.size());
-              return cb(unpacked_buff, state_total_bytes, state_received_bytes_base + received_bytes);
+              stopped = !cb(unpacked_buff, state_total_bytes, state_received_bytes_base + received_bytes);
+              return !stopped;
             });            
           };
           uint64_t current_err_count = 0;
@@ -974,6 +976,8 @@ namespace epee
             r = this->invoke_cb(local_cb, url, timeout, method, body, additional_params_local);
             if (!r)
             {
+              if (stopped)
+                break;
               current_err_count++;
               state_received_bytes_base += state_received_bytes_current;
               state_received_bytes_current = 0;
