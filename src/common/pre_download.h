@@ -49,9 +49,18 @@ namespace tools
     md5::MD5_CTX md5_state = AUTO_VAL_INIT(md5_state);
     md5::MD5Init(&md5_state);
 
-
+    auto last_update = std::chrono::system_clock::now();
     auto cb = [&](const std::string& buff, uint64_t total_bytes, uint64_t received_bytes)
     {
+      md5::MD5Update(&md5_state, reinterpret_cast<const unsigned char *>(buff.data()), buff.size());
+
+      auto dif = std::chrono::system_clock::now() - last_update;
+      if (dif < std::chrono::milliseconds(300))
+      {
+        return true;
+      }
+
+
       std::cout << "Received " << received_bytes << " from " << total_bytes << " (" << (received_bytes * 100) / total_bytes << "%)\r";
       if (is_stop(total_bytes, received_bytes))
       {
@@ -59,7 +68,8 @@ namespace tools
         return false;
       }
 
-      md5::MD5Update(&md5_state, reinterpret_cast<const unsigned char *>(buff.data()), buff.size());
+
+      last_update = std::chrono::system_clock::now();
       return true;
     };
     tools::create_directories_if_necessary(working_folder);
