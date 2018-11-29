@@ -868,7 +868,7 @@ namespace epee
             u_c.port = 80;//default for http
 
           res = tr.connect(u_c.host, static_cast<int>(u_c.port), static_cast<unsigned int>(timeout));
-          CHECK_AND_ASSERT_MES(res, false, "failed to connect " << u_c.host << ":" << u_c.port);
+          CHECK_AND_NO_ASSERT_MES(res, false, "failed to connect " << u_c.host << ":" << u_c.port);
         }
 
         return tr.invoke(u_c.uri, method, body, ppresponse_info, additional_params);
@@ -935,7 +935,7 @@ namespace epee
 
         //
         template<typename callback_t>
-        bool download_and_unzip(callback_t cb, const std::string& path_for_file, const std::string& url, uint64_t timeout, const std::string& method = "GET", const std::string& body = std::string(), const fields_list& additional_params = fields_list())
+        bool download_and_unzip(callback_t cb, const std::string& path_for_file, const std::string& url, uint64_t timeout, const std::string& method = "GET", const std::string& body = std::string(), uint64_t fails_count = 1000, const fields_list& additional_params = fields_list())
         {
           std::ofstream fs;
           fs.open(path_for_file, std::ios::binary | std::ios::out | std::ios::trunc);
@@ -946,16 +946,41 @@ namespace epee
           }
           std::string buff;
           gzip_decoder_lambda zip_decoder;
+          uint64_t state_total_bytes = 0;
+          uint64_t state_received_bytes_base = 0;
+          uint64_t state_received_bytes_current = 0;
           auto local_cb = [&](const std::string& piece_of_data, uint64_t total_bytes, uint64_t received_bytes)
           {
+            //remember total_bytes only for first attempt, where fetched full lenght of the file
+            if (!state_total_bytes)
+              state_total_bytes = total_bytes;
+
             buff += piece_of_data;
             return zip_decoder.update_in(buff, [&](const std::string& unpacked_buff)
             {
+              state_received_bytes_current = received_bytes;
               fs.write(unpacked_buff.data(), unpacked_buff.size());
-              return cb(unpacked_buff, total_bytes, received_bytes);
+              return cb(unpacked_buff, state_total_bytes, state_received_bytes_base + received_bytes);
             });            
           };
-          bool r = this->invoke_cb(local_cb, url, timeout, method, body, additional_params);
+          uint64_t current_err_count = 0;
+          bool r = false;
+          
+          while (!r || current_err_count > fails_count)
+          {
+            LOG_PRINT_L0("Attempt to invoke http: " << url << " (offset:" << state_received_bytes_base << ")");
+            fields_list additional_params_local = additional_params;
+            additional_params_local.push_back(std::make_pair<std::string, std::string>("Range", std::string("bytes=") + std::to_string(state_received_bytes_base) + "-"));
+            r = this->invoke_cb(local_cb, url, timeout, method, body, additional_params_local);
+            if (!r)
+            {
+              current_err_count++;
+              state_received_bytes_base += state_received_bytes_current;
+              state_received_bytes_current = 0;
+              std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            }
+          }
+
           fs.close();
           return r;
         }

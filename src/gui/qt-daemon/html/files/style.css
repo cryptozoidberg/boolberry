@@ -445,12 +445,6 @@ span.daemon_view_general_status_value_fail_text
     animation-iteration-count: infinite;
 }
 
-#close_wallet_button_id
-{
-    float: right;
-    margin-left: 480px;
-}
-
 .details {
     margin-top: 35px;
     padding-bottom: 12px;
@@ -743,6 +737,49 @@ input:focus {
 .btn:focus {
    outline: none;
 }
+
+.btn-icon {
+    position: relative;
+    top: 2px;
+    margin-right: 10px;
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background-image: url('../files/copy-content.svg');
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+}
+
+.copy_tooltip {
+    display: none;
+    padding: 0 4px;
+    position: absolute;
+    top: -26px;
+    left: 0;
+    height: 20px;
+    line-height: 20px;
+    font-size: 12px;
+    -webkit-transform: translateX(-50%);
+    white-space: nowrap;
+    background-color: #209bff;
+    color: #ffffff;
+}
+
+.copy_group {
+    display: inline-block;
+    position: relative;
+}
+
+.btn-icon:hover {
+    background-image: url('../files/copy-content-blue.svg');
+}
+
+.btn-group {
+    float: right;
+    margin-left: 480px;
+}
+
 .wrap {
     width: 50%;
 }

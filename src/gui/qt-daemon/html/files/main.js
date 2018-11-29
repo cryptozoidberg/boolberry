@@ -458,6 +458,19 @@ function on_close_wallet()
     Qt_parent.close_wallet();
 }
 
+function on_copy_wallet () {
+    var $addressValue = $('#wallet_address').text();
+    Qt_parent.place_to_clipboard($addressValue);
+    show_hide_tooltip();
+}
+
+function show_hide_tooltip () {
+    var $tooltip = $('#copy_tooltip');
+    $($tooltip).show(100);
+    var timeOut = setTimeout(function() {
+        $($tooltip).hide(100);
+    }, 3000);
+}
 
 var last_timerId;
 
@@ -712,6 +725,18 @@ function on_address_change() {
       return;
     }
 
+    // not show status if user put only '@'
+    if (addressInputVal === '@') {
+        hide_address_status();
+        return;
+    }
+
+    // validate address when user select alias from drop-down list
+    if (addressInputVal.indexOf('@') !== -1) {
+        var $aliasesList = $('#ui-id-1');
+        $($aliasesList).on('click', on_address_change);
+    }
+
     var addressValidation = $.parseJSON(Qt_parent.parse_transfer_target(addressInputVal));
 
     if (addressValidation.valid) {
@@ -767,6 +792,7 @@ $(function()
     $( "#synchronization_progressbar" ).progressbar({value: false });
     $( "#wallet_progressbar" ).progressbar({value: false });
     $(".common_button").button();
+    $("#copy-wallet").on('click', on_copy_wallet);
 
     $("#open_wallet_button").button("disable");
     $("#generate_wallet_button").button("disable");

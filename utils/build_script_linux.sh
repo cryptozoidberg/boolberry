@@ -58,6 +58,10 @@ mkdir -p boolberry;
 
 cp -Rv ../../src/gui/qt-daemon/html ./boolberry
 cp -Rv ../../utils/Boolberry.sh ./boolberry
+cp  src/boolbd ./boolberry
+cp  src/Boolberry ./boolberry
+cp  src/simplewallet ./boolberry
+cp  src/connectivity_tool ./boolberry
 chmod 777 ./boolberry/Boolberry.sh
 
 mkdir ./boolberry/lib
