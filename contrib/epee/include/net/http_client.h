@@ -977,7 +977,7 @@ namespace epee
               current_err_count++;
               state_received_bytes_base += state_received_bytes_current;
               state_received_bytes_current = 0;
-              std::this_thread::sleep_for(std::chrono::milliseconds(500));
+              boost::this_thread::sleep_for(std::chrono::milliseconds(500));
             }
           }
 
