@@ -70,7 +70,6 @@ namespace crypto {
 
   inline bool do_chacha_crypt(std::string& buff, const std::string& pass)
   {
-
     std::string decrypted_buff;
     decrypted_buff.resize(buff.size());
     do_chacha_crypt(buff.data(), buff.size(), (void*)decrypted_buff.data(), pass.data(), pass.size());
@@ -86,6 +85,16 @@ namespace crypto {
     do_chacha_crypt(buff.data(), buff.size(), (void*)buff_target.data(), &pass, sizeof(pass));
     buff = buff_target;
     return true;
+  }
+
+  template<typename pod_pass>
+  inline std::string do_chacha_crypt(const std::string& input, const pod_pass& pass)
+  {
+    std::string result;
+    result.resize(input.size());
+    if (do_chacha_crypt(input.data(), input.size(), (void*)result.data(), &pass, sizeof pass))
+      return result;
+    return "";
   }
 
   template<typename pod_to_encrypt, typename pod_pass>
