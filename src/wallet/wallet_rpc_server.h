@@ -28,7 +28,7 @@ namespace tools
 
     static void init_options(boost::program_options::options_description& desc);
     bool init(const boost::program_options::variables_map& vm);
-    bool run();
+    bool run(bool offline_mode = false);
   private:
 
     CHAIN_HTTP_TO_MAP2(connection_context); //forward http requests to uri map

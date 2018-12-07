@@ -28,7 +28,9 @@ namespace tools
   wallet_rpc_server::wallet_rpc_server(wallet2& w):m_wallet(w)
   {}
   //------------------------------------------------------------------------------------------------------------------------------
-  bool wallet_rpc_server::run()
+  bool wallet_rpc_server::run(bool offline_mode)
+  {
+    if (!offline_mode)
   {
     m_net_server.add_idle_handler([this](){
       size_t blocks_fetched = 0;
@@ -37,6 +39,7 @@ namespace tools
       m_wallet.refresh(blocks_fetched, received_money, ok);
       return true;
     }, 20000);
+    }
 
     //DO NOT START THIS SERVER IN MORE THEN 1 THREADS WITHOUT REFACTORING
     return epee::http_server_impl_base<wallet_rpc_server, connection_context>::run(1, true);
