@@ -140,8 +140,10 @@ namespace tools
     void refresh(size_t & blocks_fetched, bool& received_money);
     bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok);
 
-    void sign_transfer(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
-    void submit_transfer(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
+    void sign_transfer(const std::string& tx_sources_blob, std::string& signed_tx_blob, currency::transaction& tx);
+    void sign_transfer_files(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
+    void submit_transfer(const std::string& tx_sources_blob, const std::string& signed_tx_blob, currency::transaction& tx);
+    void submit_transfer_files(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
 
 
     void sign_text(const std::string& text, crypto::signature& sig);

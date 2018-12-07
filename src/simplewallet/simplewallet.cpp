@@ -1075,7 +1075,7 @@ bool simple_wallet::sign_transfer(const std::vector<std::string> &args)
   try
   {
     currency::transaction res_tx;
-    m_wallet->sign_transfer(args[0], args[1], res_tx);
+    m_wallet->sign_transfer_files(args[0], args[1], res_tx);
     success_msg_writer() << "transaction signed and stored to file: " << args[1] << ", transaction " << get_transaction_hash(res_tx) << ", " << get_object_blobsize(res_tx) << " bytes";
   }
   catch (const std::exception& e)
@@ -1101,7 +1101,7 @@ bool simple_wallet::submit_transfer(const std::vector<std::string> &args)
   try
   {
     currency::transaction res_tx;
-    m_wallet->submit_transfer(args[0], args[1], res_tx);
+    m_wallet->submit_transfer_files(args[0], args[1], res_tx);
     success_msg_writer() << "transaction submitted, " << get_transaction_hash(res_tx) << ", " << get_object_blobsize(res_tx) << " bytes";
   }
   catch (const std::exception& e)
