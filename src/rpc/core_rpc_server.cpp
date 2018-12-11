@@ -1449,4 +1449,9 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
 
     return true;
   }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_swap_tsx(const COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::request& req, COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::response& res, connection_context& cntx)
+  {
+    return true;
+  }
 }

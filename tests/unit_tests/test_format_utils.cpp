@@ -74,7 +74,7 @@ TEST(parse_and_validate_tx_extra, test_payment_ids)
   char h[100];
   generate_random_bytes(sizeof h, h);
   currency::payment_id_t payment_id(h, sizeof h);
-  bool r = currency::set_payment_id_to_tx_extra(tx.extra, payment_id);
+  bool r = currency::set_payment_id_and_swap_addr_to_tx_extra(tx.extra, payment_id);
   ASSERT_TRUE(r);
   
   currency::payment_id_t payment_id_2;
@@ -82,6 +82,32 @@ TEST(parse_and_validate_tx_extra, test_payment_ids)
   ASSERT_TRUE(r);
   ASSERT_EQ(payment_id, payment_id_2);
 }
+
+TEST(parse_and_validate_tx_extra, test_payment_ids_and_swap_address)
+{
+  currency::transaction tx = AUTO_VAL_INIT(tx);
+  char h[100];
+  generate_random_bytes(sizeof h, h);
+  currency::payment_id_t payment_id(h, sizeof h);
+  currency::account_public_address swap_addr = AUTO_VAL_INIT(swap_addr);
+  generate_random_bytes(sizeof(swap_addr.m_view_public_key), &swap_addr.m_view_public_key);
+  generate_random_bytes(sizeof(swap_addr.m_spend_public_key), &swap_addr.m_spend_public_key);
+  swap_addr.is_swap_address = true;
+
+  bool r = currency::set_payment_id_and_swap_addr_to_tx_extra(tx.extra, payment_id, swap_addr);
+  ASSERT_TRUE(r);
+
+  currency::payment_id_t payment_id_2;
+  r = currency::get_payment_id_from_tx_extra(tx, payment_id_2);
+  ASSERT_TRUE(r);
+  ASSERT_EQ(payment_id, payment_id_2);
+  currency::account_public_address swap_addr2 = AUTO_VAL_INIT(swap_addr2);
+  r = currency::get_swap_info_from_tx_extra(tx, swap_addr2);
+  ASSERT_TRUE(r);
+  ASSERT_EQ(swap_addr.m_spend_public_key, swap_addr2.m_spend_public_key);
+  ASSERT_EQ(swap_addr.m_view_public_key, swap_addr2.m_view_public_key);
+}
+
 
 template<int sz>
 struct t_dummy

@@ -1046,5 +1046,41 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
     };
   };
 
+  struct swap_transaction_info
+  {
+    std::string tx_id;
+    uint64_t swaped_amount;
+    std::string swap_address;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(tx_id)
+      KV_SERIALIZE(swaped_amount)
+      KV_SERIALIZE(swap_address)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK
+  {
+    struct request
+    {
+      std::string block_id;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(block_id)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+      std::list<swap_transaction_info> swap_txs_list;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(swap_txs_list)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
 }
 

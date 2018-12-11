@@ -1352,7 +1352,7 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
   create_tx_context ctc = AUTO_VAL_INIT(ctc);
   create_tx_arg& create_tx_param = ctc.arg;
   if (!payment_id.empty())
-    set_payment_id_to_tx_extra(create_tx_param.extra, payment_id);
+    set_payment_id_and_swap_addr_to_tx_extra(create_tx_param.extra, payment_id);
   create_tx_param.unlock_time = 0;
   create_tx_param.tx_outs_attr = CURRENCY_TO_KEY_OUT_RELAXED;
   create_tx_param.spend_pub_key = m_account.get_keys().m_account_address.m_spend_public_key;

@@ -16,6 +16,7 @@ using namespace epee;
 #include "common/int-util.h"
 #include "common/util.h"
 #include "crypto/hash.h"
+#include "swap_address.h"
 
 namespace currency {
 
@@ -135,12 +136,18 @@ namespace currency {
       LOG_PRINT_L1("Invalid address format: " << str);
       return false;
     }
-
-    if (CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX != prefix && CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX != prefix)
+    addr.is_swap_address = false;
+    if(SWAP_CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX != prefix && SWAP_CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX != prefix)
+    {
+      addr.is_swap_address = true;
+    }
+    else if (CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX != prefix && CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX != prefix)
     {
       LOG_PRINT_L1("Wrong address prefix: " << prefix << ", expected " << CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX << " or " << CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX);
       return false;
     }
+
+
 
     if (data.size() < ADDRESS_KEYS_DATA_SIZE)
     {

@@ -798,21 +798,19 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
 
   std::vector<uint8_t> extra;
   payment_id_t payment_id;
+  account_public_address swap_addr = AUTO_VAL_INIT(swap_addr);
   if (1 == local_args.size() % 2)
   {
     std::string payment_id_str = local_args.back();
     local_args.pop_back();
-
-    r = parse_payment_id_from_hex_str(payment_id_str, payment_id);
-    if (r)
+    if (payment_id_str.size())
     {
-      r = set_payment_id_to_tx_extra(extra, payment_id);
-    }
-
-    if (!r)
-    {
-      fail_msg_writer() << "payment id has invalid format: \"" << payment_id_str << "\", expected hex string";
-      return false;
+      r = parse_payment_id_from_hex_str(payment_id_str, payment_id);
+      if (!r)
+      {
+        fail_msg_writer() << "payment id has invalid format: \"" << payment_id_str << "\", expected hex string";
+        return false;
+      }
     }
   }
 
@@ -826,6 +824,16 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
       fail_msg_writer() << "wrong address: " << local_args[i];
       return false;
     }
+    //handle swap address
+    if (de.addr.is_swap_address)
+    {
+      if(swap_addr.is_swap_address)
+      {
+        fail_msg_writer() << "More then one swap addresses is not supported in swap transaction";
+        return false;
+      }
+      swap_addr = de.addr;
+    }
 
     // handle integrated payment id
     if (!integrated_payment_id.empty())
@@ -834,12 +842,6 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
       {
         fail_msg_writer() << "address " << local_args[i] << " has integrated payment id " << epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) <<
           " which is incompatible with payment id " << epee::string_tools::buff_to_hex_nodelimer(payment_id) << " that was already assigned to this transfer";
-        return false;
-      }
-
-      if (!set_payment_id_to_tx_extra(extra, integrated_payment_id))
-      {
-        fail_msg_writer() << "address " << local_args[i] << " has invalid integrated payment id " << epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id);
         return false;
       }
 
@@ -863,6 +865,10 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
 
     dsts.push_back(de);
   }
+
+  r = set_payment_id_and_swap_addr_to_tx_extra(extra, payment_id, swap_addr);
+
+  
 
   try
   {
