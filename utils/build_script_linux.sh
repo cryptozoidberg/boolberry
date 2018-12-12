@@ -69,8 +69,19 @@ cp -Rv $QT_PREFIX_PATH/plugins ./boolberry
 
 
 printf "\nmaking compressed build archive...\n\n"
-tar -cjvf bbr-linux-x64-$version_str.tar.bz2 boolberry
+
+package_filename=boolberry-linux-x64-$version_str.tar.bz2
+
+tar -cjvf $package_filename boolberry
 
 printf "\nbuild succeeded!\n"
+
+echo "uploading to build server..."
+scp $package_filename bbr_build_server:/var/www/html/builds
+
+
+mail_msg="New build for linux-x64 available at http://$BBR_BUILD_SERVER_ADDR_PORT/builds/$package_filename"
+echo $mail_msg
+echo $mail_msg | mail -s "Boolberry linux-x64 build $version_str" ${emails}
 
 exit 0
