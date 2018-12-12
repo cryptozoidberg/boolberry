@@ -1051,11 +1051,13 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
     std::string tx_id;
     uint64_t swaped_amount;
     std::string swap_address;
+    std::string payment_id_hex_str;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(tx_id)
       KV_SERIALIZE(swaped_amount)
       KV_SERIALIZE(swap_address)
+      KV_SERIALIZE(payment_id_hex_str)
     END_KV_SERIALIZE_MAP()
   };
 

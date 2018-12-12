@@ -13,6 +13,8 @@ using namespace epee;
 #include "crypto/crypto.h"
 #include "crypto/hash.h"
 #include "profile_tools.h"
+#include "currency_core/swap_address.h"
+#include "common/base58.h"
 
 namespace currency
 {
@@ -771,6 +773,33 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
+  bool get_swap_info_from_tx(const transaction& tx, swap_transaction_info& swap_info)
+  {
+    account_public_address addr = AUTO_VAL_INIT(addr);
+    get_swap_info_from_tx_extra(tx, addr);
+    if (!addr.is_swap_address)
+      return false;
+    payment_id_t payment_id;
+    get_payment_id_from_tx_extra(tx, payment_id);
+    uint64_t total_amount = 0;
+    for (auto& o : tx.vout)
+    {
+      if (o.target.type() == typeid(txout_to_key))
+      {
+        if (boost::get<txout_to_key>(o.target).key == null_pkey)
+          total_amount += o.amount;
+      }
+    }
+    if (!total_amount)
+      return false;
+
+    swap_info.payment_id_hex_str = epee::string_tools::buff_to_hex_nodelimer(payment_id);
+    swap_info.swap_address = tools::base58::encode_addr(SWAP_CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX, t_serializable_object_to_blob(addr));
+    swap_info.swaped_amount = total_amount;
+    swap_info.tx_id = get_transaction_hash(tx);
+    return true;
+  }
+  //---------------------------------------------------------------
   bool get_payment_id_userdata_entry(std::vector<uint8_t>& extra, const payment_id_t& payment_id)
   {
     if (!payment_id.size())
@@ -788,8 +817,6 @@ namespace currency
   //---------------------------------------------------------------
   bool get_swapinfo_userdata_entry(std::vector<uint8_t>& extra, const account_public_address& swap_addr)
   {
-    //     extra.push_back(TX_EXTRA_TAG_USER_DATA);
-    //     extra.push_back(static_cast<uint8_t>(sizeof(crypto::public_key)*2 + 2));
     if (swap_addr.is_swap_address)
     {
       extra.push_back(TX_USER_DATA_TAG_SWAP_ADDRESS);

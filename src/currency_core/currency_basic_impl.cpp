@@ -137,7 +137,7 @@ namespace currency {
       return false;
     }
     addr.is_swap_address = false;
-    if(SWAP_CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX != prefix && SWAP_CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX != prefix)
+    if(SWAP_CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX == prefix || SWAP_CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX == prefix)
     {
       addr.is_swap_address = true;
     }

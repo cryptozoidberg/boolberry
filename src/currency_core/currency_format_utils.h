@@ -222,6 +222,7 @@ namespace currency
   bool set_swapinfo_to_tx_extra(std::vector<uint8_t>& extra, const std::string& swap_address);
   bool get_payment_id_from_tx_extra(const transaction& tx, payment_id_t& payment_id);
   bool get_swap_info_from_tx_extra(const transaction& tx, account_public_address& addr);
+  bool get_swap_info_from_tx(const transaction& tx, swap_transaction_info& swap_info)
   crypto::hash get_blob_longhash(const blobdata& bd, uint64_t height, const std::vector<crypto::hash>& scratchpad);
   crypto::hash get_blob_longhash_opt(const blobdata& bd, const std::vector<crypto::hash>& scratchpad);
 

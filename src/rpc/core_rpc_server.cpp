@@ -1452,6 +1452,19 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_swap_tsx(const COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::request& req, COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::response& res, connection_context& cntx)
   {
+    crypto::hash id = AUTO_VAL_INIT(id);
+    if (!string_tools::parse_tpod_from_hex_string(req.block_id, id))
+    {
+      res.status = CORE_RPC_STATUS_INVALID_ARGUMENT;
+      return true;
+    }
+
+    if (!m_core.get_blockchain_storage().get_block_swap_transactions(id, res.swap_txs_list))
+    {
+      res.status = CORE_RPC_STATUS_INVALID_ARGUMENT;
+      return true;
+    }
+    res.status = CORE_RPC_STATUS_OK;
     return true;
   }
 }
