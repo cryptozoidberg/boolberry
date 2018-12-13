@@ -1,72 +1,32 @@
-set -x #echo on
+set -x # echo on
+set -e # stop on errors
+curr_path=${BASH_SOURCE%/*}
 
-export PROJECT_ROOT="/Users/roky/projects/boolberry/repo"
-export QT_PATH="/Users/roky/Qt5.5.0/5.5"
-export LOCAL_BOOST_LIBS_PATH="/Users/roky/projects/boolberry/deploy/boost_libs"
+: "${BOOST_ROOT:?BOOST_ROOT should be set to the root of Boost, ex.: /home/user/boost_1_56_0}"
+: "${BOOST_LIBS_PATH:?BOOST_LIBS_PATH should be set to libs folder of Boost, ex.: /home/user/boost_1_56_0/stage/lib}"
+: "${QT_PREFIX_PATH:?QT_PREFIX_PATH should be set to Qt libs folder, ex.: /home/user/Qt5.5.1/5.5/}"
 
+echo "entering directory $curr_path/.."
+cd $curr_path/..
 
+rm -rf build
+mkdir -p build/release
+cd build/release
 
-cd "$PROJECT_ROOT"
-if [ $? -ne 0 ]; then
-    echo "Failed to cd boolberry"
-    exit $?
-fi
-
-git pull
-if [ $? -ne 0 ]; then
-    echo "Failed to git pull"
-    exit $?
-fi
-
-rm -rf build; mkdir -p build/release; cd build/release;
-
-cmake -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PATH/clang_64" -D CMAKE_BUILD_TYPE=Release ../..
-if [ $? -ne 0 ]; then
-    echo "Failed to cmake"
-    exit $?
-fi
-
-
+cmake -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH/clang_64" -D CMAKE_BUILD_TYPE=Release ../..
 
 make -j Boolberry
-if [ $? -ne 0 ]; then
-    echo "Failed to make Boolberry"
-    exit $?
-fi
-
 make -j connectivity_tool simplewallet daemon
-if [ $? -ne 0 ]; then
-    echo "Failed to make connectivity_tool"
-    exit $?
-fi
 
-cd src/
-if [ $? -ne 0 ]; then
-    echo "Failed to cd src"
-    exit $?
-fi
+cd src
 
+printf "\nCopying boost files...\n\n"
 
-# copy boost files
-echo "Copying boost files...."
 mkdir -p Boolberry.app/Contents/Frameworks/boost_libs
-cp -R "$LOCAL_BOOST_LIBS_PATH/" Boolberry.app/Contents/Frameworks/boost_libs/
-if [ $? -ne 0 ]; then
-    echo "Failed to cp workaround to MacOS"
-    exit 1
-fi
+cp -R "$BOOST_LIBS_PATH/" Boolberry.app/Contents/Frameworks/boost_libs/
 
 cp simplewallet Boolberry.app/Contents/MacOS
-if [ $? -ne 0 ]; then
-    echo "Failed to cp simplewallet to MacOS"
-    exit $?
-fi
-
 cp boolbd Boolberry.app/Contents/MacOS
-if [ $? -ne 0 ]; then
-    echo "Failed to cp boolbd to MacOS"
-    exit $?
-fi
 
 # fix boost links
 echo "Fixing boost library links...."
@@ -77,66 +37,37 @@ update_links_in_boost_binary @executable_path/../Frameworks/boost_libs Boolberry
 update_links_in_boost_libs @executable_path/../Frameworks/boost_libs Boolberry.app/Contents/Frameworks/boost_libs
 
 
-
-$QT_PATH/clang_64/bin/macdeployqt Boolberry.app
-if [ $? -ne 0 ]; then
-    echo "Failed to macdeployqt Boolberry.app"
-    exit $?
-fi
-
+$QT_PREFIX_PATH/clang_64/bin/macdeployqt Boolberry.app
 cp -R ../../../src/gui/qt-daemon/html Boolberry.app/Contents/MacOS
-if [ $? -ne 0 ]; then
-    echo "Failed to cp html to MacOS"
-    exit $?
-fi
-
 cp ../../../src/gui/qt-daemon/app.icns Boolberry.app/Contents/Resources
-if [ $? -ne 0 ]; then
-    echo "Failed to cp app.icns to resources"
-    exit $?
-fi
-
-
 
 
 read version_str <<< $(DYLD_LIBRARY_PATH=$LOCAL_BOOST_LIBS_PATH ./connectivity_tool --version | awk '/^Boolberry / { print $2 }')
-echo "Version built: $version_str"
-
-
+printf "\nVersion built: $version_str\n\n"
 
 echo "############### Prepearing archive... ################"
 mkdir package_folder
-if [ $? -ne 0 ]; then
-    echo "Failed to zip app"
-    exit 1
-fi
 
 ln -s /Applications package_folder/Applications 
-if [ $? -ne 0 ]; then
-    echo "Failed to copy applications link"
-    exit 1
-fi
 
 mv Boolberry.app package_folder 
-if [ $? -ne 0 ]; then
-    echo "Failed to top app package"
-    exit 1
-fi
+
+package_filename="boolberry-macos-x64-$version_str.dmg"
+
+hdiutil create -format UDZO -srcfolder package_folder -volname Boolberry $package_filename
+
+printf "\nbuild succeeded!\n\n"
 
 
-hdiutil create -format UDZO -srcfolder package_folder -volname Boolberry "Boolberry-macos-x64-$version_str.dmg"
-if [ $? -ne 0 ]; then
-    echo "Failed to create dmg"
-    exit 1
-fi
+echo "############### uploading... ################"
 
+scp $package_filename bbr_build_server:/var/www/html/builds/
 
-#zip -r -y "bbr-macos-x64-v0.2.0.zip" Boolberry.app
-#if [ $? -ne 0 ]; then
-#    echo "Failed to zip app"
-#    exit $?
-# fi
+mail_msg="New build for macOS-x64 available at http://$BBR_BUILD_SERVER_ADDR_PORT/builds/$package_filename"
+
+echo $mail_msg
+
+echo $mail_msg | mail -s "Boolberry macOS-x64 build $version_str" ${emails}
 
 cd ../..
-echo "Build success"
-
+exit 0
