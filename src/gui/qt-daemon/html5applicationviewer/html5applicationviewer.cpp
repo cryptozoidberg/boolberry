@@ -728,7 +728,7 @@ void Html5ApplicationViewer::set_gui_lang(const QString& str_config)
 QString Html5ApplicationViewer::parse_transfer_target(const QString& transfer_target_str)
 {
   view::address_details ad = AUTO_VAL_INIT(ad);
-  ad.valid = m_backend.parse_transfer_target(transfer_target_str.toStdString(), ad.payment_id_hex, ad.standard_address);
+  ad.valid = m_backend.parse_transfer_target(transfer_target_str.toStdString(), ad.payment_id_hex, ad.standard_address, ad.swap_address);
   return epee::serialization::store_t_to_json(ad).c_str();
 }
 

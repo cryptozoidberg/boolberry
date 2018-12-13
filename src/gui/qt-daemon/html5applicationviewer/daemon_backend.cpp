@@ -174,7 +174,7 @@ std::string daemon_backend::get_config_folder()
   return m_data_dir;
 }
 
-bool daemon_backend::parse_transfer_target(const std::string& transfer_target, std::string& payment_id_hex, std::string& standard_addr_str)
+bool daemon_backend::parse_transfer_target(const std::string& transfer_target, std::string& payment_id_hex, std::string& standard_addr_str, bool& swap_address)
 {
   if (transfer_target.empty())
     return false;
@@ -187,6 +187,7 @@ bool daemon_backend::parse_transfer_target(const std::string& transfer_target, s
 
   standard_addr_str = currency::get_account_address_as_str(addr);
   payment_id_hex = epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id);
+  swap_address = addr.is_swap_address;
   return true;
 }
 
