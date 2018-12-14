@@ -22,7 +22,7 @@ namespace tools
     uint64_t unpacked_size;
   };
 #ifndef TESTNET
-    const static pre_download_entrie pre_download = { "http://88.99.193.104/downloads/data2.mdb.pak", "1e8eecdd2be438d13650f551775038da", 4864663828, 6718447616 };
+  const static pre_download_entrie pre_download = { "http://88.99.193.104/downloads/data3.mdb.pak", "852ad69914faf6c2e5220b719b30bb4a", 5769499320, 7884759040 };
 #else
   const static pre_download_entrie pre_download = { "http://88.99.193.104/downloads/data_testnet.mdb.pak", "57feaa97401048386f335355d23fdf18", 164782602, 238563328 };
 #endif
