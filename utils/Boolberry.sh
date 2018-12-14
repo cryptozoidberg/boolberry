@@ -1,11 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+set -e
+curr_path=${BASH_SOURCE%/*}
 
-set LD_LIBRARY_PATH=${0%}
-set LD_LIBRARY_PATH=$LD_LIBRARY_PATH/libs
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH$PWD/libs
-export QT_PLUGIN_PATH=$LD_LIBRARY_PATH
-
-echo $LD_LIBRARY_PATH
-echo $QT_PLUGIN_PATH
-
-./qt-boolb
+set -x
+LD_LIBRARY_PATH=$curr_path/lib QT_PLUGIN_PATH=$curr_path/plugins $curr_path/Boolberry

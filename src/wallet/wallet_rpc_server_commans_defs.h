@@ -135,10 +135,12 @@ namespace wallet_rpc
     {
       std::string tx_hash;
       std::string tx_blob;
+      std::string tx_unsigned_hex; // for cold-signing process
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash)
         KV_SERIALIZE(tx_blob)
+        KV_SERIALIZE(tx_unsigned_hex)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -444,6 +446,50 @@ namespace wallet_rpc
         KV_SERIALIZE(amount_total)
         KV_SERIALIZE(outs_swept)
         KV_SERIALIZE(amount_swept)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_SIGN_TRANSFER
+  {
+    struct request
+    {
+      std::string     tx_unsigned_hex;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_unsigned_hex)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string     tx_signed_hex;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_signed_hex)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_SUBMIT_TRANSFER
+  {
+    struct request
+    {
+      std::string     tx_unsigned_hex;
+      std::string     tx_signed_hex;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_unsigned_hex)
+        KV_SERIALIZE(tx_signed_hex)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string   tx_hash;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_hash)
       END_KV_SERIALIZE_MAP()
     };
   };

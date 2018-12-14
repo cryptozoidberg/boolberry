@@ -875,58 +875,80 @@ void wallet2::get_payments(const payment_id_t& payment_id, std::list<wallet2::pa
   });
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::sign_transfer(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx)
+void wallet2::sign_transfer(const std::string& tx_sources_blob, std::string& signed_tx_blob, currency::transaction& tx)
 {
+  // assumed to be called from normal, non-watch-only wallet
+  CHECK_AND_THROW_WALLET_EX(m_is_view_only, error::wallet_common_error, "watch-only wallet is unable to sign transfers, you need to use normal wallet for that");
+  
+  // decrypt the blob
+  std::string decrypted_src_blob = crypto::do_chacha_crypt(tx_sources_blob, m_account.get_keys().m_view_secret_key);
 
-  std::string blob;
-  bool r = epee::file_io_utils::load_file_to_string(tx_sources_file, blob);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to open file");
-
-  crypto::do_chacha_crypt(blob, m_account.get_keys().m_view_secret_key);
-
+  // deserialize create_tx_arg
   create_tx_arg create_tx_param = AUTO_VAL_INIT(create_tx_param);
-  r = t_unserializable_object_from_blob(create_tx_param, blob);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt unsigned file");
+  bool r = t_unserializable_object_from_blob(create_tx_param, decrypted_src_blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt tx sources blob");
   
+  // make sure unsigned tx was created with the same keys
+  CHECK_AND_THROW_WALLET_EX(create_tx_param.spend_pub_key != m_account.get_keys().m_account_address.m_spend_public_key, error::wallet_common_error, "The tx sources was created in a different wallet, keys missmatch");
+  
+  // construct the transaction
   create_tx_res create_tx_result = AUTO_VAL_INIT(create_tx_result);
-
-  if (create_tx_param.spend_pub_key != m_account.get_keys().m_account_address.m_spend_public_key)
-  {
-    CHECK_AND_THROW_WALLET_EX(true, error::wallet_common_error, "The tx_sources file was created with the different wallet");
-  }
-  
   r = currency::construct_tx(m_account.get_keys(), create_tx_param, create_tx_result);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "failed to construct_tx at sign_transfer");
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "construct_tx failed at sign_transfer");
   tx = create_tx_result.tx;
 
-  blob = t_serializable_object_to_blob(create_tx_result);
-  crypto::do_chacha_crypt(blob, m_account.get_keys().m_view_secret_key);
-
-  r = epee::file_io_utils::save_string_to_file(signed_tx_file, blob);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "failed to store signed tx to file");
+  // serialize and encrypt the result
+  signed_tx_blob = t_serializable_object_to_blob(create_tx_result);
+  crypto::do_chacha_crypt(signed_tx_blob, m_account.get_keys().m_view_secret_key);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::submit_transfer(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx)
+void wallet2::sign_transfer_files(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx)
+{
+  std::string sources_blob;
+  bool r = epee::file_io_utils::load_file_to_string(tx_sources_file, sources_blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, std::string("failed to open file ") + tx_sources_file);
+
+  std::string signed_tx_blob;
+  sign_transfer(sources_blob, signed_tx_blob, tx);
+
+  r = epee::file_io_utils::save_string_to_file(signed_tx_file, signed_tx_blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, std::string("failed to store signed tx to file ") + signed_tx_file);
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::submit_transfer(const std::string& tx_sources_blob, const std::string& signed_tx_blob, currency::transaction& tx)
 {
   //decrypt sources
-  std::string blob;
-  bool r = epee::file_io_utils::load_file_to_string(tx_sources_file, blob);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to open file");
-  crypto::do_chacha_crypt(blob, m_account.get_keys().m_view_secret_key);
+  std::string decrypted_src_blob = crypto::do_chacha_crypt(tx_sources_blob, m_account.get_keys().m_view_secret_key);
+
+  // deserialize create_tx_arg
   create_tx_arg create_tx_param = AUTO_VAL_INIT(create_tx_param);
-  r = t_unserializable_object_from_blob(create_tx_param, blob);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt unsigned tx file");
+  bool r = t_unserializable_object_from_blob(create_tx_param, decrypted_src_blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt tx sources blob");
 
   //decrypt result
-  r = epee::file_io_utils::load_file_to_string(target_file, blob);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to open file");
-  crypto::do_chacha_crypt(blob, m_account.get_keys().m_view_secret_key);
+  std::string descrypted_signed_tx_blob = crypto::do_chacha_crypt(signed_tx_blob, m_account.get_keys().m_view_secret_key);
+  
+  // deserialize signed tx blob
   create_tx_res create_tx_result = AUTO_VAL_INIT(create_tx_result);
-  r = t_unserializable_object_from_blob(create_tx_result, blob);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt signed tx file");
+  r = t_unserializable_object_from_blob(create_tx_result, descrypted_signed_tx_blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt signed tx blob");
 
+  // broadcast transaction
   finalize_transaction(create_tx_param, create_tx_result);
   tx = create_tx_result.tx;
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::submit_transfer_files(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx)
+{
+  std::string tx_sources_blob;
+  bool r = epee::file_io_utils::load_file_to_string(tx_sources_file, tx_sources_blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, std::string("failed to open file ") + tx_sources_file);
+  
+  std::string signed_tx_blob;
+  r = epee::file_io_utils::load_file_to_string(target_file, signed_tx_blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, std::string("failed to open file ") + target_file);
+
+  submit_transfer(tx_sources_blob, signed_tx_blob, tx);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result, bool do_not_relay)

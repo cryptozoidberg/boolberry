@@ -140,8 +140,10 @@ namespace tools
     void refresh(size_t & blocks_fetched, bool& received_money);
     bool refresh(size_t & blocks_fetched, bool& received_money, bool& ok);
 
-    void sign_transfer(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
-    void submit_transfer(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
+    void sign_transfer(const std::string& tx_sources_blob, std::string& signed_tx_blob, currency::transaction& tx);
+    void sign_transfer_files(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
+    void submit_transfer(const std::string& tx_sources_blob, const std::string& signed_tx_blob, currency::transaction& tx);
+    void submit_transfer_files(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
 
 
     void sign_text(const std::string& text, crypto::signature& sig);
@@ -547,6 +549,7 @@ namespace tools
       crypto::do_chacha_crypt(bl, m_account.get_keys().m_view_secret_key);
       epee::file_io_utils::save_string_to_file("unsigned_boolberry_tx", bl);
       LOG_PRINT_L0("Transaction stored to unsigned_boolberry_tx. Take this file to offline wallet to sign it and then transfer it usign this wallet");
+      relay_blob = bl; // save encrypted tx param blob to relay_blob
       return;
     }
     bool r = currency::construct_tx(m_account.get_keys(), create_tx_param, create_tx_result);

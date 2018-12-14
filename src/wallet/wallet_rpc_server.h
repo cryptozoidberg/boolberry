@@ -28,22 +28,24 @@ namespace tools
 
     static void init_options(boost::program_options::options_description& desc);
     bool init(const boost::program_options::variables_map& vm);
-    bool run();
+    bool run(bool offline_mode = false);
   private:
 
     CHAIN_HTTP_TO_MAP2(connection_context); //forward http requests to uri map
 
     BEGIN_URI_MAP2()
       BEGIN_JSON_RPC_MAP("/json_rpc")
-        MAP_JON_RPC_WE("getbalance",   on_getbalance,   wallet_rpc::COMMAND_RPC_GET_BALANCE)
-        MAP_JON_RPC_WE("getaddress",   on_getaddress,   wallet_rpc::COMMAND_RPC_GET_ADDRESS)
-        MAP_JON_RPC_WE("transfer",     on_transfer,     wallet_rpc::COMMAND_RPC_TRANSFER)
-        MAP_JON_RPC_WE("store",        on_store,        wallet_rpc::COMMAND_RPC_STORE)
-        MAP_JON_RPC_WE("get_payments", on_get_payments, wallet_rpc::COMMAND_RPC_GET_PAYMENTS)
-        MAP_JON_RPC_WE("get_bulk_payments",  on_get_bulk_payments,  wallet_rpc::COMMAND_RPC_GET_BULK_PAYMENTS)
-        MAP_JON_RPC_WE("get_transfers", on_get_transfers, wallet_rpc::COMMAND_RPC_GET_TRANSFERS)
-        MAP_JON_RPC_WE("convert_address", on_convert_address, wallet_rpc::COMMAND_RPC_CONVERT_ADDRESS)
-        MAP_JON_RPC_WE("sweep_below",   on_sweep_below, wallet_rpc::COMMAND_SWEEP_BELOW)
+        MAP_JON_RPC_WE("getbalance",          on_getbalance,            wallet_rpc::COMMAND_RPC_GET_BALANCE)
+        MAP_JON_RPC_WE("getaddress",          on_getaddress,            wallet_rpc::COMMAND_RPC_GET_ADDRESS)
+        MAP_JON_RPC_WE("transfer",            on_transfer,              wallet_rpc::COMMAND_RPC_TRANSFER)
+        MAP_JON_RPC_WE("store",               on_store,                 wallet_rpc::COMMAND_RPC_STORE)
+        MAP_JON_RPC_WE("get_payments",        on_get_payments,          wallet_rpc::COMMAND_RPC_GET_PAYMENTS)
+        MAP_JON_RPC_WE("get_bulk_payments",   on_get_bulk_payments,     wallet_rpc::COMMAND_RPC_GET_BULK_PAYMENTS)
+        MAP_JON_RPC_WE("get_transfers",       on_get_transfers,         wallet_rpc::COMMAND_RPC_GET_TRANSFERS)
+        MAP_JON_RPC_WE("convert_address",     on_convert_address,       wallet_rpc::COMMAND_RPC_CONVERT_ADDRESS)
+        MAP_JON_RPC_WE("sweep_below",         on_sweep_below,           wallet_rpc::COMMAND_SWEEP_BELOW)
+        MAP_JON_RPC_WE("sign_transfer",       on_sign_transfer,         wallet_rpc::COMMAND_SIGN_TRANSFER)
+        MAP_JON_RPC_WE("submit_transfer",     on_submit_transfer,       wallet_rpc::COMMAND_SUBMIT_TRANSFER)
 
         // supernet api
         MAP_JON_RPC_WE("maketelepod",   on_maketelepod,   wallet_rpc::COMMAND_RPC_MAKETELEPOD)
@@ -63,7 +65,8 @@ namespace tools
       bool on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANSFERS::request& req, wallet_rpc::COMMAND_RPC_GET_TRANSFERS::response& res, epee::json_rpc::error& er, connection_context& cntx);
       bool on_convert_address(const wallet_rpc::COMMAND_RPC_CONVERT_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_CONVERT_ADDRESS::response& res, epee::json_rpc::error& er, connection_context& cntx);
       bool on_sweep_below(const wallet_rpc::COMMAND_SWEEP_BELOW::request& req, wallet_rpc::COMMAND_SWEEP_BELOW::response& res, epee::json_rpc::error& er, connection_context& cntx);
-
+      bool on_sign_transfer(const wallet_rpc::COMMAND_SIGN_TRANSFER::request& req, wallet_rpc::COMMAND_SIGN_TRANSFER::response& res, epee::json_rpc::error& er, connection_context& cntx);
+      bool on_submit_transfer(const wallet_rpc::COMMAND_SUBMIT_TRANSFER::request& req, wallet_rpc::COMMAND_SUBMIT_TRANSFER::response& res, epee::json_rpc::error& er, connection_context& cntx);
 
       bool on_maketelepod(const wallet_rpc::COMMAND_RPC_MAKETELEPOD::request& req, wallet_rpc::COMMAND_RPC_MAKETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx);
       bool on_clonetelepod(const wallet_rpc::COMMAND_RPC_CLONETELEPOD::request& req, wallet_rpc::COMMAND_RPC_CLONETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx);

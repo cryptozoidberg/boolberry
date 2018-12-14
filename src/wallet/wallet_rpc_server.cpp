@@ -28,15 +28,18 @@ namespace tools
   wallet_rpc_server::wallet_rpc_server(wallet2& w):m_wallet(w)
   {}
   //------------------------------------------------------------------------------------------------------------------------------
-  bool wallet_rpc_server::run()
+  bool wallet_rpc_server::run(bool offline_mode)
   {
-    m_net_server.add_idle_handler([this](){
-      size_t blocks_fetched = 0;
-      bool received_money = false;
-      bool ok;
-      m_wallet.refresh(blocks_fetched, received_money, ok);
-      return true;
-    }, 20000);
+    if (!offline_mode)
+    {
+      m_net_server.add_idle_handler([this](){
+        size_t blocks_fetched = 0;
+        bool received_money = false;
+        bool ok;
+        m_wallet.refresh(blocks_fetched, received_money, ok);
+        return true;
+      }, 20000);
+    }
 
     //DO NOT START THIS SERVER IN MORE THEN 1 THREADS WITHOUT REFACTORING
     return epee::http_server_impl_base<wallet_rpc_server, connection_context>::run(1, true);
@@ -144,10 +147,13 @@ namespace tools
         currency::set_payment_id_and_swap_addr_to_tx_extra(extra, payment_id, swap_address);
 
       currency::transaction tx;
-      currency::blobdata relay_blob;
-      m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, extra, tx, relay_blob, req.do_not_relay);
-      res.tx_hash = boost::lexical_cast<std::string>(currency::get_transaction_hash(tx));
-      res.tx_blob = epee::string_tools::buff_to_hex_nodelimer(relay_blob);
+      currency::blobdata tx_blob;
+      m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, extra, tx, tx_blob, req.do_not_relay);
+      res.tx_hash = epee::string_tools::pod_to_hex(currency::get_transaction_hash(tx));
+      if (m_wallet.is_view_only())
+        res.tx_unsigned_hex = epee::string_tools::buff_to_hex_nodelimer(tx_blob); // view-only wallets can't sign and relay transactions, so exctract unsigned blob from tx_blob
+      else
+        res.tx_blob = epee::string_tools::buff_to_hex_nodelimer(tx_blob);
       return true;
     }
     catch (const tools::error::daemon_busy& e)
@@ -638,6 +644,77 @@ namespace tools
       return false;
     }
 
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_sign_transfer(const wallet_rpc::COMMAND_SIGN_TRANSFER::request& req, wallet_rpc::COMMAND_SIGN_TRANSFER::response& res, epee::json_rpc::error& er, connection_context& cntx)
+  {
+    try
+    {
+      currency::transaction tx = AUTO_VAL_INIT(tx);
+      std::string tx_unsigned_blob;
+      if (!string_tools::parse_hexstr_to_binbuff(req.tx_unsigned_hex, tx_unsigned_blob))
+      {
+        er.code = WALLET_RPC_ERROR_CODE_WRONG_ARGUMENT;
+        er.message = "tx_unsigned_hex is invalid";
+        return false;
+      }
+      std::string tx_signed_blob;
+      m_wallet.sign_transfer(tx_unsigned_blob, tx_signed_blob, tx);
+      
+      res.tx_signed_hex = epee::string_tools::buff_to_hex_nodelimer(tx_signed_blob);
+    }
+    catch (const std::exception& e)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
+      er.message = e.what();
+      return false;
+    }
+    catch (...)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
+      er.message = "WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR";
+      return false;
+    }
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_submit_transfer(const wallet_rpc::COMMAND_SUBMIT_TRANSFER::request& req, wallet_rpc::COMMAND_SUBMIT_TRANSFER::response& res, epee::json_rpc::error& er, connection_context& cntx)
+  {
+    std::string tx_unsigned_blob;
+    if (!string_tools::parse_hexstr_to_binbuff(req.tx_unsigned_hex, tx_unsigned_blob))
+    {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ARGUMENT;
+      er.message = "tx_unsigned_hex is invalid";
+      return false;
+    }
+
+    std::string tx_signed_blob;
+    if (!string_tools::parse_hexstr_to_binbuff(req.tx_signed_hex, tx_signed_blob))
+    {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ARGUMENT;
+      er.message = "tx_signed_hex is invalid";
+      return false;
+    }
+
+    try
+    {
+      currency::transaction tx = AUTO_VAL_INIT(tx);
+      m_wallet.submit_transfer(tx_unsigned_blob, tx_signed_blob, tx);
+      res.tx_hash = epee::string_tools::pod_to_hex(currency::get_transaction_hash(tx));
+    }
+    catch (const std::exception& e)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
+      er.message = e.what();
+      return false;
+    }
+    catch (...)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
+      er.message = "WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR";
+      return false;
+    }
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------

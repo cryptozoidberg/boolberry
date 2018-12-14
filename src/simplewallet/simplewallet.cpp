@@ -43,7 +43,8 @@ namespace
   const command_line::arg_descriptor<std::string> arg_password = {"password", "Wallet password", "", true};
   const command_line::arg_descriptor<std::string> arg_restore_seed = { "restore-seed", "Restore wallet from the 24-word seed", ""};
   const command_line::arg_descriptor<int> arg_daemon_port = { "daemon-port", "Use daemon instance at port <arg> instead of default", 0 };
-  const command_line::arg_descriptor<uint32_t> arg_log_level = {"set-log", "", 0, true};
+  const command_line::arg_descriptor<uint32_t> arg_log_level = { "set-log", "", 0, true };
+  const command_line::arg_descriptor<bool> arg_offline_mode = { "offline-mode", "Don't connect to daemon, work offline (for cold-signing process)", false, true };
 
   const command_line::arg_descriptor< std::vector<std::string> > arg_command = {"command", ""};
 
@@ -1080,7 +1081,7 @@ bool simple_wallet::sign_transfer(const std::vector<std::string> &args)
   try
   {
     currency::transaction res_tx;
-    m_wallet->sign_transfer(args[0], args[1], res_tx);
+    m_wallet->sign_transfer_files(args[0], args[1], res_tx);
     success_msg_writer() << "transaction signed and stored to file: " << args[1] << ", transaction " << get_transaction_hash(res_tx) << ", " << get_object_blobsize(res_tx) << " bytes";
   }
   catch (const std::exception& e)
@@ -1106,7 +1107,7 @@ bool simple_wallet::submit_transfer(const std::vector<std::string> &args)
   try
   {
     currency::transaction res_tx;
-    m_wallet->submit_transfer(args[0], args[1], res_tx);
+    m_wallet->submit_transfer_files(args[0], args[1], res_tx);
     success_msg_writer() << "transaction submitted, " << get_transaction_hash(res_tx) << ", " << get_object_blobsize(res_tx) << " bytes";
   }
   catch (const std::exception& e)
@@ -1587,6 +1588,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_params, arg_daemon_port);
   command_line::add_arg(desc_params, arg_command);
   command_line::add_arg(desc_params, arg_log_level);
+  command_line::add_arg(desc_params, arg_offline_mode);
   tools::wallet_rpc_server::init_options(desc_params);
 
   po::positional_options_description positional_options;
@@ -1644,7 +1646,7 @@ int main(int argc, char* argv[])
       LOG_ERROR("Wallet file not set.");
       return 1;
     }
-    if(!command_line::has_arg(vm, arg_daemon_address) )
+    if(!command_line::has_arg(vm, arg_daemon_address) && !command_line::has_arg(vm, arg_offline_mode))
     {
       LOG_ERROR("Daemon address not set.");
       return 1;
@@ -1658,7 +1660,13 @@ int main(int argc, char* argv[])
     std::string wallet_file     = command_line::get_arg(vm, arg_wallet_file);    
     std::string wallet_password = command_line::get_arg(vm, arg_password);
     std::string daemon_address  = command_line::get_arg(vm, arg_daemon_address);
-    std::string daemon_host = command_line::get_arg(vm, arg_daemon_host);
+    std::string daemon_host     = command_line::get_arg(vm, arg_daemon_host);
+    bool offline_mode = command_line::get_arg(vm, arg_offline_mode);
+    if (offline_mode)
+    {
+      LOG_PRINT_YELLOW("WARNING: the wallet is running in OFFLINE MODE!", LOG_LEVEL_0);
+    }
+
     int daemon_port = command_line::get_arg(vm, arg_daemon_port);
     if (daemon_host.empty())
       daemon_host = "localhost";
@@ -1673,7 +1681,8 @@ int main(int argc, char* argv[])
       LOG_PRINT_L0("Loading wallet...");
       wal.load(wallet_file, wallet_password);
       wal.init(daemon_address);
-      wal.refresh();
+      if (!offline_mode)
+        wal.refresh();
       LOG_PRINT_GREEN("Loaded ok", LOG_LEVEL_0);
     }
     catch (const std::exception& e)
@@ -1690,7 +1699,7 @@ int main(int argc, char* argv[])
       wal.store();
     });
     LOG_PRINT_L0("Starting wallet rpc server");
-    wrpc.run();
+    wrpc.run(offline_mode);
     LOG_PRINT_L0("Stopped wallet rpc server");
     try
     {

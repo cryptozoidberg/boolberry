@@ -11,8 +11,6 @@ set CERT_FILEPATH=C:\home\cert\bbr\boolberry.pfx
 
 cd %SOURCES_PATH%
 
-git pull
-
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -82,10 +80,15 @@ copy /Y simplewallet.exe bunch
 
 %QT_PREFIX_PATH%\bin\windeployqt.exe bunch\Boolberry.exe
 
+set PACKAGE_ZIP_FILENAME=%ACHIVE_NAME_PREFIX%%version%.zip
+set PACKAGE_EXE_FILENAME=%ACHIVE_NAME_PREFIX%%version%-installer.exe
+set PACKAGE_EXE_FILESTEM=%ACHIVE_NAME_PREFIX%%version%-installer
+set PACKAGE_ZIP_PATH=%BUILDS_PATH%\builds\%PACKAGE_ZIP_FILENAME%
+set PACKAGE_EXE_PATH=%BUILDS_PATH%\builds\%PACKAGE_EXE_FILENAME%
 
 cd bunch
 
-zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%.zip *.*
+zip -r %PACKAGE_ZIP_PATH% *.*
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -95,7 +98,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 
 cd %SOURCES_PATH%\src\gui\qt-daemon\
-zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%.zip html
+zip -r %PACKAGE_ZIP_PATH% html
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -103,7 +106,7 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "Other stuff"
 
 cd %ETC_BINARIES_PATH%
-zip -r %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%.zip *.*
+zip -r %PACKAGE_ZIP_PATH% *.*
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -122,26 +125,46 @@ IF %ERRORLEVEL% NEQ 0 (
 mkdir installer_src
 
 
-unzip %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%.zip -d installer_src
+unzip %PACKAGE_ZIP_PATH% -d installer_src
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
 
-"%INNOSETUP_PATH%"  /dBinariesPath=../build/installer_src /DMyAppVersion=%version% /o%BUILDS_PATH%\builds\ /f%ACHIVE_NAME_PREFIX%%version%-installer ..\utils\setup.iss 
+"%INNOSETUP_PATH%"  /dBinariesPath=../build/installer_src /DMyAppVersion=%version% /o%BUILDS_PATH%\builds\ /f%PACKAGE_EXE_FILESTEM% ..\utils\setup.iss 
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
 @echo on
 @echo "Signing installer..."
-signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% %BUILDS_PATH%\builds\%ACHIVE_NAME_PREFIX%%version%-installer.exe
+signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% %PACKAGE_EXE_PATH%
+IF %ERRORLEVEL% NEQ 0 (
+  goto error
+)
 
 
 
 @echo "---------------------------------------------------------------"
 @echo "---------------------------------------------------------------"
 
+pscp -load boolberry_build_server %PACKAGE_ZIP_PATH% %BBR_BUILD_SERVER_ADDR%:/var/www/html/builds
+IF %ERRORLEVEL% NEQ 0 (
+  @echo "error on uploading zip package to the server"
+  goto error
+)
+
+pscp -load boolberry_build_server %PACKAGE_EXE_PATH% %BBR_BUILD_SERVER_ADDR%:/var/www/html/builds
+IF %ERRORLEVEL% NEQ 0 (
+  @echo "error on uploading exe package to the server"
+  goto error
+)
+
+set mail_msg="New build for win-x64 available at http://%BBR_BUILD_SERVER_ADDR%:8081/builds/%PACKAGE_EXE_FILENAME% <br><br>ZIP:  http://%BBR_BUILD_SERVER_ADDR%:8081/builds/%PACKAGE_ZIP_FILENAME%"
+
+echo %mail_msg%
+
+senditquiet.exe -t %emails% -subject "Boolberry win-x64 build %version%" -body %mail_msg%
 
 
 goto success
@@ -153,7 +176,4 @@ exit /B %ERRORLEVEL%
 :success
 echo "BUILD SUCCESS"
 
-pause
-
-
-
+exit 0
