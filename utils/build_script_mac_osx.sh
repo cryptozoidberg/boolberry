@@ -5,6 +5,7 @@ curr_path=${BASH_SOURCE%/*}
 : "${BOOST_ROOT:?BOOST_ROOT should be set to the root of Boost, ex.: /home/user/boost_1_56_0}"
 : "${BOOST_LIBS_PATH:?BOOST_LIBS_PATH should be set to libs folder of Boost, ex.: /home/user/boost_1_56_0/stage/lib}"
 : "${QT_PREFIX_PATH:?QT_PREFIX_PATH should be set to Qt libs folder, ex.: /home/user/Qt5.5.1/5.5/}"
+: "${CMAKE_OSX_SYSROOT:?CMAKE_OSX_SYSROOT should be set to macOS SDK path, e.g.: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk}"
 
 echo "entering directory $curr_path/.."
 cd $curr_path/..
@@ -13,7 +14,7 @@ rm -rf build
 mkdir -p build/release
 cd build/release
 
-cmake -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH/clang_64" -D CMAKE_BUILD_TYPE=Release ../..
+cmake -D CMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH/clang_64" -D CMAKE_BUILD_TYPE=Release ../..
 
 make -j Boolberry
 make -j connectivity_tool simplewallet daemon
