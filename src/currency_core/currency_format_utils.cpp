@@ -796,7 +796,7 @@ namespace currency
     swap_info.payment_id_hex_str = epee::string_tools::buff_to_hex_nodelimer(payment_id);
     swap_info.swap_address = tools::base58::encode_addr(SWAP_CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX, t_serializable_object_to_blob(addr));
     swap_info.swaped_amount = total_amount;
-    swap_info.tx_id = get_transaction_hash(tx);
+    swap_info.tx_id = string_tools::pod_to_hex(get_transaction_hash(tx));
     return true;
   }
   //---------------------------------------------------------------
