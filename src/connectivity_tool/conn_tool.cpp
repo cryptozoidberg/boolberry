@@ -270,7 +270,11 @@ bool handle_request_stat(po::variables_map& vm, peerid_type peer_id)
   pot.peer_id = peer_id;
   pot.time = time(NULL);
   crypto::public_key pubk = AUTO_VAL_INIT(pubk);
-  string_tools::hex_to_pod(P2P_MAINTAINERS_PUB_KEY, pubk);
+  if (!crypto::secret_key_to_public_key(prvk, pubk))
+  {
+    std::cout << "{" << ENDL << "  \"status\": \"ERROR: failed to convert secret key to public\"" << ENDL << "}" << ENDL;
+    return false;
+  }
   crypto::hash h = tools::get_proof_of_trust_hash(pot);
   crypto::generate_signature(h, pubk, prvk, pot.sign);
 
@@ -282,6 +286,7 @@ bool handle_request_stat(po::variables_map& vm, peerid_type peer_id)
     {
       std::stringstream ss;
       ss << "ERROR: " << "Failed to invoke remote command COMMAND_REQUEST_STAT_INFO to " << command_line::get_arg(vm, arg_ip) << ":" << command_line::get_arg(vm, arg_port);
+      ss << ", pubk: \"" << pubk << "\", sign: \"" << pot.sign << "\", proof_h: \"" << h << "\"";
       rs.COMMAND_REQUEST_STAT_INFO_status = ss.str();
     }else
     {
@@ -302,6 +307,7 @@ bool handle_request_stat(po::variables_map& vm, peerid_type peer_id)
     {
       std::stringstream ss;
       ss << "ERROR: " << "Failed to invoke remote command COMMAND_REQUEST_NETWORK_STATE to " << command_line::get_arg(vm, arg_ip) << ":" << command_line::get_arg(vm, arg_port);
+      ss << ", pubk: \"" << pubk << "\", sign: \"" << pot.sign << "\", proof_h: \"" << h << "\"";
       rs.COMMAND_REQUEST_NETWORK_STATE_status = ss.str();
     }else
     {
