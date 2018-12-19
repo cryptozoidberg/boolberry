@@ -72,6 +72,8 @@ namespace currency
     bool save(const std::vector<std::string> &args);
     bool set_log(const std::vector<std::string> &args);
     bool show_seed(const std::vector<std::string> &args);
+    bool spendkey(const std::vector<std::string> &args);
+    bool viewkey(const std::vector<std::string> &args);
     bool list_outputs(const std::vector<std::string> &args);
     bool sweep_below(const std::vector<std::string> &args);
 
