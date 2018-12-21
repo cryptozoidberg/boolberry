@@ -8,6 +8,7 @@ http://gcc.gnu.org/
 http://www.cmake.org/
 http://www.boost.org/
 Alternatively, it may be possible to install them using a package manager.
+
 **Unix server version(without GUI)**
 As an example of easiest install on Ubuntu(well tested on 12/14/16):
 ```bash
