@@ -10,6 +10,7 @@ http://www.boost.org/
 Alternatively, it may be possible to install them using a package manager.
 
 **Unix server version(without GUI)**
+
 As an example of easiest install on Ubuntu(well tested on 12/14/16):
 ```bash
  sudo apt-get install -y build-essential g++ python-dev autotools-dev libicu-dev build-essential libbz2-dev cmake git libboost-all-dev screen
@@ -23,6 +24,7 @@ As an example of easiest install on Ubuntu(well tested on 12/14/16):
 After project built binary located in build/src/boolbd and build/src/simplewallet
 
 **MacOS X**
+
 More detailed instructions for OS X (assume you’re using MacPorts (they’re, however, pretty self-explanatory and homebrew users shouldn't have troubles following it too):
 
 * Install latest Xcode and command line tools (these are in fact MacPorts prerequisites)
