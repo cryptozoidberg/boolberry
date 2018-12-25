@@ -532,16 +532,11 @@ namespace currency
     tx.version = CURRENT_TRANSACTION_VERSION;
     tx.unlock_time = unlock_time;
 
-    if (destinations.size() && destinations.back().addr.m_spend_public_key == currency::null_pkey)
-    { 
-      //swap transaction
-      txkey.pub = currency::null_pkey;
-      txkey.sec = currency::null_skey;
-    }
-    else
-    {
-      txkey = keypair::generate();
-    }
+    txkey = keypair::generate();
+
+    if (is_swap_tx(tx, destinations))
+      encrypt_user_data_with_tx_secret_key(txkey.sec, tx.extra);
+
     add_tx_pub_key_to_extra(tx, txkey.pub);
 
     struct input_generation_context_data
@@ -773,12 +768,13 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool get_swap_info_from_tx(const transaction& tx, swap_transaction_info& swap_info)
+  bool get_swap_info_from_tx(const transaction& tx, const crypto::secret_key& sk, swap_transaction_info& swap_info)
   {
     account_public_address addr = AUTO_VAL_INIT(addr);
-    get_swap_info_from_tx_extra(tx, addr);
+    get_swap_info_from_tx_extra(tx, sk, addr); // do not check return code as it's okay if it is false
     if (!addr.is_swap_address)
       return false;
+
     payment_id_t payment_id;
     get_payment_id_from_tx_extra(tx, payment_id);
     uint64_t total_amount = 0;
@@ -794,8 +790,8 @@ namespace currency
       return false;
 
     swap_info.payment_id_hex_str = epee::string_tools::buff_to_hex_nodelimer(payment_id);
-    swap_info.swap_address = tools::base58::encode_addr(SWAP_CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX, t_serializable_object_to_blob(addr));
-    swap_info.swaped_amount = total_amount;
+    swap_info.swap_address = get_account_swap_address_as_str(addr);
+    swap_info.swapped_amount = total_amount;
     swap_info.tx_id = string_tools::pod_to_hex(get_transaction_hash(tx));
     return true;
   }
@@ -826,6 +822,7 @@ namespace currency
       const uint8_t* pspend_key = reinterpret_cast<const uint8_t*>(&swap_addr.m_spend_public_key);
       std::copy(pview_key, pview_key + sizeof(swap_addr.m_view_public_key), std::back_inserter(extra));
       std::copy(pspend_key, pspend_key + sizeof(swap_addr.m_spend_public_key), std::back_inserter(extra));
+      LOG_PRINT_MAGENTA("addr keys before encryption: view: " << swap_addr.m_view_public_key << ", spend: " << swap_addr.m_spend_public_key, LOG_LEVEL_0);
     }
     return true;
   }
@@ -842,7 +839,7 @@ namespace currency
       return true;
 
     CHECK_AND_ASSERT_MES(payment_id_userdata_entry.size() + swap_address_userdata_entry.size() < TX_EXTRA_MAX_USER_DATA_SIZE, false, "To big size for user-data: payment_id_userdata_entry " << payment_id_userdata_entry.size()
-      << "  + swap_address_userdata_entry " << swap_address_userdata_entry.size() << ", expected not more then " << TX_EXTRA_MAX_USER_DATA_SIZE);
+      << "  + swap_address_userdata_entry " << swap_address_userdata_entry.size() << ", expected no more then " << TX_EXTRA_MAX_USER_DATA_SIZE);
 
 
     extra.push_back(TX_EXTRA_TAG_USER_DATA);
@@ -866,7 +863,7 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool get_swapinfo_from_user_data(const std::string& user_data, account_public_address& acc)
+  bool get_swapinfo_encrypted_buff_from_user_data(const std::string& user_data, std::string& encrypted_buff)
   {
     if (!user_data.size())
       return false;
@@ -875,14 +872,18 @@ namespace currency
     {
       if (user_data[i] != TX_USER_DATA_TAG_SWAP_ADDRESS)
       {
+        CHECK_AND_ASSERT_MES(user_data.size() - 1 - i >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data.size() - 1 - i);
         i += user_data[i + 1] + 2;
       }
       else
       {
-        CHECK_AND_ASSERT_MES(user_data[i + 1] == sizeof(crypto::public_key) * 2, false, "wrong TX_USER_DATA_TAG_SWAP_ADDRESS semantics: size=" << user_data[i + 1] << ", expected " << sizeof(crypto::public_key) * 2);
-        acc.is_swap_address = true;
-        acc.m_view_public_key = *((crypto::public_key*)&user_data[i + 2]);
-        acc.m_spend_public_key = *((crypto::public_key*)&user_data[i + 2  + sizeof(crypto::public_key)]);
+        CHECK_AND_ASSERT_MES(user_data.size() - 1 - i >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data.size() - 1 - i);
+        size_t data_size = user_data[i + 1];
+        CHECK_AND_ASSERT_MES(data_size == sizeof(crypto::public_key) * 2, false, "wrong TX_USER_DATA_TAG_SWAP_ADDRESS semantics: data_size: " << data_size << ", expected " << sizeof(crypto::public_key) * 2);
+        ++i;
+        CHECK_AND_ASSERT_MES(user_data.size() - 1 - i >= data_size, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data.size() - 1 - i);
+        ++i;
+        encrypted_buff.assign(static_cast<const char*>(&user_data[i]), data_size);
         return true;
       }
     }
@@ -901,15 +902,38 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool get_swap_info_from_tx_extra(const transaction& tx, account_public_address& addr)
+  bool get_swap_info_from_tx_extra(const transaction& tx, const crypto::secret_key& sk, account_public_address& addr)
   {
     tx_extra_info tei = AUTO_VAL_INIT(tei);
     bool r = parse_and_validate_tx_extra(tx, tei);
     CHECK_AND_ASSERT_MES(r, false, "Failed to parse and validate extra");
     if (!tei.m_user_data_blob.size())
       return false;
-    if (!get_swapinfo_from_user_data(tei.m_user_data_blob, addr))
-      return false;
+
+    // retrieve encrypted data
+    std::string buff;
+    if (!get_swapinfo_encrypted_buff_from_user_data(tei.m_user_data_blob, buff))
+      return false; // no swap info, it's okay
+
+    CHECK_AND_ASSERT_MES(buff.size() == sizeof(crypto::public_key) * 2, false, "wrong size of encrypted swap info: " << buff.size());
+
+    // decrypt
+    crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
+    r = crypto::generate_key_derivation(tei.m_tx_pub_key, sk, derivation);
+    CHECK_AND_ASSERT_MES(r, false, "generate_key_derivation failed");
+    LOG_PRINT_MAGENTA("derivation: " << derivation << ", sk: " << sk << ", tx_pub: " << tei.m_tx_pub_key, LOG_LEVEL_0);
+
+    r = crypto::do_chacha_crypt(buff, derivation);
+    CHECK_AND_ASSERT_MES(r, false, "do_chacha_crypt failed");
+
+    CHECK_AND_ASSERT_MES(buff.size() == sizeof(crypto::public_key) * 2, false, "wrong size of decrypted swap info: " << buff.size());
+
+    // copy decrypted buffer to addr
+    addr.m_view_public_key  = *reinterpret_cast<const crypto::public_key*>(buff.data());
+    addr.m_spend_public_key = *reinterpret_cast<const crypto::public_key*>(buff.data() + sizeof addr.m_view_public_key);
+    addr.is_swap_address    = true;
+    LOG_PRINT_MAGENTA("addr keys after decryption: view: " << addr.m_view_public_key << ", spend: " << addr.m_spend_public_key, LOG_LEVEL_0);
+
     return true;
   }
   //---------------------------------------------------------------
@@ -1274,6 +1298,128 @@ namespace currency
     BOOST_FOREACH(auto& th, b.tx_hashes)
       txs_ids.push_back(th);
     return get_tx_tree_hash(txs_ids);
+  }
+  //---------------------------------------------------------------
+  bool encrypt_user_data_with_tx_secret_key(const crypto::secret_key& sk, uint8_t* data, size_t size)
+  {
+    crypto::public_key pub_key = AUTO_VAL_INIT(pub_key);
+    bool r = string_tools::hex_to_pod(SWAP_ADDRESS_ENCRYPTION_PUB_KEY, pub_key);
+    CHECK_AND_ASSERT_MES(r, false, "failed to load SWAP_ADDRESS_ENCRYPTION_PUB_KEY");
+
+    crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
+    r = crypto::generate_key_derivation(pub_key, sk, derivation);
+    CHECK_AND_ASSERT_MES(r, false, "generate_key_derivation failed");
+    LOG_PRINT_MAGENTA("derivation: " << derivation << ", sk: " << sk << ", pub: " << pub_key, LOG_LEVEL_0);
+
+    std::vector<uint8_t> buff(size, '\0');
+    r = crypto::do_chacha_crypt(data, size, buff.data(), &derivation, sizeof derivation);
+    CHECK_AND_ASSERT_MES(r, false, "do_chacha_crypt failed");
+
+    memcpy_s(data, size, buff.data(), buff.size());
+
+    return true;
+  }
+
+  bool encrypt_user_data_with_tx_secret_key(const crypto::secret_key& sk, std::vector<uint8_t>& extra)
+  {
+    bool padding_started = false;
+    for (size_t i = 0; i < extra.size(); /* nothing */)
+    {
+      if (padding_started)
+      {
+        CHECK_AND_ASSERT_MES(extra[i] == 0, false, "Failed to parse transaction extra (not 0 after padding)");
+      }
+      else if (extra[i] == TX_EXTRA_TAG_PUBKEY)
+      {
+        CHECK_AND_ASSERT_MES(extra.size() - 1 - i >= sizeof(crypto::public_key), false, "Failed to parse transaction extra (TX_EXTRA_TAG_PUBKEY have not enough bytes)");
+        i += 1 + sizeof(crypto::public_key);
+        continue;
+      }
+      else if (extra[i] == TX_EXTRA_TAG_USER_DATA)
+      {
+        CHECK_AND_ASSERT_MES(extra.size() - 1 - i >= 1, false, "Failed to parse transaction extra (TX_EXTRA_TAG_USER_DATA have not enough bytes)");
+        ++i;
+        CHECK_AND_ASSERT_MES(extra.size() - 1 - i >= extra[i], false, "Failed to parse transaction extra (TX_EXTRA_TAG_USER_DATA have wrong bytes counter)");
+        if (extra[i] > 0)
+        {
+          uint8_t* user_data = &extra[i + 1];
+          const size_t user_data_size = static_cast<size_t>(extra[i]);
+
+          size_t j = 0;
+          while (j < user_data_size)
+          {
+            if (user_data[j] != TX_USER_DATA_TAG_SWAP_ADDRESS)
+            {
+              CHECK_AND_ASSERT_MES(user_data_size - 1 - j >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data_size - 1 - j);
+              j += user_data[j + 1] + 2;
+            }
+            else
+            {
+              CHECK_AND_ASSERT_MES(user_data_size - 1 - j >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data_size - 1 - j);
+              ++j;
+              size_t swap_addr_size = user_data[j];
+              CHECK_AND_ASSERT_MES(swap_addr_size == sizeof(crypto::public_key) * 2, false, "wrong TX_USER_DATA_TAG_SWAP_ADDRESS semantics! size: " << swap_addr_size << ", expected: " << sizeof(crypto::public_key) * 2);
+              CHECK_AND_ASSERT_MES(user_data_size - 1 - j >= swap_addr_size, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data_size - 1 - j);
+              ++j;
+              uint8_t *swap_addr = &user_data[j];
+
+              encrypt_user_data_with_tx_secret_key(sk, swap_addr, swap_addr_size);
+
+              return true;
+            }
+          }
+
+        }
+        i += extra[i];
+      }
+      else if (extra[i] == TX_EXTRA_TAG_ALIAS)
+      {
+        CHECK_AND_ASSERT_MES(false, false, "TX_EXTRA_TAG_ALIAS is incompartible with TX_USER_DATA_TAG_SWAP_ADDRESS atm");
+      }
+      else if (extra[i] == 0)
+      {
+        padding_started = true;
+        continue;
+      }
+      else
+      {
+        CHECK_AND_ASSERT_MES(false, false, "unknown tx extra tag: 0x" << std::hex << extra[i]);
+      }
+      ++i;
+    }
+
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool is_swap_tx(const currency::transaction& tx, const std::vector<tx_destination_entry>& destinations)
+  {
+    // a tx is a swap tx if it has at least one swap destination address (null_pkey output) AND swap info in extra.userdata
+    bool has_swap_destinations = false;
+    for (auto& d : destinations)
+    {
+      if (d.addr.is_swap_address)
+      {
+        has_swap_destinations = true;
+        break;
+      }
+    }
+
+    if (!has_swap_destinations)
+      return false;
+    
+    tx_extra_info tei = AUTO_VAL_INIT(tei);
+    bool r = parse_and_validate_tx_extra(tx, tei);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to parse and validate extra");
+    if (!tei.m_user_data_blob.size())
+      return false;
+
+    // retrieve encrypted data
+    std::string buff;
+    if (!get_swapinfo_encrypted_buff_from_user_data(tei.m_user_data_blob, buff))
+      return false; // no swap info, it's okay
+
+    // there is a swap info, consider it as a swap tx
+    return true;
   }
   //---------------------------------------------------------------
 }

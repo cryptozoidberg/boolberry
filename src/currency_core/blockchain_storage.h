@@ -133,7 +133,7 @@ namespace currency
     crypto::hash get_block_id_by_height(uint64_t height);
     bool get_block_by_hash(const crypto::hash &h, block &blk);
     bool get_block_by_height(uint64_t h, block &blk);
-    bool get_block_swap_transactions(uint64_t height, std::string& block_id, std::string& prev_block_id, std::list<swap_transaction_info>& swap_txs_list);
+    bool get_block_swap_transactions(uint64_t height, const crypto::secret_key& sk, std::string& block_id, std::string& prev_block_id, std::list<swap_transaction_info>& swap_txs_list);
     //void get_all_known_block_ids(std::list<crypto::hash> &main, std::list<crypto::hash> &alt, std::list<crypto::hash> &invalid);
 
     template<class archive_t>
@@ -198,7 +198,6 @@ namespace currency
     bool get_block_extended_info_by_hash(const crypto::hash &h, block_extended_info &blk) const;
     bool get_block_extended_info_by_height(uint64_t h, block_extended_info &blk) const;
     bool lookfor_donation(const transaction& tx, uint64_t& donation, uint64_t& royalty);
-    bool get_block_swap_transactions(const crypto::hash& block_id, std::list<swap_transaction_info>& swap_txs_list);
 
     std::string print_key_image_details(const crypto::key_image& ki, bool& found);
 

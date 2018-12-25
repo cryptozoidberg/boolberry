@@ -1450,14 +1450,30 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  bool core_rpc_server::on_get_swap_tsx(const COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::request& req, COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::response& res, connection_context& cntx)
+  bool core_rpc_server::on_get_swap_txs(const COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::request& req, COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
   {
-    if (!m_core.get_blockchain_storage().get_block_swap_transactions(req.height, res.block_id, res.prev_block_id, res.swap_txs_list))
+    if (!check_core_ready())
     {
-      res.status = CORE_RPC_STATUS_INVALID_ARGUMENT;
-      return true;
+      error_resp.code = CORE_RPC_ERROR_CODE_CORE_BUSY;
+      error_resp.message = "Core is busy.";
+      return false;
     }
-    res.status = CORE_RPC_STATUS_OK;
+
+    crypto::secret_key sk = AUTO_VAL_INIT(sk);
+    if (req.secret_key.size() != sizeof(crypto::secret_key)*2 || !string_tools::hex_to_pod(req.secret_key, sk))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "Invalid parameter: secret_key";
+      return false;
+    }
+
+    if (!m_core.get_blockchain_storage().get_block_swap_transactions(req.height, sk, res.block_id, res.prev_block_id, res.swap_txs_list))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "Couldn't retrieve swap transactions from block";
+      return false;
+    }
+
     return true;
   }
 }

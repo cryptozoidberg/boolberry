@@ -1049,13 +1049,13 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
   struct swap_transaction_info
   {
     std::string tx_id;
-    uint64_t swaped_amount;
+    uint64_t swapped_amount;
     std::string swap_address;
     std::string payment_id_hex_str;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(tx_id)
-      KV_SERIALIZE(swaped_amount)
+      KV_SERIALIZE(swapped_amount)
       KV_SERIALIZE(swap_address)
       KV_SERIALIZE(payment_id_hex_str)
     END_KV_SERIALIZE_MAP()
@@ -1065,10 +1065,12 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
   {
     struct request
     {
-      uint64_t height;
+      uint64_t    height;
+      std::string secret_key;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(height)
+        KV_SERIALIZE(secret_key)
       END_KV_SERIALIZE_MAP()
     };
 

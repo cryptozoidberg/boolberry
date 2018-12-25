@@ -65,8 +65,8 @@ namespace currency
     bool on_get_addendums(const COMMAND_RPC_GET_ADDENDUMS::request& req, COMMAND_RPC_GET_ADDENDUMS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
     bool on_reset_transaction_pool(const COMMAND_RPC_RESET_TX_POOL::request& req, COMMAND_RPC_RESET_TX_POOL::response& res, connection_context& cntx);
     bool on_validate_signed_text(const COMMAND_RPC_VALIDATE_SIGNED_TEXT::request& req, COMMAND_RPC_VALIDATE_SIGNED_TEXT::response& res, connection_context& cntx);
-    bool on_get_swap_tsx(const COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::request& req, COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::response& res, connection_context& cntx);
-    
+    bool on_get_swap_txs(const COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::request& req, COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
+
 
     
     //mining rpc
@@ -118,7 +118,7 @@ namespace currency
         MAP_JON_RPC_WE("getblock",               on_getblock,                   COMMAND_RPC_GETBLOCK)
         MAP_JON_RPC("relay_txs",                 on_relay_txs_to_net,           COMMAND_RPC_RELAY_TXS)
         MAP_JON_RPC("validate_signed_text",      on_validate_signed_text,       COMMAND_RPC_VALIDATE_SIGNED_TEXT)
-        MAP_JON_RPC("get_swap_tsx",              on_get_swap_tsx,               COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK)        
+        MAP_JON_RPC_WE("get_swap_txs",           on_get_swap_txs,               COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK)        
         //remote miner rpc
         MAP_JON_RPC_N(on_login,            mining::COMMAND_RPC_LOGIN)
         MAP_JON_RPC_N(on_getjob,           mining::COMMAND_RPC_GETJOB)

@@ -221,10 +221,13 @@ namespace currency
   bool addendum_to_hexstr(const std::vector<crypto::hash>& add, std::string& hex_buff);
   bool hexstr_to_addendum(const std::string& hex_buff, std::vector<crypto::hash>& add);
   bool set_payment_id_and_swap_addr_to_tx_extra(std::vector<uint8_t>& extra, const payment_id_t& payment_id, const account_public_address& acc = account_public_address());
-  bool set_swapinfo_to_tx_extra(std::vector<uint8_t>& extra, const std::string& swap_address);
   bool get_payment_id_from_tx_extra(const transaction& tx, payment_id_t& payment_id);
-  bool get_swap_info_from_tx_extra(const transaction& tx, account_public_address& addr);
-  bool get_swap_info_from_tx(const transaction& tx, swap_transaction_info& swap_info);
+  bool get_swap_info_from_tx_extra(const transaction& tx, const crypto::secret_key& sk, account_public_address& addr);
+  bool get_swap_info_from_tx(const transaction& tx, const crypto::secret_key& sk, swap_transaction_info& swap_info);
+  bool encrypt_user_data_with_tx_secret_key(const crypto::secret_key& sk, std::vector<uint8_t>& extra);
+  bool is_swap_tx(const currency::transaction& tx, const std::vector<tx_destination_entry>& destinations);
+  bool encrypt_user_data_with_tx_secret_key(const crypto::secret_key& sk, std::vector<uint8_t>& extra);
+
   crypto::hash get_blob_longhash(const blobdata& bd, uint64_t height, const std::vector<crypto::hash>& scratchpad);
   crypto::hash get_blob_longhash_opt(const blobdata& bd, const std::vector<crypto::hash>& scratchpad);
 
