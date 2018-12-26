@@ -11,7 +11,7 @@ extern "C"
 
 #include "common/util.h"
 #include "currency_core/currency_format_utils.h"
-
+#include "currency_core/swap_address.h"
 
 TEST(parse_and_validate_tx_extra, is_correct_parse_and_validate_tx_extra)
 {
@@ -83,6 +83,8 @@ TEST(parse_and_validate_tx_extra, test_payment_ids)
   ASSERT_EQ(payment_id, payment_id_2);
 }
 
+#if defined(TESTNET)
+// this test requires SWAP_ADDRESS_ENCRYPTION_SEC_KEY to run
 TEST(parse_and_validate_tx_extra, test_payment_ids_and_swap_address)
 {
   currency::transaction tx = AUTO_VAL_INIT(tx);
@@ -97,16 +99,25 @@ TEST(parse_and_validate_tx_extra, test_payment_ids_and_swap_address)
   bool r = currency::set_payment_id_and_swap_addr_to_tx_extra(tx.extra, payment_id, swap_addr);
   ASSERT_TRUE(r);
 
+  currency::keypair tx_keys = currency::keypair::generate();
+  ASSERT_TRUE(currency::add_tx_pub_key_to_extra(tx, tx_keys.pub));
+  ASSERT_TRUE(currency::encrypt_user_data_with_tx_secret_key(tx_keys.sec, tx.extra)); // encrypt using one-time tx secret key
+
   currency::payment_id_t payment_id_2;
   r = currency::get_payment_id_from_tx_extra(tx, payment_id_2);
   ASSERT_TRUE(r);
   ASSERT_EQ(payment_id, payment_id_2);
+
+  crypto::secret_key swap_encrypt_sec_key = AUTO_VAL_INIT(swap_encrypt_sec_key);
+  ASSERT_TRUE(epee::string_tools::hex_to_pod(SWAP_ADDRESS_ENCRYPTION_SEC_KEY, swap_encrypt_sec_key));
+
   currency::account_public_address swap_addr2 = AUTO_VAL_INIT(swap_addr2);
-  r = currency::get_swap_info_from_tx_extra(tx, swap_addr2);
+  r = currency::get_swap_info_from_tx_extra(tx, swap_encrypt_sec_key, swap_addr2); // decrypt using SWAP_ADDRESS_ENCRYPTION_SEC_KEY
   ASSERT_TRUE(r);
   ASSERT_EQ(swap_addr.m_spend_public_key, swap_addr2.m_spend_public_key);
   ASSERT_EQ(swap_addr.m_view_public_key, swap_addr2.m_view_public_key);
 }
+#endif // TESTNET
 
 
 template<int sz>

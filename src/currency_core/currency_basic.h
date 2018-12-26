@@ -258,7 +258,6 @@ namespace currency
   {
     crypto::public_key m_spend_public_key;
     crypto::public_key m_view_public_key;
-    bool is_swap_address;
 
     BEGIN_SERIALIZE_OBJECT()
       FIELD(m_spend_public_key)
@@ -274,9 +273,11 @@ namespace currency
 
   struct account_public_address: public account_public_address_base
   {
-    bool is_swap_address;
-    account_public_address(): is_swap_address(false)
+    account_public_address()
+      : is_swap_address(false)
     {}
+
+    bool is_swap_address;
   };
 
   struct keypair

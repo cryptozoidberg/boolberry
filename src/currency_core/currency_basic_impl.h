@@ -34,6 +34,7 @@ namespace currency
   void get_donation_parts(uint64_t total_donations, uint64_t& royalty, uint64_t& donation);
   std::string get_account_address_as_str(const account_public_address& adr);
   std::string get_account_address_as_str(const account_public_address& addr, const payment_id_t& payment_id);
+  std::string get_account_swap_address_as_str(const account_public_address& addr);
   bool get_account_address_from_str(account_public_address& adr, const std::string& str);
   bool get_account_address_and_payment_id_from_str(account_public_address& adr, payment_id_t& payment_id, const std::string& str);
   bool is_coinbase(const transaction& tx);

@@ -125,6 +125,11 @@ namespace currency {
     return tools::base58::encode_addr(CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX, t_serializable_object_to_blob(addr));
   }
   //-----------------------------------------------------------------------
+  std::string get_account_swap_address_as_str(const account_public_address& addr)
+  {
+    return tools::base58::encode_addr(SWAP_CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX, t_serializable_object_to_blob(addr));
+  }
+  //-----------------------------------------------------------------------
 #define ADDRESS_KEYS_DATA_SIZE (sizeof(crypto::public_key) * 2)
   
   bool get_account_address_and_payment_id_from_str(account_public_address& addr, payment_id_t& payment_id, const std::string& str)

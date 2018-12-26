@@ -1,3 +1,8 @@
+
+if (NOT STATIC)
+  set(gtest_force_shared_crt ON) # enforce shared linkage for gtests
+endif()
+
 add_subdirectory(gtest)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 

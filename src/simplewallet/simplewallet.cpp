@@ -830,7 +830,7 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
     {
       if(swap_addr.is_swap_address)
       {
-        fail_msg_writer() << "More then one swap addresses is not supported in swap transaction";
+        fail_msg_writer() << "Only one swap address is allowed in a swap transaction";
         return false;
       }
       swap_addr = de.addr;
