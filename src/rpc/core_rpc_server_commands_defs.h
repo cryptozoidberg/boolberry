@@ -1076,13 +1076,11 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
 
     struct response
     {
-      std::string status;
       std::string block_id;
       std::string prev_block_id;
       std::list<swap_transaction_info> swap_txs_list;
 
       BEGIN_KV_SERIALIZE_MAP()
-        KV_SERIALIZE(status)
         KV_SERIALIZE(block_id)
         KV_SERIALIZE(prev_block_id)
         KV_SERIALIZE(swap_txs_list)

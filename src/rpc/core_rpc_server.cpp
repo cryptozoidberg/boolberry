@@ -17,6 +17,7 @@ using namespace epee;
 #include "crypto/hash.h"
 #include "core_rpc_server_error_codes.h"
 #include "currency_core/alias_helper.h"
+#include "currency_core/swap_address.h"
 
 namespace currency
 {
@@ -1464,6 +1465,17 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
     {
       error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
       error_resp.message = "Invalid parameter: secret_key";
+      return false;
+    }
+
+    crypto::public_key swap_pk = AUTO_VAL_INIT(swap_pk);
+    string_tools::hex_to_pod(SWAP_ADDRESS_ENCRYPTION_PUB_KEY, swap_pk);
+    crypto::public_key pk = AUTO_VAL_INIT(pk);
+    crypto::secret_key_to_public_key(sk, pk);
+    if (pk != swap_pk)
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = std::string("Secret key does not match with public key ") + SWAP_ADDRESS_ENCRYPTION_PUB_KEY;
       return false;
     }
 

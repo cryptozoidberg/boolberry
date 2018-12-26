@@ -815,14 +815,13 @@ namespace currency
   {
     if (swap_addr.is_swap_address)
     {
-      extra.push_back(TX_USER_DATA_TAG_SWAP_ADDRESS);
-      extra.push_back(static_cast<uint8_t>(sizeof(crypto::public_key) * 2));
+      swap_address_extra_entry saee = AUTO_VAL_INIT(saee);
+      saee.addr_base = static_cast<const account_public_address_base&>(swap_addr);
+      saee.calc_and_set_checksum();
 
-      const uint8_t* pview_key = reinterpret_cast<const uint8_t*>(&swap_addr.m_view_public_key);
-      const uint8_t* pspend_key = reinterpret_cast<const uint8_t*>(&swap_addr.m_spend_public_key);
-      std::copy(pview_key, pview_key + sizeof(swap_addr.m_view_public_key), std::back_inserter(extra));
-      std::copy(pspend_key, pspend_key + sizeof(swap_addr.m_spend_public_key), std::back_inserter(extra));
-      LOG_PRINT_MAGENTA("addr keys before encryption: view: " << swap_addr.m_view_public_key << ", spend: " << swap_addr.m_spend_public_key, LOG_LEVEL_0);
+      extra.push_back(TX_USER_DATA_TAG_SWAP_ADDRESS);
+      extra.push_back(static_cast<uint8_t>(sizeof saee));
+      std::copy(reinterpret_cast<const uint8_t*>(&saee), reinterpret_cast<const uint8_t*>(&saee) + sizeof saee, std::back_inserter(extra));
     }
     return true;
   }
@@ -879,7 +878,7 @@ namespace currency
       {
         CHECK_AND_ASSERT_MES(user_data.size() - 1 - i >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data.size() - 1 - i);
         size_t data_size = user_data[i + 1];
-        CHECK_AND_ASSERT_MES(data_size == sizeof(crypto::public_key) * 2, false, "wrong TX_USER_DATA_TAG_SWAP_ADDRESS semantics: data_size: " << data_size << ", expected " << sizeof(crypto::public_key) * 2);
+        CHECK_AND_ASSERT_MES(data_size == sizeof(swap_address_extra_entry), false, "wrong TX_USER_DATA_TAG_SWAP_ADDRESS semantics: data_size: " << data_size << ", expected " << sizeof(swap_address_extra_entry));
         ++i;
         CHECK_AND_ASSERT_MES(user_data.size() - 1 - i >= data_size, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data.size() - 1 - i);
         ++i;
@@ -915,24 +914,23 @@ namespace currency
     if (!get_swapinfo_encrypted_buff_from_user_data(tei.m_user_data_blob, buff))
       return false; // no swap info, it's okay
 
-    CHECK_AND_ASSERT_MES(buff.size() == sizeof(crypto::public_key) * 2, false, "wrong size of encrypted swap info: " << buff.size());
+    CHECK_AND_ASSERT_MES(buff.size() == sizeof(swap_address_extra_entry), false, "wrong size of encrypted swap info: " << buff.size());
 
     // decrypt
     crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
     r = crypto::generate_key_derivation(tei.m_tx_pub_key, sk, derivation);
     CHECK_AND_ASSERT_MES(r, false, "generate_key_derivation failed");
-    LOG_PRINT_MAGENTA("derivation: " << derivation << ", sk: " << sk << ", tx_pub: " << tei.m_tx_pub_key, LOG_LEVEL_0);
 
     r = crypto::do_chacha_crypt(buff, derivation);
     CHECK_AND_ASSERT_MES(r, false, "do_chacha_crypt failed");
 
-    CHECK_AND_ASSERT_MES(buff.size() == sizeof(crypto::public_key) * 2, false, "wrong size of decrypted swap info: " << buff.size());
+    CHECK_AND_ASSERT_MES(buff.size() == sizeof(swap_address_extra_entry), false, "wrong size of decrypted swap info: " << buff.size());
 
-    // copy decrypted buffer to addr
-    addr.m_view_public_key  = *reinterpret_cast<const crypto::public_key*>(buff.data());
-    addr.m_spend_public_key = *reinterpret_cast<const crypto::public_key*>(buff.data() + sizeof addr.m_view_public_key);
-    addr.is_swap_address    = true;
-    LOG_PRINT_MAGENTA("addr keys after decryption: view: " << addr.m_view_public_key << ", spend: " << addr.m_spend_public_key, LOG_LEVEL_0);
+    // verify checksum and copy decrypted buffer to addr
+    const swap_address_extra_entry& saee = *reinterpret_cast<const swap_address_extra_entry*>(buff.data());
+    CHECK_AND_ASSERT_MES(saee.is_checksum_valid(), false, "incorrect checksum: " << saee.checksum);
+    static_cast<account_public_address_base&>(addr) = saee.addr_base;
+    addr.is_swap_address = true;
 
     return true;
   }
@@ -1309,8 +1307,7 @@ namespace currency
     crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
     r = crypto::generate_key_derivation(pub_key, sk, derivation);
     CHECK_AND_ASSERT_MES(r, false, "generate_key_derivation failed");
-    LOG_PRINT_MAGENTA("derivation: " << derivation << ", sk: " << sk << ", pub: " << pub_key, LOG_LEVEL_0);
-
+    
     std::vector<uint8_t> buff(size, '\0');
     r = crypto::do_chacha_crypt(data, size, buff.data(), &derivation, sizeof derivation);
     CHECK_AND_ASSERT_MES(r, false, "do_chacha_crypt failed");
@@ -1358,7 +1355,7 @@ namespace currency
               CHECK_AND_ASSERT_MES(user_data_size - 1 - j >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data_size - 1 - j);
               ++j;
               size_t swap_addr_size = user_data[j];
-              CHECK_AND_ASSERT_MES(swap_addr_size == sizeof(crypto::public_key) * 2, false, "wrong TX_USER_DATA_TAG_SWAP_ADDRESS semantics! size: " << swap_addr_size << ", expected: " << sizeof(crypto::public_key) * 2);
+              CHECK_AND_ASSERT_MES(swap_addr_size == sizeof(swap_address_extra_entry), false, "wrong TX_USER_DATA_TAG_SWAP_ADDRESS semantics! size: " << swap_addr_size << ", expected: " << sizeof(swap_address_extra_entry));
               CHECK_AND_ASSERT_MES(user_data_size - 1 - j >= swap_addr_size, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data_size - 1 - j);
               ++j;
               uint8_t *swap_addr = &user_data[j];
