@@ -682,6 +682,7 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
     return false;
   }
 
+  currency::account_public_address swap_addr = AUTO_VAL_INIT(swap_addr);
   for (auto& d : tp.destinations)
   {
     currency::payment_id_t integrated_payment_id;
