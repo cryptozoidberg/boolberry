@@ -1452,9 +1452,11 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
     }
 
     size_t blob_size = get_object_blobsize(create_tx_result.tx);
-    if (blob_size > CURRENCY_MAX_TRANSACTION_BLOB_SIZE)
+    if (blob_size >= CURRENCY_MAX_TRANSACTION_BLOB_SIZE)
       return rc_too_many_outputs;
 
+    std::string create_tx_param_str = obj_to_json_str(create_tx_param);
+    LOG_PRINT_L2("sweep_below: rc_ok, blob_size = " << blob_size << ", param hash: " << crypto::cn_fast_hash_64(create_tx_param_str.data(), create_tx_param_str.size()));
     return rc_ok;
   };
 
@@ -1467,20 +1469,27 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
   {
     size_t low_bound = 0;
     size_t high_bound = st_index_upper_boundary;
+    create_tx_arg create_tx_param_ok = create_tx_param;
     for (;;)
     {
       if (low_bound + 1 >= high_bound)
       {
         st_index_upper_boundary = low_bound;
         res = rc_ok;
+        create_tx_param = create_tx_param_ok;
         break;
       }
       st_index_upper_boundary = (low_bound + high_bound) / 2;
       try_construct_result_t res = try_construct_tx(st_index_upper_boundary, create_tx_param);
       if (res == rc_ok)
+      {
         low_bound = st_index_upper_boundary;
+        create_tx_param_ok = create_tx_param;
+      }
       else if (res == rc_too_many_outputs)
+      {
         high_bound = st_index_upper_boundary;
+      }
       else
         break;
     }
@@ -1511,6 +1520,10 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
 
   if (p_result_tx != nullptr)
     *p_result_tx = create_tx_result.tx;
+
+  size_t blob_size = get_object_blobsize(create_tx_result.tx);
+  std::string create_tx_param_str = obj_to_json_str(create_tx_param);
+  LOG_PRINT_L2("sweep_below: before finalize, blob_size = " << blob_size << ", param hash: " << crypto::cn_fast_hash_64(create_tx_param_str.data(), create_tx_param_str.size()));
 
   finalize_transaction(create_tx_param, create_tx_result, false);
 }
