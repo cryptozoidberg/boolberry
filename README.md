@@ -14,7 +14,7 @@ Alternatively, it may be possible to install them using a package manager.
 As an example of easiest install on Ubuntu(well tested on 12/14/16):
 ```bash
  sudo apt-get install -y build-essential g++ python-dev autotools-dev libicu-dev build-essential libbz2-dev cmake git libboost-all-dev screen
- got clone git@github.com:cryptozoidberg/boolberry.git
+ git clone https://github.com/cryptozoidberg/boolberry.git
  cd boolberry
  mkdir build
  cd build
