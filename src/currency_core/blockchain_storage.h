@@ -197,6 +197,7 @@ namespace currency
     bool get_block_extended_info_by_hash(const crypto::hash &h, block_extended_info &blk) const;
     bool get_block_extended_info_by_height(uint64_t h, block_extended_info &blk) const;
     bool lookfor_donation(const transaction& tx, uint64_t& donation, uint64_t& royalty);
+    bool check_tx_with_view_key(const crypto::hash& tx_hash, const crypto::secret_key& view_key, const account_public_address& addr, uint64_t& incoming_amount, payment_id_t& payment_id, std::vector<uint64_t>& outs_indicies) const;
 
     std::string print_key_image_details(const crypto::key_image& ki, bool& found);
 

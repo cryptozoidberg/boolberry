@@ -1046,5 +1046,34 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
     };
   };
 
+  struct COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY
+  {
+    struct request
+    {
+      std::string tx_hash;
+      std::string address;
+      std::string view_key;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_hash)
+        KV_SERIALIZE(address)
+        KV_SERIALIZE(view_key)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      uint64_t    amount_received;
+      std::string payment_id_hex;
+      std::vector<uint64_t> outs_indicies;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(amount_received)
+        KV_SERIALIZE(payment_id_hex)
+        KV_SERIALIZE(outs_indicies)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
 }
 
