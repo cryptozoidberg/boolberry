@@ -138,11 +138,16 @@ namespace tools
       currency::transaction tx;
       currency::blobdata tx_blob;
       m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, extra, tx, tx_blob, req.do_not_relay);
-      res.tx_hash = epee::string_tools::pod_to_hex(currency::get_transaction_hash(tx));
       if (m_wallet.is_view_only())
-        res.tx_unsigned_hex = epee::string_tools::buff_to_hex_nodelimer(tx_blob); // view-only wallets can't sign and relay transactions, so exctract unsigned blob from tx_blob
+      {
+        res.tx_unsigned_hex = epee::string_tools::buff_to_hex_nodelimer(tx_blob); // view-only wallets can't sign and relay transactions, so extract unsigned blob from tx_blob
+        // leave res.tx_hash empty, because tx has will change after signing
+      }
       else
+      {
         res.tx_blob = epee::string_tools::buff_to_hex_nodelimer(tx_blob);
+        res.tx_hash = epee::string_tools::pod_to_hex(currency::get_transaction_hash(tx));
+      }
       return true;
     }
     catch (const tools::error::daemon_busy& e)
@@ -652,6 +657,7 @@ namespace tools
       m_wallet.sign_transfer(tx_unsigned_blob, tx_signed_blob, tx);
       
       res.tx_signed_hex = epee::string_tools::buff_to_hex_nodelimer(tx_signed_blob);
+      res.tx_hash = epee::string_tools::pod_to_hex(currency::get_transaction_hash(tx));
     }
     catch (const std::exception& e)
     {

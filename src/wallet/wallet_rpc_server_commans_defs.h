@@ -464,9 +464,11 @@ namespace wallet_rpc
     struct response
     {
       std::string     tx_signed_hex;
+      std::string     tx_hash;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_signed_hex)
+        KV_SERIALIZE(tx_hash)
       END_KV_SERIALIZE_MAP()
     };
   };

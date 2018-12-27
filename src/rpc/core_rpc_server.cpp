@@ -67,7 +67,9 @@ namespace currency
     }
     return true;
   }
-#define CHECK_CORE_READY() if(!check_core_ready()){res.status =  CORE_RPC_STATUS_BUSY;return true;}
+
+#define CHECK_CORE_READY()    if (!check_core_ready()) { res.status = CORE_RPC_STATUS_BUSY; return true; }
+#define CHECK_CORE_READY_WE() if (!check_core_ready()) { error_resp.code = CORE_RPC_ERROR_CODE_CORE_BUSY; error_resp.message = "Core is busy"; return false; }
 
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_height(const COMMAND_RPC_GET_HEIGHT::request& req, COMMAND_RPC_GET_HEIGHT::response& res, connection_context& cntx)
@@ -1449,4 +1451,57 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
 
     return true;
   }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_check_tx_with_view_key(const COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY::request& req, COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
+  {
+    CHECK_CORE_READY_WE();
+
+    crypto::secret_key view_sk = AUTO_VAL_INIT(view_sk);
+    if (req.view_key.size() != sizeof(crypto::secret_key) * 2 || !string_tools::hex_to_pod(req.view_key, view_sk))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "Invalid parameter: view_key";
+      return false;
+    }
+
+    account_public_address addr;
+    if (!get_account_address_from_str(addr, req.address))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "Invalid parameter: address";
+      return false;
+    }
+
+    crypto::public_key view_pk = AUTO_VAL_INIT(view_pk);
+    crypto::secret_key_to_public_key(view_sk, view_pk);
+    if (view_pk != addr.m_view_public_key)
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "view_key does not match with the given address";
+      return false;
+    }
+
+    crypto::hash tx_hash = null_hash;
+    if (req.tx_hash.size() != sizeof(crypto::hash) * 2 || !string_tools::hex_to_pod(req.tx_hash, tx_hash))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "Invalid parameter: tx_hash";
+      return false;
+    }
+
+    payment_id_t payment_id;
+    res.amount_received = 0;
+    if (!m_core.get_blockchain_storage().check_tx_with_view_key(tx_hash, view_sk, addr, res.amount_received, payment_id, res.outs_indicies))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
+      error_resp.message = "check_tx_with_view_key failed, see daemon log for details";
+      return false;
+    }
+
+    res.payment_id_hex = epee::string_tools::buff_to_hex_nodelimer(payment_id);
+
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+
 }
