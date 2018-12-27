@@ -187,7 +187,9 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("submit_transfer", boost::bind(&simple_wallet::submit_transfer, this, _1),                   "Submit a signed transaction from a file <tx_sources_file> <result_file>");
 
   m_cmd_binder.set_handler("integrated_address", boost::bind(&simple_wallet::integrated_address, this, _1),             "integrated_address [payment_id|integrated_address] - Encode given payment_id into an integrated address (for this waller public address). Uses random id if not provided. Decode given integrated address into payment id and standard address.");
-  m_cmd_binder.set_handler("show_seed", boost::bind(&simple_wallet::show_seed, this, _1),                               "Displays secret 24 word phrase that could be used to recover this wallet");
+  m_cmd_binder.set_handler("show_seed", boost::bind(&simple_wallet::show_seed, this, _1),                               "Display secret 24 word phrase that could be used to recover this wallet");
+  m_cmd_binder.set_handler("spendkey", boost::bind(&simple_wallet::spendkey, this, _1),                                 "Display secret spend key");
+  m_cmd_binder.set_handler("viewkey",  boost::bind(&simple_wallet::viewkey, this, _1),                                  "Display secret view key");
   m_cmd_binder.set_handler("list_outputs", boost::bind(&simple_wallet::list_outputs, this, _1),                         "list_outputs [spent|unspent] - Lists all the outputs that have ever been sent to this wallet if called without arguments, otherwise it lists only the spent or unspent outputs");
   m_cmd_binder.set_handler("sweep_below", boost::bind(&simple_wallet::sweep_below, this, _1),                           "sweep_below <mixin_count> <address> <amount_lower_limit> [payment_id] -  Tries to transfers all coins with amount below the given limit to the given address");
 
@@ -1439,6 +1441,30 @@ bool simple_wallet::show_seed(const std::vector<std::string> &args)
       "It looks like this wallet was created quite a while ago. It can't be restored using a seed phrase.\n" <<
       "If you would like to use a wallet that can be restored with a key phrase you will need to transfer all your funds to another, newly generated wallet.\n";
   }
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::spendkey(const std::vector<std::string> &args)
+{
+  message_writer(epee::log_space::console_color_red, true, std::string())
+   << "WARNING! Anyone who knows the following secret key can access you wallet and spend your coins.";
+
+  const account_keys& keys = m_wallet->get_account().get_keys();
+  std::cout << "secret: " << epee::string_tools::pod_to_hex(keys.m_spend_secret_key) << std::endl;
+  std::cout << "public: " << epee::string_tools::pod_to_hex(keys.m_account_address.m_spend_public_key) << std::endl << std::flush;
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::viewkey(const std::vector<std::string> &args)
+{
+  message_writer(epee::log_space::console_color_yellow, false, std::string())
+    << "WARNING! Anyone who knows the following secret key can view you wallet (but can not spend your coins).";
+
+  const account_keys& keys = m_wallet->get_account().get_keys();
+  std::cout << "secret: " << epee::string_tools::pod_to_hex(keys.m_view_secret_key) << std::endl;
+  std::cout << "public: " << epee::string_tools::pod_to_hex(keys.m_account_address.m_view_public_key) << std::endl << std::flush;
 
   return true;
 }

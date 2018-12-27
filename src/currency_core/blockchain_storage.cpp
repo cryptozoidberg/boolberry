@@ -864,6 +864,51 @@ bool blockchain_storage::lookfor_donation(const transaction& tx, uint64_t& donat
   return true;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::check_tx_with_view_key(const crypto::hash& tx_hash, const crypto::secret_key& view_key, const account_public_address& addr, uint64_t& incoming_amount, payment_id_t& payment_id, std::vector<uint64_t>& outs_indicies) const
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  bool r = false;
+
+  auto tx_ptr = m_db_transactions.find(tx_hash);
+  CHECK_AND_ASSERT_MES(tx_ptr, false, "can't find tx " << tx_hash);
+
+  get_payment_id_from_tx_extra(tx_ptr->tx, payment_id);
+
+  crypto::public_key tx_pub_key = get_tx_pub_key_from_extra(tx_ptr->tx);
+  CHECK_AND_ASSERT_MES(tx_pub_key != null_pkey, false, "null public key is retrieved for tx " << tx_hash);
+
+  crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
+  r = crypto::generate_key_derivation(tx_pub_key, view_key, derivation);
+  CHECK_AND_ASSERT_MES(r, false, "generate_key_derivation failed, tx " << tx_hash);
+
+  incoming_amount = 0;
+  outs_indicies.clear();
+
+  size_t output_index = 0;
+  for (auto& out : tx_ptr->tx.vout)
+  {
+    if (out.target.type() == typeid(txout_to_key))
+    {
+      const crypto::public_key& pk = boost::get<txout_to_key>(out.target).key;
+
+      crypto::public_key derived_pk = AUTO_VAL_INIT(derived_pk);
+      r = crypto::derive_public_key(derivation, output_index, addr.m_spend_public_key, derived_pk);
+      CHECK_AND_ASSERT_MES(r, false, "derive_public_key failed, tx: " << tx_hash << ", output: " << output_index << ", addr.m_spend_public_key: " << addr.m_spend_public_key);
+
+      if (pk == derived_pk)
+      {
+        // this output is for 'addr'
+        incoming_amount += out.amount;
+        outs_indicies.push_back(output_index);
+      }
+    }
+
+    ++output_index;
+  }
+
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::get_required_donations_value_for_next_block(uint64_t& don_am)
 {
   TRY_ENTRY();

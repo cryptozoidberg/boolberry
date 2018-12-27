@@ -65,6 +65,7 @@ namespace currency
     bool on_get_addendums(const COMMAND_RPC_GET_ADDENDUMS::request& req, COMMAND_RPC_GET_ADDENDUMS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
     bool on_reset_transaction_pool(const COMMAND_RPC_RESET_TX_POOL::request& req, COMMAND_RPC_RESET_TX_POOL::response& res, connection_context& cntx);
     bool on_validate_signed_text(const COMMAND_RPC_VALIDATE_SIGNED_TEXT::request& req, COMMAND_RPC_VALIDATE_SIGNED_TEXT::response& res, connection_context& cntx);
+    bool on_check_tx_with_view_key(const COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY::request& req, COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
 
     
     //mining rpc
@@ -114,6 +115,7 @@ namespace currency
         MAP_JON_RPC_WE("f_pool_json",            f_on_pool_json,                F_COMMAND_RPC_GET_POOL)
         MAP_JON_RPC_IF("reset_transaction_pool", on_reset_transaction_pool,     COMMAND_RPC_RESET_TX_POOL, !m_restricted)
         MAP_JON_RPC_WE("getblock",               on_getblock,                   COMMAND_RPC_GETBLOCK)
+        MAP_JON_RPC_WE("check_tx_with_view_key", on_check_tx_with_view_key,     COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY)
         MAP_JON_RPC("relay_txs",              on_relay_txs_to_net,           COMMAND_RPC_RELAY_TXS)
         MAP_JON_RPC("validate_signed_text",      on_validate_signed_text,       COMMAND_RPC_VALIDATE_SIGNED_TEXT)
         //remote miner rpc
