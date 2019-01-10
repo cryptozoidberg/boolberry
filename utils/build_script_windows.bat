@@ -1,7 +1,7 @@
 SET QT_PREFIX_PATH=C:\Qt\Qt5.5.0\5.5\msvc2013_64
 SET INNOSETUP_PATH=C:\Program Files (x86)\Inno Setup 5\ISCC.exe
 SET QT_BINARIES_PATH=C:\home\projects\binaries\qt-daemon
-SET ACHIVE_NAME_PREFIX=Boolberry-win-x64-
+SET ACHIVE_NAME_PREFIX=Boolberry-win-x64-%BUILD_SUFFIX%
 SET BUILDS_PATH=C:\home\deploy\boolberry
 SET SOURCES_PATH=C:\home\deploy\boolberry\sources\boolberry
 set BOOST_ROOT=C:\local\boost_1_56_0
