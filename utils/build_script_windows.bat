@@ -22,7 +22,8 @@ IF %ERRORLEVEL% NEQ 0 (
 
 setLocal 
 
-
+call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat" x86_amd64 
+ 
 IF "%1"=="skip_build" GOTO skip_build
 
 rmdir build /s /q
@@ -33,7 +34,6 @@ IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat" x86_amd64
 
 
 msbuild version.vcxproj /p:SubSystem="CONSOLE,5.02"  /p:Configuration=Release /t:Build
