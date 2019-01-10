@@ -8,6 +8,7 @@ set BOOST_ROOT=C:\local\boost_1_56_0
 set BOOST_LIBRARYDIR=C:\local\boost_1_56_0\lib64-msvc-12.0
 set EXTRA_FILES_PATH=C:\home\deploy\boolberry\extra_files
 set CERT_FILEPATH=C:\home\cert\bbr\boolberry.pfx
+set ETC_BINARIES_PATH=C:\dev\deploy\etc-binaries
 
 cd %SOURCES_PATH%
 
@@ -21,17 +22,18 @@ IF %ERRORLEVEL% NEQ 0 (
 
 setLocal 
 
-call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86_amd64
 
 IF "%1"=="skip_build" GOTO skip_build
 
 rmdir build /s /q
 mkdir build
 cd build
-cmake -D CMAKE_PREFIX_PATH="%QT_PREFIX_PATH%" -D BUILD_GUI=TRUE -D STATIC=FALSE -G "Visual Studio 12 Win64" ..
+cmake -D CMAKE_PREFIX_PATH="%QT_PREFIX_PATH%" -D BUILD_GUI=TRUE -D STATIC=FALSE -G "Visual Studio 15 2017 Win64" -T host=x64 ..
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
+
+call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat" x86_amd64
 
 
 msbuild version.vcxproj /p:SubSystem="CONSOLE,5.02"  /p:Configuration=Release /t:Build
