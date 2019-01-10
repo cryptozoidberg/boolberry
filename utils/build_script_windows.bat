@@ -1,4 +1,4 @@
-SET QT_PREFIX_PATH=C:\Qt\Qt5.5.0\5.5\msvc2013_64
+SET QT_PREFIX_PATH=C:\dev\_sdk\Qt5.11.2\5.11.2\msvc2017_64
 SET INNOSETUP_PATH=C:\Program Files (x86)\Inno Setup 5\ISCC.exe
 SET QT_BINARIES_PATH=C:\home\projects\binaries\qt-daemon
 SET ACHIVE_NAME_PREFIX=Boolberry-win-x64-%BUILD_SUFFIX%
