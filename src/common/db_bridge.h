@@ -741,6 +741,13 @@ namespace db
       super::erase(ck);
     }
 
+    template<typename callback_t>
+    void enumerate_subitems(callback_t callback)
+    {
+      subitems_visitor<callback_t> visitor(callback);
+      m_dbb.get_adapter()->visit_table(m_tid, &visitor);
+    }
+
   private:
     const uuid128_key array_counter_suffix_key; // just a number to store array counter using complex_key
 
@@ -757,6 +764,31 @@ namespace db
       complex_key<array_key_t, uuid128_key> cc = { array_key, array_counter_suffix_key };
       return const_single_value<complex_key<array_key_t, uuid128_key>, size_t, super >(cc, *this);
     }
+
+    template<typename callback_t>
+    struct subitems_visitor : public i_db_visitor
+    {
+      subitems_visitor(callback_t cb)
+        : m_callback(cb)
+      {}
+
+      virtual bool on_visit_db_item(size_t i, const void* key_data, size_t key_size, const void* value_data, size_t value_size) override
+      {
+        if (key_size != sizeof(complex_key<array_key_t, size_t>))
+          return true; // skip single values containing items size
+
+        complex_key<array_key_t, size_t> key;
+        tkey_from_pointer(key, key_data, key_size);
+
+        value_t value = AUTO_VAL_INIT(value);
+        value_type_helper_selector<value_type_is_serializable>::tvalue_from_pointer(value_data, value_size, value);
+
+        return m_callback(i, key.key_a, key.key_b, value);
+      }
+
+      callback_t& m_callback;
+    };
+
   }; // class key_to_array_accessor_base
 
 

@@ -47,6 +47,15 @@ namespace db
       return it->second.back().txn;
     }
 
+    MDB_txn* get_current_transaction_if_exists() const
+    {
+      std::lock_guard<boost::recursive_mutex> guard(m_transaction_stack_mutex);
+      auto it = m_transaction_stack.find(std::this_thread::get_id());
+      if (it != m_transaction_stack.end() && !it->second.empty())
+        return it->second.back().txn;
+      return nullptr;
+    }
+
     bool has_active_transaction() const
     {
       std::lock_guard<boost::recursive_mutex> guard(m_transaction_stack_mutex);
