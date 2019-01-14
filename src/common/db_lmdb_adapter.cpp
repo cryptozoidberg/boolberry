@@ -189,7 +189,7 @@ namespace db
     if (!m_p_impl->has_active_transaction())
     {
       local_transaction = true;
-      begin_transaction();
+      begin_transaction(true);
     }
     int r = mdb_stat(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &table_stat);
     if (local_transaction)
