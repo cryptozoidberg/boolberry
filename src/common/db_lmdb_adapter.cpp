@@ -351,6 +351,12 @@ namespace db
       local_transaction = true;
       begin_transaction();
     }
+    
+    auto commiter = epee::misc_utils::create_scope_leave_handler([this, &local_transaction](){
+      if (local_transaction)
+        commit_transaction();
+    });
+
     MDB_cursor* p_cursor = nullptr;
     int r = mdb_cursor_open(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &p_cursor);
     CHECK_DB_CALL_RESULT(r, false, "mdb_cursor_open failed");
@@ -368,8 +374,6 @@ namespace db
     }
 
     mdb_cursor_close(p_cursor);
-    if (local_transaction)
-      commit_transaction();
     return true;
   }
 
