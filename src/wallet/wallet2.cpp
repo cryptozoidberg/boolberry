@@ -1028,6 +1028,28 @@ void wallet2::get_recent_transfers_history(std::vector<wallet_rpc::wallet_transf
   trs.insert(trs.end(), start, stop);
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::get_recent_blocks_stat(std::vector<wallet_block_stat_t>& wbs, size_t blocks_limit)
+{
+  std::map<uint64_t, wallet_block_stat_t> blocks_stat;
+
+  for (size_t i = m_transfer_history.size() - 1; i != SIZE_MAX; --i)
+  {
+    auto& thi = m_transfer_history[i];
+    auto& bsi = blocks_stat[thi.height];
+    (thi.is_income ? bsi.amount_in : bsi.amount_out) += thi.amount;
+    bsi.ts = thi.timestamp;
+    bsi.height = thi.height;
+
+    if (blocks_stat.size() == blocks_limit)
+      break;
+  }
+
+  wbs.reserve(blocks_stat.size());
+
+  for (auto& bsi : blocks_stat)
+    wbs.push_back(bsi.second);
+}
+//----------------------------------------------------------------------------------------------------
 bool wallet2::get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id)
 {
   return m_core_proxy->get_transfer_address(adr_str, addr, payment_id);
