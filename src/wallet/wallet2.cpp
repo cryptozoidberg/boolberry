@@ -1362,6 +1362,9 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
     }
   }
 
+  // sort by amount descending in order to spend bigger outputs first
+  std::sort(selected_transfers.begin(), selected_transfers.end(), [this](size_t a, size_t b) { return m_transfers[b].amount() < m_transfers[a].amount(); });
+
   CHECK_AND_THROW_WALLET_EX(selected_transfers.empty(), error::wallet_common_error, "No spendable outputs meet the criterion");
 
   typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry out_entry;
@@ -1404,10 +1407,10 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
   create_tx_param.recipients.push_back(addr);
 
   enum try_construct_result_t {rc_ok = 0, rc_too_few_outputs = 1, rc_too_many_outputs = 2, rc_create_tx_failed = 3 };
-  auto try_construct_tx = [&](size_t st_index_upper_boundary, create_tx_arg &create_tx_param) -> try_construct_result_t
+  auto try_construct_tx = [&](size_t st_index_upper_boundary, create_tx_arg& create_tx_param, uint64_t& amount_swept) -> try_construct_result_t
   {
     //prepare inputs
-    uint64_t amount_swept = 0;
+    amount_swept = 0;
     create_tx_param.sources.clear();
     create_tx_param.sources.resize(st_index_upper_boundary);
     CHECK_AND_THROW_WALLET_EX(st_index_upper_boundary > selected_transfers.size(), error::wallet_internal_error, "index_upper_boundary = "
@@ -1484,7 +1487,10 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
   const size_t estimated_max_inputs = CURRENCY_MAX_TRANSACTION_BLOB_SIZE / (estimated_bytes_per_input * (fake_outs_count + 1));
 
   size_t st_index_upper_boundary = std::min(selected_transfers.size(), estimated_max_inputs); // selected_transfers.size();
-  try_construct_result_t res = try_construct_tx(st_index_upper_boundary, create_tx_param);
+  uint64_t amount_swept = 0;
+  try_construct_result_t res = try_construct_tx(st_index_upper_boundary, create_tx_param, amount_swept);
+  CHECK_AND_THROW_WALLET_EX(res == rc_too_few_outputs, error::wallet_common_error, epee::string_tools::num_to_string_fast(st_index_upper_boundary) + " biggest unspent outputs have total amount of "
+    + print_money(amount_swept, true) + " which is less than required fee: " + print_money(fee, true) + ", transaction cannot be constructed");
   if (res == rc_too_many_outputs)
   {
     size_t low_bound = 0;
@@ -1500,7 +1506,7 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
         break;
       }
       st_index_upper_boundary = (low_bound + high_bound) / 2;
-      try_construct_result_t res = try_construct_tx(st_index_upper_boundary, create_tx_param);
+      try_construct_result_t res = try_construct_tx(st_index_upper_boundary, create_tx_param, amount_swept);
       if (res == rc_ok)
       {
         low_bound = st_index_upper_boundary;
@@ -1517,12 +1523,23 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
 
   if (res != rc_ok)
   {
-    std::string msg;
+    uint64_t amount_min = UINT64_MAX, amount_max = 0, amount_sum = 0;
     for (auto& i : selected_transfers)
-      msg += "#" + epee::string_tools::num_to_string_fast(i) + " " + print_money(m_transfers[i].amount()) + "\n";
-    CHECK_AND_THROW_WALLET_EX(true, error::wallet_internal_error, "try_construct_tx failed with result: " + epee::string_tools::num_to_string_fast(res) + ", transfers:\n" + msg);
+    {
+      uint64_t amount = m_transfers[i].amount();
+      amount_min = std::min(amount_min, amount);
+      amount_max = std::max(amount_max, amount);
+      amount_sum += amount;
+    }
+    CHECK_AND_THROW_WALLET_EX(true, error::wallet_internal_error, "try_construct_tx failed with result: " + epee::string_tools::num_to_string_fast(res) +
+      ", selected_transfers stats:\n" +
+      "  outs:       " + epee::string_tools::num_to_string_fast(selected_transfers.size()) + "\n" +
+      "  amount min: " + print_money(amount_min) + "\n" +
+      "  amount max: " + print_money(amount_max) + "\n" +
+      "  amount avg: " + (selected_transfers.empty() ? std::string("n/a") : print_money(amount_sum / selected_transfers.size())));
   }
 
+  outs_swept = create_tx_result.tx.vin.size();
 
   if (m_is_view_only)
   {
@@ -1535,8 +1552,6 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
 
   r = currency::construct_tx(m_account.get_keys(), create_tx_param, create_tx_result);
   CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, "can't construct tx, create_tx_param: " + obj_to_json_str(create_tx_param));
-
-  outs_swept = create_tx_result.tx.vin.size();
 
   if (p_result_tx != nullptr)
     *p_result_tx = create_tx_result.tx;
