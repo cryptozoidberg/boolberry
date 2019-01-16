@@ -1572,11 +1572,63 @@ bool simple_wallet::sweep_below(const std::vector<std::string> &args)
     m_wallet->sweep_below(fake_outs_count, addr, amount, payment_id, fee, outs_total, amount_total, outs_swept, &result_tx);
     if (!get_inputs_money_amount(result_tx, amount_swept))
       LOG_ERROR("get_inputs_money_amount failed, tx: " << obj_to_json_str(result_tx));
-    success_msg_writer(false) << outs_swept << " outputs (" << print_money(amount_swept) << " coins) of " << outs_total << " total (" << print_money(amount_total)
-      << ") below the specified limit of " << print_money(amount) << " were successfully swept";
+    success_msg_writer(false) << outs_swept << " outputs (" << print_money(amount_swept, true) << " coins) of " << outs_total << " total (" << print_money(amount_total, true)
+      << ") below the specified limit of " << print_money(amount, true) << " were successfully swept";
     success_msg_writer(true) << "tx: " << get_transaction_hash(result_tx) << " size: " << get_object_blobsize(result_tx) << " bytes";
   }
   catch (const std::exception& e)
+  {
+    LOG_ERROR(e.what());
+    fail_msg_writer() << e.what();
+    return true;
+  }
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::show_dust(const std::vector<std::string> &args)
+{
+  tools::wallet2::transfer_container transfers;
+  m_wallet->get_transfers(transfers);
+
+  uint64_t total_unspent_amount = 0;
+  uint64_t total_unspent_outs = 0;
+  std::vector<uint64_t> dust_amounts;
+  dust_amounts.reserve(transfers.size());
+  for (size_t i = 0; i < transfers.size(); ++i)
+  {
+    auto& tr = transfers[i];
+    uint64_t amount = tr.amount();
+    if (tr.m_spent)
+      continue;
+
+    if (amount < DEFAULT_DUST_THRESHOLD)
+      dust_amounts.push_back(amount);
+
+    total_unspent_amount += amount;
+    ++total_unspent_outs;
+  }
+
+  if (dust_amounts.empty())
+  {
+    success_msg_writer() << "there is no dust in the wallet";
+    return true;
+  }
+
+  std::sort(dust_amounts.begin(), dust_amounts.end());
+  uint64_t median_amount = dust_amounts[dust_amounts.size() / 2];
+  uint64_t sum = std::accumulate(dust_amounts.begin(), dust_amounts.end(), static_cast<uint64_t>(0));
+
+  success_msg_writer() << "dust statictics:" << ENDL <<
+    "  dust outputs:            " << dust_amounts.size() << " of " << total_unspent_outs << " total unspent outputs ( " << std::fixed << std::setprecision(3) << (100.0 * dust_amounts.size() / total_unspent_outs) << "% )" << ENDL <<
+    "  total dust amount:       " << print_money(sum, true) << " of " << print_money(total_unspent_amount, true) << " total balance ( " << std::fixed << std::setprecision(3) << (100.0 * sum / total_unspent_amount) << "% )" << ENDL <<
+    "  amounts of dust outputs: " << ENDL <<
+    "    min    : " << print_money(dust_amounts.front()) << ENDL <<
+    "    max    : " << print_money(dust_amounts.back()) << ENDL <<
+    "    avg    : " << print_money(sum / dust_amounts.size()) << ENDL <<
+    "    median : " << print_money(median_amount) << ENDL;
+  return true;
+}
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::recent_blocks(const std::vector<std::string> &args)
 {
