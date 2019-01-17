@@ -951,6 +951,27 @@ void wallet2::submit_transfer_files(const std::string& tx_sources_file, const st
   submit_transfer(tx_sources_blob, signed_tx_blob, tx);
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::cancel_transfer(const std::string& tx_sources_blob)
+{
+  //decrypt sources
+  std::string decrypted_src_blob = crypto::do_chacha_crypt(tx_sources_blob, m_account.get_keys().m_view_secret_key);
+
+  // deserialize create_tx_arg
+  create_tx_arg create_tx_param = AUTO_VAL_INIT(create_tx_param);
+  bool r = t_unserializable_object_from_blob(create_tx_param, decrypted_src_blob);
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_common_error, "Failed to decrypt tx sources blob");
+
+  for (auto& s : create_tx_param.sources)
+  {
+    bool& spent_flag = m_transfers[s.transfer_index].m_spent;
+    // flag should be in cleared state
+    CHECK_AND_THROW_WALLET_EX(spent_flag == false, error::wallet_common_error, std::string("internal error: transfer #") + epee::string_tools::num_to_string_fast(s.transfer_index)
+      + " is NOT spent as expected. Please, resynchronize the wallet from scratch.");
+    spent_flag = false; // clear the flag
+    LOG_PRINT_L1("clearing spent flag of transfer #" << s.transfer_index << " due to cancelling a transaction");
+  }
+}
+//----------------------------------------------------------------------------------------------------
 void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result, bool do_not_relay)
 {
   using namespace currency;

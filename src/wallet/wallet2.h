@@ -152,7 +152,7 @@ namespace tools
     void sign_transfer_files(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
     void submit_transfer(const std::string& tx_sources_blob, const std::string& signed_tx_blob, currency::transaction& tx);
     void submit_transfer_files(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
-
+    void cancel_transfer(const std::string& tx_sources_blob);
 
     void sign_text(const std::string& text, crypto::signature& sig);
     std::string validate_signed_text(const std::string& addr, const std::string& text, const crypto::signature& sig);
