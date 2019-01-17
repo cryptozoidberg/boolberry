@@ -61,7 +61,7 @@ namespace tools
       }
 
 
-      std::cout << "Received " << received_bytes << " from " << total_bytes << " (" << (received_bytes * 100) / total_bytes << "%)\r";
+      std::cout << "Received " << received_bytes/1048576 << "Mb from " << total_bytes/1048576 << "Mb (" << (received_bytes * 100) / total_bytes << "%)\r";
       if (is_stop(total_bytes, received_bytes))
       {
         LOG_PRINT_MAGENTA(ENDL << "Interrupting download", LOG_LEVEL_0);
