@@ -745,7 +745,7 @@ namespace db
     void enumerate_subitems(callback_t callback)
     {
       subitems_visitor<callback_t> visitor(callback);
-      m_dbb.get_adapter()->visit_table(m_tid, &visitor);
+      super::m_dbb.get_adapter()->visit_table(super::m_tid, &visitor);
     }
 
   private:
