@@ -178,7 +178,9 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("list_recent_transfers", boost::bind(&simple_wallet::list_recent_transfers, this, _1),       "list_recent_transfers - Show recent maximum 1000 transfers");
   m_cmd_binder.set_handler("payments", boost::bind(&simple_wallet::show_payments, this, _1),                            "payments <payment_id_1> [<payment_id_2> ... <payment_id_N>] - Show payments <payment_id_1>, ... <payment_id_N>");
   m_cmd_binder.set_handler("bc_height", boost::bind(&simple_wallet::show_blockchain_height, this, _1),                  "Show blockchain height");
-  
+  m_cmd_binder.set_handler("list_outputs", boost::bind(&simple_wallet::list_outputs, this, _1),                         "list_outputs [spent|unspent] - Lists all the outputs that have ever been sent to this wallet if called without arguments, otherwise it lists only the spent or unspent outputs");
+  m_cmd_binder.set_handler("recent_blocks", boost::bind(&simple_wallet::recent_blocks, this, _1),                       "recent_blocks [N] - Lists summary information for N recent blocks, that have txs related to this wallet. N = 40 by default.");
+
   m_cmd_binder.set_handler("transfer", boost::bind(&simple_wallet::transfer, this, _1),                                 "transfer <mixin_count> <addr_1> <amount_1> [<addr_2> <amount_2> ... <addr_N> <amount_N>] [payment_id] - Transfer <amount_1>,... <amount_N> to <address_1>,... <address_N>, respectively. <mixin_count> is the number of transactions yours is indistinguishable from (from 0 to maximum available)");
   m_cmd_binder.set_handler("transfer_so", boost::bind(&simple_wallet::transfer_so, this, _1),                           "transfer_so <out_idx,out_idx,...> <fee> <mixin_count> <addr_1> <amount_1> [<addr_2> <amount_2> ... <addr_N> <amount_N>] [payment_id] - Transfer coins spending only provided outputs (use list_outputs command to get outputs' indecies)");
 
@@ -190,8 +192,8 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("show_seed", boost::bind(&simple_wallet::show_seed, this, _1),                               "Display secret 24 word phrase that could be used to recover this wallet");
   m_cmd_binder.set_handler("spendkey", boost::bind(&simple_wallet::spendkey, this, _1),                                 "Display secret spend key");
   m_cmd_binder.set_handler("viewkey",  boost::bind(&simple_wallet::viewkey, this, _1),                                  "Display secret view key");
-  m_cmd_binder.set_handler("list_outputs", boost::bind(&simple_wallet::list_outputs, this, _1),                         "list_outputs [spent|unspent] - Lists all the outputs that have ever been sent to this wallet if called without arguments, otherwise it lists only the spent or unspent outputs");
   m_cmd_binder.set_handler("sweep_below", boost::bind(&simple_wallet::sweep_below, this, _1),                           "sweep_below <mixin_count> <address> <amount_lower_limit> [payment_id] -  Tries to transfers all coins with amount below the given limit to the given address");
+  m_cmd_binder.set_handler("show_dust", boost::bind(&simple_wallet::show_dust, this, _1),                               "prints dust statictics");
 
   m_cmd_binder.set_handler("get_tx_key", boost::bind(&simple_wallet::get_tx_key, this, _1),                             "Get transaction key (r) for a given <txid>");
   m_cmd_binder.set_handler("check_tx_key", boost::bind(&simple_wallet::check_tx_key, this, _1),                         "Check amount going to <address> in <txid>");
@@ -550,10 +552,11 @@ bool simple_wallet::refresh(const std::vector<std::string>& args)
   try
   {
     m_wallet->refresh(fetched_blocks);
+    uint64_t last_block_height = m_wallet->get_blockchain_current_height() - 1;
     ok = true;
     // Clear line "Height xxx of xxx"
     std::cout << "\r                                                                \r";
-    success_msg_writer(true) << "Refresh done, blocks received: " << fetched_blocks;
+    success_msg_writer(true) << "Refresh done, blocks received: " << fetched_blocks << ", last block's height: " << last_block_height;
     show_balance();
   }
   catch (const tools::error::daemon_busy&)
@@ -1569,9 +1572,103 @@ bool simple_wallet::sweep_below(const std::vector<std::string> &args)
     m_wallet->sweep_below(fake_outs_count, addr, amount, payment_id, fee, outs_total, amount_total, outs_swept, &result_tx);
     if (!get_inputs_money_amount(result_tx, amount_swept))
       LOG_ERROR("get_inputs_money_amount failed, tx: " << obj_to_json_str(result_tx));
-    success_msg_writer(false) << outs_swept << " outputs (" << print_money(amount_swept) << " coins) of " << outs_total << " total (" << print_money(amount_total)
-      << ") below the specified limit of " << print_money(amount) << " were successfully swept";
+    success_msg_writer(false) << outs_swept << " outputs (" << print_money(amount_swept, true) << " coins) of " << outs_total << " total (" << print_money(amount_total, true)
+      << ") below the specified limit of " << print_money(amount, true) << " were successfully swept";
     success_msg_writer(true) << "tx: " << get_transaction_hash(result_tx) << " size: " << get_object_blobsize(result_tx) << " bytes";
+  }
+  catch (const std::exception& e)
+  {
+    LOG_ERROR(e.what());
+    fail_msg_writer() << e.what();
+    return true;
+  }
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::show_dust(const std::vector<std::string> &args)
+{
+  tools::wallet2::transfer_container transfers;
+  m_wallet->get_transfers(transfers);
+
+  uint64_t total_unspent_amount = 0;
+  uint64_t total_unspent_outs = 0;
+  std::vector<uint64_t> dust_amounts;
+  dust_amounts.reserve(transfers.size());
+  for (size_t i = 0; i < transfers.size(); ++i)
+  {
+    auto& tr = transfers[i];
+    uint64_t amount = tr.amount();
+    if (tr.m_spent)
+      continue;
+
+    if (amount < DEFAULT_DUST_THRESHOLD)
+      dust_amounts.push_back(amount);
+
+    total_unspent_amount += amount;
+    ++total_unspent_outs;
+  }
+
+  if (dust_amounts.empty())
+  {
+    success_msg_writer() << "there is no dust in the wallet";
+    return true;
+  }
+
+  std::sort(dust_amounts.begin(), dust_amounts.end());
+  uint64_t median_amount = dust_amounts[dust_amounts.size() / 2];
+  uint64_t sum = std::accumulate(dust_amounts.begin(), dust_amounts.end(), static_cast<uint64_t>(0));
+
+  success_msg_writer() << "dust statictics:" << ENDL <<
+    "  dust outputs:            " << dust_amounts.size() << " of " << total_unspent_outs << " total unspent outputs ( " << std::fixed << std::setprecision(3) << (100.0 * dust_amounts.size() / total_unspent_outs) << "% )" << ENDL <<
+    "  total dust amount:       " << print_money(sum, true) << " of " << print_money(total_unspent_amount, true) << " total balance ( " << std::fixed << std::setprecision(3) << (100.0 * sum / total_unspent_amount) << "% )" << ENDL <<
+    "  amounts of dust outputs: " << ENDL <<
+    "    min    : " << print_money(dust_amounts.front()) << ENDL <<
+    "    max    : " << print_money(dust_amounts.back()) << ENDL <<
+    "    avg    : " << print_money(sum / dust_amounts.size()) << ENDL <<
+    "    median : " << print_money(median_amount) << ENDL;
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::recent_blocks(const std::vector<std::string> &args)
+{
+  uint16_t blocks_limit = 40;
+  if (args.size() > 0)
+  {
+    bool ok = string_tools::get_xtype_from_string(blocks_limit, args[0]);
+    if (!ok)
+    {
+      fail_msg_writer() << "invalid parameter";
+      return true;
+    }
+  }
+
+  try
+  {
+    std::vector<tools::wallet_block_stat_t> wbs;
+    m_wallet->get_recent_blocks_stat(wbs, blocks_limit);
+    std::stringstream ss;
+    uint64_t total_in = 0, total_out = 0, min_height = UINT64_MAX, max_height = 0;
+    ss << "block h. timestamp (UTC)       amount in       amount out    " << ENDL;
+    for (auto& e : wbs)
+    {
+      ss
+        << std::setw(7) << e.height
+        << "  " << epee::misc_utils::get_time_str_v3(boost::posix_time::from_time_t(e.ts))
+        << "  " << currency::print_money(e.amount_in)
+        << "  " << currency::print_money(e.amount_out)
+        << ENDL;
+      total_in += e.amount_in;
+      total_out += e.amount_out;
+      min_height = std::min(min_height, e.height);
+      max_height = std::max(max_height, e.height);
+    }
+    ss << "blocks range: " << max_height - min_height << ", blocks with relevant txs: " << wbs.size() << ENDL;
+    int64_t diff = total_in - total_out;
+    ss << "total income: " << print_money(total_in, true) << ", total outgo: " << print_money(total_out, true) << ", change: "
+      << (diff < 0 ? "-" : "+") << print_money(abs(diff), true);
+
+    success_msg_writer() << ss.str();
   }
   catch (const std::exception& e)
   {
@@ -1579,6 +1676,7 @@ bool simple_wallet::sweep_below(const std::vector<std::string> &args)
     fail_msg_writer() << "error: " << e.what();
     return true;
   }
+
 
   return true;
 }

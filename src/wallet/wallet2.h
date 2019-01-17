@@ -44,7 +44,14 @@ namespace tools
     virtual void on_money_sent(const wallet_rpc::wallet_transfer_info& wti) {}
   };
 
-    
+  struct wallet_block_stat_t
+  {
+    wallet_block_stat_t() : amount_in(0), amount_out(0), height(0), ts(0) {}
+    uint64_t amount_in;
+    uint64_t amount_out;
+    uint64_t height;
+    uint64_t ts;
+  };
 
   struct tx_dust_policy
   {
@@ -124,6 +131,7 @@ namespace tools
     currency::account_base& get_account(){return m_account;}
 
     void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
+    void get_recent_blocks_stat(std::vector<wallet_block_stat_t>& wbs, size_t blocks_limit);
     void get_unconfirmed_transfers(std::vector<wallet_rpc::wallet_transfer_info>& trs);
     void init(const std::string& daemon_address = "http://localhost:8080");
     void reset_and_sync_wallet();
@@ -144,7 +152,7 @@ namespace tools
     void sign_transfer_files(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
     void submit_transfer(const std::string& tx_sources_blob, const std::string& signed_tx_blob, currency::transaction& tx);
     void submit_transfer_files(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
-
+    void cancel_transfer(const std::string& tx_sources_blob);
 
     void sign_text(const std::string& text, crypto::signature& sig);
     std::string validate_signed_text(const std::string& addr, const std::string& text, const crypto::signature& sig);

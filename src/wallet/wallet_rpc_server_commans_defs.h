@@ -496,6 +496,24 @@ namespace wallet_rpc
     };
   };
 
+  struct COMMAND_CANCEL_TRANSFER
+  {
+    struct request
+    {
+      std::string     tx_unsigned_hex;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_unsigned_hex)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      BEGIN_KV_SERIALIZE_MAP()
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
 }
 }
 
