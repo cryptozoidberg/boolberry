@@ -51,7 +51,7 @@ Root: HKCR; Subkey: "BoolberryWalletDataKyesFile\DefaultIcon"; ValueType: string
 [Files]
 Source: "{#BinariesPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs ignoreversion overwritereadonly replacesameversion
 Source: "..\src\gui\qt-daemon\html\*"; DestDir: "{app}\html"; Flags: ignoreversion recursesubdirs
-Source: "{#BinariesPath}\vcredist_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall
+Source: "{#BinariesPath}\vc_redist.x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
