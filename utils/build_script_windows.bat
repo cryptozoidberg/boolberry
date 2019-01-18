@@ -1,20 +1,19 @@
 SET QT_PREFIX_PATH=C:\dev\_sdk\Qt5.11.2\5.11.2\msvc2017_64
 SET INNOSETUP_PATH=C:\Program Files (x86)\Inno Setup 5\ISCC.exe
-SET QT_BINARIES_PATH=C:\home\projects\binaries\qt-daemon
-SET ACHIVE_NAME_PREFIX=Boolberry-win-x64-%BUILD_SUFFIX%
-SET BUILDS_PATH=C:\home\deploy\boolberry
-SET SOURCES_PATH=C:\home\deploy\boolberry\sources\boolberry
-set BOOST_ROOT=C:\local\boost_1_56_0
-set BOOST_LIBRARYDIR=C:\local\boost_1_56_0\lib64-msvc-12.0
-set EXTRA_FILES_PATH=C:\home\deploy\boolberry\extra_files
+SET ETC_BINARIES_PATH=C:\dev\deploy\etc-binaries
+SET ACHIVE_NAME_PREFIX=boolberry-win-x64-
+SET BUILDS_PATH=C:\dev\deploy\boolberry
+set BOOST_ROOT=C:\dev\_sdk\boost_1_68_0
+set BOOST_LIBRARYDIR=C:\dev\_sdk\boost_1_68_0\lib64-msvc-14.1
 set CERT_FILEPATH=C:\home\cert\bbr\boolberry.pfx
-set ETC_BINARIES_PATH=C:\dev\deploy\etc-binaries
+SET MY_PATH=%~dp0
+SET SOURCES_PATH=%MY_PATH:~0,-7%
 
 cd %SOURCES_PATH%
-
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
+
 @echo on
 
 @echo "---------------- BUILDING CONSOLE APPLICATIONS ----------------"
@@ -22,9 +21,12 @@ IF %ERRORLEVEL% NEQ 0 (
 
 setLocal 
 
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat" x86_amd64 
- 
-IF "%1"=="skip_build" GOTO skip_build
+call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat" x86_amd64
+
+set skip_build_flag=
+if "%1"=="skip_build"   set skip_build_flag=true
+if "%1"=="--skip-build" set skip_build_flag=true
+if defined skip_build_flag goto skip_build
 
 rmdir build /s /q
 mkdir build
@@ -139,11 +141,11 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 @echo on
-@echo "Signing installer..."
-signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% %PACKAGE_EXE_PATH%
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
+rem @echo "Signing installer..."
+rem signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% %PACKAGE_EXE_PATH%
+rem IF %ERRORLEVEL% NEQ 0 (
+rem   goto error
+rem )
 
 
 
