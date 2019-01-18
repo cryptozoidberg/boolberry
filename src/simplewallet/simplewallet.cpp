@@ -434,25 +434,18 @@ bool simple_wallet::close_wallet()
     return false;
   }
 
-  try
-  {
-    m_wallet->store();
-  }
-  catch (const std::exception& e)
-  {
-    fail_msg_writer() << e.what();
-    return false;
-  }
+  save(std::vector<std::string>());
 
   return true;
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::save(const std::vector<std::string> &args)
 {
+  success_msg_writer() << "saving wallet data...";
   try
   {
     m_wallet->store();
-    success_msg_writer() << "Wallet data saved";
+    success_msg_writer() << "wallet data is saved";
   }
   catch (const std::exception& e)
   {
