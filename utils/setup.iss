@@ -62,6 +62,6 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 
 
 [Run]
-Filename: {tmp}\vcredist_x64.exe; Parameters: "/install /quiet /norestart";  StatusMsg: Installing VC++ 2013 Redistributables...
+Filename: {tmp}\vc_redist.x64.exe; Parameters: "/install /quiet /norestart";  StatusMsg: Installing VC++ 2013 Redistributables...
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
