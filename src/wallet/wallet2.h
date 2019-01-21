@@ -176,6 +176,8 @@ namespace tools
 
     void sweep_below(size_t fake_outs_count, const currency::account_public_address& addr, uint64_t threshold_amount, const currency::payment_id_t& payment_id,
       uint64_t fee, size_t& outs_total, uint64_t& amount_total, size_t& outs_swept, currency::transaction* result_tx = nullptr);
+
+    std::string print_key_image_info(const crypto::key_image& ki) const;
     
     bool get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) const;
     bool check_connection();

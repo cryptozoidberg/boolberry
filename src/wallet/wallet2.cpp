@@ -1580,6 +1580,31 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
   finalize_transaction(create_tx_param, create_tx_result, false);
 }
 //----------------------------------------------------------------------------------------------------
+std::string wallet2::print_key_image_info(const crypto::key_image& ki) const
+{
+  std::stringstream ss;
+
+  auto it = m_key_images.find(ki);
+  if (it != m_key_images.end())
+  {
+    size_t index = it->second;
+    CHECK_AND_THROW_WALLET_EX(index >= m_transfers.size(), tools::error::wallet_common_error, std::string("ki index is out of bounds: ") + epee::string_tools::num_to_string_fast(index) +
+      " >= " + epee::string_tools::num_to_string_fast(m_transfers.size()));
+    const auto& tr = m_transfers[index];
+
+    ss << "transfer #" << index << ":" << ENDL <<
+      "  amount:              " << print_money(tr.amount(), true) << ENDL <<
+      "  block height:        " << tr.m_block_height << ENDL <<
+      "  global output index: " << tr.m_global_output_index << ENDL <<
+      "  tx hash:             " << get_transaction_hash(tr.m_tx) << ENDL <<
+      "  int. output index:   " << tr.m_internal_output_index << ENDL <<
+      "  spent flag:          " << tr.m_spent << ENDL;
+  }
+
+  return ss.str();
+}
+//----------------------------------------------------------------------------------------------------
+
 
 }
 

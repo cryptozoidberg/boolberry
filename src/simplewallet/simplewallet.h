@@ -78,6 +78,7 @@ namespace currency
     bool list_outputs(const std::vector<std::string> &args);
     bool sweep_below(const std::vector<std::string> &args);
     bool show_dust(const std::vector<std::string> &args);
+    bool print_ki(const std::vector<std::string> &args);
 
     bool get_alias_from_daemon(const std::string& alias_name, currency::alias_info_base& ai);
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
