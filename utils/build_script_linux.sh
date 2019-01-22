@@ -39,9 +39,9 @@ cp  src/connectivity_tool ./boolberry
 chmod 777 ./boolberry/Boolberry.sh
 
 mkdir ./boolberry/lib
-cp $QT_PREFIX_PATH/lib/libicudata.so.54 ./boolberry/lib
-cp $QT_PREFIX_PATH/lib/libicui18n.so.54 ./boolberry/lib
-cp $QT_PREFIX_PATH/lib/libicuuc.so.54 ./boolberry/lib
+cp $QT_PREFIX_PATH/lib/libicudata.so.56 ./boolberry/lib
+cp $QT_PREFIX_PATH/lib/libicui18n.so.56 ./boolberry/lib
+cp $QT_PREFIX_PATH/lib/libicuuc.so.56 ./boolberry/lib
 cp $QT_PREFIX_PATH/lib/libQt5Core.so.5 ./boolberry/lib
 cp $QT_PREFIX_PATH/lib/libQt5DBus.so.5 ./boolberry/lib
 cp $QT_PREFIX_PATH/lib/libQt5Gui.so.5 ./boolberry/lib
@@ -61,16 +61,19 @@ cp $QT_PREFIX_PATH/lib/libQt5WebChannel.so.5 ./boolberry/lib
 cp $QT_PREFIX_PATH/lib/libQt5XcbQpa.so.5 ./boolberry/lib
 cp $QT_PREFIX_PATH/lib/libQt5QuickWidgets.so.5 ./boolberry/lib
 cp $QT_PREFIX_PATH/libexec/QtWebEngineProcess ./boolberry
-cp $QT_PREFIX_PATH/qtwebengine_resources.pak ./boolberry
-cp $QT_PREFIX_PATH/qtwebengine_resources_100p.pak ./boolberry
-cp $QT_PREFIX_PATH/qtwebengine_resources_200p.pak ./boolberry
-cp $QT_PREFIX_PATH/icudtl.dat ./boolberry
-cp -Rv $QT_PREFIX_PATH/plugins ./boolberry
+cp $QT_PREFIX_PATH/resources/qtwebengine_resources.pak ./boolberry
+cp $QT_PREFIX_PATH/resources/qtwebengine_resources_100p.pak ./boolberry
+cp $QT_PREFIX_PATH/resources/qtwebengine_resources_200p.pak ./boolberry
+cp $QT_PREFIX_PATH/resources/icudtl.dat ./boolberry
 
+mkdir ./boolberry/lib/platforms
+cp $QT_PREFIX_PATH/plugins/platforms/libqxcb.so ./boolberry/lib/platforms
+mkdir ./boolberry/xcbglintegrations
+cp $QT_PREFIX_PATH/plugins/xcbglintegrations/libqxcb-glx-integration.so ./boolberry/xcbglintegrations
 
 printf "\nmaking compressed build archive...\n\n"
 
-package_filename=boolberry-linux-x64-$version_str.tar.bz2
+package_filename=boolberry-linux-x64-webegine-$version_str.tar.bz2
 
 tar -cjvf $package_filename boolberry
 
