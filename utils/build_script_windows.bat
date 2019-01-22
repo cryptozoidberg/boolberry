@@ -70,11 +70,11 @@ FOR /F "tokens=3" %%a IN ('%cmd%') DO set version=%%a
 set version=%version:~0,-2%
 echo '%version%'
 
-REM @echo "Signing...."
-REM @echo on
-REM signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% Boolberry.exe
-REM signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% boolbd.exe
-REM signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% simplewallet.exe
+@echo "Signing...."
+@echo on
+signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% Boolberry.exe
+signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% boolbd.exe
+signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% simplewallet.exe
 
 @echo "Copying...."
 mkdir bunch
