@@ -617,3 +617,26 @@ namespace tools
     LOG_ERROR(#cond << ". THROW EXCEPTION: " << #err_type);                                                 \
     tools::error::throw_wallet_ex<err_type>(std::string(__FILE__ ":" STRINGIZE(__LINE__)), ## __VA_ARGS__); \
   }
+
+#define THROW_IF_TRUE_WALLET_EX(cond, err_type, ...)                                                       \
+  if (cond)                                                                                                \
+  {                                                                                                        \
+    LOG_ERROR(#cond << ". THROW EXCEPTION: " << #err_type);                                                \
+    tools::error::throw_wallet_ex<err_type>(std::string(__FILE__ ":" STRINGIZE(__LINE__)), ## __VA_ARGS__);\
+  }
+
+#define THROW_IF_FALSE_WALLET_EX(cond, err_type, ...)                                                      \
+  if (!(cond))                                                                                             \
+  {                                                                                                        \
+    LOG_ERROR(#cond << ". THROW EXCEPTION: " << #err_type);                                                \
+    tools::error::throw_wallet_ex<err_type>(std::string(__FILE__ ":" STRINGIZE(__LINE__)), ## __VA_ARGS__);\
+  }
+
+#define THROW_IF_FALSE_WALLET_INT_ERR_EX(cond, mess)                                                                              \
+  if (!(cond))                                                                                                                    \
+  {                                                                                                                               \
+    std::stringstream ss;                                                                                                         \
+    ss << mess;                                                                                                                   \
+    LOG_ERROR(#cond << ". THROW EXCEPTION: wallet_internal_error");                                                               \
+    tools::error::throw_wallet_ex<tools::error::wallet_internal_error>(std::string(__FILE__ ":" STRINGIZE(__LINE__)), ss.str());  \
+  }
