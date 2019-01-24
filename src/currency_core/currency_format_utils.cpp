@@ -491,9 +491,41 @@ namespace currency
     tx.vout.push_back(out);
     return true;
   }
+  //---------------------------------------------------------------
   bool construct_tx(const account_keys& keys, const create_tx_arg& arg, create_tx_res& rsp)
   {
-    return construct_tx(keys, arg.sources, arg.splitted_dsts, arg.extra, rsp.tx, rsp.txkey, arg.unlock_time, arg.tx_outs_attr);
+    if (!construct_tx(keys, arg.sources, arg.splitted_dsts, arg.extra, rsp.tx, rsp.txkey, arg.unlock_time, arg.tx_outs_attr))
+      return false;
+
+    // calculate key images for each change output
+    crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
+    crypto::generate_key_derivation(keys.m_account_address.m_view_public_key, rsp.txkey.sec, derivation);
+
+    for (size_t i = 0; i < rsp.tx.vout.size(); ++i)
+    {
+      const auto& out = rsp.tx.vout[i];
+      if (out.target.type() != typeid(txout_to_key))
+        continue;
+      const txout_to_key& otk = boost::get<const txout_to_key&>(out.target);
+
+      crypto::public_key ephemeral_pub = AUTO_VAL_INIT(ephemeral_pub);
+      bool r = crypto::derive_public_key(derivation, i, keys.m_account_address.m_spend_public_key, ephemeral_pub);
+      CHECK_AND_ASSERT_MES(r, false, "derive_public_key failed for tx " << get_transaction_hash(rsp.tx) << ", out # " << i);
+
+      if (otk.key == ephemeral_pub)
+      {
+        // this is the output to the given keys
+        // derive secret key and calculate key image
+        crypto::secret_key ephemeral_sec = AUTO_VAL_INIT(ephemeral_sec);
+        crypto::derive_secret_key(derivation, i, keys.m_spend_secret_key, ephemeral_sec);
+        crypto::key_image ki = AUTO_VAL_INIT(ki);
+        crypto::generate_key_image(ephemeral_pub, ephemeral_sec, ki);
+
+        rsp.outs_key_images.push_back(std::make_pair(static_cast<uint64_t>(i), ki));
+      }
+    }
+
+    return true;
   }
   //---------------------------------------------------------------
   bool construct_tx(const account_keys& sender_account_keys, const std::vector<tx_source_entry>& sources, 

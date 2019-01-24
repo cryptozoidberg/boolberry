@@ -110,10 +110,12 @@ namespace currency
   {
     currency::transaction tx;
     keypair txkey;
+    std::vector<std::pair<uint64_t, crypto::key_image>> outs_key_images; // pairs (out_index, key_image) for each change output
 
     BEGIN_SERIALIZE_OBJECT()
       FIELD(tx)
       FIELD(txkey)
+      FIELD(outs_key_images)
     END_SERIALIZE()
   };
 
