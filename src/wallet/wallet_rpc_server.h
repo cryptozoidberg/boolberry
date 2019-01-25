@@ -46,7 +46,7 @@ namespace tools
         MAP_JON_RPC_WE("sweep_below",         on_sweep_below,           wallet_rpc::COMMAND_SWEEP_BELOW)
         MAP_JON_RPC_WE("sign_transfer",       on_sign_transfer,         wallet_rpc::COMMAND_SIGN_TRANSFER)
         MAP_JON_RPC_WE("submit_transfer",     on_submit_transfer,       wallet_rpc::COMMAND_SUBMIT_TRANSFER)
-        MAP_JON_RPC_WE("cancel_transfer",     on_cancel_transfer,       wallet_rpc::COMMAND_CANCEL_TRANSFER)
+        MAP_JON_RPC_WE("cancel_transfer",     on_cancel_transfer,       wallet_rpc::COMMAND_CANCEL_TRANSFER) // WARNING: If a tx cancelled using this method would be submitted later (submit_transfer) it can lead to unrecoverable wallet errors that would require wallet's resynchronization! The same issues will arise if a successfully broadcasted transaction would be cancelled using this method!
 
         // supernet api
         MAP_JON_RPC_WE("maketelepod",   on_maketelepod,   wallet_rpc::COMMAND_RPC_MAKETELEPOD)
