@@ -102,18 +102,15 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
         // don't have spend secret key, so we unable to calculate key image for an output
         // look it up in special container instead
         auto it = m_pending_key_images.find(otk.key);
-        // THROW_IF_FALSE_WALLET_INT_ERR_EX(it != m_pending_key_images.end(), "can't find key image by out pub key: " << otk.key);
         if (it != m_pending_key_images.end())
         {
           ki = it->second;
-          LOG_PRINT_L0("pending key image " << ki << " was found by out pub key " << otk.key, LOG_LEVEL_0);
+          LOG_PRINT_L1("pending key image " << ki << " was found by out pub key " << otk.key);
         }
         else
         {
-          LOG_PRINT_YELLOW("WARNING: can't find key image by out pub key: " << otk.key, LOG_LEVEL_0);
-          // use wrong, but unique ki
-          currency::keypair in_ephemeral;
-          currency::generate_key_image_helper(m_account.get_keys(), tx_pub_key, o, in_ephemeral, ki);
+          ki = null_key_image;
+          LOG_PRINT_L1("can't find pending key image by out pub key: " << otk.key << ", key image temporarily set to null");
         }
       }
       else
@@ -124,17 +121,20 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
         THROW_IF_FALSE_WALLET_INT_ERR_EX(in_ephemeral.pub == otk.key, "key_image generated ephemeral public key that does not match with output_key");
       }
 
-      auto it = m_key_images.find(ki);
-      if (it != m_key_images.end())
+      if (ki != null_key_image)
       {
-        CHECK_AND_THROW_WALLET_EX(it->second >= m_transfers.size(), error::wallet_internal_error, "m_key_images entry has wrong m_transfers index, it->second: " + epee::string_tools::num_to_string_fast(it->second) + ", m_transfers.size(): " + epee::string_tools::num_to_string_fast(m_transfers.size()));
-        const transfer_details& td = m_transfers[it->second];
-        LOG_PRINT_YELLOW("tx " << tx_hash << " @ block " << height << " has output #" << o << " with key image " << ki << " that has already been seen in output #" <<
-          td.m_internal_output_index << " in tx " << get_transaction_hash(td.m_tx) << " @ block " << td.m_block_height <<
-          ". This output can't ever be spent and will be skipped.", LOG_LEVEL_0);
-        CHECK_AND_THROW_WALLET_EX(tx_money_got_in_outs < tx.vout[o].amount, error::wallet_internal_error, "tx_money_got_in_outs: " + epee::string_tools::num_to_string_fast(tx_money_got_in_outs) + ", tx.vout[o].amount:" + print_money(tx.vout[o].amount));
-        tx_money_got_in_outs -= tx.vout[o].amount;
-        continue; // skip the output
+        auto it = m_key_images.find(ki);
+        if (it != m_key_images.end())
+        {
+          CHECK_AND_THROW_WALLET_EX(it->second >= m_transfers.size(), error::wallet_internal_error, "m_key_images entry has wrong m_transfers index, it->second: " + epee::string_tools::num_to_string_fast(it->second) + ", m_transfers.size(): " + epee::string_tools::num_to_string_fast(m_transfers.size()));
+          const transfer_details& td = m_transfers[it->second];
+          LOG_PRINT_YELLOW("tx " << tx_hash << " @ block " << height << " has output #" << o << " with key image " << ki << " that has already been seen in output #" <<
+            td.m_internal_output_index << " in tx " << get_transaction_hash(td.m_tx) << " @ block " << td.m_block_height <<
+            ". This output can't ever be spent and will be skipped.", LOG_LEVEL_0);
+          CHECK_AND_THROW_WALLET_EX(tx_money_got_in_outs < tx.vout[o].amount, error::wallet_internal_error, "tx_money_got_in_outs: " + epee::string_tools::num_to_string_fast(tx_money_got_in_outs) + ", tx.vout[o].amount:" + print_money(tx.vout[o].amount));
+          tx_money_got_in_outs -= tx.vout[o].amount;
+          continue; // skip the output
+        }
       }
 
 
@@ -149,7 +149,9 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
       td.m_spent = false;
       td.m_key_image = ki;
 
-      m_key_images[td.m_key_image] = m_transfers.size()-1;
+      if (ki != null_key_image)
+        m_key_images[td.m_key_image] = m_transfers.size()-1;
+
       LOG_PRINT_L0("Received money: " << print_money(td.amount()) << ", with tx: " << tx_hash);
       if (0 != m_callback)
         m_callback->on_money_received(height, td.m_tx, td.m_internal_output_index);
@@ -343,7 +345,7 @@ void wallet2::pull_blocks(size_t& blocks_added)
     " not less than local blockchain size=" + std::to_string(m_blockchain.size()));
 
   size_t current_index = res.start_height;
-  BOOST_FOREACH(auto& bl_entry, res.blocks)
+  for(auto& bl_entry : res.blocks)
   {
     currency::block bl;
     r = currency::parse_and_validate_block_from_blob(bl_entry.block, bl);
@@ -1070,7 +1072,30 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
       auto ib = m_pending_key_images.insert(std::make_pair(otk.key, p.second));
       THROW_IF_FALSE_WALLET_INT_ERR_EX(ib.second, "out pub key " << otk.key << " is already exist in m_pending_key_images, ki: " << ib.first->second);
 
-      LOG_PRINT_L2("for tx " << tx_hash << " pending key images added (" << p.first << ", " << otk.key << ", " << p.second << ")");
+      LOG_PRINT_L2("for tx " << tx_hash << " pending key image added (" << p.first << ", " << otk.key << ", " << p.second << ")");
+    }
+
+    THROW_IF_FALSE_WALLET_INT_ERR_EX(tx.vin.size() == create_tx_param.sources.size(), "tx.vin and create_tx_param.sources sizes missmatch");
+    for (size_t i = 0; i < tx.vin.size(); ++i)
+    {
+      const txin_v& in = tx.vin[i];
+      THROW_IF_FALSE_WALLET_CMN_ERR_EX(in.type() == typeid(txin_to_key), "tx " << tx_hash << " has a non txin_to_key input");
+      const crypto::key_image& ki = boost::get<txin_to_key>(in).k_image;
+      
+      const auto& src = create_tx_param.sources[i];
+      THROW_IF_FALSE_WALLET_INT_ERR_EX(src.real_output < src.outputs.size(), "src.real_output is out of bounds: " << src.real_output);
+      const crypto::public_key& out_key = src.outputs[src.real_output].second;
+
+      THROW_IF_FALSE_WALLET_INT_ERR_EX(src.transfer_index < m_transfers.size(), "incorrect transfer index: " << src.transfer_index);
+      auto& tr = m_transfers[src.transfer_index];
+      THROW_IF_FALSE_WALLET_INT_ERR_EX(tr.m_key_image == currency::null_key_image, "transfer #" << src.transfer_index << " has not null key image");
+      tr.m_key_image = ki;
+      m_key_images[ki] = src.transfer_index;
+
+      auto ib = m_pending_key_images.insert(std::make_pair(out_key, ki));
+      THROW_IF_FALSE_WALLET_INT_ERR_EX(ib.second, "out pub key " << out_key << " is already exist in m_pending_key_images, ki: " << ki);
+
+      LOG_PRINT_L2("for tx " << tx_hash << " key image " << ki << " was set for transfer #" << src.transfer_index);
     }
   }
 
