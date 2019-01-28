@@ -552,7 +552,7 @@ namespace tools
     if (m_is_view_only)
     {
       //mark outputs as spent 
-      BOOST_FOREACH(transfer_container::iterator it, selected_transfers)
+      for(transfer_container::iterator it : selected_transfers)
         it->m_spent = true;
       //do offline sig
       blobdata bl = t_serializable_object_to_blob(create_tx_param);
