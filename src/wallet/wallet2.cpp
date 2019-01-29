@@ -603,8 +603,10 @@ bool wallet2::clear()
   m_transfers.clear();
   m_payments.clear();
   m_key_images.clear();
+  // m_pending_key_images.clear();
   m_transfer_history.clear();
   m_unconfirmed_in_transfers.clear();
+  m_unconfirmed_txs.clear();
   // m_tx_keys is not cleared intentionally, considered to be safe
   currency::block b;
   currency::generate_genesis_block(b);
@@ -1010,6 +1012,25 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
   //update_current_tx_limit();
   CHECK_AND_THROW_WALLET_EX(CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
 
+  THROW_IF_FALSE_WALLET_CMN_ERR_EX(m_tx_keys.count(tx_hash) == 0, "tx " << tx_hash << " seems to be already processed by this wallet");
+
+  // foolproof check to make sure create_tx_param and create_tx_result DO match each other
+  {
+    THROW_IF_FALSE_WALLET_CMN_ERR_EX(create_tx_param.sources.size() == tx.vin.size(), "create_tx_param and create_tx_result do not match in sources, check arguments");
+    for (size_t i = 0; i < tx.vin.size(); ++i)
+    {
+      // check inputs' global indicies vs sources
+      const auto& src_offsets = create_tx_param.sources[i].outputs;
+      THROW_IF_FALSE_WALLET_INT_ERR_EX(tx.vin[i].type() == typeid(txin_to_key), "input #" << i << " is not txin_to_key");
+      std::vector<uint64_t> abs_offsets = relative_output_offsets_to_absolute(boost::get<txin_to_key>(tx.vin[i]).key_offsets);
+      THROW_IF_FALSE_WALLET_CMN_ERR_EX(src_offsets.size() == abs_offsets.size(), "create_tx_param and create_tx_result do not match in key offsets size for input #" << i);
+      for (size_t j = 0; j < src_offsets.size(); ++j)
+      {
+        THROW_IF_FALSE_WALLET_CMN_ERR_EX(src_offsets[j].first == abs_offsets[j], "create_tx_param and create_tx_result do not match in key offsets for input #" << i);
+      }
+    }
+  }
+
   std::string key_images;
   bool all_are_txin_to_key = std::all_of(tx.vin.begin(), tx.vin.end(), [&](const txin_v& s_e) -> bool
   {
@@ -1027,15 +1048,15 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
     bool r = m_core_proxy->call_COMMAND_RPC_SEND_RAW_TX(req, daemon_send_resp);
     if (daemon_send_resp.status != CORE_RPC_STATUS_OK)
     {
-      //unlock funds if transaction rejected
+      // unlock funds if transaction rejected
       for (auto& s : create_tx_param.sources)
-        m_transfers[s.transfer_index].m_spent = false;
+        set_transfer_spent_flag(s.transfer_index, false);
     }
     else
     {
-      //unlock funds if transaction rejected
+      // lock funds if transaction accepted
       for (auto& s : create_tx_param.sources)
-        m_transfers[s.transfer_index].m_spent = true;
+        set_transfer_spent_flag(s.transfer_index, true);
     }
     CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "sendrawtransaction");
     CHECK_AND_THROW_WALLET_EX(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
@@ -1062,6 +1083,9 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
   // handle change key images for watch-only wallets
   if (m_is_view_only)
   {
+    std::vector<std::pair<crypto::public_key, crypto::key_image>> pk_ki_to_be_added;
+    std::vector<std::pair<uint64_t, crypto::key_image>> tri_ki_to_be_added;
+
     for (auto& p : create_tx_result.outs_key_images)
     {
       THROW_IF_FALSE_WALLET_INT_ERR_EX(p.first < tx.vout.size(), "outs_key_images has invalid out index: " << p.first << ", tx.vout.size() = " << tx.vout.size());
@@ -1069,10 +1093,12 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
       THROW_IF_FALSE_WALLET_INT_ERR_EX(out.target.type() == typeid(txout_to_key), "outs_key_images has invalid out type, index: " << p.first);
       const txout_to_key& otk = boost::get<const txout_to_key&>(out.target);
 
-      auto ib = m_pending_key_images.insert(std::make_pair(otk.key, p.second));
-      THROW_IF_FALSE_WALLET_INT_ERR_EX(ib.second, "out pub key " << otk.key << " is already exist in m_pending_key_images, ki: " << ib.first->second);
-
-      LOG_PRINT_L2("for tx " << tx_hash << " pending key image added (" << p.first << ", " << otk.key << ", " << p.second << ")");
+      auto it = m_pending_key_images.find(otk.key);
+      if (it != m_pending_key_images.end())
+      {
+        LOG_PRINT_YELLOW("warning: out pub key " << otk.key << " is already exist in m_pending_key_images, ki: " << it->second << ", will be overwritten with " << p.second, LOG_LEVEL_0);
+      }
+      pk_ki_to_be_added.push_back(std::make_pair(otk.key, p.second));
     }
 
     THROW_IF_FALSE_WALLET_INT_ERR_EX(tx.vin.size() == create_tx_param.sources.size(), "tx.vin and create_tx_param.sources sizes missmatch");
@@ -1088,14 +1114,31 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
 
       THROW_IF_FALSE_WALLET_INT_ERR_EX(src.transfer_index < m_transfers.size(), "incorrect transfer index: " << src.transfer_index);
       auto& tr = m_transfers[src.transfer_index];
-      THROW_IF_FALSE_WALLET_INT_ERR_EX(tr.m_key_image == currency::null_key_image, "transfer #" << src.transfer_index << " has not null key image");
-      tr.m_key_image = ki;
-      m_key_images[ki] = src.transfer_index;
+      if (tr.m_key_image != currency::null_key_image)
+      {
+        LOG_PRINT_YELLOW("transfer #" << src.transfer_index << " has not null key image: " << tr.m_key_image, LOG_LEVEL_0);
+      }
+      tri_ki_to_be_added.push_back(std::make_pair(src.transfer_index, ki));
 
-      auto ib = m_pending_key_images.insert(std::make_pair(out_key, ki));
-      THROW_IF_FALSE_WALLET_INT_ERR_EX(ib.second, "out pub key " << out_key << " is already exist in m_pending_key_images, ki: " << ki);
+      auto it = m_pending_key_images.find(out_key);
+      if (it != m_pending_key_images.end())
+      {
+        LOG_PRINT_YELLOW("warning: out pub key " << out_key << " is already exist in m_pending_key_images, ki: " << it->second << ", will be overwritten with " << ki, LOG_LEVEL_0);
+      }
+      pk_ki_to_be_added.push_back(std::make_pair(out_key, ki));
+    }
 
-      LOG_PRINT_L2("for tx " << tx_hash << " key image " << ki << " was set for transfer #" << src.transfer_index);
+    for (auto& p : pk_ki_to_be_added)
+    {
+      m_pending_key_images[p.first] = p.second;
+      LOG_PRINT_L2("for tx " << tx_hash << " pending key image added (" << p.first << ", " << p.second << ")");
+    }
+
+    for (auto& p : tri_ki_to_be_added)
+    {
+      m_transfers[p.first].m_key_image = p.second;
+      m_key_images[p.second] = p.first;
+      LOG_PRINT_L2("for tx " << tx_hash << " key image " << p.second << " was associated with transfer # " << p.first);
     }
   }
 
@@ -1674,6 +1717,16 @@ std::string wallet2::print_key_image_info(const crypto::key_image& ki) const
   return ss.str();
 }
 //----------------------------------------------------------------------------------------------------
+void wallet2::set_transfer_spent_flag(uint64_t transfer_index, bool spent_flag)
+{
+  THROW_IF_FALSE_WALLET_INT_ERR_EX(transfer_index < m_transfers.size(), "invalid transfer index: " << transfer_index);
+
+  bool old_spent_flag = m_transfers[transfer_index].m_spent;
+  m_transfers[transfer_index].m_spent = spent_flag;
+
+  LOG_PRINT_L2("transfer #" << transfer_index << " spent flag change: " << old_spent_flag << " -> " << spent_flag);
+}
+
 
 
 }

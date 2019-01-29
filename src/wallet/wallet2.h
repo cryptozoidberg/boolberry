@@ -237,6 +237,7 @@ namespace tools
     void wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& utd, wallet_rpc::wallet_transfer_info& wti)const;
     void finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result, bool do_not_relay = false);
     void resend_unconfirmed();
+    void set_transfer_spent_flag(uint64_t transfer_index, bool spent_flag);
 
     currency::account_base m_account;
     bool m_is_view_only;
