@@ -194,6 +194,8 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("viewkey",  boost::bind(&simple_wallet::viewkey, this, _1),                                  "Display secret view key");
   m_cmd_binder.set_handler("sweep_below", boost::bind(&simple_wallet::sweep_below, this, _1),                           "sweep_below <mixin_count> <address> <amount_lower_limit> [payment_id] -  Tries to transfers all coins with amount below the given limit to the given address");
   m_cmd_binder.set_handler("show_dust", boost::bind(&simple_wallet::show_dust, this, _1),                               "prints dust statictics");
+  m_cmd_binder.set_handler("print_ki", boost::bind(&simple_wallet::print_ki, this, _1),                                "prints output's info by sgiven key image");
+
 
   m_cmd_binder.set_handler("get_tx_key", boost::bind(&simple_wallet::get_tx_key, this, _1),                             "Get transaction key (r) for a given <txid>");
   m_cmd_binder.set_handler("check_tx_key", boost::bind(&simple_wallet::check_tx_key, this, _1),                         "Check amount going to <address> in <txid>");
@@ -434,25 +436,18 @@ bool simple_wallet::close_wallet()
     return false;
   }
 
-  try
-  {
-    m_wallet->store();
-  }
-  catch (const std::exception& e)
-  {
-    fail_msg_writer() << e.what();
-    return false;
-  }
+  save(std::vector<std::string>());
 
   return true;
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::save(const std::vector<std::string> &args)
 {
+  success_msg_writer() << "saving wallet data...";
   try
   {
     m_wallet->store();
-    success_msg_writer() << "Wallet data saved";
+    success_msg_writer() << "wallet data is saved";
   }
   catch (const std::exception& e)
   {
@@ -1630,6 +1625,35 @@ bool simple_wallet::show_dust(const std::vector<std::string> &args)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+bool simple_wallet::print_ki(const std::vector<std::string> &args)
+{
+  crypto::key_image ki = AUTO_VAL_INIT(ki);
+
+  if (args.size() != 1)
+  {
+    fail_msg_writer() << "missing argument";
+    return true;
+  }
+
+  if (!epee::string_tools::hex_to_pod(args[0], ki))
+  {
+    fail_msg_writer() << "failed to parse key image from string '" << args[0] << "'";
+    return true;
+  }
+
+  std::string s = m_wallet->print_key_image_info(ki);
+  if (s.empty())
+  {
+    success_msg_writer() << "key image " << ki << " is not found in wallet's internal table";
+    return true;
+  }
+
+  success_msg_writer() << "key image " << ki << " corresponds to the following wallet's transfer:";
+  success_msg_writer() << s;
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
 bool simple_wallet::recent_blocks(const std::vector<std::string> &args)
 {
   uint16_t blocks_limit = 40;
@@ -1688,6 +1712,8 @@ int main(int argc, char* argv[])
 #endif
 
   //TRY_ENTRY();
+
+  epee::debug::get_set_enable_assert(true, false);
 
   string_tools::set_module_name_and_folder(argv[0]);
 

@@ -176,6 +176,8 @@ namespace tools
 
     void sweep_below(size_t fake_outs_count, const currency::account_public_address& addr, uint64_t threshold_amount, const currency::payment_id_t& payment_id,
       uint64_t fee, size_t& outs_total, uint64_t& amount_total, size_t& outs_swept, currency::transaction* result_tx = nullptr);
+
+    std::string print_key_image_info(const crypto::key_image& ki) const;
     
     bool get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) const;
     bool check_connection();
@@ -207,7 +209,9 @@ namespace tools
       if (ver < 9)
           return;
       a & m_tx_keys;
-
+      if (ver < 11)
+        return;
+      a & m_pending_key_images;
     }
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
   private:
@@ -233,6 +237,7 @@ namespace tools
     void wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& utd, wallet_rpc::wallet_transfer_info& wti)const;
     void finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result, bool do_not_relay = false);
     void resend_unconfirmed();
+    void set_transfer_spent_flag(uint64_t transfer_index, bool spent_flag);
 
     currency::account_base m_account;
     bool m_is_view_only;
@@ -245,6 +250,7 @@ namespace tools
     transfer_container m_transfers;
     payment_container m_payments;
     std::unordered_map<crypto::key_image, size_t> m_key_images;
+    std::unordered_map<crypto::public_key, crypto::key_image> m_pending_key_images; // (out_pk -> ki) pairs of change outputs to be added in watch-only wallet without spend sec key
     currency::account_public_address m_account_public_address;
     uint64_t m_upper_transaction_size_limit; //TODO: auto-calc this value or request from daemon, now use some fixed value
 
@@ -259,7 +265,7 @@ namespace tools
 }
 
 
-BOOST_CLASS_VERSION(tools::wallet2, 10)
+BOOST_CLASS_VERSION(tools::wallet2, 11)
 BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 3)
 BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 3)
 
@@ -547,7 +553,7 @@ namespace tools
     if (m_is_view_only)
     {
       //mark outputs as spent 
-      BOOST_FOREACH(transfer_container::iterator it, selected_transfers)
+      for(transfer_container::iterator it : selected_transfers)
         it->m_spent = true;
       //do offline sig
       blobdata bl = t_serializable_object_to_blob(create_tx_param);
