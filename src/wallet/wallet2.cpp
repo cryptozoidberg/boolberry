@@ -335,7 +335,10 @@ void wallet2::pull_blocks(size_t& blocks_added)
   blocks_added = 0;
   currency::COMMAND_RPC_GET_BLOCKS_FAST::request req = AUTO_VAL_INIT(req);
   currency::COMMAND_RPC_GET_BLOCKS_FAST::response res = AUTO_VAL_INIT(res);
+  PROF_L2_START(get_short_chain_history_time);
   get_short_chain_history(req.block_ids);
+  PROF_L2_FINISH(get_short_chain_history_time);
+  PROF_L2_START(rpc_get_blocks_time);
   bool r = m_core_proxy->call_COMMAND_RPC_GET_BLOCKS_FAST(req, res);
   CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "getblocks.bin");
   CHECK_AND_THROW_WALLET_EX(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "getblocks.bin");
@@ -343,7 +346,9 @@ void wallet2::pull_blocks(size_t& blocks_added)
   CHECK_AND_THROW_WALLET_EX(m_blockchain.size() <= res.start_height, error::wallet_internal_error,
     "wrong daemon response: m_start_height=" + std::to_string(res.start_height) +
     " not less than local blockchain size=" + std::to_string(m_blockchain.size()));
+  PROF_L2_FINISH(rpc_get_blocks_time);
 
+  PROF_L2_START(process_blocks_time);
   size_t current_index = res.start_height;
   for(auto& bl_entry : res.blocks)
   {
@@ -375,6 +380,9 @@ void wallet2::pull_blocks(size_t& blocks_added)
 
     ++current_index;
   }
+  PROF_L2_FINISH(process_blocks_time);
+  PROF_L2_LOG_PRINT("pull_blocks: " << res.blocks.size() << " blocks processed, timings: short_chain_history: " << print_mcsec_as_ms(get_short_chain_history_time)
+    << ", rpc_get_blocks: " << print_mcsec_as_ms(rpc_get_blocks_time) << ", process_blocks: " << print_mcsec_as_ms(process_blocks_time), LOG_LEVEL_2);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::refresh()

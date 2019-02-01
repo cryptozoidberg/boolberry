@@ -463,7 +463,7 @@ bool blockchain_storage::purge_transaction_from_blockchain(const crypto::hash& t
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
 
   auto tx_res_ptr = m_db_transactions.find(tx_id);
-  CHECK_AND_ASSERT_MES(tx_res_ptr != m_db_transactions.end(), false, "purge_block_data_from_blockchain: transaction not found in blockchain index!!");
+  CHECK_AND_ASSERT_MES(tx_res_ptr != m_db_transactions.end(), false, "transaction not found in blockchain index!!");
   const transaction& tx = tx_res_ptr->tx;
 
   purge_transaction_keyimages_from_blockchain(tx, true);
@@ -475,7 +475,7 @@ bool blockchain_storage::purge_transaction_from_blockchain(const crypto::hash& t
   {
     currency::tx_verification_context tvc = AUTO_VAL_INIT(tvc);
     bool r = m_tx_pool.add_tx(tx, tvc, true);
-    CHECK_AND_ASSERT_MES(r, false, "purge_block_data_from_blockchain: failed to add transaction to transaction pool");
+    CHECK_AND_ASSERT_MES(r, false, "failed to add transaction to transaction pool");
   }
 
   bool res = pop_transaction_from_global_index(tx, tx_id);

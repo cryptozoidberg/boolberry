@@ -469,11 +469,13 @@ namespace currency
       PROF_L1_START(blocks_handle_time);
       {
         m_core.pause_mine();
+        m_core.get_tx_pool().lock();
         m_core.get_blockchain_storage().start_batch_exclusive_operation();
         bool success = false;
         misc_utils::auto_scope_leave_caller scope_exit_handler = misc_utils::create_scope_leave_handler([&, this](){
           boost::bind(&t_core::resume_mine, &m_core);
           m_core.get_blockchain_storage().finish_batch_exclusive_operation(success);
+          m_core.get_tx_pool().unlock();
         });
 
         BOOST_FOREACH(const block_complete_entry& block_entry, arg.blocks)
