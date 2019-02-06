@@ -381,27 +381,27 @@ function on_restore_wallet()
     var seed_phrase = callback;
     if (seed_phrase.length === 0)
       return;
-  });
   
-  backend.browse_wallet(false, function(callback){
-    var wallet_path = callback;
-    if (wallet_path.length === 0)
-      return;
+    backend.browse_wallet(false, function(callback){
+      var wallet_path = callback;
+      if (wallet_path.length === 0)
+        return;
+      
+      backend.get_password(function(callback){
+        var pass = callback;
+        if (pass.length === 0)
+          return;
+      
+        backend.restore_wallet(seed_phrase, pass, wallet_path, function(callback){
+          var r = callback;
+          if(!r) 
+          {
+             backend.message_box("Unable to restore wallet");
+          }
+        });
+      });
+    });
   });
- 
-  backend.backend.get_password(function(callback){
-    var pass = callback;
-    if (pass.length === 0)
-      return;
-  });
-  
-  backend.restore_wallet(seed_phrase, pass, wallet_path, function(callback){
-    var r = callback;
-    if(!r) 
-    {
-      backend.message_box("Unable to restore wallet");
-    }
-  });  
 }
 
 function show_wallet()
