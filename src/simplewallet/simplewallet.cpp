@@ -1673,14 +1673,15 @@ bool simple_wallet::recent_blocks(const std::vector<std::string> &args)
     m_wallet->get_recent_blocks_stat(wbs, blocks_limit);
     std::stringstream ss;
     uint64_t total_in = 0, total_out = 0, min_height = UINT64_MAX, max_height = 0;
-    ss << "block h. timestamp (UTC)       amount in       amount out    " << ENDL;
+    ss << "block h. timestamp (UTC)          amount in            amount out" << ENDL;
+
     for (auto& e : wbs)
     {
       ss
         << std::setw(7) << e.height
         << "  " << epee::misc_utils::get_time_str_v3(boost::posix_time::from_time_t(e.ts))
-        << "  " << currency::print_money(e.amount_in)
-        << "  " << currency::print_money(e.amount_out)
+        << "  " << std::setw(18) << currency::print_money(e.amount_in)
+        << "  " << std::setw(18) << currency::print_money(e.amount_out)
         << ENDL;
       total_in += e.amount_in;
       total_out += e.amount_out;
@@ -1693,6 +1694,7 @@ bool simple_wallet::recent_blocks(const std::vector<std::string> &args)
       << (diff < 0 ? "-" : "+") << print_money(abs(diff), true);
 
     success_msg_writer() << ss.str();
+    show_balance();
   }
   catch (const std::exception& e)
   {
