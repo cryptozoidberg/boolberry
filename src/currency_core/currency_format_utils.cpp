@@ -1191,4 +1191,166 @@ namespace currency
     return get_tx_tree_hash(txs_ids);
   }
   //---------------------------------------------------------------
+  bool get_reward_from_miner_tx(const transaction& tx, uint64_t& reward)
+  {
+    // make sure it's a miner tx
+    if (tx.vin.size() != 1)
+      return false;
+
+    if (tx.vin[0].type() != typeid(txin_gen))
+      return false;
+
+    reward = 0;
+    for (auto& out : tx.vout)
+      reward += out.amount;
+    
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool fill_tx_rpc_outputs(tx_rpc_extended_info& tei, const transaction& tx, const transaction_chain_entry* ptce)
+  {
+    size_t i = 0;
+    for (auto& out : tx.vout)
+    {
+      tei.outs.push_back(tx_out_rpc_entry());
+      tei.outs.back().amount = out.amount;
+      tei.outs.back().is_spent = ptce ? ptce->m_spent_flags[i] : false;
+      tei.outs.back().global_index = ptce ? ptce->m_global_output_indexes[i] : 0;
+
+      if (out.target.type() == typeid(txout_to_key))
+      {
+        const txout_to_key& otk = boost::get<txout_to_key>(out.target);
+        tei.outs.back().pub_keys.push_back(epee::string_tools::pod_to_hex(otk.key));
+        if (otk.mix_attr == CURRENCY_TO_KEY_OUT_FORCED_NO_MIX)
+          tei.outs.back().pub_keys.back() += "(FORCED_NO_MIX)";
+        if (otk.mix_attr >= CURRENCY_TO_KEY_OUT_FORCED_MIX_LOWER_BOUND)
+          tei.outs.back().pub_keys.back() += std::string("(FORCED_MIX_LOWER_BOUND: ") + std::to_string(otk.mix_attr) + ")";
+      }
+
+      ++i;
+    }
+    return true;
+  }
+  //------------------------------------------------------------------
+  bool fill_tx_rpc_inputs(tx_rpc_extended_info& tei, const transaction& tx)
+  {
+    //handle inputs
+    for (auto in : tx.vin)
+    {
+      tei.ins.push_back(tx_in_rpc_entry());
+      if (in.type() == typeid(txin_gen))
+      {
+        tei.ins.back().amount = 0;
+      }
+      else if (in.type() == typeid(txin_to_key))
+      {
+        txin_to_key& tk = boost::get<txin_to_key>(in);
+        tei.ins.back().amount = tk.amount;
+        tei.ins.back().kimage_or_ms_id = epee::string_tools::pod_to_hex(tk.k_image);
+        std::vector<size_t> absolute_offsets = relative_output_offsets_to_absolute(tk.key_offsets);
+        for (auto& ao : absolute_offsets)
+        {
+          tei.ins.back().global_indexes.push_back(0);
+          tei.ins.back().global_indexes.back() = ao;
+        }
+      }
+    }
+    return true;
+  }
+  //------------------------------------------------------------------
+  bool fill_block_rpc_details(block_rpc_extended_info& pei_rpc, const block_extended_info& bei_chain, const crypto::hash& h)
+  {
+    pei_rpc.cumulative_difficulty = bei_chain.cumulative_difficulty.convert_to<std::string>();
+    pei_rpc.block_cumulative_size = bei_chain.block_cumulative_size;
+    pei_rpc.timestamp = bei_chain.bl.timestamp;
+    pei_rpc.id = epee::string_tools::pod_to_hex(h);
+    pei_rpc.prev_id = epee::string_tools::pod_to_hex(bei_chain.bl.prev_id);
+    pei_rpc.actual_timestamp = bei_chain.bl.timestamp;
+    pei_rpc.already_generated_coins = bei_chain.already_generated_coins;
+    pei_rpc.height = bei_chain.height;
+    pei_rpc.object_in_json = currency::obj_to_json_str(bei_chain.bl);
+
+    /*
+    extra_user_data eud = AUTO_VAL_INIT(eud);
+    if (get_type_in_variant_container(bei_chain.bl.miner_tx.extra, eud))
+    {
+    pei_rpc.miner_text_info = eud.buff;
+    }
+    */
+
+    pei_rpc.base_reward = get_base_block_reward(bei_chain.already_generated_coins);
+    get_reward_from_miner_tx(bei_chain.bl.miner_tx, pei_rpc.summary_reward);
+    pei_rpc.penalty = (pei_rpc.base_reward + pei_rpc.total_fee) - pei_rpc.summary_reward;
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool fill_tx_rpc_extra_items(std::vector<tx_extra_rpc_entry>& extra_rpc_entry, const transaction& tx)
+  {
+    tx_extra_info tei = AUTO_VAL_INIT(tei);
+    if (!parse_and_validate_tx_extra(tx, tei))
+      return false;
+
+    // tx public key
+    {
+      tx_extra_rpc_entry te = AUTO_VAL_INIT(te);
+      te.type = "pub_key";
+      te.short_view = epee::string_tools::pod_to_hex(tei.m_tx_pub_key);
+      extra_rpc_entry.push_back(te);
+    }
+
+    // alias
+    if (tei.m_alias.m_alias.size() != 0)
+    {
+      tx_extra_rpc_entry te = AUTO_VAL_INIT(te);
+      te.type = "alias_info";
+      te.short_view = tei.m_alias.m_alias + "-->" + get_account_address_as_str(tei.m_alias.m_address);
+      te.datails_view = currency::obj_to_json_str(tei.m_alias);
+      extra_rpc_entry.push_back(te);
+    }
+
+    // user data
+    if (tei.m_user_data_blob.size() != 0)
+    {
+      std::string payment_id;
+      if (get_payment_id_from_user_data(tei.m_user_data_blob, payment_id))
+      {
+        // payment_id
+        tx_extra_rpc_entry te = AUTO_VAL_INIT(te);
+        te.type = "payment_id";
+        te.short_view = string_tools::buff_to_hex_nodelimer(payment_id);
+        extra_rpc_entry.push_back(te);
+      }
+
+      tx_extra_rpc_entry te = AUTO_VAL_INIT(te);
+      te.type = "user_data";
+      te.short_view = string_tools::buff_to_hex_nodelimer(tei.m_user_data_blob);
+      extra_rpc_entry.push_back(te);
+    }
+
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool fill_tx_rpc_details(tx_rpc_extended_info& tei, const transaction& tx, const transaction_chain_entry* ptce, const crypto::hash& h, uint64_t timestamp, bool is_short /* = false */)
+  {
+    //tei.blob = tx_ptr->tx
+    tei.id = epee::string_tools::pod_to_hex(h);
+    if (!tei.blob_size)
+      tei.blob_size = get_object_blobsize(tx);
+
+    tei.fee = get_tx_fee(tx);
+    tei.pub_key = epee::string_tools::pod_to_hex(get_tx_pub_key_from_extra(tx));
+    tei.timestamp = timestamp;
+    tei.amount = get_outs_money_amount(tx);
+
+    if (is_short)
+      return true;
+
+    fill_tx_rpc_inputs(tei, tx);
+    fill_tx_rpc_outputs(tei, tx, ptce);
+    fill_tx_rpc_extra_items(tei.extra, tx);
+    return true;
+  }
+  //---------------------------------------------------------------
+
+
 }

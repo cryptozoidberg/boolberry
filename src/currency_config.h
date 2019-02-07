@@ -27,6 +27,7 @@
 
 #define CURRENCY_TO_KEY_OUT_RELAXED                   0
 #define CURRENCY_TO_KEY_OUT_FORCED_NO_MIX             1
+#define CURRENCY_TO_KEY_OUT_FORCED_MIX_LOWER_BOUND    2 // this and greather values means minimum number of total outputs (fakes + 1) that must be mixed together for using that one
 
 #define CURRENCY_REWARD_BLOCKS_WINDOW                 400
 #define CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE       30000 //size of block (bytes) after which reward for block calculated using block size

@@ -2935,3 +2935,173 @@ bool blockchain_storage::add_new_block(const block& bl_, block_verification_cont
     return false;
   }
 }
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+bool blockchain_storage::get_main_blocks_rpc_details(uint64_t start_offset, size_t count, bool ignore_transactions, std::list<block_rpc_extended_info>& blocks) const
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  if (start_offset >= m_db_blocks.size())
+    return false;
+
+  for (size_t i = start_offset; i < start_offset + count && i < m_db_blocks.size(); i++)
+  {
+    blocks.push_back(block_rpc_extended_info());
+    block_rpc_extended_info& bei = blocks.back();
+    get_main_block_rpc_details(i, bei);
+  }
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::get_main_block_rpc_details(uint64_t h, block_rpc_extended_info& bei) const
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  auto core_bei_ptr = m_db_blocks[h];
+  crypto::hash id = get_block_hash(core_bei_ptr->bl);
+  bei.is_orphan = false;
+  bei.total_fee = 0;
+  bei.total_txs_size = 0;
+  if (true/*!ignore_transactions*/)
+  {
+    crypto::hash coinbase_id = get_transaction_hash(core_bei_ptr->bl.miner_tx);
+    //load transactions details
+    bei.transactions_details.push_back(tx_rpc_extended_info());
+    get_tx_rpc_details(coinbase_id, bei.transactions_details.back(), core_bei_ptr->bl.timestamp, true);
+    for (auto& h : core_bei_ptr->bl.tx_hashes)
+    {
+      bei.transactions_details.push_back(tx_rpc_extended_info());
+      get_tx_rpc_details(h, bei.transactions_details.back(), core_bei_ptr->bl.timestamp, true);
+      bei.total_fee += bei.transactions_details.back().fee;
+      bei.total_txs_size += bei.transactions_details.back().blob_size;
+    }
+  }
+  fill_block_rpc_details(bei, *core_bei_ptr, id);
+
+  // calculate difficulty
+  wide_difficulty_type prev_cumul_diff = 0;
+  if (h > 0)
+    prev_cumul_diff = m_db_blocks[h - 1]->cumulative_difficulty;
+  bei.difficulty = (core_bei_ptr->cumulative_difficulty - prev_cumul_diff).convert_to<std::string>();
+
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::get_tx_rpc_details(const crypto::hash& h, tx_rpc_extended_info& tei, uint64_t timestamp, bool is_short) const
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  auto tx_ptr = m_db_transactions.get(h);
+  if (!tx_ptr)
+  {
+    tei.keeper_block = -1; // tx is not confirmed yet, probably it's in the pool
+    return false;
+  }
+
+  if (tx_ptr && !timestamp)
+  {
+    timestamp = m_db_blocks[tx_ptr->m_keeper_block_height]->bl.timestamp;
+  }
+  tei.keeper_block = static_cast<int64_t>(tx_ptr->m_keeper_block_height);
+  fill_tx_rpc_details(tei, tx_ptr->tx, &(*tx_ptr), h, timestamp, is_short);
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::get_alt_blocks_rpc_details(uint64_t start_offset, uint64_t count, std::vector<block_rpc_extended_info>& blocks) const
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
+  if (start_offset >= m_alternative_chains.size() || count == 0)
+    return true; // empty result
+
+  if (start_offset + count >= m_alternative_chains.size())
+    count = m_alternative_chains.size() - start_offset; // correct count if it's too big
+
+  // collect iterators to all the alt blocks for speedy sorting
+  std::vector<blocks_ext_by_hash::const_iterator> blocks_its;
+  blocks_its.reserve(m_alternative_chains.size());
+  for (blocks_ext_by_hash::const_iterator it = m_alternative_chains.begin(); it != m_alternative_chains.end(); ++it)
+    blocks_its.push_back(it);
+
+  // partially sort blocks by height, so only 0...(start_offset+count-1) first blocks are sorted
+  std::partial_sort(blocks_its.begin(), blocks_its.begin() + start_offset + count, blocks_its.end(),
+    [](const blocks_ext_by_hash::const_iterator &lhs, const blocks_ext_by_hash::const_iterator& rhs) ->bool {
+    return lhs->second.height < rhs->second.height;
+  }
+  );
+
+  // erase blocks from 0 till start_offset-1
+  blocks_its.erase(blocks_its.begin(), blocks_its.begin() + start_offset);
+
+  // erase the tail
+  blocks_its.erase(blocks_its.begin() + count, blocks_its.end());
+
+  // populate the result
+  blocks.reserve(blocks_its.size());
+  for (auto it : blocks_its)
+  {
+    blocks.push_back(block_rpc_extended_info());
+    get_alt_block_rpc_details(it->second, it->first, blocks.back());
+  }
+
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::get_alt_block_rpc_details(const crypto::hash& id, block_rpc_extended_info& bei) const
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  auto it = m_alternative_chains.find(id);
+  if (it == m_alternative_chains.end())
+    return false;
+
+  const block_extended_info& bei_core = it->second;
+  return get_alt_block_rpc_details(bei_core, id, bei);
+}
+//------------------------------------------------------------------
+bool blockchain_storage::get_alt_block_rpc_details(const block_extended_info& bei_core, const crypto::hash& id, block_rpc_extended_info& bei) const
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
+  bei.is_orphan = true;
+
+  crypto::hash coinbase_id = get_transaction_hash(bei_core.bl.miner_tx);
+  //load transactions details
+  bei.transactions_details.push_back(tx_rpc_extended_info());
+  fill_tx_rpc_details(bei.transactions_details.back(), bei_core.bl.miner_tx, nullptr, coinbase_id, bei_core.bl.timestamp);
+
+  bei.total_fee = 0;
+  for (auto& h : bei_core.bl.tx_hashes)
+  {
+    bei.transactions_details.push_back(tx_rpc_extended_info());
+    if (!get_tx_rpc_details(h, bei.transactions_details.back(), bei_core.bl.timestamp, true))
+    {
+      //tx not in blockchain, supposed to be in tx pool
+      m_tx_pool.get_transaction_details(h, bei.transactions_details.back());
+    }
+    bei.total_fee += bei.transactions_details.back().fee;
+  }
+
+  fill_block_rpc_details(bei, bei_core, id);
+  return true;
+}
+//------------------------------------------------------------------
+bool blockchain_storage::get_global_index_details(const COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::request& req, COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::response & resp) const
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  
+  try
+  {
+    auto out_ptr = m_db_outputs.get_subitem(req.amount, req.i); // get_subitem can rise an out_of_range exception
+    if (!out_ptr)
+      return false;
+    resp.tx_id = epee::string_tools::pod_to_hex(out_ptr->first);
+    resp.out_no = out_ptr->second;
+    return true;
+  }
+  catch (std::out_of_range&)
+  {
+    return false;
+  }
+}
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+//------------------------------------------------------------------
