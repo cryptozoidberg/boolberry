@@ -60,9 +60,9 @@
 #define DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN             DIFFICULTY_TARGET //just alias
 
 
-#define BLOCKS_IDS_SYNCHRONIZING_DEFAULT_COUNT          10000  //by default, blocks ids count in synchronizing
+#define BLOCKS_IDS_SYNCHRONIZING_DEFAULT_COUNT          2000  //by default, blocks ids count in synchronizing
 #define BLOCKS_SYNCHRONIZING_DEFAULT_COUNT              200    //by default, blocks count in blocks downloading
-#define CURRENCY_PROTOCOL_HOP_RELAX_COUNT               3      //value of hop, after which we use only announce of new block
+#define CURRENCY_PROTOCOL_MAX_BLOCKS_REQUEST_COUNT      500        
 
 
 #define CURRENCY_ALT_BLOCK_LIVETIME_COUNT               (720*7)//one week

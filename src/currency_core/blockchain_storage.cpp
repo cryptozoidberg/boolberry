@@ -1835,6 +1835,30 @@ void blockchain_storage::print_blockchain(uint64_t start_index, uint64_t end_ind
   LOG_PRINT_L0("Blockchain printed with log level 1");
 }
 //------------------------------------------------------------------
+#define TIMESTAMPS_FILENAME   "timestamps.txt"
+void blockchain_storage::print_blocks_timestamps(uint64_t start_index, uint64_t end_index)
+{
+  std::stringstream ss;
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+  if (start_index >= m_db_blocks.size())
+  {
+    LOG_PRINT_L0("Wrong starter index set: " << start_index << ", expected max index " << m_db_blocks.size() - 1);
+    return;
+  }
+
+  wide_difficulty_type prev_cumul_dif = 0;
+  for (size_t i = start_index; i != m_db_blocks.size() && i != end_index; i++)
+  {
+    auto bl_ptr = m_db_blocks[i];
+    ss << std::left << std::setw(10) << i << std::left << std::setw(15) <<  bl_ptr->bl.timestamp << std::left << std::setw(20) << bl_ptr->cumulative_difficulty - prev_cumul_dif <<  bl_ptr->cumulative_difficulty << ENDL;
+    prev_cumul_dif = bl_ptr->cumulative_difficulty;
+  }
+  bool r = file_io_utils::save_string_to_file(epee::log_space::log_singletone::get_default_log_folder() + "/" + TIMESTAMPS_FILENAME, ss.str());
+  CHECK_AND_ASSERT_MES(r, void(), "failed to store timestamps");
+  
+  LOG_PRINT_L0("Block's timestamps stored");
+}
+//------------------------------------------------------------------
 void blockchain_storage::print_blockchain_index()
 {
   LOG_ERROR("NOT IMPLEMENTED YET");
