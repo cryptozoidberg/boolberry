@@ -707,7 +707,6 @@ namespace currency
   bool t_currency_protocol_handler<t_core>::do_force_handshake_idle_connections()
   {
     nodetool::connections_list_type peer_list;
-    size_t count = 0;
     m_p2p->for_each_connection([&](currency_connection_context& context, nodetool::peerid_type peer_id)->bool{
       if (context.m_state == currency_connection_context::state_idle)
       {

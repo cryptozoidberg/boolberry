@@ -491,7 +491,7 @@ namespace md5
 		MD5Final(digest, &hmac->octx); /* Finalize outer md5 */
 	}
 
-
+  inline
 	void hmac_md5(const unsigned char* text, int text_len, const unsigned char* key, int key_len, unsigned char *digest)
 	{
 		MD5_CTX context; 
