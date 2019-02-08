@@ -33,8 +33,9 @@
 #include "file_io_utils.h"
 #include "net_parse_helpers.h"
 
-#define HTTP_MAX_URI_LEN		 9000 
-#define HTTP_MAX_HEADER_LEN		 100000
+#define HTTP_MAX_URI_LEN	              	 9000 
+#define HTTP_MAX_PRE_COMMAND_LINE_CHARS		 20 
+#define HTTP_MAX_HEADER_LEN		             100000
 
 namespace epee
 {
@@ -200,7 +201,8 @@ namespace net_utils
 		m_len_remain(0),
 		m_config(config), 
 		m_want_close(false),
-        m_psnd_hndlr(psnd_hndlr)
+    m_psnd_hndlr(psnd_hndlr), 
+    m_precommand_line_chars(0)
 	{
 
 	}
@@ -213,6 +215,7 @@ namespace net_utils
 		m_body_transfer_type = http_body_transfer_undefined;
 		m_query_info.clear();
 		m_len_summary = 0;
+    m_precommand_line_chars = 0;
 		return true;
 	}
 	//--------------------------------------------------------------------------------------------
@@ -255,6 +258,14 @@ namespace net_utils
           //some times it could be that before query line cold be few line breaks
           //so we have to be calm without panic with assers
 					m_cache.erase(0, 1);
+          //fixed bug with possible '\r\n' chars flood, thanks to @anonimal (https://github.com/anonimal) for pointing this
+          ++m_precommand_line_chars;
+          if (m_precommand_line_chars > HTTP_MAX_PRE_COMMAND_LINE_CHARS)
+          {
+            LOG_ERROR("simple_http_connection_handler::handle_buff_in: Too long URI line");
+            m_state = http_state_error;
+            return false;
+          }
 					break;
 				}
 
