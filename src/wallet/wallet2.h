@@ -44,7 +44,14 @@ namespace tools
     virtual void on_money_sent(const wallet_rpc::wallet_transfer_info& wti) {}
   };
 
-    
+  struct wallet_block_stat_t
+  {
+    wallet_block_stat_t() : amount_in(0), amount_out(0), height(0), ts(0) {}
+    uint64_t amount_in;
+    uint64_t amount_out;
+    uint64_t height;
+    uint64_t ts;
+  };
 
   struct tx_dust_policy
   {
@@ -124,6 +131,7 @@ namespace tools
     currency::account_base& get_account(){return m_account;}
 
     void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
+    void get_recent_blocks_stat(std::vector<wallet_block_stat_t>& wbs, size_t blocks_limit);
     void get_unconfirmed_transfers(std::vector<wallet_rpc::wallet_transfer_info>& trs);
     void init(const std::string& daemon_address = "http://localhost:8080");
     void reset_and_sync_wallet();
@@ -144,7 +152,7 @@ namespace tools
     void sign_transfer_files(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
     void submit_transfer(const std::string& tx_sources_blob, const std::string& signed_tx_blob, currency::transaction& tx);
     void submit_transfer_files(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
-
+    void cancel_transfer(const std::string& tx_sources_blob);
 
     void sign_text(const std::string& text, crypto::signature& sig);
     std::string validate_signed_text(const std::string& addr, const std::string& text, const crypto::signature& sig);
@@ -168,6 +176,8 @@ namespace tools
 
     void sweep_below(size_t fake_outs_count, const currency::account_public_address& addr, uint64_t threshold_amount, const currency::payment_id_t& payment_id,
       uint64_t fee, size_t& outs_total, uint64_t& amount_total, size_t& outs_swept, currency::transaction* result_tx = nullptr);
+
+    std::string print_key_image_info(const crypto::key_image& ki) const;
     
     bool get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) const;
     bool check_connection();
@@ -199,7 +209,9 @@ namespace tools
       if (ver < 9)
           return;
       a & m_tx_keys;
-
+      if (ver < 11)
+        return;
+      a & m_pending_key_images;
     }
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
   private:
@@ -225,6 +237,7 @@ namespace tools
     void wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& utd, wallet_rpc::wallet_transfer_info& wti)const;
     void finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result, bool do_not_relay = false);
     void resend_unconfirmed();
+    void set_transfer_spent_flag(uint64_t transfer_index, bool spent_flag);
 
     currency::account_base m_account;
     bool m_is_view_only;
@@ -237,6 +250,7 @@ namespace tools
     transfer_container m_transfers;
     payment_container m_payments;
     std::unordered_map<crypto::key_image, size_t> m_key_images;
+    std::unordered_map<crypto::public_key, crypto::key_image> m_pending_key_images; // (out_pk -> ki) pairs of change outputs to be added in watch-only wallet without spend sec key
     currency::account_public_address m_account_public_address;
     uint64_t m_upper_transaction_size_limit; //TODO: auto-calc this value or request from daemon, now use some fixed value
 
@@ -251,7 +265,7 @@ namespace tools
 }
 
 
-BOOST_CLASS_VERSION(tools::wallet2, 10)
+BOOST_CLASS_VERSION(tools::wallet2, 11)
 BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 3)
 BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 3)
 
@@ -539,7 +553,7 @@ namespace tools
     if (m_is_view_only)
     {
       //mark outputs as spent 
-      BOOST_FOREACH(transfer_container::iterator it, selected_transfers)
+      for(transfer_container::iterator it : selected_transfers)
         it->m_spent = true;
       //do offline sig
       blobdata bl = t_serializable_object_to_blob(create_tx_param);

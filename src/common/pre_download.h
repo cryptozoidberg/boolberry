@@ -14,17 +14,18 @@
 
 namespace tools
 {
-  struct pre_download_entrie
+  struct pre_download_entry
   {
     std::string url;
     std::string md5;
     uint64_t packed_size;
     uint64_t unpacked_size;
   };
+
 #ifndef TESTNET
-  const static pre_download_entrie pre_download = { "http://88.99.193.104/downloads/data3.mdb.pak", "852ad69914faf6c2e5220b719b30bb4a", 5769499320, 7884759040 };
+  const static pre_download_entry c_pre_download = { "http://88.99.193.104/downloads/data3.mdb.pak", "852ad69914faf6c2e5220b719b30bb4a", 5769499320, 7884759040 };
 #else
-  const static pre_download_entrie pre_download = { "http://88.99.193.104/downloads/data_testnet.mdb.pak", "57feaa97401048386f335355d23fdf18", 164782602, 238563328 };
+  const static pre_download_entry c_pre_download = { "http://88.99.193.104/downloads/data_testnet.mdb.pak", "57feaa97401048386f335355d23fdf18", 164782602, 238563328 };
 #endif
 
   template<class callback_t>
@@ -32,6 +33,11 @@ namespace tools
   {
     std::string config_folder = command_line::get_arg(vm, command_line::arg_data_dir);
     std::string working_folder = config_folder + "/" CURRENCY_BLOCKCHAINDATA_FOLDERNAME;
+
+    pre_download_entry pre_download = c_pre_download;
+    if (command_line::has_arg(vm, command_line::arg_predownload_link))
+      pre_download.url = command_line::get_arg(vm, command_line::arg_predownload_link);
+
     boost::system::error_code ec;
     uint64_t sz = boost::filesystem::file_size(working_folder + "/" LMDB_DATA_FILE_NAME, ec);
     if (!(ec || pre_download.unpacked_size > sz * 2 || command_line::has_arg(vm, command_line::arg_explicit_predownload)) )

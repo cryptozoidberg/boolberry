@@ -256,7 +256,7 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------------------------
-  bool tx_memory_pool::have_tx(const crypto::hash &id)
+  bool tx_memory_pool::have_tx(const crypto::hash &id) const
   {
     PROFILE_FUNC("tx_memory_pool::have_tx");
     CRITICAL_REGION_LOCAL(m_transactions_lock);
@@ -265,7 +265,7 @@ namespace currency
     return false;
   }
   //---------------------------------------------------------------------------------
-  bool tx_memory_pool::have_tx_keyimges_as_spent(const transaction& tx)
+  bool tx_memory_pool::have_tx_keyimges_as_spent(const transaction& tx) const
   {
     PROFILE_FUNC("tx_memory_pool::have_tx_keyimges_as_spent");
     CRITICAL_REGION_LOCAL(m_transactions_lock);
@@ -278,7 +278,7 @@ namespace currency
     return false;
   }
   //---------------------------------------------------------------------------------
-  bool tx_memory_pool::have_tx_keyimg_as_spent(const crypto::key_image& key_im)
+  bool tx_memory_pool::have_tx_keyimg_as_spent(const crypto::key_image& key_im) const
   {
     CRITICAL_REGION_LOCAL(m_transactions_lock);
     return m_spent_key_images.end() != m_spent_key_images.find(key_im);
@@ -531,4 +531,67 @@ namespace currency
     }
     return true;
   }
+  //---------------------------------------------------------------------------------
+  bool tx_memory_pool::get_transaction_details(const crypto::hash& id, tx_rpc_extended_info& trei) const
+  {
+    CRITICAL_REGION_LOCAL(m_transactions_lock);
+    auto it = m_transactions.find(id);
+    if (it == m_transactions.end())
+      return false;
+
+    fill_tx_rpc_details(trei, it->second.tx, nullptr, id, it->second.receive_time, false);
+    return true;
+  }
+  //---------------------------------------------------------------------------------
+  bool tx_memory_pool::get_all_transactions_list(std::list<std::string>& txs) const
+  {
+    CRITICAL_REGION_LOCAL(m_transactions_lock);
+
+    for(auto it = m_transactions.begin(); it != m_transactions.end(); ++it)
+      txs.push_back(epee::string_tools::pod_to_hex(it->first));
+
+    return true;
+  }
+  //---------------------------------------------------------------------------------
+  bool tx_memory_pool::get_transactions_details(const std::list<std::string>& ids, std::list<tx_rpc_extended_info>& txs) const
+  {
+    CRITICAL_REGION_LOCAL(m_transactions_lock);
+
+    for (auto& id_str : ids)
+    {
+      crypto::hash id = null_hash;
+      if (!epee::string_tools::hex_to_pod(id_str, id))
+      {
+        LOG_ERROR("Failed to parse id in list: " << id_str);
+        return false;
+      }
+
+      auto it = m_transactions.find(id);
+      if (it == m_transactions.end())
+        return false;
+
+      txs.push_back(tx_rpc_extended_info());
+      tx_rpc_extended_info& trei = txs.back();
+      trei.blob_size = it->second.blob_size;
+      fill_tx_rpc_details(trei, it->second.tx, nullptr, id, it->second.receive_time, false);
+    }
+    return true;
+  }
+  //---------------------------------------------------------------------------------
+  bool tx_memory_pool::get_all_transactions_details(std::list<tx_rpc_extended_info>& txs) const
+  {
+    CRITICAL_REGION_LOCAL(m_transactions_lock);
+
+    for(auto& el : m_transactions)
+    {
+      txs.push_back(tx_rpc_extended_info());
+      tx_rpc_extended_info& trei = txs.back();
+      trei.blob_size = el.second.blob_size;
+      fill_tx_rpc_details(trei, el.second.tx, nullptr, el.first, el.second.receive_time, true);
+      return true;
+    }
+
+    return true;
+  }
+
 }

@@ -137,11 +137,11 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 @echo on
-@echo "Signing installer..."
-signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% %PACKAGE_EXE_PATH%
-IF %ERRORLEVEL% NEQ 0 (
-  goto error
-)
+rem @echo "Signing installer..."
+rem signtool sign /f %CERT_FILEPATH% /p %BBR_CERT_PASS% %PACKAGE_EXE_PATH%
+rem IF %ERRORLEVEL% NEQ 0 (
+rem   goto error
+rem )
 
 
 

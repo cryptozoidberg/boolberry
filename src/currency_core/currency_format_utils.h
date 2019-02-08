@@ -11,6 +11,8 @@
 #include "crypto/crypto.h"
 #include "crypto/hash.h"
 #include "crypto/wild_keccak.h"
+#include "rpc/core_rpc_server_commands_defs.h"
+#include "blockchain_storage_basic.h"
 
 #define MAX_ALIAS_LEN         255
 #define VALID_ALIAS_CHARS     "0123456789abcdefghijklmnopqrstuvwxyz-."
@@ -110,10 +112,12 @@ namespace currency
   {
     currency::transaction tx;
     keypair txkey;
+    std::vector<serializable_pair<uint64_t, crypto::key_image>> outs_key_images; // pairs (out_index, key_image) for each change output
 
     BEGIN_SERIALIZE_OBJECT()
       FIELD(tx)
       FIELD(txkey)
+      FIELD(outs_key_images)
     END_SERIALIZE()
   };
 
@@ -187,6 +191,7 @@ namespace currency
   bool is_mixattr_applicable_for_fake_outs_counter(uint8_t mix_attr, uint64_t fake_attr_count);
   serializable_pair<uint64_t, crypto::public_key> make_output_entry(uint64_t index, const crypto::public_key& key);
 
+  bool get_reward_from_miner_tx(const transaction& tx, uint64_t& reward);
 
   crypto::hash get_transaction_hash(const transaction& t);
   bool get_transaction_hash(const transaction& t, crypto::hash& res);
@@ -219,9 +224,18 @@ namespace currency
   bool addendum_to_hexstr(const std::vector<crypto::hash>& add, std::string& hex_buff);
   bool hexstr_to_addendum(const std::string& hex_buff, std::vector<crypto::hash>& add);
   bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const payment_id_t& payment_id);
+  bool get_payment_id_from_user_data(const std::string& user_data, payment_id_t& payment_id);
   bool get_payment_id_from_tx_extra(const transaction& tx, payment_id_t& payment_id);
   crypto::hash get_blob_longhash(const blobdata& bd, uint64_t height, const std::vector<crypto::hash>& scratchpad);
   crypto::hash get_blob_longhash_opt(const blobdata& bd, const std::vector<crypto::hash>& scratchpad);
+
+
+  bool fill_tx_rpc_outputs(tx_rpc_extended_info& tei, const transaction& tx, const transaction_chain_entry* ptce);
+  bool fill_tx_rpc_inputs(tx_rpc_extended_info& tei, const transaction& tx);
+  bool fill_block_rpc_details(block_rpc_extended_info& pei_rpc, const block_extended_info& bei_chain, const crypto::hash& h);
+  bool fill_tx_rpc_extra_items(std::vector<tx_extra_rpc_entry>& extra_rpc_entry, const transaction& tx);
+  bool fill_tx_rpc_details(tx_rpc_extended_info& tei, const transaction& tx, const transaction_chain_entry* ptce, const crypto::hash& h, uint64_t timestamp, bool is_short = false);
+
 
   void print_currency_details();
     
