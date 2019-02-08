@@ -54,7 +54,7 @@ else()
   endif()
   message(STATUS "Using ARCH_FLAG = ${ARCH_FLAG}")
   
-  set(WARNINGS "-Wall -Wextra -Wpointer-arith -Wundef -Wvla -Wunused-but-set-variable -Wwrite-strings -Wno-error=extra -Wno-error=deprecated-declarations -Wno-error=sign-compare -Wno-error=strict-aliasing -Wno-error=type-limits -Wno-unused-parameter -Wno-error=unused-variable -Wundef")
+  set(WARNINGS "-Wall -Wextra -Wpointer-arith -Wundef -Wvla -Wunused-but-set-variable -Wold-style-definition -Wwrite-strings -Wno-error=extra -Wno-error=deprecated-declarations -Wno-error=sign-compare -Wno-error=strict-aliasing -Wno-error=type-limits -Wno-unused-parameter -Wno-error=unused-variable -Wundef")
   if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     set(WARNINGS "${WARNINGS} -Wno-error=mismatched-tags -Wno-error=null-conversion -Wno-overloaded-shift-op-parentheses -Wno-error=shift-count-overflow -Wno-error=tautological-constant-out-of-range-compare -Wno-error=unused-private-field -Wno-error=unneeded-internal-declaration")
   else()
