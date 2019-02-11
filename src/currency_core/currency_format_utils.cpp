@@ -1278,8 +1278,8 @@ namespace currency
     }
     */
 
-    pei_rpc.base_reward = get_base_block_reward(bei_chain.already_generated_coins);
     get_reward_from_miner_tx(bei_chain.bl.miner_tx, pei_rpc.summary_reward);
+    pei_rpc.base_reward = get_base_block_reward(bei_chain.already_generated_coins - pei_rpc.summary_reward); // need to calculate reward from already_generated_coins of prev block
     pei_rpc.penalty = (pei_rpc.base_reward + pei_rpc.total_fee) - pei_rpc.summary_reward;
     return true;
   }
