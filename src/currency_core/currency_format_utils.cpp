@@ -506,7 +506,7 @@ namespace currency
       const auto& out = rsp.tx.vout[i];
       if (out.target.type() != typeid(txout_to_key))
         continue;
-      const txout_to_key& otk = boost::get<const txout_to_key&>(out.target);
+      const txout_to_key& otk = boost::get<txout_to_key>(out.target);
 
       crypto::public_key ephemeral_pub = AUTO_VAL_INIT(ephemeral_pub);
       bool r = crypto::derive_public_key(derivation, i, keys.m_account_address.m_spend_public_key, ephemeral_pub);
@@ -1278,8 +1278,8 @@ namespace currency
     }
     */
 
-    pei_rpc.base_reward = get_base_block_reward(bei_chain.already_generated_coins);
     get_reward_from_miner_tx(bei_chain.bl.miner_tx, pei_rpc.summary_reward);
+    pei_rpc.base_reward = get_base_block_reward(bei_chain.already_generated_coins - pei_rpc.summary_reward); // need to calculate reward from already_generated_coins of prev block
     pei_rpc.penalty = (pei_rpc.base_reward + pei_rpc.total_fee) - pei_rpc.summary_reward;
     return true;
   }
