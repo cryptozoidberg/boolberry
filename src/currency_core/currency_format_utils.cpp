@@ -506,7 +506,7 @@ namespace currency
       const auto& out = rsp.tx.vout[i];
       if (out.target.type() != typeid(txout_to_key))
         continue;
-      const txout_to_key& otk = boost::get<const txout_to_key&>(out.target);
+      const txout_to_key& otk = boost::get<txout_to_key>(out.target);
 
       crypto::public_key ephemeral_pub = AUTO_VAL_INIT(ephemeral_pub);
       bool r = crypto::derive_public_key(derivation, i, keys.m_account_address.m_spend_public_key, ephemeral_pub);
