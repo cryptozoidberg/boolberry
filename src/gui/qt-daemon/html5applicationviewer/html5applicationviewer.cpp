@@ -24,6 +24,7 @@
 #include <QClipboard>
 #include "warnings.h"
 #include "net/http_client.h"
+#include "string_coding.h"
 
 Html5ApplicationViewer::Html5ApplicationViewer():
                         m_quit_requested(false),
@@ -541,7 +542,7 @@ QString Html5ApplicationViewer::generate_wallet()
     return QString();
 
   std::string seed; //not used yet
-  m_backend.generate_wallet(path.toStdString(), pass.toStdString(), seed);
+  m_backend.generate_wallet(epee::string_encoding::utf8_to_wstring(path.toStdString()), pass.toStdString(), seed);
   QString res = seed.c_str();
 // 
 //   QString message = "This is your wallet seed phrase:\n\n";
@@ -589,7 +590,7 @@ bool Html5ApplicationViewer::restore_wallet(const QString& restore_text, const Q
 
   m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
 
-  return m_backend.restore_wallet(path.toStdString(), restore_text.toStdString(), password.toStdString());
+  return m_backend.restore_wallet(epee::string_encoding::utf8_to_wstring(path.toStdString()), restore_text.toStdString(), password.toStdString());
 }
 
 void Html5ApplicationViewer::place_to_clipboard(const QString& data)
@@ -655,7 +656,7 @@ void Html5ApplicationViewer::open_wallet()
   if (!ok)
     return;
 
-  m_backend.open_wallet(path.toStdString(), pass.toStdString());
+  m_backend.open_wallet(epee::string_encoding::utf8_to_wstring(path.toStdString()), pass.toStdString());
 }
 
 QString Html5ApplicationViewer::get_gui_lang()

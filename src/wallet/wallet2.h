@@ -123,11 +123,11 @@ namespace tools
       END_SERIALIZE()
     };
 
-    std::vector<unsigned char> generate(const std::string& wallet, const std::string& password);
-    void restore(const std::string& wallet, const std::vector<unsigned char>& restore_seed, const std::string& password);
-    void load(const std::string& wallet, const std::string& password);    
+    std::vector<unsigned char> generate(const std::wstring& wallet, const std::string& password);
+    void restore(const std::wstring& wallet, const std::vector<unsigned char>& restore_seed, const std::string& password);
+    void load(const std::wstring& wallet, const std::string& password);    
     void store();
-    std::string get_wallet_path(){ return m_keys_file; }
+    std::wstring get_wallet_path(){ return m_keys_file; }
     currency::account_base& get_account(){return m_account;}
 
     void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
@@ -156,7 +156,7 @@ namespace tools
 
     void sign_text(const std::string& text, crypto::signature& sig);
     std::string validate_signed_text(const std::string& addr, const std::string& text, const crypto::signature& sig);
-    bool generate_view_wallet(const std::string new_name, const std::string& password);
+    bool generate_view_wallet(const std::wstring new_name, const std::string& password);
     bool is_view_only(){ return m_is_view_only;}
     
     bool set_core_proxy(std::shared_ptr<i_core_proxy>& proxy);
@@ -186,7 +186,7 @@ namespace tools
     std::string get_transfers_str(bool include_spent = true, bool include_unspent = true) const;
     void get_payments(const currency::payment_id_t& payment_id, std::list<payment_details>& payments, uint64_t min_height = 0) const;
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id);
-    bool store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet = false);
+    bool store_keys(const std::wstring& keys_file_name, const std::string& password, bool save_as_view_wallet = false);
     uint64_t get_blockchain_current_height() const { return m_local_bc_height; }
     template <class t_archive>
     inline void serialize(t_archive &a, const unsigned int ver)
@@ -216,7 +216,7 @@ namespace tools
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
   private:
 
-    void load_keys(const std::string& keys_file_name, const std::string& password);
+    void load_keys(const std::wstring& keys_file_name, const std::string& password);
     void process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b);
     void process_new_blockchain_entry(const currency::block& b, currency::block_complete_entry& bche, crypto::hash& bl_id, uint64_t height);
     void detach_blockchain(uint64_t height);
@@ -226,7 +226,7 @@ namespace tools
     bool clear();
     void pull_blocks(size_t& blocks_added);
     uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, const std::vector<size_t>& outs_to_spend, std::list<transfer_container::iterator>& selected_transfers);
-    bool prepare_file_names(const std::string& file_path);
+    bool prepare_file_names(const std::wstring& file_path);
     void process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias);
     void add_sent_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient);
     void update_current_tx_limit();
@@ -241,8 +241,8 @@ namespace tools
 
     currency::account_base m_account;
     bool m_is_view_only;
-    std::string m_wallet_file;
-    std::string m_keys_file;
+    std::wstring m_wallet_file;
+    std::wstring m_keys_file;
     std::vector<crypto::hash> m_blockchain;
     std::atomic<uint64_t> m_local_bc_height; //temporary workaround 
     std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;
