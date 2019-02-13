@@ -353,6 +353,12 @@ namespace currency
   template<class t_core> 
   int t_currency_protocol_handler<t_core>::handle_request_get_objects(int command, NOTIFY_REQUEST_GET_OBJECTS::request& arg, currency_connection_context& context)
   {
+    if (arg.blocks.size() > CURRENCY_PROTOCOL_MAX_BLOCKS_REQUEST_COUNT)
+    {
+      LOG_ERROR_CCONTEXT("Requested objects count is to big (" << arg.blocks.size() << ")expected not more then " << CURRENCY_PROTOCOL_MAX_BLOCKS_REQUEST_COUNT);
+      m_p2p->drop_connection(context);
+    }
+
     if (!m_been_synchronized)
     {
       LOG_ERROR_CCONTEXT("Internal error: got NOTIFY_REQUEST_GET_OBJECTS while m_been_synchronized = false, dropping connection");
@@ -707,7 +713,6 @@ namespace currency
   bool t_currency_protocol_handler<t_core>::do_force_handshake_idle_connections()
   {
     nodetool::connections_list_type peer_list;
-    size_t count = 0;
     m_p2p->for_each_connection([&](currency_connection_context& context, nodetool::peerid_type peer_id)->bool{
       if (context.m_state == currency_connection_context::state_idle)
       {
