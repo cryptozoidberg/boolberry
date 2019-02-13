@@ -26,6 +26,7 @@ public:
     m_cmd_binder.set_handler("print_pl", boost::bind(&daemon_cmmands_handler::print_pl, this, _1), "Print peer list");
     m_cmd_binder.set_handler("print_cn", boost::bind(&daemon_cmmands_handler::print_cn, this, _1), "Print connections");
     m_cmd_binder.set_handler("print_bc", boost::bind(&daemon_cmmands_handler::print_bc, this, _1), "Print blockchain info in a given blocks range, print_bc <begin_height> [<end_height>]");
+    m_cmd_binder.set_handler("print_bc_timestamps", boost::bind(&daemon_cmmands_handler::print_bc_timestamps, this, _1), "Print block's timestamps in a given blocks range, print_bc <begin_height> [<end_height>]");
     //m_cmd_binder.set_handler("print_bci", boost::bind(&daemon_cmmands_handler::print_bci, this, _1));
     //m_cmd_binder.set_handler("print_bc_outs", boost::bind(&daemon_cmmands_handler::print_bc_outs, this, _1));
     m_cmd_binder.set_handler("print_block", boost::bind(&daemon_cmmands_handler::print_block, this, _1), "Print block, print_block <block_hash> | <block_height>");
@@ -165,6 +166,30 @@ private:
     }
 
     m_srv.get_payload_object().get_core().print_blockchain(start_index, end_block_parametr);
+    return true;
+  }  
+  //--------------------------------------------------------------------------------
+    bool print_bc_timestamps(const std::vector<std::string>& args)
+  {
+    if (!args.size())
+    {
+      std::cout << "need block index parameter" << ENDL;
+      return false;
+    }
+    uint64_t start_index = 0;
+    uint64_t end_block_parametr = m_srv.get_payload_object().get_core().get_current_blockchain_height();
+    if (!string_tools::get_xtype_from_string(start_index, args[0]))
+    {
+      std::cout << "wrong starter block index parameter" << ENDL;
+      return false;
+    }
+    if (args.size() > 1 && !string_tools::get_xtype_from_string(end_block_parametr, args[1]))
+    {
+      std::cout << "wrong end block index parameter" << ENDL;
+      return false;
+    }
+
+    m_srv.get_payload_object().get_core().get_blockchain_storage().print_blocks_timestamps(start_index, end_block_parametr);
     return true;
   }
   //--------------------------------------------------------------------------------

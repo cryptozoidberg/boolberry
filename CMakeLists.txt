@@ -151,9 +151,7 @@ endif()
 
 if(BUILD_GUI)
   cmake_minimum_required(VERSION 2.8.11)
-  find_package(Qt5Widgets REQUIRED)  
-  find_package(Qt5WebKit REQUIRED)
-  find_package(Qt5WebKitWidgets REQUIRED)
+  find_package(Qt5Widgets REQUIRED)
 endif()
 
 set(COMMIT_ID_IN_VERSION ON CACHE BOOL "Include commit ID in version")
