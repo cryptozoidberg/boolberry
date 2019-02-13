@@ -261,9 +261,9 @@ namespace file_io_utils
   typedef int native_filesystem_handle;
 #endif
 
-
+  template<class string_t>
 	inline
-		bool save_string_to_file(const std::string& path_to_file, const std::string& str)
+		bool save_string_to_file(const string_t& path_to_file, const std::string& str)
 	{
 
 		try
@@ -352,9 +352,9 @@ namespace file_io_utils
 			return false;
 	}
 
-
+  template<class string_t>
 	inline
-		bool load_file_to_string(const std::string& path_to_file, std::string& target_str)
+		bool load_file_to_string(const string_t& path_to_file, std::string& target_str)
 	{
 		try
 		{

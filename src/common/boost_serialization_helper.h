@@ -13,8 +13,8 @@
 
 namespace tools
 {
-  template<class t_object>
-  bool serialize_obj_to_file(t_object& obj, const std::string& file_path)
+  template<class t_object, class t_string>
+  bool serialize_obj_to_file(t_object& obj, const t_string& file_path)
   {
     TRY_ENTRY();
     std::ofstream data_file;
@@ -29,8 +29,8 @@ namespace tools
     CATCH_ENTRY_L0("serialize_obj_to_file", false);
   }
 
-  template<class t_object>
-  bool unserialize_obj_from_file(t_object& obj, const std::string& file_path)
+  template<class t_object, class t_string>
+  bool unserialize_obj_from_file(t_object& obj, const t_string& file_path)
   {
     TRY_ENTRY();
 
