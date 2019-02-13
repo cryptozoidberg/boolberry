@@ -73,7 +73,7 @@ cp $QT_PREFIX_PATH/plugins/xcbglintegrations/libqxcb-glx-integration.so ./boolbe
 
 printf "\nmaking compressed build archive...\n\n"
 
-package_filename=boolberry-linux-x64-webegine-$version_str.tar.bz2
+package_filename=boolberry-linux-x64-dev-$version_str.tar.bz2
 
 tar -cjvf $package_filename boolberry
 

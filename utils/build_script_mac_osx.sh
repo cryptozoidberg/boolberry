@@ -53,7 +53,7 @@ ln -s /Applications package_folder/Applications
 
 mv Boolberry.app package_folder 
 
-package_filename="boolberry-macos-x64-webegine-$version_str.dmg"
+package_filename="boolberry-macos-x64-dev-$version_str.dmg"
 
 hdiutil create -format UDZO -srcfolder package_folder -volname Boolberry $package_filename
 

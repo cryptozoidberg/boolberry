@@ -1,7 +1,7 @@
 SET QT_PREFIX_PATH=C:\dev\_sdk\Qt5.11.2\5.11.2\msvc2017_64
 SET INNOSETUP_PATH=C:\Program Files (x86)\Inno Setup 5\ISCC.exe
 SET ETC_BINARIES_PATH=C:\dev\deploy\etc-binaries
-SET ACHIVE_NAME_PREFIX=boolberry-win-x64-webegine-
+SET ACHIVE_NAME_PREFIX=boolberry-win-x64-dev-
 SET BUILDS_PATH=C:\dev\deploy\boolberry
 set BOOST_ROOT=C:\dev\_sdk\boost_1_68_0
 set BOOST_LIBRARYDIR=C:\dev\_sdk\boost_1_68_0\lib64-msvc-14.1
