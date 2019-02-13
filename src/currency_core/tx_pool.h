@@ -20,6 +20,7 @@ using namespace epee;
 #include "verification_context.h"
 #include "crypto/hash.h"
 #include "common/boost_serialization_helper.h"
+#include "rpc/core_rpc_server_commands_defs.h"
 
 
 namespace currency
@@ -38,9 +39,9 @@ namespace currency
     //gets tx and remove it from pool
     bool take_tx(const crypto::hash &id, transaction &tx, size_t& blob_size, uint64_t& fee);
 
-    bool have_tx(const crypto::hash &id);
-    bool have_tx_keyimg_as_spent(const crypto::key_image& key_im);
-    bool have_tx_keyimges_as_spent(const transaction& tx);
+    bool have_tx(const crypto::hash &id) const;
+    bool have_tx_keyimg_as_spent(const crypto::key_image& key_im) const;
+    bool have_tx_keyimges_as_spent(const transaction& tx) const;
 
     bool on_blockchain_inc(uint64_t new_block_height, const crypto::hash& top_block_id);
     bool on_blockchain_dec(uint64_t new_block_height, const crypto::hash& top_block_id);
@@ -57,6 +58,11 @@ namespace currency
     bool fill_block_template(block &bl, size_t median_size, uint64_t already_generated_coins, uint64_t already_donated_coins, size_t &total_size, uint64_t &fee);
     bool get_transactions(std::list<transaction>& txs);
     bool get_transaction(const crypto::hash& h, transaction& tx);
+    bool get_transaction_details(const crypto::hash& id, tx_rpc_extended_info& trei) const;
+    bool get_all_transactions_list(std::list<std::string>& txs) const;
+    bool get_transactions_details(const std::list<std::string>& ids, std::list<tx_rpc_extended_info>& txs) const;
+    bool get_all_transactions_details(std::list<tx_rpc_extended_info>& txs) const;
+
     size_t get_transactions_count();
     bool remove_transaction_keyimages(const transaction& tx);
     bool have_key_images(const std::unordered_set<crypto::key_image>& kic, const transaction& tx);
@@ -102,7 +108,7 @@ namespace currency
     typedef std::unordered_map<crypto::hash, tx_details > transactions_container;
     typedef std::unordered_map<crypto::key_image, std::unordered_set<crypto::hash> > key_images_container;
 
-    epee::critical_section m_transactions_lock;
+    mutable epee::critical_section m_transactions_lock;
     transactions_container m_transactions;
     key_images_container m_spent_key_images;
     

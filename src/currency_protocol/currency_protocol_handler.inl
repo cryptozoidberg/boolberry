@@ -475,11 +475,13 @@ namespace currency
       PROF_L1_START(blocks_handle_time);
       {
         m_core.pause_mine();
+        m_core.get_tx_pool().lock();
         m_core.get_blockchain_storage().start_batch_exclusive_operation();
         bool success = false;
         misc_utils::auto_scope_leave_caller scope_exit_handler = misc_utils::create_scope_leave_handler([&, this](){
           boost::bind(&t_core::resume_mine, &m_core);
           m_core.get_blockchain_storage().finish_batch_exclusive_operation(success);
+          m_core.get_tx_pool().unlock();
         });
 
         BOOST_FOREACH(const block_complete_entry& block_entry, arg.blocks)
@@ -711,7 +713,6 @@ namespace currency
   bool t_currency_protocol_handler<t_core>::do_force_handshake_idle_connections()
   {
     nodetool::connections_list_type peer_list;
-    size_t count = 0;
     m_p2p->for_each_connection([&](currency_connection_context& context, nodetool::peerid_type peer_id)->bool{
       if (context.m_state == currency_connection_context::state_idle)
       {

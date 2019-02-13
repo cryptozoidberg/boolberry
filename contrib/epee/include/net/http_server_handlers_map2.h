@@ -47,7 +47,7 @@
 #define BEGIN_URI_MAP2()   template<class t_context> bool handle_http_request_map(const epee::net_utils::http::http_request_info& query_info, \
   epee::net_utils::http::http_response_info& response_info, \
   t_context& m_conn_context) { \
-  LOG_PRINT_L1("[HTTP][" << query_info.m_URI << "]"); \
+  LOG_PRINT_L2("[HTTP][" << query_info.m_URI << "]"); \
   LOG_PRINT_L4("[HTTP][HEADER]: " << ENDL << query_info.m_request_head << ENDL << "[BODY]" << ENDL << query_info.m_body); \
   bool handled = false; \
   if(false) return true; //just a stub to have "else if"
@@ -230,7 +230,7 @@ namespace epee
       epee::serialization::store_t_to_json(static_cast<epee::json_rpc::error_response&>(rsp), response_info.m_body); \
       return true; \
     } \
-    LOG_PRINT_L1("json_rpc: ") \
+    LOG_PRINT_L2("json_rpc: ") \
     if(false) return true; //just a stub to have "else if"
 
 

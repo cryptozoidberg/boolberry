@@ -48,51 +48,6 @@ namespace currency
   class blockchain_storage
   {
   public:
-    struct transaction_chain_entry
-    {
-      transaction tx;
-      uint64_t m_keeper_block_height;
-      std::vector<uint64_t> m_global_output_indexes;
-      std::vector<bool> m_spent_flags;
-      uint32_t version;
-
-      DEFINE_SERIALIZATION_VERSION(1)
-
-      BEGIN_SERIALIZE_OBJECT()
-        VERSION_ENTRY(version)
-        FIELD(version)
-        FIELDS(tx)
-        FIELD(m_keeper_block_height)
-        FIELD(m_global_output_indexes)
-        FIELD(m_spent_flags)
-      END_SERIALIZE()
-    };
-
-    struct block_extended_info
-    {
-      block   bl;
-      uint64_t height;
-      size_t block_cumulative_size;
-      wide_difficulty_type cumulative_difficulty;
-      uint64_t already_generated_coins;
-      uint64_t already_donated_coins;
-      uint64_t scratch_offset;
-
-      uint32_t version;
-
-      DEFINE_SERIALIZATION_VERSION(1)
-      BEGIN_SERIALIZE_OBJECT()
-        VERSION_ENTRY(version)
-        FIELDS(bl)
-        FIELD(height)
-        FIELD(block_cumulative_size)
-        FIELD(cumulative_difficulty)
-        FIELD(already_generated_coins)
-        FIELD(already_donated_coins)
-        FIELD(scratch_offset)
-      END_SERIALIZE()
-    };
-
     typedef db::key_to_array_accessor_base<uint64_t, std::pair<crypto::hash, uint64_t>, false>  outputs_container;
 
     blockchain_storage(tx_memory_pool& tx_pool);
@@ -198,6 +153,15 @@ namespace currency
     bool get_block_extended_info_by_height(uint64_t h, block_extended_info &blk) const;
     bool lookfor_donation(const transaction& tx, uint64_t& donation, uint64_t& royalty);
     bool check_tx_with_view_key(const crypto::hash& tx_hash, const crypto::secret_key& view_key, const account_public_address& addr, uint64_t& incoming_amount, payment_id_t& payment_id, std::vector<uint64_t>& outs_indicies) const;
+
+    bool get_main_blocks_rpc_details(uint64_t start_offset, size_t count, bool ignore_transactions, std::list<block_rpc_extended_info>& blocks) const;
+    bool get_main_block_rpc_details(uint64_t i, block_rpc_extended_info& bei) const;
+    bool get_tx_rpc_details(const crypto::hash& h, tx_rpc_extended_info& tei, uint64_t timestamp, bool is_short) const;
+    bool get_alt_blocks_rpc_details(uint64_t start_offset, uint64_t count, std::vector<block_rpc_extended_info>& blocks) const;
+    bool get_alt_block_rpc_details(const crypto::hash& id, block_rpc_extended_info& bei) const;
+    bool get_alt_block_rpc_details(const block_extended_info& bei_core, const crypto::hash& id, block_rpc_extended_info& bei) const;
+    bool get_global_index_details(const COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::request& req, COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::response & resp) const;
+
 
     std::string print_key_image_details(const crypto::key_image& ki, bool& found);
 
@@ -423,6 +387,6 @@ namespace currency
 
 
 BOOST_CLASS_VERSION(currency::blockchain_storage, CURRENT_BLOCKCHAIN_STORAGE_ARCHIVE_VER)
-BOOST_CLASS_VERSION(currency::blockchain_storage::transaction_chain_entry, CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER)
-BOOST_CLASS_VERSION(currency::blockchain_storage::block_extended_info, CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER)
+BOOST_CLASS_VERSION(currency::transaction_chain_entry, CURRENT_TRANSACTION_CHAIN_ENTRY_ARCHIVE_VER)
+BOOST_CLASS_VERSION(currency::block_extended_info, CURRENT_BLOCK_EXTENDED_INFO_ARCHIVE_VER)
 

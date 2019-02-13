@@ -47,6 +47,15 @@ namespace db
       return it->second.back().txn;
     }
 
+    MDB_txn* get_current_transaction_if_exists() const
+    {
+      std::lock_guard<boost::recursive_mutex> guard(m_transaction_stack_mutex);
+      auto it = m_transaction_stack.find(std::this_thread::get_id());
+      if (it != m_transaction_stack.end() && !it->second.empty())
+        return it->second.back().txn;
+      return nullptr;
+    }
+
     bool has_active_transaction() const
     {
       std::lock_guard<boost::recursive_mutex> guard(m_transaction_stack_mutex);
@@ -189,7 +198,7 @@ namespace db
     if (!m_p_impl->has_active_transaction())
     {
       local_transaction = true;
-      begin_transaction();
+      begin_transaction(true);
     }
     int r = mdb_stat(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &table_stat);
     if (local_transaction)
@@ -351,6 +360,12 @@ namespace db
       local_transaction = true;
       begin_transaction();
     }
+    
+    auto commiter = epee::misc_utils::create_scope_leave_handler([this, &local_transaction](){
+      if (local_transaction)
+        commit_transaction();
+    });
+
     MDB_cursor* p_cursor = nullptr;
     int r = mdb_cursor_open(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &p_cursor);
     CHECK_DB_CALL_RESULT(r, false, "mdb_cursor_open failed");
@@ -368,8 +383,6 @@ namespace db
     }
 
     mdb_cursor_close(p_cursor);
-    if (local_transaction)
-      commit_transaction();
     return true;
   }
 

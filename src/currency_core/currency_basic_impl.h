@@ -29,6 +29,7 @@ namespace currency
   /************************************************************************/
   size_t get_max_block_size();
   size_t get_max_tx_size();
+  uint64_t get_base_block_reward(uint64_t already_generated_coins);
   bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t already_donated_coins, uint64_t &reward, uint64_t &max_donation);
   uint64_t get_donations_anount_for_day(uint64_t already_donated_coins, const std::vector<bool>& votes);
   void get_donation_parts(uint64_t total_donations, uint64_t& royalty, uint64_t& donation);

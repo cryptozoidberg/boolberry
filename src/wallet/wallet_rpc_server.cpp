@@ -713,8 +713,35 @@ namespace tools
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_cancel_transfer(const wallet_rpc::COMMAND_CANCEL_TRANSFER::request& req, wallet_rpc::COMMAND_CANCEL_TRANSFER::response& res, epee::json_rpc::error& er, connection_context& cntx)
+  {
+    try
+    {
+      std::string tx_unsigned_blob;
+      if (!string_tools::parse_hexstr_to_binbuff(req.tx_unsigned_hex, tx_unsigned_blob))
+      {
+        er.code = WALLET_RPC_ERROR_CODE_WRONG_ARGUMENT;
+        er.message = "tx_unsigned_hex is invalid";
+        return false;
+      }
+      m_wallet.cancel_transfer(tx_unsigned_blob);
+    }
+    catch (const std::exception& e)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
+      er.message = e.what();
+      return false;
+    }
+    catch (...)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
+      er.message = "WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR";
+      return false;
+    }
+
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
 
 }
-
-
 

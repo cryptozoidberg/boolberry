@@ -334,6 +334,7 @@ struct EMPTY_STRUCT {
       uint64_t max_net_seen_height;
       uint64_t transactions_cnt_per_day;
       uint64_t transactions_volume_per_day;
+      uint64_t already_generated_coins;
       nodetool::maintainers_info_external mi;
 
       BEGIN_KV_SERIALIZE_MAP()
@@ -357,6 +358,7 @@ struct EMPTY_STRUCT {
         KV_SERIALIZE(max_net_seen_height)
         KV_SERIALIZE(transactions_cnt_per_day)
         KV_SERIALIZE(transactions_volume_per_day)
+        KV_SERIALIZE(already_generated_coins)
         KV_SERIALIZE(mi)
       END_KV_SERIALIZE_MAP()
     };
@@ -1071,6 +1073,273 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
         KV_SERIALIZE(amount_received)
         KV_SERIALIZE(payment_id_hex)
         KV_SERIALIZE(outs_indicies)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct tx_out_rpc_entry
+  {
+    uint64_t amount;
+    std::list<std::string> pub_keys;
+    uint64_t minimum_sigs;
+    bool is_spent;
+    uint64_t global_index;
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(amount)
+      KV_SERIALIZE(pub_keys)
+      KV_SERIALIZE(minimum_sigs)
+      KV_SERIALIZE(is_spent)
+      KV_SERIALIZE(global_index)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct tx_in_rpc_entry
+  {
+    uint64_t amount;
+    uint64_t multisig_count;
+    std::string kimage_or_ms_id;
+    std::vector<uint64_t> global_indexes;
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(amount)
+      KV_SERIALIZE(kimage_or_ms_id)
+      KV_SERIALIZE(global_indexes)
+      KV_SERIALIZE(multisig_count)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct tx_extra_rpc_entry
+  {
+    std::string type;
+    std::string short_view;
+    std::string datails_view;
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(type)
+      KV_SERIALIZE(short_view)
+      KV_SERIALIZE(datails_view)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct tx_rpc_extended_info
+  {
+    blobdata blob;
+    uint64_t blob_size;
+    uint64_t fee;
+    uint64_t amount;
+    uint64_t timestamp;
+    int64_t keeper_block; // signed int, -1 means unconfirmed transaction
+    std::string id;
+    std::string pub_key;
+    std::vector<tx_out_rpc_entry> outs;
+    std::vector<tx_in_rpc_entry> ins;
+    std::vector<tx_extra_rpc_entry> extra;
+    std::string object_in_json;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(blob)
+      KV_SERIALIZE(blob_size)
+      KV_SERIALIZE(timestamp)
+      KV_SERIALIZE(keeper_block)
+      KV_SERIALIZE(fee)
+      KV_SERIALIZE(amount)
+      KV_SERIALIZE(id)
+      KV_SERIALIZE(pub_key)
+      KV_SERIALIZE(outs)
+      KV_SERIALIZE(ins)
+      KV_SERIALIZE(extra)
+      KV_SERIALIZE(object_in_json)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct block_rpc_extended_info
+  {
+    std::string blob;
+    uint64_t height;
+    uint64_t timestamp;
+    uint64_t actual_timestamp;
+    uint64_t block_cumulative_size;
+    uint64_t total_txs_size;
+    uint64_t block_tself_size;
+    uint64_t base_reward;
+    uint64_t summary_reward;
+    uint64_t penalty;
+    uint64_t total_fee;
+    std::string id;
+    std::string cumulative_difficulty;
+    std::string difficulty;
+    std::string prev_id;
+    bool is_orphan;
+    uint64_t already_generated_coins;
+    std::list<tx_rpc_extended_info> transactions_details;
+    std::string miner_text_info;
+    std::string object_in_json;
+
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(blob)
+      KV_SERIALIZE(height)
+      KV_SERIALIZE(timestamp)
+      KV_SERIALIZE(actual_timestamp)
+      KV_SERIALIZE(block_cumulative_size)
+      KV_SERIALIZE(total_txs_size)
+      KV_SERIALIZE(block_tself_size)
+      KV_SERIALIZE(base_reward)
+      KV_SERIALIZE(summary_reward)
+      KV_SERIALIZE(total_fee)
+      KV_SERIALIZE(penalty)
+      KV_SERIALIZE(id)
+      KV_SERIALIZE(prev_id)
+      KV_SERIALIZE(cumulative_difficulty)
+      KV_SERIALIZE(difficulty)
+      KV_SERIALIZE(already_generated_coins)
+      KV_SERIALIZE(transactions_details)
+      KV_SERIALIZE(is_orphan)
+      KV_SERIALIZE(miner_text_info)
+      KV_SERIALIZE(object_in_json)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct COMMAND_RPC_GET_BLOCKS_DETAILS
+  {
+    struct request
+    {
+      uint64_t height_start;
+      uint64_t count;
+      bool ignore_transactions;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(height_start)
+        KV_SERIALIZE(count)
+        KV_SERIALIZE(ignore_transactions)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+      std::list<block_rpc_extended_info> blocks;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(blocks)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_GET_ALT_BLOCKS_DETAILS
+  {
+    struct request
+    {
+      uint64_t offset;
+      uint64_t count;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(offset)
+        KV_SERIALIZE(count)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+      std::vector<block_rpc_extended_info> blocks;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(blocks)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_GET_ALL_POOL_TX_LIST
+  {
+    struct request
+    {
+      BEGIN_KV_SERIALIZE_MAP()
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+      std::list<std::string> ids;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(ids)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_GET_POOL_TXS_DETAILS
+  {
+    struct request
+    {
+      std::list<std::string> ids;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(ids)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+      std::list<tx_rpc_extended_info> txs;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(txs)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT
+  {
+    struct request
+    {
+      uint64_t amount;
+      uint64_t i;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(amount)
+        KV_SERIALIZE(i)
+      END_KV_SERIALIZE_MAP()
+    };
+
+
+    struct response
+    {
+      std::string status;
+      std::string tx_id;
+      uint64_t out_no;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_id)
+        KV_SERIALIZE(out_no)
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_GET_TX_DETAILS
+  {
+    struct request
+    {
+      std::string tx_hash;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_hash)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+      tx_rpc_extended_info tx_info;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE(tx_info)
       END_KV_SERIALIZE_MAP()
     };
   };
