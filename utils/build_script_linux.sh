@@ -85,6 +85,6 @@ scp $package_filename bbr_build_server:/var/www/html/builds
 
 mail_msg="New build for linux-x64 available at http://$BBR_BUILD_SERVER_ADDR_PORT/builds/$package_filename"
 echo $mail_msg
-echo $mail_msg | mail -s "Boolberry linux-x64 build $version_str" ${emails}
+echo $mail_msg | mail -s "Boolberry linux-x64 DEV build $version_str" ${emails}
 
 exit 0

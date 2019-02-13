@@ -168,7 +168,7 @@ set mail_msg="New build for win-x64 available at http://%BBR_BUILD_SERVER_ADDR%:
 
 echo %mail_msg%
 
-senditquiet.exe -t %emails% -subject "Boolberry win-x64 build %version%" -body %mail_msg%
+senditquiet.exe -t %emails% -subject "Boolberry win-x64 DEV build %version%" -body %mail_msg%
 
 
 goto success
