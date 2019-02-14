@@ -34,7 +34,7 @@
 
 #include <iostream>
 #include <boost/filesystem.hpp>
-
+#include <boost/filesystem/fstream.hpp>
 
 #ifndef MAKE64
 	#define MAKE64(low,high)	((__int64)(((DWORD)(low)) | ((__int64)((DWORD)(high))) << 32))
