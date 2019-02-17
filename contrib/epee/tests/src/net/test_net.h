@@ -312,7 +312,7 @@ namespace tests
   {
     uint64_t i = 0;
     boost::mutex wait_event;
-    wait_event.lock();
+    CRITICAL_SECTION_LOCK(wait_event);
     while(true)
     {
       net_utils::connection_context_base cntxt_local = AUTO_VAL_INIT(cntxt_local);
@@ -330,10 +330,10 @@ namespace tests
         {
             CHECK_AND_ASSERT_MES(code > 0, void(), "Failed to invoke"); 
             LOG_PRINT_L0("command 1 invoke to " << port_ << " OK.");
-            wait_event_.unlock();
+            CRITICAL_SECTION_UNLOCK(wait_event_);
         });        
       });
-      wait_event.lock();
+      CRITICAL_SECTION_LOCK(wait_event);
       srv.close(cntxt_local);
       ++i;
     }

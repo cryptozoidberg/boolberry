@@ -40,7 +40,7 @@ public:
     m_cmd_binder.set_handler("make_alias", boost::bind(&daemon_cmmands_handler::make_alias, this, _1), "Puts alias reservation record into block template, if alias is free");
     m_cmd_binder.set_handler("set_donations", boost::bind(&daemon_cmmands_handler::set_donations, this, _1), "Set donations mode: true if you vote for donation, and false - if against");
     m_cmd_binder.set_handler("print_ki", boost::bind(&daemon_cmmands_handler::print_ki, this, _1), "Print details of the specified key image");
-
+    m_cmd_binder.set_handler("print_deadlock_guard", boost::bind(&daemon_cmmands_handler::print_deadlock_guard, this, _1), "Print all threads which is blocked or involved in mutex ownership");
     //m_cmd_binder.set_handler("save", boost::bind(&daemon_cmmands_handler::save, this, _1), "Save blockchain");
     //m_cmd_binder.set_handler("get_transactions_statics", boost::bind(&daemon_cmmands_handler::get_transactions_statistics, this, _1), "Calculates transactions statistics");
   }
@@ -203,6 +203,12 @@ private:
   static bool print_as_json(T& obj)
   {
     std::cout << currency::obj_to_json_str(obj) << ENDL;
+    return true;
+  }
+  //--------------------------------------------------------------------------------
+  bool print_deadlock_guard(const std::vector<std::string>& args)
+  {
+    LOG_PRINT_L0(ENDL << epee::deadlock_guard_singleton::get_dlg_state());
     return true;
   }
   //--------------------------------------------------------------------------------
