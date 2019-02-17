@@ -24,10 +24,15 @@ namespace currency
     {
       LOG_PRINT_MAGENTA("from " << config_folder << "/" << CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE << " have just been loaded loaded " << m_scratchpad_cache.size() << " elements", LOG_LEVEL_1);
       size_t sz = m_rdb_scratchpad.size();
-      if (sz == m_scratchpad_cache.size() && m_scratchpad_cache[m_scratchpad_cache.size() - 1] == m_rdb_scratchpad[m_rdb_scratchpad.size() - 1])
+      if (m_scratchpad_cache.size() && sz == m_scratchpad_cache.size() && m_scratchpad_cache[m_scratchpad_cache.size() - 1] == m_rdb_scratchpad[m_rdb_scratchpad.size() - 1])
       {
         success_from_cache = true;
         LOG_PRINT_MAGENTA("Scratchpad loaded from cache file OK (" << m_scratchpad_cache.size() << " elements, " << (m_scratchpad_cache.size() * 32) / 1024 << " KB)", LOG_LEVEL_0);
+      }
+      else
+      {
+        LOG_PRINT_MAGENTA("Scratchpad file [" << m_scratchpad_cache.size() << "]:" << (m_scratchpad_cache.size() ? m_scratchpad_cache[m_scratchpad_cache.size() - 1]:currency::null_hash) <<
+          ")missmatch  with db [" << m_rdb_scratchpad.size() << "]:" << m_rdb_scratchpad[m_rdb_scratchpad.size() - 1], LOG_LEVEL_0);
       }
     }
     boost::system::error_code ec;
@@ -62,7 +67,7 @@ namespace currency
     }
 #endif
     epee::file_io_utils::save_buff_to_file(m_config_folder + "/" + CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE, &m_scratchpad_cache[0], m_scratchpad_cache.size()*sizeof(m_scratchpad_cache[0]));
-    LOG_PRINT_MAGENTA(m_scratchpad_cache.size() << " elements (" << m_scratchpad_cache.size() * sizeof(m_scratchpad_cache[0]) << " bytes)" << " has just been saved to " << m_config_folder << " / " << CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE, LOG_LEVEL_1);
+    LOG_PRINT_MAGENTA("Stored scratchpad file [" << m_scratchpad_cache.size() << "]:" << m_scratchpad_cache[m_scratchpad_cache.size() - 1] << " to " << m_config_folder << " / " << CURRENCY_BLOCKCHAINDATA_SCRATCHPAD_CACHE, LOG_LEVEL_0);
     return true;
   }
 
