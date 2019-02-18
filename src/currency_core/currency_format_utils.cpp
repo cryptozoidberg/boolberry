@@ -1247,7 +1247,7 @@ namespace currency
         txin_to_key& tk = boost::get<txin_to_key>(in);
         tei.ins.back().amount = tk.amount;
         tei.ins.back().kimage_or_ms_id = epee::string_tools::pod_to_hex(tk.k_image);
-        std::vector<size_t> absolute_offsets = relative_output_offsets_to_absolute(tk.key_offsets);
+        std::vector<uint64_t> absolute_offsets = relative_output_offsets_to_absolute(tk.key_offsets);
         for (auto& ao : absolute_offsets)
         {
           tei.ins.back().global_indexes.push_back(0);

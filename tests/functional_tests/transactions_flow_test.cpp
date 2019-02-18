@@ -6,6 +6,7 @@
 #include <boost/uuid/random_generator.hpp>
 #include <unordered_map>
 #include "include_base_utils.h"
+#include "string_coding.h"
 using namespace epee;
 #include "storages/http_abstract_invoke.h"
 
@@ -95,8 +96,8 @@ bool transactions_flow_test(std::string& working_folder,
 
   try
   {
-    w1.generate(working_folder + "/" + path_source_wallet, "");
-    w2.generate(working_folder + "/" + path_terget_wallet, "");
+    w1.generate(string_encoding::convert_to_unicode(working_folder + "/" + path_source_wallet), "");
+    w2.generate(string_encoding::convert_to_unicode(working_folder + "/" + path_terget_wallet), "");
   }
   catch (const std::exception& e)
   {

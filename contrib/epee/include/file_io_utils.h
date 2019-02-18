@@ -34,7 +34,7 @@
 
 #include <iostream>
 #include <boost/filesystem.hpp>
-
+#include <boost/filesystem/fstream.hpp>
 
 #ifndef MAKE64
 	#define MAKE64(low,high)	((__int64)(((DWORD)(low)) | ((__int64)((DWORD)(high))) << 32))
@@ -261,7 +261,6 @@ namespace file_io_utils
   typedef int native_filesystem_handle;
 #endif
 
-
 	inline
 		bool save_string_to_file(const std::string& path_to_file, const std::string& str)
 	{
@@ -269,7 +268,7 @@ namespace file_io_utils
 		try
 		{
 			std::ofstream fstream;
-			fstream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+			fstream.exceptions(std::ofstream::failbit | std::ofstream::badbit);
 			fstream.open(path_to_file, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
 			fstream << str;
 			fstream.close();
@@ -282,7 +281,25 @@ namespace file_io_utils
 		}
 	}
 
+  inline bool save_string_to_file(const std::wstring& path_to_file, const std::string& str)
+  {
 
+    try
+    {
+      boost::filesystem::ofstream fstream;
+      fstream.exceptions(boost::filesystem::ofstream::failbit | boost::filesystem::ofstream::badbit);
+      fstream.open(path_to_file, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+      fstream << str;
+      fstream.close();
+      return true;
+    }
+
+    catch (...)
+    {
+      return false;
+    }
+  }
+  
 
   inline
     bool save_buff_to_file(const std::string& path_to_file, const void* pbuff, size_t counter)
@@ -352,7 +369,6 @@ namespace file_io_utils
 			return false;
 	}
 
-
 	inline
 		bool load_file_to_string(const std::string& path_to_file, std::string& target_str)
 	{
@@ -381,6 +397,34 @@ namespace file_io_utils
 			return false;
 		}
 	}
+
+  inline bool load_file_to_string(const std::wstring& path_to_file, std::string& target_str)
+  {
+    try
+    {
+      boost::filesystem::ifstream fstream;
+      fstream.exceptions(boost::filesystem::ifstream::failbit | boost::filesystem::ifstream::badbit);
+      fstream.open(path_to_file, std::ios_base::binary | std::ios_base::in | std::ios::ate);
+
+      boost::filesystem::ifstream::pos_type file_size = fstream.tellg();
+
+      if (file_size > 1000000000)
+        return false;//don't go crazy
+      size_t file_size_t = static_cast<size_t>(file_size);
+
+      target_str.resize(file_size_t);
+
+      fstream.seekg(0, std::ios::beg);
+      fstream.read((char*)target_str.data(), target_str.size());
+      fstream.close();
+      return true;
+    }
+
+    catch (...)
+    {
+      return false;
+    }
+  }
 
   template<class t_value>
   bool load_file_to_vector(const std::string& path_to_file, std::vector<t_value>& res)
