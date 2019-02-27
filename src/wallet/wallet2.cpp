@@ -19,6 +19,7 @@ using namespace epee;
 #include "profile_tools.h"
 #include "crypto/crypto.h"
 #include "serialization/binary_utils.h"
+#include "string_coding.h"
 using namespace currency;
 
 namespace tools
@@ -417,7 +418,7 @@ std::string wallet2::validate_signed_text(const std::string& addr, const std::st
   return res.status;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::generate_view_wallet(const std::string new_name, const std::string& password)
+bool wallet2::generate_view_wallet(const std::wstring new_name, const std::string& password)
 {  
   return store_keys(new_name, password, true);
 }
@@ -629,7 +630,7 @@ void wallet2::reset_and_sync_wallet()
   refresh();
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet)
+bool wallet2::store_keys(const std::wstring& keys_file_name, const std::string& password, bool save_as_view_wallet)
 {
   std::string account_data;
   bool r = false;
@@ -658,7 +659,7 @@ bool wallet2::store_keys(const std::string& keys_file_name, const std::string& p
   std::string buf;
   r = ::serialization::dump_binary(keys_file_data, buf);
   r = r && epee::file_io_utils::save_string_to_file(keys_file_name, buf); //and never touch wallet_keys_file again, only read
-  CHECK_AND_ASSERT_MES(r, false, "failed to generate wallet keys file " << keys_file_name);
+  CHECK_AND_ASSERT_MES(r, false, "failed to generate wallet keys file " << string_encoding::convert_to_ansii(keys_file_name));
   return true;
 }
 //----------------------------------------------------------------------------------------------------
@@ -672,14 +673,14 @@ namespace
   }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::load_keys(const std::string& keys_file_name, const std::string& password)
+void wallet2::load_keys(const std::wstring& keys_file_name, const std::string& password)
 {
   wallet2::keys_file_data keys_file_data;
   std::string buf;
   bool r = epee::file_io_utils::load_file_to_string(keys_file_name, buf);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_read_error, keys_file_name);
+  CHECK_AND_THROW_WALLET_EX(!r, error::file_read_error, string_encoding::convert_to_ansii(keys_file_name));
   r = ::serialization::parse_binary(buf, keys_file_data);
-  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, "internal error: failed to deserialize \"" + keys_file_name + '\"');
+  CHECK_AND_THROW_WALLET_EX(!r, error::wallet_internal_error, "internal error: failed to deserialize \"" + string_encoding::convert_to_ansii(keys_file_name) + '\"');
 
   crypto::chacha8_key key;
   crypto::generate_chacha8_key_helper(password, key);
@@ -701,22 +702,22 @@ void wallet2::load_keys(const std::string& keys_file_name, const std::string& pa
   CHECK_AND_THROW_WALLET_EX(!r, error::invalid_password);
 }
 //----------------------------------------------------------------------------------------------------
-std::vector<unsigned char> wallet2::generate(const std::string& wallet_, const std::string& password)
+std::vector<unsigned char> wallet2::generate(const std::wstring& wallet_, const std::string& password)
 {
   clear();
   prepare_file_names(wallet_);
 
   boost::system::error_code ignored_ec;
-  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
-  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_keys_file,   ignored_ec), error::file_exists, m_keys_file);
+  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, string_encoding::convert_to_ansii(m_wallet_file));
+  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_keys_file,   ignored_ec), error::file_exists, string_encoding::convert_to_ansii(m_keys_file));
 
   std::vector<unsigned char> restore_seed = m_account.generate();
   m_account_public_address = m_account.get_keys().m_account_address;
 
   bool r = store_keys(m_keys_file, password);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_keys_file);
+  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, string_encoding::convert_to_ansii(m_keys_file));
 
-  r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str() );
+  r = file_io_utils::save_string_to_file(m_wallet_file + string_encoding::convert_to_unicode(".address.txt"), m_account.get_public_address_str() );
   if(!r) LOG_PRINT_RED_L0("String with address text not saved");
 
   store();
@@ -725,39 +726,39 @@ std::vector<unsigned char> wallet2::generate(const std::string& wallet_, const s
 }
 
 //----------------------------------------------------------------------------------------------------
-void wallet2::restore(const std::string& wallet_, const std::vector<unsigned char>& restore_seed, const std::string& password)
+void wallet2::restore(const std::wstring& wallet_, const std::vector<unsigned char>& restore_seed, const std::string& password)
 {
   clear();
   prepare_file_names(wallet_);
 
   boost::system::error_code ignored_ec;
-  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
-  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_keys_file, ignored_ec), error::file_exists, m_keys_file);
+  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, string_encoding::convert_to_ansii(m_wallet_file));
+  CHECK_AND_THROW_WALLET_EX(boost::filesystem::exists(m_keys_file, ignored_ec), error::file_exists, string_encoding::convert_to_ansii(m_keys_file));
 
   m_account.restore(restore_seed);
   m_account_public_address = m_account.get_keys().m_account_address;
 
   bool r = store_keys(m_keys_file, password);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_keys_file);
+  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, string_encoding::convert_to_ansii(m_keys_file));
 
-  r = file_io_utils::save_string_to_file(m_wallet_file + ".address.txt", m_account.get_public_address_str());
+  r = file_io_utils::save_string_to_file(m_wallet_file + string_encoding::convert_to_unicode(".address.txt"), m_account.get_public_address_str());
   if (!r) LOG_PRINT_RED_L0("String with address text not saved");
 
   store();
 }
 
 //----------------------------------------------------------------------------------------------------
-bool wallet2::prepare_file_names(const std::string& file_path)
+bool wallet2::prepare_file_names(const std::wstring& file_path)
 {
   m_keys_file = file_path;
   m_wallet_file = file_path;
   boost::system::error_code e;
-  if(string_tools::get_extension(m_keys_file) == "keys")
+  if(string_encoding::convert_to_ansii(string_tools::get_extension(m_keys_file)) == "keys")
   {//provided keys file name
     m_wallet_file = string_tools::cut_off_extension(m_wallet_file);
   }else
   {//provided wallet file name
-    m_keys_file += ".keys";
+    m_keys_file += string_encoding::convert_to_unicode(".keys");
   }
   return true;
 }
@@ -767,14 +768,14 @@ bool wallet2::check_connection()
   return m_core_proxy->check_connection();
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::load(const std::string& wallet_, const std::string& password)
+void wallet2::load(const std::wstring& wallet_, const std::string& password)
 {
   clear();
   prepare_file_names(wallet_);
 
   boost::system::error_code e;
   bool exists = boost::filesystem::exists(m_keys_file, e);
-  CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, m_keys_file);
+  CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, string_encoding::convert_to_ansii(m_keys_file));
 
   load_keys(m_keys_file, password);
   LOG_PRINT_L0("Loaded wallet keys file, with public address: " << m_account.get_public_address_str());
@@ -783,7 +784,7 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
   //try to load wallet file. but even if we failed, it is not big problem
   if(!boost::filesystem::exists(m_wallet_file, e) || e)
   {
-    LOG_PRINT_L0("file not found: " << m_wallet_file << ", starting with empty blockchain");
+    LOG_PRINT_L0("file not found: " << string_encoding::convert_to_ansii(m_wallet_file) << ", starting with empty blockchain");
     m_account_public_address = m_account.get_keys().m_account_address;
     return;
   }
@@ -811,7 +812,7 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
 void wallet2::store()
 {
   bool r = tools::serialize_obj_to_file(*this, m_wallet_file);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_wallet_file);
+  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, string_encoding::convert_to_ansii(m_wallet_file));
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::unlocked_balance()
