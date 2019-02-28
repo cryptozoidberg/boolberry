@@ -53,7 +53,7 @@ ln -s /Applications package_folder/Applications
 
 mv Boolberry.app package_folder 
 
-package_filename="boolberry-macos-x64-$version_str.dmg"
+package_filename="boolberry-macos-x64-dev-$version_str.dmg"
 
 hdiutil create -format UDZO -srcfolder package_folder -volname Boolberry $package_filename
 
@@ -68,7 +68,7 @@ mail_msg="New build for macOS-x64 available at http://$BBR_BUILD_SERVER_ADDR_POR
 
 echo $mail_msg
 
-echo $mail_msg | mail -s "Boolberry macOS-x64 build $version_str" ${emails}
+echo $mail_msg | mail -s "Boolberry macOS-x64 DEV build $version_str" ${emails}
 
 cd ../..
 exit 0
