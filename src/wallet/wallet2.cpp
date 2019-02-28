@@ -778,7 +778,7 @@ void wallet2::load(const std::wstring& wallet_, const std::string& password)
   CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, string_encoding::convert_to_ansii(m_keys_file));
 
   load_keys(m_keys_file, password);
-  LOG_PRINT_L0("Loaded wallet keys file, with public address: " << m_account.get_public_address_str());
+  LOG_PRINT_L0("Loaded wallet keys file" << (m_is_view_only ? " (WATCH ONLY)" : "") << ", with public address: " << m_account.get_public_address_str());
 
   //keys loaded ok!
   //try to load wallet file. but even if we failed, it is not big problem
@@ -807,12 +807,17 @@ void wallet2::load(const std::wstring& wallet_, const std::string& password)
     clear();
   }
   m_local_bc_height = m_blockchain.size();
+
+  LOG_PRINT_L0("Loaded wallet data from " << string_encoding::convert_to_ansii(m_wallet_file));
+  LOG_PRINT_L0("(pending_key_images=" << m_pending_key_images.size() << ",tx_keys=" << m_tx_keys.size() << ")");
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::store()
 {
+  LOG_PRINT_L0("(before storing: pending_key_images=" << m_pending_key_images.size() << ",tx_keys=" << m_tx_keys.size() << ")");
   bool r = tools::serialize_obj_to_file(*this, m_wallet_file);
   CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, string_encoding::convert_to_ansii(m_wallet_file));
+  LOG_PRINT_L0("Stored wallet data into " << string_encoding::convert_to_ansii(m_wallet_file));
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::unlocked_balance()

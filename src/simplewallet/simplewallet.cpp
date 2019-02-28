@@ -410,7 +410,7 @@ bool simple_wallet::open_wallet(const string &wallet_file, const std::string& pa
   try
   {
     m_wallet->load(epee::string_encoding::convert_to_unicode(m_wallet_file), password);
-    message_writer(epee::log_space::console_color_white, true) << "Opened wallet" << (m_wallet->is_view_only() ? "watch-only" : "" ) << ": " << m_wallet->get_account().get_public_address_str();
+    message_writer(epee::log_space::console_color_white, true) << "Opened" << (m_wallet->is_view_only() ? " watch-only" : "" ) << " wallet: " << m_wallet->get_account().get_public_address_str();
   }
   catch (const std::exception& e)
   {
@@ -1044,7 +1044,7 @@ bool simple_wallet::save_watch_only(const std::vector<std::string> &args)
   try
   {
     m_wallet->store_keys(string_encoding::convert_to_unicode(args[0]), args[1], true);
-    success_msg_writer() << "Keys stored to " << args[0];
+    success_msg_writer() << "Watch-only keys stored to " << args[0];
   }
   catch (const std::exception& e)
   {
