@@ -35,24 +35,28 @@ function update_aliases_autocompletion()
   if(aliases_set.aliases)
     return;
 
-  aliases_set = jQuery.parseJSON(backend.request_aliases());
-  if(aliases_set.aliases)
-  {
-    console.log("aliases loaded: " + aliases_set.aliases.length);
-    var availableTags = [];
-    for(var i=0; i < aliases_set.aliases.length; i++)
+  backend.request_aliases(function(callback){
+    var result = callback;
+    aliases_set = jQuery.parseJSON(result);
+    if(aliases_set.aliases)
     {
-      availableTags.push("@" + aliases_set.aliases[i].alias);
+      console.log("aliases loaded: " + aliases_set.aliases.length);
+      var availableTags = [];
+      for(var i=0; i < aliases_set.aliases.length; i++)
+      {
+        availableTags.push("@" + aliases_set.aliases[i].alias);
+      }
+      $( "#transfer_address_id" ).autocomplete({
+        source: availableTags,
+        minLength: 2
+      });
     }
-    $( "#transfer_address_id" ).autocomplete({
-      source: availableTags,
-      minLength: 2
-    });
-  }
-  else
-  {
-    console.log("internal error: aliases  not loaded");
-  }
+    else
+    {
+      console.log("internal error: aliases  not loaded");
+    }
+  });
+  
 }
 
 function on_update_daemon_state(info_obj){  
@@ -354,11 +358,13 @@ function on_open_wallet()
 
 function on_generate_new_wallet()
 {
-  var seed_phrase = backend.generate_wallet();
-
-  if (seed_phrase) {
-  showModal(seed_phrase);
-  }
+  backend.generate_wallet(function(callback){
+    var seed_phrase = callback;
+ 
+    if (seed_phrase) {
+      showModal(seed_phrase);
+    }
+  });
 }
 
 function showModal(text) {

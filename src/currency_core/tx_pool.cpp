@@ -286,12 +286,12 @@ namespace currency
   //---------------------------------------------------------------------------------
   void tx_memory_pool::lock()
   {
-    m_transactions_lock.lock();
+    CRITICAL_SECTION_LOCK(m_transactions_lock);
   }
   //---------------------------------------------------------------------------------
   void tx_memory_pool::unlock()
   {
-    m_transactions_lock.unlock();
+    CRITICAL_SECTION_UNLOCK(m_transactions_lock);
   }
   //---------------------------------------------------------------------------------
   void tx_memory_pool::purge_transactions()

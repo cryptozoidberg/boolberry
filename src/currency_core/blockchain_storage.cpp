@@ -1425,11 +1425,11 @@ bool blockchain_storage::get_blocks(uint64_t start_offset, size_t count, std::li
 //------------------------------------------------------------------
 bool blockchain_storage::start_batch_exclusive_operation()
 {
-  m_exclusive_batch_lock.lock();
+  CRITICAL_REGION_BEGIN(m_exclusive_batch_lock);
   m_exclusive_batch_active = true;
-  m_exclusive_batch_lock.unlock();
+  CRITICAL_REGION_END();
   
-  m_blockchain_lock.lock();
+  CRITICAL_SECTION_LOCK(m_blockchain_lock);
   m_db.begin_batch_exclusive_operation();
   LOG_PRINT_MAGENTA("[START_BATCH_EXCLUSIVE_OPERATION]", LOG_LEVEL_0);
   return true;
@@ -1439,11 +1439,11 @@ bool blockchain_storage::finish_batch_exclusive_operation(bool success)
 {
 
   m_db.finish_batch_exclusive_operation(success);
-  m_blockchain_lock.unlock();
+  CRITICAL_SECTION_UNLOCK(m_blockchain_lock);
   
-  m_exclusive_batch_lock.lock();
+  CRITICAL_REGION_BEGIN(m_exclusive_batch_lock);
   m_exclusive_batch_active = false;
-  m_exclusive_batch_lock.unlock();
+  CRITICAL_REGION_END();
   LOG_PRINT_MAGENTA("[FINISH_BATCH_EXCLUSIVE_OPERATION]", LOG_LEVEL_0);
   return true;
 }

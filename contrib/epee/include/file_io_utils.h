@@ -451,6 +451,7 @@ namespace file_io_utils
         return true;
       }
 
+
       catch (...)
       {
         return false;

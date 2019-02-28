@@ -73,7 +73,7 @@ cp $QT_PREFIX_PATH/plugins/xcbglintegrations/libqxcb-glx-integration.so ./boolbe
 
 printf "\nmaking compressed build archive...\n\n"
 
-package_filename=boolberry-linux-x64-dev-$version_str.tar.bz2
+package_filename=boolberry-linux-x64-$version_str.tar.bz2
 
 tar -cjvf $package_filename boolberry
 
@@ -85,6 +85,6 @@ scp $package_filename bbr_build_server:/var/www/html/builds
 
 mail_msg="New build for linux-x64 available at http://$BBR_BUILD_SERVER_ADDR_PORT/builds/$package_filename"
 echo $mail_msg
-echo $mail_msg | mail -s "Boolberry linux-x64 DEV build $version_str" ${emails}
+echo $mail_msg | mail -s "Boolberry linux-x64 build $version_str" ${emails}
 
 exit 0

@@ -47,8 +47,10 @@
 #include "net_utils_base.h"
 #include "syncobj.h"
 
+#undef LOG_DEFAULT_CHANNEL 
+#define LOG_DEFAULT_CHANNEL "net_server"
 
-#define ABSTRACT_SERVER_SEND_QUE_MAX_COUNT 2000
+#define ABSTRACT_SERVER_SEND_QUE_MAX_COUNT 1000
 
 namespace epee
 {
@@ -284,5 +286,8 @@ namespace net_utils
 }
 
 #include "abstract_tcp_server2.inl"
+
+#undef LOG_DEFAULT_CHANNEL 
+#define LOG_DEFAULT_CHANNEL NULL
 
 #endif
