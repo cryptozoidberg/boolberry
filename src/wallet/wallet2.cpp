@@ -626,6 +626,7 @@ bool wallet2::clear()
 //----------------------------------------------------------------------------------------------------
 void wallet2::reset_and_sync_wallet()
 {
+  LOG_PRINT_L0("reset and sync...");
   clear();
   refresh();
 }
