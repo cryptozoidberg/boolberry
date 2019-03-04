@@ -110,11 +110,13 @@ namespace currency
     uint64_t current_height;
     crypto::hash  top_id;
     uint64_t last_checkpoint_height;
+    std::string client_version;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(current_height)
       KV_SERIALIZE_VAL_POD_AS_BLOB(top_id)
       KV_SERIALIZE(last_checkpoint_height)
+      KV_SERIALIZE(client_version)
     END_KV_SERIALIZE_MAP()
   };
 

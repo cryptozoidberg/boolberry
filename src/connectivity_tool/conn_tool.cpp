@@ -78,21 +78,53 @@ struct response_schema
     }
     if(rs.ns_rsp.enabled)
     {
-      ss << "," << ENDL << "  \"ns_rsp\": {" << ENDL 
-        << "    \"local_time\": " <<  rs.ns_rsp.v.local_time << "," << ENDL 
-        << "    \"my_id\": \"" <<  rs.ns_rsp.v.my_id << "\"," << ENDL
-        << "    \"connections_list\": [" << ENDL;
+      ss << "," << ENDL << "  \"ns_rsp\": {" << ENDL
+        << "    \"local_time\": " << rs.ns_rsp.v.local_time << "," << ENDL
+        << "    \"my_id\": \"" << rs.ns_rsp.v.my_id << "\"," << ENDL;
+
+      if (!rs.ns_rsp.v.connections_list.empty())
+      {
+        ss << "    \"connections_list\": [" << ENDL;
+        size_t i = 0;
+        for (auto& ce : rs.ns_rsp.v.connections_list)
+        {
+          ss << "      {"
+            "\"peer_id\": \"" << ce.id << "\", "
+            "\"ip\": \"" << string_tools::get_ip_string_from_int32(ce.adr.ip) << "\", "
+            "\"port\": " << ce.adr.port << ", "
+            "\"is_income\": " << ce.is_income << "}";
+          if (rs.ns_rsp.v.connections_list.size() - 1 != i)
+            ss << ",";
+          ss << ENDL;
+          ++i;
+        }
+        ss << "    ]," << ENDL;
+      }
+
+      if (!rs.ns_rsp.v.connections_list_2.empty())
+      {
+        ss << "    \"connections_list_2\": [" << ENDL;
+        size_t i = 0;
+        for (auto& ce : rs.ns_rsp.v.connections_list_2)
+        {
+          ss << "      {"
+            "\"peer_id\": \"" << ce.id << "\", "
+            "\"ip\": \"" << string_tools::get_ip_string_from_int32(ce.adr.ip) << "\", "
+            "\"port\": " << ce.adr.port << ", "
+            "\"time_started\": " << ce.time_started << ", "
+            "\"last_recv\": " << ce.last_recv << ", "
+            "\"last_send\": " << ce.last_send << ", "
+            "\"version\": \"" << ce.version << "\", "
+            "\"is_income\": " << ce.is_income << "}";
+          if (rs.ns_rsp.v.connections_list_2.size() - 1 != i)
+            ss << ",";
+          ss << ENDL;
+          ++i;
+        }
+        ss << "    ]," << ENDL;
+      }
 
       size_t i = 0;
-      BOOST_FOREACH(const connection_entry& ce, rs.ns_rsp.v.connections_list)
-      {
-        ss <<  "      {\"peer_id\": \"" << ce.id << "\", \"ip\": \"" << string_tools::get_ip_string_from_int32(ce.adr.ip) << "\", \"port\": " << ce.adr.port << ", \"is_income\": "<< ce.is_income << "}";
-        if(rs.ns_rsp.v.connections_list.size()-1 != i)
-          ss << ",";
-        ss << ENDL; 
-        i++;
-      }
-      ss << "    ]," << ENDL;
       ss << "    \"local_peerlist_white\": [" << ENDL;      
       i = 0;
       BOOST_FOREACH(const peerlist_entry& pe, rs.ns_rsp.v.local_peerlist_white)

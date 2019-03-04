@@ -111,7 +111,9 @@ namespace currency
       << std::setw(20) << "Peer id"
       << std::setw(25) << "Recv/Sent (idle,sec)"
       << std::setw(25) << "State"
-      << std::setw(20) << "Livetime(seconds)" << ENDL;
+      << std::setw(20) << "Height"
+      << std::setw(20) << "Livetime (sec)"
+      << std::setw(20) << "Version" << ENDL;
 
     m_p2p->for_each_connection([&](const connection_context& cntxt, nodetool::peerid_type peer_id)
     {
@@ -119,8 +121,11 @@ namespace currency
         string_tools::get_ip_string_from_int32(cntxt.m_remote_ip) + ":" + std::to_string(cntxt.m_remote_port) 
         << std::setw(20) << std::hex << peer_id
         << std::setw(25) << std::to_string(cntxt.m_recv_cnt)+ "(" + std::to_string(time(NULL) - cntxt.m_last_recv) + ")" + "/" + std::to_string(cntxt.m_send_cnt) + "(" + std::to_string(time(NULL) - cntxt.m_last_send) + ")"
-        << std::setw(25) << get_protocol_state_string(cntxt.m_state) << "(remote_h: " << cntxt.m_remote_blockchain_height << ")"
-        << std::setw(20) << std::to_string(time(NULL) - cntxt.m_started) << ENDL;
+        << std::setw(25) << get_protocol_state_string(cntxt.m_state) 
+        << std::setw(20) << std::dec << cntxt.m_remote_blockchain_height
+        << std::setw(20) << std::to_string(time(NULL) - cntxt.m_started)
+        << std::setw(20) << cntxt.m_remote_version
+        << ENDL;
       return true;
     });
     LOG_PRINT_L0("Connections: " << ENDL << ss.str());
@@ -129,6 +134,7 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::process_payload_sync_data(const CORE_SYNC_DATA& hshd, currency_connection_context& context, bool is_inital)
   {
+    context.m_remote_version = hshd.client_version;
     context.m_remote_blockchain_height = hshd.current_height;
     LOG_PRINT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA][m_been_synchronized=" << m_been_synchronized << "]: hshd.current_height = " << hshd.current_height << "(" << hshd.top_id << ")", LOG_LEVEL_3);
     if (context.m_state == currency_connection_context::state_befor_handshake && !is_inital)
@@ -235,6 +241,7 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::get_payload_sync_data(CORE_SYNC_DATA& hshd)
   {
+    hshd.client_version = PROJECT_VERSION_LONG;
     bool have_called = false;
     
     m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
