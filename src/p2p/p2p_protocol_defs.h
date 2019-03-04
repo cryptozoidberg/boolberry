@@ -38,6 +38,19 @@ namespace nodetool
     bool is_income;
   };
 
+#define P2P_CONNECTION_ENTRY_VERSION_MAX_SIZE 50
+
+  struct connection_entry_2
+  {
+    net_address adr;
+    peerid_type id;
+    uint64_t time_started;
+    uint64_t last_recv;
+    uint64_t last_send;
+    char version[P2P_CONNECTION_ENTRY_VERSION_MAX_SIZE];
+    bool is_income;
+  };
+
 #pragma pack(pop)
 
   inline
@@ -349,13 +362,15 @@ namespace nodetool
     {
       std::list<peerlist_entry> local_peerlist_white; 
       std::list<peerlist_entry> local_peerlist_gray; 
-      std::list<connection_entry> connections_list; 
+      std::list<connection_entry> connections_list;
+      std::list<connection_entry_2> connections_list_2;
       peerid_type my_id;
-      int64_t    local_time;
+      int64_t local_time;
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE_CONTAINER_POD_AS_BLOB(local_peerlist_white)
         KV_SERIALIZE_CONTAINER_POD_AS_BLOB(local_peerlist_gray)
         KV_SERIALIZE_CONTAINER_POD_AS_BLOB(connections_list)
+        KV_SERIALIZE_CONTAINER_POD_AS_BLOB(connections_list_2)
         KV_SERIALIZE(my_id)
         KV_SERIALIZE(local_time)
       END_KV_SERIALIZE_MAP()    

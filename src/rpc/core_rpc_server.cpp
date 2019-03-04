@@ -119,6 +119,9 @@ namespace currency
     m_core.get_blockchain_storage().get_block_extended_info_by_height(res.height - 1, last_block_ei);
     res.already_generated_coins = last_block_ei.already_generated_coins;
     m_p2p.get_maintainers_info(res.mi);
+
+    res.last_block_timestamp = last_block_ei.bl.timestamp;
+    res.last_block_hash = string_tools::pod_to_hex(get_block_hash(last_block_ei.bl));
     
     res.status = CORE_RPC_STATUS_OK;
     return true;

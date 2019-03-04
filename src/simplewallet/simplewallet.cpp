@@ -410,7 +410,7 @@ bool simple_wallet::open_wallet(const string &wallet_file, const std::string& pa
   try
   {
     m_wallet->load(epee::string_encoding::convert_to_unicode(m_wallet_file), password);
-    message_writer(epee::log_space::console_color_white, true) << "Opened wallet" << (m_wallet->is_view_only() ? "watch-only" : "" ) << ": " << m_wallet->get_account().get_public_address_str();
+    message_writer(epee::log_space::console_color_white, true) << "Opened" << (m_wallet->is_view_only() ? " watch-only" : "" ) << " wallet: " << m_wallet->get_account().get_public_address_str();
   }
   catch (const std::exception& e)
   {
@@ -1044,7 +1044,7 @@ bool simple_wallet::save_watch_only(const std::vector<std::string> &args)
   try
   {
     m_wallet->store_keys(string_encoding::convert_to_unicode(args[0]), args[1], true);
-    success_msg_writer() << "Keys stored to " << args[0];
+    success_msg_writer() << "Watch-only keys stored to " << args[0];
   }
   catch (const std::exception& e)
   {
@@ -1736,6 +1736,8 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_params, arg_command);
   command_line::add_arg(desc_params, arg_log_level);
   command_line::add_arg(desc_params, arg_offline_mode);
+  command_line::add_arg(desc_params, command_line::arg_log_file);
+  command_line::add_arg(desc_params, command_line::arg_log_level);
   tools::wallet_rpc_server::init_options(desc_params);
 
   po::positional_options_description positional_options;
@@ -1772,18 +1774,25 @@ int main(int argc, char* argv[])
   //set up logging options
   log_space::get_set_log_detalisation_level(true, LOG_LEVEL_2);
   //log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL, LOG_LEVEL_0);
-  log_space::log_singletone::add_logger(LOGGER_FILE,
-    log_space::log_singletone::get_default_log_file().c_str(),
-    log_space::log_singletone::get_default_log_folder().c_str(), LOG_LEVEL_4);
-
+  boost::filesystem::path log_file_path(command_line::get_arg(vm, command_line::arg_log_file));
+  if (log_file_path.empty())
+    log_file_path = log_space::log_singletone::get_default_log_file();
+  std::string log_dir;
+  log_dir = log_file_path.has_parent_path() ? log_file_path.parent_path().string() : log_space::log_singletone::get_default_log_folder();
+  log_space::log_singletone::add_logger(LOGGER_FILE, log_file_path.filename().string().c_str(), log_dir.c_str(), LOG_LEVEL_4);
   message_writer(epee::log_space::console_color_white, true) << CURRENCY_NAME << " wallet v" << PROJECT_VERSION_LONG;
 
-  if(command_line::has_arg(vm, arg_log_level))
+  if (command_line::has_arg(vm, arg_log_level))
   {
     LOG_PRINT_L0("Setting log level = " << command_line::get_arg(vm, arg_log_level));
     log_space::get_set_log_detalisation_level(true, command_line::get_arg(vm, arg_log_level));
   }
-  
+  if (command_line::has_arg(vm, command_line::arg_log_level))
+  {
+    LOG_PRINT_L0("Setting log level = " << command_line::get_arg(vm, command_line::arg_log_level));
+    log_space::get_set_log_detalisation_level(true, command_line::get_arg(vm, command_line::arg_log_level));
+  }
+
   if(command_line::has_arg(vm, tools::wallet_rpc_server::arg_rpc_bind_port))
   {
     log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL, LOG_LEVEL_2);

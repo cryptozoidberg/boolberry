@@ -336,6 +336,8 @@ struct EMPTY_STRUCT {
       uint64_t transactions_volume_per_day;
       uint64_t already_generated_coins;
       nodetool::maintainers_info_external mi;
+      uint64_t last_block_timestamp;
+      std::string last_block_hash;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -360,6 +362,8 @@ struct EMPTY_STRUCT {
         KV_SERIALIZE(transactions_volume_per_day)
         KV_SERIALIZE(already_generated_coins)
         KV_SERIALIZE(mi)
+        KV_SERIALIZE(last_block_timestamp)
+        KV_SERIALIZE(last_block_hash)
       END_KV_SERIALIZE_MAP()
     };
   };    
