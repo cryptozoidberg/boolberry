@@ -1106,7 +1106,7 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
       THROW_IF_FALSE_WALLET_INT_ERR_EX(p.first < tx.vout.size(), "outs_key_images has invalid out index: " << p.first << ", tx.vout.size() = " << tx.vout.size());
       auto& out = tx.vout[p.first];
       THROW_IF_FALSE_WALLET_INT_ERR_EX(out.target.type() == typeid(txout_to_key), "outs_key_images has invalid out type, index: " << p.first);
-      const txout_to_key& otk = boost::get<const txout_to_key&>(out.target);
+      const txout_to_key& otk = boost::get<txout_to_key>(out.target);
 
       auto it = m_pending_key_images.find(otk.key);
       if (it != m_pending_key_images.end())
