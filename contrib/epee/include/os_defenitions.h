@@ -31,8 +31,8 @@
 
 
 // Check windows
-#if _WIN32 || _WIN64
-#if _WIN64
+#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN64)
 #define ENV64BIT
 #else
 #define ENV32BIT
@@ -40,8 +40,8 @@
 #endif
 
 // Check GCC
-#if __GNUC__
-#if __x86_64__ || __ppc64__
+#if defined(__GNUC__)
+#if defined(__x86_64__) || defined(__ppc64__)
 #define ENV64BIT
 #else
 #define ENV32BIT

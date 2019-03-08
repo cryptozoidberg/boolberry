@@ -962,7 +962,6 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::transfer(const std::vector<std::string> &args_)
 {
-  bool r = false;
   if (!try_connect_to_daemon())
     return true;
 
@@ -1544,7 +1543,7 @@ bool simple_wallet::sweep_below(const std::vector<std::string> &args)
     {
       fail_msg_writer() << "address " << args[1] << " has integrated payment id " << epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) <<
         " which is incompatible with payment id " << epee::string_tools::buff_to_hex_nodelimer(payment_id) << " that was already assigned to this transfer";
-      true;
+      return true;
     }
 
     payment_id = integrated_payment_id; // remember integrated payment id as the main payment id
