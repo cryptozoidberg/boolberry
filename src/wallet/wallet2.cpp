@@ -1171,9 +1171,12 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
       auto it = m_pending_key_images.find(otk.key);
       if (it != m_pending_key_images.end())
       {
-        LOG_PRINT_YELLOW("warning: out pub key " << otk.key << " is already exist in m_pending_key_images, ki: " << it->second << ", will be overwritten with " << p.second, LOG_LEVEL_0);
+        LOG_PRINT_YELLOW("warning: out pub key " << otk.key << " is already exist in m_pending_key_images, ki: " << it->second << ", new ki: " << p.second, LOG_LEVEL_0);
       }
-      pk_ki_to_be_added.push_back(std::make_pair(otk.key, p.second));
+      else
+      {
+        pk_ki_to_be_added.push_back(std::make_pair(otk.key, p.second));
+      }
     }
 
     THROW_IF_FALSE_WALLET_INT_ERR_EX(tx.vin.size() == create_tx_param.sources.size(), "tx.vin and create_tx_param.sources sizes missmatch");
