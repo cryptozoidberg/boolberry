@@ -766,7 +766,9 @@ bool wallet2::prepare_file_names(const std::wstring& file_path)
   m_pending_ki_file = string_tools::cut_off_extension(m_wallet_file) + L".outkey2ki";
 
   // make sure file path is accessible and exists
-  boost::filesystem::create_directories( boost::filesystem::path(file_path).parent_path() );
+  boost::filesystem::path pp = boost::filesystem::path(file_path).parent_path();
+  if (!pp.empty())
+    boost::filesystem::create_directories(pp);
 
   return true;
 }
