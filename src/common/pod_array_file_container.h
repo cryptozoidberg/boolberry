@@ -77,7 +77,7 @@ namespace tools
 
     bool push_back(const pod_t& item)
     {
-      if (m_stream.rdstate() != std::ios::goodbit && m_stream.rdstate() != std::ios::eofbit)
+      if (!m_stream.is_open() || (m_stream.rdstate() != std::ios::goodbit && m_stream.rdstate() != std::ios::eofbit))
         return false;
 
       m_stream.seekp(0, std::ios_base::end);
@@ -93,7 +93,7 @@ namespace tools
 
     bool get_item(size_t index, pod_t& result) const
     {
-      if (m_stream.rdstate() != std::ios::goodbit && m_stream.rdstate() != std::ios::eofbit)
+      if (!m_stream.is_open() || (m_stream.rdstate() != std::ios::goodbit && m_stream.rdstate() != std::ios::eofbit))
         return false;
 
       size_t offset = index * sizeof result;
@@ -108,7 +108,7 @@ namespace tools
 
     size_t size_bytes() const
     {
-      if (m_stream.rdstate() != std::ios::goodbit && m_stream.rdstate() != std::ios::eofbit)
+      if (!m_stream.is_open() || (m_stream.rdstate() != std::ios::goodbit && m_stream.rdstate() != std::ios::eofbit))
         return 0;
 
       m_stream.seekg(0, std::ios_base::end);

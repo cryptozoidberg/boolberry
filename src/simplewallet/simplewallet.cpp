@@ -1714,7 +1714,8 @@ void simple_wallet::set_offline_mode(bool offline_mode)
 {
   if (offline_mode && !m_offline_mode)
   {
-    fail_msg_writer() << "WARNING: the wallet is running in OFFLINE MODE!";
+    message_writer(epee::log_space::console_color_yellow, true, std::string(), LOG_LEVEL_0)
+      << "WARNING: the wallet is running in OFFLINE MODE!";
   }
   m_offline_mode = offline_mode;
 }
@@ -1879,11 +1880,10 @@ int main(int argc, char* argv[])
     }
   }else
   {
+    w.set_offline_mode(offline_mode);
     //runs wallet with console interface 
     r = w.init(vm);
     CHECK_AND_ASSERT_MES(r, 1, "Failed to initialize wallet");
-
-    w.set_offline_mode(offline_mode);
 
     std::vector<std::string> command = command_line::get_arg(vm, arg_command);
     if (!command.empty())

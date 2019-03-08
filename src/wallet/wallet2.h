@@ -142,7 +142,7 @@ namespace tools
     void store();
     std::wstring get_wallet_path(){ return m_keys_file; }
     currency::account_base& get_account(){return m_account;}
-    void load_keys2ki(bool create_if_not_exis, bool& need_to_resync);
+    void load_keys2ki(bool create_if_not_exist, bool& need_to_resync);
 
     void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
     void get_recent_blocks_stat(std::vector<wallet_block_stat_t>& wbs, size_t blocks_limit);
