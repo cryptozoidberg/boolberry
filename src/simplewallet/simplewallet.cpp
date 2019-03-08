@@ -170,6 +170,7 @@ bool simple_wallet::help(const std::vector<std::string> &args/* = std::vector<st
 simple_wallet::simple_wallet()
   : m_daemon_port(0)
   , m_refresh_progress_reporter(*this)
+  , m_offline_mode(false)
 {
   m_cmd_binder.set_handler("start_mining", boost::bind(&simple_wallet::start_mining, this, _1),                         "start_mining <threads_count> - Start mining in daemon");
   m_cmd_binder.set_handler("stop_mining", boost::bind(&simple_wallet::stop_mining, this, _1),                           "Stop mining in daemon");
@@ -420,7 +421,9 @@ bool simple_wallet::open_wallet(const string &wallet_file, const std::string& pa
 
   m_wallet->init(m_daemon_address);
 
-  refresh(std::vector<std::string>());
+  if (!m_offline_mode)
+    refresh(std::vector<std::string>());
+
   success_msg_writer() <<
     "**********************************************************************\n" <<
     "Use \"help\" command to see the list of available commands.\n" <<
@@ -1707,6 +1710,15 @@ bool simple_wallet::recent_blocks(const std::vector<std::string> &args)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+void simple_wallet::set_offline_mode(bool offline_mode)
+{
+  if (offline_mode && !m_offline_mode)
+  {
+    fail_msg_writer() << "WARNING: the wallet is running in OFFLINE MODE!";
+  }
+  m_offline_mode = offline_mode;
+}
+//----------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
 #ifdef WIN32
@@ -1792,9 +1804,12 @@ int main(int argc, char* argv[])
     log_space::get_set_log_detalisation_level(true, command_line::get_arg(vm, command_line::arg_log_level));
   }
 
+  bool offline_mode = command_line::get_arg(vm, arg_offline_mode);
+
   if(command_line::has_arg(vm, tools::wallet_rpc_server::arg_rpc_bind_port))
   {
     log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL, LOG_LEVEL_2);
+    w.set_offline_mode(offline_mode);
     //runs wallet with rpc interface 
     if(!command_line::has_arg(vm, arg_wallet_file) )
     {
@@ -1816,11 +1831,6 @@ int main(int argc, char* argv[])
     std::string wallet_password = command_line::get_arg(vm, arg_password);
     std::string daemon_address  = command_line::get_arg(vm, arg_daemon_address);
     std::string daemon_host     = command_line::get_arg(vm, arg_daemon_host);
-    bool offline_mode = command_line::get_arg(vm, arg_offline_mode);
-    if (offline_mode)
-    {
-      LOG_PRINT_YELLOW("WARNING: the wallet is running in OFFLINE MODE!", LOG_LEVEL_0);
-    }
 
     int daemon_port = command_line::get_arg(vm, arg_daemon_port);
     if (daemon_host.empty())
@@ -1872,6 +1882,8 @@ int main(int argc, char* argv[])
     //runs wallet with console interface 
     r = w.init(vm);
     CHECK_AND_ASSERT_MES(r, 1, "Failed to initialize wallet");
+
+    w.set_offline_mode(offline_mode);
 
     std::vector<std::string> command = command_line::get_arg(vm, arg_command);
     if (!command.empty())
