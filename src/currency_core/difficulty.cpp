@@ -94,12 +94,16 @@ namespace currency {
     if (((const uint64_t *) &hash)[3] > 0)
       return false;
     // usual slow check
-    boost::multiprecision::uint512_t hashVal = 0;
-    for(int i = 1; i < 4; i++) { // highest word is zero
-      hashVal |= swap64le(((const uint64_t *) &hash)[3 - i]);
-      hashVal << 64;
+    boost::multiprecision::uint512_t hashVal = 0;    
+    /*
+    special thanks to moneromooo-monero (https://github.com/moneromooo-monero) for pointing on bugs in next 3 lines  
+    */    
+    for(int i = 0; i < 4; i++) 
+    { // highest word is zero
+      hashVal <<= 64;
+      hashVal |= swap64le(((const uint64_t *) &hash)[3-i]);      
     }
-    return (hashVal * difficulty > max256bit);
+    return (hashVal * difficulty <= max256bit);
   }
 
   difficulty_type next_difficulty_old(vector<uint64_t> timestamps, vector<difficulty_type> cumulative_difficulties, size_t target_seconds) {
