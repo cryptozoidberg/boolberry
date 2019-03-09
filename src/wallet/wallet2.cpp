@@ -172,8 +172,9 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
     {
       LOG_PRINT_L0("Spent money: " << print_money(intk.amount) << ", with tx: " << tx_hash);
       tx_money_spent_in_ins += intk.amount;
+
+      set_transfer_spent_flag(it->second, true);
       transfer_details& td = m_transfers[it->second];
-      td.m_spent = true;
       
       mtd.spent_indices.push_back(i);
 
@@ -753,20 +754,67 @@ bool wallet2::prepare_file_names(const std::wstring& file_path)
 {
   m_keys_file = file_path;
   m_wallet_file = file_path;
+
   boost::system::error_code e;
-  if(string_encoding::convert_to_ansii(string_tools::get_extension(m_keys_file)) == "keys")
+  if (string_tools::get_extension(m_keys_file) == L"keys")
   {//provided keys file name
     m_wallet_file = string_tools::cut_off_extension(m_wallet_file);
   }else
   {//provided wallet file name
-    m_keys_file += string_encoding::convert_to_unicode(".keys");
+    m_keys_file += L".keys";
   }
+
+  m_pending_ki_file = string_tools::cut_off_extension(m_wallet_file) + L".outkey2ki";
+
+  // make sure file path is accessible and exists
+  boost::filesystem::path pp = boost::filesystem::path(file_path).parent_path();
+  if (!pp.empty())
+    boost::filesystem::create_directories(pp);
+
   return true;
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::check_connection()
 {
   return m_core_proxy->check_connection();
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::load_keys2ki(bool create_if_not_exist, bool& need_to_resync)
+{
+  m_pending_key_images_file_container.close(); // just in case it was opened
+  bool pki_corrupted = false;
+  std::string reason;
+  bool ok = m_pending_key_images_file_container.open(m_pending_ki_file, create_if_not_exist, &pki_corrupted, &reason);
+  THROW_IF_FALSE_WALLET_EX(ok, error::file_not_found, std::string("error opening file ") + string_encoding::convert_to_ansii(m_pending_ki_file));
+  if (pki_corrupted)
+  {
+    LOG_ERROR("file " << string_encoding::convert_to_ansii(m_pending_ki_file) << " is corrupted! " << reason);
+  }
+
+  if (m_pending_key_images.size() < m_pending_key_images_file_container.size())
+  {
+    LOG_PRINT_RED_L0("m_pending_key_images size: " << m_pending_key_images.size() << " is LESS than m_pending_key_images_file_container size: " << m_pending_key_images_file_container.size());
+    LOG_PRINT_L0("Restoring m_pending_key_images from file container...");
+    m_pending_key_images.clear();
+    for (size_t i = 0, size = m_pending_key_images_file_container.size(); i < size; ++i)
+    {
+      out_key_to_ki item = AUTO_VAL_INIT(item);
+      ok = m_pending_key_images_file_container.get_item(i, item);
+      THROW_IF_FALSE_WALLET_INT_ERR_EX(ok, "m_pending_key_images_file_container.get_item() failed for index " << i << ", size: " << m_pending_key_images_file_container.size());
+      ok = m_pending_key_images.insert(std::make_pair(item.out_key, item.key_image)).second;
+      THROW_IF_FALSE_WALLET_INT_ERR_EX(ok, "m_pending_key_images.insert failed for index " << i << ", size: " << m_pending_key_images_file_container.size());
+      LOG_PRINT_L2("pending key image restored: (" << item.out_key << ", " << item.key_image << ")");
+    }
+    LOG_PRINT_L0(m_pending_key_images.size() << " elements restored, requesting full wallet resync");
+    LOG_PRINT_L0("m_pending_key_images size: " << m_pending_key_images.size() << ", m_pending_key_images_file_container size: " << m_pending_key_images_file_container.size());
+    need_to_resync = true;
+  }
+  else if (m_pending_key_images.size() > m_pending_key_images_file_container.size())
+  {
+    LOG_PRINT_RED_L0("m_pending_key_images size: " << m_pending_key_images.size() << " is GREATER than m_pending_key_images_file_container size: " << m_pending_key_images_file_container.size());
+    LOG_PRINT_RED_L0("UNRECOVERABLE ERROR, wallet stops");
+    THROW_IF_FALSE_WALLET_INT_ERR_EX(false, "m_pending_key_images > m_pending_key_images_file_container");
+  }
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::load(const std::wstring& wallet_, const std::string& password)
@@ -779,16 +827,25 @@ void wallet2::load(const std::wstring& wallet_, const std::string& password)
   CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, string_encoding::convert_to_ansii(m_keys_file));
 
   load_keys(m_keys_file, password);
-  LOG_PRINT_L0("Loaded wallet keys file" << (m_is_view_only ? " (WATCH ONLY)" : "") << ", with public address: " << m_account.get_public_address_str());
+  LOG_PRINT_L0("Loaded wallet keys file" << (m_is_view_only ? " (WATCH ONLY) " : " ") << string_encoding::convert_to_ansii(m_keys_file) << " with public address: " << m_account.get_public_address_str());
 
   //keys loaded ok!
   //try to load wallet file. but even if we failed, it is not big problem
   if(!boost::filesystem::exists(m_wallet_file, e) || e)
   {
+    // wallet data file does not exist
     LOG_PRINT_L0("file not found: " << string_encoding::convert_to_ansii(m_wallet_file) << ", starting with empty blockchain");
     m_account_public_address = m_account.get_keys().m_account_address;
+
+    if (m_is_view_only)
+    {
+      bool stub = false;
+      load_keys2ki(true, stub);
+    }
     return;
   }
+
+  // wallet data file exists
   bool r = tools::unserialize_obj_from_file(*this, m_wallet_file);
 
   bool need_to_resync = false;
@@ -800,6 +857,9 @@ void wallet2::load(const std::wstring& wallet_, const std::string& password)
     need_to_resync = true;
   }
 
+  if (m_is_view_only)
+    load_keys2ki(false, need_to_resync);
+
   if (need_to_resync)
   {
     LOG_PRINT_L0("Wallet resyncing from genesis...");
@@ -810,14 +870,15 @@ void wallet2::load(const std::wstring& wallet_, const std::string& password)
   m_local_bc_height = m_blockchain.size();
 
   LOG_PRINT_L0("Loaded wallet data from " << string_encoding::convert_to_ansii(m_wallet_file));
-  LOG_PRINT_L0("(pending_key_images=" << m_pending_key_images.size() << ",tx_keys=" << m_tx_keys.size() << ")");
+  LOG_PRINT_L0("(pending_key_images: " << m_pending_key_images.size() << ", pki file elements: " << m_pending_key_images_file_container.size() << ", tx_keys: " << m_tx_keys.size() << ")");
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::store()
 {
-  LOG_PRINT_L0("(before storing: pending_key_images=" << m_pending_key_images.size() << ",tx_keys=" << m_tx_keys.size() << ")");
+  LOG_PRINT_L0("(before storing: pending_key_images: " << m_pending_key_images.size() << ", pki file elements: " << m_pending_key_images_file_container.size() << ", tx_keys: " << m_tx_keys.size() << ")");
+
   bool r = tools::serialize_obj_to_file(*this, m_wallet_file);
-  CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, string_encoding::convert_to_ansii(m_wallet_file));
+  THROW_IF_FALSE_WALLET_EX(r, error::file_save_error, string_encoding::convert_to_ansii(m_wallet_file));
   LOG_PRINT_L0("Stored wallet data into " << string_encoding::convert_to_ansii(m_wallet_file));
 }
 //----------------------------------------------------------------------------------------------------
@@ -1081,7 +1142,7 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
   {
     //unlock funds if transaction rejected
     for (auto& s : create_tx_param.sources)
-      m_transfers[s.transfer_index].m_spent = true;
+      set_transfer_spent_flag(s.transfer_index, true);
   }
 
   std::string recipient;
@@ -1107,12 +1168,6 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
       auto& out = tx.vout[p.first];
       THROW_IF_FALSE_WALLET_INT_ERR_EX(out.target.type() == typeid(txout_to_key), "outs_key_images has invalid out type, index: " << p.first);
       const txout_to_key& otk = boost::get<txout_to_key>(out.target);
-
-      auto it = m_pending_key_images.find(otk.key);
-      if (it != m_pending_key_images.end())
-      {
-        LOG_PRINT_YELLOW("warning: out pub key " << otk.key << " is already exist in m_pending_key_images, ki: " << it->second << ", will be overwritten with " << p.second, LOG_LEVEL_0);
-      }
       pk_ki_to_be_added.push_back(std::make_pair(otk.key, p.second));
     }
 
@@ -1127,31 +1182,34 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
       THROW_IF_FALSE_WALLET_INT_ERR_EX(src.real_output < src.outputs.size(), "src.real_output is out of bounds: " << src.real_output);
       const crypto::public_key& out_key = src.outputs[src.real_output].second;
 
-      THROW_IF_FALSE_WALLET_INT_ERR_EX(src.transfer_index < m_transfers.size(), "incorrect transfer index: " << src.transfer_index);
-      auto& tr = m_transfers[src.transfer_index];
-      if (tr.m_key_image != currency::null_key_image)
-      {
-        LOG_PRINT_YELLOW("transfer #" << src.transfer_index << " has not null key image: " << tr.m_key_image, LOG_LEVEL_0);
-      }
       tri_ki_to_be_added.push_back(std::make_pair(src.transfer_index, ki));
-
-      auto it = m_pending_key_images.find(out_key);
-      if (it != m_pending_key_images.end())
-      {
-        LOG_PRINT_YELLOW("warning: out pub key " << out_key << " is already exist in m_pending_key_images, ki: " << it->second << ", will be overwritten with " << ki, LOG_LEVEL_0);
-      }
       pk_ki_to_be_added.push_back(std::make_pair(out_key, ki));
     }
 
     for (auto& p : pk_ki_to_be_added)
     {
-      m_pending_key_images[p.first] = p.second;
-      LOG_PRINT_L2("for tx " << tx_hash << " pending key image added (" << p.first << ", " << p.second << ")");
+      auto it = m_pending_key_images.find(p.first);
+      if (it != m_pending_key_images.end())
+      {
+        LOG_PRINT_YELLOW("warning: for tx " << tx_hash << " out pub key " << p.first << " already exist in m_pending_key_images, ki: " << it->second << ", proposed new ki: " << p.second, LOG_LEVEL_0);
+      }
+      else
+      {
+        m_pending_key_images[p.first] = p.second;
+        m_pending_key_images_file_container.push_back(tools::out_key_to_ki(p.first, p.second));
+        LOG_PRINT_L2("for tx " << tx_hash << " pending key image added (" << p.first << ", " << p.second << ")");
+      }
     }
 
     for (auto& p : tri_ki_to_be_added)
     {
-      m_transfers[p.first].m_key_image = p.second;
+      THROW_IF_FALSE_WALLET_INT_ERR_EX(p.first < m_transfers.size(), "incorrect transfer index: " << p.first);
+      auto& tr = m_transfers[p.first];
+      if (tr.m_key_image != currency::null_key_image)
+      {
+        LOG_PRINT_YELLOW("transfer #" << p.first << " has not null key image: " << tr.m_key_image << " will be replaced with ki " << p.second, LOG_LEVEL_0);
+      }
+      tr.m_key_image = p.second;
       m_key_images[p.second] = p.first;
       LOG_PRINT_L2("for tx " << tx_hash << " key image " << p.second << " was associated with transfer # " << p.first);
     }

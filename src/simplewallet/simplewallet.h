@@ -34,6 +34,8 @@ namespace currency
     //wallet *create_wallet();
     bool process_command(const std::vector<std::string> &args);
     std::string get_commands_str();
+    void set_offline_mode(bool offline_mode);
+
   private:
     void handle_command_line(const boost::program_options::variables_map& vm);
 
@@ -155,6 +157,8 @@ namespace currency
     std::string m_daemon_address;
     std::string m_daemon_host;
     int m_daemon_port;
+
+    bool m_offline_mode;
 
     epee::console_handlers_binder m_cmd_binder;
 
