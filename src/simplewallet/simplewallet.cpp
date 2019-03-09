@@ -1771,6 +1771,7 @@ int main(int argc, char* argv[])
     }
     else if (command_line::get_arg(vm, command_line::arg_version))
     {
+      LOG_PRINT_L0(ENDL << ENDL << ENDL << ENDL << ENDL);
       success_msg_writer() << CURRENCY_NAME << " wallet v" << PROJECT_VERSION_LONG;
       return false;
     }

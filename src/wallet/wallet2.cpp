@@ -172,8 +172,9 @@ void wallet2::process_new_transaction(const currency::transaction& tx, uint64_t 
     {
       LOG_PRINT_L0("Spent money: " << print_money(intk.amount) << ", with tx: " << tx_hash);
       tx_money_spent_in_ins += intk.amount;
+
+      set_transfer_spent_flag(it->second, true);
       transfer_details& td = m_transfers[it->second];
-      td.m_spent = true;
       
       mtd.spent_indices.push_back(i);
 
@@ -780,6 +781,7 @@ bool wallet2::check_connection()
 //----------------------------------------------------------------------------------------------------
 void wallet2::load_keys2ki(bool create_if_not_exist, bool& need_to_resync)
 {
+  m_pending_key_images_file_container.close(); // just in case it was opened
   bool pki_corrupted = false;
   std::string reason;
   bool ok = m_pending_key_images_file_container.open(m_pending_ki_file, create_if_not_exist, &pki_corrupted, &reason);
@@ -801,8 +803,10 @@ void wallet2::load_keys2ki(bool create_if_not_exist, bool& need_to_resync)
       THROW_IF_FALSE_WALLET_INT_ERR_EX(ok, "m_pending_key_images_file_container.get_item() failed for index " << i << ", size: " << m_pending_key_images_file_container.size());
       ok = m_pending_key_images.insert(std::make_pair(item.out_key, item.key_image)).second;
       THROW_IF_FALSE_WALLET_INT_ERR_EX(ok, "m_pending_key_images.insert failed for index " << i << ", size: " << m_pending_key_images_file_container.size());
+      LOG_PRINT_L2("pending key image restored: (" << item.out_key << ", " << item.key_image << ")");
     }
     LOG_PRINT_L0(m_pending_key_images.size() << " elements restored, requesting full wallet resync");
+    LOG_PRINT_L0("m_pending_key_images size: " << m_pending_key_images.size() << ", m_pending_key_images_file_container size: " << m_pending_key_images_file_container.size());
     need_to_resync = true;
   }
   else if (m_pending_key_images.size() > m_pending_key_images_file_container.size())
@@ -823,7 +827,7 @@ void wallet2::load(const std::wstring& wallet_, const std::string& password)
   CHECK_AND_THROW_WALLET_EX(e || !exists, error::file_not_found, string_encoding::convert_to_ansii(m_keys_file));
 
   load_keys(m_keys_file, password);
-  LOG_PRINT_L0("Loaded wallet keys file" << (m_is_view_only ? " (WATCH ONLY)" : "") << ", with public address: " << m_account.get_public_address_str());
+  LOG_PRINT_L0("Loaded wallet keys file" << (m_is_view_only ? " (WATCH ONLY) " : " ") << string_encoding::convert_to_ansii(m_keys_file) << " with public address: " << m_account.get_public_address_str());
 
   //keys loaded ok!
   //try to load wallet file. but even if we failed, it is not big problem
@@ -872,9 +876,6 @@ void wallet2::load(const std::wstring& wallet_, const std::string& password)
 void wallet2::store()
 {
   LOG_PRINT_L0("(before storing: pending_key_images: " << m_pending_key_images.size() << ", pki file elements: " << m_pending_key_images_file_container.size() << ", tx_keys: " << m_tx_keys.size() << ")");
-
-  if (m_is_view_only)
-    m_pending_key_images_file_container.close();
 
   bool r = tools::serialize_obj_to_file(*this, m_wallet_file);
   THROW_IF_FALSE_WALLET_EX(r, error::file_save_error, string_encoding::convert_to_ansii(m_wallet_file));
@@ -1141,7 +1142,7 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
   {
     //unlock funds if transaction rejected
     for (auto& s : create_tx_param.sources)
-      m_transfers[s.transfer_index].m_spent = true;
+      set_transfer_spent_flag(s.transfer_index, true);
   }
 
   std::string recipient;

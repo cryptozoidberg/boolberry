@@ -570,7 +570,7 @@ namespace tools
     {
       //mark outputs as spent 
       for(transfer_container::iterator it : selected_transfers)
-        it->m_spent = true;
+        set_transfer_spent_flag(it - m_transfers.begin(), true);
       //do offline sig
       blobdata bl = t_serializable_object_to_blob(create_tx_param);
       crypto::do_chacha_crypt(bl, m_account.get_keys().m_view_secret_key);
