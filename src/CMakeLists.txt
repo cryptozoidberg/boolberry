@@ -81,6 +81,7 @@ if(BUILD_GUI)
   QT5_USE_MODULES(Boolberry WebEngineWidgets WebChannel)
   target_link_libraries(Boolberry wallet rpc currency_core crypto common zlibstatic Qt5::Widgets ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} )
   set_property(TARGET Boolberry PROPERTY FOLDER "prog")
+  set_target_properties(Boolberry PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "--html-path=${CMAKE_CURRENT_SOURCE_DIR}/gui/qt-daemon/html")
   set(CMAKE_AUTOMOC OFF)
 endif()
 
