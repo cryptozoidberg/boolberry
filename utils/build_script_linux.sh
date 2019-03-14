@@ -6,6 +6,14 @@ curr_path=${BASH_SOURCE%/*}
 : "${BOOST_ROOT:?BOOST_ROOT should be set to the root of Boost, ex.: /home/user/boost_1_68_0}"
 : "${QT_PREFIX_PATH:?QT_PREFIX_PATH should be set to Qt libs folder, ex.: /home/user/Qt5.5.1/5.5.1/gcc_64}"
 
+build_postfix_hyp=
+build_postfix_cl=
+if [ "$build_postfix" == "dev" ]
+then
+  build_postfix_hyp=dev- 
+  build_postfix_cl="DEV "
+fi
+
 echo "entering directory $curr_path/.."
 cd $curr_path/..
 
@@ -73,7 +81,7 @@ cp $QT_PREFIX_PATH/plugins/xcbglintegrations/libqxcb-glx-integration.so ./boolbe
 
 printf "\nmaking compressed build archive...\n\n"
 
-package_filename=boolberry-linux-x64-dev-$version_str.tar.bz2
+package_filename=boolberry-linux-x64-${build_postfix_hyp}$version_str.tar.bz2
 
 tar -cjvf $package_filename boolberry
 
@@ -85,6 +93,6 @@ scp $package_filename bbr_build_server:/var/www/html/builds
 
 mail_msg="New build for linux-x64 available at http://$BBR_BUILD_SERVER_ADDR_PORT/builds/$package_filename"
 echo $mail_msg
-echo $mail_msg | mail -s "Boolberry linux-x64 DEV build $version_str" ${emails}
+echo $mail_msg | mail -s "Boolberry linux-x64 ${build_postfix_cl}build $version_str" ${emails}
 
 exit 0
