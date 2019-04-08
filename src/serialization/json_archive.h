@@ -1,3 +1,4 @@
+// Copyright (c) 2014-2017 The The Louisdor Project
 // Copyright (c) 2012-2013 The Cryptonote developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -81,9 +82,16 @@ struct json_archive<true> : public json_archive_base<std::ostream, true>
     // If T is signed or unsigned char, it's promoted to int and printed as number.
     return +v;
   }
+  bool is_saving_arch(){ return true; }
 
   template <class T>
   void serialize_int(T v)
+  {
+    stream_ << std::dec << promote_to_printable_integer_type(v);
+  }
+
+  template <class T>
+  void serialize_uint(T v)
   {
     stream_ << std::dec << promote_to_printable_integer_type(v);
   }

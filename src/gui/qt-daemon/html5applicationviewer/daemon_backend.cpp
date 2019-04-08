@@ -420,8 +420,11 @@ bool daemon_backend::update_wallets()
     if (m_last_daemon_height != m_last_wallet_synch_height)
     {
       view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
-      wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
-      m_pview->update_wallet_status(wsi);
+      if (m_last_daemon_height - m_last_wallet_synch_height > 3)
+      {
+        wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
+        m_pview->update_wallet_status(wsi);
+      }
       try
       {
         m_wallet->refresh();

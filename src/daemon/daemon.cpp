@@ -67,6 +67,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_cmd_sett, command_line::arg_log_level);
   command_line::add_arg(desc_cmd_sett, command_line::arg_console);
   command_line::add_arg(desc_cmd_sett, command_line::arg_show_details);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_calc_coin_swap);
 
   command_line::add_arg(desc_cmd_sett, command_line::arg_no_predownload);
   command_line::add_arg(desc_cmd_sett, command_line::arg_explicit_predownload);
@@ -247,6 +248,11 @@ bool command_line_preprocessor(const boost::program_options::variables_map& vm)
     currency::print_currency_details();
     exit = true;
   }
+  if (command_line::get_arg(vm, command_line::arg_calc_coin_swap))
+  {
+    currency::print_coins_that_can_be_swapped();
+    exit = true;
+  }  
   if (command_line::get_arg(vm, command_line::arg_os_version))
   {
     std::cout << "OS: " << tools::get_os_version_string() << ENDL;
