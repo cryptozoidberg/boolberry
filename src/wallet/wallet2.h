@@ -22,6 +22,7 @@
 #include "core_rpc_proxy.h"
 #include "core_default_rpc_proxy.h"
 #include "wallet_errors.h"
+#include "common/pod_array_file_container.h"
 
 #define DEFAULT_TX_SPENDABLE_AGE                               10
 
@@ -66,6 +67,18 @@ namespace tools
     {
     }
   };
+
+#pragma pack(push, 1)
+  struct out_key_to_ki
+  {
+    out_key_to_ki() {}
+    out_key_to_ki(const crypto::public_key& out_key, const crypto::key_image& key_image) : out_key(out_key), key_image(key_image) {}
+    crypto::public_key out_key;
+    crypto::key_image  key_image;
+  };
+#pragma pack(pop)
+
+  typedef tools::pod_array_file_container<out_key_to_ki> pending_ki_file_container_t;
 
   class wallet2
   {
@@ -129,6 +142,7 @@ namespace tools
     void store();
     std::wstring get_wallet_path(){ return m_keys_file; }
     currency::account_base& get_account(){return m_account;}
+    void load_keys2ki(bool create_if_not_exist, bool& need_to_resync);
 
     void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
     void get_recent_blocks_stat(std::vector<wallet_block_stat_t>& wbs, size_t blocks_limit);
@@ -243,6 +257,7 @@ namespace tools
     bool m_is_view_only;
     std::wstring m_wallet_file;
     std::wstring m_keys_file;
+    std::wstring m_pending_ki_file;
     std::vector<crypto::hash> m_blockchain;
     std::atomic<uint64_t> m_local_bc_height; //temporary workaround 
     std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;
@@ -251,6 +266,7 @@ namespace tools
     payment_container m_payments;
     std::unordered_map<crypto::key_image, size_t> m_key_images;
     std::unordered_map<crypto::public_key, crypto::key_image> m_pending_key_images; // (out_pk -> ki) pairs of change outputs to be added in watch-only wallet without spend sec key
+    pending_ki_file_container_t m_pending_key_images_file_container;
     currency::account_public_address m_account_public_address;
     uint64_t m_upper_transaction_size_limit; //TODO: auto-calc this value or request from daemon, now use some fixed value
 
@@ -554,7 +570,7 @@ namespace tools
     {
       //mark outputs as spent 
       for(transfer_container::iterator it : selected_transfers)
-        it->m_spent = true;
+        set_transfer_spent_flag(it - m_transfers.begin(), true);
       //do offline sig
       blobdata bl = t_serializable_object_to_blob(create_tx_param);
       crypto::do_chacha_crypt(bl, m_account.get_keys().m_view_secret_key);
