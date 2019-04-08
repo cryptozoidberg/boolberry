@@ -238,6 +238,7 @@ namespace currency
 
 
   void print_currency_details();
+  void print_coins_that_can_be_swapped();
     
   //---------------------------------------------------------------
 //   bool get_block_scratchpad_data(const block& b, std::string& res, uint64_t selector);

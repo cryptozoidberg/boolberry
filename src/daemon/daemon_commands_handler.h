@@ -214,14 +214,13 @@ private:
   //--------------------------------------------------------------------------------
   bool print_block_by_height(uint64_t height)
   {
-    std::list<currency::block> blocks;
-    m_srv.get_payload_object().get_core().get_blocks(height, 1, blocks);
+    currency::block_extended_info blk = AUTO_VAL_INIT(blk);
+    bool r = m_srv.get_payload_object().get_core().get_blockchain_storage().get_block_extended_info_by_height(height, blk);
 
-    if (1 == blocks.size())
+    if (r)
     {
-      currency::block& block = blocks.front();
-      std::cout << "block_id: " << get_block_hash(block) << ENDL;
-      print_as_json(block);
+      std::cout << "block_id: " << get_block_hash(blk.bl) << ENDL;
+      print_as_json(blk);
     }
     else
     {
