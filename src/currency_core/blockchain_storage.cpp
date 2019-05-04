@@ -2473,6 +2473,8 @@ bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::ha
     if (have_tx_keyimg_as_spent(in_to_key.k_image))
     {
       LOG_PRINT_L0("Key image already spent in blockchain: " << string_tools::pod_to_hex(in_to_key.k_image));
+      // bool stub;
+      // LOG_PRINT_L1(print_key_image_details(in_to_key.k_image, stub));
       return false;
     }
 
