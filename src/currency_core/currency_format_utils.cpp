@@ -1312,7 +1312,7 @@ namespace currency
     r = crypto::do_chacha_crypt(data, size, buff.data(), &derivation, sizeof derivation);
     CHECK_AND_ASSERT_MES(r, false, "do_chacha_crypt failed");
 
-    memcpy_s(data, size, buff.data(), buff.size());
+    memcpy(data, buff.data(), size);
 
     return true;
   }
