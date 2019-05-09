@@ -1002,13 +1002,12 @@ namespace currency
   void print_coins_that_can_be_swapped()
   {
     
-    uint64_t h = 0;
-    uint64_t already_generated_coins = 12871624879042785615;
+    uint64_t h = 1279441;
+    uint64_t already_generated_coins = 12871624879042786098;
+    uint64_t already_donated_coins = 134336574538000000;
 
-    //starting from this block https://explorer.mining.blue/en/?hash=380d14b4ab410acfdb4099db3782f0e94502dd99dc49d459d3d1065e1550ac47#blockchain_block
-
-    uint64_t summary_mined_coins_which_can_be_swaped = already_generated_coins;
-    for (uint64_t h = 1279441; h != 1551075; ++h)
+    uint64_t summary_mined_coins_which_can_be_swaped = already_generated_coins + already_donated_coins;
+    for (h = 1279441; h != 1551075; ++h)
     {
       uint64_t emission_reward = 0;
       uint64_t stub = 0;
@@ -1024,6 +1023,23 @@ namespace currency
       else
       {
         summary_mined_coins_which_can_be_swaped += emission_reward;
+      }
+      if (!(h % 720))
+      {
+        std::vector<bool> votes(CURRENCY_DONATIONS_INTERVAL, true);
+        uint64_t max_possible_donation_reward = get_donations_anount_for_day(already_donated_coins, votes);
+        already_donated_coins += max_possible_donation_reward;
+        if (h > 1353794)
+        {
+          //1551074 estimated N block when swap is over
+          //197280 - period of 9 months in blocks (720 block * 274 days)
+          double correction_factor = double(1551074 - h) / 197280;
+          summary_mined_coins_which_can_be_swaped += static_cast<uint64_t>(correction_factor * max_possible_donation_reward);
+        }
+        else
+        {
+          summary_mined_coins_which_can_be_swaped += max_possible_donation_reward;
+        }
       }
     }
 
