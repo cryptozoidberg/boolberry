@@ -1130,7 +1130,7 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
     }
     else
     {
-      // lock funds if transaction accepted
+      // make sure funds are locked if transaction was accepted
       for (auto& s : create_tx_param.sources)
         set_transfer_spent_flag(s.transfer_index, true);
     }
