@@ -211,9 +211,10 @@ namespace wallet_rpc
     struct request
     {
       std::string payment_id;
-
+      bool allow_locked_transactions;
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(payment_id)
+        KV_SERIALIZE(allow_locked_transactions)
       END_KV_SERIALIZE_MAP()
     };
 
