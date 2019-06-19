@@ -2683,16 +2683,28 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
   PROF_L1_START(longhash_calculating_time);
   crypto::hash proof_of_work = null_hash;
 
+  std::vector<uint64_t> used_sp_indices;
+  used_sp_indices.reserve(1104);
+  
   proof_of_work = get_block_longhash(bl, m_db_blocks.size(), [&](uint64_t index) -> crypto::hash
   {
-    return m_scratchpad_wr.get_scratchpad()[index%m_scratchpad_wr.get_scratchpad().size()];
+    uint64_t idx = index % m_scratchpad_wr.get_scratchpad().size();
+    used_sp_indices.push_back(idx);
+    return m_scratchpad_wr.get_scratchpad()[idx];
   });
 
   if (!check_hash(proof_of_work, current_diffic))
   {
+    std::stringstream ss;
+    ss << "used scratchpad elements:" << ENDL;
+    for (auto& index : used_sp_indices)
+      ss << std::setw(8) << index << " : " << m_scratchpad_wr.get_scratchpad()[index%m_scratchpad_wr.get_scratchpad().size()] << ENDL;
+
     LOG_PRINT_L0("Block with id: " << id << ENDL
       << "have not enough proof of work: " << proof_of_work << ENDL
-      << "nexpected difficulty: " << current_diffic);
+      << "nexpected difficulty: " << current_diffic << ENDL
+      << ss.str() << ENDL
+      << "BLOCK JSON: " << obj_to_json_str(bl));
     bvc.m_verifivation_failed = true;
     return false;
   }

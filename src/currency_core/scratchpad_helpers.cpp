@@ -48,6 +48,13 @@ namespace currency
       CHECK_AND_ASSERT_MES(res, false, "scratchpad loading failed");
       PROF_L1_FINISH(cache_load_timer);
       LOG_PRINT_MAGENTA("Scratchpad loaded from db OK (" << m_scratchpad_cache.size() << " elements, " << (m_scratchpad_cache.size() * 32) / 1024 << " KB)" << PROF_L1_STR_MS_STR(" in ", cache_load_timer, " ms"), LOG_LEVEL_0);
+      
+      static const size_t sp_n = 5;
+      std::stringstream ss;
+      ss << ENDL << "Last " << sp_n << " elements of scratchpad:" << ENDL;
+      for (size_t i = sp_n; i != 0; --i)
+        ss << m_scratchpad_cache[m_scratchpad_cache.size() - i] << ENDL;
+      LOG_PRINT_L0(ss.str());
     }
 
     return true;
