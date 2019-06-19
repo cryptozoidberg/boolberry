@@ -2700,11 +2700,18 @@ bool blockchain_storage::handle_block_to_main_chain(const block& bl, const crypt
     for (auto& index : used_sp_indices)
       ss << std::setw(8) << index << " : " << m_scratchpad_wr.get_scratchpad()[index%m_scratchpad_wr.get_scratchpad().size()] << ENDL;
 
+    ss << "BLOCK JSON: " << obj_to_json_str(bl) << ENDL;
+    ss << "scratchpad size: " << m_scratchpad_wr.get_scratchpad().size() << ENDL;
+
+    static const size_t sp_n = 5;
+    ss << "Last " << sp_n << " elements of scratchpad:" << ENDL;
+    for (size_t i = sp_n; i != 0; --i)
+      ss << m_scratchpad_wr.get_scratchpad()[m_scratchpad_wr.get_scratchpad().size() - i] << ENDL;
+
     LOG_PRINT_L0("Block with id: " << id << ENDL
       << "have not enough proof of work: " << proof_of_work << ENDL
       << "nexpected difficulty: " << current_diffic << ENDL
-      << ss.str() << ENDL
-      << "BLOCK JSON: " << obj_to_json_str(bl));
+      << ss.str());
     bvc.m_verifivation_failed = true;
     return false;
   }
