@@ -42,7 +42,9 @@ Html5ApplicationViewer::Html5ApplicationViewer():
 
   setCentralWidget(m_view);
   
+#if QT_VERSION >= 0x050a00
   m_view->settings()->setAttribute(QWebEngineSettings::ShowScrollBars, false);
+#endif
   m_view->page()->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessFileUrls, true);
   m_view->page()->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
   m_view->page()->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);

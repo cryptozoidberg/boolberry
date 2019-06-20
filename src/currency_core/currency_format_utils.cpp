@@ -1660,4 +1660,4 @@ bool encrypt_user_data_with_tx_secret_key(const crypto::secret_key& sk, uint8_t*
     return true;
   }
   //---------------------------------------------------------------
-}}
+}
