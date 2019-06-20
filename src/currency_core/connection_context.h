@@ -29,6 +29,7 @@ namespace currency
     uint64_t m_last_response_height;
     epee::copyable_atomic m_callback_request_count; //in debug purpose: problem with double callback rise
     //size_t m_score;  TODO: add score calculations
+    std::string m_remote_version;
   };
 
   inline std::string get_protocol_state_string(currency_connection_context::state s)

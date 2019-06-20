@@ -26,6 +26,7 @@ public:
     m_cmd_binder.set_handler("print_pl", boost::bind(&daemon_cmmands_handler::print_pl, this, _1), "Print peer list");
     m_cmd_binder.set_handler("print_cn", boost::bind(&daemon_cmmands_handler::print_cn, this, _1), "Print connections");
     m_cmd_binder.set_handler("print_bc", boost::bind(&daemon_cmmands_handler::print_bc, this, _1), "Print blockchain info in a given blocks range, print_bc <begin_height> [<end_height>]");
+    m_cmd_binder.set_handler("print_bc_timestamps", boost::bind(&daemon_cmmands_handler::print_bc_timestamps, this, _1), "Print block's timestamps in a given blocks range, print_bc <begin_height> [<end_height>]");
     //m_cmd_binder.set_handler("print_bci", boost::bind(&daemon_cmmands_handler::print_bci, this, _1));
     //m_cmd_binder.set_handler("print_bc_outs", boost::bind(&daemon_cmmands_handler::print_bc_outs, this, _1));
     m_cmd_binder.set_handler("print_block", boost::bind(&daemon_cmmands_handler::print_block, this, _1), "Print block, print_block <block_hash> | <block_height>");
@@ -39,7 +40,7 @@ public:
     m_cmd_binder.set_handler("make_alias", boost::bind(&daemon_cmmands_handler::make_alias, this, _1), "Puts alias reservation record into block template, if alias is free");
     m_cmd_binder.set_handler("set_donations", boost::bind(&daemon_cmmands_handler::set_donations, this, _1), "Set donations mode: true if you vote for donation, and false - if against");
     m_cmd_binder.set_handler("print_ki", boost::bind(&daemon_cmmands_handler::print_ki, this, _1), "Print details of the specified key image");
-
+    m_cmd_binder.set_handler("print_deadlock_guard", boost::bind(&daemon_cmmands_handler::print_deadlock_guard, this, _1), "Print all threads which is blocked or involved in mutex ownership");
     //m_cmd_binder.set_handler("save", boost::bind(&daemon_cmmands_handler::save, this, _1), "Save blockchain");
     //m_cmd_binder.set_handler("get_transactions_statics", boost::bind(&daemon_cmmands_handler::get_transactions_statistics, this, _1), "Calculates transactions statistics");
   }
@@ -166,6 +167,30 @@ private:
 
     m_srv.get_payload_object().get_core().print_blockchain(start_index, end_block_parametr);
     return true;
+  }  
+  //--------------------------------------------------------------------------------
+    bool print_bc_timestamps(const std::vector<std::string>& args)
+  {
+    if (!args.size())
+    {
+      std::cout << "need block index parameter" << ENDL;
+      return false;
+    }
+    uint64_t start_index = 0;
+    uint64_t end_block_parametr = m_srv.get_payload_object().get_core().get_current_blockchain_height();
+    if (!string_tools::get_xtype_from_string(start_index, args[0]))
+    {
+      std::cout << "wrong starter block index parameter" << ENDL;
+      return false;
+    }
+    if (args.size() > 1 && !string_tools::get_xtype_from_string(end_block_parametr, args[1]))
+    {
+      std::cout << "wrong end block index parameter" << ENDL;
+      return false;
+    }
+
+    m_srv.get_payload_object().get_core().get_blockchain_storage().print_blocks_timestamps(start_index, end_block_parametr);
+    return true;
   }
   //--------------------------------------------------------------------------------
   bool print_bci(const std::vector<std::string>& args)
@@ -181,16 +206,21 @@ private:
     return true;
   }
   //--------------------------------------------------------------------------------
+  bool print_deadlock_guard(const std::vector<std::string>& args)
+  {
+    LOG_PRINT_L0(ENDL << epee::deadlock_guard_singleton::get_dlg_state());
+    return true;
+  }
+  //--------------------------------------------------------------------------------
   bool print_block_by_height(uint64_t height)
   {
-    std::list<currency::block> blocks;
-    m_srv.get_payload_object().get_core().get_blocks(height, 1, blocks);
+    currency::block_extended_info blk = AUTO_VAL_INIT(blk);
+    bool r = m_srv.get_payload_object().get_core().get_blockchain_storage().get_block_extended_info_by_height(height, blk);
 
-    if (1 == blocks.size())
+    if (r)
     {
-      currency::block& block = blocks.front();
-      std::cout << "block_id: " << get_block_hash(block) << ENDL;
-      print_as_json(block);
+      std::cout << "block_id: " << get_block_hash(blk.bl) << ENDL;
+      print_as_json(blk);
     }
     else
     {

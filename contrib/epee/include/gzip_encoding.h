@@ -31,7 +31,7 @@
 #define _GZIP_ENCODING_H_
 #include "net/http_client_base.h"
 #include "zlib/zlib.h"
-//#include "http.h"
+#include <boost/core/ignore_unused.hpp>
 
 
 namespace epee
@@ -57,6 +57,7 @@ namespace net_utils
 			memset(&m_zstream_in, 0, sizeof(m_zstream_in));
 			memset(&m_zstream_out, 0, sizeof(m_zstream_out));
 			int ret = 0;
+			boost::ignore_unused(ret);
 			if(is_deflate_mode)
 			{
 				ret = inflateInit(&m_zstream_in);	

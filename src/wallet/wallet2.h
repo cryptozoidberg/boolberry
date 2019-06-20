@@ -22,6 +22,7 @@
 #include "core_rpc_proxy.h"
 #include "core_default_rpc_proxy.h"
 #include "wallet_errors.h"
+#include "common/pod_array_file_container.h"
 
 #define DEFAULT_TX_SPENDABLE_AGE                               10
 
@@ -44,7 +45,14 @@ namespace tools
     virtual void on_money_sent(const wallet_rpc::wallet_transfer_info& wti) {}
   };
 
-    
+  struct wallet_block_stat_t
+  {
+    wallet_block_stat_t() : amount_in(0), amount_out(0), height(0), ts(0) {}
+    uint64_t amount_in;
+    uint64_t amount_out;
+    uint64_t height;
+    uint64_t ts;
+  };
 
   struct tx_dust_policy
   {
@@ -59,6 +67,18 @@ namespace tools
     {
     }
   };
+
+#pragma pack(push, 1)
+  struct out_key_to_ki
+  {
+    out_key_to_ki() {}
+    out_key_to_ki(const crypto::public_key& out_key, const crypto::key_image& key_image) : out_key(out_key), key_image(key_image) {}
+    crypto::public_key out_key;
+    crypto::key_image  key_image;
+  };
+#pragma pack(pop)
+
+  typedef tools::pod_array_file_container<out_key_to_ki> pending_ki_file_container_t;
 
   class wallet2
   {
@@ -116,14 +136,16 @@ namespace tools
       END_SERIALIZE()
     };
 
-    std::vector<unsigned char> generate(const std::string& wallet, const std::string& password);
-    void restore(const std::string& wallet, const std::vector<unsigned char>& restore_seed, const std::string& password);
-    void load(const std::string& wallet, const std::string& password);    
+    std::vector<unsigned char> generate(const std::wstring& wallet, const std::string& password);
+    void restore(const std::wstring& wallet, const std::vector<unsigned char>& restore_seed, const std::string& password);
+    void load(const std::wstring& wallet, const std::string& password);    
     void store();
-    std::string get_wallet_path(){ return m_keys_file; }
+    std::wstring get_wallet_path(){ return m_keys_file; }
     currency::account_base& get_account(){return m_account;}
+    void load_keys2ki(bool create_if_not_exist, bool& need_to_resync);
 
     void get_recent_transfers_history(std::vector<wallet_rpc::wallet_transfer_info>& trs, size_t offset, size_t count);
+    void get_recent_blocks_stat(std::vector<wallet_block_stat_t>& wbs, size_t blocks_limit);
     void get_unconfirmed_transfers(std::vector<wallet_rpc::wallet_transfer_info>& trs);
     void init(const std::string& daemon_address = "http://localhost:8080");
     void reset_and_sync_wallet();
@@ -144,11 +166,11 @@ namespace tools
     void sign_transfer_files(const std::string& tx_sources_file, const std::string& signed_tx_file, currency::transaction& tx);
     void submit_transfer(const std::string& tx_sources_blob, const std::string& signed_tx_blob, currency::transaction& tx);
     void submit_transfer_files(const std::string& tx_sources_file, const std::string& target_file, currency::transaction& tx);
-
+    void cancel_transfer(const std::string& tx_sources_blob);
 
     void sign_text(const std::string& text, crypto::signature& sig);
     std::string validate_signed_text(const std::string& addr, const std::string& text, const crypto::signature& sig);
-    bool generate_view_wallet(const std::string new_name, const std::string& password);
+    bool generate_view_wallet(const std::wstring new_name, const std::string& password);
     bool is_view_only(){ return m_is_view_only;}
     
     bool set_core_proxy(std::shared_ptr<i_core_proxy>& proxy);
@@ -168,6 +190,8 @@ namespace tools
     void transfer_to_swap(const std::string swap_address, const currency::payment_id_t& payment_id, uint64_t amount, size_t fake_outputs_count, uint64_t fee, currency::transaction &tx);
     void sweep_below(size_t fake_outs_count, const currency::account_public_address& addr, uint64_t threshold_amount, const currency::payment_id_t& payment_id,
       uint64_t fee, size_t& outs_total, uint64_t& amount_total, size_t& outs_swept, currency::transaction* result_tx = nullptr);
+
+    std::string print_key_image_info(const crypto::key_image& ki) const;
     
     bool get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key) const;
     bool check_connection();
@@ -176,7 +200,7 @@ namespace tools
     std::string get_transfers_str(bool include_spent = true, bool include_unspent = true) const;
     void get_payments(const currency::payment_id_t& payment_id, std::list<payment_details>& payments, uint64_t min_height = 0) const;
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr, currency::payment_id_t& payment_id);
-    bool store_keys(const std::string& keys_file_name, const std::string& password, bool save_as_view_wallet = false);
+    bool store_keys(const std::wstring& keys_file_name, const std::string& password, bool save_as_view_wallet = false);
     uint64_t get_blockchain_current_height() const { return m_local_bc_height; }
     template <class t_archive>
     inline void serialize(t_archive &a, const unsigned int ver)
@@ -199,7 +223,9 @@ namespace tools
       if (ver < 9)
           return;
       a & m_tx_keys;
-
+      if (ver < 11)
+        return;
+      a & m_pending_key_images;
     }
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
     //----------------------------------------------------------------------------------------------------
@@ -207,7 +233,7 @@ namespace tools
 
   private:
 
-    void load_keys(const std::string& keys_file_name, const std::string& password);
+    void load_keys(const std::wstring& keys_file_name, const std::string& password);
     void process_new_transaction(const currency::transaction& tx, uint64_t height, const currency::block& b);
     void process_new_blockchain_entry(const currency::block& b, currency::block_complete_entry& bche, crypto::hash& bl_id, uint64_t height);
     void detach_blockchain(uint64_t height);
@@ -217,7 +243,7 @@ namespace tools
     bool clear();
     void pull_blocks(size_t& blocks_added);
     uint64_t select_transfers(uint64_t needed_money, size_t fake_outputs_count, uint64_t dust, const std::vector<size_t>& outs_to_spend, std::list<transfer_container::iterator>& selected_transfers);
-    bool prepare_file_names(const std::string& file_path);
+    bool prepare_file_names(const std::wstring& file_path);
     void process_unconfirmed(const currency::transaction& tx, std::string& recipient, std::string& recipient_alias);
     void add_sent_unconfirmed_tx(const currency::transaction& tx, uint64_t change_amount, std::string recipient);
     void update_current_tx_limit();
@@ -228,11 +254,13 @@ namespace tools
     void wallet_transfer_info_from_unconfirmed_transfer_details(const unconfirmed_transfer_details& utd, wallet_rpc::wallet_transfer_info& wti)const;
     void finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result, bool do_not_relay = false);
     void resend_unconfirmed();
+    void set_transfer_spent_flag(uint64_t transfer_index, bool spent_flag);
 
     currency::account_base m_account;
     bool m_is_view_only;
-    std::string m_wallet_file;
-    std::string m_keys_file;
+    std::wstring m_wallet_file;
+    std::wstring m_keys_file;
+    std::wstring m_pending_ki_file;
     std::vector<crypto::hash> m_blockchain;
     std::atomic<uint64_t> m_local_bc_height; //temporary workaround 
     std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;
@@ -240,6 +268,8 @@ namespace tools
     transfer_container m_transfers;
     payment_container m_payments;
     std::unordered_map<crypto::key_image, size_t> m_key_images;
+    std::unordered_map<crypto::public_key, crypto::key_image> m_pending_key_images; // (out_pk -> ki) pairs of change outputs to be added in watch-only wallet without spend sec key
+    pending_ki_file_container_t m_pending_key_images_file_container;
     currency::account_public_address m_account_public_address;
     uint64_t m_upper_transaction_size_limit; //TODO: auto-calc this value or request from daemon, now use some fixed value
 
@@ -254,7 +284,7 @@ namespace tools
 }
 
 
-BOOST_CLASS_VERSION(tools::wallet2, 10)
+BOOST_CLASS_VERSION(tools::wallet2, 11)
 BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 3)
 BOOST_CLASS_VERSION(tools::wallet_rpc::wallet_transfer_info, 3)
 
@@ -542,8 +572,8 @@ namespace tools
     if (m_is_view_only)
     {
       //mark outputs as spent 
-      BOOST_FOREACH(transfer_container::iterator it, selected_transfers)
-        it->m_spent = true;
+      for(transfer_container::iterator it : selected_transfers)
+        set_transfer_spent_flag(it - m_transfers.begin(), true);
       //do offline sig
       blobdata bl = t_serializable_object_to_blob(create_tx_param);
       crypto::do_chacha_crypt(bl, m_account.get_keys().m_view_secret_key);

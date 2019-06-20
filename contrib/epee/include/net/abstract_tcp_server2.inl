@@ -310,10 +310,10 @@ DISABLE_VS_WARNINGS(4355)
     //some data should be wrote to stream
     //request complete
     
-    epee::critical_region_t<decltype(m_send_que_lock)> send_guard(m_send_que_lock);
+    CRITICAL_REGION_LOCAL_VAR(m_send_que_lock, send_guard);
     if(m_send_que.size() > ABSTRACT_SERVER_SEND_QUE_MAX_COUNT)
     {
-      send_guard.unlock();
+      send_guard.unlock();//manual unlock
       LOG_ERROR("send to [" << print_connection_context_short(context) << ", (" << (void*)this << ")] que size is more than ABSTRACT_SERVER_SEND_QUE_MAX_COUNT(" << ABSTRACT_SERVER_SEND_QUE_MAX_COUNT << "), shutting down connection");
       close();
       return false;
@@ -627,12 +627,7 @@ POP_WARNINGS
     m_stop_signal_sent = true;
     TRY_ENTRY();
     m_config.on_send_stop_signal();
-//    connections_mutex.lock();
-//     for (auto &c : connections_)
-//     {
-//       c->cancel();
-//     }
-//     connections_mutex.unlock();
+
     io_service_.stop();
     CATCH_ENTRY_L0("boosted_tcp_server<t_protocol_handler>::send_stop_signal()", void());
   }
@@ -670,10 +665,6 @@ POP_WARNINGS
     TRY_ENTRY();
 
     connection_ptr new_connection_l(new connection<t_protocol_handler>(io_service_, m_config, m_sockets_count, m_pfilter) );
-//     connections_mutex.lock();
-//     connections_.push_back(new_connection_l);
-//     LOG_PRINT_L2("connections_ size now " << connections_.size());
-//     connections_mutex.unlock();
     boost::asio::ip::tcp::socket&  sock_ = new_connection_l->socket();
     
     //////////////////////////////////////////////////////////////////////////
@@ -718,7 +709,10 @@ POP_WARNINGS
     boost::unique_lock<boost::mutex> lock(local_shared_context->connect_mut);
     auto connect_callback = [](boost::system::error_code ec_, boost::shared_ptr<local_async_context> shared_context)
     {
-      shared_context->connect_mut.lock(); shared_context->ec = ec_; shared_context->connect_mut.unlock(); shared_context->cond.notify_one(); 
+      CRITICAL_SECTION_LOCK(shared_context->connect_mut);
+      shared_context->ec = ec_; 
+      CRITICAL_SECTION_UNLOCK(shared_context->connect_mut);
+      shared_context->cond.notify_one(); 
     };
 
     sock_.async_connect(remote_endpoint, boost::bind<void>(connect_callback, _1, local_shared_context));
@@ -771,10 +765,7 @@ POP_WARNINGS
     TRY_ENTRY();    
     connection_ptr new_connection_l(new connection<t_protocol_handler>(io_service_, m_config, m_sockets_count, m_pfilter) );
     boost::asio::ip::tcp::socket&  sock_ = new_connection_l->socket();
-//     connections_mutex.lock();
-//     connections_.push_back(new_connection_l);
-//     LOG_PRINT_L2("connections_ size now " << connections_.size());
-//     connections_mutex.unlock();
+
     //////////////////////////////////////////////////////////////////////////
     boost::asio::ip::tcp::resolver resolver(io_service_);
     boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), adr, port);

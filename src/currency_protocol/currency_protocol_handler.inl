@@ -111,7 +111,9 @@ namespace currency
       << std::setw(20) << "Peer id"
       << std::setw(25) << "Recv/Sent (idle,sec)"
       << std::setw(25) << "State"
-      << std::setw(20) << "Livetime(seconds)" << ENDL;
+      << std::setw(20) << "Height"
+      << std::setw(20) << "Livetime (sec)"
+      << std::setw(20) << "Version" << ENDL;
 
     m_p2p->for_each_connection([&](const connection_context& cntxt, nodetool::peerid_type peer_id)
     {
@@ -119,8 +121,11 @@ namespace currency
         string_tools::get_ip_string_from_int32(cntxt.m_remote_ip) + ":" + std::to_string(cntxt.m_remote_port) 
         << std::setw(20) << std::hex << peer_id
         << std::setw(25) << std::to_string(cntxt.m_recv_cnt)+ "(" + std::to_string(time(NULL) - cntxt.m_last_recv) + ")" + "/" + std::to_string(cntxt.m_send_cnt) + "(" + std::to_string(time(NULL) - cntxt.m_last_send) + ")"
-        << std::setw(25) << get_protocol_state_string(cntxt.m_state) << "(remote_h: " << cntxt.m_remote_blockchain_height << ")"
-        << std::setw(20) << std::to_string(time(NULL) - cntxt.m_started) << ENDL;
+        << std::setw(25) << get_protocol_state_string(cntxt.m_state) 
+        << std::setw(20) << std::dec << cntxt.m_remote_blockchain_height
+        << std::setw(20) << std::to_string(time(NULL) - cntxt.m_started)
+        << std::setw(20) << cntxt.m_remote_version
+        << ENDL;
       return true;
     });
     LOG_PRINT_L0("Connections: " << ENDL << ss.str());
@@ -129,6 +134,7 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::process_payload_sync_data(const CORE_SYNC_DATA& hshd, currency_connection_context& context, bool is_inital)
   {
+    context.m_remote_version = hshd.client_version;
     context.m_remote_blockchain_height = hshd.current_height;
     LOG_PRINT_MAGENTA("[PROCESS_PAYLOAD_SYNC_DATA][m_been_synchronized=" << m_been_synchronized << "]: hshd.current_height = " << hshd.current_height << "(" << hshd.top_id << ")", LOG_LEVEL_3);
     if (context.m_state == currency_connection_context::state_befor_handshake && !is_inital)
@@ -235,6 +241,7 @@ namespace currency
   template<class t_core> 
   bool t_currency_protocol_handler<t_core>::get_payload_sync_data(CORE_SYNC_DATA& hshd)
   {
+    hshd.client_version = PROJECT_VERSION_LONG;
     bool have_called = false;
     
     m_core.get_blockchain_storage().template call_if_no_batch_exclusive_operation<bool>(have_called, [&]()
@@ -353,6 +360,13 @@ namespace currency
   template<class t_core> 
   int t_currency_protocol_handler<t_core>::handle_request_get_objects(int command, NOTIFY_REQUEST_GET_OBJECTS::request& arg, currency_connection_context& context)
   {
+    if (arg.blocks.size() > CURRENCY_PROTOCOL_MAX_BLOCKS_REQUEST_COUNT || 
+      arg.txs.size() > CURRENCY_PROTOCOL_MAX_TXS_REQUEST_COUNT)
+    {
+      LOG_ERROR_CCONTEXT("Requested objects count is to big (" << arg.blocks.size() << ")expected not more then " << CURRENCY_PROTOCOL_MAX_BLOCKS_REQUEST_COUNT);
+      m_p2p->drop_connection(context);
+    }
+
     if (!m_been_synchronized)
     {
       LOG_ERROR_CCONTEXT("Internal error: got NOTIFY_REQUEST_GET_OBJECTS while m_been_synchronized = false, dropping connection");
@@ -469,11 +483,13 @@ namespace currency
       PROF_L1_START(blocks_handle_time);
       {
         m_core.pause_mine();
+        m_core.get_tx_pool().lock();
         m_core.get_blockchain_storage().start_batch_exclusive_operation();
         bool success = false;
         misc_utils::auto_scope_leave_caller scope_exit_handler = misc_utils::create_scope_leave_handler([&, this](){
           boost::bind(&t_core::resume_mine, &m_core);
           m_core.get_blockchain_storage().finish_batch_exclusive_operation(success);
+          m_core.get_tx_pool().unlock();
         });
 
         BOOST_FOREACH(const block_complete_entry& block_entry, arg.blocks)
@@ -705,7 +721,6 @@ namespace currency
   bool t_currency_protocol_handler<t_core>::do_force_handshake_idle_connections()
   {
     nodetool::connections_list_type peer_list;
-    size_t count = 0;
     m_p2p->for_each_connection([&](currency_connection_context& context, nodetool::peerid_type peer_id)->bool{
       if (context.m_state == currency_connection_context::state_idle)
       {

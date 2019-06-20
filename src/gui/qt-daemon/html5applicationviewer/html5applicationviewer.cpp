@@ -12,8 +12,8 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsLinearLayout>
-#include <QGraphicsWebView>
-#include <QWebFrame>
+#include <QtWidgets>
+#include <QtWebEngineWidgets>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -24,79 +24,40 @@
 #include <QClipboard>
 #include "warnings.h"
 #include "net/http_client.h"
+#include "string_coding.h"
 
-class Html5ApplicationViewerPrivate : public QGraphicsView
+Html5ApplicationViewer::Html5ApplicationViewer():
+                        m_quit_requested(false),
+                        m_deinitialize_done(false),
+                        m_backend_stopped(false),
+                        m_request_uri_threads_count(0)
 {
-  Q_OBJECT
-public:
-  Html5ApplicationViewerPrivate(QWidget *parent = 0);
+  m_view = new QWebEngineView(this);
+  m_channel = new QWebChannel(m_view->page());  
+  m_view->page()->setWebChannel(m_channel);
 
-  void resizeEvent(QResizeEvent *event);
-  static QString adjustPath(const QString &path);
+  //register an object that will be available on JS side to communicate with
+  m_channel->registerObject(QStringLiteral("backend"), this);  
+  connect(m_view, SIGNAL(quitRequested()), this, SLOT(on_request_quit()));
 
-  public slots:
-  void quit();
-  void closeEvent(QCloseEvent *event);
-
-  private slots:
-  void addToJavaScript();
-
-signals:
-  void quitRequested();
-  void update_daemon_state(const QString str);
-  void update_wallet_status(const QString str);
-  void update_wallet_info(const QString str);
-  void money_transfer(const QString str);
-  void show_wallet();
-  void hide_wallet();
-  void switch_view(const QString str);
-  void set_recent_transfers(const QString str);
-  void handle_internal_callback(const QString str, const QString callback_name);
-
-
-
-public:
-  QGraphicsWebView *m_webView;
-#ifdef TOUCH_OPTIMIZED_NAVIGATION
-  NavigationController *m_controller;
-#endif // TOUCH_OPTIMIZED_NAVIGATION
-};
-
-void Html5ApplicationViewerPrivate::closeEvent(QCloseEvent *event)
-{
-
+  setCentralWidget(m_view);
+  
+  m_view->settings()->setAttribute(QWebEngineSettings::ShowScrollBars, false);
+  m_view->page()->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessFileUrls, true);
+  m_view->page()->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+  m_view->page()->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
+  m_view->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessFileUrls, true);
+  m_view->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+  m_view->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true); 
+  
 }
 
-Html5ApplicationViewerPrivate::Html5ApplicationViewerPrivate(QWidget *parent)
-: QGraphicsView(parent)
+void Html5ApplicationViewer::resizeEvent(QResizeEvent *event)
 {
-  QGraphicsScene *scene = new QGraphicsScene;
-  setScene(scene);
-  setFrameShape(QFrame::NoFrame);
-  setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-  m_webView = new QGraphicsWebView;
-  //m_webView->setAcceptTouchEvents(true);
-  //m_webView->setAcceptHoverEvents(false);
-  m_webView->setAcceptTouchEvents(false);
-  m_webView->setAcceptHoverEvents(true);
-  //setAttribute(Qt::WA_AcceptTouchEvents, true);
-  scene->addItem(m_webView);
-  scene->setActiveWindow(m_webView);
-#ifdef TOUCH_OPTIMIZED_NAVIGATION
-  m_controller = new NavigationController(parent, m_webView);
-#endif // TOUCH_OPTIMIZED_NAVIGATION
-  connect(m_webView->page()->mainFrame(),
-    SIGNAL(javaScriptWindowObjectCleared()), SLOT(addToJavaScript()));
+  m_view->resize(event->size());
 }
 
-void Html5ApplicationViewerPrivate::resizeEvent(QResizeEvent *event)
-{
-  m_webView->resize(event->size());
-}
-
-QString Html5ApplicationViewerPrivate::adjustPath(const QString &path)
+QString Html5ApplicationViewer::adjustPath(const QString &path)
 {
 #ifdef Q_OS_UNIX
 #ifdef Q_OS_MAC
@@ -116,32 +77,9 @@ QString Html5ApplicationViewerPrivate::adjustPath(const QString &path)
   return QFileInfo(path).absoluteFilePath();
 }
 
-void Html5ApplicationViewerPrivate::quit()
+void Html5ApplicationViewer::quit()
 {
-  emit quitRequested();
-}
-
-void Html5ApplicationViewerPrivate::addToJavaScript()
-{
-  m_webView->page()->mainFrame()->addToJavaScriptWindowObject("Qt_parent", QGraphicsView::parent());
-  m_webView->page()->mainFrame()->addToJavaScriptWindowObject("Qt", this);
-}
-
-Html5ApplicationViewer::Html5ApplicationViewer(QWidget *parent): QWidget(parent),
-                                                                  m_d(new Html5ApplicationViewerPrivate(this)),
-                                                                  m_quit_requested(false),
-                                                                  m_deinitialize_done(false),
-                                                                  m_backend_stopped(false),
-                                                                  m_request_uri_threads_count(0)
-{
-  //connect(m_d, SIGNAL(quitRequested()), SLOT(close()));
-
-  connect(m_d, SIGNAL(quitRequested()), this, SLOT(on_request_quit()));
-
-  QVBoxLayout *layout = new QVBoxLayout;
-  layout->addWidget(m_d);
-  layout->setMargin(0);
-  setLayout(layout);
+  emit quitRequested("{}");
 }
 
 bool Html5ApplicationViewer::init_config()
@@ -168,7 +106,9 @@ Html5ApplicationViewer::~Html5ApplicationViewer()
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
   store_config();
-  delete m_d;
+  m_view->page()->setWebChannel(nullptr);
+  m_channel->deregisterObject(this);
+  delete m_channel;
 }
 void Html5ApplicationViewer::closeEvent(QCloseEvent *event)
 {
@@ -189,17 +129,17 @@ void Html5ApplicationViewer::changeEvent(QEvent *e)
   {
   case QEvent::WindowStateChange:
   {
-                                  if (this->windowState() & Qt::WindowMinimized)
-                                  {
-                                    if (m_trayIcon)
-                                    {
-                                      QTimer::singleShot(250, this, SLOT(hide()));
-                                      m_trayIcon->showMessage("Boolberry app is minimized to tray",
-                                        "You can restore it with double-click or context menu");
-                                    }
-                                  }
+      if (this->windowState() & Qt::WindowMinimized)
+      {
+        if (m_trayIcon)
+        {
+          QTimer::singleShot(250, this, SLOT(hide()));
+          m_trayIcon->showMessage("Boolberry app is minimized to tray",
+            "You can restore it with double-click or context menu");
+        }
+      }
 
-                                  break;
+      break;
   }
   default:
     break;
@@ -249,12 +189,12 @@ void Html5ApplicationViewer::trayIconActivated(QSystemTrayIcon::ActivationReason
 
 void Html5ApplicationViewer::loadFile(const QString &fileName)
 {
-  m_d->m_webView->setUrl(QUrl::fromLocalFile(Html5ApplicationViewerPrivate::adjustPath(fileName)));
+  m_view->load(QUrl::fromLocalFile(Html5ApplicationViewer::adjustPath(fileName)));
 }
 
 void Html5ApplicationViewer::loadUrl(const QUrl &url)
 {
-  m_d->m_webView->setUrl(url);
+  m_view->load(url);
 }
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4065)
@@ -305,13 +245,13 @@ void Html5ApplicationViewer::showExpanded()
   this->setMinimumWidth(1000);
   this->setMinimumHeight(650);
   //this->setFixedSize(800, 600);
-  m_d->m_webView->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
-  m_d->m_webView->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+  m_view->settings()->setAttribute(QWebEngineSettings::JavascriptEnabled, true);
+  //m_view->settings()->setAttribute(QWebEngineSettings::DeveloperExtrasEnabled, true);
 }
 
-QGraphicsWebView *Html5ApplicationViewer::webView() const
+QWebEngineView *Html5ApplicationViewer::webView() const
 {
-  return m_d->m_webView;
+  return m_view;
 }
 
 bool Html5ApplicationViewer::on_request_quit()
@@ -349,10 +289,15 @@ bool Html5ApplicationViewer::on_backend_stopped()
 
 bool Html5ApplicationViewer::update_daemon_status(const view::daemon_status_info& info)
 {
-  //m_d->update_daemon_state(info);
   std::string json_str;
   epee::serialization::store_t_to_json(info, json_str);
-  m_d->update_daemon_state(json_str.c_str());
+  
+  if (m_last_update_daemon_status_json == json_str)
+    return true;
+
+  QMetaObject::invokeMethod(this, "update_daemon_state", Qt::QueuedConnection, Q_ARG(QString, json_str.c_str()));
+  m_last_update_daemon_status_json = json_str;
+  
   return true;
 }
 
@@ -372,7 +317,7 @@ QString Html5ApplicationViewer::request_aliases()
 
 bool Html5ApplicationViewer::show_msg_box(const std::string& message)
 {
-  QMessageBox::information(m_d, "Error", message.c_str(), QMessageBox::Ok);
+  QMessageBox::information(m_view, "Error", message.c_str(), QMessageBox::Ok);
   return true;
 }
 
@@ -385,7 +330,7 @@ bool Html5ApplicationViewer::update_wallet_status(const view::wallet_status_info
 {
   std::string json_str;
   epee::serialization::store_t_to_json(wsi, json_str);
-  m_d->update_wallet_status(json_str.c_str());
+  QMetaObject::invokeMethod(this, "update_wallet_status", Qt::QueuedConnection, Q_ARG(QString, json_str.c_str()));
   return true;
 }
 
@@ -393,7 +338,7 @@ bool Html5ApplicationViewer::update_wallet_info(const view::wallet_info& wsi)
 {
   std::string json_str;
   epee::serialization::store_t_to_json(wsi, json_str);
-  m_d->update_wallet_info(json_str.c_str());
+  QMetaObject::invokeMethod(this, "update_wallet_info", Qt::QueuedConnection, Q_ARG(QString, json_str.c_str()));
   return true;
 }
 
@@ -401,7 +346,7 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
 {
   std::string json_str;
   epee::serialization::store_t_to_json(tei, json_str);
-  m_d->money_transfer(json_str.c_str());
+  QMetaObject::invokeMethod(this, "money_transfer", Qt::QueuedConnection, Q_ARG(QString, json_str.c_str()));
   if (!m_trayIcon)
     return true;
   if (!tei.ti.is_income)
@@ -420,15 +365,15 @@ bool Html5ApplicationViewer::money_transfer(const view::transfer_event_info& tei
   return true;
 }
 
-
 bool Html5ApplicationViewer::hide_wallet()
 {
-  m_d->hide_wallet();
+  //this->hide_wallet();
+  QMetaObject::invokeMethod(this, "hide_wallet", Qt::QueuedConnection, Q_ARG(QString, ""));
   return true;
 }
 bool Html5ApplicationViewer::show_wallet()
 {
-  m_d->show_wallet();
+  QMetaObject::invokeMethod(this, "show_wallet", Qt::QueuedConnection, Q_ARG(QString, ""));
   return true;
 }
 
@@ -471,7 +416,7 @@ bool Html5ApplicationViewer::switch_view(int view_no)
   swi.view = view_no;
   std::string json_str;
   epee::serialization::store_t_to_json(swi, json_str);
-  m_d->switch_view(json_str.c_str());
+  QMetaObject::invokeMethod(this, "switch_view", Qt::QueuedConnection, Q_ARG(QString, json_str.c_str()));
   return true;
 }
 
@@ -479,7 +424,7 @@ bool Html5ApplicationViewer::set_recent_transfers(const view::transfers_array& t
 {
   std::string json_str;
   epee::serialization::store_t_to_json(ta, json_str);
-  m_d->set_recent_transfers(json_str.c_str());
+  QMetaObject::invokeMethod(this, "set_recent_transfers", Qt::QueuedConnection, Q_ARG(QString, json_str.c_str()));
   return true;
 }
 
@@ -511,7 +456,7 @@ QString Html5ApplicationViewer::request_uri(const QString& url_str, const QStrin
     if (!epee::serialization::load_t_from_json(prms, params.toStdString()))
     {
       show_msg_box("Internal error: failed to load request_uri params");
-      m_d->handle_internal_callback("", callbackname);
+      this->handle_internal_callback("", callbackname);
       --m_request_uri_threads_count;
       return;
     }
@@ -523,7 +468,7 @@ QString Html5ApplicationViewer::request_uri(const QString& url_str, const QStrin
     connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
     eventLoop.exec();
     QByteArray res = reply->readAll();
-    m_d->handle_internal_callback(res, callbackname);
+    this->handle_internal_callback(res, callbackname);
     --m_request_uri_threads_count;
   }).detach();
 
@@ -540,33 +485,33 @@ QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
   if (!epee::serialization::load_t_from_json(tp, json_transfer_object.toStdString()))
   {
     show_msg_box("Internal error: failed to load transfer params");
-    return epee::serialization::store_t_to_json(tr).c_str();
+    return (epee::serialization::store_t_to_json(tr)).c_str();
   }
 
   if (!tp.destinations.size())
   {
     show_msg_box("Internal error: empty destinations");
-    return epee::serialization::store_t_to_json(tr).c_str();
+    return (epee::serialization::store_t_to_json(tr)).c_str();
   }
 
   currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
 
   if (!m_backend.transfer(tp, res_tx))
   {
-    return epee::serialization::store_t_to_json(tr).c_str();
+    return (epee::serialization::store_t_to_json(tr)).c_str();
   }
   tr.success = true;
   tr.tx_hash = string_tools::pod_to_hex(currency::get_transaction_hash(res_tx));
   tr.tx_blob_size = currency::get_object_blobsize(res_tx);
 
-  return epee::serialization::store_t_to_json(tr).c_str();
+  return (epee::serialization::store_t_to_json(tr)).c_str();
 }
 
 QString Html5ApplicationViewer::sign_text(const QString& text_to_sign)
 {
   view::sign_response sr = AUTO_VAL_INIT(sr);
   sr.success = m_backend.sign_text(text_to_sign.toStdString(), sr.signature_hex);
-  return epee::serialization::store_t_to_json(sr).c_str();
+  return (epee::serialization::store_t_to_json(sr)).c_str();
 }
 
 void Html5ApplicationViewer::message_box(const QString& msg)
@@ -597,7 +542,7 @@ QString Html5ApplicationViewer::generate_wallet()
     return QString();
 
   std::string seed; //not used yet
-  m_backend.generate_wallet(path.toStdString(), pass.toStdString(), seed);
+  m_backend.generate_wallet(epee::string_encoding::utf8_to_wstring(path.toStdString()), pass.toStdString(), seed);
   QString res = seed.c_str();
 // 
 //   QString message = "This is your wallet seed phrase:\n\n";
@@ -645,7 +590,7 @@ bool Html5ApplicationViewer::restore_wallet(const QString& restore_text, const Q
 
   m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
 
-  return m_backend.restore_wallet(path.toStdString(), restore_text.toStdString(), password.toStdString());
+  return m_backend.restore_wallet(epee::string_encoding::utf8_to_wstring(path.toStdString()), restore_text.toStdString(), password.toStdString());
 }
 
 void Html5ApplicationViewer::place_to_clipboard(const QString& data)
@@ -703,7 +648,6 @@ void Html5ApplicationViewer::open_wallet()
 
   m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
 
-
   //read password
   bool ok;
   QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
@@ -712,14 +656,14 @@ void Html5ApplicationViewer::open_wallet()
   if (!ok)
     return;
 
-  m_backend.open_wallet(path.toStdString(), pass.toStdString());
+  m_backend.open_wallet(epee::string_encoding::utf8_to_wstring(path.toStdString()), pass.toStdString());
 }
 
 QString Html5ApplicationViewer::get_gui_lang()
 {
   return m_config.gui_lang.c_str();
 }
-
+ 
 void Html5ApplicationViewer::set_gui_lang(const QString& str_config)
 {
   m_config.gui_lang = str_config.toStdString();
@@ -729,7 +673,7 @@ QString Html5ApplicationViewer::parse_transfer_target(const QString& transfer_ta
 {
   view::address_details ad = AUTO_VAL_INIT(ad);
   ad.valid = m_backend.parse_transfer_target(transfer_target_str.toStdString(), ad.payment_id_hex, ad.standard_address, ad.swap_address);
-  return epee::serialization::store_t_to_json(ad).c_str();
+  return (epee::serialization::store_t_to_json(ad)).c_str();
 }
 
 #include "html5applicationviewer.moc"

@@ -34,6 +34,8 @@ namespace currency
     //wallet *create_wallet();
     bool process_command(const std::vector<std::string> &args);
     std::string get_commands_str();
+    void set_offline_mode(bool offline_mode);
+
   private:
     void handle_command_line(const boost::program_options::variables_map& vm);
 
@@ -59,6 +61,7 @@ namespace currency
     bool save_watch_only(const std::vector<std::string> &args);
     bool sign_transfer(const std::vector<std::string> &args);
     bool submit_transfer(const std::vector<std::string> &args);
+    bool recent_blocks(const std::vector<std::string> &args);
 
     bool integrated_address(const std::vector<std::string> &args);
 
@@ -72,8 +75,12 @@ namespace currency
     bool save(const std::vector<std::string> &args);
     bool set_log(const std::vector<std::string> &args);
     bool show_seed(const std::vector<std::string> &args);
+    bool spendkey(const std::vector<std::string> &args);
+    bool viewkey(const std::vector<std::string> &args);
     bool list_outputs(const std::vector<std::string> &args);
     bool sweep_below(const std::vector<std::string> &args);
+    bool show_dust(const std::vector<std::string> &args);
+    bool print_ki(const std::vector<std::string> &args);
 
     bool get_alias_from_daemon(const std::string& alias_name, currency::alias_info_base& ai);
     bool get_transfer_address(const std::string& adr_str, currency::account_public_address& addr);
@@ -150,6 +157,8 @@ namespace currency
     std::string m_daemon_address;
     std::string m_daemon_host;
     int m_daemon_port;
+
+    bool m_offline_mode;
 
     epee::console_handlers_binder m_cmd_binder;
 

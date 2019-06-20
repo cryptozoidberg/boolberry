@@ -31,6 +31,7 @@ namespace currency
   const static crypto::public_key null_pkey = AUTO_VAL_INIT(null_pkey);
   const static crypto::secret_key null_skey = AUTO_VAL_INIT(null_skey);
   const static crypto::signature null_sig = AUTO_VAL_INIT(null_sig);
+  const static crypto::key_image null_key_image = AUTO_VAL_INIT(null_key_image);
 
   typedef std::vector<crypto::signature> ring_signature;
 

@@ -60,14 +60,19 @@ namespace currency {
     donation = total_donations - royalty;
   }
   //-----------------------------------------------------------------------------------------------
-  bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t already_donated_coins, uint64_t &reward, uint64_t& /*max_donation*/) 
-  {    
+  uint64_t get_base_block_reward(uint64_t already_generated_coins)
+  {
     uint64_t base_reward = (EMISSION_SUPPLY - already_generated_coins) >> EMISSION_CURVE_CHARACTER;
     //max_donation = (DONATIONS_SUPPLY - already_donated_coins) >> EMISSION_CURVE_CHARACTER;
     //crop dust
     base_reward = base_reward - base_reward%DEFAULT_DUST_THRESHOLD;
     //max_donation = max_donation - max_donation%DEFAULT_DUST_THRESHOLD;
-
+    return base_reward;
+  }
+  //-----------------------------------------------------------------------------------------------
+  bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t already_donated_coins, uint64_t &reward, uint64_t& /*max_donation*/)
+  {    
+    uint64_t base_reward = get_base_block_reward(already_generated_coins);
 
     //make it soft
     if (median_size < CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE) 

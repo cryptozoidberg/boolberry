@@ -51,7 +51,7 @@ Root: HKCR; Subkey: "BoolberryWalletDataKyesFile\DefaultIcon"; ValueType: string
 [Files]
 Source: "{#BinariesPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs ignoreversion overwritereadonly replacesameversion
 Source: "..\src\gui\qt-daemon\html\*"; DestDir: "{app}\html"; Flags: ignoreversion recursesubdirs
-Source: "{#BinariesPath}\vcredist_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall
+Source: "{#BinariesPath}\vc_redist.x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -62,6 +62,8 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 
 
 [Run]
-Filename: {tmp}\vcredist_x64.exe; Parameters: "/install /quiet /norestart";  StatusMsg: Installing VC++ 2013 Redistributables...
+Filename: {tmp}\vc_redist.x64.exe; Parameters: "/install /quiet /norestart";  StatusMsg: Installing VC++ 2013 Redistributables...
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
+[Setup]
+UninstallDisplayIcon={app}\{#MyAppExeName}

@@ -19,9 +19,11 @@ namespace command_line
   const arg_descriptor<int>         arg_log_level =    { "log-level", "", LOG_LEVEL_0 };
   const arg_descriptor<bool>        arg_console =      { "no-console", "Disable daemon console commands" };
   const arg_descriptor<bool>        arg_show_details = { "currency-details", "Display currency details" };
+  const arg_descriptor<bool>        arg_calc_coin_swap = { "calc-swap-data", "Internal command for coinswap" };
 
   const arg_descriptor<bool>        arg_no_predownload       = { "no-predownload", "Avoid pre-download of blockchain database", };
   const arg_descriptor<bool>        arg_explicit_predownload = { "explicit-predownload", "Pre-download of blockchain database not matter if it was there before, or not", };
   const arg_descriptor<bool>        arg_validate_predownload = { "validate-predownload", "Paranoid mode, re-validate each block from pre-downloaded database and rebuild own database", };
+  const arg_descriptor<std::string> arg_predownload_link     = { "predownload-link", "Override url for pre-download database", "", true };
 
 }

@@ -27,6 +27,7 @@
 
 #define CURRENCY_TO_KEY_OUT_RELAXED                   0
 #define CURRENCY_TO_KEY_OUT_FORCED_NO_MIX             1
+#define CURRENCY_TO_KEY_OUT_FORCED_MIX_LOWER_BOUND    2 // this and greather values means minimum number of total outputs (fakes + 1) that must be mixed together for using that one
 
 #define CURRENCY_REWARD_BLOCKS_WINDOW                 400
 #define CURRENCY_BLOCK_GRANTED_FULL_REWARD_ZONE       30000 //size of block (bytes) after which reward for block calculated using block size
@@ -60,9 +61,10 @@
 #define DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN             DIFFICULTY_TARGET //just alias
 
 
-#define BLOCKS_IDS_SYNCHRONIZING_DEFAULT_COUNT          10000  //by default, blocks ids count in synchronizing
+#define BLOCKS_IDS_SYNCHRONIZING_DEFAULT_COUNT          2000  //by default, blocks ids count in synchronizing
 #define BLOCKS_SYNCHRONIZING_DEFAULT_COUNT              200    //by default, blocks count in blocks downloading
-#define CURRENCY_PROTOCOL_HOP_RELAX_COUNT               3      //value of hop, after which we use only announce of new block
+#define CURRENCY_PROTOCOL_MAX_BLOCKS_REQUEST_COUNT      500        
+#define CURRENCY_PROTOCOL_MAX_TXS_REQUEST_COUNT         500        
 
 
 #define CURRENCY_ALT_BLOCK_LIVETIME_COUNT               (720*7)//one week

@@ -6,18 +6,18 @@
 
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
-
+#include <boost/filesystem/fstream.hpp>
 
 #define CHECK_PROJECT_NAME()    std::string project_name = CURRENCY_NAME; ar & project_name;  if(project_name != CURRENCY_NAME) {throw std::runtime_error(std::string("wrong storage file: project name in file: ") + project_name + ", expected: " + CURRENCY_NAME );}
 
 
 namespace tools
 {
-  template<class t_object>
-  bool serialize_obj_to_file(t_object& obj, const std::string& file_path)
+  template<class t_object, class t_string>
+  bool serialize_obj_to_file(t_object& obj, const t_string& file_path)
   {
     TRY_ENTRY();
-    std::ofstream data_file;
+    boost::filesystem::ofstream data_file;
     data_file.open( file_path , std::ios_base::binary | std::ios_base::out| std::ios::trunc);
     if(data_file.fail())
       return false;
@@ -29,12 +29,12 @@ namespace tools
     CATCH_ENTRY_L0("serialize_obj_to_file", false);
   }
 
-  template<class t_object>
-  bool unserialize_obj_from_file(t_object& obj, const std::string& file_path)
+  template<class t_object, class t_string>
+  bool unserialize_obj_from_file(t_object& obj, const t_string& file_path)
   {
     TRY_ENTRY();
 
-    std::ifstream data_file;  
+    boost::filesystem::ifstream data_file;  
     data_file.open( file_path, std::ios_base::binary | std::ios_base::in);
     if(data_file.fail())
       return false;

@@ -47,6 +47,15 @@ namespace db
       return it->second.back().txn;
     }
 
+    MDB_txn* get_current_transaction_if_exists() const
+    {
+      std::lock_guard<boost::recursive_mutex> guard(m_transaction_stack_mutex);
+      auto it = m_transaction_stack.find(std::this_thread::get_id());
+      if (it != m_transaction_stack.end() && !it->second.empty())
+        return it->second.back().txn;
+      return nullptr;
+    }
+
     bool has_active_transaction() const
     {
       std::lock_guard<boost::recursive_mutex> guard(m_transaction_stack_mutex);
@@ -153,7 +162,9 @@ namespace db
           }
         }
         if (unlock_begin_commit_abort_mutex)
-          m_p_impl->m_begin_commit_abort_mutex.lock();
+        {
+          CRITICAL_SECTION_LOCK(m_p_impl->m_begin_commit_abort_mutex);
+        }
       } // lock_guard : m_p_impl->m_transaction_stack_mutex
 
       mdb_env_close(m_p_impl->p_mdb_env);
@@ -189,7 +200,7 @@ namespace db
     if (!m_p_impl->has_active_transaction())
     {
       local_transaction = true;
-      begin_transaction();
+      begin_transaction(true);
     }
     int r = mdb_stat(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &table_stat);
     if (local_transaction)
@@ -201,7 +212,9 @@ namespace db
   bool lmdb_adapter::begin_transaction(bool read_only_access)
   {
     if (!read_only_access)
-      m_p_impl->m_begin_commit_abort_mutex.lock(); // lock db tx sequence guard only for write-enabled transactions
+    {
+      CRITICAL_SECTION_LOCK(m_p_impl->m_begin_commit_abort_mutex);// lock db tx sequence guard only for write-enabled transactions
+    }
 
     std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
     std::list<stack_entry_t>& tx_stack = m_p_impl->m_transaction_stack[std::this_thread::get_id()]; // get or create empty list
@@ -231,7 +244,11 @@ namespace db
     bool read_only_access = false; // will be set later
     auto unlocker = epee::misc_utils::create_scope_leave_handler([this, &read_only_access](){
       if (!read_only_access)
-        m_p_impl->m_begin_commit_abort_mutex.unlock();
+      {
+        // lock db tx sequence guard only for write-enabled transactions
+        CRITICAL_SECTION_UNLOCK(m_p_impl->m_begin_commit_abort_mutex);
+      }
+        
     });
 
     std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
@@ -262,7 +279,9 @@ namespace db
     bool read_only_access = false; // will be set later
     auto unlocker = epee::misc_utils::create_scope_leave_handler([this, &read_only_access](){
       if (!read_only_access)
-        m_p_impl->m_begin_commit_abort_mutex.unlock();
+      {
+        CRITICAL_SECTION_UNLOCK(m_p_impl->m_begin_commit_abort_mutex);
+      }
     });
 
     std::lock_guard<boost::recursive_mutex> guard(m_p_impl->m_transaction_stack_mutex);
@@ -351,6 +370,12 @@ namespace db
       local_transaction = true;
       begin_transaction();
     }
+    
+    auto commiter = epee::misc_utils::create_scope_leave_handler([this, &local_transaction](){
+      if (local_transaction)
+        commit_transaction();
+    });
+
     MDB_cursor* p_cursor = nullptr;
     int r = mdb_cursor_open(m_p_impl->get_current_transaction(), static_cast<MDB_dbi>(tid), &p_cursor);
     CHECK_DB_CALL_RESULT(r, false, "mdb_cursor_open failed");
@@ -368,8 +393,6 @@ namespace db
     }
 
     mdb_cursor_close(p_cursor);
-    if (local_transaction)
-      commit_transaction();
     return true;
   }
 

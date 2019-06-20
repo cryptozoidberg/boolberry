@@ -33,8 +33,13 @@
 #include "file_io_utils.h"
 #include "net_parse_helpers.h"
 
-#define HTTP_MAX_URI_LEN		 9000 
-#define HTTP_MAX_HEADER_LEN		 100000
+#define HTTP_MAX_URI_LEN	              	 9000 
+#define HTTP_MAX_PRE_COMMAND_LINE_CHARS		 20 
+#define HTTP_MAX_HEADER_LEN		             100000
+
+PUSH_WARNINGS
+DISABLE_GCC_WARNING(maybe-uninitialized)
+
 
 namespace epee
 {
@@ -200,7 +205,8 @@ namespace net_utils
 		m_len_remain(0),
 		m_config(config), 
 		m_want_close(false),
-        m_psnd_hndlr(psnd_hndlr)
+    m_psnd_hndlr(psnd_hndlr), 
+    m_precommand_line_chars(0)
 	{
 
 	}
@@ -213,6 +219,7 @@ namespace net_utils
 		m_body_transfer_type = http_body_transfer_undefined;
 		m_query_info.clear();
 		m_len_summary = 0;
+    m_precommand_line_chars = 0;
 		return true;
 	}
 	//--------------------------------------------------------------------------------------------
@@ -253,11 +260,19 @@ namespace net_utils
 				if((m_cache[0] == '\r' || m_cache[0] == '\n'))
 				{
           //some times it could be that before query line cold be few line breaks
-          //so we have to be calm without panic with assers
+          //so we have to be calm down without panic and asserts
 					m_cache.erase(0, 1);
+
+          //fixed bug with possible '\r\n' chars flood, thanks to @anonimal (https://github.com/anonimal) for pointing this
+          ++m_precommand_line_chars;
+          if (m_precommand_line_chars > HTTP_MAX_PRE_COMMAND_LINE_CHARS)
+          {
+            LOG_ERROR("simple_http_connection_handler::handle_buff_in: Too long URI line");
+            m_state = http_state_error;
+            return false;
+          }
 					break;
 				}
-
 				if(std::string::npos != m_cache.find('\n', 0))
 					handle_invoke_query_line();
 				else
@@ -265,7 +280,7 @@ namespace net_utils
 					m_is_stop_handling = true;
 					if(m_cache.size() > HTTP_MAX_URI_LEN)
 					{
-						LOG_ERROR("simple_http_connection_handler::handle_buff_out: Too long URI line");
+						LOG_ERROR("simple_http_connection_handler::handle_buff_in: Too long URI line");
 						m_state = http_state_error;
 						return false;
 					}
@@ -293,10 +308,10 @@ namespace net_utils
 			case http_state_connection_close:
 				return false;
 			default:
-				LOG_ERROR("simple_http_connection_handler::handle_char_out: Wrong state: " << m_state);
+				LOG_ERROR("simple_http_connection_handler::handle_buff_in: Wrong state: " << m_state);
 				return false;
 			case http_state_error:
-				LOG_ERROR("simple_http_connection_handler::handle_char_out: Error state!!!");
+				LOG_ERROR("simple_http_connection_handler::handle_buff_in: Error state!!!");
 				return false;
 			}
 
@@ -330,10 +345,10 @@ namespace net_utils
   template<class t_connection_context>
 	bool simple_http_connection_handler<t_connection_context>::handle_invoke_query_line()
 	{ 
-		LOG_FRAME("simple_http_connection_handler<t_connection_context>::handle_recognize_protocol_out(*)", LOG_LEVEL_3);
+		LOG_FRAME("simple_http_connection_handler<t_connection_context>::handle_invoke_query_line(*)", LOG_LEVEL_3);
 
 		STATIC_REGEXP_EXPR_1(rexp_match_command_line, "^(((OPTIONS)|(GET)|(HEAD)|(POST)|(PUT)|(DELETE)|(TRACE)) (\\S+) HTTP/(\\d+).(\\d+))\r?\n", boost::regex::icase | boost::regex::normal);
-		//											    123         4     5      6      7     8        9        10          11     12    
+		//											                       123         4     5      6      7     8        9        10          11     12    
 		//size_t match_len = 0;
 		boost::smatch result;	
 		if(boost::regex_search(m_cache, result, rexp_match_command_line, boost::match_default) && result[0].matched)
@@ -560,9 +575,9 @@ namespace net_utils
 			uri_to_path = "/index.html";
 
 		//slash_to_back_slash(uri_to_path);
-		m_config.m_lock.lock();
+    CRITICAL_SECTION_LOCK(m_config.m_lock);
 		std::string destination_file_path = m_config.m_folder + uri_to_path;
-		m_config.m_lock.unlock();
+    CRITICAL_SECTION_UNLOCK(m_config.m_lock);
 		if(!file_io_utils::load_file_to_string(destination_file_path.c_str(), response.m_body))
 		{
 			LOG_PRINT("URI \""<< query_info.m_full_request_str.substr(0, query_info.m_full_request_str.size()-2) << "\" [" << destination_file_path << "] Not Found (404 )" , LOG_LEVEL_1);
@@ -675,6 +690,7 @@ namespace net_utils
 }
 }
 
+POP_WARNINGS
 //--------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------

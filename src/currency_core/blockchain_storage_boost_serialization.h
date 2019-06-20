@@ -11,7 +11,7 @@ namespace boost
 
 
     template<class archive_t>
-    void serialize(archive_t & ar, currency::blockchain_storage::transaction_chain_entry& te, const unsigned int version)
+    void serialize(archive_t & ar, currency::transaction_chain_entry& te, const unsigned int version)
     {
       ar & te.tx;
       ar & te.m_keeper_block_height;
@@ -30,7 +30,7 @@ namespace boost
     }
 
     template<class archive_t>
-    void serialize(archive_t & ar, currency::blockchain_storage::block_extended_info& ei, const unsigned int version)
+    void serialize(archive_t & ar, currency::block_extended_info& ei, const unsigned int version)
     {
       ar & ei.bl;
       ar & ei.height;

@@ -5,6 +5,15 @@ curr_path=${BASH_SOURCE%/*}
 : "${BOOST_ROOT:?BOOST_ROOT should be set to the root of Boost, ex.: /home/user/boost_1_56_0}"
 : "${BOOST_LIBS_PATH:?BOOST_LIBS_PATH should be set to libs folder of Boost, ex.: /home/user/boost_1_56_0/stage/lib}"
 : "${QT_PREFIX_PATH:?QT_PREFIX_PATH should be set to Qt libs folder, ex.: /home/user/Qt5.5.1/5.5/}"
+: "${CMAKE_OSX_SYSROOT:?CMAKE_OSX_SYSROOT should be set to macOS SDK path, e.g.: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk}"
+
+build_postfix_hyp=
+build_postfix_cl=
+if [ "$build_postfix" == "dev" ]
+then
+  build_postfix_hyp=dev- 
+  build_postfix_cl="DEV "
+fi
 
 echo "entering directory $curr_path/.."
 cd $curr_path/..
@@ -13,7 +22,7 @@ rm -rf build
 mkdir -p build/release
 cd build/release
 
-cmake -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH/clang_64" -D CMAKE_BUILD_TYPE=Release ../..
+cmake -D CMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH/clang_64" -D CMAKE_BUILD_TYPE=Release ../..
 
 make -j Boolberry
 make -j connectivity_tool simplewallet daemon
@@ -52,7 +61,7 @@ ln -s /Applications package_folder/Applications
 
 mv Boolberry.app package_folder 
 
-package_filename="boolberry-macos-x64-$version_str.dmg"
+package_filename="boolberry-macos-x64-${build_postfix_hyp}$version_str.dmg"
 
 hdiutil create -format UDZO -srcfolder package_folder -volname Boolberry $package_filename
 
@@ -67,7 +76,7 @@ mail_msg="New build for macOS-x64 available at http://$BBR_BUILD_SERVER_ADDR_POR
 
 echo $mail_msg
 
-echo $mail_msg | mail -s "Boolberry macOS-x64 build $version_str" ${emails}
+echo $mail_msg | mail -s "Boolberry macOS-x64 ${build_postfix_cl}build $version_str" ${emails}
 
 cd ../..
 exit 0

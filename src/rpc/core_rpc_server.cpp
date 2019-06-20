@@ -68,7 +68,9 @@ namespace currency
     }
     return true;
   }
-#define CHECK_CORE_READY() if(!check_core_ready()){res.status =  CORE_RPC_STATUS_BUSY;return true;}
+
+#define CHECK_CORE_READY()    if (!check_core_ready()) { res.status = CORE_RPC_STATUS_BUSY; return true; }
+#define CHECK_CORE_READY_WE() if (!check_core_ready()) { error_resp.code = CORE_RPC_ERROR_CODE_CORE_BUSY; error_resp.message = "Core is busy"; return false; }
 
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_height(const COMMAND_RPC_GET_HEIGHT::request& req, COMMAND_RPC_GET_HEIGHT::response& res, connection_context& cntx)
@@ -113,7 +115,14 @@ namespace currency
     
     res.synchronization_start_height = m_p2p.get_payload_object().get_core_inital_height();
     res.max_net_seen_height = m_p2p.get_payload_object().get_max_seen_height();
+
+    block_extended_info last_block_ei = AUTO_VAL_INIT(last_block_ei);
+    m_core.get_blockchain_storage().get_block_extended_info_by_height(res.height - 1, last_block_ei);
+    res.already_generated_coins = last_block_ei.already_generated_coins;
     m_p2p.get_maintainers_info(res.mi);
+
+    res.last_block_timestamp = last_block_ei.bl.timestamp;
+    res.last_block_hash = string_tools::pod_to_hex(get_block_hash(last_block_ei.bl));
     
     res.status = CORE_RPC_STATUS_OK;
     return true;
@@ -1450,6 +1459,126 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
 
     return true;
   }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_check_tx_with_view_key(const COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY::request& req, COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
+  {
+    CHECK_CORE_READY_WE();
+
+    crypto::secret_key view_sk = AUTO_VAL_INIT(view_sk);
+    if (req.view_key.size() != sizeof(crypto::secret_key) * 2 || !string_tools::hex_to_pod(req.view_key, view_sk))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "Invalid parameter: view_key";
+      return false;
+    }
+
+    account_public_address addr;
+    if (!get_account_address_from_str(addr, req.address))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "Invalid parameter: address";
+      return false;
+    }
+
+    crypto::public_key view_pk = AUTO_VAL_INIT(view_pk);
+    crypto::secret_key_to_public_key(view_sk, view_pk);
+    if (view_pk != addr.m_view_public_key)
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "view_key does not match with the given address";
+      return false;
+    }
+
+    crypto::hash tx_hash = null_hash;
+    if (req.tx_hash.size() != sizeof(crypto::hash) * 2 || !string_tools::hex_to_pod(req.tx_hash, tx_hash))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "Invalid parameter: tx_hash";
+      return false;
+    }
+
+    payment_id_t payment_id;
+    res.amount_received = 0;
+    if (!m_core.get_blockchain_storage().check_tx_with_view_key(tx_hash, view_sk, addr, res.amount_received, payment_id, res.outs_indicies))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
+      error_resp.message = "check_tx_with_view_key failed, see daemon log for details";
+      return false;
+    }
+
+    res.payment_id_hex = epee::string_tools::buff_to_hex_nodelimer(payment_id);
+
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_blocks_details(const COMMAND_RPC_GET_BLOCKS_DETAILS::request& req, COMMAND_RPC_GET_BLOCKS_DETAILS::response& res, connection_context& cntx)
+  {
+    m_core.get_blockchain_storage().get_main_blocks_rpc_details(req.height_start, req.count, req.ignore_transactions, res.blocks);
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_alt_blocks_details(const COMMAND_RPC_GET_ALT_BLOCKS_DETAILS::request& req, COMMAND_RPC_GET_ALT_BLOCKS_DETAILS::response& res, connection_context& cntx)
+  {
+    m_core.get_blockchain_storage().get_alt_blocks_rpc_details(req.offset, req.count, res.blocks);
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_all_pool_tx_list(const COMMAND_RPC_GET_ALL_POOL_TX_LIST::request& req, COMMAND_RPC_GET_ALL_POOL_TX_LIST::response& res, connection_context& cntx)
+  {
+    m_core.get_tx_pool().get_all_transactions_list(res.ids);
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_pool_txs_details(const COMMAND_RPC_GET_POOL_TXS_DETAILS::request& req, COMMAND_RPC_GET_POOL_TXS_DETAILS::response& res, connection_context& cntx)
+  {
+    if (!req.ids.size())
+    {
+      m_core.get_tx_pool().get_all_transactions_details(res.txs);
+    }
+    else
+    {
+      m_core.get_tx_pool().get_transactions_details(req.ids, res.txs);
+    }
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_out_info(const COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::request& req, COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::response& res, connection_context& cntx)
+  {
+    if (!m_core.get_blockchain_storage().get_global_index_details(req, res))
+      res.status = CORE_RPC_STATUS_NOT_FOUND;
+    else
+      res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool core_rpc_server::on_get_tx_details(const COMMAND_RPC_GET_TX_DETAILS::request& req, COMMAND_RPC_GET_TX_DETAILS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
+  {
+    crypto::hash h = null_hash;
+    if (!epee::string_tools::hex_to_pod(req.tx_hash, h))
+    {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "Invalid tx hash given";
+      return false;
+    }
+    if (!m_core.get_blockchain_storage().get_tx_rpc_details(h, res.tx_info, 0, false))
+    {
+      if (!m_core.get_tx_pool().get_transaction_details(h, res.tx_info))
+      {
+        error_resp.code = CORE_RPC_ERROR_CODE_NOT_FOUND;
+        error_resp.message = "tx is not found";
+        return false;
+      }
+
+    }
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_swap_txs(const COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::request& req, COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::response& res, epee::json_rpc::error& error_resp, connection_context& cntx)
   {

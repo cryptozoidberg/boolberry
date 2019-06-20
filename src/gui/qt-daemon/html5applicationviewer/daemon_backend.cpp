@@ -7,6 +7,7 @@
 #include "currency_core/alias_helper.h"
 #include "crypto/mnemonic-encoding.h"
 #include "common/pre_download.h"
+#include "string_coding.h"
 
 daemon_backend::daemon_backend():m_pview(&m_view_stub),
                                  m_stop_singal_sent(false),
@@ -420,8 +421,11 @@ bool daemon_backend::update_wallets()
     if (m_last_daemon_height != m_last_wallet_synch_height)
     {
       view::wallet_status_info wsi = AUTO_VAL_INIT(wsi);
-      wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
-      m_pview->update_wallet_status(wsi);
+      if (m_last_daemon_height - m_last_wallet_synch_height > 3)
+      {
+        wsi.wallet_state = view::wallet_status_info::wallet_state_synchronizing;
+        m_pview->update_wallet_status(wsi);
+      }
       try
       {
         m_wallet->refresh();
@@ -488,7 +492,7 @@ void daemon_backend::loop()
   }
 }
 
-bool daemon_backend::open_wallet(const std::string& path, const std::string& password)
+bool daemon_backend::open_wallet(const std::wstring& path, const std::string& password)
 {
   CRITICAL_REGION_LOCAL(m_wallet_lock);
   try
@@ -535,8 +539,7 @@ bool daemon_backend::load_recent_transfers()
   return m_pview->set_recent_transfers(tr_hist);
 }
 
-bool daemon_backend::generate_wallet(const std::string& path,
-  const std::string& password, std::string& restore_seed)
+bool daemon_backend::generate_wallet(const std::wstring& path, const std::string& password, std::string& restore_seed)
 {
   CRITICAL_REGION_LOCAL(m_wallet_lock);
   try
@@ -566,8 +569,7 @@ bool daemon_backend::generate_wallet(const std::string& path,
 
 }
 
-bool daemon_backend::restore_wallet(const std::string& path,
-  const std::string& restore_text, const std::string& password)
+bool daemon_backend::restore_wallet(const std::wstring& path, const std::string& restore_text, const std::string& password)
 {
   CRITICAL_REGION_LOCAL(m_wallet_lock);
   try
@@ -766,7 +768,7 @@ bool daemon_backend::update_wallet_info()
   wi.balance = m_wallet->balance();
   wi.unlocked_balance = m_wallet->unlocked_balance();
   wi.unconfirmed_balance = m_wallet->unconfirmed_balance();
-  wi.path = m_wallet->get_wallet_path();
+  wi.path = epee::string_encoding::wstring_to_utf8(m_wallet->get_wallet_path());
   m_pview->update_wallet_info(wi);
   return true;
 }

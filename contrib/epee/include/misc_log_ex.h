@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <list>
 #include <map>
+#include <set>
 #include <time.h>
 #ifndef Q_MOC_RUN
 #include <boost/cstdint.hpp>
@@ -50,14 +51,11 @@
 #else
 #include <unistd.h>
 #endif
-
+#include "os_defenitions.h"
 #include "warnings.h"
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4100)
 
-#ifndef ENABLE_RELEASE_LOGGING
-  #define ENABLE_RELEASE_LOGGING
-#endif
 
 #include "static_initializer.h"
 #include "string_tools.h"
@@ -65,6 +63,7 @@ DISABLE_VS_WARNINGS(4100)
 #include "misc_os_dependent.h"
 
 #include "syncobj.h"
+#include "sync_locked_object.h"
 
 
 #define LOG_LEVEL_SILENT     -1
@@ -83,16 +82,42 @@ DISABLE_VS_WARNINGS(4100)
 #define   LOGGER_CONSOLE    3
 #define   LOGGER_DUMP       4
 
+#define LOG_JOURNAL_MAX_ELEMENTS 100
+
+#ifdef _DEBUG 
+  #define _ASSERTE__(expr)   if(!expr) {__debugbreak();}
+#else
+  #define _ASSERTE__(expr)  
+#endif
+
 
 #ifndef LOCAL_ASSERT
-#include <assert.h>
-#if (defined _MSC_VER)
-#define LOCAL_ASSERT(expr) {if(epee::debug::get_set_enable_assert()){_ASSERTE(expr);}}
-#else
-#define LOCAL_ASSERT(expr)
+  #include <assert.h>
+  #if (defined _MSC_VER)
+    #define LOCAL_ASSERT(expr) {if(epee::debug::get_set_enable_assert()){_ASSERTE__(expr);}}
+    #define FORCE_ASSERT(expr) { _ASSERTE(expr); }
+  #else
+    #define LOCAL_ASSERT(expr)
+    #define FORCE_ASSERT(expr)
+  #endif
 #endif
 
-#endif
+
+#define COMBINE1(X,Y) X##Y  // helper macro
+#define COMBINE(X,Y) COMBINE1(X,Y)
+#define _STR(X) #X
+#define STR(X) _STR(X)
+
+#if defined(_MSC_VER)
+#define LOCAL_FUNCTION_DEF__ __FUNCTION__
+#define UNUSED_ATTRIBUTE
+#else
+#define LOCAL_FUNCTION_DEF__ __PRETTY_FUNCTION__ 
+#define UNUSED_ATTRIBUTE __attribute__((unused))
+#endif 
+
+#define LOCATION_SS "[" << LOCAL_FUNCTION_DEF__ << ("] @ " __FILE__ ":" STR(__LINE__))
+
 
 namespace epee
 {
@@ -177,6 +202,9 @@ namespace log_space
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
+#define CONSOLE_DEFAULT_STREAM  std::cout
+
+
   struct delete_ptr
   {
     template <class P>
@@ -241,9 +269,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE| (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          std::cout << "\033[1;37m";
+          CONSOLE_DEFAULT_STREAM << "\033[1;37m";
         else
-          std::cout << "\033[0m";
+          CONSOLE_DEFAULT_STREAM << "\033[0m";
 #endif
       }
       break;
@@ -254,9 +282,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          std::cout << "\033[1;37m";
+          CONSOLE_DEFAULT_STREAM << "\033[1;37m";
         else
-          std::cout << "\033[0;37m";
+          CONSOLE_DEFAULT_STREAM << "\033[0;37m";
 #endif
       }
       break;
@@ -267,9 +295,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_RED | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          std::cout << "\033[1;31m";
+          CONSOLE_DEFAULT_STREAM << "\033[1;31m";
         else
-          std::cout << "\033[0;31m";
+          CONSOLE_DEFAULT_STREAM << "\033[0;31m";
 #endif
       }
       break;
@@ -280,9 +308,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_GREEN | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          std::cout << "\033[1;32m";
+          CONSOLE_DEFAULT_STREAM << "\033[1;32m";
         else
-          std::cout << "\033[0;32m";
+          CONSOLE_DEFAULT_STREAM << "\033[0;32m";
 #endif
       }
       break;
@@ -294,9 +322,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_BLUE | FOREGROUND_INTENSITY);//(bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          std::cout << "\033[1;34m";
+          CONSOLE_DEFAULT_STREAM << "\033[1;34m";
         else
-          std::cout << "\033[0;34m";
+          CONSOLE_DEFAULT_STREAM << "\033[0;34m";
 #endif
       }
       break;
@@ -308,9 +336,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_GREEN | FOREGROUND_BLUE | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          std::cout << "\033[1;36m";
+          CONSOLE_DEFAULT_STREAM << "\033[1;36m";
         else
-          std::cout << "\033[0;36m";
+          CONSOLE_DEFAULT_STREAM << "\033[0;36m";
 #endif
       }
       break;
@@ -322,9 +350,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_BLUE | FOREGROUND_RED | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          std::cout << "\033[1;35m";
+          CONSOLE_DEFAULT_STREAM << "\033[1;35m";
         else
-          std::cout << "\033[0;35m";
+          CONSOLE_DEFAULT_STREAM << "\033[0;35m";
 #endif
       }
       break;
@@ -336,9 +364,9 @@ namespace log_space
         SetConsoleTextAttribute(h_stdout, FOREGROUND_RED | FOREGROUND_GREEN | (bright ? FOREGROUND_INTENSITY:0));
 #else
         if(bright)
-          std::cout << "\033[1;33m";
+          CONSOLE_DEFAULT_STREAM << "\033[1;33m";
         else
-          std::cout << "\033[0;33m";
+          CONSOLE_DEFAULT_STREAM << "\033[0;33m";
 #endif
       }
       break;
@@ -354,8 +382,8 @@ namespace log_space
     HANDLE h_stdout = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(h_stdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 #else
-    std::cout << "\033[0m";
-    std::cout.flush();
+    CONSOLE_DEFAULT_STREAM << "\033[0m";
+    CONSOLE_DEFAULT_STREAM.flush();
 #endif
   }
 
@@ -377,6 +405,7 @@ namespace log_space
 
       ::AllocConsole();
       freopen("CONOUT$", "w", stdout);
+      std::cout.clear();
 #endif
     }
 
@@ -423,7 +452,7 @@ namespace log_space
 
       //uint32_t b = 0;
       //::WriteConsoleA(::GetStdHandle(STD_OUTPUT_HANDLE), ptarget_buf, buffer_len, (DWORD*)&b, 0);
-      std::cout << ptarget_buf;
+      CONSOLE_DEFAULT_STREAM << ptarget_buf;
       if(pallocated_buf) delete [] pallocated_buf;
 #else
       std::string buf(buffer, buffer_len);
@@ -433,7 +462,7 @@ namespace log_space
           buf[i] = '^';
       }
 
-      std::cout << buf;
+      CONSOLE_DEFAULT_STREAM << buf;
 #endif
       reset_console_color();
       return  true;
@@ -502,7 +531,8 @@ namespace log_space
     std::ofstream*    add_new_stream_and_open(const char* pstream_name)
     {
       //log_space::rotate_log_file((m_default_log_path + "\\" + pstream_name).c_str());
-
+      boost::system::error_code ec;
+      boost::filesystem::create_directories(m_default_log_path, ec);
       std::ofstream* pstream = (m_log_file_names[pstream_name] = new std::ofstream);
       std::string target_path = m_default_log_path + "/" + pstream_name;
       pstream->open( target_path.c_str(), std::ios_base::out | std::ios::app /*ios_base::trunc */);
@@ -548,7 +578,7 @@ namespace log_space
         uint64_t current_sz = pt;
         if(current_sz > m_max_logfile_size)
         {
-          std::cout << "current_sz= " << current_sz << " m_max_logfile_size= " << m_max_logfile_size << std::endl;
+          CONSOLE_DEFAULT_STREAM << "current_sz= " << current_sz << " m_max_logfile_size= " << m_max_logfile_size << std::endl;
           std::string log_file_name;
           if(!plog_name)
             log_file_name = m_default_log_filename;
@@ -578,7 +608,7 @@ namespace log_space
           boost::filesystem::rename(m_default_log_path + "/" + log_file_name, new_log_file_path, ec);
           if(ec)
           {
-            std::cout << "Filed to rename, ec = " << ec.message() << std::endl;
+            CONSOLE_DEFAULT_STREAM << "Filed to rename, ec = " << ec.message() << std::endl;
           }
 
           if(m_log_rotate_cmd.size())
@@ -641,6 +671,11 @@ namespace log_space
       return true;
     }
 
+    std::string get_log_file_path()
+    {
+      return m_default_log_file_path;
+    }
+
     bool add_logger( int type, const char* pdefault_file_name, const char* pdefault_log_folder, int log_level_limit = LOG_LEVEL_4 )
     {
       ibase_log_stream* ls = NULL;
@@ -648,6 +683,7 @@ namespace log_space
       switch( type )
       {
       case LOGGER_FILE:
+        m_default_log_file_path = std::string(pdefault_log_folder) + "/" + pdefault_file_name;
         ls = new file_output_stream( pdefault_file_name, pdefault_log_folder );
         break;
 
@@ -695,6 +731,7 @@ namespace log_space
   private:
 
         streams_container m_log_streams;
+        std::string m_default_log_file_path;
   };
 
   /************************************************************************/
@@ -705,6 +742,22 @@ namespace log_space
   inline bool get_set_need_thread_id(bool is_need_set = false, bool is_need_val = false);
   inline bool get_set_need_proc_name(bool is_need_set = false, bool is_need_val = false);
 
+  typedef std::map<std::string, uint64_t> channels_err_stat_container_type;
+  inline epee::locked_object_proxy<channels_err_stat_container_type> get_channels_errors_stat_container()
+  {
+    static std::recursive_mutex cs;
+    static channels_err_stat_container_type errors_by_channel;
+    epee::locked_object_proxy<channels_err_stat_container_type> res(errors_by_channel, cs);
+    return res; 
+  }
+
+  inline void increase_error_count(const char* channel)
+  {
+    auto ch_container = get_channels_errors_stat_container();
+    std::string ch_name = channel ? channel : "";
+    uint64_t& r = (*ch_container)[ch_name];
+    r++;
+  }
 
   inline std::string get_daytime_string2()
   {
@@ -747,16 +800,16 @@ namespace log_space
 
 
 
-    class logger
+  class logger
   {
   public:
     friend class log_singletone;
 
     logger()
     {
-      CRITICAL_REGION_BEGIN(m_critical_sec);
+      FAST_CRITICAL_REGION_BEGIN(m_critical_sec);
       init();
-      CRITICAL_REGION_END();
+      FAST_CRITICAL_REGION_END();
     }
     ~logger()
     {
@@ -764,70 +817,85 @@ namespace log_space
 
     bool set_max_logfile_size(uint64_t max_size)
     {
-      CRITICAL_REGION_BEGIN(m_critical_sec);
+      FAST_CRITICAL_REGION_BEGIN(m_critical_sec);
       m_log_target.set_max_logfile_size(max_size);
-      CRITICAL_REGION_END();
+      FAST_CRITICAL_REGION_END();
       return true;
     }
 
     bool set_log_rotate_cmd(const std::string& cmd)
     {
-      CRITICAL_REGION_BEGIN(m_critical_sec);
+      FAST_CRITICAL_REGION_BEGIN(m_critical_sec);
       m_log_target.set_log_rotate_cmd(cmd);
-      CRITICAL_REGION_END();
+      FAST_CRITICAL_REGION_END();
       return true;
     }
 
     bool take_away_journal(std::list<std::string>& journal)
     {
-      CRITICAL_REGION_BEGIN(m_critical_sec);
+      FAST_CRITICAL_REGION_BEGIN(m_critical_sec);
       m_journal.swap(journal);
-      CRITICAL_REGION_END();
+      FAST_CRITICAL_REGION_END();
       return true;
     }
 
+    bool get_journal_items(std::list<std::string>& journal, size_t count)
+    {
+      FAST_CRITICAL_REGION_BEGIN(m_critical_sec);
+      size_t i = 0;
+      for (auto it = m_journal.rbegin(); it != m_journal.rend() && i!= count; it++, i++)
+      {
+        journal.push_front(*it);
+      }
+      FAST_CRITICAL_REGION_END();
+      return true;
+    }
     bool do_log_message(const std::string& rlog_mes, int log_level, int color, bool add_to_journal = false, const char* plog_name = NULL)
     {
-      CRITICAL_REGION_BEGIN(m_critical_sec);
+      FAST_CRITICAL_REGION_BEGIN(m_critical_sec);
       m_log_target.do_log_message(rlog_mes, log_level, color, plog_name);
-      if(add_to_journal)
+      if (add_to_journal)
+      {
         m_journal.push_back(rlog_mes);
+        if (m_journal.size() > m_journal_max_elements)
+          m_journal.pop_front();
+      }
 
       return true;
-      CRITICAL_REGION_END();
+      FAST_CRITICAL_REGION_END();
     }
 
     bool add_logger( int type, const char* pdefault_file_name, const char* pdefault_log_folder , int log_level_limit = LOG_LEVEL_4)
     {
-      CRITICAL_REGION_BEGIN(m_critical_sec);
+      FAST_CRITICAL_REGION_BEGIN(m_critical_sec);
       return m_log_target.add_logger( type, pdefault_file_name, pdefault_log_folder, log_level_limit);
-      CRITICAL_REGION_END();
+      FAST_CRITICAL_REGION_END();
     }
     bool add_logger( ibase_log_stream* pstream, int log_level_limit = LOG_LEVEL_4)
     {
-      CRITICAL_REGION_BEGIN(m_critical_sec);
+      FAST_CRITICAL_REGION_BEGIN(m_critical_sec);
       return m_log_target.add_logger(pstream, log_level_limit);
-      CRITICAL_REGION_END();
+      FAST_CRITICAL_REGION_END();
     }
 
     bool remove_logger(int type)
     {
-      CRITICAL_REGION_BEGIN(m_critical_sec);
+      FAST_CRITICAL_REGION_BEGIN(m_critical_sec);
       return m_log_target.remove_logger(type);
-      CRITICAL_REGION_END();
+      FAST_CRITICAL_REGION_END();
     }
 
 
     bool set_thread_prefix(const std::string& prefix)
     {
-      CRITICAL_REGION_BEGIN(m_critical_sec);
+      FAST_CRITICAL_REGION_BEGIN(m_critical_sec);
       m_thr_prefix_strings[misc_utils::get_thread_string_id()] = prefix;
-      CRITICAL_REGION_END();
+      FAST_CRITICAL_REGION_END();
       return true;
     }
     std::string get_thread_prefix()
     {
-      CRITICAL_REGION_LOCAL(m_critical_sec);
+      FAST_CRITICAL_REGION_LOCAL(m_critical_sec);
       return m_thr_prefix_strings[misc_utils::get_thread_string_id()];
     }
 
@@ -846,22 +914,30 @@ namespace log_space
       m_default_log_folder = folder;
     }
 
+    std::string get_actual_log_file_path()
+    {
+      return m_log_target.get_log_file_path();
+    }
+
   protected:
   private:
     bool init()
     {
       //
-
+      m_journal_max_elements = LOG_JOURNAL_MAX_ELEMENTS;
       m_process_name = string_tools::get_current_module_name();
 
       init_log_path_by_default();
+
+      //this need ti initialize static critical section in get_channels_errors_stat_container()
+      get_channels_errors_stat_container();
 
       //init default set of loggers
       init_default_loggers();
 
       std::stringstream ss;
       ss  << get_time_string() << " Init logging. Level=" << get_set_log_detalisation_level()
-        << " Log path=" << m_default_log_folder << std::endl;
+        << "Default log path=" << m_default_log_folder << std::endl;
       this->do_log_message(ss.str(), console_color_white, LOG_LEVEL_0);
       return true;
     }
@@ -873,13 +949,14 @@ namespace log_space
 
     bool init_log_path_by_default()
     {
+      m_default_log_file =  m_process_name;
+      std::string::size_type a = m_default_log_file.rfind('.');
+      if (a != std::string::npos)
+        m_default_log_file.erase(a, m_default_log_file.size());
+
       //load process name
       m_default_log_folder = string_tools::get_current_module_folder();
 
-      m_default_log_file =  m_process_name;
-      std::string::size_type a = m_default_log_file.rfind('.');
-      if ( a != std::string::npos )
-        m_default_log_file.erase( a, m_default_log_file.size());
       m_default_log_file += ".log";
 
       return true;
@@ -892,6 +969,7 @@ namespace log_space
     std::string m_process_name;
     std::map<std::string, std::string> m_thr_prefix_strings;
     std::list<std::string> m_journal;
+    size_t m_journal_max_elements;
     critical_section m_critical_sec;
   };
   /************************************************************************/
@@ -907,6 +985,78 @@ namespace log_space
       get_or_create_instance();//to initialize logger, if it not initialized
       return get_set_log_detalisation_level();
     }
+
+    //get_enabled_channels not thread-safe, at the moment leave it like this because it's configured in main, before other threads started
+    static std::set<std::string>& get_enabled_channels()
+    {
+      static std::set<std::string> genabled_channels;
+      return genabled_channels;
+    }
+
+    static bool channel_enabled(const std::string& ch_name)
+    {
+      std::set<std::string>& genabled_channels = get_enabled_channels();
+      return genabled_channels.find(ch_name) != genabled_channels.end();
+    }
+
+    static void enable_channels(const std::string& channels_set)
+    {
+      std::set<std::string>& genabled_channels = get_enabled_channels();
+      std::list<std::string> list_of_channels;
+      boost::split(list_of_channels, channels_set, boost::is_any_of(",;: "), boost::token_compress_on);
+      std::cout << "log channels: ";
+      for (const auto& ch : list_of_channels)
+      {
+        genabled_channels.insert(ch);
+        std::cout << ch << " ";
+      }
+      std::cout << " enabled" << std::endl;
+    }
+
+    static void enable_channel(const std::string& ch_name)
+    {
+      std::set<std::string>& genabled_channels = get_enabled_channels();
+      //lazy synchronization: just replace with modified copy of whole set
+      std::set<std::string> enabled_channels_local = genabled_channels;
+      enabled_channels_local.insert(ch_name);
+      genabled_channels.swap(enabled_channels_local);
+      std::cout << "log channel '" << ch_name << "' enabled" << std::endl;
+    }
+
+    static void disable_channels(const std::string& channels_set)
+    {
+      std::set<std::string>& genabled_channels = get_enabled_channels();
+      std::list<std::string> list_of_channels;
+      boost::split(list_of_channels, channels_set, boost::is_any_of(",;: "), boost::token_compress_on);
+      std::cout << "log channels: ";
+      for (const auto& ch : list_of_channels)
+      {
+        genabled_channels.erase(ch);
+        std::cout << ch << " ";
+      }
+      std::cout << " disabled" << std::endl;
+    }
+    
+    static void disable_channel(const std::string& ch_name)
+    {
+      std::set<std::string>& genabled_channels = get_enabled_channels();
+      //lazy synchronization: just replace with modified copy of whole set
+      std::set<std::string> enabled_channels_local = genabled_channels;
+      auto it = enabled_channels_local.find(ch_name);
+      if (it != enabled_channels_local.end())
+        enabled_channels_local.erase(it);
+      genabled_channels.swap(enabled_channels_local);
+      std::cout << "log channel '" << ch_name << "' disabled" << std::endl;
+    }
+
+    static bool channel_enabled(const char* pch_name)
+    {
+      //null channel, enabled by default
+      if (!pch_name)
+        return true;
+      return channel_enabled(std::string(pch_name));
+    }
+
 
     static bool is_filter_error(int error_code)
     {
@@ -937,6 +1087,16 @@ namespace log_space
       bool res = false;
       if(plogger)
         res = plogger->take_away_journal(journal);
+
+      return res;
+    }
+
+    static bool get_journal_items(std::list<std::string>& journal, size_t count)
+    {
+      logger* plogger = get_or_create_instance();
+      bool res = false;
+      if (plogger)
+        res = plogger->get_journal_items(journal, count);
 
       return res;
     }
@@ -973,6 +1133,14 @@ namespace log_space
       return "";
     }
 
+    static std::string get_actual_log_file_path()
+    {
+      logger* plogger = get_or_create_instance();
+      if (plogger)
+        return plogger->get_actual_log_file_path();
+      return "";
+    }
+
     static std::string get_default_log_folder()
     {
       logger* plogger = get_or_create_instance();
@@ -982,12 +1150,12 @@ namespace log_space
       return "";
     }
 
-
-    static void set_default_log_folder(const std::string& dir)
+    static void set_default_log_folder(const std::string& folder)
     {
       logger* plogger = get_or_create_instance();
-      if(plogger)
-        return plogger->set_default_log_folder(dir);
+      if (plogger)
+        plogger->set_default_log_folder(folder);
+
     }
 
     static bool add_logger( ibase_log_stream* pstream, int log_level_limit = LOG_LEVEL_4 )
@@ -1008,9 +1176,12 @@ PUSH_WARNINGS
 DISABLE_GCC_WARNING(maybe-uninitialized)
     static int get_set_log_detalisation_level(bool is_need_set = false, int log_level_to_set = LOG_LEVEL_1)
     {
+
       static int log_detalisation_level = LOG_LEVEL_1;
-      if(is_need_set)
+      if (is_need_set)
+      {
         log_detalisation_level = log_level_to_set;
+      }
       return log_detalisation_level;
     }
 POP_WARNINGS
@@ -1058,14 +1229,6 @@ POP_WARNINGS
 
       return is_need;
     }
-    static uint64_t get_set_err_count(bool is_need_set = false, uint64_t err_val = false)
-    {
-      static uint64_t err_count = 0;
-      if(is_need_set)
-        err_count = err_val;
-
-      return err_count;
-    }
 
 
 #ifdef _MSC_VER
@@ -1110,12 +1273,10 @@ POP_WARNINGS
       SetThreadName(-1, prefix.c_str());
 #endif
 
-
       logger* plogger = get_or_create_instance();
       if(!plogger) return false;
       return plogger->set_thread_prefix(prefix);
     }
-
 
     static std::string get_thread_log_prefix()
     {
@@ -1143,12 +1304,12 @@ POP_WARNINGS
       //    str_prefix << "[" << plogger->m_process_name << " (id=" << GetCurrentProcessId() << ")] ";
 //#ifdef _MSC_VER_EX
       if ( get_set_need_thread_id() /*&& get_set_tid_level() <= get_set_log_detalisation_level()*/ )
-        str_prefix << "tid:" << misc_utils::get_thread_string_id() << " ";
+        str_prefix << "[tid:" << misc_utils::get_thread_string_id() << "] ";
 //#endif
 
       if(plogger->m_thr_prefix_strings.size())
       {
-        CRITICAL_REGION_LOCAL(plogger->m_critical_sec);
+        FAST_CRITICAL_REGION_LOCAL(plogger->m_critical_sec);
         std::string thr_str = misc_utils::get_thread_string_id();
         std::map<std::string, std::string>::iterator it = plogger->m_thr_prefix_strings.find(thr_str);
         if(it!=plogger->m_thr_prefix_strings.end())
@@ -1338,49 +1499,51 @@ POP_WARNINGS
     return true;
   }
 }
-#if defined(_DEBUG) || defined(__GNUC__)
+
+#if !defined(DISABLE_RELEASE_LOGGING)
   #define  ENABLE_LOGGING_INTERNAL
 #endif
 
-#if defined(ENABLE_RELEASE_LOGGING)
-  #define  ENABLE_LOGGING_INTERNAL
-#endif
+
+
+#define LOG_DEFAULT_CHANNEL    NULL
+#define ENABLE_CHANNEL_BY_DEFAULT(ch_name)   \
+  static bool COMBINE(init_channel, __LINE__) UNUSED_ATTRIBUTE = epee::misc_utils::static_initializer([](){  \
+  epee::log_space::log_singletone::enable_channel(ch_name);  return true; \
+}); 
+
+
+
 
 
 #if defined(ENABLE_LOGGING_INTERNAL)
 
-#define LOG_PRINT_NO_PREFIX2(log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() )\
+#define LOG_PRINT_CHANNEL_NO_PREFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str() , y, epee::log_space::console_color_default, false, log_name);}}
 
-#define LOG_PRINT_NO_PREFIX_NO_POSTFIX2(log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() )\
+#define LOG_PRINT_CHANNEL_NO_PREFIX_NO_POSTFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << x; epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
 
-#define LOG_PRINT_NO_POSTFIX2(log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() )\
+#define LOG_PRINT_CHANNEL_NO_POSTFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x; epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
 
-#define LOG_PRINT2(log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() )\
+#define LOG_PRINT_CHANNEL2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
 
-#define LOG_PRINT_COLOR2(log_name, x, y, color) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() )\
+#define LOG_PRINT_CHANNEL_COLOR2(log_channel, log_name, x, y, color) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, color, false, log_name);}}
 
-#define LOG_PRINT2_JORNAL(log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() )\
+#define LOG_PRINT_CHANNEL_2_JORNAL(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, true, log_name);}}
 
 
 
-#if defined(_MSC_VER)
-#define LOCAL_FUNCTION_DEF__ __FUNCTION__
-#else
-#define LOCAL_FUNCTION_DEF__ __PRETTY_FUNCTION__ 
-#endif 
-
 #define LOG_ERROR2(log_name, x) { \
-  std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << "ERROR " << __FILE__ << ":" << __LINE__ << "[" << LOCAL_FUNCTION_DEF__ << "]" << x << " # " << epee::misc_utils::get_callstack_str() << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str(), LOG_LEVEL_0, epee::log_space::console_color_red, true, log_name);LOCAL_ASSERT(0); epee::log_space::log_singletone::get_set_err_count(true, epee::log_space::log_singletone::get_set_err_count()+1);}
+  std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << "[ERROR] Location: " << std::endl << LOCATION_SS << epee::misc_utils::print_trace() << " Message:" << std::endl << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str(), LOG_LEVEL_0, epee::log_space::console_color_red, true, log_name); LOCAL_ASSERT(0); epee::log_space::increase_error_count(LOG_DEFAULT_CHANNEL); }
 
 #define LOG_FRAME2(log_name, x, y) epee::log_space::log_frame frame(x, y, log_name)
 
-#else
+#else // #if defined(ENABLE_LOGGING_INTERNAL)
 
 
 #define LOG_PRINT_NO_PREFIX2(log_name, x, y)
@@ -1401,8 +1564,16 @@ POP_WARNINGS
 #define LOG_FRAME2(log_name, x, y)
 
 
-#endif
+#endif // #if defined(ENABLE_LOGGING_INTERNAL)
 
+#define LOG_PRINT_NO_PREFIX2(log_name, x, y)                    LOG_PRINT_CHANNEL_NO_PREFIX2(LOG_DEFAULT_CHANNEL, log_name, x, y)    
+#define LOG_PRINT_NO_PREFIX_NO_POSTFIX2(log_name, x, y)         LOG_PRINT_CHANNEL_NO_PREFIX_NO_POSTFIX2(LOG_DEFAULT_CHANNEL, log_name, x, y) 
+#define LOG_PRINT_NO_POSTFIX2(log_name, x, y)                   LOG_PRINT_CHANNEL_NO_POSTFIX2(LOG_DEFAULT_CHANNEL, log_name, x, y) 
+#define LOG_PRINT2(log_name, x, y)                              LOG_PRINT_CHANNEL2(LOG_DEFAULT_CHANNEL, log_name, x, y) 
+#define LOG_PRINT_COLOR2(log_name, x, y, color)                 LOG_PRINT_CHANNEL_COLOR2(LOG_DEFAULT_CHANNEL, log_name, x, y, color)
+#define LOG_PRINT2_JORNAL(log_name, x, y)                       LOG_PRINT_CHANNEL_2_JORNAL(LOG_DEFAULT_CHANNEL, log_name, x, y) 
+
+  
 
 #ifndef LOG_DEFAULT_TARGET
   #define LOG_DEFAULT_TARGET    NULL
@@ -1442,29 +1613,35 @@ POP_WARNINGS
 #define ENDL std::endl
 
 #define TRY_ENTRY()   try {
-#define CATCH_ENTRY(location, return_val) } \
+#define CATCH_ENTRY_CUSTOM(location, custom_code, return_val) } \
   catch(const std::exception& ex) \
 { \
   (void)(ex); \
   LOG_ERROR("Exception at [" << location << "], what=" << ex.what()); \
+  custom_code; \
   return return_val; \
-}\
-  catch(...)\
-{\
-  LOG_ERROR("Exception at [" << location << "], generic exception \"...\"");\
+} \
+  catch(...) \
+{ \
+  LOG_ERROR("Exception at [" << location << "], generic exception \"...\""); \
+  custom_code; \
   return return_val; \
 }
+#define CATCH_ENTRY(location, return_val) CATCH_ENTRY_CUSTOM(location, (void)0, return_val)
 
-#define CATCH_ENTRY_L0(lacation, return_val) CATCH_ENTRY(lacation, return_val)
-#define CATCH_ENTRY_L1(lacation, return_val) CATCH_ENTRY(lacation, return_val)
-#define CATCH_ENTRY_L2(lacation, return_val) CATCH_ENTRY(lacation, return_val)
-#define CATCH_ENTRY_L3(lacation, return_val) CATCH_ENTRY(lacation, return_val)
-#define CATCH_ENTRY_L4(lacation, return_val) CATCH_ENTRY(lacation, return_val)
+#define CATCH_ENTRY2(return_val) CATCH_ENTRY_CUSTOM(LOCATION_SS, (void)0, return_val)
+
+#define CATCH_ENTRY_L0(location, return_val) CATCH_ENTRY(location, return_val)
+#define CATCH_ENTRY_L1(location, return_val) CATCH_ENTRY(location, return_val)
+#define CATCH_ENTRY_L2(location, return_val) CATCH_ENTRY(location, return_val)
+#define CATCH_ENTRY_L3(location, return_val) CATCH_ENTRY(location, return_val)
+#define CATCH_ENTRY_L4(location, return_val) CATCH_ENTRY(location, return_val)
 
 
 #define ASSERT_MES_AND_THROW(message) {LOG_ERROR(message); std::stringstream ss; ss << message; throw std::runtime_error(ss.str());}
 
-#define CHECK_AND_ASSERT_THROW_MES(expr, message) {if(!(expr)) ASSERT_MES_AND_THROW(message);}
+#define CHECK_AND_ASSERT_THROW_MES(expr, message) {if(!(expr)) ASSERT_MES_AND_THROW(message << ENDL << "thrown from " << LOCATION_SS);}
+#define CHECK_AND_ASSERT_THROW(expr, exception_exp) {if(!(expr)) {LOG_ERROR("EXCEPTION is thrown from " << LOCATION_SS); throw exception_exp; };}
 
 
 #ifndef CHECK_AND_ASSERT
@@ -1477,13 +1654,22 @@ POP_WARNINGS
 #define CHECK_AND_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_ERROR(message); return fail_ret_val;};}while(0)
 #endif
 
+#ifndef CHECK_AND_FORCE_ASSERT_MES
+#define CHECK_AND_FORCE_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_ERROR(message); FORCE_ASSERT(expr); return fail_ret_val;};}while(0)
+#endif
+
+
+#ifndef CHECK_AND_ASSERT_MES_CUSTOM
+#define CHECK_AND_ASSERT_MES_CUSTOM(expr, fail_ret_val, custom_code, message)   do{if(!(expr)) {LOG_ERROR(message); custom_code; return fail_ret_val;};}while(0)
+#endif
+
 /*#ifndef CHECK_AND_ASSERT_MES_AND_THROW
 #define CHECK_AND_ASSERT_MES_AND_THROW(expr, message)   do{if(!(expr)) {LOG_ERROR(message); throw std::runtime_error(message);};}while(0)
 #endif
 */
 
 #ifndef CHECK_AND_NO_ASSERT_MES
-#define CHECK_AND_NO_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_PRINT_RED_L0(message); /*LOCAL_ASSERT(expr);*/ return fail_ret_val;};}while(0)
+#define CHECK_AND_NO_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_PRINT_MAGENTA(message, LOG_LEVEL_0); /*LOCAL_ASSERT(expr);*/ return fail_ret_val;};}while(0)
 #endif
 
 #ifndef CHECK_AND_NO_ASSERT_MES_LEVEL
@@ -1491,12 +1677,12 @@ POP_WARNINGS
 #endif
 
 #ifndef CHECK_AND_ASSERT_MES_NO_RET
-#define CHECK_AND_ASSERT_MES_NO_RET(expr, message)   do{if(!(expr)) {LOG_ERROR(message); return;};}while(0)
+#define CHECK_AND_ASSERT_MES_NO_RET(expr, message)   do{if(!(expr)) {LOG_ERROR(message);};}while(0)
 #endif
 
 
 #ifndef CHECK_AND_ASSERT_MES2
-#define CHECK_AND_ASSERT_MES2(expr, message)   do{if(!(expr)) {LOG_ERROR(message); };}while(0)
+#define CHECK_AND_ASSERT_MES2(expr, message)         do{if(!(expr)) {LOG_ERROR(message); };}while(0)
 #endif
 
 }

@@ -65,7 +65,13 @@ namespace currency
     bool on_get_addendums(const COMMAND_RPC_GET_ADDENDUMS::request& req, COMMAND_RPC_GET_ADDENDUMS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
     bool on_reset_transaction_pool(const COMMAND_RPC_RESET_TX_POOL::request& req, COMMAND_RPC_RESET_TX_POOL::response& res, connection_context& cntx);
     bool on_validate_signed_text(const COMMAND_RPC_VALIDATE_SIGNED_TEXT::request& req, COMMAND_RPC_VALIDATE_SIGNED_TEXT::response& res, connection_context& cntx);
-    bool on_get_swap_txs(const COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::request& req, COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
+
+    bool on_get_blocks_details(const COMMAND_RPC_GET_BLOCKS_DETAILS::request& req, COMMAND_RPC_GET_BLOCKS_DETAILS::response& res, connection_context& cntx);
+    bool on_get_alt_blocks_details(const COMMAND_RPC_GET_ALT_BLOCKS_DETAILS::request& req, COMMAND_RPC_GET_ALT_BLOCKS_DETAILS::response& res, connection_context& cntx);
+    bool on_get_all_pool_tx_list(const COMMAND_RPC_GET_ALL_POOL_TX_LIST::request& req, COMMAND_RPC_GET_ALL_POOL_TX_LIST::response& res, connection_context& cntx);
+    bool on_get_pool_txs_details(const COMMAND_RPC_GET_POOL_TXS_DETAILS::request& req, COMMAND_RPC_GET_POOL_TXS_DETAILS::response& res, connection_context& cntx);
+    bool on_get_out_info(const COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::request& req, COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::response& res, connection_context& cntx);
+    bool on_get_tx_details(const COMMAND_RPC_GET_TX_DETAILS::request& req, COMMAND_RPC_GET_TX_DETAILS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
 
 
     
@@ -116,8 +122,17 @@ namespace currency
         MAP_JON_RPC_WE("f_pool_json",            f_on_pool_json,                F_COMMAND_RPC_GET_POOL)
         MAP_JON_RPC_IF("reset_transaction_pool", on_reset_transaction_pool,     COMMAND_RPC_RESET_TX_POOL, !m_restricted)
         MAP_JON_RPC_WE("getblock",               on_getblock,                   COMMAND_RPC_GETBLOCK)
+        MAP_JON_RPC_WE("check_tx_with_view_key", on_check_tx_with_view_key,     COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY)
         MAP_JON_RPC("relay_txs",                 on_relay_txs_to_net,           COMMAND_RPC_RELAY_TXS)
         MAP_JON_RPC("validate_signed_text",      on_validate_signed_text,       COMMAND_RPC_VALIDATE_SIGNED_TEXT)
+
+        MAP_JON_RPC("get_blocks_details",        on_get_blocks_details,         COMMAND_RPC_GET_BLOCKS_DETAILS)
+        MAP_JON_RPC("get_alt_blocks_details",    on_get_alt_blocks_details,     COMMAND_RPC_GET_ALT_BLOCKS_DETAILS)
+        MAP_JON_RPC("get_all_pool_tx_list",      on_get_all_pool_tx_list,       COMMAND_RPC_GET_ALL_POOL_TX_LIST)
+        MAP_JON_RPC("get_pool_txs_details",      on_get_pool_txs_details,       COMMAND_RPC_GET_POOL_TXS_DETAILS)
+        MAP_JON_RPC("get_out_info",              on_get_out_info,               COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT)
+        MAP_JON_RPC_WE("get_tx_details",         on_get_tx_details,             COMMAND_RPC_GET_TX_DETAILS)
+        MAP_JON_RPC("getinfo",                   on_get_info,                   COMMAND_RPC_GET_INFO)
         MAP_JON_RPC_WE("get_swap_txs",           on_get_swap_txs,               COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK)        
         //remote miner rpc
         MAP_JON_RPC_N(on_login,            mining::COMMAND_RPC_LOGIN)

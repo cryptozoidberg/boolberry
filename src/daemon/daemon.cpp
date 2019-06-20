@@ -67,10 +67,12 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_cmd_sett, command_line::arg_log_level);
   command_line::add_arg(desc_cmd_sett, command_line::arg_console);
   command_line::add_arg(desc_cmd_sett, command_line::arg_show_details);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_calc_coin_swap);
 
   command_line::add_arg(desc_cmd_sett, command_line::arg_no_predownload);
   command_line::add_arg(desc_cmd_sett, command_line::arg_explicit_predownload);
   command_line::add_arg(desc_cmd_sett, command_line::arg_validate_predownload);
+  command_line::add_arg(desc_cmd_sett, command_line::arg_predownload_link);
   
 
   currency::core::init_options(desc_cmd_sett);
@@ -161,7 +163,7 @@ int main(int argc, char* argv[])
   //do pre_download if needed
   if (!command_line::has_arg(vm, command_line::arg_no_predownload) || command_line::has_arg(vm, command_line::arg_explicit_predownload))
   {
-    bool r = tools::process_predownload(vm, [&](uint64_t total_bytes, uint64_t received_bytes){
+    tools::process_predownload(vm, [&](uint64_t total_bytes, uint64_t received_bytes){
       return static_cast<nodetool::i_p2p_endpoint<currency::t_currency_protocol_handler<currency::core>::connection_context> *>(&p2psrv)->is_stop_signal_sent();
     });
     if (static_cast<nodetool::i_p2p_endpoint<currency::t_currency_protocol_handler<currency::core>::connection_context>*>(&p2psrv)->is_stop_signal_sent())
@@ -246,6 +248,11 @@ bool command_line_preprocessor(const boost::program_options::variables_map& vm)
     currency::print_currency_details();
     exit = true;
   }
+  if (command_line::get_arg(vm, command_line::arg_calc_coin_swap))
+  {
+    currency::print_coins_that_can_be_swapped();
+    exit = true;
+  }  
   if (command_line::get_arg(vm, command_line::arg_os_version))
   {
     std::cout << "OS: " << tools::get_os_version_string() << ENDL;

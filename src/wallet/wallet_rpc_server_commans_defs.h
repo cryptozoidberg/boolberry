@@ -211,9 +211,10 @@ namespace wallet_rpc
     struct request
     {
       std::string payment_id;
-
+      bool allow_locked_transactions;
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(payment_id)
+        KV_SERIALIZE(allow_locked_transactions)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -464,9 +465,11 @@ namespace wallet_rpc
     struct response
     {
       std::string     tx_signed_hex;
+      std::string     tx_hash;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_signed_hex)
+        KV_SERIALIZE(tx_hash)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -490,6 +493,24 @@ namespace wallet_rpc
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_CANCEL_TRANSFER
+  {
+    struct request
+    {
+      std::string     tx_unsigned_hex;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_unsigned_hex)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      BEGIN_KV_SERIALIZE_MAP()
       END_KV_SERIALIZE_MAP()
     };
   };

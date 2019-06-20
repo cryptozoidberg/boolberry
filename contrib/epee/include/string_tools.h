@@ -602,7 +602,18 @@ POP_WARNINGS
 		return res;
 	}
 	//----------------------------------------------------------------------------
-	inline std::string get_filename_from_path(const std::string& str)
+  inline std::wstring get_extension(const std::wstring& str)
+  {
+    std::wstring res;
+    std::wstring::size_type pos = str.rfind('.');
+    if (std::wstring::npos == pos)
+      return res;
+
+    res = str.substr(pos + 1, str.size() - pos);
+    return res;
+  }
+  //----------------------------------------------------------------------------
+  inline std::string get_filename_from_path(const std::string& str)
 	{
 		std::string res;
 		std::string::size_type pos = str.rfind('\\');
@@ -613,9 +624,6 @@ POP_WARNINGS
 		return res;
 	}
 	//----------------------------------------------------------------------------
-
-
-
 	inline std::string cut_off_extension(const std::string& str)
 	{
 		std::string res;
@@ -626,8 +634,18 @@ POP_WARNINGS
 		res = str.substr(0, pos);
 		return res;
 	}
+  //----------------------------------------------------------------------------
+  inline std::wstring cut_off_extension(const std::wstring& str)
+  {
+    std::wstring res;
+    std::wstring::size_type pos = str.rfind('.');
+    if (std::wstring::npos == pos)
+      return str;
 
-	//----------------------------------------------------------------------------
+    res = str.substr(0, pos);
+    return res;
+  }
+  //----------------------------------------------------------------------------
 #ifdef _WININET_
 	inline std::string get_string_from_systemtime(const SYSTEMTIME& sys_time)
 	{

@@ -149,11 +149,16 @@ namespace tools
       currency::transaction tx;
       currency::blobdata tx_blob;
       m_wallet.transfer(dsts, req.mixin, req.unlock_time, req.fee, extra, tx, tx_blob, req.do_not_relay);
-      res.tx_hash = epee::string_tools::pod_to_hex(currency::get_transaction_hash(tx));
       if (m_wallet.is_view_only())
-        res.tx_unsigned_hex = epee::string_tools::buff_to_hex_nodelimer(tx_blob); // view-only wallets can't sign and relay transactions, so exctract unsigned blob from tx_blob
+      {
+        res.tx_unsigned_hex = epee::string_tools::buff_to_hex_nodelimer(tx_blob); // view-only wallets can't sign and relay transactions, so extract unsigned blob from tx_blob
+        // leave res.tx_hash empty, because tx has will change after signing
+      }
       else
+      {
         res.tx_blob = epee::string_tools::buff_to_hex_nodelimer(tx_blob);
+        res.tx_hash = epee::string_tools::pod_to_hex(currency::get_transaction_hash(tx));
+      }
       return true;
     }
     catch (const tools::error::daemon_busy& e)
@@ -207,6 +212,13 @@ namespace tools
     m_wallet.get_payments(payment_id, payment_list);
     for (auto & payment : payment_list)
     {
+      if (payment.m_unlock_time && !req.allow_locked_transactions)
+      {
+        //check that transaction don't have locking for time longer then 10 blocks ahead
+        //TODO: add code for "unlock_time" set as timestamp, now it's all being filtered
+        if(payment.m_unlock_time > payment.m_block_height + DEFAULT_TX_SPENDABLE_AGE)
+          continue;
+      }
       wallet_rpc::payment_details rpc_payment;
       rpc_payment.payment_id   = req.payment_id;
       rpc_payment.tx_hash      = epee::string_tools::pod_to_hex(payment.m_tx_hash);
@@ -663,6 +675,7 @@ namespace tools
       m_wallet.sign_transfer(tx_unsigned_blob, tx_signed_blob, tx);
       
       res.tx_signed_hex = epee::string_tools::buff_to_hex_nodelimer(tx_signed_blob);
+      res.tx_hash = epee::string_tools::pod_to_hex(currency::get_transaction_hash(tx));
     }
     catch (const std::exception& e)
     {
@@ -718,8 +731,35 @@ namespace tools
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_cancel_transfer(const wallet_rpc::COMMAND_CANCEL_TRANSFER::request& req, wallet_rpc::COMMAND_CANCEL_TRANSFER::response& res, epee::json_rpc::error& er, connection_context& cntx)
+  {
+    try
+    {
+      std::string tx_unsigned_blob;
+      if (!string_tools::parse_hexstr_to_binbuff(req.tx_unsigned_hex, tx_unsigned_blob))
+      {
+        er.code = WALLET_RPC_ERROR_CODE_WRONG_ARGUMENT;
+        er.message = "tx_unsigned_hex is invalid";
+        return false;
+      }
+      m_wallet.cancel_transfer(tx_unsigned_blob);
+    }
+    catch (const std::exception& e)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
+      er.message = e.what();
+      return false;
+    }
+    catch (...)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
+      er.message = "WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR";
+      return false;
+    }
+
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
 
 }
-
-
 
