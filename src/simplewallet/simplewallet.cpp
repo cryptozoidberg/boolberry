@@ -144,6 +144,12 @@ namespace
     return message_writer(color ? epee::log_space::console_color_green : epee::log_space::console_color_default, false, std::string(), LOG_LEVEL_2);
   }
 
+  message_writer color_msg_writer(epee::log_space::console_colors color)
+  {
+    return message_writer(color, true, std::string(), LOG_LEVEL_2);
+  }
+
+
   message_writer fail_msg_writer()
   {
     return message_writer(epee::log_space::console_color_red, true, "Error: ", LOG_LEVEL_0);
@@ -804,6 +810,7 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
   std::vector<uint8_t> extra;
   payment_id_t payment_id;
   account_public_address swap_addr = AUTO_VAL_INIT(swap_addr);
+  uint64_t swap_amount = 0;
   if (1 == local_args.size() % 2)
   {
     std::string payment_id_str = local_args.back();
@@ -867,6 +874,9 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
         ", expected number from 0 to " << print_money(std::numeric_limits<uint64_t>::max());
       return false;
     }
+    
+    if(de.addr.is_swap_address)
+      swap_amount = de.amount;
 
     dsts.push_back(de);
   }
@@ -885,7 +895,19 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
       relay_blob, false /*do_not_relay*/, outs_to_spend);
 
     if (!m_wallet->is_view_only())
-      success_msg_writer(true) << "Money successfully sent, transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
+    {
+      if (swap_amount)
+      {
+        color_msg_writer(epee::log_space::console_color_blue, true) 
+          << "Money successfully sent(" << print_money(swap_amount)<< " sent to Zano via coinswap), transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
+      }
+      else
+      {
+        success_msg_writer(true) << "Money successfully sent, transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
+      }
+      
+
+    }      
     else
       success_msg_writer(true) << "Transaction prepared for signing and saved into \"unsigned_boolberry_tx\" file, use offline wallet top sign transfer and then use command \"submit_transfer\" on this wallet to transfer transaction into the network";
 
