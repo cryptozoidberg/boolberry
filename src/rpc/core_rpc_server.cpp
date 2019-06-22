@@ -1608,7 +1608,7 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
       return false;
     }
 
-    if (!m_core.get_blockchain_storage().get_block_swap_transactions(req.height, sk, res.block_id, res.prev_block_id, res.swap_txs_list))
+    if (!m_core.get_blockchain_storage().get_block_swap_transactions(req.height, sk, res.block_id, res.prev_block_id, res.timestamp, res.swap_txs_list))
     {
       error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
       error_resp.message = "Couldn't retrieve swap transactions from block";
