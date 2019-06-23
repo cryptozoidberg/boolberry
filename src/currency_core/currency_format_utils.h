@@ -285,10 +285,18 @@ namespace currency
         memset(&mix, 0, sizeof(mix));
         return;
       }
-#define GET_H(index) accessor(st[index])
-      for(size_t i = 0; i!=6; i++)
+
+      for (size_t i = 0; i != 6; i++)
       {
-        *(crypto::hash*)&mix[i*4]  = XOR_4(GET_H(i*4), GET_H(i*4+1), GET_H(i*4+2), GET_H(i*4+3));  
+        crypto::hash h0 = accessor(st[i * 4 + 0]);
+        crypto::hash h1 = accessor(st[i * 4 + 1]);
+        crypto::hash h2 = accessor(st[i * 4 + 2]);
+        crypto::hash h3 = accessor(st[i * 4 + 3]);
+
+        mix[i * 4 + 0] = reinterpret_cast<const uint64_t*>(&h0)[0] ^ reinterpret_cast<const uint64_t*>(&h1)[0] ^ reinterpret_cast<const uint64_t*>(&h2)[0] ^ reinterpret_cast<const uint64_t*>(&h3)[0];
+        mix[i * 4 + 1] = reinterpret_cast<const uint64_t*>(&h0)[1] ^ reinterpret_cast<const uint64_t*>(&h1)[1] ^ reinterpret_cast<const uint64_t*>(&h2)[1] ^ reinterpret_cast<const uint64_t*>(&h3)[1];
+        mix[i * 4 + 2] = reinterpret_cast<const uint64_t*>(&h0)[2] ^ reinterpret_cast<const uint64_t*>(&h1)[2] ^ reinterpret_cast<const uint64_t*>(&h2)[2] ^ reinterpret_cast<const uint64_t*>(&h3)[2];
+        mix[i * 4 + 3] = reinterpret_cast<const uint64_t*>(&h0)[3] ^ reinterpret_cast<const uint64_t*>(&h1)[3] ^ reinterpret_cast<const uint64_t*>(&h2)[3] ^ reinterpret_cast<const uint64_t*>(&h3)[3];
       }
     });
     return true;
