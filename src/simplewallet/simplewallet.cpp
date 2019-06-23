@@ -898,7 +898,7 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
     {
       if (swap_amount)
       {
-        color_msg_writer(epee::log_space::console_color_blue, true) 
+        color_msg_writer(epee::log_space::console_color_blue) 
           << "Money successfully sent(" << print_money(swap_amount)<< " sent to Zano via coinswap), transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
       }
       else

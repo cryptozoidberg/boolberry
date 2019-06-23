@@ -866,6 +866,7 @@ void wallet2::load(const std::wstring& wallet_, const std::string& password)
     currency::block b;
     currency::generate_genesis_block(b);
     clear();
+    m_account_public_address = m_account.get_keys().m_account_address;
   }
   m_local_bc_height = m_blockchain.size();
 
@@ -877,6 +878,7 @@ void wallet2::store()
 {
   LOG_PRINT_L0("(before storing: pending_key_images: " << m_pending_key_images.size() << ", pki file elements: " << m_pending_key_images_file_container.size() << ", tx_keys: " << m_tx_keys.size() << ")");
 
+  m_account_public_address = m_account.get_keys().m_account_address;
   bool r = tools::serialize_obj_to_file(*this, m_wallet_file);
   THROW_IF_FALSE_WALLET_EX(r, error::file_save_error, string_encoding::convert_to_ansii(m_wallet_file));
   LOG_PRINT_L0("Stored wallet data into " << string_encoding::convert_to_ansii(m_wallet_file));
