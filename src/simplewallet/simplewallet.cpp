@@ -1728,8 +1728,6 @@ int main(int argc, char* argv[])
 
   //TRY_ENTRY();
 
-  epee::debug::get_set_enable_assert(true, false);
-
   string_tools::set_module_name_and_folder(argv[0]);
 
   po::options_description desc_general("General options");
