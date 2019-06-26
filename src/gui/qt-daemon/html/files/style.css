@@ -619,6 +619,14 @@ h2
     display: block;
 }
 
+.address-status.with-status.swap {
+    background-color: #064574;
+}
+
+#toggle-section-payment.swap {
+    background-image: url('../files/bg_swap.png');
+}
+
 .address-status.valid .address-status-icon {
     background-image: url('../files/valid.png');
 }
@@ -631,6 +639,10 @@ h2
     background-image: url('../files/integrated.png');
 }
 
+.address-status.swap .address-status-icon {
+    background-image: url('../files/swap.png');
+}
+
 .address-status.invalid:hover {
     background-color: #f44336;
 }
@@ -641,6 +653,10 @@ h2
 
 .address-status.valid:hover {
     background-color: #28c42f;
+}
+
+.address-status.swap:hover {
+    background-color: #064574;
 }
 
 .address-status-text {
