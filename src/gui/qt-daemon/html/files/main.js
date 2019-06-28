@@ -740,6 +740,7 @@ function on_address_change() {
     var addressValidation = $.parseJSON(result);
 
     if (addressValidation.valid) {
+
       if (addressValidation.payment_id_hex.length) {
         $('#transfer_address_id_container').addClass('integrated');
         $('#payment_id').val(addressValidation.payment_id_hex);
@@ -747,14 +748,16 @@ function on_address_change() {
         $('#payment_id').prop('disabled', true);
         show_address_status('integrated');
       } else {
-        if (addressValidation.swap_address) {
-          show_address_status('swap');
-        } else {
-          show_address_status('valid');
-        }
         $('#payment_id').val('').removeClass('is-disabled');
         $('#payment_id').prop('disabled', false);
       }
+	  
+	  if (addressValidation.swap_address) {
+          show_address_status('swap');
+      } else {
+          show_address_status('valid');
+      }
+	  
     } else {
       show_address_status('invalid');
       $('#payment_id').val('').removeClass('is-disabled');
