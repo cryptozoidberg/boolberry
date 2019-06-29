@@ -592,6 +592,33 @@ bool blockchain_storage::get_block_by_hash(const crypto::hash &h, block &blk) {
   return false;
 }
 //------------------------------------------------------------------
+bool blockchain_storage::get_block_swap_transactions(uint64_t height, const crypto::secret_key& sk, std::string& block_id, std::string& prev_block_id, uint64_t& timestamp, std::list<swap_transaction_info>& swap_txs_list)
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
+  // try to find block in main chain
+  if (height >= m_db_blocks.size())
+  {
+    return false;
+  }
+  
+  auto b_ptr = m_db_blocks[height];
+  block_id = string_tools::pod_to_hex(get_block_hash(b_ptr->bl));
+  prev_block_id = string_tools::pod_to_hex(b_ptr->bl.prev_id);
+  timestamp = b_ptr->bl.timestamp;
+  for (auto& tx_id : b_ptr->bl.tx_hashes)
+  {
+    swap_transaction_info si = AUTO_VAL_INIT(si);
+    auto tx_ptr = get_tx(tx_id);
+    CHECK_AND_ASSERT_MES(tx_ptr.get(), false, "Failed to get tx with id " << tx_id << " from block " << block_id);
+    if(!get_swap_info_from_tx(*tx_ptr, sk, si))
+      continue;
+    swap_txs_list.push_back(si);    
+  }
+  
+  return true;
+}
+//------------------------------------------------------------------
 bool blockchain_storage::get_block_extended_info_by_hash(const crypto::hash &h, block_extended_info &blk) const
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
