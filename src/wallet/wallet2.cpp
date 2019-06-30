@@ -1087,6 +1087,9 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
   using namespace currency;
   const transaction& tx = create_tx_result.tx;
   const crypto::hash tx_hash = get_transaction_hash(tx);
+
+  LOG_PRINT_L0(ENDL << ENDL << "$$####$$ FINALIZE TX: " << tx_hash << ", json:" << ENDL << obj_to_json_str(tx));
+
   //update_current_tx_limit();
   CHECK_AND_THROW_WALLET_EX(CURRENCY_MAX_TRANSACTION_BLOB_SIZE <= get_object_blobsize(tx), error::tx_too_big, tx, m_upper_transaction_size_limit);
 

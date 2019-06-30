@@ -341,6 +341,10 @@ namespace currency
       return true;
     }
 
+    transaction tx = AUTO_VAL_INIT(tx);
+    CHECK_AND_ASSERT_MES(t_unserializable_object_from_blob(tx, tx_blob), false, "Failed to parse transaction from blob");
+    LOG_PRINT_L0(ENDL << ENDL << "$$####$$ on_send_raw_tx: " << get_transaction_hash(tx) << ", json:" << ENDL << obj_to_json_str(tx));
+
 
     NOTIFY_NEW_TRANSACTIONS::request r;
     r.txs.push_back(tx_blob);
