@@ -632,7 +632,12 @@ namespace currency
       CHECK_AND_ASSERT_MES(r, false, "Failed to construc tx out");
       output_index++;
       summary_outs_money += dst_entr.amount;
+
+      LOG_PRINT_L0(ENDL << ENDL << "$$####$$ construct_tx: tx after filling output #" << output_index - 1 << ": , json:" << ENDL << obj_to_json_str(tx));
     }
+
+    LOG_PRINT_L0(ENDL << ENDL << "$$####$$ construct_tx: tx after filling all outputs: , json:" << ENDL << obj_to_json_str(tx));
+
 
     //check money
     if(summary_outs_money > summary_inputs_money )
@@ -667,6 +672,8 @@ namespace currency
       ss_ring_s << "prefix_hash:" << tx_prefix_hash << ENDL << "in_ephemeral_key: " << in_contexts[i].in_ephemeral.sec << ENDL << "real_output: " << src_entr.real_output;
       i++;
     }
+
+    LOG_PRINT_L0(ENDL << ENDL << "$$####$$ construct_tx: tx after signing, hash: " << get_transaction_hash(tx) << ", json:" << ENDL << obj_to_json_str(tx));
 
     LOG_PRINT2("construct_tx.log", "transaction_created: " << get_transaction_hash(tx) << ENDL << obj_to_json_str(tx) << ENDL << ss_ring_s.str() , LOG_LEVEL_3);
 
