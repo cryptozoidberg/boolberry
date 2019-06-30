@@ -16,33 +16,33 @@
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4100)
 
-class daemon_cmmands_handler
+class daemon_commands_handler
 {
   nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& m_srv;
 public:
-  daemon_cmmands_handler(nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& srv):m_srv(srv)
+  daemon_commands_handler(nodetool::node_server<currency::t_currency_protocol_handler<currency::core> >& srv):m_srv(srv)
   {
-    m_cmd_binder.set_handler("help", boost::bind(&daemon_cmmands_handler::help, this, _1), "Show this help");
-    m_cmd_binder.set_handler("print_pl", boost::bind(&daemon_cmmands_handler::print_pl, this, _1), "Print peer list");
-    m_cmd_binder.set_handler("print_cn", boost::bind(&daemon_cmmands_handler::print_cn, this, _1), "Print connections");
-    m_cmd_binder.set_handler("print_bc", boost::bind(&daemon_cmmands_handler::print_bc, this, _1), "Print blockchain info in a given blocks range, print_bc <begin_height> [<end_height>]");
-    m_cmd_binder.set_handler("print_bc_timestamps", boost::bind(&daemon_cmmands_handler::print_bc_timestamps, this, _1), "Print block's timestamps in a given blocks range, print_bc <begin_height> [<end_height>]");
-    //m_cmd_binder.set_handler("print_bci", boost::bind(&daemon_cmmands_handler::print_bci, this, _1));
-    //m_cmd_binder.set_handler("print_bc_outs", boost::bind(&daemon_cmmands_handler::print_bc_outs, this, _1));
-    m_cmd_binder.set_handler("print_block", boost::bind(&daemon_cmmands_handler::print_block, this, _1), "Print block, print_block <block_hash> | <block_height>");
-    m_cmd_binder.set_handler("print_tx", boost::bind(&daemon_cmmands_handler::print_tx, this, _1), "Print transaction, print_tx <transaction_hash>");
-    m_cmd_binder.set_handler("start_mining", boost::bind(&daemon_cmmands_handler::start_mining, this, _1), "Start mining for specified address, start_mining <addr> [threads=1]");
-    m_cmd_binder.set_handler("stop_mining", boost::bind(&daemon_cmmands_handler::stop_mining, this, _1), "Stop mining");
-    m_cmd_binder.set_handler("print_pool", boost::bind(&daemon_cmmands_handler::print_pool, this, _1), "Print transaction pool (long format)");
-    m_cmd_binder.set_handler("print_pool_sh", boost::bind(&daemon_cmmands_handler::print_pool_sh, this, _1), "Print transaction pool (short format)");
-    m_cmd_binder.set_handler("show_hr", boost::bind(&daemon_cmmands_handler::show_hr, this, _1), "Start showing hash rate");
-    m_cmd_binder.set_handler("hide_hr", boost::bind(&daemon_cmmands_handler::hide_hr, this, _1), "Stop showing hash rate");
-    m_cmd_binder.set_handler("make_alias", boost::bind(&daemon_cmmands_handler::make_alias, this, _1), "Puts alias reservation record into block template, if alias is free");
-    m_cmd_binder.set_handler("set_donations", boost::bind(&daemon_cmmands_handler::set_donations, this, _1), "Set donations mode: true if you vote for donation, and false - if against");
-    m_cmd_binder.set_handler("print_ki", boost::bind(&daemon_cmmands_handler::print_ki, this, _1), "Print details of the specified key image");
-    m_cmd_binder.set_handler("print_deadlock_guard", boost::bind(&daemon_cmmands_handler::print_deadlock_guard, this, _1), "Print all threads which is blocked or involved in mutex ownership");
-    //m_cmd_binder.set_handler("save", boost::bind(&daemon_cmmands_handler::save, this, _1), "Save blockchain");
-    //m_cmd_binder.set_handler("get_transactions_statics", boost::bind(&daemon_cmmands_handler::get_transactions_statistics, this, _1), "Calculates transactions statistics");
+    m_cmd_binder.set_handler("help", boost::bind(&daemon_commands_handler::help, this, _1), "Show this help");
+    m_cmd_binder.set_handler("print_pl", boost::bind(&daemon_commands_handler::print_pl, this, _1), "Print peer list");
+    m_cmd_binder.set_handler("print_cn", boost::bind(&daemon_commands_handler::print_cn, this, _1), "Print connections");
+    m_cmd_binder.set_handler("print_bc", boost::bind(&daemon_commands_handler::print_bc, this, _1), "Print blockchain info in a given blocks range, print_bc <begin_height> [<end_height>]");
+    m_cmd_binder.set_handler("print_bc_timestamps", boost::bind(&daemon_commands_handler::print_bc_timestamps, this, _1), "Print block's timestamps in a given blocks range, print_bc <begin_height> [<end_height>]");
+    //m_cmd_binder.set_handler("print_bci", boost::bind(&daemon_commands_handler::print_bci, this, _1));
+    //m_cmd_binder.set_handler("print_bc_outs", boost::bind(&daemon_commands_handler::print_bc_outs, this, _1));
+    m_cmd_binder.set_handler("print_block", boost::bind(&daemon_commands_handler::print_block, this, _1), "Print block, print_block <block_hash> | <block_height>");
+    m_cmd_binder.set_handler("print_tx", boost::bind(&daemon_commands_handler::print_tx, this, _1), "Print transaction, print_tx <transaction_hash>");
+    m_cmd_binder.set_handler("start_mining", boost::bind(&daemon_commands_handler::start_mining, this, _1), "Start mining for specified address, start_mining <addr> [threads=1]");
+    m_cmd_binder.set_handler("stop_mining", boost::bind(&daemon_commands_handler::stop_mining, this, _1), "Stop mining");
+    m_cmd_binder.set_handler("print_pool", boost::bind(&daemon_commands_handler::print_pool, this, _1), "Print transaction pool (long format)");
+    m_cmd_binder.set_handler("print_pool_sh", boost::bind(&daemon_commands_handler::print_pool_sh, this, _1), "Print transaction pool (short format)");
+    m_cmd_binder.set_handler("show_hr", boost::bind(&daemon_commands_handler::show_hr, this, _1), "Start showing hash rate");
+    m_cmd_binder.set_handler("hide_hr", boost::bind(&daemon_commands_handler::hide_hr, this, _1), "Stop showing hash rate");
+    m_cmd_binder.set_handler("make_alias", boost::bind(&daemon_commands_handler::make_alias, this, _1), "Puts alias reservation record into block template, if alias is free");
+    m_cmd_binder.set_handler("set_donations", boost::bind(&daemon_commands_handler::set_donations, this, _1), "Set donations mode: true if you vote for donation, and false - if against");
+    m_cmd_binder.set_handler("print_ki", boost::bind(&daemon_commands_handler::print_ki, this, _1), "Print details of the specified key image");
+    m_cmd_binder.set_handler("print_deadlock_guard", boost::bind(&daemon_commands_handler::print_deadlock_guard, this, _1), "Print all threads which is blocked or involved in mutex ownership");
+    //m_cmd_binder.set_handler("save", boost::bind(&daemon_commands_handler::save, this, _1), "Save blockchain");
+    //m_cmd_binder.set_handler("get_transactions_statics", boost::bind(&daemon_commands_handler::get_transactions_statistics, this, _1), "Calculates transactions statistics");
   }
 
   bool start_handling()

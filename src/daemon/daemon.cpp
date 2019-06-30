@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
   currency::core_rpc_server rpc_server(ccore, p2psrv);
   cprotocol.set_p2p_endpoint(&p2psrv);
   ccore.set_currency_protocol(&cprotocol);
-  daemon_cmmands_handler dch(p2psrv);
+  daemon_commands_handler dch(p2psrv);
   tools::miniupnp_helper upnp_helper;
 
   // start components
@@ -155,6 +155,7 @@ int main(int argc, char* argv[])
   {
     dch.start_handling();
   }
+
   tools::signal_handler::install([&dch, &p2psrv] {
     dch.stop_handling();
     p2psrv.send_stop_signal();
