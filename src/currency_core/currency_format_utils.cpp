@@ -478,6 +478,8 @@ namespace currency
   {
     tx_out out = AUTO_VAL_INIT(out);
     txout_to_key tk = AUTO_VAL_INIT(tk);
+    memset(&tk, 0, sizeof(tx));
+
     out.amount = amount;
     tk.mix_attr = tx_outs_attr;
 
