@@ -175,7 +175,7 @@ std::string daemon_backend::get_config_folder()
   return m_data_dir;
 }
 
-bool daemon_backend::parse_transfer_target(const std::string& transfer_target, std::string& payment_id_hex, std::string& standard_addr_str)
+bool daemon_backend::parse_transfer_target(const std::string& transfer_target, std::string& payment_id_hex, std::string& standard_addr_str, bool& swap_address)
 {
   if (transfer_target.empty())
     return false;
@@ -188,6 +188,7 @@ bool daemon_backend::parse_transfer_target(const std::string& transfer_target, s
 
   standard_addr_str = currency::get_account_address_as_str(addr);
   payment_id_hex = epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id);
+  swap_address = addr.is_swap_address;
   return true;
 }
 
@@ -683,6 +684,7 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
     return false;
   }
 
+  currency::account_public_address swap_addr = AUTO_VAL_INIT(swap_addr);
   for (auto& d : tp.destinations)
   {
     currency::payment_id_t integrated_payment_id;
@@ -699,6 +701,17 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
       return false;
     }
     
+    //handle swap address
+    if (dsts.back().addr.is_swap_address)
+    {
+      if (swap_addr.is_swap_address)
+      {
+        m_pview->show_msg_box("Only one swap address is allowed in a swap transaction");
+        return false;
+      }
+      swap_addr = dsts.back().addr;
+    }
+
     if (!integrated_payment_id.empty())
     {
       if (!payment_id.empty())
@@ -713,9 +726,10 @@ bool daemon_backend::transfer(const view::transfer_params& tp, currency::transac
   
   // extra
   std::vector<uint8_t> extra;
-  if (!payment_id.empty() && !currency::set_payment_id_to_tx_extra(extra, payment_id))
+  bool r = currency::set_payment_id_and_swap_addr_to_tx_extra(extra, payment_id, swap_addr);
+  if (!r)
   {
-    m_pview->show_msg_box("Failed to send transaction: internal error, failed to set payment id");
+    m_pview->show_msg_box("Failed to send transaction: internal error, set_payment_id_and_swap_addr_to_tx_extra failed");
     return false;
   }
 

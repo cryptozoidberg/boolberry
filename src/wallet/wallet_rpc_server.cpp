@@ -102,6 +102,7 @@ namespace tools
     }
 
     std::vector<currency::tx_destination_entry> dsts;
+    currency::account_public_address swap_address = AUTO_VAL_INIT(swap_address);
     for (auto it = req.destinations.begin(); it != req.destinations.end(); it++) 
     {
       currency::tx_destination_entry de;
@@ -111,6 +112,16 @@ namespace tools
         er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
         er.message = std::string("WALLET_RPC_ERROR_CODE_WRONG_ADDRESS: ") + it->address;
         return false;
+      }
+      if (de.addr.is_swap_address)
+      {
+        if (swap_address.is_swap_address)
+        {
+          er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
+          er.message = "More then one swap address specified";
+          return false;
+        }
+        swap_address = de.addr;
       }
       
       if (!integrated_payment_id.empty())
@@ -132,8 +143,8 @@ namespace tools
     try
     {
       std::vector<uint8_t> extra;
-      if (!payment_id.empty())
-        currency::set_payment_id_to_tx_extra(extra, payment_id);
+      if (!payment_id.empty() || swap_address.is_swap_address)
+        currency::set_payment_id_and_swap_addr_to_tx_extra(extra, payment_id, swap_address);
 
       currency::transaction tx;
       currency::blobdata tx_blob;

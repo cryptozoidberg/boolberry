@@ -13,7 +13,9 @@
 
 //types predefined in TX_EXTRA_TAG_USER_DATA, rules are not strict, just a recommendation
 #define TX_USER_DATA_TAG_PAYMENT_ID                   0x00
+#define TX_USER_DATA_TAG_SWAP_ADDRESS                 0x01
 
 #define TX_EXTRA_MAX_USER_DATA_SIZE                   250
 #define TX_MAX_PAYMENT_ID_SIZE                        TX_EXTRA_MAX_USER_DATA_SIZE
+#define TX_MAX_SWAP_ADDRESS_SIZE                      250
 

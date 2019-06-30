@@ -66,6 +66,7 @@ namespace currency
     bool on_reset_transaction_pool(const COMMAND_RPC_RESET_TX_POOL::request& req, COMMAND_RPC_RESET_TX_POOL::response& res, connection_context& cntx);
     bool on_validate_signed_text(const COMMAND_RPC_VALIDATE_SIGNED_TEXT::request& req, COMMAND_RPC_VALIDATE_SIGNED_TEXT::response& res, connection_context& cntx);
     bool on_check_tx_with_view_key(const COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY::request& req, COMMAND_RPC_CHECK_TX_WITH_VIEW_KEY::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
+    bool on_get_swap_txs(const COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::request& req, COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
 
     bool on_get_blocks_details(const COMMAND_RPC_GET_BLOCKS_DETAILS::request& req, COMMAND_RPC_GET_BLOCKS_DETAILS::response& res, connection_context& cntx);
     bool on_get_alt_blocks_details(const COMMAND_RPC_GET_ALT_BLOCKS_DETAILS::request& req, COMMAND_RPC_GET_ALT_BLOCKS_DETAILS::response& res, connection_context& cntx);
@@ -74,6 +75,8 @@ namespace currency
     bool on_get_out_info(const COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::request& req, COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::response& res, connection_context& cntx);
     bool on_get_tx_details(const COMMAND_RPC_GET_TX_DETAILS::request& req, COMMAND_RPC_GET_TX_DETAILS::response& res, epee::json_rpc::error& error_resp, connection_context& cntx);
 
+
+    
     //mining rpc
     bool on_login(const mining::COMMAND_RPC_LOGIN::request& req, mining::COMMAND_RPC_LOGIN::response& res, connection_context& cntx);
     bool on_getjob(const mining::COMMAND_RPC_GETJOB::request& req, mining::COMMAND_RPC_GETJOB::response& res, connection_context& cntx);
@@ -132,8 +135,7 @@ namespace currency
         MAP_JON_RPC("get_out_info",              on_get_out_info,               COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT)
         MAP_JON_RPC_WE("get_tx_details",         on_get_tx_details,             COMMAND_RPC_GET_TX_DETAILS)
         MAP_JON_RPC("getinfo",                   on_get_info,                   COMMAND_RPC_GET_INFO)
-
-
+        MAP_JON_RPC_WE("get_swap_txs",           on_get_swap_txs,               COMMAND_RPC_GET_SWAP_TXS_FROM_BLOCK)        
         //remote miner rpc
         MAP_JON_RPC_N(on_login,            mining::COMMAND_RPC_LOGIN)
         MAP_JON_RPC_N(on_getjob,           mining::COMMAND_RPC_GETJOB)
