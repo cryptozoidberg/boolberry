@@ -55,8 +55,15 @@ namespace currency
   #pragma pack(push, 1)
   struct txout_to_key
   {
-    txout_to_key() { }
-    txout_to_key(const crypto::public_key &_key) : key(_key) { }
+    txout_to_key()
+     : key(AUTO_VAL_INIT(key))
+     , mix_attr(0)
+    {}
+
+    txout_to_key(const crypto::public_key &_key)
+     : key(_key)
+     , mix_attr(0)
+    {}
 
     crypto::public_key key;
     uint8_t mix_attr;
