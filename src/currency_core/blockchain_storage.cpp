@@ -2992,7 +2992,7 @@ bool blockchain_storage::add_new_block(const block& bl_, block_verification_cont
 //------------------------------------------------------------------
 //------------------------------------------------------------------
 //------------------------------------------------------------------
-bool blockchain_storage::get_main_blocks_rpc_details(uint64_t start_offset, size_t count, bool ignore_transactions, std::list<block_rpc_extended_info>& blocks) const
+bool blockchain_storage::get_main_blocks_rpc_details(uint64_t start_offset, size_t count, bool is_short, std::list<block_rpc_extended_info>& blocks) const
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   if (start_offset >= m_db_blocks.size())
@@ -3002,12 +3002,12 @@ bool blockchain_storage::get_main_blocks_rpc_details(uint64_t start_offset, size
   {
     blocks.push_back(block_rpc_extended_info());
     block_rpc_extended_info& bei = blocks.back();
-    get_main_block_rpc_details(i, bei);
+    get_main_block_rpc_details(i, bei, is_short);
   }
   return true;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::get_main_block_rpc_details(uint64_t h, block_rpc_extended_info& bei) const
+bool blockchain_storage::get_main_block_rpc_details(uint64_t h, block_rpc_extended_info& bei, bool is_short) const
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   auto core_bei_ptr = m_db_blocks[h];
@@ -3020,11 +3020,11 @@ bool blockchain_storage::get_main_block_rpc_details(uint64_t h, block_rpc_extend
     crypto::hash coinbase_id = get_transaction_hash(core_bei_ptr->bl.miner_tx);
     //load transactions details
     bei.transactions_details.push_back(tx_rpc_extended_info());
-    get_tx_rpc_details(coinbase_id, bei.transactions_details.back(), core_bei_ptr->bl.timestamp, true);
+    get_tx_rpc_details(coinbase_id, bei.transactions_details.back(), core_bei_ptr->bl.timestamp, is_short);
     for (auto& h : core_bei_ptr->bl.tx_hashes)
     {
       bei.transactions_details.push_back(tx_rpc_extended_info());
-      get_tx_rpc_details(h, bei.transactions_details.back(), core_bei_ptr->bl.timestamp, true);
+      get_tx_rpc_details(h, bei.transactions_details.back(), core_bei_ptr->bl.timestamp, is_short);
       bei.total_fee += bei.transactions_details.back().fee;
       bei.total_txs_size += bei.transactions_details.back().blob_size;
     }

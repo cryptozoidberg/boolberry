@@ -1226,12 +1226,12 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
     {
       uint64_t height_start;
       uint64_t count;
-      bool ignore_transactions;
+      bool is_short;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(height_start)
         KV_SERIALIZE(count)
-        KV_SERIALIZE(ignore_transactions)
+        KV_SERIALIZE(is_short)
       END_KV_SERIALIZE_MAP()
     };
 

@@ -1513,7 +1513,7 @@ bool core_rpc_server::f_getMixin(const transaction& transaction, uint64_t& mixin
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_blocks_details(const COMMAND_RPC_GET_BLOCKS_DETAILS::request& req, COMMAND_RPC_GET_BLOCKS_DETAILS::response& res, connection_context& cntx)
   {
-    m_core.get_blockchain_storage().get_main_blocks_rpc_details(req.height_start, req.count, req.ignore_transactions, res.blocks);
+    m_core.get_blockchain_storage().get_main_blocks_rpc_details(req.height_start, req.count, req.is_short, res.blocks);
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
