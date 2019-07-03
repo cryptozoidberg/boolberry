@@ -3056,6 +3056,23 @@ bool blockchain_storage::get_tx_rpc_details(const crypto::hash& h, tx_rpc_extend
   }
   tei.keeper_block = static_cast<int64_t>(tx_ptr->m_keeper_block_height);
   fill_tx_rpc_details(tei, tx_ptr->tx, &(*tx_ptr), h, timestamp, is_short);
+
+  for (auto& in : tei.ins)
+  {
+    COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::request req = AUTO_VAL_INIT(req);
+    req.amount = in.amount;
+    for (auto gi : in.global_indexes)
+    {
+      req.i = gi;
+      COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::response  resp = AUTO_VAL_INIT(resp);
+      this->get_global_index_details(req, resp);
+      related_tx_info rt = AUTO_VAL_INIT(rt);
+      rt.tx_id = resp.tx_id;
+      rt.out_no = resp.out_no;
+      in.global_indexes_related_txs.push_back(rt);
+    }
+  }
+ 
   return true;
 }
 //------------------------------------------------------------------
