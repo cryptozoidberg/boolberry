@@ -88,6 +88,7 @@ namespace currency
     crypto::hash get_block_id_by_height(uint64_t height);
     bool get_block_by_hash(const crypto::hash &h, block &blk);
     bool get_block_by_height(uint64_t h, block &blk);
+    bool get_block_swap_transactions(uint64_t height, const crypto::secret_key& sk, std::string& block_id, std::string& prev_block_id, uint64_t& timestamp, std::list<swap_transaction_info>& swap_txs_list);
     //void get_all_known_block_ids(std::list<crypto::hash> &main, std::list<crypto::hash> &alt, std::list<crypto::hash> &invalid);
 
     template<class archive_t>
@@ -222,7 +223,7 @@ namespace currency
 
 
     typedef db::key_value_accessor_base<std::string, std::list<alias_info_base>, true> aliases_container; //typedef std::map<std::string, std::list<extra_alias_entry_base>> aliases_container; //alias can be address address address + view key
-    typedef db::key_value_accessor_base<account_public_address, std::set<std::string>, true> address_to_aliases_container;//typedef std::unordered_map<account_public_address, std::set<std::string> > address_to_aliases_container;
+    typedef db::key_value_accessor_base<account_public_address_base, std::set<std::string>, true> address_to_aliases_container;//typedef std::unordered_map<account_public_address, std::set<std::string> > address_to_aliases_container;
     typedef db::key_value_accessor_base<crypto::hash, std::pair<crypto::hash, uint64_t>, false> multisig_outs_container;//  typedef std::unordered_map<crypto::hash, std::pair<crypto::hash, size_t>> multisig_outs_container;// hash key - multisig output id, pair<tx_id, n> - reference to tx id + output in transaction
     typedef db::key_value_accessor_base<uint64_t, uint64_t, false> solo_options_container;
 

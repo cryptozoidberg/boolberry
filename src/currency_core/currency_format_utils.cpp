@@ -13,6 +13,8 @@ using namespace epee;
 #include "crypto/crypto.h"
 #include "crypto/hash.h"
 #include "profile_tools.h"
+#include "currency_core/swap_address.h"
+#include "common/base58.h"
 
 namespace currency
 {
@@ -474,21 +476,30 @@ namespace currency
   //---------------------------------------------------------------
   bool construct_tx_out(const account_public_address& destination_addr, const crypto::secret_key& tx_sec_key, size_t output_index, uint64_t amount, transaction& tx, uint8_t tx_outs_attr)
   {
-    crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
-    crypto::public_key out_eph_public_key = AUTO_VAL_INIT(out_eph_public_key);
-    bool r = crypto::generate_key_derivation(destination_addr.m_view_public_key, tx_sec_key, derivation);
-    CHECK_AND_ASSERT_MES(r, false, "at creation outs: failed to generate_key_derivation(" << destination_addr.m_view_public_key << ", " << tx_sec_key << ")");
-
-    r = crypto::derive_public_key(derivation, output_index, destination_addr.m_spend_public_key, out_eph_public_key);
-    CHECK_AND_ASSERT_MES(r, false, "at creation outs: failed to derive_public_key(" << derivation << ", " << output_index << ", "<< destination_addr.m_view_public_key << ")");
-
-    tx_out out;
+    tx_out out = AUTO_VAL_INIT(out);
+    txout_to_key tk = AUTO_VAL_INIT(tk);
     out.amount = amount;
-    txout_to_key tk;
-    tk.key = out_eph_public_key;
     tk.mix_attr = tx_outs_attr;
-    out.target = tk;
-    tx.vout.push_back(out);
+
+    if (destination_addr.is_swap_address)
+    {  
+      //swap transaction
+      out.target = tk;
+      //add key zero 
+      tx.vout.push_back(out);
+    }
+    else
+    {
+      crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
+      crypto::public_key out_eph_public_key = AUTO_VAL_INIT(out_eph_public_key);
+      bool r = crypto::generate_key_derivation(destination_addr.m_view_public_key, tx_sec_key, derivation);
+      CHECK_AND_ASSERT_MES(r, false, "at creation outs: failed to generate_key_derivation(" << destination_addr.m_view_public_key << ", " << tx_sec_key << ")");
+      r = crypto::derive_public_key(derivation, output_index, destination_addr.m_spend_public_key, out_eph_public_key);
+      CHECK_AND_ASSERT_MES(r, false, "at creation outs: failed to derive_public_key(" << derivation << ", " << output_index << ", " << destination_addr.m_view_public_key << ")");
+      tk.key = out_eph_public_key;
+      out.target = tk;
+      tx.vout.push_back(out);
+    }
     return true;
   }
   //---------------------------------------------------------------
@@ -554,6 +565,10 @@ namespace currency
     tx.unlock_time = unlock_time;
 
     txkey = keypair::generate();
+
+    if (is_swap_tx(tx, destinations))
+      encrypt_user_data_with_tx_secret_key(txkey.sec, tx.extra);
+
     add_tx_pub_key_to_extra(tx, txkey.pub);
 
     struct input_generation_context_data
@@ -785,23 +800,86 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
-  bool set_payment_id_to_tx_extra(std::vector<uint8_t>& extra, const payment_id_t& payment_id)
+  bool get_swap_info_from_tx(const transaction& tx, const crypto::secret_key& sk, swap_transaction_info& swap_info)
   {
-    if(!payment_id.size() || payment_id.size() >= TX_MAX_PAYMENT_ID_SIZE)
+    account_public_address addr = AUTO_VAL_INIT(addr);
+    get_swap_info_from_tx_extra(tx, sk, addr); // do not check return code as it's okay if it is false
+    if (!addr.is_swap_address)
       return false;
 
-    if(std::find(extra.begin(), extra.end(), TX_EXTRA_TAG_USER_DATA) != extra.end())
+    payment_id_t payment_id;
+    get_payment_id_from_tx_extra(tx, payment_id);
+    uint64_t total_amount = 0;
+    for (auto& o : tx.vout)
+    {
+      if (o.target.type() == typeid(txout_to_key))
+      {
+        if (boost::get<txout_to_key>(o.target).key == null_pkey)
+          total_amount += o.amount;
+      }
+    }
+    if (!total_amount)
       return false;
 
-    extra.push_back(TX_EXTRA_TAG_USER_DATA);
-    extra.push_back(static_cast<uint8_t>(payment_id.size()+2));
+    swap_info.payment_id_hex_str = epee::string_tools::buff_to_hex_nodelimer(payment_id);
+    swap_info.swap_address = get_account_swap_address_as_str(addr);
+    swap_info.swapped_amount = total_amount;
+    swap_info.tx_id = string_tools::pod_to_hex(get_transaction_hash(tx));
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool get_payment_id_userdata_entry(std::vector<uint8_t>& extra, const payment_id_t& payment_id)
+  {
+    if (!payment_id.size())
+      return true;
+    if (payment_id.size() >= TX_MAX_PAYMENT_ID_SIZE)
+      return false;
+
     extra.push_back(TX_USER_DATA_TAG_PAYMENT_ID);
     extra.push_back(static_cast<uint8_t>(payment_id.size()));
-    
+
     const uint8_t* payment_id_ptr = reinterpret_cast<const uint8_t*>(payment_id.data());
     std::copy(payment_id_ptr, payment_id_ptr + payment_id.size(), std::back_inserter(extra));
     return true;
   }
+  //---------------------------------------------------------------
+  bool get_swapinfo_userdata_entry(std::vector<uint8_t>& extra, const account_public_address& swap_addr)
+  {
+    if (swap_addr.is_swap_address)
+    {
+      swap_address_extra_entry saee = AUTO_VAL_INIT(saee);
+      saee.addr_base = static_cast<const account_public_address_base&>(swap_addr);
+      saee.calc_and_set_checksum();
+
+      extra.push_back(TX_USER_DATA_TAG_SWAP_ADDRESS);
+      extra.push_back(static_cast<uint8_t>(sizeof saee));
+      std::copy(reinterpret_cast<const uint8_t*>(&saee), reinterpret_cast<const uint8_t*>(&saee) + sizeof saee, std::back_inserter(extra));
+    }
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool set_payment_id_and_swap_addr_to_tx_extra(std::vector<uint8_t>& extra, const payment_id_t& payment_id, const account_public_address& acc)
+  {
+    std::vector<uint8_t> payment_id_userdata_entry;
+    std::vector<uint8_t> swap_address_userdata_entry;
+    bool r = get_payment_id_userdata_entry(payment_id_userdata_entry, payment_id);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to get_payment_id_userdata_entry");
+    r = get_swapinfo_userdata_entry(swap_address_userdata_entry, acc);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to get_swapinfo_userdata_entry");
+    if (payment_id_userdata_entry.empty() && swap_address_userdata_entry.empty())
+      return true;
+
+    CHECK_AND_ASSERT_MES(payment_id_userdata_entry.size() + swap_address_userdata_entry.size() < TX_EXTRA_MAX_USER_DATA_SIZE, false, "To big size for user-data: payment_id_userdata_entry " << payment_id_userdata_entry.size()
+      << "  + swap_address_userdata_entry " << swap_address_userdata_entry.size() << ", expected no more then " << TX_EXTRA_MAX_USER_DATA_SIZE);
+
+
+    extra.push_back(TX_EXTRA_TAG_USER_DATA);
+    extra.push_back(static_cast<uint8_t>(payment_id_userdata_entry.size() + swap_address_userdata_entry.size()));
+    extra.insert(extra.end(), payment_id_userdata_entry.begin(), payment_id_userdata_entry.end());
+    extra.insert(extra.end(), swap_address_userdata_entry.begin(), swap_address_userdata_entry.end());
+    return true;
+  }
+
   //---------------------------------------------------------------
   bool get_payment_id_from_user_data(const std::string& user_data, payment_id_t& payment_id)
   {
@@ -816,6 +894,33 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
+  bool get_swapinfo_encrypted_buff_from_user_data(const std::string& user_data, std::string& encrypted_buff)
+  {
+    if (!user_data.size())
+      return false;
+    size_t i = 0;
+    while (i < user_data.size())
+    {
+      if (user_data[i] != TX_USER_DATA_TAG_SWAP_ADDRESS)
+      {
+        CHECK_AND_ASSERT_MES(user_data.size() - 1 - i >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data.size() - 1 - i);
+        i += user_data[i + 1] + 2;
+      }
+      else
+      {
+        CHECK_AND_ASSERT_MES(user_data.size() - 1 - i >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data.size() - 1 - i);
+        size_t data_size = user_data[i + 1];
+        CHECK_AND_ASSERT_MES(data_size == sizeof(swap_address_extra_entry), false, "wrong TX_USER_DATA_TAG_SWAP_ADDRESS semantics: data_size: " << data_size << ", expected " << sizeof(swap_address_extra_entry));
+        ++i;
+        CHECK_AND_ASSERT_MES(user_data.size() - 1 - i >= data_size, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data.size() - 1 - i);
+        ++i;
+        encrypted_buff.assign(static_cast<const char*>(&user_data[i]), data_size);
+        return true;
+      }
+    }
+    return false;
+  }
+  //---------------------------------------------------------------
   bool get_payment_id_from_tx_extra(const transaction& tx, std::string& payment_id)
   {
     tx_extra_info tei = AUTO_VAL_INIT(tei);
@@ -825,6 +930,40 @@ namespace currency
       return false;
     if(!get_payment_id_from_user_data(tei.m_user_data_blob, payment_id))
       return false;
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool get_swap_info_from_tx_extra(const transaction& tx, const crypto::secret_key& sk, account_public_address& addr)
+  {
+    tx_extra_info tei = AUTO_VAL_INIT(tei);
+    bool r = parse_and_validate_tx_extra(tx, tei);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to parse and validate extra");
+    if (!tei.m_user_data_blob.size())
+      return false;
+
+    // retrieve encrypted data
+    std::string buff;
+    if (!get_swapinfo_encrypted_buff_from_user_data(tei.m_user_data_blob, buff))
+      return false; // no swap info, it's okay
+
+    CHECK_AND_ASSERT_MES(buff.size() == sizeof(swap_address_extra_entry), false, "wrong size of encrypted swap info: " << buff.size());
+
+    // decrypt
+    crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
+    r = crypto::generate_key_derivation(tei.m_tx_pub_key, sk, derivation);
+    CHECK_AND_ASSERT_MES(r, false, "generate_key_derivation failed");
+
+    r = crypto::do_chacha_crypt(buff, derivation);
+    CHECK_AND_ASSERT_MES(r, false, "do_chacha_crypt failed");
+
+    CHECK_AND_ASSERT_MES(buff.size() == sizeof(swap_address_extra_entry), false, "wrong size of decrypted swap info: " << buff.size());
+
+    // verify checksum and copy decrypted buffer to addr
+    const swap_address_extra_entry& saee = *reinterpret_cast<const swap_address_extra_entry*>(buff.data());
+    CHECK_AND_ASSERT_MES(saee.is_checksum_valid(), false, "incorrect checksum: " << saee.checksum);
+    static_cast<account_public_address_base&>(addr) = saee.addr_base;
+    addr.is_swap_address = true;
+
     return true;
   }
   //---------------------------------------------------------------
@@ -1002,13 +1141,12 @@ namespace currency
   void print_coins_that_can_be_swapped()
   {
     
-    uint64_t h = 0;
-    uint64_t already_generated_coins = 12871624879042785615;
+    uint64_t h = 1279441;
+    uint64_t already_generated_coins = 12871624879042786098;
+    uint64_t already_donated_coins = 134336574538000000;
 
-    //starting from this block https://explorer.mining.blue/en/?hash=380d14b4ab410acfdb4099db3782f0e94502dd99dc49d459d3d1065e1550ac47#blockchain_block
-
-    uint64_t summary_mined_coins_which_can_be_swaped = already_generated_coins;
-    for (uint64_t h = 1279441; h != 1551075; ++h)
+    uint64_t summary_mined_coins_which_can_be_swaped = already_generated_coins + already_donated_coins;
+    for (h = 1279441; h != 1551075; ++h)
     {
       uint64_t emission_reward = 0;
       uint64_t stub = 0;
@@ -1024,6 +1162,23 @@ namespace currency
       else
       {
         summary_mined_coins_which_can_be_swaped += emission_reward;
+      }
+      if (!(h % 720))
+      {
+        std::vector<bool> votes(CURRENCY_DONATIONS_INTERVAL, true);
+        uint64_t max_possible_donation_reward = get_donations_anount_for_day(already_donated_coins, votes);
+        already_donated_coins += max_possible_donation_reward;
+        if (h > 1353794)
+        {
+          //1551074 estimated N block when swap is over
+          //197280 - period of 9 months in blocks (720 block * 274 days)
+          double correction_factor = double(1551074 - h) / 197280;
+          summary_mined_coins_which_can_be_swaped += static_cast<uint64_t>(correction_factor * max_possible_donation_reward);
+        }
+        else
+        {
+          summary_mined_coins_which_can_be_swaped += max_possible_donation_reward;
+        }
       }
     }
 
@@ -1224,7 +1379,7 @@ namespace currency
     return get_tx_tree_hash(txs_ids);
   }
   //---------------------------------------------------------------
-  bool get_reward_from_miner_tx(const transaction& tx, uint64_t& reward)
+ bool get_reward_from_miner_tx(const transaction& tx, uint64_t& reward)
   {
     // make sure it's a miner tx
     if (tx.vin.size() != 1)
@@ -1384,6 +1539,125 @@ namespace currency
     return true;
   }
   //---------------------------------------------------------------
+bool encrypt_user_data_with_tx_secret_key(const crypto::secret_key& sk, uint8_t* data, size_t size)
+  {
+    crypto::public_key pub_key = AUTO_VAL_INIT(pub_key);
+    bool r = string_tools::hex_to_pod(SWAP_ADDRESS_ENCRYPTION_PUB_KEY, pub_key);
+    CHECK_AND_ASSERT_MES(r, false, "failed to load SWAP_ADDRESS_ENCRYPTION_PUB_KEY");
 
+    crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
+    r = crypto::generate_key_derivation(pub_key, sk, derivation);
+    CHECK_AND_ASSERT_MES(r, false, "generate_key_derivation failed");
+    
+    std::vector<uint8_t> buff(size, '\0');
+    r = crypto::do_chacha_crypt(data, size, buff.data(), &derivation, sizeof derivation);
+    CHECK_AND_ASSERT_MES(r, false, "do_chacha_crypt failed");
 
+    memcpy(data, buff.data(), size);
+
+    return true;
+  }
+
+  bool encrypt_user_data_with_tx_secret_key(const crypto::secret_key& sk, std::vector<uint8_t>& extra)
+  {
+    bool padding_started = false;
+    for (size_t i = 0; i < extra.size(); /* nothing */)
+    {
+      if (padding_started)
+      {
+        CHECK_AND_ASSERT_MES(extra[i] == 0, false, "Failed to parse transaction extra (not 0 after padding)");
+      }
+      else if (extra[i] == TX_EXTRA_TAG_PUBKEY)
+      {
+        CHECK_AND_ASSERT_MES(extra.size() - 1 - i >= sizeof(crypto::public_key), false, "Failed to parse transaction extra (TX_EXTRA_TAG_PUBKEY have not enough bytes)");
+        i += 1 + sizeof(crypto::public_key);
+        continue;
+      }
+      else if (extra[i] == TX_EXTRA_TAG_USER_DATA)
+      {
+        CHECK_AND_ASSERT_MES(extra.size() - 1 - i >= 1, false, "Failed to parse transaction extra (TX_EXTRA_TAG_USER_DATA have not enough bytes)");
+        ++i;
+        CHECK_AND_ASSERT_MES(extra.size() - 1 - i >= extra[i], false, "Failed to parse transaction extra (TX_EXTRA_TAG_USER_DATA have wrong bytes counter)");
+        if (extra[i] > 0)
+        {
+          uint8_t* user_data = &extra[i + 1];
+          const size_t user_data_size = static_cast<size_t>(extra[i]);
+
+          size_t j = 0;
+          while (j < user_data_size)
+          {
+            if (user_data[j] != TX_USER_DATA_TAG_SWAP_ADDRESS)
+            {
+              CHECK_AND_ASSERT_MES(user_data_size - 1 - j >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data_size - 1 - j);
+              j += user_data[j + 1] + 2;
+            }
+            else
+            {
+              CHECK_AND_ASSERT_MES(user_data_size - 1 - j >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data_size - 1 - j);
+              ++j;
+              size_t swap_addr_size = user_data[j];
+              CHECK_AND_ASSERT_MES(swap_addr_size == sizeof(swap_address_extra_entry), false, "wrong TX_USER_DATA_TAG_SWAP_ADDRESS semantics! size: " << swap_addr_size << ", expected: " << sizeof(swap_address_extra_entry));
+              CHECK_AND_ASSERT_MES(user_data_size - 1 - j >= swap_addr_size, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data_size - 1 - j);
+              ++j;
+              uint8_t *swap_addr = &user_data[j];
+
+              encrypt_user_data_with_tx_secret_key(sk, swap_addr, swap_addr_size);
+
+              return true;
+            }
+          }
+
+        }
+        i += extra[i];
+      }
+      else if (extra[i] == TX_EXTRA_TAG_ALIAS)
+      {
+        CHECK_AND_ASSERT_MES(false, false, "TX_EXTRA_TAG_ALIAS is incompartible with TX_USER_DATA_TAG_SWAP_ADDRESS atm");
+      }
+      else if (extra[i] == 0)
+      {
+        padding_started = true;
+        continue;
+      }
+      else
+      {
+        CHECK_AND_ASSERT_MES(false, false, "unknown tx extra tag: 0x" << std::hex << extra[i]);
+      }
+      ++i;
+    }
+
+    return true;
+  }
+  //---------------------------------------------------------------
+  bool is_swap_tx(const currency::transaction& tx, const std::vector<tx_destination_entry>& destinations)
+  {
+    // a tx is a swap tx if it has at least one swap destination address (null_pkey output) AND swap info in extra.userdata
+    bool has_swap_destinations = false;
+    for (auto& d : destinations)
+    {
+      if (d.addr.is_swap_address)
+      {
+        has_swap_destinations = true;
+        break;
+      }
+    }
+
+    if (!has_swap_destinations)
+      return false;
+    
+    tx_extra_info tei = AUTO_VAL_INIT(tei);
+    bool r = parse_and_validate_tx_extra(tx, tei);
+    CHECK_AND_ASSERT_MES(r, false, "Failed to parse and validate extra");
+    if (!tei.m_user_data_blob.size())
+      return false;
+
+    // retrieve encrypted data
+    std::string buff;
+    if (!get_swapinfo_encrypted_buff_from_user_data(tei.m_user_data_blob, buff))
+      return false; // no swap info, it's okay
+
+    // there is a swap info, consider it as a swap tx
+    return true;
+  }
+  //---------------------------------------------------------------
 }

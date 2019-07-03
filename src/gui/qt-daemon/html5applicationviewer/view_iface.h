@@ -240,11 +240,13 @@ namespace view
     bool valid;
     std::string standard_address;
     std::string payment_id_hex;
+    bool swap_address;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(valid)
       KV_SERIALIZE(standard_address)
       KV_SERIALIZE(payment_id_hex)
+      KV_SERIALIZE(swap_address)
     END_KV_SERIALIZE_MAP()
   };
 

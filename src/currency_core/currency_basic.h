@@ -55,8 +55,15 @@ namespace currency
   #pragma pack(push, 1)
   struct txout_to_key
   {
-    txout_to_key() { }
-    txout_to_key(const crypto::public_key &_key) : key(_key) { }
+    txout_to_key()
+     : key(AUTO_VAL_INIT(key))
+     , mix_attr(0)
+    {}
+
+    txout_to_key(const crypto::public_key &_key)
+     : key(_key)
+     , mix_attr(0)
+    {}
 
     crypto::public_key key;
     uint8_t mix_attr;
@@ -255,7 +262,7 @@ namespace currency
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
-  struct account_public_address
+  struct account_public_address_base
   {
     crypto::public_key m_spend_public_key;
     crypto::public_key m_view_public_key;
@@ -263,12 +270,22 @@ namespace currency
     BEGIN_SERIALIZE_OBJECT()
       FIELD(m_spend_public_key)
       FIELD(m_view_public_key)
-    END_SERIALIZE()
+      END_SERIALIZE()
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(m_spend_public_key)
       KV_SERIALIZE_VAL_POD_AS_BLOB_FORCE(m_view_public_key)
     END_KV_SERIALIZE_MAP()
+
+  };
+
+  struct account_public_address: public account_public_address_base
+  {
+    account_public_address()
+      : is_swap_address(false)
+    {}
+
+    bool is_swap_address;
   };
 
   struct keypair

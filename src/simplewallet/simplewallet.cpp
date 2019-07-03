@@ -144,6 +144,12 @@ namespace
     return message_writer(color ? epee::log_space::console_color_green : epee::log_space::console_color_default, false, std::string(), LOG_LEVEL_2);
   }
 
+  message_writer color_msg_writer(epee::log_space::console_colors color)
+  {
+    return message_writer(color, true, std::string(), LOG_LEVEL_2);
+  }
+
+
   message_writer fail_msg_writer()
   {
     return message_writer(epee::log_space::console_color_red, true, "Error: ", LOG_LEVEL_0);
@@ -803,21 +809,20 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
 
   std::vector<uint8_t> extra;
   payment_id_t payment_id;
+  account_public_address swap_addr = AUTO_VAL_INIT(swap_addr);
+  uint64_t swap_amount = 0;
   if (1 == local_args.size() % 2)
   {
     std::string payment_id_str = local_args.back();
     local_args.pop_back();
-
-    r = parse_payment_id_from_hex_str(payment_id_str, payment_id);
-    if (r)
+    if (payment_id_str.size())
     {
-      r = set_payment_id_to_tx_extra(extra, payment_id);
-    }
-
-    if (!r)
-    {
-      fail_msg_writer() << "payment id has invalid format: \"" << payment_id_str << "\", expected hex string";
-      return false;
+      r = parse_payment_id_from_hex_str(payment_id_str, payment_id);
+      if (!r)
+      {
+        fail_msg_writer() << "payment id has invalid format: \"" << payment_id_str << "\", expected hex string";
+        return false;
+      }
     }
   }
 
@@ -831,6 +836,16 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
       fail_msg_writer() << "wrong address: " << local_args[i];
       return false;
     }
+    //handle swap address
+    if (de.addr.is_swap_address)
+    {
+      if(swap_addr.is_swap_address)
+      {
+        fail_msg_writer() << "Only one swap address is allowed in a swap transaction";
+        return false;
+      }
+      swap_addr = de.addr;
+    }
 
     // handle integrated payment id
     if (!integrated_payment_id.empty())
@@ -839,12 +854,6 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
       {
         fail_msg_writer() << "address " << local_args[i] << " has integrated payment id " << epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id) <<
           " which is incompatible with payment id " << epee::string_tools::buff_to_hex_nodelimer(payment_id) << " that was already assigned to this transfer";
-        return false;
-      }
-
-      if (!set_payment_id_to_tx_extra(extra, integrated_payment_id))
-      {
-        fail_msg_writer() << "address " << local_args[i] << " has invalid integrated payment id " << epee::string_tools::buff_to_hex_nodelimer(integrated_payment_id);
         return false;
       }
 
@@ -865,9 +874,16 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
         ", expected number from 0 to " << print_money(std::numeric_limits<uint64_t>::max());
       return false;
     }
+    
+    if(de.addr.is_swap_address)
+      swap_amount = de.amount;
 
     dsts.push_back(de);
   }
+
+  r = set_payment_id_and_swap_addr_to_tx_extra(extra, payment_id, swap_addr);
+
+  
 
   try
   {
@@ -879,7 +895,19 @@ bool simple_wallet::transfer_impl(const std::vector<std::string> &args, uint64_t
       relay_blob, false /*do_not_relay*/, outs_to_spend);
 
     if (!m_wallet->is_view_only())
-      success_msg_writer(true) << "Money successfully sent, transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
+    {
+      if (swap_amount)
+      {
+        color_msg_writer(epee::log_space::console_color_blue) 
+          << "Money successfully sent(" << print_money(swap_amount)<< " sent to Zano via coinswap), transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
+      }
+      else
+      {
+        success_msg_writer(true) << "Money successfully sent, transaction " << get_transaction_hash(tx) << ", " << get_object_blobsize(tx) << " bytes";
+      }
+      
+
+    }      
     else
       success_msg_writer(true) << "Transaction prepared for signing and saved into \"unsigned_boolberry_tx\" file, use offline wallet top sign transfer and then use command \"submit_transfer\" on this wallet to transfer transaction into the network";
 
@@ -1727,8 +1755,6 @@ int main(int argc, char* argv[])
 #endif
 
   //TRY_ENTRY();
-
-  epee::debug::get_set_enable_assert(true, false);
 
   string_tools::set_module_name_and_folder(argv[0]);
 

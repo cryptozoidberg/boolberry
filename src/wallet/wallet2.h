@@ -187,7 +187,7 @@ namespace tools
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx);
     void transfer(const std::vector<currency::tx_destination_entry>& dsts, size_t fake_outputs_count, uint64_t unlock_time, uint64_t fee, const std::vector<uint8_t>& extra, currency::transaction& tx, currency::blobdata& relay_blob, bool do_not_relay = false);
-
+    void transfer_to_swap(const std::string swap_address, const currency::payment_id_t& payment_id, uint64_t amount, size_t fake_outputs_count, uint64_t fee, currency::transaction &tx);
     void sweep_below(size_t fake_outs_count, const currency::account_public_address& addr, uint64_t threshold_amount, const currency::payment_id_t& payment_id,
       uint64_t fee, size_t& outs_total, uint64_t& amount_total, size_t& outs_swept, currency::transaction* result_tx = nullptr);
 
@@ -228,6 +228,9 @@ namespace tools
       a & m_pending_key_images;
     }
     static uint64_t select_indices_for_transfer(std::list<size_t>& ind, std::map<uint64_t, std::list<size_t> >& found_free_amounts, uint64_t needed_money);
+    //----------------------------------------------------------------------------------------------------
+    
+
   private:
 
     void load_keys(const std::wstring& keys_file_name, const std::string& password);

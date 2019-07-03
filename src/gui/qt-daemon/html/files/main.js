@@ -736,55 +736,69 @@ function on_address_change() {
   
   //async communication
   backend.parse_transfer_target(addressInputVal, function(callback) {
-      result = callback;     
-      var addressValidation = $.parseJSON(result);    
+    result = callback;     
+    var addressValidation = $.parseJSON(result);
+
     if (addressValidation.valid) {
-    if (addressValidation.payment_id_hex.length) {
-      $('#transfer_address_id_container').addClass('integrated');
-      $('#payment_id').val(addressValidation.payment_id_hex);
-      $('#payment_id').addClass('is-disabled');
-      $('#payment_id').prop('disabled', true);
-      show_address_status('integrated');
+
+      if (addressValidation.payment_id_hex.length) {
+        $('#transfer_address_id_container').addClass('integrated');
+        $('#payment_id').val(addressValidation.payment_id_hex);
+        $('#payment_id').addClass('is-disabled');
+        $('#payment_id').prop('disabled', true);
+        show_address_status('integrated');
+      } else {
+        $('#payment_id').val('').removeClass('is-disabled');
+        $('#payment_id').prop('disabled', false);
+      }
+	  
+	  if (addressValidation.swap_address) {
+          show_address_status('swap');
+      } else {
+          show_address_status('valid');
+      }
+	  
     } else {
-      show_address_status('valid');
+      show_address_status('invalid');
       $('#payment_id').val('').removeClass('is-disabled');
       $('#payment_id').prop('disabled', false);
     }
-    } else {
-    show_address_status('invalid');
-    $('#payment_id').val('').removeClass('is-disabled');
-    $('#payment_id').prop('disabled', false);
-    }
-    });  
+  });
 }
 
 function show_address_status(status) {
   var newStatus = 'with-status' + ' ' + status;
-  $('.address-status').removeClass('with-status valid invalid integrated');
-  $('#transfer_address_id').removeClass('with-status');
+  hide_address_status();
 
   $('.address-status').addClass(newStatus);
   $('#transfer_address_id').addClass('with-status');
 
   switch (status) {
     case 'valid':
-    $('.address-status-text').text('Valid address');
-    break;
+      $('.address-status-text').text('Valid address');
+      break;
     case 'invalid':
-    $('.address-status-text').text('Invalid address');
-    break;
+      $('.address-status-text').text('Invalid address');
+      break;
     case 'integrated':
-    $('.address-status-text').text('Integrated address');
-    break;
+      $('.address-status-text').text('Integrated address');
+      break;
+    case 'swap':
+      $('.address-status-text').text('Coinswap address');
+      $('#toggle-section-payment').text('Zano coinswap transaction');
+      $('#toggle-section-payment').addClass('swap');
+      break;
     default:
-    break;
+      break;
   }
 }
 
 function hide_address_status() {
-  $('.address-status').removeClass('with-status valid invalid integrated');
+  $('.address-status').removeClass('with-status valid invalid integrated swap');
   $('#transfer_address_id').removeClass('with-status');
   $('.address-status-text').text('');
+  $('#toggle-section-payment').text('Send payment');
+  $('#toggle-section-payment').removeClass('swap');
 }
 
 $(function()
