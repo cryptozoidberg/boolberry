@@ -1466,6 +1466,22 @@ namespace currency
     }
     */
 
+    //read if block registrat aliases
+    tx_extra_info tei = AUTO_VAL_INIT(tei);
+    if (parse_and_validate_tx_extra(bei_chain.bl.miner_tx, tei))
+    {
+      if (tei.m_alias.m_alias.size() != 0)
+      {
+        pei_rpc.registered_alias.alias = tei.m_alias.m_alias;
+        pei_rpc.registered_alias.details.address = get_account_address_as_str(tei.m_alias.m_address);
+        pei_rpc.registered_alias.details.comment = tei.m_alias.m_text_comment;
+        if(currency::null_skey != tei.m_alias.m_view_key )
+          pei_rpc.registered_alias.details.tracking_key = epee::string_tools::pod_to_hex(tei.m_alias.m_view_key);
+        if (currency::null_sig != tei.m_alias.m_sign)
+          pei_rpc.registered_alias.details.signature = epee::string_tools::pod_to_hex(tei.m_alias.m_sign);
+      }
+    }
+
     get_reward_from_miner_tx(bei_chain.bl.miner_tx, pei_rpc.summary_reward);
     pei_rpc.base_reward = get_base_block_reward(bei_chain.already_generated_coins - pei_rpc.summary_reward); // need to calculate reward from already_generated_coins of prev block
     pei_rpc.penalty = (pei_rpc.base_reward + pei_rpc.total_fee) - pei_rpc.summary_reward;

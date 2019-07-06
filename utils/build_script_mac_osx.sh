@@ -51,7 +51,7 @@ cp -R ../../../src/gui/qt-daemon/html Boolberry.app/Contents/MacOS
 cp ../../../src/gui/qt-daemon/app.icns Boolberry.app/Contents/Resources
 
 
-read version_str <<< $(DYLD_LIBRARY_PATH=$LOCAL_BOOST_LIBS_PATH ./connectivity_tool --version | awk '/^Boolberry / { print $2 }')
+read version_str <<< $(DYLD_LIBRARY_PATH=$BOOST_LIBS_PATH ./connectivity_tool --version | awk '/^Boolberry / { print $2 }')
 printf "\nVersion built: $version_str\n\n"
 
 echo "############### Prepearing archive... ################"

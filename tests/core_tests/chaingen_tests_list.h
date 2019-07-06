@@ -31,7 +31,7 @@ public:
 
 class one_block: public test_chain_unit_base
 {
-  currency::account_base alice;
+  currency::account_base m_alice;
 public:
   one_block();
   bool generate(std::vector<test_event_entry> &events);

@@ -1554,6 +1554,8 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
   outs_total = 0;
   amount_total = 0;
   outs_swept = 0;
+
+  THROW_IF_FALSE_WALLET_EX(!addr.is_swap_address, error::wallet_common_error, "sweep_below does not support swap addresses");
   
   std::vector<size_t> selected_transfers;
   selected_transfers.reserve(m_transfers.size());

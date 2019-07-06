@@ -32,8 +32,8 @@ bool one_block::generate(std::vector<test_event_entry> &events)
 {
     uint64_t ts_start = 1338224400;
 
-    MAKE_GENESIS_BLOCK(events, blk_0, alice, ts_start);
-    MAKE_ACCOUNT(events, alice);
+    m_alice.generate();
+    MAKE_GENESIS_BLOCK(events, blk_0, m_alice, ts_start);
     DO_CALLBACK(events, "verify_1");
 
     return true;
@@ -41,14 +41,11 @@ bool one_block::generate(std::vector<test_event_entry> &events)
 
 bool one_block::verify_1(currency::core& c, size_t ev_index, const std::vector<test_event_entry> &events)
 {
-
-    alice = boost::get<currency::account_base>(events[1]);
-
     // check balances
     //std::vector<const currency::block*> chain;
     //map_hash2tx_t mtx;
     //CHECK_TEST_CONDITION(find_block_chain(events, chain, mtx, get_block_hash(boost::get<currency::block>(events[1]))));
-    //CHECK_TEST_CONDITION(get_block_reward(0) == get_balance(alice, events, chain, mtx));
+    //CHECK_TEST_CONDITION(get_block_reward(0) == get_balance(m_alice, events, chain, mtx));
 
     // check height
     std::list<currency::block> blocks;

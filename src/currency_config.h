@@ -71,7 +71,6 @@
 #define CURRENCY_MEMPOOL_TX_LIVETIME                    86400 //seconds, one day
 #define CURRENCY_MEMPOOL_TX_FROM_ALT_BLOCK_LIVETIME     (CURRENCY_ALT_BLOCK_LIVETIME_COUNT*DIFFICULTY_TARGET) //seconds, one week
 
-
 #ifndef TESTNET
 #define P2P_DEFAULT_PORT                                10101
 #define RPC_DEFAULT_PORT                                10102

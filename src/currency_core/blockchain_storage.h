@@ -155,8 +155,8 @@ namespace currency
     bool lookfor_donation(const transaction& tx, uint64_t& donation, uint64_t& royalty);
     bool check_tx_with_view_key(const crypto::hash& tx_hash, const crypto::secret_key& view_key, const account_public_address& addr, uint64_t& incoming_amount, payment_id_t& payment_id, std::vector<uint64_t>& outs_indicies) const;
 
-    bool get_main_blocks_rpc_details(uint64_t start_offset, size_t count, bool ignore_transactions, std::list<block_rpc_extended_info>& blocks) const;
-    bool get_main_block_rpc_details(uint64_t i, block_rpc_extended_info& bei) const;
+    bool get_main_blocks_rpc_details(uint64_t start_offset, size_t count, bool is_short, std::list<block_rpc_extended_info>& blocks) const;
+    bool get_main_block_rpc_details(uint64_t i, block_rpc_extended_info& bei, bool is_short = true) const;
     bool get_tx_rpc_details(const crypto::hash& h, tx_rpc_extended_info& tei, uint64_t timestamp, bool is_short) const;
     bool get_alt_blocks_rpc_details(uint64_t start_offset, uint64_t count, std::vector<block_rpc_extended_info>& blocks) const;
     bool get_alt_block_rpc_details(const crypto::hash& id, block_rpc_extended_info& bei) const;
