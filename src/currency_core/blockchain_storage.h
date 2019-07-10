@@ -142,7 +142,6 @@ namespace currency
     bool update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent);
     bool update_spent_tx_flags_for_input(const crypto::hash& tx_id, size_t n, bool spent);
     bool clear();
-    bool is_storing_blockchain(){ return m_is_blockchain_storing; }
     wide_difficulty_type block_difficulty(size_t i);
     bool copy_scratchpad(std::vector<crypto::hash>& dst);//TODO: not the best way, add later update method instead of full copy    
     bool copy_scratchpad_as_blob(std::string& dst);
@@ -261,7 +260,6 @@ namespace currency
     blocks_ext_by_hash m_alternative_chains; // crypto::hash -> block_extended_info
 
     std::atomic<bool> m_is_in_checkpoint_zone;
-    std::atomic<bool> m_is_blockchain_storing;
 
     std::string m_config_folder;
     account_keys m_donations_account;

@@ -83,12 +83,6 @@ namespace currency
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_info(const COMMAND_RPC_GET_INFO::request& req, COMMAND_RPC_GET_INFO::response& res, connection_context& cntx)
   {
-    if (m_p2p.get_payload_object().get_core().get_blockchain_storage().is_storing_blockchain())
-    {
-      res.status = CORE_RPC_STATUS_BUSY; 
-      return true; 
-    }
-
     res.height = m_core.get_current_blockchain_height();
     res.difficulty = m_core.get_blockchain_storage().get_difficulty_for_next_block().convert_to<uint64_t>();
     res.tx_count = m_core.get_blockchain_storage().get_total_transactions() - res.height; //without coinbase
@@ -119,6 +113,7 @@ namespace currency
     block_extended_info last_block_ei = AUTO_VAL_INIT(last_block_ei);
     m_core.get_blockchain_storage().get_block_extended_info_by_height(res.height - 1, last_block_ei);
     res.already_generated_coins = last_block_ei.already_generated_coins;
+    res.max_coins_supply = TOTAL_MONEY_SUPPLY;
     m_p2p.get_maintainers_info(res.mi);
 
     res.last_block_timestamp = last_block_ei.bl.timestamp;

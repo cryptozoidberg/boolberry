@@ -80,8 +80,7 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) : m_lmdb_adapter
                                                                  m_tx_pool(tx_pool),
                                                                  m_is_in_checkpoint_zone(false), 
                                                                  m_donations_account(AUTO_VAL_INIT(m_donations_account)), 
-                                                                 m_royalty_account(AUTO_VAL_INIT(m_royalty_account)),
-                                                                 m_is_blockchain_storing(false), 
+                                                                 m_royalty_account(AUTO_VAL_INIT(m_royalty_account))
                                                                  m_locker_file(0), 
                                                                  m_exclusive_batch_active(false)
 {
