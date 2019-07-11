@@ -62,10 +62,6 @@ namespace currency
       return false;
     }
 #endif
-    if(m_p2p.get_payload_object().get_core().get_blockchain_storage().is_storing_blockchain())
-    {
-      return false;
-    }
     return true;
   }
 
