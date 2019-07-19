@@ -161,6 +161,7 @@ namespace currency
     bool get_alt_block_rpc_details(const crypto::hash& id, block_rpc_extended_info& bei) const;
     bool get_alt_block_rpc_details(const block_extended_info& bei_core, const crypto::hash& id, block_rpc_extended_info& bei) const;
     bool get_global_index_details(const COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::request& req, COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::response & resp) const;
+    bool are_swap_txs_allowed();
 
 
     std::string print_key_image_details(const crypto::key_image& ki, bool& found);
@@ -268,6 +269,9 @@ namespace currency
     checkpoints m_checkpoints;
 
     epee::file_io_utils::native_filesystem_handle m_locker_file;
+
+    crypto::hash m_last_median_ts_checked_top_block_id;
+    uint64_t m_last_median_ts_checked;
 
     // mutable members
     mutable critical_section m_blockchain_lock; // TODO: add here reader/writer lock
