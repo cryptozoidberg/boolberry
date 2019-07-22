@@ -80,13 +80,13 @@ namespace currency
         tvc.m_verifivation_failed = true;
         return false;
       }
-    }
 
-    if (is_swap_tx(tx) && !m_blockchain.are_swap_txs_allowed())
-    {
-      LOG_ERROR("Transaction with id= " << id << " is a swap tx. Swap txs are not allowed now.");
-      tvc.m_verifivation_failed = true;
-      return false;
+      if (is_swap_tx(tx) && !m_blockchain.are_swap_txs_allowed())
+      {
+        LOG_ERROR("Transaction with id= " << id << " is a swap tx. Swap txs are not allowed now.");
+        tvc.m_verifivation_failed = true;
+        return false;
+      }
     }
     
     crypto::hash max_used_block_id = null_hash;
