@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 set -e
 curr_path=${BASH_SOURCE%/*}
@@ -37,7 +37,7 @@ make -j Boolberry
 make -j simplewallet
 make -j connectivity_tool
 
-read version_str <<< $(./src/boolbd --version | awk '/^Boolberry / { print $2 }')
+read version_str <<< $(./src/boolbd --version | awk '/^Boolberry/ { print $2 }')
 echo $version_str
 
 printf "\npreparing final deploy folder...\n\n"
