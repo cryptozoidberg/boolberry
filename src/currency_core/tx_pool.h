@@ -41,7 +41,7 @@ namespace currency
 
     bool have_tx(const crypto::hash &id) const;
     bool have_tx_keyimg_as_spent(const crypto::key_image& key_im) const;
-    bool have_tx_keyimges_as_spent(const transaction& tx) const;
+    bool have_tx_keyimges_as_spent(const transaction& tx, crypto::hash& ki_tx, crypto::key_image& ki) const;
 
     bool on_blockchain_inc(uint64_t new_block_height, const crypto::hash& top_block_id);
     bool on_blockchain_dec(uint64_t new_block_height, const crypto::hash& top_block_id);
