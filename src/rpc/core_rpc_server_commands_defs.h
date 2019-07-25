@@ -337,8 +337,10 @@ struct EMPTY_STRUCT {
       uint64_t transactions_cnt_per_day;
       uint64_t transactions_volume_per_day;
       uint64_t already_generated_coins;
+      uint64_t max_coins_supply;
       nodetool::maintainers_info_external mi;
       uint64_t last_block_timestamp;
+      uint64_t blocks_ts_median;
       std::string last_block_hash;
 
       BEGIN_KV_SERIALIZE_MAP()
@@ -352,7 +354,7 @@ struct EMPTY_STRUCT {
         KV_SERIALIZE(incoming_connections_count)
         KV_SERIALIZE(white_peerlist_size)
         KV_SERIALIZE(grey_peerlist_size)
-        KV_SERIALIZE(current_blocks_median)      
+        KV_SERIALIZE(current_blocks_median)
         KV_SERIALIZE(current_network_hashrate_50)
         KV_SERIALIZE(current_network_hashrate_350)
         KV_SERIALIZE(scratchpad_size)
@@ -363,8 +365,10 @@ struct EMPTY_STRUCT {
         KV_SERIALIZE(transactions_cnt_per_day)
         KV_SERIALIZE(transactions_volume_per_day)
         KV_SERIALIZE(already_generated_coins)
+        KV_SERIALIZE(max_coins_supply)
         KV_SERIALIZE(mi)
         KV_SERIALIZE(last_block_timestamp)
+        KV_SERIALIZE(blocks_ts_median)
         KV_SERIALIZE(last_block_hash)
       END_KV_SERIALIZE_MAP()
     };

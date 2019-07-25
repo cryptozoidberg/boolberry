@@ -1,17 +1,22 @@
-#!/bin/bash
+#!/bin/bash -x
 
 set -e
 curr_path=${BASH_SOURCE%/*}
 
+ARCHIVE_NAME_PREFIX=boolberry-linux-x64-
+
 : "${BOOST_ROOT:?BOOST_ROOT should be set to the root of Boost, ex.: /home/user/boost_1_68_0}"
 : "${QT_PREFIX_PATH:?QT_PREFIX_PATH should be set to Qt libs folder, ex.: /home/user/Qt5.5.1/5.5.1/gcc_64}"
 
-build_postfix_hyp=
-build_postfix_cl=
-if [ "$build_postfix" == "dev" ]
-then
-  build_postfix_hyp=dev- 
-  build_postfix_cl="DEV "
+if [ -n "$build_prefix" ]; then
+  ARCHIVE_NAME_PREFIX=${ARCHIVE_NAME_PREFIX}${build_prefix}-
+  build_prefix_label="$build_prefix "
+fi
+
+if [ -n "$testnet" ]; then
+  testnet_def="-D TESTNET=TRUE"
+  testnet_label="testnet "
+  ARCHIVE_NAME_PREFIX=${ARCHIVE_NAME_PREFIX}testnet-
 fi
 
 echo "entering directory $curr_path/.."
@@ -25,14 +30,14 @@ cp -v build/release/src/*.bin build/release/src/*.bin.keys build/release/src/*.b
 
 printf "\nbuilding....\n"
 rm -rf build; mkdir -p build/release; cd build/release
-cmake -D STATIC=TRUE -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH" -D CMAKE_BUILD_TYPE=Release ../..
+cmake $testnet_def -D STATIC=TRUE -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH" -D CMAKE_BUILD_TYPE=Release ../..
 
 make -j daemon
 make -j Boolberry
 make -j simplewallet
 make -j connectivity_tool
 
-read version_str <<< $(./src/boolbd --version | awk '/^Boolberry / { print $2 }')
+read version_str <<< $(./src/boolbd --version | awk '/^Boolberry/ { print $2 }')
 echo $version_str
 
 printf "\npreparing final deploy folder...\n\n"
@@ -81,7 +86,7 @@ cp $QT_PREFIX_PATH/plugins/xcbglintegrations/libqxcb-glx-integration.so ./boolbe
 
 printf "\nmaking compressed build archive...\n\n"
 
-package_filename=boolberry-linux-x64-${build_postfix_hyp}$version_str.tar.bz2
+package_filename=${ARCHIVE_NAME_PREFIX}${version_str}.tar.bz2
 
 tar -cjvf $package_filename boolberry
 
@@ -90,9 +95,10 @@ printf "\nbuild succeeded!\n"
 echo "uploading to build server..."
 scp $package_filename bbr_build_server:/var/www/html/builds
 
+mail_msg="New ${build_prefix_label}${testnet_label}build for linux-x64:<br>
+http://$BBR_BUILD_SERVER_ADDR_PORT/builds/$package_filename<br>"
 
-mail_msg="New build for linux-x64 available at http://$BBR_BUILD_SERVER_ADDR_PORT/builds/$package_filename"
 echo $mail_msg
-echo $mail_msg | mail -s "Boolberry linux-x64 ${build_postfix_cl}build $version_str" ${emails}
+echo $mail_msg | mail -s "Boolberry linux-x64 ${build_prefix_label}${testnet_label}build $version_str" ${emails}
 
 exit 0

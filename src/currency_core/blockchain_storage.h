@@ -142,7 +142,6 @@ namespace currency
     bool update_spent_tx_flags_for_input(uint64_t amount, uint64_t global_index, bool spent);
     bool update_spent_tx_flags_for_input(const crypto::hash& tx_id, size_t n, bool spent);
     bool clear();
-    bool is_storing_blockchain(){ return m_is_blockchain_storing; }
     wide_difficulty_type block_difficulty(size_t i);
     bool copy_scratchpad(std::vector<crypto::hash>& dst);//TODO: not the best way, add later update method instead of full copy    
     bool copy_scratchpad_as_blob(std::string& dst);
@@ -162,6 +161,7 @@ namespace currency
     bool get_alt_block_rpc_details(const crypto::hash& id, block_rpc_extended_info& bei) const;
     bool get_alt_block_rpc_details(const block_extended_info& bei_core, const crypto::hash& id, block_rpc_extended_info& bei) const;
     bool get_global_index_details(const COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::request& req, COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::response & resp) const;
+    uint64_t get_blocks_ts_median(); // returns median of last BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW blocks
 
 
     std::string print_key_image_details(const crypto::key_image& ki, bool& found);
@@ -261,7 +261,6 @@ namespace currency
     blocks_ext_by_hash m_alternative_chains; // crypto::hash -> block_extended_info
 
     std::atomic<bool> m_is_in_checkpoint_zone;
-    std::atomic<bool> m_is_blockchain_storing;
 
     std::string m_config_folder;
     account_keys m_donations_account;
@@ -270,6 +269,9 @@ namespace currency
     checkpoints m_checkpoints;
 
     epee::file_io_utils::native_filesystem_handle m_locker_file;
+
+    crypto::hash m_last_median_ts_checked_top_block_id;
+    uint64_t m_last_median_ts_checked;
 
     // mutable members
     mutable critical_section m_blockchain_lock; // TODO: add here reader/writer lock

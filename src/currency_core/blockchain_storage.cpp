@@ -81,9 +81,10 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) : m_lmdb_adapter
                                                                  m_is_in_checkpoint_zone(false), 
                                                                  m_donations_account(AUTO_VAL_INIT(m_donations_account)), 
                                                                  m_royalty_account(AUTO_VAL_INIT(m_royalty_account)),
-                                                                 m_is_blockchain_storing(false), 
                                                                  m_locker_file(0), 
-                                                                 m_exclusive_batch_active(false)
+                                                                 m_exclusive_batch_active(false),
+                                                                 m_last_median_ts_checked_top_block_id(null_hash),
+                                                                 m_last_median_ts_checked(0)
 {
   bool r = get_donation_accounts(m_donations_account, m_royalty_account);
   CHECK_AND_ASSERT_THROW_MES(r, "failed to load donation accounts");
@@ -2636,6 +2637,9 @@ bool blockchain_storage::check_block_timestamp(std::vector<uint64_t> timestamps,
     return false;
   }
 
+  m_last_median_ts_checked_top_block_id = get_block_hash(b);
+  m_last_median_ts_checked = median_ts;
+
   return true;
 }
 
@@ -3173,5 +3177,20 @@ bool blockchain_storage::get_global_index_details(const COMMAND_RPC_GET_TX_GLOBA
   }
 }
 //------------------------------------------------------------------
+// returns median ts of last BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW blocks
+uint64_t blockchain_storage::get_blocks_ts_median()
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
+  if (get_top_block_id() != m_last_median_ts_checked_top_block_id)
+  {
+    auto val_ptr = m_db_blocks.back();
+    CHECK_AND_ASSERT_MES(val_ptr.get(), false, "m_db_blocks.back() returned null");
+    check_block_timestamp_main(val_ptr->bl);
+    CHECK_AND_ASSERT_MES(m_last_median_ts_checked_top_block_id == get_block_hash(val_ptr->bl), false, "check_block_timestamp_main did not update m_last_median_ts_checked_top_block_id");
+  }
+
+  return m_last_median_ts_checked;
+}
 //------------------------------------------------------------------
 //------------------------------------------------------------------

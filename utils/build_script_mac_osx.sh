@@ -7,12 +7,17 @@ curr_path=${BASH_SOURCE%/*}
 : "${QT_PREFIX_PATH:?QT_PREFIX_PATH should be set to Qt libs folder, ex.: /home/user/Qt5.5.1/5.5/}"
 : "${CMAKE_OSX_SYSROOT:?CMAKE_OSX_SYSROOT should be set to macOS SDK path, e.g.: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk}"
 
-build_postfix_hyp=
-build_postfix_cl=
-if [ "$build_postfix" == "dev" ]
-then
-  build_postfix_hyp=dev- 
-  build_postfix_cl="DEV "
+ARCHIVE_NAME_PREFIX=boolberry-macos-x64-
+
+if [ -n "$build_prefix" ]; then
+  ARCHIVE_NAME_PREFIX=${ARCHIVE_NAME_PREFIX}${build_prefix}-
+  build_prefix_label="$build_prefix "
+fi
+
+if [ -n "$testnet" ]; then
+  testnet_def="-D TESTNET=TRUE"
+  testnet_label="testnet "
+  ARCHIVE_NAME_PREFIX=${ARCHIVE_NAME_PREFIX}testnet-
 fi
 
 echo "entering directory $curr_path/.."
@@ -22,7 +27,7 @@ rm -rf build
 mkdir -p build/release
 cd build/release
 
-cmake -D CMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH/clang_64" -D CMAKE_BUILD_TYPE=Release ../..
+cmake $testnet_def -D CMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT -D BUILD_GUI=TRUE -D CMAKE_PREFIX_PATH="$QT_PREFIX_PATH/clang_64" -D CMAKE_BUILD_TYPE=Release ../..
 
 make -j Boolberry
 make -j connectivity_tool simplewallet daemon
@@ -51,17 +56,17 @@ cp -R ../../../src/gui/qt-daemon/html Boolberry.app/Contents/MacOS
 cp ../../../src/gui/qt-daemon/app.icns Boolberry.app/Contents/Resources
 
 
-read version_str <<< $(DYLD_LIBRARY_PATH=$BOOST_LIBS_PATH ./connectivity_tool --version | awk '/^Boolberry / { print $2 }')
+read version_str <<< $(DYLD_LIBRARY_PATH=$BOOST_LIBS_PATH ./connectivity_tool --version | awk '/^Boolberry/ { print $2 }')
 printf "\nVersion built: $version_str\n\n"
 
 echo "############### Prepearing archive... ################"
 mkdir package_folder
 
-ln -s /Applications package_folder/Applications 
+ln -s /Applications package_folder/Applications
 
-mv Boolberry.app package_folder 
+mv Boolberry.app package_folder
 
-package_filename="boolberry-macos-x64-${build_postfix_hyp}$version_str.dmg"
+package_filename=${ARCHIVE_NAME_PREFIX}${version_str}.dmg
 
 hdiutil create -format UDZO -srcfolder package_folder -volname Boolberry $package_filename
 
@@ -72,11 +77,12 @@ echo "############### uploading... ################"
 
 scp $package_filename bbr_build_server:/var/www/html/builds/
 
-mail_msg="New build for macOS-x64 available at http://$BBR_BUILD_SERVER_ADDR_PORT/builds/$package_filename"
+mail_msg="New ${build_prefix_label}${testnet_label}build for macOS-x64:<br>
+http://$BBR_BUILD_SERVER_ADDR_PORT/builds/$package_filename"
 
 echo $mail_msg
 
-echo $mail_msg | mail -s "Boolberry macOS-x64 ${build_postfix_cl}build $version_str" ${emails}
+echo $mail_msg | mail -s "Boolberry macOS-x64 ${build_prefix_label}${testnet_label}build $version_str" ${emails}
 
 cd ../..
 exit 0
