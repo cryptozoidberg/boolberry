@@ -340,6 +340,7 @@ struct EMPTY_STRUCT {
       uint64_t max_coins_supply;
       nodetool::maintainers_info_external mi;
       uint64_t last_block_timestamp;
+      uint64_t blocks_ts_median;
       std::string last_block_hash;
 
       BEGIN_KV_SERIALIZE_MAP()
@@ -367,6 +368,7 @@ struct EMPTY_STRUCT {
         KV_SERIALIZE(max_coins_supply)
         KV_SERIALIZE(mi)
         KV_SERIALIZE(last_block_timestamp)
+        KV_SERIALIZE(blocks_ts_median)
         KV_SERIALIZE(last_block_hash)
       END_KV_SERIALIZE_MAP()
     };

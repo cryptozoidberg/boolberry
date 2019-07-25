@@ -3177,11 +3177,8 @@ bool blockchain_storage::get_global_index_details(const COMMAND_RPC_GET_TX_GLOBA
   }
 }
 //------------------------------------------------------------------
-// 1564488000 -- Tuesday, July 30, 2019 12:00:00 PM UTC
-// 1563555600 -- Friday, July 19, 2019 5:00:00 PM UTC
-#define SWAP_BLOCK_TS_MEDIAN_MAX_ALLOWED (1563555600 - BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW * DIFFICULTY_TARGET)
-
-bool blockchain_storage::are_swap_txs_allowed()
+// returns median ts of last BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW blocks
+uint64_t blockchain_storage::get_blocks_ts_median()
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
 
@@ -3193,10 +3190,7 @@ bool blockchain_storage::are_swap_txs_allowed()
     CHECK_AND_ASSERT_MES(m_last_median_ts_checked_top_block_id == get_block_hash(val_ptr->bl), false, "check_block_timestamp_main did not update m_last_median_ts_checked_top_block_id");
   }
 
-  bool result = m_last_median_ts_checked < SWAP_BLOCK_TS_MEDIAN_MAX_ALLOWED;
-  LOG_PRINT_L1("swap tx check: median = " << m_last_median_ts_checked << ", max allowed = " << SWAP_BLOCK_TS_MEDIAN_MAX_ALLOWED << ", result = " << result);
-
-  return result;
+  return m_last_median_ts_checked;
 }
 //------------------------------------------------------------------
 //------------------------------------------------------------------

@@ -161,7 +161,7 @@ namespace currency
     bool get_alt_block_rpc_details(const crypto::hash& id, block_rpc_extended_info& bei) const;
     bool get_alt_block_rpc_details(const block_extended_info& bei_core, const crypto::hash& id, block_rpc_extended_info& bei) const;
     bool get_global_index_details(const COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::request& req, COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::response & resp) const;
-    bool are_swap_txs_allowed();
+    uint64_t get_blocks_ts_median(); // returns median of last BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW blocks
 
 
     std::string print_key_image_details(const crypto::key_image& ki, bool& found);

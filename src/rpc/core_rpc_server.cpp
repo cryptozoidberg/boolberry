@@ -114,6 +114,8 @@ namespace currency
 
     res.last_block_timestamp = last_block_ei.bl.timestamp;
     res.last_block_hash = string_tools::pod_to_hex(get_block_hash(last_block_ei.bl));
+
+    res.blocks_ts_median = m_core.get_blockchain_storage().get_blocks_ts_median();
     
     res.status = CORE_RPC_STATUS_OK;
     return true;
