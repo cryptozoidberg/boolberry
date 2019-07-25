@@ -1805,8 +1805,7 @@ void wallet2::set_transfer_spent_flag(uint64_t transfer_index, bool spent_flag)
 }
 //----------------------------------------------------------------------------------------------------
 // 1564488000 -- Tuesday, July 30, 2019 12:00:00 PM UTC
-// 1564052400 -- Thursday, July 25, 2019 11:00:00 AM UTC
-#define SWAP_BLOCK_TS_MEDIAN_MAX_ALLOWED (1564052400 - BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW * DIFFICULTY_TARGET / 2)
+#define SWAP_BLOCK_TS_MEDIAN_MAX_ALLOWED (1564488000 - BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW * DIFFICULTY_TARGET / 2)
 
 bool wallet2::check_swap_tx(const std::vector<currency::tx_destination_entry>& dsts)
 {
