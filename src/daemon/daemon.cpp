@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
-  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_0);
+  log_space::get_set_log_detalization_level(true, LOG_LEVEL_0);
   log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
   LOG_PRINT_L0("Starting...");
 
@@ -270,9 +270,9 @@ bool command_line_preprocessor(const boost::program_options::variables_map& vm)
   {
     LOG_PRINT_L0("Wrong log level value: ");
   }
-  else if (log_space::get_set_log_detalisation_level(false) != new_log_level)
+  else if (log_space::get_set_log_detalization_level(false) != new_log_level)
   {
-    log_space::get_set_log_detalisation_level(true, new_log_level);
+    log_space::get_set_log_detalization_level(true, new_log_level);
     LOG_PRINT_L0("LOG_LEVEL set to " << new_log_level);
   }
 

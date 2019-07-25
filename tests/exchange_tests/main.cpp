@@ -6,7 +6,7 @@
 #include "rpc/core_rpc_server.h"
 
 int main () {
-    log_space::get_set_log_detalisation_level(true, LOG_LEVEL_1);
+    log_space::get_set_log_detalization_level(true, LOG_LEVEL_1);
     log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL, LOG_LEVEL_1);
   
     std::string daemon_address = "http://localhost:10102";

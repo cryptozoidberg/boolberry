@@ -546,7 +546,7 @@ bool generate_and_print_keys()
 int main(int argc, char* argv[])
 {
   string_tools::set_module_name_and_folder(argv[0]);
-  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_0);
+  log_space::get_set_log_detalization_level(true, LOG_LEVEL_0);
 
   // Declare the supported options.
   po::options_description desc_general("General options");
