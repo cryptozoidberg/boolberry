@@ -500,6 +500,15 @@ namespace currency
     bool res = tools::unserialize_obj_from_file(*this, state_file_path);
     if (res)
     {
+      if (epee::log_space::log_singletone::get_log_detalization_level() >= LOG_LEVEL_2)
+      {
+        std::stringstream ss;
+        ss << "tx pool loaded ok from " << state_file_path << ", loaded " << m_transactions.size() << " transactions:" << ENDL;
+        for (auto& tx : m_transactions)
+          ss << tx.first << " sz: " << std::setw(5) << tx.second.blob_size << " rcv: " << misc_utils::get_time_interval_string(time(nullptr) - tx.second.receive_time) << " ago"  << ENDL;
+        LOG_PRINT_L2(ss.str());
+      }
+
       // mem pool has just been successfully loaded from file
       // delete pool file to avoid loading outdated data on the next load (in case a crash happen for ex.)
       if (!boost::filesystem::remove_all(state_file_path))
