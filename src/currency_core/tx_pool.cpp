@@ -66,9 +66,11 @@ namespace currency
     //check key images for transaction if it is not kept by block
     if(!kept_by_block)
     {
-      if(have_tx_keyimges_as_spent(tx))
+      crypto::hash ki_tx = AUTO_VAL_INIT(ki_tx);
+      crypto::key_image ki = AUTO_VAL_INIT(ki);
+      if(have_tx_keyimges_as_spent(tx, ki_tx, ki))
       {
-        LOG_ERROR("Transaction with id= "<< id << " used already spent key images");
+        LOG_ERROR("Transaction " << id << " uses already spent key image " << ki << " seen in tx " << ki_tx);
         tvc.m_verifivation_failed = true;
         return false;
       }
@@ -265,15 +267,21 @@ namespace currency
     return false;
   }
   //---------------------------------------------------------------------------------
-  bool tx_memory_pool::have_tx_keyimges_as_spent(const transaction& tx) const
+  bool tx_memory_pool::have_tx_keyimges_as_spent(const transaction& tx, crypto::hash& ki_tx, crypto::key_image& ki) const
   {
     PROFILE_FUNC("tx_memory_pool::have_tx_keyimges_as_spent");
     CRITICAL_REGION_LOCAL(m_transactions_lock);
     BOOST_FOREACH(const auto& in, tx.vin)
     {
       CHECKED_GET_SPECIFIC_VARIANT(in, const txin_to_key, tokey_in, true);//should never fail
-      if(have_tx_keyimg_as_spent(tokey_in.k_image))
+      auto it = m_spent_key_images.find(tokey_in.k_image);
+      if (it != m_spent_key_images.end())
+      {
+        if (it->second.size() > 0)
+          ki_tx = *(it->second.begin());
+        ki = tokey_in.k_image;
          return true;
+    }
     }
     return false;
   }
@@ -349,7 +357,7 @@ namespace currency
     //if we here, transaction seems valid, but, anyway, check for key_images collisions with blockchain, just to be sure
     if (m_blockchain.have_tx_keyimges_as_spent(txd.tx))
     {
-      txd.decline_reason = "have_tx_keyimges_as_spent";
+      txd.decline_reason = "ki is spent in blockchain";
       return false;
     }
     //transaction is ok.
