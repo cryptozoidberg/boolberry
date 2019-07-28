@@ -231,6 +231,7 @@ namespace currency
   bool get_swap_info_from_tx_extra(const transaction& tx, const crypto::secret_key& sk, account_public_address& addr);
   bool get_swap_info_from_tx(const transaction& tx, const crypto::secret_key& sk, swap_transaction_info& swap_info);
   bool encrypt_user_data_with_tx_secret_key(const crypto::secret_key& sk, std::vector<uint8_t>& extra);
+  bool is_swap_tx(const currency::transaction& tx);
   bool is_swap_tx(const currency::transaction& tx, const std::vector<tx_destination_entry>& destinations);
   bool encrypt_user_data_with_tx_secret_key(const crypto::secret_key& sk, std::vector<uint8_t>& extra);
 

@@ -81,9 +81,10 @@ blockchain_storage::blockchain_storage(tx_memory_pool& tx_pool) : m_lmdb_adapter
                                                                  m_is_in_checkpoint_zone(false), 
                                                                  m_donations_account(AUTO_VAL_INIT(m_donations_account)), 
                                                                  m_royalty_account(AUTO_VAL_INIT(m_royalty_account)),
-                                                                 m_is_blockchain_storing(false), 
                                                                  m_locker_file(0), 
-                                                                 m_exclusive_batch_active(false)
+                                                                 m_exclusive_batch_active(false),
+                                                                 m_last_median_ts_checked_top_block_id(null_hash),
+                                                                 m_last_median_ts_checked(0)
 {
   bool r = get_donation_accounts(m_donations_account, m_royalty_account);
   CHECK_AND_ASSERT_THROW_MES(r, "failed to load donation accounts");
@@ -2500,6 +2501,8 @@ bool blockchain_storage::check_tx_inputs(const transaction& tx, const crypto::ha
     if (have_tx_keyimg_as_spent(in_to_key.k_image))
     {
       LOG_PRINT_L0("Key image already spent in blockchain: " << string_tools::pod_to_hex(in_to_key.k_image));
+      // bool stub;
+      // LOG_PRINT_L1(print_key_image_details(in_to_key.k_image, stub));
       return false;
     }
 
@@ -2633,6 +2636,9 @@ bool blockchain_storage::check_block_timestamp(std::vector<uint64_t> timestamps,
     LOG_PRINT_L0("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", less than median of last " << BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW << " blocks, " << median_ts);
     return false;
   }
+
+  m_last_median_ts_checked_top_block_id = get_block_hash(b);
+  m_last_median_ts_checked = median_ts;
 
   return true;
 }
@@ -2990,7 +2996,7 @@ bool blockchain_storage::add_new_block(const block& bl_, block_verification_cont
 //------------------------------------------------------------------
 //------------------------------------------------------------------
 //------------------------------------------------------------------
-bool blockchain_storage::get_main_blocks_rpc_details(uint64_t start_offset, size_t count, bool ignore_transactions, std::list<block_rpc_extended_info>& blocks) const
+bool blockchain_storage::get_main_blocks_rpc_details(uint64_t start_offset, size_t count, bool is_short, std::list<block_rpc_extended_info>& blocks) const
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   if (start_offset >= m_db_blocks.size())
@@ -3000,12 +3006,12 @@ bool blockchain_storage::get_main_blocks_rpc_details(uint64_t start_offset, size
   {
     blocks.push_back(block_rpc_extended_info());
     block_rpc_extended_info& bei = blocks.back();
-    get_main_block_rpc_details(i, bei);
+    get_main_block_rpc_details(i, bei, is_short);
   }
   return true;
 }
 //------------------------------------------------------------------
-bool blockchain_storage::get_main_block_rpc_details(uint64_t h, block_rpc_extended_info& bei) const
+bool blockchain_storage::get_main_block_rpc_details(uint64_t h, block_rpc_extended_info& bei, bool is_short) const
 {
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   auto core_bei_ptr = m_db_blocks[h];
@@ -3018,11 +3024,11 @@ bool blockchain_storage::get_main_block_rpc_details(uint64_t h, block_rpc_extend
     crypto::hash coinbase_id = get_transaction_hash(core_bei_ptr->bl.miner_tx);
     //load transactions details
     bei.transactions_details.push_back(tx_rpc_extended_info());
-    get_tx_rpc_details(coinbase_id, bei.transactions_details.back(), core_bei_ptr->bl.timestamp, true);
+    get_tx_rpc_details(coinbase_id, bei.transactions_details.back(), core_bei_ptr->bl.timestamp, is_short);
     for (auto& h : core_bei_ptr->bl.tx_hashes)
     {
       bei.transactions_details.push_back(tx_rpc_extended_info());
-      get_tx_rpc_details(h, bei.transactions_details.back(), core_bei_ptr->bl.timestamp, true);
+      get_tx_rpc_details(h, bei.transactions_details.back(), core_bei_ptr->bl.timestamp, is_short);
       bei.total_fee += bei.transactions_details.back().fee;
       bei.total_txs_size += bei.transactions_details.back().blob_size;
     }
@@ -3054,6 +3060,23 @@ bool blockchain_storage::get_tx_rpc_details(const crypto::hash& h, tx_rpc_extend
   }
   tei.keeper_block = static_cast<int64_t>(tx_ptr->m_keeper_block_height);
   fill_tx_rpc_details(tei, tx_ptr->tx, &(*tx_ptr), h, timestamp, is_short);
+
+  for (auto& in : tei.ins)
+  {
+    COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::request req = AUTO_VAL_INIT(req);
+    req.amount = in.amount;
+    for (auto gi : in.global_indexes)
+    {
+      req.i = gi;
+      COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES_BY_AMOUNT::response  resp = AUTO_VAL_INIT(resp);
+      this->get_global_index_details(req, resp);
+      related_tx_info rt = AUTO_VAL_INIT(rt);
+      rt.tx_id = resp.tx_id;
+      rt.out_no = resp.out_no;
+      in.global_indexes_related_txs.push_back(rt);
+    }
+  }
+ 
   return true;
 }
 //------------------------------------------------------------------
@@ -3154,5 +3177,20 @@ bool blockchain_storage::get_global_index_details(const COMMAND_RPC_GET_TX_GLOBA
   }
 }
 //------------------------------------------------------------------
+// returns median ts of last BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW blocks
+uint64_t blockchain_storage::get_blocks_ts_median()
+{
+  CRITICAL_REGION_LOCAL(m_blockchain_lock);
+
+  if (get_top_block_id() != m_last_median_ts_checked_top_block_id)
+  {
+    auto val_ptr = m_db_blocks.back();
+    CHECK_AND_ASSERT_MES(val_ptr.get(), false, "m_db_blocks.back() returned null");
+    check_block_timestamp_main(val_ptr->bl);
+    CHECK_AND_ASSERT_MES(m_last_median_ts_checked_top_block_id == get_block_hash(val_ptr->bl), false, "check_block_timestamp_main did not update m_last_median_ts_checked_top_block_id");
+  }
+
+  return m_last_median_ts_checked;
+}
 //------------------------------------------------------------------
 //------------------------------------------------------------------

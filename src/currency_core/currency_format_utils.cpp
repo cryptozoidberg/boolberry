@@ -903,7 +903,7 @@ namespace currency
     {
       if (user_data[i] != TX_USER_DATA_TAG_SWAP_ADDRESS)
       {
-        CHECK_AND_ASSERT_MES(user_data.size() - 1 - i >= 1, false, "not enough data for TX_USER_DATA_TAG_SWAP_ADDRESS: " << user_data.size() - 1 - i);
+        CHECK_AND_ASSERT_MES(user_data.size() - 1 - i >= 1, false, "not enough data for user data tag " << user_data[i] << " : " << user_data.size() - 1 - i);
         i += user_data[i + 1] + 2;
       }
       else
@@ -1466,6 +1466,22 @@ namespace currency
     }
     */
 
+    //read if block registrat aliases
+    tx_extra_info tei = AUTO_VAL_INIT(tei);
+    if (parse_and_validate_tx_extra(bei_chain.bl.miner_tx, tei))
+    {
+      if (tei.m_alias.m_alias.size() != 0)
+      {
+        pei_rpc.registered_alias.alias = tei.m_alias.m_alias;
+        pei_rpc.registered_alias.details.address = get_account_address_as_str(tei.m_alias.m_address);
+        pei_rpc.registered_alias.details.comment = tei.m_alias.m_text_comment;
+        if(currency::null_skey != tei.m_alias.m_view_key )
+          pei_rpc.registered_alias.details.tracking_key = epee::string_tools::pod_to_hex(tei.m_alias.m_view_key);
+        if (currency::null_sig != tei.m_alias.m_sign)
+          pei_rpc.registered_alias.details.signature = epee::string_tools::pod_to_hex(tei.m_alias.m_sign);
+      }
+    }
+
     get_reward_from_miner_tx(bei_chain.bl.miner_tx, pei_rpc.summary_reward);
     pei_rpc.base_reward = get_base_block_reward(bei_chain.already_generated_coins - pei_rpc.summary_reward); // need to calculate reward from already_generated_coins of prev block
     pei_rpc.penalty = (pei_rpc.base_reward + pei_rpc.total_fee) - pei_rpc.summary_reward;
@@ -1629,16 +1645,38 @@ bool encrypt_user_data_with_tx_secret_key(const crypto::secret_key& sk, uint8_t*
     return true;
   }
   //---------------------------------------------------------------
+  bool is_swap_tx(const currency::transaction& tx)
+  {
+    static std::vector<tx_destination_entry> empty_destinations;
+    return is_swap_tx(tx, empty_destinations);
+  }
+  //---------------------------------------------------------------
   bool is_swap_tx(const currency::transaction& tx, const std::vector<tx_destination_entry>& destinations)
   {
     // a tx is a swap tx if it has at least one swap destination address (null_pkey output) AND swap info in extra.userdata
     bool has_swap_destinations = false;
-    for (auto& d : destinations)
+
+    if (!destinations.empty())
     {
-      if (d.addr.is_swap_address)
+      for (auto& d : destinations)
       {
-        has_swap_destinations = true;
-        break;
+        if (d.addr.is_swap_address)
+        {
+          has_swap_destinations = true;
+          break;
+        }
+      }
+    }
+    else
+    {
+      // use tx outputs if destinations was not provided
+      for (auto& o : tx.vout)
+      {
+        if (o.target.type() == typeid(txout_to_key) && boost::get<txout_to_key>(o.target).key == null_pkey)
+        {
+          has_swap_destinations = true;
+          break;
+        }
       }
     }
 

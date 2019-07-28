@@ -1,20 +1,23 @@
-SET BUILD_POSTFIX_HYP=
-SET BUILD_POSTFIX_CL=
-IF "%BUILD_POSTFIX%" == "dev" (
-  SET BUILD_POSTFIX_HYP=dev-
-  SET "BUILD_POSTFIX_CL=DEV "
-)
-
 SET QT_PREFIX_PATH=C:\dev\_sdk\Qt5.11.2\5.11.2\msvc2017_64
 SET INNOSETUP_PATH=C:\Program Files (x86)\Inno Setup 5\ISCC.exe
 SET ETC_BINARIES_PATH=C:\dev\deploy\etc-binaries
-SET ACHIVE_NAME_PREFIX=boolberry-win-x64-%BUILD_POSTFIX_HYP%
+SET ACHIVE_NAME_PREFIX=boolberry-win-x64-
 SET BUILDS_PATH=C:\dev\deploy\boolberry
 set BOOST_ROOT=C:\dev\_sdk\boost_1_68_0
 set BOOST_LIBRARYDIR=C:\dev\_sdk\boost_1_68_0\lib64-msvc-14.1
 set CERT_FILEPATH=C:\dev\cert\boolberry\boolberry_cert.pfx
 SET MY_PATH=%~dp0
 SET SOURCES_PATH=%MY_PATH:~0,-7%
+
+IF NOT [%build_prefix%] == [] (
+  SET ACHIVE_NAME_PREFIX=%ACHIVE_NAME_PREFIX%%build_prefix%-
+)
+
+IF NOT [%testnet%] == [] (
+  SET TESTNET_DEF=-D TESTNET=TRUE
+  SET TESTNET_LABEL=testnet 
+  SET ACHIVE_NAME_PREFIX=%ACHIVE_NAME_PREFIX%testnet-
+)
 
 cd %SOURCES_PATH%
 IF %ERRORLEVEL% NEQ 0 (
@@ -26,7 +29,7 @@ IF %ERRORLEVEL% NEQ 0 (
 @echo "---------------- BUILDING CONSOLE APPLICATIONS ----------------"
 @echo "---------------------------------------------------------------"
 
-setLocal 
+setLocal
 
 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat" x86_amd64
 
@@ -38,7 +41,7 @@ if defined skip_build_flag goto skip_build
 rmdir build /s /q
 mkdir build
 cd build
-cmake -D CMAKE_PREFIX_PATH="%QT_PREFIX_PATH%" -D BUILD_GUI=TRUE -D STATIC=FALSE -G "Visual Studio 15 2017 Win64" -T host=x64 ..
+cmake %TESTNET_DEF% -D CMAKE_PREFIX_PATH="%QT_PREFIX_PATH%" -D BUILD_GUI=TRUE -D STATIC=FALSE -G "Visual Studio 15 2017 Win64" -T host=x64 ..
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -73,7 +76,7 @@ cd %SOURCES_PATH%\build\src\release
 @echo "Version: "
 
 set cmd=simplewallet.exe --version
-FOR /F "tokens=3" %%a IN ('%cmd%') DO set version=%%a  
+FOR /F "tokens=3" %%a IN ('%cmd%') DO set version=%%a
 set version=%version:~0,-2%
 echo '%version%'
 
@@ -142,7 +145,7 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 
-"%INNOSETUP_PATH%"  /dBinariesPath=../build/installer_src /DMyAppVersion=%version% /o%BUILDS_PATH%\builds\ /f%PACKAGE_EXE_FILESTEM% ..\utils\setup.iss 
+"%INNOSETUP_PATH%"  /dBinariesPath=../build/installer_src /DMyAppVersion=%version% /o%BUILDS_PATH%\builds\ /f%PACKAGE_EXE_FILESTEM% ..\utils\setup.iss
 IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
@@ -171,11 +174,11 @@ IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
-set mail_msg="New build for win-x64 available at http://%BBR_BUILD_SERVER_ADDR%:8081/builds/%PACKAGE_EXE_FILENAME% <br><br>ZIP:  http://%BBR_BUILD_SERVER_ADDR%:8081/builds/%PACKAGE_ZIP_FILENAME%"
+set mail_msg="New %build_prefix% %TESTNET_LABEL%build for win-x64:<br>INST: http://%BBR_BUILD_SERVER_ADDR%:8081/builds/%PACKAGE_EXE_FILENAME%<br>ZIP:  http://%BBR_BUILD_SERVER_ADDR%:8081/builds/%PACKAGE_ZIP_FILENAME%"
 
 echo %mail_msg%
 
-senditquiet.exe -t %emails% -subject "Boolberry win-x64 %BUILD_POSTFIX_CL%build %version%" -body %mail_msg%
+senditquiet.exe -t %emails% -subject "Boolberry win-x64 %build_prefix% %TESTNET_LABEL%build %version%" -body %mail_msg%
 
 
 goto success

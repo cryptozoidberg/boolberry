@@ -36,7 +36,7 @@ DISABLE_VS_WARNINGS(4244 4345)
   //-----------------------------------------------------------------
   void account_base::set_null()
   {
-    m_keys = account_keys();
+    m_keys = AUTO_VAL_INIT(m_keys);
   }
   //-----------------------------------------------------------------
   vector<unsigned char> account_base::generate()

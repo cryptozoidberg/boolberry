@@ -737,7 +737,7 @@ namespace log_space
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
-  inline int get_set_log_detalisation_level(bool is_need_set = false, int log_level_to_set = LOG_LEVEL_1);
+  inline int get_set_log_detalization_level(bool is_need_set = false, int log_level_to_set = LOG_LEVEL_1);
   inline int  get_set_time_level(bool is_need_set = false, int time_log_level = LOG_LEVEL_0);
   inline bool get_set_need_thread_id(bool is_need_set = false, bool is_need_val = false);
   inline bool get_set_need_proc_name(bool is_need_set = false, bool is_need_val = false);
@@ -936,7 +936,7 @@ namespace log_space
       init_default_loggers();
 
       std::stringstream ss;
-      ss  << get_time_string() << " Init logging. Level=" << get_set_log_detalisation_level()
+      ss  << get_time_string() << " Init logging. Level=" << get_set_log_detalization_level()
         << "Default log path=" << m_default_log_folder << std::endl;
       this->do_log_message(ss.str(), console_color_white, LOG_LEVEL_0);
       return true;
@@ -980,10 +980,10 @@ namespace log_space
   public:
     friend class initializer<log_singletone>;
     friend class logger;
-    static int get_log_detalisation_level()
+    static int get_log_detalization_level()
     {
       get_or_create_instance();//to initialize logger, if it not initialized
-      return get_set_log_detalisation_level();
+      return get_set_log_detalization_level();
     }
 
     //get_enabled_channels not thread-safe, at the moment leave it like this because it's configured in main, before other threads started
@@ -1174,15 +1174,15 @@ namespace log_space
     }
 PUSH_WARNINGS
 DISABLE_GCC_WARNING(maybe-uninitialized)
-    static int get_set_log_detalisation_level(bool is_need_set = false, int log_level_to_set = LOG_LEVEL_1)
+    static int get_set_log_detalization_level(bool is_need_set = false, int log_level_to_set = LOG_LEVEL_1)
     {
 
-      static int log_detalisation_level = LOG_LEVEL_1;
+      static int log_detalization_level = LOG_LEVEL_1;
       if (is_need_set)
       {
-        log_detalisation_level = log_level_to_set;
+        log_detalization_level = log_level_to_set;
       }
-      return log_detalisation_level;
+      return log_detalization_level;
     }
 POP_WARNINGS
     static int  get_set_time_level(bool is_need_set = false, int time_log_level = LOG_LEVEL_0)
@@ -1289,7 +1289,7 @@ POP_WARNINGS
     {
       std::stringstream str_prefix;
       //write time entry
-      if ( get_set_time_level() <= get_set_log_detalisation_level() )
+      if ( get_set_time_level() <= get_set_log_detalization_level() )
         str_prefix << get_day_time_string() << " ";
 
       //write process info
@@ -1300,10 +1300,10 @@ POP_WARNINGS
         plogger = new logger();
       }
 
-      //if ( get_set_need_proc_name() && get_set_process_level() <= get_set_log_detalisation_level()  )
+      //if ( get_set_need_proc_name() && get_set_process_level() <= get_set_log_detalization_level()  )
       //    str_prefix << "[" << plogger->m_process_name << " (id=" << GetCurrentProcessId() << ")] ";
 //#ifdef _MSC_VER_EX
-      if ( get_set_need_thread_id() /*&& get_set_tid_level() <= get_set_log_detalisation_level()*/ )
+      if ( get_set_need_thread_id() /*&& get_set_tid_level() <= get_set_log_detalization_level()*/ )
         str_prefix << "[tid:" << misc_utils::get_thread_string_id() << "] ";
 //#endif
 
@@ -1413,7 +1413,7 @@ POP_WARNINGS
       int lasterr=::GetLastError();
 #endif
       m_plog_name = plog_name;
-      if ( dlevel <= log_singletone::get_log_detalisation_level() )
+      if ( dlevel <= log_singletone::get_log_detalization_level() )
       {
         m_name = name;
         std::stringstream ss;
@@ -1431,7 +1431,7 @@ POP_WARNINGS
       int lasterr=::GetLastError();
 #endif
 
-      if (m_level <= log_singletone::get_log_detalisation_level() )
+      if (m_level <= log_singletone::get_log_detalization_level() )
       {
         std::stringstream ss;
         ss << log_space::log_singletone::get_prefix_entry() << "<<--" << m_name << std::endl;
@@ -1447,9 +1447,9 @@ POP_WARNINGS
   {
     return log_singletone::get_set_time_level(is_need_set, time_log_level);
   }
-  inline int get_set_log_detalisation_level(bool is_need_set, int log_level_to_set)
+  inline int get_set_log_detalization_level(bool is_need_set, int log_level_to_set)
   {
-    return log_singletone::get_set_log_detalisation_level(is_need_set, log_level_to_set);
+    return log_singletone::get_set_log_detalization_level(is_need_set, log_level_to_set);
   }
   inline std::string get_prefix_entry()
   {
@@ -1518,22 +1518,22 @@ POP_WARNINGS
 
 #if defined(ENABLE_LOGGING_INTERNAL)
 
-#define LOG_PRINT_CHANNEL_NO_PREFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+#define LOG_PRINT_CHANNEL_NO_PREFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str() , y, epee::log_space::console_color_default, false, log_name);}}
 
-#define LOG_PRINT_CHANNEL_NO_PREFIX_NO_POSTFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+#define LOG_PRINT_CHANNEL_NO_PREFIX_NO_POSTFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << x; epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
 
-#define LOG_PRINT_CHANNEL_NO_POSTFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+#define LOG_PRINT_CHANNEL_NO_POSTFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x; epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
 
-#define LOG_PRINT_CHANNEL2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+#define LOG_PRINT_CHANNEL2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
 
-#define LOG_PRINT_CHANNEL_COLOR2(log_channel, log_name, x, y, color) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+#define LOG_PRINT_CHANNEL_COLOR2(log_channel, log_name, x, y, color) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, color, false, log_name);}}
 
-#define LOG_PRINT_CHANNEL_2_JORNAL(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+#define LOG_PRINT_CHANNEL_2_JORNAL(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
   {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, true, log_name);}}
 
 

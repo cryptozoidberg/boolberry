@@ -29,11 +29,13 @@ struct EMPTY_STRUCT {
     std::string address;
     std::string tracking_key;
     std::string comment;
+    std::string signature;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(address)
       KV_SERIALIZE(tracking_key)
       KV_SERIALIZE(comment)
+      KV_SERIALIZE(signature)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -335,8 +337,10 @@ struct EMPTY_STRUCT {
       uint64_t transactions_cnt_per_day;
       uint64_t transactions_volume_per_day;
       uint64_t already_generated_coins;
+      uint64_t max_coins_supply;
       nodetool::maintainers_info_external mi;
       uint64_t last_block_timestamp;
+      uint64_t blocks_ts_median;
       std::string last_block_hash;
 
       BEGIN_KV_SERIALIZE_MAP()
@@ -350,7 +354,7 @@ struct EMPTY_STRUCT {
         KV_SERIALIZE(incoming_connections_count)
         KV_SERIALIZE(white_peerlist_size)
         KV_SERIALIZE(grey_peerlist_size)
-        KV_SERIALIZE(current_blocks_median)      
+        KV_SERIALIZE(current_blocks_median)
         KV_SERIALIZE(current_network_hashrate_50)
         KV_SERIALIZE(current_network_hashrate_350)
         KV_SERIALIZE(scratchpad_size)
@@ -361,8 +365,10 @@ struct EMPTY_STRUCT {
         KV_SERIALIZE(transactions_cnt_per_day)
         KV_SERIALIZE(transactions_volume_per_day)
         KV_SERIALIZE(already_generated_coins)
+        KV_SERIALIZE(max_coins_supply)
         KV_SERIALIZE(mi)
         KV_SERIALIZE(last_block_timestamp)
+        KV_SERIALIZE(blocks_ts_median)
         KV_SERIALIZE(last_block_hash)
       END_KV_SERIALIZE_MAP()
     };
@@ -1097,17 +1103,31 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
     END_KV_SERIALIZE_MAP()
   };
 
+  struct related_tx_info
+  {
+    std::string tx_id;
+    uint64_t out_no;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(tx_id)
+      KV_SERIALIZE(out_no)
+    END_KV_SERIALIZE_MAP()
+  };
+
   struct tx_in_rpc_entry
   {
     uint64_t amount;
     uint64_t multisig_count;
     std::string kimage_or_ms_id;
     std::vector<uint64_t> global_indexes;
+    std::vector<related_tx_info> global_indexes_related_txs;
+
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(amount)
       KV_SERIALIZE(kimage_or_ms_id)
       KV_SERIALIZE(global_indexes)
       KV_SERIALIZE(multisig_count)
+      KV_SERIALIZE(global_indexes_related_txs)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -1176,6 +1196,7 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
     std::list<tx_rpc_extended_info> transactions_details;
     std::string miner_text_info;
     std::string object_in_json;
+    alias_rpc_details registered_alias;
 
 
     BEGIN_KV_SERIALIZE_MAP()
@@ -1199,6 +1220,7 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
       KV_SERIALIZE(is_orphan)
       KV_SERIALIZE(miner_text_info)
       KV_SERIALIZE(object_in_json)
+      KV_SERIALIZE(registered_alias)
     END_KV_SERIALIZE_MAP()
   };
 
@@ -1208,12 +1230,12 @@ struct F_COMMAND_RPC_GET_BLOCKCHAIN_SETTINGS {
     {
       uint64_t height_start;
       uint64_t count;
-      bool ignore_transactions;
+      bool is_short;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(height_start)
         KV_SERIALIZE(count)
-        KV_SERIALIZE(ignore_transactions)
+        KV_SERIALIZE(is_short)
       END_KV_SERIALIZE_MAP()
     };
 

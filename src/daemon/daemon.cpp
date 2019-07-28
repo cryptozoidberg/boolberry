@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
-  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_0);
+  log_space::get_set_log_detalization_level(true, LOG_LEVEL_0);
   log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
   LOG_PRINT_L0("Starting...");
 
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
   currency::core_rpc_server rpc_server(ccore, p2psrv);
   cprotocol.set_p2p_endpoint(&p2psrv);
   ccore.set_currency_protocol(&cprotocol);
-  daemon_cmmands_handler dch(p2psrv);
+  daemon_commands_handler dch(p2psrv);
   tools::miniupnp_helper upnp_helper;
 
   // start components
@@ -155,6 +155,7 @@ int main(int argc, char* argv[])
   {
     dch.start_handling();
   }
+
   tools::signal_handler::install([&dch, &p2psrv] {
     dch.stop_handling();
     p2psrv.send_stop_signal();
@@ -269,9 +270,9 @@ bool command_line_preprocessor(const boost::program_options::variables_map& vm)
   {
     LOG_PRINT_L0("Wrong log level value: ");
   }
-  else if (log_space::get_set_log_detalisation_level(false) != new_log_level)
+  else if (log_space::get_set_log_detalization_level(false) != new_log_level)
   {
-    log_space::get_set_log_detalisation_level(true, new_log_level);
+    log_space::get_set_log_detalization_level(true, new_log_level);
     LOG_PRINT_L0("LOG_LEVEL set to " << new_log_level);
   }
 

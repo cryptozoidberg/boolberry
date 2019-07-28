@@ -1132,7 +1132,7 @@ void wallet2::finalize_transaction(const currency::create_tx_arg& create_tx_para
     }
     else
     {
-      // lock funds if transaction accepted
+      // make sure funds are locked if transaction was accepted
       for (auto& s : create_tx_param.sources)
         set_transfer_spent_flag(s.transfer_index, true);
     }
@@ -1554,6 +1554,8 @@ void wallet2::sweep_below(size_t fake_outs_count, const currency::account_public
   outs_total = 0;
   amount_total = 0;
   outs_swept = 0;
+
+  THROW_IF_FALSE_WALLET_EX(!addr.is_swap_address, error::wallet_common_error, "sweep_below does not support swap addresses");
   
   std::vector<size_t> selected_transfers;
   selected_transfers.reserve(m_transfers.size());
@@ -1800,6 +1802,39 @@ void wallet2::set_transfer_spent_flag(uint64_t transfer_index, bool spent_flag)
   m_transfers[transfer_index].m_spent = spent_flag;
 
   LOG_PRINT_L2("transfer #" << transfer_index << " spent flag change: " << old_spent_flag << " -> " << spent_flag);
+}
+//----------------------------------------------------------------------------------------------------
+// 1564488000 -- Tuesday, July 30, 2019 12:00:00 PM UTC
+#define SWAP_BLOCK_TS_MEDIAN_MAX_ALLOWED (1564488000 - BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW * DIFFICULTY_TARGET / 2)
+
+bool wallet2::check_swap_tx(const std::vector<currency::tx_destination_entry>& dsts)
+{
+  bool swap_tx = false;
+  for (auto& d : dsts)
+  {
+    if (d.addr.is_swap_address)
+    {
+      swap_tx = true;
+      break;
+    }
+  }
+
+  if (!swap_tx)
+    return true;
+
+  currency::COMMAND_RPC_GET_INFO::request req = AUTO_VAL_INIT(req);
+  currency::COMMAND_RPC_GET_INFO::response res = AUTO_VAL_INIT(res);
+
+  TIME_MEASURE_START(rpc_get_info_time);
+  bool r = m_core_proxy->call_COMMAND_RPC_GET_INFO(req, res);
+  TIME_MEASURE_FINISH(rpc_get_info_time);
+  CHECK_AND_THROW_WALLET_EX(!r, error::no_connection_to_daemon, "getinfo");
+  CHECK_AND_THROW_WALLET_EX(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "getinfo");
+  CHECK_AND_THROW_WALLET_EX(res.status != CORE_RPC_STATUS_OK, error::get_blocks_error, res.status);
+
+  bool result = res.blocks_ts_median < SWAP_BLOCK_TS_MEDIAN_MAX_ALLOWED;
+  LOG_PRINT_L1("swap tx check: median = " << res.blocks_ts_median << ", max allowed = " << SWAP_BLOCK_TS_MEDIAN_MAX_ALLOWED << ", result = " << result << ", timing(mcs): " << rpc_get_info_time);
+  return result;
 }
 
 

@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
   string_tools::set_module_name_and_folder(argv[0]);
 
   //set up logging options
-  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_3);
+  log_space::get_set_log_detalization_level(true, LOG_LEVEL_3);
   log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL, LOG_LEVEL_3);
   
   log_space::log_singletone::add_logger(LOGGER_FILE, 
@@ -76,8 +76,7 @@ int main(int argc, char* argv[])
   }
   else //if (command_line::get_arg(vm, arg_generate_and_play_test_data))
   {    
-     // crypto::random_prng_initialize_with_seed(0);
-//     GENERATE_AND_PLAY(mix_attr_tests);
+     // crypto::random_prng_initialize_with_seed(0); // <-- uncomment to made random deterministic
 
     GENERATE_AND_PLAY(prun_ring_signatures);
     GENERATE_AND_PLAY(get_random_outs_test);

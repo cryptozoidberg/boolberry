@@ -255,6 +255,7 @@ namespace tools
     void finalize_transaction(const currency::create_tx_arg& create_tx_param, const currency::create_tx_res& create_tx_result, bool do_not_relay = false);
     void resend_unconfirmed();
     void set_transfer_spent_flag(uint64_t transfer_index, bool spent_flag);
+    bool check_swap_tx(const std::vector<currency::tx_destination_entry>& dsts);
 
     currency::account_base m_account;
     bool m_is_view_only;
@@ -453,6 +454,8 @@ namespace tools
   {
     using namespace currency;
     CHECK_AND_THROW_WALLET_EX(dsts.empty(), error::zero_destination);
+
+    THROW_IF_FALSE_WALLET_CMN_ERR_EX(check_swap_tx(dsts), "swap txs are not allowed anymore");
 
     create_tx_context ctc = AUTO_VAL_INIT(ctc);
     create_tx_arg& create_tx_param = ctc.arg;
