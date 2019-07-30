@@ -147,11 +147,7 @@ namespace currency {
       return false;
     }
     addr.is_swap_address = false;
-    if(SWAP_CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX == prefix || SWAP_CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX == prefix)
-    {
-      addr.is_swap_address = true;
-    }
-    else if (CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX != prefix && CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX != prefix)
+    if (CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX != prefix && CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX != prefix)
     {
       LOG_PRINT_L1("Wrong address prefix: " << prefix << ", expected " << CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX << " or " << CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX);
       return false;
