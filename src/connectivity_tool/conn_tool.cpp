@@ -8,6 +8,7 @@
 #include "version.h"
 
 using namespace epee;
+#include <boost/regex.hpp>
 #include <boost/program_options.hpp>
 #include "p2p/p2p_protocol_defs.h"
 #include "common/command_line.h"
@@ -44,6 +45,8 @@ namespace
   const command_line::arg_descriptor<std::string> arg_pack_file          = {"pack_file", "Pack(using gzip) and calculate md5 hash for file", "", true };
   const command_line::arg_descriptor<std::string> arg_unpack_file        = { "unpack_file", "UnPack(using gzip) and calculate md5 hash", "", true };
   const command_line::arg_descriptor<std::string> arg_target_file        = { "target_file", "Specify target file for pack and upack commands", "", true };
+  
+  const command_line::arg_descriptor<std::string> arg_sort_sources = { "sort_sources", "", "", true };
 }
 
 typedef COMMAND_REQUEST_STAT_INFO_T<t_currency_protocol_handler<core>::stat_info> COMMAND_REQUEST_STAT_INFO;
@@ -488,6 +491,56 @@ bool handle_pack_file(po::variables_map& vm)
     return process_archive(gzip_decoder, false, source, target);
   }
 }
+bool sort_sources(std::string path)
+{
+  std::string header_buff;
+  std::string cpp_buff;
+  bool r = file_io_utils::load_file_to_string(path+ ".h", header_buff);
+  CHECK_AND_ASSERT_MES(r, false, "failed to load");
+   r = file_io_utils::load_file_to_string(path + ".cpp", cpp_buff);
+  CHECK_AND_ASSERT_MES(r, false, "failed to load");
+
+
+  const boost::regex	match_func_definition("^.   ([\\w:<>&]*) ([\\w_]*)\\(([\\w_ :&=<>,\\*]*)\\)( const)?;", boost::regex::icase | boost::regex::normal);
+  //
+  std::list<std::string> functions;
+  //boost::smatch result;
+
+  boost::sregex_token_iterator iter(header_buff.begin(), header_buff.end(), match_func_definition, 2);
+  boost::sregex_token_iterator end;
+
+
+
+  for (; iter != end; ++iter) 
+  {
+    functions.push_back(*iter);
+  }
+
+  const boost::regex	match_func_body("(\\/\\/-+)?\\n(([\\w:<>&]*) )?([\\w_]+)::([\\w]+)\\(.*?\\n}", boost::regex::icase | boost::regex::normal);
+  //
+  std::map<std::string, std::string> bodies;
+  boost::sregex_iterator iter_body(cpp_buff.begin(), cpp_buff.end(), match_func_body);
+  boost::sregex_iterator end_iter_body;
+
+  for (; iter_body != end_iter_body; ++iter_body)
+  {
+    boost::smatch result = *iter_body;
+    bodies[result[4]] = result[0];
+  }
+  std::string final_buff;
+  for (auto& f : functions)
+  {
+    auto f_map_it = bodies.find(f);
+    if (f_map_it == bodies.end())
+    {
+      std::cout << "Missed " << f << ENDL;
+      continue;
+    }
+    final_buff += "\r\n//------------------------------------------------------" + f_map_it->second;
+    bodies.erase(f_map_it);
+  }
+  return true;
+}
 //---------------------------------------------------------------------------------------------------------------
 bool handle_update_maintainers_info(po::variables_map& vm)
 {
@@ -546,7 +599,7 @@ bool generate_and_print_keys()
 int main(int argc, char* argv[])
 {
   string_tools::set_module_name_and_folder(argv[0]);
-  log_space::get_set_log_detalization_level(true, LOG_LEVEL_0);
+  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_0);
 
   // Declare the supported options.
   po::options_description desc_general("General options");
@@ -568,6 +621,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_params, arg_pack_file);
   command_line::add_arg(desc_params, arg_unpack_file);
   command_line::add_arg(desc_params, arg_target_file);
+  command_line::add_arg(desc_params, arg_sort_sources);
   
   command_line::add_arg(desc_params, command_line::arg_version);
   
@@ -622,6 +676,10 @@ int main(int argc, char* argv[])
   else if(command_line::has_arg(vm, arg_upate_maintainers_info))
   {
     return handle_update_maintainers_info(vm) ? 0:1;
+  }
+  else if (command_line::has_arg(vm, arg_sort_sources))
+  {
+    return sort_sources(command_line::get_arg(vm, arg_sort_sources));
   }
   else
   {

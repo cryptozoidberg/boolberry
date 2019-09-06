@@ -1,3 +1,4 @@
+// Copyright (c) 2019, anonimal <anonimal@zano.org>
 // Copyright (c) 2006-2013, Andrey N. Sabelnikov, www.sabelnikov.net
 // All rights reserved.
 // 
@@ -29,9 +30,10 @@
 #define _PROFILE_TOOLS_H_
 
 #include <chrono>
-#include "print_fixed_dec_point_helper.h"
-
-// 0 - no profiling, 1 - basic, 2 - full, 3 - ultimate
+#include <atomic>
+#include "misc_log_ex.h"
+#include "print_fixed_point_helper.h"
+#define ENABLE_PROFILING
 #define PROFILING_LEVEL 1
 
 #if PROFILING_LEVEL >= 1
@@ -89,32 +91,35 @@
 #  define PROF_L3_LOG_PRINT(str, log_level)
 #endif
 
+
 namespace epee
 {
 
 #ifdef ENABLE_PROFILING
-#define PROFILE_FUNC(immortal_ptr_str) static epee::profile_tools::local_call_account lcl_acc(immortal_ptr_str); \
+#define PROFILE_FUNC(profile_name_str) static epee::profile_tools::local_call_account lcl_acc(profile_name_str); \
 	epee::profile_tools::call_frame cf(lcl_acc);
 
-#define PROFILE_FUNC_SECOND(immortal_ptr_str) static epee::profile_tools::local_call_account lcl_acc2(immortal_ptr_str); \
-	epee::profile_tools::call_frame cf2(lcl_acc2);
+#define PROFILE_FUNC_SECOND(profile_name_str) static epee::profile_tools::local_call_account lcl_acc2(profile_name_str); \
+  epee::profile_tools::call_frame cf2(lcl_acc2);
 
-#define PROFILE_FUNC_THIRD(immortal_ptr_str) static epee::profile_tools::local_call_account lcl_acc3(immortal_ptr_str); \
-	epee::profile_tools::call_frame cf3(lcl_acc3);
+#define PROFILE_FUNC_THIRD(profile_name_str) static epee::profile_tools::local_call_account lcl_acc3(profile_name_str); \
+  epee::profile_tools::call_frame cf3(lcl_acc3);
 
 #define PROFILE_FUNC_ACC(acc) \
-	epee::profile_tools::call_frame cf(acc);
+  epee::profile_tools::call_frame cf(acc);
 
 
 #else
-#define PROFILE_FUNC(immortal_ptr_str)
-#define PROFILE_FUNC_SECOND(immortal_ptr_str)
-#define PROFILE_FUNC_THIRD(immortal_ptr_str)
+#define PROFILE_FUNC(profile_name_str)
+#define PROFILE_FUNC_SECOND(profile_name_str)
+#define PROFILE_FUNC_THIRD(profile_name_str)
+#define PROFILE_FUNC_ACC(profile_name_str) 
 #endif
 
 #define START_WAY_POINTS() uint64_t _____way_point_time = misc_utils::get_tick_count();
 #define WAY_POINT(name) {uint64_t delta = misc_utils::get_tick_count()-_____way_point_time; LOG_PRINT("Way point " << name << ": " << delta, LOG_LEVEL_2);_____way_point_time = misc_utils::get_tick_count();}
 #define WAY_POINT2(name, avrg_obj) {uint64_t delta = misc_utils::get_tick_count()-_____way_point_time; avrg_obj.push(delta); LOG_PRINT("Way point " << name << ": " << delta, LOG_LEVEL_2);_____way_point_time = misc_utils::get_tick_count();}
+
 
 #define TIME_MEASURE_START_MS(var_name)    uint64_t var_name = epee::misc_utils::get_tick_count();
 #define TIME_MEASURE_FINISH_MS(var_name)   var_name = epee::misc_utils::get_tick_count() - var_name;
@@ -124,6 +129,13 @@ namespace epee
 #define TIME_MEASURE_START(var_name)  uint64_t var_name = 0;std::chrono::high_resolution_clock::time_point var_name##_chrono = std::chrono::high_resolution_clock::now();
 #define TIME_MEASURE_FINISH(var_name)   var_name = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - var_name##_chrono).count();
 
+
+#define TIME_MEASURE_START_PD_MS(var_name)    TIME_MEASURE_START_MS(var_name)
+#define TIME_MEASURE_FINISH_PD_MS(var_name)   TIME_MEASURE_FINISH_MS(var_name);m_performance_data.var_name.push(var_name);
+
+#define TIME_MEASURE_START_PD(var_name)    TIME_MEASURE_START(var_name)
+#define TIME_MEASURE_FINISH_PD(var_name)   TIME_MEASURE_FINISH(var_name);m_performance_data.var_name.push(var_name);
+#define TIME_MEASURE_FINISH_PD_COND(cond, var_name)   if(cond){TIME_MEASURE_FINISH(var_name);m_performance_data.var_name.push(var_name);}
 
   inline std::string print_mcsec_as_ms(uint64_t microseconds, size_t target_width = 0, char padding_char = ' ')
   {
@@ -141,34 +153,42 @@ namespace epee
 
 namespace profile_tools
 {
+
   static inline void init_profile_session()
   {
-    static std::atomic<bool> is_called(false);
-    if (!is_called)
+    static std::atomic<bool> is_initialized(false);
+    if (!is_initialized)
     {
-      is_called = true;
-      LOG_PRINT2("profile_details.log", "*********************************************************************************************************", LOG_LEVEL_0);
+      is_initialized = true;
+      LOG_PRINT2("profile_details.log", "=================================================================================================================================================", LOG_LEVEL_0);
     }
   }
 
 	struct local_call_account
 	{
-		local_call_account(const char* pstr):m_count_of_call(0), m_summary_time_used(0),m_name(pstr)
+    local_call_account(const char* pstr) :m_count_of_call(0), m_summary_time_used(0), m_name(pstr)
 		{
+      init_profile_session();
+    }
+    local_call_account() :m_count_of_call(0), m_summary_time_used(0)
+    {
       init_profile_session();
     }
 		~local_call_account()
 		{
-      LOG_PRINT2("profile_details.log", "PROFILE " << std::left << std::setw(80) << (m_name + ":")
-        << "av_time:" << std::setw(15) << epee::string_tools::print_fixed_dec_point(m_count_of_call ? (m_summary_time_used / m_count_of_call) : 0, 3)
-        << "sum_time: " << std::setw(15) << epee::string_tools::print_fixed_dec_point(m_summary_time_used, 3)
+			NESTED_TRY_ENTRY();
+
+      LOG_PRINT2("profile_details.log", "PROFILE "<< std::left << std::setw(50) << (m_name + ":")
+        << "av_time:" << std::setw(15) << epee::string_tools::print_fixed_decimal_point (m_count_of_call ? (m_summary_time_used / m_count_of_call) : 0, 3)
+        << "sum_time: " << std::setw(15) << epee::string_tools::print_fixed_decimal_point(m_summary_time_used, 3)
         << "call_count: " << std::setw(15) << m_count_of_call, LOG_LEVEL_0);
 
+			NESTED_CATCH_ENTRY(__func__);
 		}
 
 		size_t m_count_of_call;
 		uint64_t m_summary_time_used;
-		const std::string m_name;
+		std::string m_name;
 	};
 	
 	struct call_frame
@@ -176,20 +196,23 @@ namespace profile_tools
 
 		call_frame(local_call_account& cc):m_cc(cc)
 		{
-			cc.m_count_of_call++;
 			m_call_time = boost::posix_time::microsec_clock::local_time();
 		}
-		
-		~call_frame()
-		{
-      boost::posix_time::ptime now_t(boost::posix_time::microsec_clock::local_time());
-      boost::posix_time::time_duration delta_microseconds = now_t - m_call_time;
-      uint64_t microsec_used = delta_microseconds.total_microseconds();
-      m_cc.m_count_of_call++;
-      m_cc.m_summary_time_used += microsec_used;
-		}
-		
-	private:
+
+                ~call_frame()
+                {
+                  NESTED_TRY_ENTRY();
+
+                      boost::posix_time::ptime now_t(boost::posix_time::microsec_clock::local_time());
+                      boost::posix_time::time_duration delta_microsec = now_t - m_call_time;
+                      uint64_t microseconds_used = delta_microsec.total_microseconds();
+                      m_cc.m_summary_time_used += microseconds_used;
+                      m_cc.m_count_of_call++;
+
+                  NESTED_CATCH_ENTRY(__func__);
+                }
+
+        private:
 		local_call_account& m_cc;
 		boost::posix_time::ptime m_call_time;
 	};

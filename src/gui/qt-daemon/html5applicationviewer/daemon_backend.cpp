@@ -46,7 +46,7 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
   //_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
   //#endif
 
-  log_space::get_set_log_detalization_level(true, LOG_LEVEL_1);
+  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_1);
   LOG_PRINT_L0("Initing...");
 
   TRY_ENTRY();
@@ -115,7 +115,7 @@ bool daemon_backend::start(int argc, char* argv[], view::i_view* pview_handler)
     return false;
 
   //set up logging options
-  log_space::log_singletone::get_set_log_detalization_level(true, command_line::get_arg(vm, command_line::arg_log_level));
+  log_space::log_singletone::get_set_log_detalisation_level(true, command_line::get_arg(vm, command_line::arg_log_level));
 
   if (command_line::has_arg(vm, arg_alloc_win_console))
   {

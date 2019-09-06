@@ -7,6 +7,7 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/list.hpp>
+#include <boost/program_options.hpp>
 
 #include <boost/foreach.hpp>
 #include <atomic>
@@ -20,7 +21,7 @@
 #include "tx_pool.h"
 #include "currency_basic.h"
 #include "common/util.h"
-#include "common/db_bridge.h"
+#include "common/db_abstract_accessor.h"
 #include "currency_protocol/currency_protocol_defs.h"
 #include "rpc/core_rpc_server_commands_defs.h"
 #include "difficulty.h"
@@ -31,11 +32,11 @@
 #include "checkpoints.h"
 #include "scratchpad_helpers.h"
 #include "file_io_utils.h"
-#include "common/db_lmdb_adapter.h"
+#include "common/db_backend_lmdb.h"
 
-MAKE_POD_C11(crypto::key_image);
+MARK_AS_POD_C11(crypto::key_image);
 typedef std::pair<crypto::hash, uint64_t> macro_alias_1;
-MAKE_POD_C11(macro_alias_1);
+MARK_AS_POD_C11(macro_alias_1);
 
 POD_MAKE_HASHABLE(currency, account_public_address);
 
@@ -48,7 +49,7 @@ namespace currency
   class blockchain_storage
   {
   public:
-    typedef db::key_to_array_accessor_base<uint64_t, std::pair<crypto::hash, uint64_t>, false>  outputs_container;
+    typedef tools::db::basic_key_to_array_accessor<uint64_t, std::pair<crypto::hash, uint64_t>, false>  outputs_container;
 
     blockchain_storage(tx_memory_pool& tx_pool);
 
@@ -215,17 +216,17 @@ namespace currency
 
   private:
     //-------------- DB containers --------------
-    typedef db::key_value_accessor_base<crypto::hash, uint64_t, false> blocks_by_id_index; //typedef std::unordered_map<crypto::hash, size_t> blocks_by_id_index;
-    typedef db::key_value_accessor_base<crypto::hash, transaction_chain_entry, true> transactions_container; //typedef std::unordered_map<crypto::hash, transaction_chain_entry> transactions_container;
+    typedef tools::db::cached_key_value_accessor<crypto::hash, uint64_t, false, false> blocks_by_id_index; //typedef std::unordered_map<crypto::hash, size_t> blocks_by_id_index;
+    typedef tools::db::cached_key_value_accessor<crypto::hash, transaction_chain_entry, true, false> transactions_container; //typedef std::unordered_map<crypto::hash, transaction_chain_entry> transactions_container;
 
-    typedef db::key_value_accessor_base<crypto::key_image, bool, false> key_images_container; //typedef std::unordered_set<crypto::key_image> key_images_container;
-    typedef db::cached_array_accessor<block_extended_info, true, DIFFICULTY_BLOCKS_COUNT+10> blocks_container;
+    typedef tools::db::cached_key_value_accessor<crypto::key_image, bool, false, false> key_images_container; //typedef std::unordered_set<crypto::key_image> key_images_container;
+    typedef tools::db::array_accessor<block_extended_info, true> blocks_container;
 
 
-    typedef db::key_value_accessor_base<std::string, std::list<alias_info_base>, true> aliases_container; //typedef std::map<std::string, std::list<extra_alias_entry_base>> aliases_container; //alias can be address address address + view key
-    typedef db::key_value_accessor_base<account_public_address_base, std::set<std::string>, true> address_to_aliases_container;//typedef std::unordered_map<account_public_address, std::set<std::string> > address_to_aliases_container;
-    typedef db::key_value_accessor_base<crypto::hash, std::pair<crypto::hash, uint64_t>, false> multisig_outs_container;//  typedef std::unordered_map<crypto::hash, std::pair<crypto::hash, size_t>> multisig_outs_container;// hash key - multisig output id, pair<tx_id, n> - reference to tx id + output in transaction
-    typedef db::key_value_accessor_base<uint64_t, uint64_t, false> solo_options_container;
+    typedef tools::db::cached_key_value_accessor<std::string, std::list<alias_info_base>, true, false> aliases_container; //typedef std::map<std::string, std::list<extra_alias_entry_base>> aliases_container; //alias can be address address address + view key
+    typedef tools::db::cached_key_value_accessor<account_public_address_base, std::set<std::string>, true, false> address_to_aliases_container;//typedef std::unordered_map<account_public_address, std::set<std::string> > address_to_aliases_container;
+    typedef tools::db::cached_key_value_accessor<crypto::hash, std::pair<crypto::hash, uint64_t>, false, false> multisig_outs_container;//  typedef std::unordered_map<crypto::hash, std::pair<crypto::hash, size_t>> multisig_outs_container;// hash key - multisig output id, pair<tx_id, n> - reference to tx id + output in transaction
+    typedef tools::db::cached_key_value_accessor<uint64_t, uint64_t, false, true> solo_options_container;
 
 
     //------
@@ -234,18 +235,17 @@ namespace currency
     tx_memory_pool& m_tx_pool;
 
     //main accessor
-    std::shared_ptr<db::lmdb_adapter> m_lmdb_adapter;
-    db::db_bridge_base m_db;
+    tools::db::basic_db_accessor m_db;
     //containers
     blocks_container m_db_blocks;
     blocks_by_id_index m_db_blocks_index;
     transactions_container m_db_transactions;
     key_images_container m_db_spent_keys;
     solo_options_container m_db_solo_options;
-    db::single_value<uint64_t, uint64_t, solo_options_container> m_db_current_block_cumul_sz_limit;
-    db::single_value<uint64_t, uint64_t, solo_options_container> m_db_current_pruned_rs_height;
-    db::single_value<uint64_t, std::string, solo_options_container, true> m_db_last_worked_version;
-    db::single_value<uint64_t, uint64_t, solo_options_container> m_db_storage_major_compability_version;
+    tools::db::solo_db_value<uint64_t, uint64_t, solo_options_container> m_db_current_block_cumul_sz_limit;
+    tools::db::solo_db_value<uint64_t, uint64_t, solo_options_container> m_db_current_pruned_rs_height;
+    tools::db::solo_db_value<uint64_t, std::string, solo_options_container, true> m_db_last_worked_version;
+    tools::db::solo_db_value<uint64_t, uint64_t, solo_options_container> m_db_storage_major_compability_version;
     outputs_container m_db_outputs;
     aliases_container m_db_aliases;
     address_to_aliases_container m_db_addr_to_alias;
@@ -277,6 +277,10 @@ namespace currency
     mutable critical_section m_blockchain_lock; // TODO: add here reader/writer lock
     mutable critical_section m_exclusive_batch_lock; // TODO: add here reader/writer lock
     std::atomic<bool> m_exclusive_batch_active;
+
+    //stub lock, used for compatibility with basic_db_accessor from Zano, Boolberry don't need shared_locking due to more primitive thread blocking model in core
+    mutable epee::shared_recursive_mutex m_stub_lock;
+
 
     bool switch_to_alternative_blockchain(std::list<blocks_ext_by_hash::iterator>& alt_chain);
     bool pop_block_from_blockchain();
