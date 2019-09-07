@@ -12,6 +12,7 @@
 #include <boost/type_traits/is_integral.hpp>
 
 #include "binary_archive.h"
+#include "misc_log_ex.h"
 
 template <class T>
 struct is_blob_type { typedef boost::false_type type; };
