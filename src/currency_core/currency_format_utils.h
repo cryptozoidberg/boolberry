@@ -283,18 +283,7 @@ namespace currency
     get_block_longhash(b, p, height, cb);
     return p;
   }
-  //---------------------------------------------------------------
-  template<class t_object>
-  bool t_unserializable_object_from_blob(t_object& to, const blobdata& b_blob)
-  {
-    std::stringstream ss;
-    ss << b_blob;
-    binary_archive<false> ba(ss);
-    bool r = ::serialization::serialize(ba, to);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to unserialize object from blob: " << typeid(to).name());
 
-    return r;
-  }
   //---------------------------------------------------------------
 
   //---------------------------------------------------------------

@@ -29,7 +29,7 @@ namespace tools
       template<typename container_t>
       bool load_all_itmes_to_container(container_t& container) const
       {
-        bdb.begin_readonly_transaction();
+        super::bdb.begin_readonly_transaction();
 
         size_t items_count = super::size();
         container.clear();
@@ -51,7 +51,7 @@ namespace tools
         };
         super::enumerate_items(lambda);
 
-        bdb.commit_transaction();
+        super::bdb.commit_transaction();
 
         CHECK_AND_ASSERT_MES(items_added == items_count, false, "internal DB error: items_added == " << items_added << ", items_count == " << items_count);
         return result;
