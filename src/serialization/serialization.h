@@ -179,7 +179,23 @@ namespace serialization {
     return r && check_stream_state(ar);
   }
 }
-
+//---------------------------------------------------------------  
+template<class t_object>
+bool t_serializable_object_to_blob(const t_object& to, std::string& b_blob)
+{
+  std::stringstream ss;
+  binary_archive<true> ba(ss);
+  bool r = ::serialization::serialize(ba, const_cast<t_object&>(to));
+  b_blob = ss.str();
+  return r;
+}
+template<class t_object>
+std::string t_serializable_object_to_blob(const t_object& to)
+{
+  std::string b;
+  t_serializable_object_to_blob(to, b);
+  return b;
+}
 #include "serialize_basic_types.h"
 #include "string.h"
 #include "multiprecision.h"
