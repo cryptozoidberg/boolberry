@@ -235,7 +235,7 @@ bool simple_wallet::set_log(const std::vector<std::string> &args)
     return true;
   }
 
-  log_space::log_singletone::get_set_log_detalization_level(true, l);
+  log_space::log_singletone::get_set_log_detalisation_level(true, l);
   return true;
 }
 //----------------------------------------------------------------------------------------------------
@@ -1811,7 +1811,7 @@ int main(int argc, char* argv[])
     return 1;
 
   //set up logging options
-  log_space::get_set_log_detalization_level(true, LOG_LEVEL_2);
+  log_space::get_set_log_detalisation_level(true, LOG_LEVEL_2);
   //log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL, LOG_LEVEL_0);
   boost::filesystem::path log_file_path(command_line::get_arg(vm, command_line::arg_log_file));
   if (log_file_path.empty())
@@ -1824,12 +1824,12 @@ int main(int argc, char* argv[])
   if (command_line::has_arg(vm, arg_log_level))
   {
     LOG_PRINT_L0("Setting log level = " << command_line::get_arg(vm, arg_log_level));
-    log_space::get_set_log_detalization_level(true, command_line::get_arg(vm, arg_log_level));
+    log_space::get_set_log_detalisation_level(true, command_line::get_arg(vm, arg_log_level));
   }
   if (command_line::has_arg(vm, command_line::arg_log_level))
   {
     LOG_PRINT_L0("Setting log level = " << command_line::get_arg(vm, command_line::arg_log_level));
-    log_space::get_set_log_detalization_level(true, command_line::get_arg(vm, command_line::arg_log_level));
+    log_space::get_set_log_detalisation_level(true, command_line::get_arg(vm, command_line::arg_log_level));
   }
 
   bool offline_mode = command_line::get_arg(vm, arg_offline_mode);

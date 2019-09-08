@@ -1,3 +1,4 @@
+// Copyright (c) 2019, anonimal <anonimal@zano.org>
 // Copyright (c) 2006-2013, Andrey N. Sabelnikov, www.sabelnikov.net
 // All rights reserved.
 //
@@ -64,7 +65,7 @@ DISABLE_VS_WARNINGS(4100)
 
 #include "syncobj.h"
 #include "sync_locked_object.h"
-
+#include "callstack_helper.h"
 
 #define LOG_LEVEL_SILENT     -1
 #define LOG_LEVEL_0     0
@@ -118,6 +119,202 @@ DISABLE_VS_WARNINGS(4100)
 
 #define LOCATION_SS "[" << LOCAL_FUNCTION_DEF__ << ("] @ " __FILE__ ":" STR(__LINE__))
 
+#if !defined(DISABLE_RELEASE_LOGGING)
+  #define  ENABLE_LOGGING_INTERNAL
+#endif
+
+#define LOG_DEFAULT_CHANNEL    NULL
+#define ENABLE_CHANNEL_BY_DEFAULT(ch_name)   \
+  static bool COMBINE(init_channel, __LINE__) UNUSED_ATTRIBUTE = epee::misc_utils::static_initializer([](){  \
+  epee::log_space::log_singletone::enable_channel(ch_name);  return true; \
+});
+
+#if defined(ENABLE_LOGGING_INTERNAL)
+
+#define LOG_PRINT_CHANNEL_NO_PREFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+  {std::stringstream ss________; ss________ << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str() , y, epee::log_space::console_color_default, false, log_name);}}
+
+#define LOG_PRINT_CHANNEL_NO_PREFIX_NO_POSTFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+  {std::stringstream ss________; ss________ << x; epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
+
+#define LOG_PRINT_CHANNEL_NO_POSTFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+  {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x; epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
+
+#define LOG_PRINT_CHANNEL2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+  {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
+
+#define LOG_PRINT_CHANNEL_COLOR2(log_channel, log_name, x, y, color) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+  {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, color, false, log_name);}}
+
+#define LOG_PRINT_CHANNEL_2_JORNAL(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalisation_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
+  {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, true, log_name);}}
+
+#define LOG_ERROR2(log_name, x) { \
+  std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << "[ERROR] Location: " << std::endl << LOCATION_SS << epee::misc_utils::get_callstack() << " Message:" << std::endl << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str(), LOG_LEVEL_0, epee::log_space::console_color_red, true, log_name); LOCAL_ASSERT(0); epee::log_space::increase_error_count(LOG_DEFAULT_CHANNEL); }
+
+#define LOG_FRAME2(log_name, x, y) epee::log_space::log_frame frame(x, y, log_name)
+
+#else // #if defined(ENABLE_LOGGING_INTERNAL)
+
+#define LOG_PRINT_NO_PREFIX2(log_name, x, y)
+#define LOG_PRINT_NO_PREFIX_NO_POSTFIX2(log_name, x, y)
+#define LOG_PRINT_NO_POSTFIX2(log_name, x, y)
+#define LOG_PRINT_COLOR2(log_name, x, y, color)
+#define LOG_PRINT2_JORNAL(log_name, x, y)
+#define LOG_PRINT2(log_name, x, y)
+#define LOG_ERROR2(log_name, x)
+#define LOG_FRAME2(log_name, x, y)
+
+#endif // #if defined(ENABLE_LOGGING_INTERNAL)
+
+#define LOG_PRINT_NO_PREFIX2(log_name, x, y)                    LOG_PRINT_CHANNEL_NO_PREFIX2(LOG_DEFAULT_CHANNEL, log_name, x, y)
+#define LOG_PRINT_NO_PREFIX_NO_POSTFIX2(log_name, x, y)         LOG_PRINT_CHANNEL_NO_PREFIX_NO_POSTFIX2(LOG_DEFAULT_CHANNEL, log_name, x, y)
+#define LOG_PRINT_NO_POSTFIX2(log_name, x, y)                   LOG_PRINT_CHANNEL_NO_POSTFIX2(LOG_DEFAULT_CHANNEL, log_name, x, y)
+#define LOG_PRINT2(log_name, x, y)                              LOG_PRINT_CHANNEL2(LOG_DEFAULT_CHANNEL, log_name, x, y)
+#define LOG_PRINT_COLOR2(log_name, x, y, color)                 LOG_PRINT_CHANNEL_COLOR2(LOG_DEFAULT_CHANNEL, log_name, x, y, color)
+#define LOG_PRINT2_JORNAL(log_name, x, y)                       LOG_PRINT_CHANNEL_2_JORNAL(LOG_DEFAULT_CHANNEL, log_name, x, y)
+
+#ifndef LOG_DEFAULT_TARGET
+  #define LOG_DEFAULT_TARGET    NULL
+#endif
+
+#define LOG_PRINT_NO_POSTFIX(mess, level) LOG_PRINT_NO_POSTFIX2(LOG_DEFAULT_TARGET, mess, level)
+#define LOG_PRINT_NO_PREFIX(mess, level)  LOG_PRINT_NO_PREFIX2(LOG_DEFAULT_TARGET, mess, level)
+#define LOG_PRINT_NO_PREFIX_NO_POSTFIX(mess, level) LOG_PRINT_NO_PREFIX_NO_POSTFIX2(LOG_DEFAULT_TARGET, mess, level)
+#define LOG_PRINT(mess, level)        LOG_PRINT2(LOG_DEFAULT_TARGET, mess, level)
+
+#define LOG_PRINT_COLOR(mess, level, color)       LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, color)
+#define LOG_PRINT_RED(mess, level)        LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_red)
+#define LOG_PRINT_GREEN(mess, level)        LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_green)
+#define LOG_PRINT_BLUE(mess, level)       LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_blue)
+#define LOG_PRINT_YELLOW(mess, level)       LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_yellow)
+#define LOG_PRINT_CYAN(mess, level)       LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_cyan)
+#define LOG_PRINT_MAGENTA(mess, level)       LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_magenta)
+
+#define LOG_PRINT_RED_L0(mess)    LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, LOG_LEVEL_0, epee::log_space::console_color_red)
+
+#define LOG_PRINT_L0(mess)        LOG_PRINT(mess, LOG_LEVEL_0)
+#define LOG_PRINT_L1(mess)        LOG_PRINT(mess, LOG_LEVEL_1)
+#define LOG_PRINT_L2(mess)        LOG_PRINT(mess, LOG_LEVEL_2)
+#define LOG_PRINT_L3(mess)        LOG_PRINT(mess, LOG_LEVEL_3)
+#define LOG_PRINT_L4(mess)        LOG_PRINT(mess, LOG_LEVEL_4)
+#define LOG_PRINT_J(mess, level)        LOG_PRINT2_JORNAL(LOG_DEFAULT_TARGET, mess, level)
+
+#define LOG_ERROR(mess)               LOG_ERROR2(LOG_DEFAULT_TARGET, mess)
+#define LOG_FRAME(mess, level)        LOG_FRAME2(LOG_DEFAULT_TARGET, mess, level)
+#define LOG_VALUE(mess, level)        LOG_VALUE2(LOG_DEFAULT_TARGET, mess, level)
+#define LOG_ARRAY(mess, level)        LOG_ARRAY2(LOG_DEFAULT_TARGET, mess, level)
+//#define LOGWIN_PLATFORM_ERROR(err_no)       LOGWINDWOS_PLATFORM_ERROR2(LOG_DEFAULT_TARGET, err_no)
+#define LOG_SOCKET_ERROR(err_no)      LOG_SOCKET_ERROR2(LOG_DEFAULT_TARGET, err_no)
+//#define LOGWIN_PLATFORM_ERROR_UNCRITICAL(mess)  LOGWINDWOS_PLATFORM_ERROR_UNCRITICAL2(LOG_DEFAULT_TARGET, mess)
+
+#define ENDL std::endl
+
+#define TRY_ENTRY()   try {
+#define CATCH_ENTRY_CUSTOM(location, custom_code, return_val) } \
+  catch(const std::exception& ex) \
+{ \
+  (void)(ex); \
+  LOG_ERROR("Exception at [" << location << "], what=" << ex.what()); \
+  custom_code; \
+  return return_val; \
+} \
+  catch(...) \
+{ \
+  LOG_ERROR("Exception at [" << location << "], generic exception \"...\""); \
+  custom_code; \
+  return return_val; \
+}
+#define CATCH_ENTRY(location, return_val) CATCH_ENTRY_CUSTOM(location, (void)0, return_val)
+#define CATCH_ENTRY2(return_val) CATCH_ENTRY_CUSTOM(LOCATION_SS, (void)0, return_val)
+
+#define CATCH_ENTRY_L0(location, return_val) CATCH_ENTRY(location, return_val)
+#define CATCH_ENTRY_L1(location, return_val) CATCH_ENTRY(location, return_val)
+#define CATCH_ENTRY_L2(location, return_val) CATCH_ENTRY(location, return_val)
+#define CATCH_ENTRY_L3(location, return_val) CATCH_ENTRY(location, return_val)
+#define CATCH_ENTRY_L4(location, return_val) CATCH_ENTRY(location, return_val)
+
+/// @brief Catches TRY_ENTRY without returning
+/// @details Useful within a dtor - but only if nested within another try block
+///    (since we can still potentially throw here). See NESTED_*ENTRY()
+/// @todo Exception dispatcher class
+#define CATCH_ENTRY_NO_RETURN(location, custom_code) } \
+  catch(const std::exception& ex) \
+{ \
+  (void)(ex); \
+  LOG_ERROR("Exception at [" << location << "], what=" << ex.what()); \
+  custom_code; \
+} \
+  catch(...) \
+{ \
+  LOG_ERROR("Exception at [" << location << "], generic exception \"...\""); \
+  custom_code; \
+}
+
+
+#define CATCH_ENTRY_WITH_FORWARDING_EXCEPTION() } \
+  catch(const std::exception& ex) \
+{ \
+  LOG_ERROR("Exception at [" << LOCATION_SS << "], what=" << ex.what()); \
+  throw std::runtime_error(std::string("[EXCEPTION FORWARDED]: ") + ex.what()); \
+} \
+  catch(...) \
+{ \
+  LOG_ERROR("Exception at [" << LOCATION_SS << "], generic unknown exception \"...\""); \
+  throw std::runtime_error("[EXCEPTION FORWARDED]"); \
+}
+
+
+
+#define NESTED_TRY_ENTRY() try { TRY_ENTRY();
+
+#define NESTED_CATCH_ENTRY(location) \
+  CATCH_ENTRY_NO_RETURN(location, {}); \
+  } catch (...) {}
+
+#define ASSERT_MES_AND_THROW(message) {LOG_ERROR(message); std::stringstream ss; ss << message; throw std::runtime_error(ss.str());}
+
+#define CHECK_AND_ASSERT_THROW_MES(expr, message) {if(!(expr)) ASSERT_MES_AND_THROW(message << ENDL << "thrown from " << LOCATION_SS);}
+#define CHECK_AND_ASSERT_THROW(expr, exception_exp) {if(!(expr)) {LOG_ERROR("EXCEPTION is thrown from " << LOCATION_SS); throw exception_exp; };}
+
+#ifndef CHECK_AND_ASSERT
+#define CHECK_AND_ASSERT(expr, fail_ret_val)   do{if(!(expr)){LOCAL_ASSERT(expr); return fail_ret_val;};}while(0)
+#endif
+
+#define NOTHING
+
+#ifndef CHECK_AND_ASSERT_MES
+#define CHECK_AND_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_ERROR(message); return fail_ret_val;};}while(0)
+#endif
+
+#ifndef CHECK_AND_FORCE_ASSERT_MES
+#define CHECK_AND_FORCE_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_ERROR(message); FORCE_ASSERT(expr); return fail_ret_val;};}while(0)
+#endif
+
+#ifndef CHECK_AND_ASSERT_MES_CUSTOM
+#define CHECK_AND_ASSERT_MES_CUSTOM(expr, fail_ret_val, custom_code, message)   do{if(!(expr)) {LOG_ERROR(message); custom_code; return fail_ret_val;};}while(0)
+#endif
+
+/*#ifndef CHECK_AND_ASSERT_MES_AND_THROW
+#define CHECK_AND_ASSERT_MES_AND_THROW(expr, message)   do{if(!(expr)) {LOG_ERROR(message); throw std::runtime_error(message);};}while(0)
+#endif
+*/
+
+#ifndef CHECK_AND_NO_ASSERT_MES
+#define CHECK_AND_NO_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_PRINT_MAGENTA(message, LOG_LEVEL_0); /*LOCAL_ASSERT(expr);*/ return fail_ret_val;};}while(0)
+#endif
+
+#ifndef CHECK_AND_NO_ASSERT_MES_LEVEL
+#define CHECK_AND_NO_ASSERT_MES_LEVEL(expr, fail_ret_val, message, log_level)   do{if(!(expr)) {LOG_PRINT(message, log_level); return fail_ret_val;};}while(0)
+#endif
+
+#ifndef CHECK_AND_ASSERT_MES_NO_RET
+#define CHECK_AND_ASSERT_MES_NO_RET(expr, message)   do{if(!(expr)) {LOG_ERROR(message);};}while(0)
+#endif
+
+#ifndef CHECK_AND_ASSERT_MES2
+#define CHECK_AND_ASSERT_MES2(expr, message)         do{if(!(expr)) {LOG_ERROR(message); };}while(0)
+#endif
 
 namespace epee
 {
@@ -703,7 +900,7 @@ namespace log_space
         m_log_streams.push_back(streams_container::value_type(ls, log_level_limit));
         return true;
       }
-      return ls ? true:false;
+      return false;
     }
     bool add_logger( ibase_log_stream* pstream, int log_level_limit = LOG_LEVEL_4 )
     {
@@ -737,7 +934,7 @@ namespace log_space
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
-  inline int get_set_log_detalization_level(bool is_need_set = false, int log_level_to_set = LOG_LEVEL_1);
+  inline int get_set_log_detalisation_level(bool is_need_set = false, int log_level_to_set = LOG_LEVEL_1);
   inline int  get_set_time_level(bool is_need_set = false, int time_log_level = LOG_LEVEL_0);
   inline bool get_set_need_thread_id(bool is_need_set = false, bool is_need_val = false);
   inline bool get_set_need_proc_name(bool is_need_set = false, bool is_need_val = false);
@@ -936,7 +1133,7 @@ namespace log_space
       init_default_loggers();
 
       std::stringstream ss;
-      ss  << get_time_string() << " Init logging. Level=" << get_set_log_detalization_level()
+      ss  << get_time_string() << " Init logging. Level=" << get_set_log_detalisation_level()
         << "Default log path=" << m_default_log_folder << std::endl;
       this->do_log_message(ss.str(), console_color_white, LOG_LEVEL_0);
       return true;
@@ -980,10 +1177,10 @@ namespace log_space
   public:
     friend class initializer<log_singletone>;
     friend class logger;
-    static int get_log_detalization_level()
+    static int get_log_detalisation_level()
     {
       get_or_create_instance();//to initialize logger, if it not initialized
-      return get_set_log_detalization_level();
+      return get_set_log_detalisation_level();
     }
 
     //get_enabled_channels not thread-safe, at the moment leave it like this because it's configured in main, before other threads started
@@ -1174,15 +1371,15 @@ namespace log_space
     }
 PUSH_WARNINGS
 DISABLE_GCC_WARNING(maybe-uninitialized)
-    static int get_set_log_detalization_level(bool is_need_set = false, int log_level_to_set = LOG_LEVEL_1)
+    static int get_set_log_detalisation_level(bool is_need_set = false, int log_level_to_set = LOG_LEVEL_1)
     {
 
-      static int log_detalization_level = LOG_LEVEL_1;
+      static int log_detalisation_level = LOG_LEVEL_1;
       if (is_need_set)
       {
-        log_detalization_level = log_level_to_set;
+        log_detalisation_level = log_level_to_set;
       }
-      return log_detalization_level;
+      return log_detalisation_level;
     }
 POP_WARNINGS
     static int  get_set_time_level(bool is_need_set = false, int time_log_level = LOG_LEVEL_0)
@@ -1289,7 +1486,7 @@ POP_WARNINGS
     {
       std::stringstream str_prefix;
       //write time entry
-      if ( get_set_time_level() <= get_set_log_detalization_level() )
+      if ( get_set_time_level() <= get_set_log_detalisation_level() )
         str_prefix << get_day_time_string() << " ";
 
       //write process info
@@ -1300,10 +1497,10 @@ POP_WARNINGS
         plogger = new logger();
       }
 
-      //if ( get_set_need_proc_name() && get_set_process_level() <= get_set_log_detalization_level()  )
+      //if ( get_set_need_proc_name() && get_set_process_level() <= get_set_log_detalisation_level()  )
       //    str_prefix << "[" << plogger->m_process_name << " (id=" << GetCurrentProcessId() << ")] ";
 //#ifdef _MSC_VER_EX
-      if ( get_set_need_thread_id() /*&& get_set_tid_level() <= get_set_log_detalization_level()*/ )
+      if ( get_set_need_thread_id() /*&& get_set_tid_level() <= get_set_log_detalisation_level()*/ )
         str_prefix << "[tid:" << misc_utils::get_thread_string_id() << "] ";
 //#endif
 
@@ -1413,7 +1610,7 @@ POP_WARNINGS
       int lasterr=::GetLastError();
 #endif
       m_plog_name = plog_name;
-      if ( dlevel <= log_singletone::get_log_detalization_level() )
+      if ( dlevel <= log_singletone::get_log_detalisation_level() )
       {
         m_name = name;
         std::stringstream ss;
@@ -1427,11 +1624,11 @@ POP_WARNINGS
     }
     ~log_frame()
     {
+      NESTED_TRY_ENTRY();
 #ifdef _MSC_VER
       int lasterr=::GetLastError();
 #endif
-
-      if (m_level <= log_singletone::get_log_detalization_level() )
+      if (m_level <= log_singletone::get_log_detalisation_level() )
       {
         std::stringstream ss;
         ss << log_space::log_singletone::get_prefix_entry() << "<<--" << m_name << std::endl;
@@ -1440,6 +1637,7 @@ POP_WARNINGS
 #ifdef _MSC_VER
       ::SetLastError(lasterr);
 #endif
+      NESTED_CATCH_ENTRY(__func__);
     }
   };
 
@@ -1447,9 +1645,9 @@ POP_WARNINGS
   {
     return log_singletone::get_set_time_level(is_need_set, time_log_level);
   }
-  inline int get_set_log_detalization_level(bool is_need_set, int log_level_to_set)
+  inline int get_set_log_detalisation_level(bool is_need_set, int log_level_to_set)
   {
-    return log_singletone::get_set_log_detalization_level(is_need_set, log_level_to_set);
+    return log_singletone::get_set_log_detalisation_level(is_need_set, log_level_to_set);
   }
   inline std::string get_prefix_entry()
   {
@@ -1500,192 +1698,7 @@ POP_WARNINGS
   }
 }
 
-#if !defined(DISABLE_RELEASE_LOGGING)
-  #define  ENABLE_LOGGING_INTERNAL
-#endif
-
-
-
-#define LOG_DEFAULT_CHANNEL    NULL
-#define ENABLE_CHANNEL_BY_DEFAULT(ch_name)   \
-  static bool COMBINE(init_channel, __LINE__) UNUSED_ATTRIBUTE = epee::misc_utils::static_initializer([](){  \
-  epee::log_space::log_singletone::enable_channel(ch_name);  return true; \
-}); 
-
-
-
-
-
-#if defined(ENABLE_LOGGING_INTERNAL)
-
-#define LOG_PRINT_CHANNEL_NO_PREFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
-  {std::stringstream ss________; ss________ << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str() , y, epee::log_space::console_color_default, false, log_name);}}
-
-#define LOG_PRINT_CHANNEL_NO_PREFIX_NO_POSTFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
-  {std::stringstream ss________; ss________ << x; epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
-
-#define LOG_PRINT_CHANNEL_NO_POSTFIX2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
-  {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x; epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
-
-#define LOG_PRINT_CHANNEL2(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
-  {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, false, log_name);}}
-
-#define LOG_PRINT_CHANNEL_COLOR2(log_channel, log_name, x, y, color) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
-  {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, color, false, log_name);}}
-
-#define LOG_PRINT_CHANNEL_2_JORNAL(log_channel, log_name, x, y) {if ( y <= epee::log_space::log_singletone::get_log_detalization_level() && epee::log_space::log_singletone::channel_enabled(log_channel))\
-  {std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << x << std::endl;epee::log_space::log_singletone::do_log_message(ss________.str(), y, epee::log_space::console_color_default, true, log_name);}}
-
-
-
-#define LOG_ERROR2(log_name, x) { \
-  std::stringstream ss________; ss________ << epee::log_space::log_singletone::get_prefix_entry() << "[ERROR] Location: " << std::endl << LOCATION_SS << epee::misc_utils::print_trace() << " Message:" << std::endl << x << std::endl; epee::log_space::log_singletone::do_log_message(ss________.str(), LOG_LEVEL_0, epee::log_space::console_color_red, true, log_name); LOCAL_ASSERT(0); epee::log_space::increase_error_count(LOG_DEFAULT_CHANNEL); }
-
-#define LOG_FRAME2(log_name, x, y) epee::log_space::log_frame frame(x, y, log_name)
-
-#else // #if defined(ENABLE_LOGGING_INTERNAL)
-
-
-#define LOG_PRINT_NO_PREFIX2(log_name, x, y)
-
-#define LOG_PRINT_NO_PREFIX_NO_POSTFIX2(log_name, x, y)
-
-#define LOG_PRINT_NO_POSTFIX2(log_name, x, y)
-
-#define LOG_PRINT_COLOR2(log_name, x, y, color)
-
-#define LOG_PRINT2_JORNAL(log_name, x, y)
-
-#define LOG_PRINT2(log_name, x, y)
-
-#define LOG_ERROR2(log_name, x)
-
-
-#define LOG_FRAME2(log_name, x, y)
-
-
-#endif // #if defined(ENABLE_LOGGING_INTERNAL)
-
-#define LOG_PRINT_NO_PREFIX2(log_name, x, y)                    LOG_PRINT_CHANNEL_NO_PREFIX2(LOG_DEFAULT_CHANNEL, log_name, x, y)    
-#define LOG_PRINT_NO_PREFIX_NO_POSTFIX2(log_name, x, y)         LOG_PRINT_CHANNEL_NO_PREFIX_NO_POSTFIX2(LOG_DEFAULT_CHANNEL, log_name, x, y) 
-#define LOG_PRINT_NO_POSTFIX2(log_name, x, y)                   LOG_PRINT_CHANNEL_NO_POSTFIX2(LOG_DEFAULT_CHANNEL, log_name, x, y) 
-#define LOG_PRINT2(log_name, x, y)                              LOG_PRINT_CHANNEL2(LOG_DEFAULT_CHANNEL, log_name, x, y) 
-#define LOG_PRINT_COLOR2(log_name, x, y, color)                 LOG_PRINT_CHANNEL_COLOR2(LOG_DEFAULT_CHANNEL, log_name, x, y, color)
-#define LOG_PRINT2_JORNAL(log_name, x, y)                       LOG_PRINT_CHANNEL_2_JORNAL(LOG_DEFAULT_CHANNEL, log_name, x, y) 
-
-  
-
-#ifndef LOG_DEFAULT_TARGET
-  #define LOG_DEFAULT_TARGET    NULL
-#endif
-
-
-#define LOG_PRINT_NO_POSTFIX(mess, level) LOG_PRINT_NO_POSTFIX2(LOG_DEFAULT_TARGET, mess, level)
-#define LOG_PRINT_NO_PREFIX(mess, level)  LOG_PRINT_NO_PREFIX2(LOG_DEFAULT_TARGET, mess, level)
-#define LOG_PRINT_NO_PREFIX_NO_POSTFIX(mess, level) LOG_PRINT_NO_PREFIX_NO_POSTFIX2(LOG_DEFAULT_TARGET, mess, level)
-#define LOG_PRINT(mess, level)        LOG_PRINT2(LOG_DEFAULT_TARGET, mess, level)
-
-#define LOG_PRINT_COLOR(mess, level, color)       LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, color)
-#define LOG_PRINT_RED(mess, level)        LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_red)
-#define LOG_PRINT_GREEN(mess, level)        LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_green)
-#define LOG_PRINT_BLUE(mess, level)       LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_blue)
-#define LOG_PRINT_YELLOW(mess, level)       LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_yellow)
-#define LOG_PRINT_CYAN(mess, level)       LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_cyan)
-#define LOG_PRINT_MAGENTA(mess, level)       LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, level, epee::log_space::console_color_magenta)
-
-#define LOG_PRINT_RED_L0(mess)    LOG_PRINT_COLOR2(LOG_DEFAULT_TARGET, mess, LOG_LEVEL_0, epee::log_space::console_color_red)
-
-#define LOG_PRINT_L0(mess)        LOG_PRINT(mess, LOG_LEVEL_0)
-#define LOG_PRINT_L1(mess)        LOG_PRINT(mess, LOG_LEVEL_1)
-#define LOG_PRINT_L2(mess)        LOG_PRINT(mess, LOG_LEVEL_2)
-#define LOG_PRINT_L3(mess)        LOG_PRINT(mess, LOG_LEVEL_3)
-#define LOG_PRINT_L4(mess)        LOG_PRINT(mess, LOG_LEVEL_4)
-#define LOG_PRINT_J(mess, level)        LOG_PRINT2_JORNAL(LOG_DEFAULT_TARGET, mess, level)
-
-#define LOG_ERROR(mess)               LOG_ERROR2(LOG_DEFAULT_TARGET, mess)
-#define LOG_FRAME(mess, level)        LOG_FRAME2(LOG_DEFAULT_TARGET, mess, level)
-#define LOG_VALUE(mess, level)        LOG_VALUE2(LOG_DEFAULT_TARGET, mess, level)
-#define LOG_ARRAY(mess, level)        LOG_ARRAY2(LOG_DEFAULT_TARGET, mess, level)
-//#define LOGWIN_PLATFORM_ERROR(err_no)       LOGWINDWOS_PLATFORM_ERROR2(LOG_DEFAULT_TARGET, err_no)
-#define LOG_SOCKET_ERROR(err_no)      LOG_SOCKET_ERROR2(LOG_DEFAULT_TARGET, err_no)
-//#define LOGWIN_PLATFORM_ERROR_UNCRITICAL(mess)  LOGWINDWOS_PLATFORM_ERROR_UNCRITICAL2(LOG_DEFAULT_TARGET, mess)
-
-#define ENDL std::endl
-
-#define TRY_ENTRY()   try {
-#define CATCH_ENTRY_CUSTOM(location, custom_code, return_val) } \
-  catch(const std::exception& ex) \
-{ \
-  (void)(ex); \
-  LOG_ERROR("Exception at [" << location << "], what=" << ex.what()); \
-  custom_code; \
-  return return_val; \
-} \
-  catch(...) \
-{ \
-  LOG_ERROR("Exception at [" << location << "], generic exception \"...\""); \
-  custom_code; \
-  return return_val; \
-}
-#define CATCH_ENTRY(location, return_val) CATCH_ENTRY_CUSTOM(location, (void)0, return_val)
-
-#define CATCH_ENTRY2(return_val) CATCH_ENTRY_CUSTOM(LOCATION_SS, (void)0, return_val)
-
-#define CATCH_ENTRY_L0(location, return_val) CATCH_ENTRY(location, return_val)
-#define CATCH_ENTRY_L1(location, return_val) CATCH_ENTRY(location, return_val)
-#define CATCH_ENTRY_L2(location, return_val) CATCH_ENTRY(location, return_val)
-#define CATCH_ENTRY_L3(location, return_val) CATCH_ENTRY(location, return_val)
-#define CATCH_ENTRY_L4(location, return_val) CATCH_ENTRY(location, return_val)
-
-
-#define ASSERT_MES_AND_THROW(message) {LOG_ERROR(message); std::stringstream ss; ss << message; throw std::runtime_error(ss.str());}
-
-#define CHECK_AND_ASSERT_THROW_MES(expr, message) {if(!(expr)) ASSERT_MES_AND_THROW(message << ENDL << "thrown from " << LOCATION_SS);}
-#define CHECK_AND_ASSERT_THROW(expr, exception_exp) {if(!(expr)) {LOG_ERROR("EXCEPTION is thrown from " << LOCATION_SS); throw exception_exp; };}
-
-
-#ifndef CHECK_AND_ASSERT
-#define CHECK_AND_ASSERT(expr, fail_ret_val)   do{if(!(expr)){LOCAL_ASSERT(expr); return fail_ret_val;};}while(0)
-#endif
-
-#define NOTHING
-
-#ifndef CHECK_AND_ASSERT_MES
-#define CHECK_AND_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_ERROR(message); return fail_ret_val;};}while(0)
-#endif
-
-#ifndef CHECK_AND_FORCE_ASSERT_MES
-#define CHECK_AND_FORCE_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_ERROR(message); FORCE_ASSERT(expr); return fail_ret_val;};}while(0)
-#endif
-
-
-#ifndef CHECK_AND_ASSERT_MES_CUSTOM
-#define CHECK_AND_ASSERT_MES_CUSTOM(expr, fail_ret_val, custom_code, message)   do{if(!(expr)) {LOG_ERROR(message); custom_code; return fail_ret_val;};}while(0)
-#endif
-
-/*#ifndef CHECK_AND_ASSERT_MES_AND_THROW
-#define CHECK_AND_ASSERT_MES_AND_THROW(expr, message)   do{if(!(expr)) {LOG_ERROR(message); throw std::runtime_error(message);};}while(0)
-#endif
-*/
-
-#ifndef CHECK_AND_NO_ASSERT_MES
-#define CHECK_AND_NO_ASSERT_MES(expr, fail_ret_val, message)   do{if(!(expr)) {LOG_PRINT_MAGENTA(message, LOG_LEVEL_0); /*LOCAL_ASSERT(expr);*/ return fail_ret_val;};}while(0)
-#endif
-
-#ifndef CHECK_AND_NO_ASSERT_MES_LEVEL
-#define CHECK_AND_NO_ASSERT_MES_LEVEL(expr, fail_ret_val, message, log_level)   do{if(!(expr)) {LOG_PRINT(message, log_level); return fail_ret_val;};}while(0)
-#endif
-
-#ifndef CHECK_AND_ASSERT_MES_NO_RET
-#define CHECK_AND_ASSERT_MES_NO_RET(expr, message)   do{if(!(expr)) {LOG_ERROR(message);};}while(0)
-#endif
-
-
-#ifndef CHECK_AND_ASSERT_MES2
-#define CHECK_AND_ASSERT_MES2(expr, message)         do{if(!(expr)) {LOG_ERROR(message); };}while(0)
-#endif
-
-}
+}  // namespace epee
 
 POP_WARNINGS
 

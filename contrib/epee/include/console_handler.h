@@ -298,7 +298,7 @@ namespace epee
             std::cout << "wrong syntax: " << command << std::endl << "use set_log n" << std::endl;
             continue;
           }
-          log_space::get_set_log_detalization_level(true, n);
+          log_space::get_set_log_detalisation_level(true, n);
           std::cout << "New log level set " << n;
           LOG_PRINT_L2("New log level set " << n);
         }else if (command.empty())

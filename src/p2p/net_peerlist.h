@@ -211,7 +211,7 @@ namespace nodetool
       return false;
 
     peers_indexed::index<by_time>::type& by_time_index = m_peers_white.get<by_time>();
-    p = *epee::misc_utils::move_it_backward(--by_time_index.end(), i);    
+    p = *std::prev(--by_time_index.end(), i);
     return true;
   }
   //--------------------------------------------------------------------------------------------------
@@ -223,7 +223,7 @@ namespace nodetool
       return false;
 
     peers_indexed::index<by_time>::type& by_time_index = m_peers_gray.get<by_time>();
-    p = *epee::misc_utils::move_it_backward(--by_time_index.end(), i);    
+    p = *std::prev(--by_time_index.end(), i);
     return true;
   }
   //--------------------------------------------------------------------------------------------------

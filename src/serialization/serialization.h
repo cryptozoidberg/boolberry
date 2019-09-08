@@ -11,6 +11,9 @@
 #include <string>
 #include <boost/type_traits/is_integral.hpp>
 
+#include "binary_archive.h"
+#include "misc_log_ex.h"
+
 template <class T>
 struct is_blob_type { typedef boost::false_type type; };
 template <class T>
@@ -179,7 +182,36 @@ namespace serialization {
     return r && check_stream_state(ar);
   }
 }
+//---------------------------------------------------------------  
+template<class t_object>
+bool t_serializable_object_to_blob(const t_object& to, std::string& b_blob)
+{
+  std::stringstream ss;
+  binary_archive<true> ba(ss);
+  bool r = ::serialization::serialize(ba, const_cast<t_object&>(to));
+  b_blob = ss.str();
+  return r;
+}
+//---------------------------------------------------------------
+template<class t_object>
+std::string t_serializable_object_to_blob(const t_object& to)
+{
+  std::string b;
+  t_serializable_object_to_blob(to, b);
+  return b;
+}
+//---------------------------------------------------------------
+template<class t_object>
+bool t_unserializable_object_from_blob(t_object& to, const std::string& b_blob)
+{
+  std::stringstream ss;
+  ss << b_blob;
+  binary_archive<false> ba(ss);
+  bool r = ::serialization::serialize(ba, to);
+  CHECK_AND_ASSERT_MES(r, false, "Failed to unserialize object from blob: " << typeid(to).name());
 
+  return r;
+}
 #include "serialize_basic_types.h"
 #include "string.h"
 #include "multiprecision.h"

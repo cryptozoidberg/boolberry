@@ -8,7 +8,7 @@
 #include "common/util.h"
 #include "currency_core/currency_format_utils.h"
 #include "crypto/hash.h"
-#include "common/db_bridge.h"
+#include "common/db_array_accessor_adapter_to_native.h"
 
 
 namespace currency
@@ -17,7 +17,7 @@ namespace currency
   class scratchpad_wrapper
   {
   public:
-    typedef db::array_accessor_adapter_to_native<crypto::hash, false> scratchpad_container;
+    typedef tools::db::array_accessor_adapter_to_native<crypto::hash, false> scratchpad_container;
 
     scratchpad_wrapper(scratchpad_container& m_db_scratchpad);
     bool init(const std::string& config_folder);

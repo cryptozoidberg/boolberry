@@ -283,36 +283,9 @@ namespace currency
     get_block_longhash(b, p, height, cb);
     return p;
   }
-  //---------------------------------------------------------------  
-  template<class t_object>
-  bool t_serializable_object_to_blob(const t_object& to, blobdata& b_blob)
-  {
-    std::stringstream ss;
-    binary_archive<true> ba(ss);
-    bool r = ::serialization::serialize(ba, const_cast<t_object&>(to));
-    b_blob = ss.str();
-    return r;
-  }
-  //---------------------------------------------------------------
-  template<class t_object>
-  bool t_unserializable_object_from_blob(t_object& to, const blobdata& b_blob)
-  {
-    std::stringstream ss;
-    ss << b_blob;
-    binary_archive<false> ba(ss);
-    bool r = ::serialization::serialize(ba, to);
-    CHECK_AND_ASSERT_MES(r, false, "Failed to unserialize object from blob: " << typeid(to).name());
 
-    return r;
-  }
   //---------------------------------------------------------------
-  template<class t_object>
-  blobdata t_serializable_object_to_blob(const t_object& to)
-  {
-    blobdata b;
-    t_serializable_object_to_blob(to, b);
-    return b;
-  }
+
   //---------------------------------------------------------------
   template<class t_object>
   bool get_object_hash(const t_object& o, crypto::hash& res)

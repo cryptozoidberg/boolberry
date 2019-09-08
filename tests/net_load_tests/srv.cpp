@@ -190,7 +190,7 @@ namespace
 int main(int argc, char** argv)
 {
   //set up logging options
-  epee::log_space::get_set_log_detalization_level(true, LOG_LEVEL_0);
+  epee::log_space::get_set_log_detalisation_level(true, LOG_LEVEL_0);
   epee::log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
 
   size_t thread_count = (std::max)(min_thread_count, std::thread::hardware_concurrency() / 2);

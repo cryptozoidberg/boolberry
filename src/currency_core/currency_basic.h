@@ -311,6 +311,8 @@ namespace currency
 
 }
 
+POD_MAKE_HASHABLE(currency, account_public_address_base);
+
 BLOB_SERIALIZER(currency::txout_to_key);
 BLOB_SERIALIZER(currency::txout_to_scripthash);
 
