@@ -672,15 +672,13 @@ namespace tools
 
       bool erase_validate(const t_key& k)
       {
-        auto res_ptr = this->get(k);
-        bdb.erase(m_h, k);
+        bool result = bdb.erase(m_h, k);
         m_isolation.isolated_write_access<bool>([&](){
           size_cache_valid = false;
           return true;
         });
-        return static_cast<bool>(res_ptr);
+        return result;
       }
-
 
       void erase(const t_key& k)
       {
