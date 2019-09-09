@@ -659,14 +659,15 @@ namespace tools
       {
         return bdb.size(m_h);
       }
-      size_t clear()
+      
+      bool clear()
       {
-        bdb.clear(m_h);
+        bool result = bdb.clear(m_h);
         m_isolation.isolated_write_access<bool>([&](){
           size_cache_valid = false;
           return true;
         });
-        return true;
+        return result;
       }
 
       bool erase_validate(const t_key& k)
