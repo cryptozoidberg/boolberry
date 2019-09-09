@@ -17,7 +17,7 @@ TEST(block_pack_unpack, basic_struct_packing)
 {
   currency::block b = AUTO_VAL_INIT(b);
   currency::generate_genesis_block(b);
-  currency::blobdata blob = currency::t_serializable_object_to_blob(b);
+  currency::blobdata blob = t_serializable_object_to_blob(b);
   currency::block b_loaded = AUTO_VAL_INIT(b_loaded);
   currency::parse_and_validate_block_from_blob(blob, b_loaded);
   crypto::hash original_id = get_block_hash(b);

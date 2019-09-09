@@ -15,5 +15,6 @@ int main(int argc, char** argv)
   epee::log_space::log_singletone::add_logger(LOGGER_FILE, "unittests.log", ".");
 
   ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  int result = RUN_ALL_TESTS();
+  return result;
 }
