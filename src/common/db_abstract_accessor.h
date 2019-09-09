@@ -860,13 +860,10 @@ namespace tools
 
       operator t_value() const 
       {
-        static_assert(std::is_pod<t_value>::value, "t_value must be a POD type.");
+        std::shared_ptr<const t_value> value_ptr = m_accessor.template explicit_get<t_key, t_value, access_strategy_selector<is_t_strategy> >(m_key);
+        if (value_ptr.get())
+          return *value_ptr.get();
 
-        std::shared_ptr<const t_value> vptr = m_accessor.template explicit_get<t_key, t_value, access_strategy_selector<false> >(m_key);
-        if (vptr.get())
-        {
-          return *vptr.get();
-        }
         return AUTO_VAL_INIT(t_value());
       }
     };
