@@ -23,7 +23,7 @@ namespace tools
   };
 
 #ifndef TESTNET
-  const static pre_download_entry c_pre_download = { "http://88.99.193.104/downloads/data4.mdb.pak", "34e96c388c8c8849a52810df06e52652", 6118469938, 8266080256 };
+  const static pre_download_entry c_pre_download = { "https://build.zano.org/pre-download/data.mdb.pak", "85739efc8d822144d4166ef93bb20d69", 6388970650, 8673984512 };
 #else
   const static pre_download_entry c_pre_download = { "http://88.99.193.104/downloads/data_testnet.mdb.pak", "57feaa97401048386f335355d23fdf18", 164782602, 238563328 };
 #endif
