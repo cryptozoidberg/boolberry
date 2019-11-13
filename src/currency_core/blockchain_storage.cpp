@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <algorithm>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 
