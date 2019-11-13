@@ -424,7 +424,7 @@ wide_difficulty_type blockchain_storage::get_difficulty_for_next_block()
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
   std::vector<uint64_t> timestamps;
   std::vector<wide_difficulty_type> commulative_difficulties;
-  size_t offset = m_db_blocks.size() - std::min(m_db_blocks.size(), static_cast<size_t>(DIFFICULTY_BLOCKS_COUNT));
+  size_t offset = m_db_blocks.size() - std::min<uint64_t>(m_db_blocks.size(), static_cast<uint64_t>(DIFFICULTY_BLOCKS_COUNT));
   if (!offset)
     ++offset;//skip genesis block
   for (; offset < m_db_blocks.size(); offset++)
